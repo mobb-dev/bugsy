@@ -7,13 +7,8 @@ import fetch from 'node-fetch';
 import extract from 'extract-zip';
 import Debug from 'debug';
 import { Spinner } from '../../utils.mjs';
-import { GITHUB_CLIENT_ID, WEB_APP_URL } from '../../constants.mjs';
 const pipeline = promisify(stream.pipeline);
 const debug = Debug('mobbdev:github');
-
-const githubTokenUrl = `${WEB_APP_URL}/gh-callback`;
-
-export const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=repo&redirect_uri=${githubTokenUrl}`;
 
 async function getRepo(slug, { token } = {}) {
     try {

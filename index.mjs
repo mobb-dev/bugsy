@@ -1,4 +1,4 @@
-import { analyze, scan } from './src/commands/index.mjs';
+import { analyze, scan, CliError } from './src/commands/index.mjs';
 import { parseArgs } from './src/yargs.mjs';
 import { hideBin } from 'yargs/helpers';
 
@@ -20,6 +20,11 @@ async function run() {
         await run();
         process.exit(0);
     } catch (err) {
+        if (err instanceof CliError) {
+            console.error(err.message);
+            process.exit(1);
+        }
+        // unexpected error - print stack trace
         console.error(
             'Something went wrong, please try again or contact support if issue persists.'
         );

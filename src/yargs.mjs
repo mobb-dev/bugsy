@@ -3,9 +3,20 @@ import chalk from 'chalk';
 
 import { SCANNERS } from './constants.mjs';
 
-const branchOption = {
-    alias: 'branch',
-    describe: chalk.bold('Branch of the repository'),
+const refOption = {
+    describe: chalk.bold('reference of the repository (branch, tag, commit)'),
+    type: 'string',
+};
+
+const srcPathOption = {
+    alias: 'src-path',
+    describe: chalk.bold('Path to the repository folder with the source code'),
+    type: 'string',
+};
+
+const commitHash = {
+    alias: 'commit-hash',
+    describe: chalk.bold('Hash of the commit'),
     type: 'string',
 };
 
@@ -59,7 +70,7 @@ export const parseArgs = (args) => {
             builder: (yargs) => {
                 return yargs.options({
                     r: repoOption,
-                    b: branchOption,
+                    ref: refOption,
                     s: {
                         alias: 'scanner',
                         choices: Object.values(SCANNERS),
@@ -76,20 +87,41 @@ export const parseArgs = (args) => {
                 'Provide a vulnerability report and relevant code repository, get automated fixes right away.'
             ),
             builder: (yargs) => {
-                return yargs.options({
-                    f: {
-                        alias: 'scan-file',
-                        demandOption: true,
-                        describe: chalk.bold(
-                            'Select the vulnerability report to analyze'
-                        ),
-                    },
-                    r: repoOption,
-                    b: branchOption,
-                    y: yesOption,
-                    ['api-key']: apiKeyOption,
-                    ci: ciOption,
-                });
+                return yargs
+                    .options({
+                        f: {
+                            alias: 'scan-file',
+                            demandOption: true,
+                            describe: chalk.bold(
+                                'Select the vulnerability report to analyze'
+                            ),
+                        },
+                        r: {
+                            ...repoOption,
+                            demandOption: false,
+                        },
+                        p: srcPathOption,
+                        ref: refOption,
+                        ch: commitHash,
+                        y: yesOption,
+                        ['api-key']: apiKeyOption,
+                        ci: ciOption,
+                    })
+                    .check((argv) => {
+                        if (!argv.srcPath && !argv.repo) {
+                            throw new Error(
+                                'You must supply either --src-path or --repo'
+                            );
+                        }
+
+                        if (argv.ci && !argv.apiKey) {
+                            throw new Error(
+                                '--ci flag requires --api-key to be provided as well'
+                            );
+                        }
+
+                        return true;
+                    });
             },
         })
         .example('$0 scan -r https://github.com/WebGoat/WebGoat')

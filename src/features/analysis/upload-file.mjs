@@ -1,10 +1,11 @@
-import fetch, { FormData, fileFrom } from 'node-fetch';
+import fetch, { FormData, fileFrom, File } from 'node-fetch';
 import Debug from 'debug';
 
 const debug = Debug('mobbdev:upload-file');
 
-export async function uploadFile(reportPath, url, uploadKey, uploadFields) {
-    debug('upload report file start %s %s', reportPath, url);
+// `file` can be string representing absolute path or buffer.
+export async function uploadFile(file, url, uploadKey, uploadFields) {
+    debug('upload file start %s', url);
     debug('upload fields %o', uploadFields);
     debug('upload key %s', uploadKey);
 
@@ -15,7 +16,13 @@ export async function uploadFile(reportPath, url, uploadKey, uploadFields) {
     }
 
     form.append('key', uploadKey);
-    form.append('file', await fileFrom(reportPath));
+    if (typeof file === 'string') {
+        debug('upload file from path %s', file);
+        form.append('file', await fileFrom(file));
+    } else {
+        debug('upload file from buffer');
+        form.append('file', new File([file], 'file'));
+    }
 
     const response = await fetch(url, {
         method: 'POST',
@@ -24,7 +31,7 @@ export async function uploadFile(reportPath, url, uploadKey, uploadFields) {
 
     if (!response.ok) {
         debug('error from S3 %s %s', response.body, response.status);
-        throw new Error(`Failed to upload the report: ${response.status}`);
+        throw new Error(`Failed to upload the file: ${response.status}`);
     }
-    debug('upload report file done');
+    debug('upload file done');
 }

@@ -20,7 +20,6 @@ const envVariablesSchema = z
         WEB_LOGIN_URL: z.string(),
         WEB_APP_URL: z.string(),
         API_URL: z.string(),
-        GITHUB_CLIENT_ID: z.string(),
     })
     .required();
 
@@ -59,4 +58,3 @@ export const mobbAscii = `
 export const WEB_LOGIN_URL = envVariables.WEB_LOGIN_URL;
 export const WEB_APP_URL = envVariables.WEB_APP_URL;
 export const API_URL = envVariables.API_URL;
-export const GITHUB_CLIENT_ID = envVariables.GITHUB_CLIENT_ID;

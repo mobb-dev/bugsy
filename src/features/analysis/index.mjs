@@ -8,22 +8,21 @@ import open from 'open';
 import semver from 'semver';
 import { callbackServer } from './callback-server.mjs';
 import tmp from 'tmp';
+import { CliError } from '../../commands/index.mjs';
 
 import { WEB_APP_URL } from '../../constants.mjs';
-import {
-    canReachRepo,
-    downloadRepo,
-    getDefaultBranch,
-    GITHUB_OAUTH_URL,
-} from './github.mjs';
+import { canReachRepo, downloadRepo, getDefaultBranch } from './github.mjs';
 import { GQLClient } from './gql.mjs';
 import { githubIntegrationPrompt, mobbAnalysisPrompt } from './prompts.mjs';
 import { getSnykReport } from './snyk.mjs';
 import { uploadFile } from './upload-file.mjs';
 import { keypress, Spinner } from '../../utils.mjs';
+import { pack } from './pack.mjs';
+import { getGitInfo } from './git.mjs';
 
 const webLoginUrl = `${WEB_APP_URL}/cli-login`;
 const githubSubmitUrl = `${WEB_APP_URL}/gh-callback`;
+const githubAuthUrl = `${WEB_APP_URL}/github-auth`;
 
 const MOBB_LOGIN_REQUIRED_MSG = `🔓 Login to Mobb is Required, you will be redirected to our login page, once the authorization is complete return to this prompt, ${chalk.bgBlue(
     'press any key to continue'
@@ -40,17 +39,16 @@ const packageJson = JSON.parse(
 );
 
 if (!semver.satisfies(process.version, packageJson.engines.node)) {
-    console.error(
+    throw new CliError(
         `${packageJson.name} requires node version ${packageJson.engines.node}, but running ${process.version}.`
     );
-    process.exit(1);
 }
 
 const config = new Configstore(packageJson.name, { token: '' });
 debug('config %o', config);
 
 export async function runAnalysis(
-    { repo, scanner, scanFile, branch, apiKey, ci },
+    { repo, scanner, scanFile, apiKey, ci, commitHash, srcPath, ref },
     options
 ) {
     try {
@@ -60,9 +58,11 @@ export async function runAnalysis(
                 repo,
                 scanner,
                 scanFile,
-                branch,
+                ref,
                 apiKey,
                 ci,
+                srcPath,
+                commitHash,
             },
             options
         );
@@ -72,7 +72,7 @@ export async function runAnalysis(
 }
 
 export async function _scan(
-    { dirname, repo, scanFile, branch, apiKey, ci },
+    { dirname, repo, scanFile, branch, apiKey, ci, srcPath, commitHash, ref },
     { skipPrompts = false } = {}
 ) {
     debug('start %s %s', dirname, repo);
@@ -83,23 +83,34 @@ export async function _scan(
     apiKey ?? debug('token %s', apiKey);
     let gqlClient = new GQLClient(apiKey ? { apiKey } : { token });
     await handleMobbLogin();
+    const { projectId, organizationId } = await gqlClient.getOrgAndProjectId();
+    const uploadData = await gqlClient.uploadS3BucketInfo();
+    let reportPath = scanFile;
+
+    if (srcPath) {
+        return await uploadExistingRepo();
+    }
+
     const userInfo = await gqlClient.getUserInfo();
     let { githubToken } = userInfo;
     const isRepoAvailable = await canReachRepo(repo, {
         token: userInfo.githubToken,
     });
     if (!isRepoAvailable) {
+        if (ci) {
+            throw new Error(
+                `Cannot access repo ${repo} with the provided token, please visit ${githubAuthUrl} to refresh your Github token`
+            );
+        }
         const { token } = await handleGithubIntegration();
         githubToken = token;
     }
 
     const reference =
-        branch ?? (await getDefaultBranch(repo, { token: githubToken }));
-    const { projectId, organizationId } = await gqlClient.getOrgAndProjectId();
+        ref ?? (await getDefaultBranch(repo, { token: githubToken }));
     debug('org id %s', organizationId);
     debug('project id %s', projectId);
     debug('default branch %s', reference);
-    const uploadData = await gqlClient.uploadS3BucketInfo();
 
     const repositoryRoot = await downloadRepo(
         {
@@ -111,7 +122,9 @@ export async function _scan(
         { token: githubToken }
     );
 
-    const reportPath = scanFile || (await getReportFromSnyk());
+    if (!reportPath) {
+        reportPath = await getReportFromSnyk();
+    }
 
     const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
     await uploadFile(
@@ -188,7 +201,7 @@ export async function _scan(
             createSpinner().start().error({
                 text: '🔓 Logged in to Mobb failed - check your api-key',
             });
-            process.exit(1);
+            throw new CliError();
         }
         const mobbLoginSpinner = createSpinner().start();
         if (!skipPrompts) {
@@ -212,7 +225,7 @@ export async function _scan(
             mobbLoginSpinner.error({
                 text: 'Something went wrong, API token is invalid.',
             });
-            process.exit(1);
+            throw new CliError();
         }
         debug('set token %s', token);
         config.set('token', token);
@@ -231,10 +244,49 @@ export async function _scan(
             throw Error('Could not reach github repo');
         }
         const result = await callbackServer(
-            GITHUB_OAUTH_URL,
+            githubAuthUrl,
             `${githubSubmitUrl}?done=true`
         );
         githubSpinner.success({ text: '🔗 Github integration successful!' });
         return result;
+    }
+    async function uploadExistingRepo() {
+        const gitInfo = await getGitInfo(srcPath);
+        const zipBuffer = await pack(srcPath);
+
+        await uploadFile(
+            reportPath,
+            uploadData.url,
+            uploadData.uploadKey,
+            uploadData.uploadFields
+        );
+        await uploadFile(
+            zipBuffer,
+            uploadData.repoUrl,
+            uploadData.repoUploadKey,
+            uploadData.repoUploadFields
+        );
+
+        const mobbSpinner = createSpinner(
+            '🕵️‍♂️ Initiating Mobb analysis'
+        ).start();
+
+        try {
+            await gqlClient.submitVulnerabilityReport(
+                uploadData.fixReportId,
+                repo || gitInfo.repoUrl,
+                branch || gitInfo.reference,
+                projectId,
+                commitHash || gitInfo.hash
+            );
+        } catch (e) {
+            mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' });
+            throw e;
+        }
+
+        mobbSpinner.success({
+            text: '🕵️‍♂️ Generating fixes...',
+        });
+        await askToOpenAnalysis();
     }
 }

@@ -49,16 +49,23 @@ mutation uploadS3BucketInfo($fileName: String!) {
       uploadFieldsJSON
       uploadKey
     }
+    repoUploadInfo {
+      url
+      fixReportId
+      uploadFieldsJSON
+      uploadKey
+    }
   }
 }
 `;
 
 const SUBMIT_VULNERABILITY_REPORT = `
-mutation SubmitVulnerabilityReport($vulnerabilityReportFileName: String!, $fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!) {
+mutation SubmitVulnerabilityReport($vulnerabilityReportFileName: String!, $fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $sha: String) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
     repoUrl: $repoUrl
     reference: $reference
+    sha: $sha
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     projectId: $projectId
   ) {
@@ -162,6 +169,13 @@ export class GQLClient {
             uploadFields: JSON.parse(
                 data.uploadS3BucketInfo.uploadInfo.uploadFieldsJSON
             ),
+
+            repoFixReportId: data.uploadS3BucketInfo.repoUploadInfo.fixReportId,
+            repoUploadKey: data.uploadS3BucketInfo.repoUploadInfo.uploadKey,
+            repoUrl: data.uploadS3BucketInfo.repoUploadInfo.url,
+            repoUploadFields: JSON.parse(
+                data.uploadS3BucketInfo.repoUploadInfo.uploadFieldsJSON
+            ),
         };
     }
 
@@ -169,7 +183,8 @@ export class GQLClient {
         fixReportId,
         repoUrl,
         reference,
-        projectId
+        projectId,
+        sha
     ) {
         await this._apiCall(SUBMIT_VULNERABILITY_REPORT, {
             fixReportId,
@@ -177,6 +192,7 @@ export class GQLClient {
             reference,
             vulnerabilityReportFileName: 'report.json',
             projectId,
+            sha: sha || '',
         });
     }
 }

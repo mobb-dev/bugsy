@@ -5,13 +5,11 @@ import chalkAnimation from 'chalk-animation';
 import { choseScanner } from '../features/analysis/prompts.mjs';
 import { SCANNERS, mobbAscii } from '../constants.mjs';
 import { runAnalysis } from '../features/analysis/index.mjs';
-import { sleep } from '../utils.mjs';
-import path from 'path';
+import { sleep, CliError } from '../utils.mjs';
 
 const GITHUB_REPO_URL_PATTERN = new RegExp(
     'https://github.com/[\\w-]+/[\\w-]+'
 );
-export class CliError extends Error {}
 
 const UrlZ = z
     .string({
@@ -48,10 +46,6 @@ export async function analyze(
 
     if (!fs.existsSync(scanFile)) {
         throw new CliError(`\nCan't access ${chalk.bold(scanFile)}`);
-    }
-
-    if (path.extname(scanFile) !== '.json') {
-        throw new CliError(`\n${chalk.bold(scanFile)} is not a json file`);
     }
 
     !ci && (await showWelcomeMessage(skipPrompts));

@@ -28,3 +28,5 @@ export function Spinner({ ci = false } = {}) {
             }),
     };
 }
+
+export class CliError extends Error {}

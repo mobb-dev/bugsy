@@ -1,7 +1,11 @@
 import yargs from 'yargs/yargs';
 import chalk from 'chalk';
+import path from 'path';
 
 import { SCANNERS } from './constants.mjs';
+import { CliError } from './utils.mjs';
+
+const supportExtensions = ['.json', '.xml', '.fpr', '.sarif'];
 
 const refOption = {
     describe: chalk.bold('reference of the repository (branch, tag, commit)'),
@@ -73,7 +77,9 @@ export const parseArgs = (args) => {
                     ref: refOption,
                     s: {
                         alias: 'scanner',
-                        choices: Object.values(SCANNERS),
+                        choices: Object.values(SCANNERS).map((scanner) =>
+                            scanner.toLowerCase()
+                        ),
                         describe: chalk.bold('Select the scanner to use'),
                     },
                     y: yesOption,
@@ -93,7 +99,7 @@ export const parseArgs = (args) => {
                             alias: 'scan-file',
                             demandOption: true,
                             describe: chalk.bold(
-                                'Select the vulnerability report to analyze'
+                                'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL)'
                             ),
                         },
                         r: {
@@ -109,14 +115,27 @@ export const parseArgs = (args) => {
                     })
                     .check((argv) => {
                         if (!argv.srcPath && !argv.repo) {
-                            throw new Error(
+                            throw new CliError(
                                 'You must supply either --src-path or --repo'
                             );
                         }
 
                         if (argv.ci && !argv.apiKey) {
-                            throw new Error(
+                            throw new CliError(
                                 '--ci flag requires --api-key to be provided as well'
+                            );
+                        }
+                        if (
+                            !supportExtensions.includes(
+                                path.extname(argv.f).toLowerCase()
+                            )
+                        ) {
+                            throw new CliError(
+                                `\n${chalk.bold(
+                                    argv.f
+                                )} is not a supported file extension. Supported extensions are: ${chalk.bold(
+                                    supportExtensions.join(', ')
+                                )}\n`
                             );
                         }
 

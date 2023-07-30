@@ -8,7 +8,6 @@ import open from 'open';
 import semver from 'semver';
 import { callbackServer } from './callback-server.mjs';
 import tmp from 'tmp';
-import { CliError } from '../../commands/index.mjs';
 
 import { WEB_APP_URL } from '../../constants.mjs';
 import { canReachRepo, downloadRepo, getDefaultBranch } from './github.mjs';
@@ -16,7 +15,7 @@ import { GQLClient } from './gql.mjs';
 import { githubIntegrationPrompt, mobbAnalysisPrompt } from './prompts.mjs';
 import { getSnykReport } from './snyk.mjs';
 import { uploadFile } from './upload-file.mjs';
-import { keypress, Spinner } from '../../utils.mjs';
+import { keypress, Spinner, CliError } from '../../utils.mjs';
 import { pack } from './pack.mjs';
 import { getGitInfo } from './git.mjs';
 
@@ -126,7 +125,6 @@ export async function _scan(
         reportPath = await getReportFromSnyk();
     }
 
-    const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
     await uploadFile(
         reportPath,
         uploadData.url,
@@ -146,20 +144,11 @@ export async function _scan(
         throw e;
     }
 
-    debug('report %o', report);
+    mobbSpinner.success({
+        text: '🕵️‍♂️ Generating fixes...',
+    });
 
-    const results = ((report.runs || [])[0] || {}).results || [];
-    if (results.length === 0 && !scanFile) {
-        mobbSpinner.success({
-            text: '🕵️‍♂️ Report did not detect any vulnerabilities — nothing to fix.',
-        });
-    } else {
-        mobbSpinner.success({
-            text: '🕵️‍♂️ Generating fixes...',
-        });
-
-        await askToOpenAnalysis();
-    }
+    await askToOpenAnalysis();
     async function getReportFromSnyk() {
         const reportPath = path.join(dirname, 'report.json');
 

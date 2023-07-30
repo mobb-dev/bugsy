@@ -1,4 +1,5 @@
-import { analyze, scan, CliError } from './src/commands/index.mjs';
+import { analyze, scan } from './src/commands/index.mjs';
+import { CliError } from './src/utils.mjs';
 import { parseArgs } from './src/yargs.mjs';
 import { hideBin } from 'yargs/helpers';
 

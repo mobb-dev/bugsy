@@ -1,0 +1,6 @@
+.env*
+!.env.project
+!.env.vault
+.flaskenv*
+package-lock.json
+snyk

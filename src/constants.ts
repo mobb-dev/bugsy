@@ -1,30 +1,31 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import * as dotenv from 'dotenv';
-import { z } from 'zod';
-import Debug from 'debug';
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const debug = Debug('mobbdev:constants');
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '../.env') });
+import Debug from 'debug'
+import * as dotenv from 'dotenv'
+import { z } from 'zod'
+
+const debug = Debug('mobbdev:constants')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.join(__dirname, '../.env') })
 
 export const SCANNERS = {
-    Checkmarx: 'checkmarx',
-    Codeql: 'codeql',
-    Fortify: 'fortify',
-    Snyk: 'snyk',
-};
+  Checkmarx: 'checkmarx',
+  Codeql: 'codeql',
+  Fortify: 'fortify',
+  Snyk: 'snyk',
+} as const
 
 const envVariablesSchema = z
-    .object({
-        WEB_LOGIN_URL: z.string(),
-        WEB_APP_URL: z.string(),
-        API_URL: z.string(),
-    })
-    .required();
+  .object({
+    WEB_LOGIN_URL: z.string(),
+    WEB_APP_URL: z.string(),
+    API_URL: z.string(),
+  })
+  .required()
 
-const envVariables = envVariablesSchema.parse(process.env);
-debug('config %o', envVariables);
+const envVariables = envVariablesSchema.parse(process.env)
+debug('config %o', envVariables)
 
 export const mobbAscii = `
                                    ..                       
@@ -53,8 +54,11 @@ export const mobbAscii = `
            ......................................           
                 ...............................             
                        .................                    
-`;
+`
 
-export const WEB_LOGIN_URL = envVariables.WEB_LOGIN_URL;
-export const WEB_APP_URL = envVariables.WEB_APP_URL;
-export const API_URL = envVariables.API_URL;
+export const WEB_LOGIN_URL = envVariables.WEB_LOGIN_URL
+export const WEB_APP_URL = envVariables.WEB_APP_URL
+export const API_URL = envVariables.API_URL
+
+export const PROJECT_PAGE_REGEX =
+  /^http:\/\/(127\.0\.0\.1)|(localhost):5173\/organization\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/project\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/

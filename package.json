@@ -1,57 +1,78 @@
 {
-    "name": "mobbdev",
-    "version": "0.0.29",
-    "description": "Automated secure code remediation tool",
-    "repository": "https://github.com/mobb-dev/bugsy",
-    "main": "index.mjs",
-    "scripts": {
-        "lint": "prettier --check . && eslint **/*.mjs",
-        "lint:fix": "prettier --write . && eslint --fix **/*.mjs",
-        "test": "TOKEN=$(../../scripts/login_auth0.sh) NODE_OPTIONS=--experimental-vm-modules jest",
-        "prepack": "dotenv-vault pull production .env"
-    },
-    "bin": {
-        "mobbdev": "bin/cli.mjs"
-    },
-    "author": "",
-    "license": "MIT",
-    "dependencies": {
-        "adm-zip": "0.5.10",
-        "chalk": "5.3.0",
-        "chalk-animation": "2.0.3",
-        "colors": "1.4.0",
-        "configstore": "6.0.0",
-        "debug": "4.3.4",
-        "dotenv": "16.0.3",
-        "extract-zip": "2.0.1",
-        "inquirer": "9.2.7",
-        "globby": "13.2.2",
-        "nanospinner": "1.1.0",
-        "node-fetch": "3.3.1",
-        "open": "8.4.2",
-        "semver": "7.5.0",
-        "snyk": "1.1118.0",
-        "simple-git": "3.19.1",
-        "tmp": "0.2.1",
-        "yargs": "17.7.2",
-        "zod": "3.21.4"
-    },
-    "devDependencies": {
-        "@jest/globals": "29.5.0",
-        "eslint": "8.36.0",
-        "jest": "29.5.0",
-        "prettier": "2.8.4"
-    },
-    "engines": {
-        "node": ">=12.20.0"
-    },
-    "type": "module",
-    "files": [
-        "bin",
-        "src",
-        ".env",
-        "README.md",
-        "LICENSE",
-        "package.json"
-    ]
+  "name": "mobbdev",
+  "version": "0.0.30",
+  "description": "Automated secure code remediation tool",
+  "repository": "https://github.com/mobb-dev/bugsy",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "scripts": {
+    "build": "tsc && tsup-node --env.NODE_ENV production",
+    "build:dev": "tsup-node --env.NODE_ENV development",
+    "test": "TOKEN=$(../../scripts/login_auth0.sh) vitest run",
+    "test:watch": "TOKEN=$(../../scripts/login_auth0.sh) vitest",
+    "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx .",
+    "lint:fix": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx .",
+    "lint:fix:files": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx",
+    "prepack": "pnpm build && dotenv-vault pull production .env"
+  },
+  "bin": {
+    "mobbdev": "bin/cli.mjs"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "0.5.10",
+    "chalk-animation": "2.0.3",
+    "chalk": "5.3.0",
+    "configstore": "6.0.0",
+    "debug": "4.3.4",
+    "dotenv": "16.0.3",
+    "extract-zip": "2.0.1",
+    "globby": "13.2.2",
+    "graphql-request": "5.0.0",
+    "graphql": "16.6.0",
+    "inquirer": "9.2.7",
+    "nanospinner": "1.1.0",
+    "node-fetch": "3.3.1",
+    "octokit": "2.0.14",
+    "open": "8.4.2",
+    "semver": "7.5.0",
+    "simple-git": "3.19.1",
+    "snyk": "1.1118.0",
+    "supports-color": "9.4.0",
+    "tmp": "0.2.1",
+    "yargs": "17.7.2",
+    "zod": "3.21.4"
+  },
+  "devDependencies": {
+    "@octokit/plugin-rest-endpoint-methods": "7.0.1",
+    "@octokit/request-error": "3.0.3",
+    "@types/adm-zip": "0.5.0",
+    "@types/chalk-animation": "1.6.1",
+    "@types/configstore": "6.0.0",
+    "@types/debug": "4.1.8",
+    "@types/inquirer": "9.0.3",
+    "@types/semver": "7.5.0",
+    "@types/tmp": "0.2.3",
+    "@types/yargs": "17.0.24",
+    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/parser": "5.44.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-prettier": "4.2.1",
+    "eslint-plugin-simple-import-sort": "10.0.0",
+    "eslint": "8.36.0",
+    "prettier": "2.8.4",
+    "tsup": "7.2.0",
+    "typescript": "4.9.3",
+    "vitest": "0.26.2"
+  },
+  "engines": {
+    "node": ">=12.20.0"
+  },
+  "type": "module",
+  "files": [
+    "bin",
+    "dist",
+    ".env"
+  ]
 }

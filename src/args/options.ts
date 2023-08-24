@@ -26,3 +26,14 @@ export const ciOption = {
   type: 'boolean',
   default: false,
 } as const
+
+export const apiKeyOption = {
+  type: 'string',
+  describe: chalk.bold('Mobb authentication api-key'),
+} as const
+
+export const commitHashOption = {
+  alias: 'ch',
+  describe: chalk.bold('Hash of the commit'),
+  type: 'string',
+} as const

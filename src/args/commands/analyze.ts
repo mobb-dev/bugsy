@@ -5,7 +5,14 @@ import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import type * as Yargs from 'yargs'
 
-import { ciOption, refOption, repoOption, yesOption } from '../options'
+import {
+  apiKeyOption,
+  ciOption,
+  commitHashOption,
+  refOption,
+  repoOption,
+  yesOption,
+} from '../options'
 import { AnalyzeOptions, BaseAnalyzeOptions } from '../types'
 import { validateReportFileFormat, validateRepoUrl } from '../validation'
 
@@ -37,6 +44,8 @@ export function analyzeBuilder(
     })
     .option('y', yesOption)
     .option('ci', ciOption)
+    .option('api-key', apiKeyOption)
+    .option('commit-hash', commitHashOption)
     .example(
       '$0 analyze -r https://github.com/WebGoat/WebGoat -f <your_vulirabitliy_report_path>',
       'analyze an existing repository'

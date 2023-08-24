@@ -4,7 +4,13 @@ import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import type * as Yargs from 'yargs'
 
-import { ciOption, refOption, repoOption, yesOption } from '../options'
+import {
+  apiKeyOption,
+  ciOption,
+  refOption,
+  repoOption,
+  yesOption,
+} from '../options'
 import { BaseScanOptions, ScanOptions } from '../types'
 import { validateRepoUrl } from '../validation'
 
@@ -24,6 +30,7 @@ export function scanBuilder(
       })
       .option('y', yesOption)
       .option('ci', ciOption)
+      .option('api-key', apiKeyOption)
       .example(
         '$0 scan -r https://github.com/WebGoat/WebGoat',
         'Scan an existing repository'

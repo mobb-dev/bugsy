@@ -91,3 +91,27 @@ export type SubmitVulnerabilityReportArgs = {
   projectId: string
   sha?: string
 }
+
+export type CreateCliLoginArgs = {
+  publicKey: string
+}
+
+export const CreateCliLoginZ = z.object({
+  insert_cli_login_one: z.object({
+    id: z.string(),
+  }),
+})
+
+export type CreateCliLoginQuery = z.infer<typeof GetOrgAndProjectIdQueryZ>
+
+export type GetEncryptedApiTokenArgs = {
+  loginId: string
+}
+
+export const GetEncryptedApiTokenZ = z.object({
+  cli_login_by_pk: z.object({
+    encryptedApiToken: z.string().nullable(),
+  }),
+})
+
+export type GetEncryptedApiTokenQuery = z.infer<typeof GetEncryptedApiTokenZ>

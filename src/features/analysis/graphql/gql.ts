@@ -3,12 +3,19 @@ import { GraphQLClient } from 'graphql-request'
 
 import { API_URL } from '../../../constants'
 import {
+  CREATE_CLI_LOGIN,
   CREATE_COMMUNITY_USER,
   SUBMIT_VULNERABILITY_REPORT,
   UPLOAD_S3_BUCKET_INFO,
 } from './mutations'
-import { GET_ORG_AND_PROJECT_ID, ME } from './queries'
+import { GET_ENCRYPTED_API_TOKEN, GET_ORG_AND_PROJECT_ID, ME } from './queries'
 import {
+  CreateCliLoginArgs,
+  CreateCliLoginQuery,
+  CreateCliLoginZ,
+  GetEncryptedApiTokenArgs,
+  GetEncryptedApiTokenQuery,
+  GetEncryptedApiTokenZ,
   GetOrgAndProjectIdQuery,
   GetOrgAndProjectIdQueryZ,
   MeQuery,
@@ -21,25 +28,34 @@ import {
 const debug = Debug('mobbdev:gql')
 
 type GQLClientArgs = {
-  token?: string
-  apiKey?: string
+  apiKey: string
 }
 
 export class GQLClient {
   _client: GraphQLClient
+
   constructor(args: GQLClientArgs) {
-    const { token, apiKey } = args
-    debug(`init with apiKey ${apiKey} token ${token}`)
-    const headers: ClientHeaders = apiKey
-      ? { 'x-mobb-key': apiKey }
-      : {
-          authorization: `Bearer ${token}`,
-        }
-    this._client = new GraphQLClient(API_URL, { headers })
+    const { apiKey } = args
+    debug(`init with apiKey ${apiKey}`)
+    this._client = new GraphQLClient(API_URL, {
+      headers: { 'x-mobb-key': apiKey || '' },
+    })
   }
+
   async getUserInfo() {
     const { me } = await this._client.request<MeQuery>(ME)
     return me
+  }
+
+  async createCliLogin(variables: CreateCliLoginArgs): Promise<string> {
+    const res = CreateCliLoginZ.parse(
+      await this._client.request<CreateCliLoginQuery>(
+        CREATE_CLI_LOGIN,
+        variables
+      )
+    )
+
+    return res.insert_cli_login_one.id
   }
 
   async verifyToken() {
@@ -68,6 +84,16 @@ export class GQLClient {
       organizationId: org.id,
       projectId: org.projects[0].id,
     }
+  }
+
+  async getEncryptedApiToken(
+    variables: GetEncryptedApiTokenArgs
+  ): Promise<string | null> {
+    const res = await this._client.request<GetEncryptedApiTokenQuery>(
+      GET_ENCRYPTED_API_TOKEN,
+      variables
+    )
+    return GetEncryptedApiTokenZ.parse(res).cli_login_by_pk.encryptedApiToken
   }
 
   async createCommunityUser() {
@@ -109,5 +135,3 @@ export class GQLClient {
     })
   }
 }
-
-type ClientHeaders = { 'x-mobb-key': string } | { authorization: string }

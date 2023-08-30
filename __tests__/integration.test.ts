@@ -1,42 +1,62 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-import Configstore from 'configstore'
 import open from 'open'
-import tmp from 'tmp'
-import { afterAll, afterEach, beforeAll, expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'vitest'
 
-import { PROJECT_PAGE_REGEX } from '../src/constants'
+import { API_URL, PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
+import {
+  CREATE_COMMUNITY_USER,
+  PERFORM_CLI_LOGIN,
+} from '../src/features/analysis/graphql/mutations'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
-)
 vi.mock('../src/utils/dirname.ts')
-const config = new Configstore(packageJson.name)
-
-let tmpObj
-
-afterEach(() => {
-  vi.resetModules()
-  vi.restoreAllMocks()
-})
-
-beforeAll(() => {
-  tmpObj = tmp.dirSync({
-    unsafeCleanup: true,
-  })
-})
-
-afterAll(() => {
-  tmpObj.removeCallback()
-})
 
 vi.mock('open', () => ({
-  default: vi.fn(),
+  default: vi.fn().mockImplementation(async (url: string) => {
+    const match = url.match(/\/cli-login\/(.*?)$/)
+
+    if (match && match.length == 2) {
+      const loginId = match[1]
+
+      const createUserRes = await fetch(API_URL, {
+        headers: {
+          authorization: `Bearer ${process.env.TOKEN}`,
+        },
+        body: JSON.stringify({
+          query: CREATE_COMMUNITY_USER,
+        }),
+        method: 'POST',
+      })
+      expect(createUserRes.status).toStrictEqual(200)
+
+      // Emulate "Authenticate" button click in the Web UI.
+      const performLoginRes = await fetch(API_URL, {
+        headers: {
+          authorization: `Bearer ${process.env.TOKEN}`,
+        },
+        body: JSON.stringify({
+          query: PERFORM_CLI_LOGIN,
+          variables: {
+            loginId,
+          },
+        }),
+        method: 'POST',
+      })
+      expect(performLoginRes.status).toStrictEqual(200)
+    }
+  }),
 }))
+
+vi.mock('configstore', () => {
+  const Configstore = vi.fn()
+
+  Configstore.prototype.get = vi.fn()
+  Configstore.prototype.set = vi.fn()
+  return { default: Configstore }
+})
+
 vi.mock('../src/features/analysis/snyk', () => ({
   getSnykReport: vi.fn().mockImplementation(async (reportPath) => {
     fs.copyFileSync(path.join(__dirname, 'report.json'), reportPath)
@@ -45,7 +65,7 @@ vi.mock('../src/features/analysis/snyk', () => ({
 }))
 
 it('Full analyze flow', async () => {
-  config.set('token', process.env.TOKEN)
+  open.mockClear()
   const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
 
   await analysisExports.runAnalysis(
@@ -57,13 +77,12 @@ it('Full analyze flow', async () => {
   )
 
   expect(runAnalysisSpy).toHaveBeenCalled()
-  expect(open).toHaveBeenCalledTimes(1)
+  expect(open).toHaveBeenCalledTimes(2)
   expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 }, 30000)
 
 it('Direct repo upload', async () => {
-  config.set('token', process.env.TOKEN)
-
+  open.mockClear()
   await analysisExports.runAnalysis(
     {
       repo: 'https://bitbucket.com/a/b',
@@ -75,6 +94,6 @@ it('Direct repo upload', async () => {
     },
     { skipPrompts: true }
   )
-  expect(open).toHaveBeenCalledTimes(1)
+  expect(open).toHaveBeenCalledTimes(2)
   expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 })

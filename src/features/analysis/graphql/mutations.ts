@@ -52,3 +52,19 @@ export const CREATE_COMMUNITY_USER = gql`
     }
   }
 `
+
+export const CREATE_CLI_LOGIN = gql`
+  mutation CreateCliLogin($publicKey: String!) {
+    insert_cli_login_one(object: { publicKey: $publicKey }) {
+      id
+    }
+  }
+`
+
+export const PERFORM_CLI_LOGIN = gql`
+  mutation performCliLogin($loginId: String!) {
+    performCliLogin(loginId: $loginId) {
+      status
+    }
+  }
+`

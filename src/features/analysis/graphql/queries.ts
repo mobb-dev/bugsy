@@ -25,3 +25,11 @@ export const GET_ORG_AND_PROJECT_ID = gql`
     }
   }
 `
+
+export const GET_ENCRYPTED_API_TOKEN = gql`
+  query GetEncryptedApiToken($loginId: uuid!) {
+    cli_login_by_pk(id: $loginId) {
+      encryptedApiToken
+    }
+  }
+`

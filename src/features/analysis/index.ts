@@ -1,9 +1,11 @@
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
 import { WEB_APP_URL } from '@mobb/bugsy/constants'
 import * as utils from '@mobb/bugsy/utils'
+import { sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -25,6 +27,9 @@ const { CliError, Spinner, keypress, getDirName } = utils
 const webLoginUrl = `${WEB_APP_URL}/cli-login`
 const githubSubmitUrl = `${WEB_APP_URL}/gh-callback`
 const githubAuthUrl = `${WEB_APP_URL}/github-auth`
+
+const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
+const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
 
 const MOBB_LOGIN_REQUIRED_MSG = `🔓 Login to Mobb is Required, you will be redirected to our login page, once the authorization is complete return to this prompt, ${chalk.bgBlue(
   'press any key to continue'
@@ -57,7 +62,7 @@ if (!semver.satisfies(process.version, packageJson.engines.node)) {
   )
 }
 
-const config = new Configstore(packageJson.name, { token: '' })
+const config = new Configstore(packageJson.name, { apiToken: '' })
 debug('config %o', config)
 export type AnalysisParams = {
   scanFile?: string
@@ -106,11 +111,10 @@ export async function _scan(
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
   skipPrompts = skipPrompts || ci
-  let token = config.get('token')
-  debug('token %s', token)
 
-  apiKey ?? debug('token %s', apiKey)
-  let gqlClient = new GQLClient(apiKey ? { apiKey } : { token })
+  let gqlClient = new GQLClient({
+    apiKey: apiKey || config.get('apiToken'),
+  })
   await handleMobbLogin()
 
   const { projectId, organizationId } = await gqlClient.getOrgAndProjectId()
@@ -218,49 +222,83 @@ export async function _scan(
   }
 
   async function handleMobbLogin() {
-    if (
-      (token && (await gqlClient.verifyToken())) ||
-      (apiKey && (await gqlClient.verifyToken()))
-    ) {
+    if (await gqlClient.verifyToken()) {
       createSpinner().start().success({
         text: '🔓 Logged in to Mobb successfully',
       })
 
       return
-    }
-    if (apiKey && !(await gqlClient.verifyToken())) {
+    } else if (apiKey) {
       createSpinner().start().error({
         text: '🔓 Logged in to Mobb failed - check your api-key',
       })
       throw new CliError()
     }
-    const mobbLoginSpinner = createSpinner().start()
+
+    const loginSpinner = createSpinner().start()
+
     if (!skipPrompts) {
-      mobbLoginSpinner.update({ text: MOBB_LOGIN_REQUIRED_MSG })
+      loginSpinner.update({ text: MOBB_LOGIN_REQUIRED_MSG })
       await keypress()
     }
 
-    mobbLoginSpinner.update({
+    loginSpinner.update({
       text: '🔓 Waiting for Mobb login...',
     })
 
-    const loginResponse = await callbackServer({
-      url: webLoginUrl,
-      redirectUrl: `${webLoginUrl}?done=true`,
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+      modulusLength: 2048,
     })
-    token = loginResponse.token
 
-    gqlClient = new GQLClient({ token })
+    const loginId = await gqlClient.createCliLogin({
+      publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
+    })
+    const browserUrl = `${webLoginUrl}/${loginId}`
 
-    if (!(await gqlClient.verifyToken())) {
-      mobbLoginSpinner.error({
+    !ci &&
+      console.log(
+        `If the page does not open automatically, kindly access it through ${browserUrl}.`
+      )
+    await open(browserUrl)
+
+    let newApiToken = null
+
+    for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
+      const encryptedApiToken = await gqlClient.getEncryptedApiToken({
+        loginId,
+      })
+      loginSpinner.spin()
+
+      if (encryptedApiToken) {
+        debug('encrypted API token received %s', encryptedApiToken)
+        newApiToken = crypto
+          .privateDecrypt(privateKey, Buffer.from(encryptedApiToken, 'base64'))
+          .toString('utf-8')
+        debug('API token decrypted')
+        break
+      }
+      await sleep(LOGIN_CHECK_DELAY)
+    }
+
+    if (!newApiToken) {
+      loginSpinner.error({
+        text: 'Login timeout error',
+      })
+      throw new CliError()
+    }
+
+    gqlClient = new GQLClient({ apiKey: newApiToken })
+
+    if (await gqlClient.verifyToken()) {
+      debug('set api token %s', newApiToken)
+      config.set('apiToken', newApiToken)
+      loginSpinner.success({ text: '🔓 Login to Mobb successful!' })
+    } else {
+      loginSpinner.error({
         text: 'Something went wrong, API token is invalid.',
       })
       throw new CliError()
     }
-    debug('set token %s', token)
-    config.set('token', token)
-    mobbLoginSpinner.success({ text: '🔓 Login to Mobb successful!' })
   }
   async function handleGithubIntegration() {
     const addGithubIntegration = skipPrompts
@@ -301,7 +339,7 @@ export async function _scan(
         uploadKey: reportUploadInfo.uploadKey,
       })
     } catch (e) {
-      uploadReportSpinner.error({ text: '📁 Repo upload failed' })
+      uploadReportSpinner.error({ text: '📁 Report upload failed' })
       throw e
     }
     uploadReportSpinner.success({
@@ -316,7 +354,7 @@ export async function _scan(
         uploadKey: repoUploadInfo.uploadKey,
       })
     } catch (e) {
-      uploadRepoSpinner.error({ text: '📁 Report upload failed' })
+      uploadRepoSpinner.error({ text: '📁 Repo upload failed' })
       throw e
     }
     uploadRepoSpinner.success({ text: '📁 Uploading Repo successful!' })

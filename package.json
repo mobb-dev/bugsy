@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx .",
     "lint:fix": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx .",
     "lint:fix:files": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx",
-    "prepack": "pnpm build && dotenv-vault pull production .env"
+    "prepack": "dotenv-vault pull production .env && pnpm build"
   },
   "bin": {
     "mobbdev": "bin/cli.mjs"

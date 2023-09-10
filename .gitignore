@@ -4,3 +4,6 @@
 .flaskenv*
 package-lock.json
 snyk
+node_modules
+dist
+.eslintcache

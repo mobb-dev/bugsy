@@ -15,7 +15,7 @@ vi.mock('../src/utils/dirname.ts')
 
 vi.mock('open', () => ({
   default: vi.fn().mockImplementation(async (url: string) => {
-    const match = url.match(/\/cli-login\/(.*?)$/)
+    const match = url.match(/\/cli-login\/(.*?)\?.*$/)
 
     if (match && match.length == 2) {
       const loginId = match[1]

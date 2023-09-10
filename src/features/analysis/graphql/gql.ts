@@ -27,6 +27,8 @@ import {
 
 const debug = Debug('mobbdev:gql')
 
+const API_KEY_HEADER_NAME = 'x-mobb-key'
+
 type GQLClientArgs = {
   apiKey: string
 }
@@ -38,7 +40,7 @@ export class GQLClient {
     const { apiKey } = args
     debug(`init with apiKey ${apiKey}`)
     this._client = new GraphQLClient(API_URL, {
-      headers: { 'x-mobb-key': apiKey || '' },
+      headers: { [API_KEY_HEADER_NAME]: apiKey || '' },
     })
   }
 
@@ -51,7 +53,11 @@ export class GQLClient {
     const res = CreateCliLoginZ.parse(
       await this._client.request<CreateCliLoginQuery>(
         CREATE_CLI_LOGIN,
-        variables
+        variables,
+        {
+          // We may have outdated API key in the config storage. Avoid using it for the login request.
+          [API_KEY_HEADER_NAME]: '',
+        }
       )
     )
 
@@ -62,7 +68,7 @@ export class GQLClient {
     await this.createCommunityUser()
 
     try {
-      await this._client.request<MeQuery>(ME)
+      await this.getUserInfo()
     } catch (e) {
       debug('verify token failed %o', e)
       return false
@@ -91,7 +97,11 @@ export class GQLClient {
   ): Promise<string | null> {
     const res = await this._client.request<GetEncryptedApiTokenQuery>(
       GET_ENCRYPTED_API_TOKEN,
-      variables
+      variables,
+      {
+        // We may have outdated API key in the config storage. Avoid using it for the login request.
+        [API_KEY_HEADER_NAME]: '',
+      }
     )
     return GetEncryptedApiTokenZ.parse(res).cli_login_by_pk.encryptedApiToken
   }

@@ -4,8 +4,11 @@ import path from 'node:path'
 import AdmZip from 'adm-zip'
 import Debug from 'debug'
 import { globby } from 'globby'
+import { isBinary } from 'istextorbinary'
 
 const debug = Debug('mobbdev:pack')
+
+const MAX_FILE_SIZE = 1024 * 1024 * 5
 
 export async function pack(srcDirPath: string) {
   debug('pack folder %s', srcDirPath)
@@ -21,10 +24,21 @@ export async function pack(srcDirPath: string) {
 
   debug('compressing files')
   for (const filepath of filepaths) {
-    zip.addFile(
-      filepath.toString(),
-      fs.readFileSync(path.join(srcDirPath, filepath.toString()))
-    )
+    const absFilepath = path.join(srcDirPath, filepath.toString())
+
+    if (fs.lstatSync(absFilepath).size > MAX_FILE_SIZE) {
+      debug('ignoring %s because the size is > 5MB', filepath)
+      continue
+    }
+
+    const data = fs.readFileSync(absFilepath)
+
+    if (isBinary(null, data)) {
+      debug('ignoring %s because is seems to be a binary file', filepath)
+      continue
+    }
+
+    zip.addFile(filepath.toString(), data)
   }
 
   debug('get zip file buffer')

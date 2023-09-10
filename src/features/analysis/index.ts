@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
@@ -13,7 +14,6 @@ import open from 'open'
 import semver from 'semver'
 import tmp from 'tmp'
 
-import { callbackServer } from './callback-server'
 import { getGitInfo } from './git'
 import { canReachRepo, downloadRepo, getRepo } from './github/github'
 import { GQLClient } from './graphql'
@@ -25,7 +25,6 @@ import { uploadFile } from './upload-file'
 const { CliError, Spinner, keypress, getDirName } = utils
 
 const webLoginUrl = `${WEB_APP_URL}/cli-login`
-const githubSubmitUrl = `${WEB_APP_URL}/gh-callback`
 const githubAuthUrl = `${WEB_APP_URL}/github-auth`
 
 const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
@@ -133,7 +132,7 @@ export async function _scan(
   const userInfo = await gqlClient.getUserInfo()
   let { githubToken } = userInfo
   const isRepoAvailable = await canReachRepo(repo, {
-    token: userInfo.githubToken,
+    token: githubToken,
   })
 
   if (!isRepoAvailable) {
@@ -142,8 +141,18 @@ export async function _scan(
         `Cannot access repo ${repo} with the provided token, please visit ${githubAuthUrl} to refresh your Github token`
       )
     }
-    const { token } = await handleGithubIntegration()
-    githubToken = token
+    githubToken = await handleGithubIntegration(githubToken)
+
+    // Check repo availability again after GH token update.
+    const isRepoAvailable = await canReachRepo(repo, {
+      token: githubToken,
+    })
+
+    if (!isRepoAvailable) {
+      throw new Error(
+        `Cannot access repo ${repo} with the provided credentials`
+      )
+    }
   }
 
   const reference =
@@ -253,7 +262,7 @@ export async function _scan(
     const loginId = await gqlClient.createCliLogin({
       publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
     })
-    const browserUrl = `${webLoginUrl}/${loginId}`
+    const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
 
     !ci &&
       console.log(
@@ -300,7 +309,7 @@ export async function _scan(
       throw new CliError()
     }
   }
-  async function handleGithubIntegration() {
+  async function handleGithubIntegration(oldToken: string) {
     const addGithubIntegration = skipPrompts
       ? true
       : await githubIntegrationPrompt()
@@ -312,12 +321,28 @@ export async function _scan(
       githubSpinner.error()
       throw Error('Could not reach github repo')
     }
-    const result = await callbackServer({
-      url: githubAuthUrl,
-      redirectUrl: `${githubSubmitUrl}?done=true`,
+
+    console.log(
+      `If the page does not open automatically, kindly access it through ${githubAuthUrl}.`
+    )
+    await open(githubAuthUrl)
+
+    for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
+      const { githubToken } = await gqlClient.getUserInfo()
+
+      if (githubToken && githubToken !== oldToken) {
+        githubSpinner.success({ text: '🔗 Github integration successful!' })
+        return githubToken
+      }
+
+      githubSpinner.spin()
+      await sleep(LOGIN_CHECK_DELAY)
+    }
+
+    githubSpinner.error({
+      text: 'Github login timeout error',
     })
-    githubSpinner.success({ text: '🔗 Github integration successful!' })
-    return result
+    throw new CliError('Github login timeout')
   }
   async function uploadExistingRepo() {
     if (!srcPath || !reportPath) {

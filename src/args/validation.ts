@@ -26,14 +26,15 @@ Example: \n\tmobbdev ${command} -r ${chalk.bold(
   throw new CliError(formattedErrorMessage)
 }
 
-const GITHUB_REPO_URL_PATTERN = new RegExp('https://github.com/[\\w-]+/[\\w-]+')
+const GIT_REPO_URL_PATTERN =
+  /^https:\/\/(gitlab|github)\.com\/(([^/.\s]+[/])+)([^/.\s]+)(\.git)?(\/)?$/i
 
 const UrlZ = z
   .string({
-    invalid_type_error: 'is not a valid github URL',
+    invalid_type_error: 'is not a valid GitHub / GitLab URL',
   })
-  .regex(GITHUB_REPO_URL_PATTERN, {
-    message: 'is not a valid github URL',
+  .regex(GIT_REPO_URL_PATTERN, {
+    message: 'is not a valid GitHub / GitLab URL',
   })
 
 export function validateRepoUrl(

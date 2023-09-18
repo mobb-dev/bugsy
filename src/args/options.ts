@@ -4,7 +4,7 @@ export const repoOption = {
   alias: 'r',
   demandOption: true,
   type: 'string',
-  describe: chalk.bold('Github repository URL'),
+  describe: chalk.bold('Github / GitLab repository URL'),
 } as const
 
 export const yesOption = {

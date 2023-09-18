@@ -31,7 +31,8 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "ES2020",
+    "target": "ESNext",
+    "lib": ["es2021", "DOM"],
     "useUnknownInCatchVariables": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true

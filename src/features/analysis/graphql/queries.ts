@@ -6,6 +6,7 @@ export const ME = gql`
       id
       email
       githubToken
+      gitlabToken
     }
   }
 `

@@ -34,15 +34,14 @@ export async function snykLoginPrompt() {
   return spinner.success()
 }
 
-export async function githubIntegrationPrompt() {
+export async function scmIntegrationPrompt(scmName: string) {
   const answers = await inquirer.prompt({
-    name: 'githubConfirm',
+    name: 'scmConfirm',
     type: 'confirm',
-    message:
-      "It seems we don't have access to the repo, do you want to grant access to your github account",
+    message: `It seems we don't have access to the repo, do you want to grant access to your ${scmName} account?`,
     default: true,
   })
-  return answers.githubConfirm
+  return answers.scmConfirm
 }
 export async function mobbAnalysisPrompt() {
   const spinner = createSpinner().start()

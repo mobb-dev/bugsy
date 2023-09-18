@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { pipeline } from 'node:stream/promises'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
 import { WEB_APP_URL } from '@mobb/bugsy/constants'
@@ -10,15 +11,22 @@ import { sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
+import extract from 'extract-zip'
+import fetch from 'node-fetch'
 import open from 'open'
 import semver from 'semver'
 import tmp from 'tmp'
 
 import { getGitInfo } from './git'
-import { canReachRepo, downloadRepo, getRepo } from './github/github'
 import { GQLClient } from './graphql'
 import { pack } from './pack'
-import { githubIntegrationPrompt, mobbAnalysisPrompt } from './prompts'
+import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
+import {
+  getScmLibTypeFromUrl,
+  scmCanReachRepo,
+  SCMLib,
+  ScmLibScmType,
+} from './scm'
 import { getSnykReport } from './snyk'
 import { uploadFile } from './upload-file'
 
@@ -26,6 +34,57 @@ const { CliError, Spinner, keypress, getDirName } = utils
 
 const webLoginUrl = `${WEB_APP_URL}/cli-login`
 const githubAuthUrl = `${WEB_APP_URL}/github-auth`
+const gitlabAuthUrl = `${WEB_APP_URL}/gitlab-auth`
+
+type DownloadRepoParams = {
+  repoUrl: string
+  dirname: string
+  ci: boolean
+  authHeaders: Record<string, string>
+  downloadUrl: string
+}
+export async function downloadRepo({
+  repoUrl,
+  authHeaders,
+  downloadUrl,
+  dirname,
+  ci,
+}: DownloadRepoParams) {
+  const { createSpinner } = Spinner({ ci })
+  const repoSpinner = createSpinner('💾 Downloading Repo').start()
+  debug('download repo %s %s %s', repoUrl, dirname)
+  const zipFilePath = path.join(dirname, 'repo.zip')
+  const response = await fetch(downloadUrl, {
+    method: 'GET',
+    headers: {
+      ...authHeaders,
+    },
+  })
+  if (!response.ok) {
+    debug('SCM zipball request failed %s %s', response.body, response.status)
+    repoSpinner.error({ text: '💾 Repo download failed' })
+    throw new Error(`Can't access ${chalk.bold(repoUrl)}`)
+  }
+
+  const fileWriterStream = fs.createWriteStream(zipFilePath)
+  if (!response.body) {
+    throw new Error('Response body is empty')
+  }
+
+  await pipeline(response.body, fileWriterStream)
+  await extract(zipFilePath, { dir: dirname })
+
+  const repoRoot = fs
+    .readdirSync(dirname, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)[0]
+  if (!repoRoot) {
+    throw new Error('Repo root not found')
+  }
+  debug('repo root %s', repoRoot)
+  repoSpinner.success({ text: '💾 Repo downloaded successfully' })
+  return path.join(dirname, repoRoot)
+}
 
 const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
 const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
@@ -130,46 +189,73 @@ export async function _scan(
     throw new Error('repo is required in case srcPath is not provided')
   }
   const userInfo = await gqlClient.getUserInfo()
-  let { githubToken } = userInfo
-  const isRepoAvailable = await canReachRepo(repo, {
-    token: githubToken,
+  const { githubToken, gitlabToken } = userInfo
+  const isRepoAvailable = await scmCanReachRepo({
+    repoUrl: repo,
+    githubToken,
+    gitlabToken,
   })
 
+  const scmLibType = getScmLibTypeFromUrl(repo)
+  const scmAuthUrl =
+    scmLibType === ScmLibScmType.GITHUB
+      ? githubAuthUrl
+      : scmLibType === ScmLibScmType.GITLAB
+      ? gitlabAuthUrl
+      : undefined
+
+  let token =
+    scmLibType === ScmLibScmType.GITHUB
+      ? githubToken
+      : scmLibType === ScmLibScmType.GITLAB
+      ? gitlabToken
+      : undefined
+
   if (!isRepoAvailable) {
-    if (ci) {
-      throw new Error(
-        `Cannot access repo ${repo} with the provided token, please visit ${githubAuthUrl} to refresh your Github token`
-      )
+    if (ci || !scmLibType || !scmAuthUrl) {
+      const errorMessage = scmAuthUrl
+        ? `Cannot access repo ${repo}`
+        : `Cannot access repo ${repo} with the provided token, please visit ${scmAuthUrl} to refresh your source control management system token`
+      throw new Error(errorMessage)
     }
-    githubToken = await handleGithubIntegration(githubToken)
 
-    // Check repo availability again after GH token update.
-    const isRepoAvailable = await canReachRepo(repo, {
-      token: githubToken,
-    })
+    if (scmLibType && scmAuthUrl) {
+      token = (await handleScmIntegration(token, scmLibType, scmAuthUrl)) || ''
 
-    if (!isRepoAvailable) {
-      throw new Error(
-        `Cannot access repo ${repo} with the provided credentials`
-      )
+      // Check repo availability again after SCM token update.
+      const isRepoAvailable = await scmCanReachRepo({
+        repoUrl: repo,
+        githubToken: token,
+        gitlabToken: token,
+      })
+
+      if (!isRepoAvailable) {
+        throw new Error(
+          `Cannot access repo ${repo} with the provided credentials`
+        )
+      }
     }
   }
+  const scm = await SCMLib.init({
+    url: repo,
+    accessToken: token,
+    scmType: scmLibType,
+  })
 
-  const reference =
-    ref ?? (await getRepo(repo, { token: githubToken })).data.default_branch
+  const reference = ref ?? (await scm.getRepoDefaultBranch())
+  const { sha } = await scm.getReferenceData(reference)
+
   debug('org id %s', organizationId)
   debug('project id %s', projectId)
   debug('default branch %s', reference)
 
-  const repositoryRoot = await downloadRepo(
-    {
-      repoUrl: repo,
-      reference,
-      dirname,
-      ci,
-    },
-    { token: githubToken }
-  )
+  const repositoryRoot = await downloadRepo({
+    repoUrl: repo,
+    dirname,
+    ci,
+    authHeaders: scm.getAuthHeaders(),
+    downloadUrl: scm.getDownloadUrl(sha),
+  })
 
   if (!reportPath) {
     reportPath = await getReportFromSnyk()
@@ -309,41 +395,58 @@ export async function _scan(
       throw new CliError()
     }
   }
-  async function handleGithubIntegration(oldToken: string) {
-    const addGithubIntegration = skipPrompts
-      ? true
-      : await githubIntegrationPrompt()
+  async function handleScmIntegration(
+    oldToken: string | undefined,
+    scmLibType: ScmLibScmType,
+    scmAuthUrl: string
+  ) {
+    const scmName =
+      scmLibType === ScmLibScmType.GITHUB
+        ? 'Github'
+        : scmLibType === ScmLibScmType.GITLAB
+        ? 'Gitlab'
+        : ''
 
-    const githubSpinner = createSpinner(
-      '🔗 Waiting for github integration...'
+    const addScmIntegration = skipPrompts
+      ? true
+      : await scmIntegrationPrompt(scmName)
+
+    const scmSpinner = createSpinner(
+      `🔗 Waiting for ${scmName} integration...`
     ).start()
-    if (!addGithubIntegration) {
-      githubSpinner.error()
-      throw Error('Could not reach github repo')
+    if (!addScmIntegration) {
+      scmSpinner.error()
+      throw Error(`Could not reach ${scmName} repo`)
     }
 
     console.log(
-      `If the page does not open automatically, kindly access it through ${githubAuthUrl}.`
+      `If the page does not open automatically, kindly access it through ${scmAuthUrl}.`
     )
-    await open(githubAuthUrl)
+    await open(scmAuthUrl)
 
     for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
-      const { githubToken } = await gqlClient.getUserInfo()
+      const { githubToken, gitlabToken } = await gqlClient.getUserInfo()
 
-      if (githubToken && githubToken !== oldToken) {
-        githubSpinner.success({ text: '🔗 Github integration successful!' })
+      if (scmLibType === ScmLibScmType.GITHUB && githubToken !== oldToken) {
+        scmSpinner.success({ text: '🔗 Github integration successful!' })
         return githubToken
       }
 
-      githubSpinner.spin()
+      if (scmLibType === ScmLibScmType.GITLAB && gitlabToken !== oldToken) {
+        scmSpinner.success({ text: '🔗 Gitlab integration successful!' })
+        return gitlabToken
+      }
+
+      scmSpinner.spin()
       await sleep(LOGIN_CHECK_DELAY)
     }
 
-    githubSpinner.error({
-      text: 'Github login timeout error',
+    scmSpinner.error({
+      text: `${scmName} login timeout error`,
     })
-    throw new CliError('Github login timeout')
+    throw new CliError(`${scmName} login timeout`)
   }
+
   async function uploadExistingRepo() {
     if (!srcPath || !reportPath) {
       throw new Error('src path and reportPath is required')

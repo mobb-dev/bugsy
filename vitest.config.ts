@@ -6,8 +6,8 @@ export default defineConfig({
   test: {
     globals: true,
     exclude: ['node_modules', './build'],
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    testTimeout: 60000,
+    hookTimeout: 60000,
   },
   resolve: {
     alias: {

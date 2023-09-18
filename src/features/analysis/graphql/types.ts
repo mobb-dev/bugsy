@@ -53,7 +53,8 @@ export type MeQuery = {
   me: {
     id: string
     email: string
-    githubToken: string
+    githubToken: string | undefined
+    gitlabToken: string | undefined
   }
 }
 

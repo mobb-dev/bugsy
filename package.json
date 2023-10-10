@@ -1,11 +1,12 @@
 {
   "name": "mobbdev",
-  "version": "0.0.38",
+  "version": "0.0.45",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
+    "postinstall": "node ./src/post_install/cx_install.mjs",
     "build": "tsc && tsup-node --env.NODE_ENV production",
     "build:dev": "tsup-node --env.NODE_ENV development",
     "test": "TOKEN=$(../../scripts/login_auth0.sh) vitest run",
@@ -26,6 +27,7 @@
     "@octokit/plugin-rest-endpoint-methods": "7.0.1",
     "@octokit/request-error": "3.0.3",
     "adm-zip": "0.5.10",
+    "axios": "1.5.0",
     "chalk": "5.3.0",
     "chalk-animation": "2.0.3",
     "configstore": "6.0.0",
@@ -45,6 +47,7 @@
     "simple-git": "3.19.1",
     "snyk": "1.1118.0",
     "supports-color": "9.4.0",
+    "tar": "6.2.0",
     "tmp": "0.2.1",
     "yargs": "17.7.2",
     "zod": "3.21.4"
@@ -58,6 +61,7 @@
     "@types/debug": "4.1.8",
     "@types/inquirer": "9.0.3",
     "@types/semver": "7.5.0",
+    "@types/tar": "^6.1.6",
     "@types/tmp": "0.2.3",
     "@types/yargs": "17.0.24",
     "@typescript-eslint/eslint-plugin": "5.44.0",

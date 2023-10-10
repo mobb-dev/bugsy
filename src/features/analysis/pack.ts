@@ -10,7 +10,7 @@ const debug = Debug('mobbdev:pack')
 
 const MAX_FILE_SIZE = 1024 * 1024 * 5
 
-export async function pack(srcDirPath: string) {
+export async function pack(srcDirPath: string, vulnFiles: string[]) {
   debug('pack folder %s', srcDirPath)
   const filepaths = await globby('**', {
     gitignore: true,
@@ -25,6 +25,11 @@ export async function pack(srcDirPath: string) {
   debug('compressing files')
   for (const filepath of filepaths) {
     const absFilepath = path.join(srcDirPath, filepath.toString())
+
+    if (!vulnFiles.includes(filepath.toString())) {
+      debug('ignoring %s because it is not a vulnerability file', filepath)
+      continue
+    }
 
     if (fs.lstatSync(absFilepath).size > MAX_FILE_SIZE) {
       debug('ignoring %s because the size is > 5MB', filepath)

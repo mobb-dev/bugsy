@@ -34,3 +34,21 @@ export const GET_ENCRYPTED_API_TOKEN = gql`
     }
   }
 `
+
+export const GET_FIX_REPORT_STATE = gql`
+  query FixReportState($id: uuid!) {
+    fixReport_by_pk(id: $id) {
+      state
+    }
+  }
+`
+
+export const GET_VULNERABILITY_REPORT_PATHS = gql`
+  query GetVulnerabilityReportPaths($vulnerabilityReportId: uuid!) {
+    vulnerability_report_path(
+      where: { vulnerabilityReportId: { _eq: $vulnerabilityReportId } }
+    ) {
+      path
+    }
+  }
+`

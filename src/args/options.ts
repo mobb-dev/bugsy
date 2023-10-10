@@ -6,6 +6,10 @@ export const repoOption = {
   type: 'string',
   describe: chalk.bold('Github / GitLab repository URL'),
 } as const
+export const projectNameOption = {
+  type: 'string',
+  describe: chalk.bold('Checkmarx project name (when scanning with Checkmarx)'),
+} as const
 
 export const yesOption = {
   alias: 'yes',

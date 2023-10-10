@@ -40,6 +40,19 @@ export const UploadS3BucketInfoZ = z.object({
 
 export type UploadS3BucketInfo = z.infer<typeof UploadS3BucketInfoZ>
 
+export type DigestVulnerabilityReportVariables = {
+  fixReportId: string
+  repoUrl: string
+  reference: string
+  sha: string
+  vulnerabilityReportFileName: string
+  projectId: string
+}
+
+export type InitializeVulnerabilityReportVariables = {
+  fixReportId: string
+}
+
 export type SubmitVulnerabilityReportVariables = {
   fixReportId: string
   repoUrl: string
@@ -85,6 +98,18 @@ export const GetOrgAndProjectIdQueryZ = z.object({
 
 export type GetOrgAndProjectIdQuery = z.infer<typeof GetOrgAndProjectIdQueryZ>
 
+export type DigestVulnerabilityReportArgs = {
+  fixReportId: string
+  projectId: string
+  repoUrl: string
+  reference: string
+  sha?: string
+}
+
+export type InitializeVulnerabilityReportArgs = {
+  fixReportId: string
+}
+
 export type SubmitVulnerabilityReportArgs = {
   fixReportId: string
   repoUrl: string
@@ -116,3 +141,33 @@ export const GetEncryptedApiTokenZ = z.object({
 })
 
 export type GetEncryptedApiTokenQuery = z.infer<typeof GetEncryptedApiTokenZ>
+
+export const DigestVulnerabilityReportZ = z.object({
+  digestVulnerabilityReport: z.object({
+    vulnerabilityReportId: z.string(),
+  }),
+})
+
+export type DigestVulnerabilityReportQuery = z.infer<
+  typeof DigestVulnerabilityReportZ
+>
+
+export const GetFixReportZ = z.object({
+  fixReport_by_pk: z.object({
+    state: z.string(),
+  }),
+})
+
+export type GetFixReportQuery = z.infer<typeof GetFixReportZ>
+
+export const GetVulnerabilityReportPathsZ = z.object({
+  vulnerability_report_path: z.array(
+    z.object({
+      path: z.string(),
+    })
+  ),
+})
+
+export type GetVulnerabilityReportPathsQuery = z.infer<
+  typeof GetVulnerabilityReportPathsZ
+>

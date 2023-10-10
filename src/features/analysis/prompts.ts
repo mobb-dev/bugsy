@@ -26,6 +26,27 @@ export async function choseScanner(): Promise<ScannerValue> {
   return scanner
 }
 
+export async function tryCheckmarxConfiguarationAgain() {
+  console.log(
+    '🔓 Oops, seems like checkmarx does not accept the current configuration'
+  )
+  const { confirmCheckmarxRetryConfigrations } = await inquirer.prompt({
+    name: 'confirmCheckmarxRetryConfigrations',
+    type: 'confirm',
+    message: 'Would like to try to configure them again? ',
+    default: true,
+  })
+  return confirmCheckmarxRetryConfigrations
+}
+
+export async function startCheckmarxConfigationPrompt() {
+  const checkmarxConfigreSpinner = createSpinner(
+    '🔓 Checkmarx needs to be configured before we start, press any key to continue'
+  ).start()
+  await keypress()
+  checkmarxConfigreSpinner.success()
+}
+
 export async function snykLoginPrompt() {
   const spinner = createSpinner(
     '🔓 Login to Snyk is required, press any key to continue'

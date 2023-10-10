@@ -28,4 +28,5 @@ export type BaseScanOptions = {
   yes?: boolean
   apiKey?: string
   ci: boolean
+  cxProjectName?: string
 }

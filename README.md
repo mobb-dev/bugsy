@@ -40,6 +40,24 @@ npx mobbdev scan -r https://github.com/mobb-dev/simple-vulnerable-java-project
 
 Bugsy will automatically generate a fix for each supported vulnerability identified in the SAST results, present it to developers for review and commit to their code.
 
+## Contribution
+
+Install the dependencies and run the tests:
+
+```shell
+pnpm install
+
+# or use npm run build:dev to watch for changes
+pnpm run build
+
+# or use npm test:watch to watch for changes
+pnpm run test
+```
+
+### Debugging
+
+If you're using VSCode, you can use the `launch.json` file to debug the code. Run the `CLI tests` configuration to continuously run and debug the tests.
+
 ## Getting support
 
 If you need support using Bugsy or just want to share your thoughts and learn more, you are more than welcome to join our [discord server](https://bit.ly/Mobb-discord)

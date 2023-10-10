@@ -175,7 +175,6 @@ export async function getGitlabRepoList(accessToken: string) {
     //directly with fetch()
     sort: 'asc',
     orderBy: 'updated_at',
-    pagination: 'keyset',
     perPage: 100,
   })
   return Promise.all(

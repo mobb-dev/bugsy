@@ -180,7 +180,7 @@ export async function getGitlabRepoList(accessToken: string) {
   return Promise.all(
     res.map(async (project) => {
       const proj = await api.Projects.show(project.id)
-      const owner = proj.owner.name
+      const owner = proj.namespace.name
       const repoLanguages = await api.Projects.showLanguages(project.id)
       return {
         repoName: project.path,

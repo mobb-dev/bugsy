@@ -165,7 +165,8 @@ export async function _scan(
     commitHash,
     ref,
     scanner,
-  }: AnalysisParams & { dirname: string },
+    cxProjectName,
+  }: AnalysisParams & { dirname: string; cxProjectName?: string },
   { skipPrompts = false } = {}
 ) {
   debug('start %s %s', dirname, repo)
@@ -302,8 +303,16 @@ export async function _scan(
         await getSnykReport(reportPath, repositoryRoot, { skipPrompts })
         break
       case 'checkmarx':
+        if (!cxProjectName) {
+          throw new Error('cxProjectName is required for checkmarx scanner')
+        }
         await getCheckmarxReport(
-          { reportPath, repositoryRoot, branch: reference },
+          {
+            reportPath,
+            repositoryRoot,
+            branch: reference,
+            projectName: cxProjectName,
+          },
           { skipPrompts }
         )
         break

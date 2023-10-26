@@ -43,7 +43,7 @@ function installBinary() {
   const { target } = supportedPlatform
 
   const url = `https://github.com/Checkmarx/ast-cli/releases/download/2.0.55/ast-cli_${target}`
-  const binaryName = 'cx'
+  const binaryName = supportedPlatform.type === 'Windows_NT' ? 'cx.exe' : 'cx'
 
   install({ binaryName, url })
 }

@@ -11,13 +11,16 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import { existsSync } from 'fs'
 import { createSpinner } from 'nanospinner'
+import { type } from 'os'
 import path from 'path'
 
 const debug = Debug('mobbdev:checkmarx')
 const require = createRequire(import.meta.url)
 const getCheckmarxPath = () => {
+  const os = type()
+  const cxFileName = os === 'Windows_NT' ? 'cx.exe' : 'cx'
   try {
-    return require.resolve('.bin/cx')
+    return require.resolve(`.bin/${cxFileName}`)
   } catch (e) {
     throw new CliError(cxOperatingSystemSupportMessage)
   }
@@ -78,9 +81,10 @@ type GetCheckmarxReportArgs = {
   reportPath: string
   repositoryRoot: string
   branch: string
+  projectName: string
 }
 export async function getCheckmarxReport(
-  { reportPath, repositoryRoot, branch }: GetCheckmarxReportArgs,
+  { reportPath, repositoryRoot, branch, projectName }: GetCheckmarxReportArgs,
   { skipPrompts = false }
 ) {
   debug('get checkmarx report start %s %s', reportPath, repositoryRoot)
@@ -103,7 +107,7 @@ export async function getCheckmarxReport(
     branch,
     filePath,
     fileName,
-    projectName: 'mobb_dev',
+    projectName,
   })
   console.log('⠋ 🔍 Initiating Checkmarx Scan ')
   const { code: scanCode } = await forkCheckmarx(
@@ -137,7 +141,7 @@ async function validateCheckamxCredentials() {
         Here's a suggestion for checkmarx configuation: 
           ${chalk.bold('AST Base URI:')} https://ast.checkmarx.net
           ${chalk.bold('AST Base Auth URI (IAM):')} https://iam.checkmarx.net
-      `)
+  `)
   await forkCheckmarx(CONFIGURE_COMMAND, { display: true })
   const { code: loginCode } = await forkCheckmarx(VALIDATE_COMMAND, {
     display: false,

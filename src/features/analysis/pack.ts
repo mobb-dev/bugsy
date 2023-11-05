@@ -10,6 +10,12 @@ const debug = Debug('mobbdev:pack')
 
 const MAX_FILE_SIZE = 1024 * 1024 * 5
 
+function endsWithAny(str: string, suffixes: string[]): boolean {
+  return suffixes.some(function (suffix) {
+    return str.endsWith(suffix)
+  })
+}
+
 export async function pack(srcDirPath: string, vulnFiles: string[]) {
   debug('pack folder %s', srcDirPath)
   const filepaths = await globby('**', {
@@ -26,7 +32,13 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
   for (const filepath of filepaths) {
     const absFilepath = path.join(srcDirPath, filepath.toString())
 
-    if (!vulnFiles.includes(filepath.toString())) {
+    // the server returns relative paths in unix style
+    if (
+      !endsWithAny(
+        absFilepath.toString().replaceAll(path.win32.sep, path.posix.sep),
+        vulnFiles
+      )
+    ) {
       debug('ignoring %s because it is not a vulnerability file', filepath)
       continue
     }

@@ -84,24 +84,27 @@ it('Full analyze flow', async () => {
   expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 }, 30000)
 
-it('Direct repo upload', async () => {
-  const packSpy = vi.spyOn(ourPackModule, 'pack')
-  open.mockClear()
-  await analysisExports.runAnalysis(
-    {
-      repo: 'https://bitbucket.com/a/b',
-      ref: 'test',
-      commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
-      scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
-      srcPath: path.join(__dirname, 'assets/simple'),
-      ci: false,
-    },
-    { skipPrompts: true }
-  )
-  expect(open).toHaveBeenCalledTimes(2)
-  expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+it.each(['assets', 'assets/simple', 'assets/simple/src'])(
+  'Direct repo upload',
+  async (srcPath) => {
+    const packSpy = vi.spyOn(ourPackModule, 'pack')
+    open.mockClear()
+    await analysisExports.runAnalysis(
+      {
+        repo: 'https://bitbucket.com/a/b',
+        ref: 'test',
+        commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+        scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
+        srcPath: path.join(__dirname, srcPath),
+        ci: false,
+      },
+      { skipPrompts: true }
+    )
+    expect(open).toHaveBeenCalledTimes(2)
+    expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 
-  // ensure that we filter only relevant files
-  const uploadedRepoZip = new AdmZip(Buffer.from(packSpy.returns[0]))
-  expect(uploadedRepoZip.getEntryCount()).toBe(1)
-})
+    // ensure that we filter only relevant files
+    const uploadedRepoZip = new AdmZip(Buffer.from(packSpy.returns[0]))
+    expect(uploadedRepoZip.getEntryCount()).toBe(1)
+  }
+)

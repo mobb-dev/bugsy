@@ -27,5 +27,8 @@
     "import/first": "error",
     "import/newline-after-import": "error",
     "@typescript-eslint/ban-ts-comment": "warn"
+  },
+   "env": {
+    "node": true
   }
 }

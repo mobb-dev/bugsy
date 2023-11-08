@@ -21,6 +21,52 @@ export const UPLOAD_S3_BUCKET_INFO = gql`
   }
 `
 
+export const DIGEST_VULNERABILITY_REPORT = gql`
+  mutation DigestVulnerabilityReport(
+    $vulnerabilityReportFileName: String!
+    $fixReportId: String!
+    $projectId: String!
+    $repoUrl: String!
+    $reference: String!
+    $sha: String
+  ) {
+    digestVulnerabilityReport(
+      fixReportId: $fixReportId
+      vulnerabilityReportFileName: $vulnerabilityReportFileName
+      projectId: $projectId
+      repoUrl: $repoUrl
+      reference: $reference
+      sha: $sha
+    ) {
+      __typename
+      ... on VulnerabilityReport {
+        vulnerabilityReportId
+        fixReportId
+      }
+      ... on RabbitSendError {
+        status
+        error
+      }
+      ... on ReportValidationError {
+        status
+        error
+      }
+      ... on ReferenceNotFoundError {
+        status
+        error
+      }
+    }
+  }
+`
+
+export const INITIALIZE_VULNERABILITY_REPORT = gql`
+  mutation InitializeVulnerabilityReport($fixReportId: String!) {
+    initializeVulnerabilityReport(fixReportId: $fixReportId) {
+      __typename
+    }
+  }
+`
+
 export const SUBMIT_VULNERABILITY_REPORT = gql`
   mutation SubmitVulnerabilityReport(
     $vulnerabilityReportFileName: String!

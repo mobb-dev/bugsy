@@ -5,6 +5,7 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
+import { SupportedScanners } from '@mobb/bugsy/constants'
 import { WEB_APP_URL } from '@mobb/bugsy/constants'
 import * as utils from '@mobb/bugsy/utils'
 import { sleep } from '@mobb/bugsy/utils'
@@ -21,13 +22,14 @@ import { getGitInfo } from './git'
 import { GQLClient } from './graphql'
 import { pack } from './pack'
 import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
+import { getCheckmarxReport } from './scanners/checkmarx'
+import { getSnykReport } from './scanners/snyk'
 import {
   getScmLibTypeFromUrl,
   scmCanReachRepo,
   SCMLib,
   ScmLibScmType,
 } from './scm'
-import { getSnykReport } from './snyk'
 import { uploadFile } from './upload-file'
 
 const { CliError, Spinner, keypress, getDirName } = utils
@@ -129,8 +131,7 @@ export type AnalysisParams = {
   srcPath?: string
   ref?: string
   commitHash?: string
-  s?: string
-  scanner?: string
+  scanner?: SupportedScanners
   y?: boolean
   yes?: boolean
   apiKey?: string
@@ -163,7 +164,9 @@ export async function _scan(
     srcPath,
     commitHash,
     ref,
-  }: AnalysisParams & { dirname: string },
+    scanner,
+    cxProjectName,
+  }: AnalysisParams & { dirname: string; cxProjectName?: string },
   { skipPrompts = false } = {}
 ) {
   debug('start %s %s', dirname, repo)
@@ -244,7 +247,6 @@ export async function _scan(
 
   const reference = ref ?? (await scm.getRepoDefaultBranch())
   const { sha } = await scm.getReferenceData(reference)
-
   debug('org id %s', organizationId)
   debug('project id %s', projectId)
   debug('default branch %s', reference)
@@ -257,8 +259,11 @@ export async function _scan(
     downloadUrl: scm.getDownloadUrl(sha),
   })
 
+  if (scanner) {
+    reportPath = await getReport(scanner)
+  }
   if (!reportPath) {
-    reportPath = await getReportFromSnyk()
+    throw new Error('reportPath is null')
   }
   const uploadReportSpinner = createSpinner('📁 Uploading Report').start()
   try {
@@ -291,21 +296,37 @@ export async function _scan(
   })
 
   await askToOpenAnalysis()
-  async function getReportFromSnyk() {
+  async function getReport(scanner: SupportedScanners): Promise<string> {
     const reportPath = path.join(dirname, 'report.json')
-    if (!(await getSnykReport(reportPath, repositoryRoot, { skipPrompts }))) {
-      debug('snyk code is not enabled')
-      throw new CliError('Snyk code is not enabled')
+    switch (scanner) {
+      case 'snyk':
+        await getSnykReport(reportPath, repositoryRoot, { skipPrompts })
+        break
+      case 'checkmarx':
+        if (!cxProjectName) {
+          throw new Error('cxProjectName is required for checkmarx scanner')
+        }
+        await getCheckmarxReport(
+          {
+            reportPath,
+            repositoryRoot,
+            branch: reference,
+            projectName: cxProjectName,
+          },
+          { skipPrompts }
+        )
+        break
     }
     return reportPath
   }
+
   async function askToOpenAnalysis() {
     const reportUrl = getReportUrl({
       organizationId,
       projectId,
       fixReportId: reportUploadInfo.fixReportId,
     })
-    !ci && console.log('You can access the report at: \n')
+    !ci && console.log('You can access the analysis at: \n')
     console.log(chalk.bold(reportUrl))
     !skipPrompts && (await mobbAnalysisPrompt())
 
@@ -451,14 +472,7 @@ export async function _scan(
     if (!srcPath || !reportPath) {
       throw new Error('src path and reportPath is required')
     }
-
-    const gitInfo = await getGitInfo(srcPath)
-    const zippingSpinner = createSpinner('📦 Zipping repo').start()
-
-    const zipBuffer = await pack(srcPath)
-    zippingSpinner.success({ text: '📦 Zipping repo successful!' })
     const uploadReportSpinner = createSpinner('📁 Uploading Report').start()
-
     try {
       await uploadFile({
         file: reportPath,
@@ -473,6 +487,41 @@ export async function _scan(
     uploadReportSpinner.success({
       text: '📁 Uploading Report successful!',
     })
+    const digestSpinner = createSpinner('🕵️‍♂️ Digesting report').start()
+    let vulnFiles = []
+    try {
+      const gitInfo = await getGitInfo(srcPath)
+      const { vulnerabilityReportId } =
+        await gqlClient.digestVulnerabilityReport({
+          fixReportId: reportUploadInfo.fixReportId,
+          projectId,
+          repoUrl: repo || gitInfo.repoUrl,
+          reference: gitInfo.reference,
+          sha: commitHash || gitInfo.hash,
+        })
+      const finalState = await gqlClient.waitFixReportInit(
+        reportUploadInfo.fixReportId,
+        true
+      )
+      if (finalState !== 'Digested') {
+        throw new Error('Digesting report failed')
+      }
+      vulnFiles = await gqlClient.getVulnerabilityReportPaths(
+        vulnerabilityReportId
+      )
+    } catch (e) {
+      digestSpinner.error({ text: '🕵️‍♂️ Digesting report failed' })
+      throw e
+    }
+    digestSpinner.success({
+      text: '🕵️‍♂️ Digesting report successful!',
+    })
+
+    const zippingSpinner = createSpinner('📦 Zipping repo').start()
+
+    const zipBuffer = await pack(srcPath, vulnFiles)
+    zippingSpinner.success({ text: '📦 Zipping repo successful!' })
+
     const uploadRepoSpinner = createSpinner('📁 Uploading Repo').start()
     try {
       await uploadFile({
@@ -490,12 +539,8 @@ export async function _scan(
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
     try {
-      await gqlClient.submitVulnerabilityReport({
+      await gqlClient.initializeVulnerabilityReport({
         fixReportId: reportUploadInfo.fixReportId,
-        repoUrl: repo || gitInfo.repoUrl,
-        reference: gitInfo.reference,
-        sha: commitHash || gitInfo.hash,
-        projectId,
       })
     } catch (e) {
       mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })

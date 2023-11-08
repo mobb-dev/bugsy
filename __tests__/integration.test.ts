@@ -1,15 +1,17 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import AdmZip from 'adm-zip'
 import open from 'open'
 import { expect, it, vi } from 'vitest'
 
-import { API_URL, PROJECT_PAGE_REGEX } from '../src/constants'
+import { API_URL, PROJECT_PAGE_REGEX, SCANNERS } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import {
   CREATE_COMMUNITY_USER,
   PERFORM_CLI_LOGIN,
 } from '../src/features/analysis/graphql/mutations'
+import * as ourPackModule from '../src/features/analysis/pack'
 
 vi.mock('../src/utils/dirname.ts')
 
@@ -57,7 +59,7 @@ vi.mock('configstore', () => {
   return { default: Configstore }
 })
 
-vi.mock('../src/features/analysis/snyk', () => ({
+vi.mock('../src/features/analysis/scanners/snyk', () => ({
   getSnykReport: vi.fn().mockImplementation(async (reportPath) => {
     fs.copyFileSync(path.join(__dirname, 'report.json'), reportPath)
     return true
@@ -71,6 +73,7 @@ it('Full analyze flow', async () => {
   await analysisExports.runAnalysis(
     {
       repo: 'https://github.com/mobb-dev/simple-vulnerable-java-project',
+      scanner: SCANNERS.Snyk,
       ci: false,
     },
     { skipPrompts: true }
@@ -81,19 +84,27 @@ it('Full analyze flow', async () => {
   expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 }, 30000)
 
-it('Direct repo upload', async () => {
-  open.mockClear()
-  await analysisExports.runAnalysis(
-    {
-      repo: 'https://bitbucket.com/a/b',
-      ref: 'test',
-      commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
-      scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
-      srcPath: path.join(__dirname, 'assets/simple'),
-      ci: false,
-    },
-    { skipPrompts: true }
-  )
-  expect(open).toHaveBeenCalledTimes(2)
-  expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
-})
+it.each(['assets', 'assets/simple', 'assets/simple/src'])(
+  'Direct repo upload',
+  async (srcPath) => {
+    const packSpy = vi.spyOn(ourPackModule, 'pack')
+    open.mockClear()
+    await analysisExports.runAnalysis(
+      {
+        repo: 'https://bitbucket.com/a/b',
+        ref: 'test',
+        commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+        scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
+        srcPath: path.join(__dirname, srcPath),
+        ci: false,
+      },
+      { skipPrompts: true }
+    )
+    expect(open).toHaveBeenCalledTimes(2)
+    expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+
+    // ensure that we filter only relevant files
+    const uploadedRepoZip = new AdmZip(Buffer.from(packSpy.returns[0]))
+    expect(uploadedRepoZip.getEntryCount()).toBe(1)
+  }
+)

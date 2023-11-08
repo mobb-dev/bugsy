@@ -16,9 +16,10 @@ export const SCANNERS = {
   Snyk: 'snyk',
 } as const
 
+export type SupportedScanners = typeof SCANNERS.Checkmarx | typeof SCANNERS.Snyk
+
 const envVariablesSchema = z
   .object({
-    WEB_LOGIN_URL: z.string(),
     WEB_APP_URL: z.string(),
     API_URL: z.string(),
   })
@@ -56,7 +57,6 @@ export const mobbAscii = `
                        .................                    
 `
 
-export const WEB_LOGIN_URL = envVariables.WEB_LOGIN_URL
 export const WEB_APP_URL = envVariables.WEB_APP_URL
 export const API_URL = envVariables.API_URL
 

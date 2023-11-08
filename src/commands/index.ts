@@ -2,6 +2,7 @@ import { AnalyzeOptions, ScanOptions } from '@mobb/bugsy/args'
 import { mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
+import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
 import { CliError, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
 
@@ -36,11 +37,20 @@ export async function scan(
 
   !ci && (await showWelcomeMessage(skipPrompts))
   const selectedScanner = scanner || (await choseScanner())
-  if (selectedScanner !== SCANNERS.Snyk) {
+  if (
+    selectedScanner !== SCANNERS.Checkmarx &&
+    selectedScanner !== SCANNERS.Snyk
+  ) {
+    // we can't use includes when using 'as const', weird
     throw new CliError(
       'Vulnerability scanning via Bugsy is available only with Snyk at the moment. Additional scanners will follow soon.'
     )
   }
+  selectedScanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()
+  if (selectedScanner === SCANNERS.Checkmarx && !scanOptions.cxProjectName) {
+    throw new CliError("Project name is needed if you're using checkmarx")
+  }
+
   await runAnalysis(
     { ...scanOptions, scanner: selectedScanner },
     { skipPrompts }

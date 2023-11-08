@@ -1,5 +1,6 @@
 import { scan } from '@mobb/bugsy/commands'
 import { SCANNERS } from '@mobb/bugsy/constants'
+import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
 import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import type * as Yargs from 'yargs'
@@ -7,6 +8,7 @@ import type * as Yargs from 'yargs'
 import {
   apiKeyOption,
   ciOption,
+  projectNameOption,
   refOption,
   repoOption,
   yesOption,
@@ -31,6 +33,7 @@ export function scanBuilder(
       .option('y', yesOption)
       .option('ci', ciOption)
       .option('api-key', apiKeyOption)
+      .option('cx-project-name', projectNameOption)
       .example(
         '$0 scan -r https://github.com/WebGoat/WebGoat',
         'Scan an existing repository'
@@ -41,6 +44,10 @@ export function scanBuilder(
 
 export function validateScanOptions(argv: ScanOptions) {
   validateRepoUrl(argv)
+  argv.scanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()
+  if (argv.scanner === SCANNERS.Checkmarx && !argv.cxProjectName) {
+    throw new CliError("project name is needed if you're using checkmarx")
+  }
   if (argv.ci && !argv.apiKey) {
     throw new CliError(
       '\nError: --ci flag requires --api-key to be provided as well'

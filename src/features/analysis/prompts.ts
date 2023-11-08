@@ -3,7 +3,7 @@ import { keypress } from '@mobb/bugsy/utils'
 import inquirer from 'inquirer'
 import { createSpinner } from 'nanospinner'
 
-type ScannerValue = typeof SCANNERS[keyof typeof SCANNERS]
+type ScannerValue = (typeof SCANNERS)[keyof typeof SCANNERS]
 type ScannerChoice = {
   name: string
   value: ScannerValue
@@ -24,6 +24,27 @@ export async function choseScanner(): Promise<ScannerValue> {
     choices: scannerChoices,
   })
   return scanner
+}
+
+export async function tryCheckmarxConfiguarationAgain() {
+  console.log(
+    '🔓 Oops, seems like checkmarx does not accept the current configuration'
+  )
+  const { confirmCheckmarxRetryConfigrations } = await inquirer.prompt({
+    name: 'confirmCheckmarxRetryConfigrations',
+    type: 'confirm',
+    message: 'Would like to try to configure them again? ',
+    default: true,
+  })
+  return confirmCheckmarxRetryConfigrations
+}
+
+export async function startCheckmarxConfigationPrompt() {
+  const checkmarxConfigreSpinner = createSpinner(
+    '🔓 Checkmarx needs to be configured before we start, press any key to continue'
+  ).start()
+  await keypress()
+  checkmarxConfigreSpinner.success()
 }
 
 export async function snykLoginPrompt() {

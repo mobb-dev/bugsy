@@ -112,6 +112,12 @@ export class InvalidUrlPatternError extends Error {
   }
 }
 
+export class BadShaError extends Error {
+  constructor(m: string) {
+    super(m)
+  }
+}
+
 export class RefNotFoundError extends Error {
   constructor(m: string) {
     super(m)

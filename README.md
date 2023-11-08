@@ -2,7 +2,7 @@
 
 Bugsy is a command-line interface (CLI) tool that provides automatic security vulnerability remediation for your code. It is the community edition version of [Mobb](https://www.mobb.ai), the first vendor-agnostic automated security vulnerability remediation tool. Bugsy is designed to help developers quickly identify and fix security vulnerabilities in their code.
 
-<img width="1888" alt="Bugsy" src="./img/bugsy.png">
+<img width="1888" alt="Bugsy" src="./img/bugsy2.png">
 
 ## What is [Mobb](https://www.mobb.ai)?
 

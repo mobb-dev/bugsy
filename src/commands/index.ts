@@ -1,5 +1,5 @@
 import { AnalyzeOptions, ScanOptions } from '@mobb/bugsy/args'
-import { mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
+import { errorMessages, mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
@@ -48,7 +48,7 @@ export async function scan(
   }
   selectedScanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()
   if (selectedScanner === SCANNERS.Checkmarx && !scanOptions.cxProjectName) {
-    throw new CliError("Project name is needed if you're using checkmarx")
+    throw new CliError(errorMessages.missingCxProjectName)
   }
 
   await runAnalysis(

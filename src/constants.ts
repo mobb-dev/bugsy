@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import chalk from 'chalk'
 import Debug from 'debug'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
@@ -62,3 +63,9 @@ export const API_URL = envVariables.API_URL
 
 export const PROJECT_PAGE_REGEX =
   /^http:\/\/(127\.0\.0\.1)|(localhost):5173\/organization\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/project\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+
+export const errorMessages = {
+  missingCxProjectName: `project name ${chalk.bold(
+    '(--cx-project-name)'
+  )} is needed if you're using checkmarx`,
+} as const

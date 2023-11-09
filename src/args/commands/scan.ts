@@ -1,5 +1,5 @@
 import { scan } from '@mobb/bugsy/commands'
-import { SCANNERS } from '@mobb/bugsy/constants'
+import { errorMessages, SCANNERS } from '@mobb/bugsy/constants'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
 import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
@@ -46,7 +46,7 @@ export function validateScanOptions(argv: ScanOptions) {
   validateRepoUrl(argv)
   argv.scanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()
   if (argv.scanner === SCANNERS.Checkmarx && !argv.cxProjectName) {
-    throw new CliError("project name is needed if you're using checkmarx")
+    throw new CliError(errorMessages.missingCxProjectName)
   }
   if (argv.ci && !argv.apiKey) {
     throw new CliError(

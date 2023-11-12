@@ -3,8 +3,8 @@ import { keypress } from '@mobb/bugsy/utils'
 import inquirer from 'inquirer'
 import { createSpinner } from 'nanospinner'
 
-type Scanners = typeof SCANNERS
-type ScannerValue = Scanners[keyof typeof SCANNERS]
+type ScannersType = typeof SCANNERS
+type ScannerValue = ScannersType[keyof ScannersType]
 type ScannerChoice = {
   name: string
   value: ScannerValue

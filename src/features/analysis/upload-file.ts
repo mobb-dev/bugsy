@@ -22,7 +22,10 @@ export async function uploadFile({
     form.append(key, value)
   })
 
-  form.append('key', uploadKey)
+  //minio needs to add the key specifically here and it is not included in the uploadFields as it is for AWS
+  if (!form.has('key')) {
+    form.append('key', uploadKey)
+  }
   if (typeof file === 'string') {
     debug('upload file from path %s', file)
     form.append('file', await fileFrom(file))

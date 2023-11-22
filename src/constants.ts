@@ -58,6 +58,7 @@ export const mobbAscii = `
                        .................                    
 `
 
+export const PROJECT_DEFAULT_NAME = 'My first project'
 export const WEB_APP_URL = envVariables.WEB_APP_URL
 export const API_URL = envVariables.API_URL
 

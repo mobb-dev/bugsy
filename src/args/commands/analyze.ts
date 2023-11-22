@@ -9,6 +9,7 @@ import {
   apiKeyOption,
   ciOption,
   commitHashOption,
+  mobbProjectNameOption,
   refOption,
   repoOption,
   yesOption,
@@ -42,6 +43,7 @@ export function analyzeBuilder(
       describe: chalk.bold('Hash of the commit'),
       type: 'string',
     })
+    .option('mobb-project-name', mobbProjectNameOption)
     .option('y', yesOption)
     .option('ci', ciOption)
     .option('api-key', apiKeyOption)

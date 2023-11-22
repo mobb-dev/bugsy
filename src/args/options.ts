@@ -1,5 +1,7 @@
 import chalk from 'chalk'
 
+import { PROJECT_DEFAULT_NAME, SCANNERS } from '../constants'
+
 export const repoOption = {
   alias: 'r',
   demandOption: true,
@@ -21,6 +23,18 @@ export const refOption = {
   describe: chalk.bold('reference of the repository (branch, tag, commit)'),
   type: 'string',
   demandOption: false,
+} as const
+
+export const scannerOptions = {
+  alias: 's',
+  choices: Object.values(SCANNERS),
+  describe: chalk.bold('Select the scanner to use'),
+} as const
+
+export const mobbProjectNameOption = {
+  type: 'string',
+  describe: chalk.bold('Mobb project name'),
+  default: PROJECT_DEFAULT_NAME,
 } as const
 
 export const ciOption = {

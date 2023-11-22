@@ -132,6 +132,7 @@ export type AnalysisParams = {
   ref?: string
   commitHash?: string
   scanner?: SupportedScanners
+  mobbProjectName?: string
   y?: boolean
   yes?: boolean
   apiKey?: string
@@ -166,6 +167,7 @@ export async function _scan(
     ref,
     scanner,
     cxProjectName,
+    mobbProjectName,
   }: AnalysisParams & { dirname: string; cxProjectName?: string },
   { skipPrompts = false } = {}
 ) {
@@ -178,7 +180,9 @@ export async function _scan(
   })
   await handleMobbLogin()
 
-  const { projectId, organizationId } = await gqlClient.getOrgAndProjectId()
+  const { projectId, organizationId } = await gqlClient.getOrgAndProjectId(
+    mobbProjectName
+  )
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()

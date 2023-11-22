@@ -14,6 +14,7 @@ export type BaseAnalyzeOptions = {
   yes?: boolean
   apiKey?: string
   ci: boolean
+  mobbProjectName?: string
 }
 
 export type ScanOptions = Yargs.ArgumentsCamelCase<BaseScanOptions>
@@ -28,5 +29,6 @@ export type BaseScanOptions = {
   yes?: boolean
   apiKey?: string
   ci: boolean
+  mobbProjectName?: string
   cxProjectName?: string
 }

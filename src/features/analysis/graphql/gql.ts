@@ -94,7 +94,7 @@ export class GQLClient {
     return true
   }
 
-  async getOrgAndProjectId() {
+  async getOrgAndProjectId(projectName?: string) {
     const getOrgAndProjectIdResult =
       await this._client.request<GetOrgAndProjectIdQuery>(
         GET_ORG_AND_PROJECT_ID
@@ -104,9 +104,14 @@ export class GQLClient {
     ).users
 
     const org = user.userOrganizationsAndUserOrganizationRoles[0].organization
+    const project = projectName
+      ? org.projects.find((project) => project.name === projectName) ??
+        org.projects[0]
+      : org.projects[0]
+
     return {
       organizationId: org.id,
-      projectId: org.projects[0].id,
+      projectId: project.id,
     }
   }
 

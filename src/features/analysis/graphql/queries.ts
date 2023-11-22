@@ -20,6 +20,7 @@ export const GET_ORG_AND_PROJECT_ID = gql`
           id
           projects(order_by: { updatedAt: desc }) {
             id
+            name
           }
         }
       }

@@ -7,7 +7,16 @@ import { CliError, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
 
 export async function analyze(
-  { repo, f: scanFile, ref, apiKey, ci, commitHash, srcPath }: AnalyzeOptions,
+  {
+    repo,
+    f: scanFile,
+    ref,
+    apiKey,
+    ci,
+    commitHash,
+    srcPath,
+    mobbProjectName,
+  }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
   !ci && (await showWelcomeMessage(skipPrompts))
@@ -20,6 +29,7 @@ export async function analyze(
       apiKey,
       ci,
       commitHash,
+      mobbProjectName,
       srcPath,
     },
     { skipPrompts }

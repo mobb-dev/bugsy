@@ -2,15 +2,16 @@ import { scan } from '@mobb/bugsy/commands'
 import { errorMessages, SCANNERS } from '@mobb/bugsy/constants'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
 import { CliError } from '@mobb/bugsy/utils'
-import chalk from 'chalk'
 import type * as Yargs from 'yargs'
 
 import {
   apiKeyOption,
   ciOption,
+  mobbProjectNameOption,
   projectNameOption,
   refOption,
   repoOption,
+  scannerOptions,
   yesOption,
 } from '../options'
 import { BaseScanOptions, ScanOptions } from '../types'
@@ -25,11 +26,8 @@ export function scanBuilder(
       .coerce('scanner', (arg) => arg.toLowerCase())
       .option('repo', repoOption)
       .option('ref', refOption)
-      .option('s', {
-        alias: 'scanner',
-        choices: Object.values(SCANNERS),
-        describe: chalk.bold('Select the scanner to use'),
-      })
+      .option('scanner', scannerOptions)
+      .option('mobb-project-name', mobbProjectNameOption)
       .option('y', yesOption)
       .option('ci', ciOption)
       .option('api-key', apiKeyOption)

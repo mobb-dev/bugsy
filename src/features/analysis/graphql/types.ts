@@ -84,6 +84,7 @@ export const GetOrgAndProjectIdQueryZ = z.object({
                   .array(
                     z.object({
                       id: z.string(),
+                      name: z.string(),
                     })
                   )
                   .nonempty(),

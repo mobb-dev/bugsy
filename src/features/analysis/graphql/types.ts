@@ -58,7 +58,7 @@ export type SubmitVulnerabilityReportVariables = {
   repoUrl: string
   reference: string
   sha: string
-  vulnerabilityReportFileName: string
+  vulnerabilityReportFileName?: string
   projectId: string
 }
 
@@ -102,21 +102,6 @@ export type GetOrgAndProjectIdQuery = z.infer<typeof GetOrgAndProjectIdQueryZ>
 export type DigestVulnerabilityReportArgs = {
   fixReportId: string
   projectId: string
-  repoUrl: string
-  reference: string
-  sha?: string
-}
-
-export type InitializeVulnerabilityReportArgs = {
-  fixReportId: string
-}
-
-export type SubmitVulnerabilityReportArgs = {
-  fixReportId: string
-  repoUrl: string
-  reference: string
-  projectId: string
-  sha?: string
 }
 
 export type CreateCliLoginArgs = {

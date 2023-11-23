@@ -7,7 +7,6 @@ import {
   CREATE_CLI_LOGIN,
   CREATE_COMMUNITY_USER,
   DIGEST_VULNERABILITY_REPORT,
-  INITIALIZE_VULNERABILITY_REPORT,
   SUBMIT_VULNERABILITY_REPORT,
   UPLOAD_S3_BUCKET_INFO,
 } from './mutations'
@@ -33,10 +32,7 @@ import {
   GetOrgAndProjectIdQuery,
   GetOrgAndProjectIdQueryZ,
   GetVulnerabilityReportPathsZ,
-  InitializeVulnerabilityReportArgs,
-  InitializeVulnerabilityReportVariables,
   MeQuery,
-  SubmitVulnerabilityReportArgs,
   SubmitVulnerabilityReportVariables,
   UploadS3BucketInfo,
   UploadS3BucketInfoZ,
@@ -151,9 +147,6 @@ export class GQLClient {
   async digestVulnerabilityReport({
     fixReportId,
     projectId,
-    repoUrl,
-    reference,
-    sha,
   }: DigestVulnerabilityReportArgs) {
     const res = await this._client.request<DigestVulnerabilityReportQuery>(
       DIGEST_VULNERABILITY_REPORT,
@@ -161,23 +154,9 @@ export class GQLClient {
         fixReportId,
         vulnerabilityReportFileName: 'report.json',
         projectId,
-        repoUrl,
-        reference,
-        sha,
       }
     )
     return DigestVulnerabilityReportZ.parse(res).digestVulnerabilityReport
-  }
-
-  async initializeVulnerabilityReport({
-    fixReportId,
-  }: InitializeVulnerabilityReportArgs) {
-    await this._client.request<
-      { __typname: string },
-      InitializeVulnerabilityReportVariables
-    >(INITIALIZE_VULNERABILITY_REPORT, {
-      fixReportId,
-    })
   }
 
   async submitVulnerabilityReport({
@@ -186,7 +165,8 @@ export class GQLClient {
     reference,
     projectId,
     sha,
-  }: SubmitVulnerabilityReportArgs) {
+    vulnerabilityReportFileName,
+  }: SubmitVulnerabilityReportVariables) {
     await this._client.request<
       { __typname: string },
       SubmitVulnerabilityReportVariables
@@ -194,7 +174,7 @@ export class GQLClient {
       fixReportId,
       repoUrl,
       reference,
-      vulnerabilityReportFileName: 'report.json',
+      vulnerabilityReportFileName,
       projectId,
       sha: sha || '',
     })

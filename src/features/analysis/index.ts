@@ -248,7 +248,6 @@ export async function _scan(
     accessToken: token,
     scmType: scmLibType,
   })
-
   const reference = ref ?? (await scm.getRepoDefaultBranch())
   const { sha } = await scm.getReferenceData(reference)
   debug('org id %s', organizationId)
@@ -289,6 +288,8 @@ export async function _scan(
       repoUrl: repo,
       reference,
       projectId,
+      vulnerabilityReportFileName: 'report.json',
+      sha,
     })
   } catch (e) {
     mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
@@ -493,15 +494,12 @@ export async function _scan(
     })
     const digestSpinner = createSpinner('🕵️‍♂️ Digesting report').start()
     let vulnFiles = []
+    const gitInfo = await getGitInfo(srcPath)
     try {
-      const gitInfo = await getGitInfo(srcPath)
       const { vulnerabilityReportId } =
         await gqlClient.digestVulnerabilityReport({
           fixReportId: reportUploadInfo.fixReportId,
           projectId,
-          repoUrl: repo || gitInfo.repoUrl,
-          reference: gitInfo.reference,
-          sha: commitHash || gitInfo.hash,
         })
       const finalState = await gqlClient.waitFixReportInit(
         reportUploadInfo.fixReportId,
@@ -543,8 +541,12 @@ export async function _scan(
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
     try {
-      await gqlClient.initializeVulnerabilityReport({
+      await gqlClient.submitVulnerabilityReport({
         fixReportId: reportUploadInfo.fixReportId,
+        projectId: projectId,
+        repoUrl: repo || gitInfo.repoUrl,
+        reference: gitInfo.reference,
+        sha: commitHash || gitInfo.hash,
       })
     } catch (e) {
       mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })

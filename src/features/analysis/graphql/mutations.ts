@@ -26,17 +26,11 @@ export const DIGEST_VULNERABILITY_REPORT = gql`
     $vulnerabilityReportFileName: String!
     $fixReportId: String!
     $projectId: String!
-    $repoUrl: String!
-    $reference: String!
-    $sha: String
   ) {
     digestVulnerabilityReport(
       fixReportId: $fixReportId
       vulnerabilityReportFileName: $vulnerabilityReportFileName
       projectId: $projectId
-      repoUrl: $repoUrl
-      reference: $reference
-      sha: $sha
     ) {
       __typename
       ... on VulnerabilityReport {
@@ -59,30 +53,22 @@ export const DIGEST_VULNERABILITY_REPORT = gql`
   }
 `
 
-export const INITIALIZE_VULNERABILITY_REPORT = gql`
-  mutation InitializeVulnerabilityReport($fixReportId: String!) {
-    initializeVulnerabilityReport(fixReportId: $fixReportId) {
-      __typename
-    }
-  }
-`
-
 export const SUBMIT_VULNERABILITY_REPORT = gql`
   mutation SubmitVulnerabilityReport(
-    $vulnerabilityReportFileName: String!
     $fixReportId: String!
     $repoUrl: String!
     $reference: String!
     $projectId: String!
     $sha: String
+    $vulnerabilityReportFileName: String
   ) {
     submitVulnerabilityReport(
       fixReportId: $fixReportId
       repoUrl: $repoUrl
       reference: $reference
       sha: $sha
-      vulnerabilityReportFileName: $vulnerabilityReportFileName
       projectId: $projectId
+      vulnerabilityReportFileName: $vulnerabilityReportFileName
     ) {
       __typename
     }

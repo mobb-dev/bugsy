@@ -1,6 +1,7 @@
 import { sleep } from '@mobb/bugsy/utils'
 import Debug from 'debug'
 import { GraphQLClient } from 'graphql-request'
+import { v4 as uuidv4 } from 'uuid'
 
 import { API_URL } from '../../../constants'
 import {
@@ -55,6 +56,19 @@ export class GQLClient {
     debug(`init with apiKey ${apiKey}`)
     this._client = new GraphQLClient(API_URL, {
       headers: { [API_KEY_HEADER_NAME]: apiKey || '' },
+      requestMiddleware: (request) => {
+        const requestId = uuidv4()
+        debug(
+          `sending API request with id: ${requestId} and with request: ${request.body}`
+        )
+        return {
+          ...request,
+          headers: {
+            ...request.headers,
+            'x-hasura-request-id': requestId,
+          },
+        }
+      },
     })
   }
 

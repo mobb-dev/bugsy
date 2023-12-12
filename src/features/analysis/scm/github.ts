@@ -9,6 +9,7 @@ import {
   ReferenceType,
   RefNotFoundError,
 } from './scm'
+import { parseScmURL } from './urlParser'
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -81,9 +82,6 @@ export type GithubBlameResponse = {
     }
   }
 }
-
-const githubUrlRegex =
-  /^http[s]?:\/\/[^/\s]+\/([^/.\s]+\/[^/.\s]+)(\.git)?(\/)?$/i
 
 function getOktoKit(options?: ApiAuthOptions) {
   const token = options?.githubAuthToken ?? GITHUB_API_TOKEN ?? ''
@@ -384,20 +382,22 @@ async function getCommit(
   })
 }
 
-export function parseOwnerAndRepo(gitHubUrl: string) {
+export function parseOwnerAndRepo(gitHubUrl: string): {
+  owner: string
+  repo: string
+} {
   gitHubUrl = removeTrailingSlash(gitHubUrl)
-  if (!githubUrlRegex.test(gitHubUrl)) {
+  const parsingResult = parseScmURL(gitHubUrl)
+  if (!parsingResult || parsingResult.hostname !== 'github.com') {
     throw new InvalidUrlPatternError(`invalid github repo Url ${gitHubUrl}`)
   }
-  const groups = gitHubUrl.split(githubUrlRegex).filter((res) => res)
-  const ownerAndRepo = groups[0]?.split('/')
-  const owner = ownerAndRepo?.at(0)
-  const repo = ownerAndRepo?.at(1)
-  if (!owner || !repo) {
+  const { organization, repoName } = parsingResult
+
+  if (!organization || !repoName) {
     throw new InvalidUrlPatternError(`invalid github repo Url ${gitHubUrl}`)
   }
 
-  return { owner, repo }
+  return { owner: organization, repo: repoName }
 }
 
 export async function queryGithubGraphql<T>(

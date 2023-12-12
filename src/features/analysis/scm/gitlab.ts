@@ -10,6 +10,7 @@ import {
   ReferenceType,
   RefNotFoundError,
 } from './scm'
+import { parseScmURL } from './urlParser'
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -24,9 +25,6 @@ const { GITLAB_API_TOKEN } = EnvVariablesZod.parse(process.env)
 type ApiAuthOptions = {
   gitlabAuthToken?: string | undefined
 }
-
-const gitlabUrlRegex =
-  /^http[s]?:\/\/[^/\s]+\/(([^/.\s]+[/])+)([^/.\s]+)(\.git)?(\/)?$/i
 
 function getGitBeaker(options?: ApiAuthOptions) {
   const token = options?.gitlabAuthToken ?? GITLAB_API_TOKEN ?? ''
@@ -304,14 +302,14 @@ export async function getGitlabReferenceData(
 
 export function parseOwnerAndRepo(gitlabUrl: string) {
   gitlabUrl = removeTrailingSlash(gitlabUrl)
-  if (!gitlabUrlRegex.test(gitlabUrl)) {
+  const parsingResult = parseScmURL(gitlabUrl)
+
+  if (!parsingResult || parsingResult.hostname !== 'gitlab.com') {
     throw new InvalidUrlPatternError(`invalid gitlab repo Url ${gitlabUrl}`)
   }
-  const groups = gitlabUrl.split(gitlabUrlRegex).filter((res) => res)
-  const owner = groups[0]?.split('/')[0]
-  const repo = groups[2]
-  const projectPath = `${groups[0]}${repo}`
-  return { owner, repo, projectPath }
+
+  const { organization, repoName, projectPath } = parsingResult
+  return { owner: organization, repo: repoName, projectPath }
 }
 
 export async function getGitlabBlameRanges(

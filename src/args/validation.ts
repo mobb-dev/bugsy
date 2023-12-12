@@ -4,6 +4,8 @@ import path from 'path'
 import type * as Yargs from 'yargs'
 import { z } from 'zod'
 
+import { parseScmURL } from '../features/analysis/scm/urlParser'
+
 type ThrowRepoUrlErrorMessageArgs = {
   error: z.ZodError<string>
   repoUrl?: string
@@ -26,14 +28,11 @@ Example: \n\tmobbdev ${command} -r ${chalk.bold(
   throw new CliError(formattedErrorMessage)
 }
 
-const GIT_REPO_URL_PATTERN =
-  /^https:\/\/(gitlab|github)\.com\/(([^/.\s]+[/])+)([^/.\s]+)(\.git)?(\/)?$/i
-
 const UrlZ = z
   .string({
     invalid_type_error: 'is not a valid GitHub / GitLab URL',
   })
-  .regex(GIT_REPO_URL_PATTERN, {
+  .refine((data) => !!parseScmURL(data), {
     message: 'is not a valid GitHub / GitLab URL',
   })
 

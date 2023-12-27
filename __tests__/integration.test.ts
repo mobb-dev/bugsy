@@ -75,6 +75,7 @@ it('Full analyze flow', async () => {
       repo: 'https://github.com/mobb-dev/simple-vulnerable-java-project',
       scanner: SCANNERS.Snyk,
       ci: false,
+      command: 'scan',
     },
     { skipPrompts: true }
   )
@@ -97,6 +98,7 @@ it.each(['assets', 'assets/simple', 'assets/simple/src'])(
         scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
         srcPath: path.join(__dirname, srcPath),
         ci: false,
+        command: 'analyze',
       },
       { skipPrompts: true }
     )

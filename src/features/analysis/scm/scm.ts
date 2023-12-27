@@ -1,3 +1,5 @@
+import { Octokit } from '@octokit/core'
+
 import {
   createPullRequest,
   getGithubBlameRanges,
@@ -9,8 +11,22 @@ import {
   getGithubRepoDefaultBranch,
   getGithubRepoList,
   getGithubUsername,
+  getUserInfo,
   githubValidateParams,
-} from './github'
+  parseOwnerAndRepo,
+} from './github/github'
+import {
+  deleteComment,
+  getPrComments,
+  postPrComment,
+  updatePrComment,
+} from './github/github-v2'
+import {
+  DeleteCommentParams,
+  GetPrCommentsParams,
+  PostCommentParams,
+  UpdateCommentParams,
+} from './github/types'
 import {
   createMergeRequest,
   getGitlabBlameRanges,
@@ -27,6 +43,7 @@ import {
 } from './gitlab'
 import { isValidBranchName } from './scmSubmit'
 
+export const ghGetUserInfo = getUserInfo
 export function getScmLibTypeFromUrl(url: string | undefined) {
   if (!url) {
     return undefined
@@ -129,6 +146,8 @@ export class RepoNoTokenAccessError extends Error {
     super(m)
   }
 }
+
+export class RebaseFailedError extends Error {}
 
 export abstract class SCMLib {
   protected readonly url?: string
@@ -452,6 +471,11 @@ export class GitlabSCMLib extends SCMLib {
 }
 
 export class GithubSCMLib extends SCMLib {
+  public readonly oktokit: Octokit
+  constructor(url?: string, accessToken?: string) {
+    super(url, accessToken)
+    this.oktokit = new Octokit({ auth: accessToken })
+  }
   async createSubmitRequest(
     targetBranchName: string,
     sourceBranchName: string,
@@ -476,6 +500,72 @@ export class GithubSCMLib extends SCMLib {
 
   async validateParams() {
     return githubValidateParams(this.url, this.accessToken)
+  }
+  async postPrComment(
+    params: Pick<
+      PostCommentParams,
+      'body' | 'commit_id' | 'pull_number' | 'path' | 'line'
+    >,
+    _oktokit?: Octokit
+  ) {
+    if ((!_oktokit && !this.accessToken) || !this.url) {
+      throw new Error('cannot post on PR without access token or url')
+    }
+    const oktokit = _oktokit || this.oktokit
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+
+    return postPrComment(oktokit, {
+      ...params,
+      owner,
+      repo,
+    })
+  }
+  async updatePrComment(
+    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
+    _oktokit?: Octokit
+  ) {
+    if ((!_oktokit && !this.accessToken) || !this.url) {
+      throw new Error('cannot update on PR without access token or url')
+    }
+    const oktokit = _oktokit || this.oktokit
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+
+    return updatePrComment(oktokit, {
+      ...params,
+      owner,
+      repo,
+    })
+  }
+  async deleteComment(
+    params: Pick<DeleteCommentParams, 'comment_id'>,
+    _oktokit?: Octokit
+  ) {
+    if ((!_oktokit && !this.accessToken) || !this.url) {
+      throw new Error('cannot delete comment without access token or url')
+    }
+    const oktokit = _oktokit || this.oktokit
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+    return deleteComment(oktokit, {
+      ...params,
+      owner,
+      repo,
+    })
+  }
+  async getPrComments(
+    params: Omit<GetPrCommentsParams, 'owner' | 'repo'>,
+    _oktokit?: Octokit
+  ) {
+    if ((!_oktokit && !this.accessToken) || !this.url) {
+      throw new Error('cannot get Pr Comments without access token or url')
+    }
+    const oktokit = _oktokit || this.oktokit
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+    return getPrComments(oktokit, {
+      per_page: 100,
+      ...params,
+      owner,
+      repo,
+    })
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {

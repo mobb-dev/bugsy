@@ -3,7 +3,10 @@ import fs from 'node:fs/promises'
 import os from 'os'
 import path from 'path'
 import { SimpleGit, simpleGit } from 'simple-git'
+import tmp from 'tmp'
 import { z } from 'zod'
+
+import { RebaseFailedError } from './scm'
 
 const APP_DIR_PREFIX = 'mobb'
 const MOBB_COMMIT_PREFIX = 'mobb fix commit:'
@@ -20,8 +23,7 @@ export const isValidBranchName = async (branchName: string) => {
     return false
   }
 }
-
-export const SubmitFixesMessageZ = z.object({
+const BaseSubmitToScmMessageZ = z.object({
   submitFixRequestId: z.string().uuid(),
   fixes: z.array(
     z.object({
@@ -29,12 +31,38 @@ export const SubmitFixesMessageZ = z.object({
       diff: z.string(),
     })
   ),
-  branchName: z.string(),
   commitHash: z.string(),
-  targetBranch: z.string(),
   repoUrl: z.string(),
 })
+
+const submitToScmMessageType = {
+  commitToSameBranch: 'commitToSameBranch',
+  submitFixesForDifferentBranch: 'submitFixesForDifferentBranch',
+} as const
+
+export const CommitToSameBranchParamsZ = BaseSubmitToScmMessageZ.merge(
+  z.object({
+    type: z.literal(submitToScmMessageType.commitToSameBranch),
+    branch: z.string(),
+  })
+)
+
+export const SubmitFixesToDifferentBranchParamsZ = z
+  .object({
+    type: z.literal(submitToScmMessageType.submitFixesForDifferentBranch),
+    submitBranch: z.string(),
+    baseBranch: z.string(),
+  })
+  .merge(BaseSubmitToScmMessageZ)
+export const SubmitFixesMessageZ = z.union([
+  CommitToSameBranchParamsZ,
+  SubmitFixesToDifferentBranchParamsZ,
+])
 export type SubmitFixesMessage = z.infer<typeof SubmitFixesMessageZ>
+export type CommitToSameBranchParams = z.infer<typeof CommitToSameBranchParamsZ>
+export type SubmitFixesToDifferentBranchParams = z.infer<
+  typeof SubmitFixesToDifferentBranchParamsZ
+>
 
 const FixResponseArrayZ = z.array(
   z.object({
@@ -44,6 +72,7 @@ const FixResponseArrayZ = z.array(
 type FixResponseArray = z.infer<typeof FixResponseArrayZ>
 
 export const SubmitFixesResponseMessageZ = z.object({
+  type: z.nativeEnum(submitToScmMessageType),
   submitFixRequestId: z.string().uuid(),
   submitBranches: z.array(
     z.object({
@@ -125,7 +154,7 @@ const rebaseFix = async (
   //sometimes the rebase fails but the git command doesn't throw an error
   //so we need to check that the fix was actually rebased
   if (!showFixLine || !showFixLine.includes(fixId)) {
-    throw new Error('rebase failed')
+    throw new RebaseFailedError('rebase failed')
   }
 }
 
@@ -162,29 +191,125 @@ const fetchInitialCommit = async (
 
 //If an error occurs, the function will add the error to the response message and
 //delete the branch that failed to push from origin.
-export const submitFixes = async (msg: SubmitFixesMessage) => {
+
+const FixesZ = z
+  .array(z.object({ fixId: z.string(), diff: z.string() }))
+  .nonempty()
+
+async function initGit(params: {
+  dirName: string
+  commitHash: string
+  repoUrl: string
+  branchName: string
+  response: SubmitFixesResponseMessage
+}) {
+  const { repoUrl, dirName, commitHash, branchName, response } = params
+  const git = simpleGit(dirName)
+  await git.init()
+
+  await git.addConfig('user.email', 'git@mobb.ai')
+  await git.addConfig('user.name', 'Mobb autofixer')
+  await git.addRemote('origin', repoUrl)
+  if (!(await fetchInitialCommit(git, commitHash, response))) {
+    return null
+  }
+  await git.checkout([commitHash])
+  await git.checkout(['-b', branchName, 'HEAD'])
+  return git
+}
+
+export async function submitFixesToSameBranch(
+  msg: Omit<CommitToSameBranchParams, 'type'>
+): Promise<SubmitFixesResponseMessage> {
   const response: SubmitFixesResponseMessage = {
     submitBranches: [],
     submitFixRequestId: '',
+    type: submitToScmMessageType.commitToSameBranch,
+  }
+  const tmpDir = tmp.dirSync({
+    unsafeCleanup: true,
+  })
+  try {
+    response.submitFixRequestId = msg.submitFixRequestId
+    const fixesParseRes = FixesZ.safeParse(msg.fixes)
+    if (!fixesParseRes.success) {
+      return response
+    }
+
+    const fixes = fixesParseRes.data
+    const dirName = tmpDir.name
+    const git = await initGit({
+      dirName,
+      commitHash: msg.commitHash,
+      repoUrl: msg.repoUrl,
+      branchName: msg.branch,
+      response,
+    })
+    if (!git) {
+      return response
+    }
+
+    const branchName = msg.branch
+    const [fix] = fixes
+    const fixTmpDir = await tmp.dirSync({ unsafeCleanup: true })
+    try {
+      await fs.writeFile(path.join(fixTmpDir.name, 'mobb.patch'), fix.diff)
+      await git.applyPatch(path.join(fixTmpDir.name, 'mobb.patch'))
+    } finally {
+      fixTmpDir.removeCallback()
+    }
+    await git.add('.')
+    await git.commit(`${MOBB_COMMIT_PREFIX} ${fix.fixId}`)
+    if (
+      !(await pushBranch(git, branchName, [{ fixId: fix.fixId }], response))
+    ) {
+      console.log('pushBranch failed')
+      return response
+    }
+    return response
+  } catch (e) {
+    console.log('error', e)
+    if (e instanceof RebaseFailedError) {
+      return {
+        ...response,
+        error: {
+          type: 'PushBranchError',
+          info: {
+            message: 'Failed to rebase fix',
+          },
+        },
+      }
+    }
+    return response
+  } finally {
+    tmpDir.removeCallback()
+  }
+}
+
+export const submitFixesToDifferentBranch = async (
+  msg: Omit<SubmitFixesToDifferentBranchParams, 'type'>
+) => {
+  const response: SubmitFixesResponseMessage = {
+    submitBranches: [],
+    submitFixRequestId: '',
+    type: submitToScmMessageType.submitFixesForDifferentBranch,
   }
   //create a new temp dir for the repo
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), APP_DIR_PREFIX))
   try {
     response.submitFixRequestId = msg.submitFixRequestId
-    const git = simpleGit(tmpDir)
-    await git.init()
-    //TODO: add email and name to config
-    await git.addConfig('user.email', 'git@mobb.ai')
-    await git.addConfig('user.name', 'Mobb autofixer')
-    await git.addRemote('origin', msg.repoUrl)
-    //fetch the commit (shallow copy - no history) from the origin
-    if (!(await fetchInitialCommit(git, msg.commitHash, response))) {
+    const git = await initGit({
+      dirName: tmpDir,
+      commitHash: msg.commitHash,
+      repoUrl: msg.repoUrl,
+      branchName: msg.submitBranch,
+      response,
+    })
+    if (!git) {
       return response
     }
     //create a new branch from the commit to apply the fixes on
-    let branchName = msg.branchName
-    await git.checkout([msg.commitHash])
-    await git.checkout(['-b', branchName, 'HEAD'])
+    let submitBranch = msg.submitBranch
     let branchIndex = 0
     let fixArray: FixResponseArray = []
     for (const fix of msg.fixes) {
@@ -205,42 +330,42 @@ export const submitFixes = async (msg: SubmitFixesMessage) => {
       await git.checkout(['-b', `mobb-fix-${fix.fixId}`, 'HEAD'])
       try {
         //rebase the fix branch on the branch we created from the input commit (the PR branch saved in branchName)
-        await rebaseFix(git, branchName, fix.fixId, msg.commitHash)
+        await rebaseFix(git, submitBranch, fix.fixId, msg.commitHash)
         //if the rebase succeeded, push the fix id into the fix array that goes into the response
         fixArray.push({ fixId: fix.fixId })
         //move the PR branch to the new fix commit that was rebased on the PR branch
-        await git.branch(['-f', branchName, 'HEAD'])
+        await git.branch(['-f', submitBranch, 'HEAD'])
       } catch (e) {
         //sometimes rebase fails and leaves the repo in a bad state and sometimes it doesn't
         await abortRebase(git)
         //check if we encountered a first conflict as the current PR branch name matches the input branch name exactly
-        if (msg.branchName === branchName) {
+        if (msg.submitBranch === submitBranch) {
           //move the current PR branch name to have a "-1" suffix
-          branchName = `${branchName}-1`
-          await git.checkout([msg.branchName])
-          await git.checkout(['-b', branchName, 'HEAD'])
+          submitBranch = `${submitBranch}-1`
+          await git.checkout([msg.submitBranch])
+          await git.checkout(['-b', submitBranch, 'HEAD'])
         }
         //checkout the current PR branch
-        await git.checkout([branchName])
+        await git.checkout([submitBranch])
         //push the branch to the origin and add the branch name and the fixes ids to the response
-        if (!(await pushBranch(git, branchName, fixArray, response))) {
+        if (!(await pushBranch(git, submitBranch, fixArray, response))) {
           return response
         }
         fixArray = []
         branchIndex++
         //start a new branch for the next fixes in the input
         //create a new branch with the same name as the PR branch but with a "-x" suffix where x is the branch index
-        branchName = `${msg.branchName}-${branchIndex + 1}`
+        submitBranch = `${msg.submitBranch}-${branchIndex + 1}`
         await git.checkout([`mobb-fix-${fix.fixId}`])
-        await git.checkout(['-b', branchName, 'HEAD'])
+        await git.checkout(['-b', submitBranch, 'HEAD'])
         fixArray.push({ fixId: fix.fixId })
       }
       //checkout the current PR branch
-      await git.checkout([branchName])
+      await git.checkout([submitBranch])
       await git.reset(['--hard', 'HEAD'])
     }
     //push the branch to the origin and add the branch name and the fixes ids to the response
-    if (!(await pushBranch(git, branchName, fixArray, response))) {
+    if (!(await pushBranch(git, submitBranch, fixArray, response))) {
       return response
     }
     fixArray = []

@@ -1,10 +1,43 @@
-import { AnalyzeOptions, ScanOptions } from '@mobb/bugsy/args'
+import { AnalyzeOptions, ReviewOptions, ScanOptions } from '@mobb/bugsy/args'
 import { errorMessages, mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
 import { CliError, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
+
+export async function review(
+  params: ReviewOptions,
+  { skipPrompts = true }: CommandOptions = {}
+) {
+  const {
+    repo,
+    f: scanFile,
+    ref,
+    apiKey,
+    commitHash,
+    mobbProjectName,
+    pullRequest,
+    githubToken,
+    scanner,
+  } = params
+  await runAnalysis(
+    {
+      repo,
+      scanFile,
+      ref,
+      apiKey,
+      ci: true,
+      commitHash,
+      mobbProjectName,
+      pullRequest,
+      githubToken,
+      scanner,
+      command: 'review',
+    },
+    { skipPrompts }
+  )
+}
 
 export async function analyze(
   {
@@ -31,6 +64,7 @@ export async function analyze(
       commitHash,
       mobbProjectName,
       srcPath,
+      command: 'analyze',
     },
     { skipPrompts }
   )
@@ -62,7 +96,7 @@ export async function scan(
   }
 
   await runAnalysis(
-    { ...scanOptions, scanner: selectedScanner },
+    { ...scanOptions, scanner: selectedScanner, command: 'scan' },
     { skipPrompts }
   )
 }

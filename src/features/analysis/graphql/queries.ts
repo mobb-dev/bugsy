@@ -53,3 +53,56 @@ export const GET_VULNERABILITY_REPORT_PATHS = gql`
     }
   }
 `
+
+export const SUBSCRIBE_TO_ANALYSIS = gql`
+  subscription getAnalysis($analysisId: uuid!) {
+    analysis: fixReport_by_pk(id: $analysisId) {
+      id
+      state
+    }
+  }
+`
+
+export const GET_ANALYSIS = gql`
+  query getAnalsyis($analysisId: uuid!) {
+    analysis: fixReport_by_pk(id: $analysisId) {
+      id
+      state
+      repo {
+        commitSha
+        pullRequest
+      }
+      fixes {
+        id
+        issueType
+        vulnerabilityReportIssues {
+          issueLanguage
+          state
+          issueType
+          vendorIssueId
+        }
+      }
+      vulnerabilityReport {
+        projectId
+        project {
+          organizationId
+        }
+        file {
+          signedFile {
+            url
+          }
+        }
+      }
+    }
+  }
+`
+
+export const GET_FIX = gql`
+  query getFix($fixId: uuid!) {
+    fix_by_pk(id: $fixId) {
+      patchAndQuestions {
+        patch
+      }
+    }
+  }
+`

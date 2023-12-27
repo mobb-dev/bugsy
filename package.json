@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@gitbeaker/rest": "39.13.0",
+    "@octokit/core": "5.0.2",
     "@octokit/graphql": "5.0.5",
     "@octokit/plugin-rest-endpoint-methods": "7.0.1",
     "@octokit/request-error": "3.0.3",
@@ -37,7 +38,9 @@
     "globby": "13.2.2",
     "graphql": "16.8.1",
     "graphql-request": "5.0.0",
+    "graphql-ws": "5.11.2",
     "inquirer": "9.2.7",
+    "isomorphic-ws": "5.0.0",
     "istextorbinary": "6.0.0",
     "nanospinner": "1.1.0",
     "node-fetch": "3.3.1",
@@ -50,12 +53,14 @@
     "tar": "6.2.0",
     "tmp": "0.2.1",
     "uuid": "9.0.0",
+    "ws": "8.10.0",
     "yargs": "17.7.2",
     "zod": "3.22.3"
   },
   "devDependencies": {
     "@octokit/plugin-rest-endpoint-methods": "7.0.1",
     "@octokit/request-error": "3.0.3",
+    "@octokit/types": "12.4.0",
     "@types/adm-zip": "0.5.0",
     "@types/chalk-animation": "1.6.1",
     "@types/configstore": "6.0.0",
@@ -65,6 +70,7 @@
     "@types/tar": "^6.1.6",
     "@types/tmp": "0.2.3",
     "@types/uuid": "9.0.1",
+    "@types/ws": "8.5.3",
     "@types/yargs": "17.0.24",
     "@typescript-eslint/eslint-plugin": "5.44.0",
     "@typescript-eslint/parser": "5.44.0",

@@ -61,16 +61,22 @@ export const SUBMIT_VULNERABILITY_REPORT = gql`
     $projectId: String!
     $sha: String
     $vulnerabilityReportFileName: String
+    $pullRequest: Int
   ) {
     submitVulnerabilityReport(
       fixReportId: $fixReportId
       repoUrl: $repoUrl
       reference: $reference
       sha: $sha
+      pullRequest: $pullRequest
       projectId: $projectId
       vulnerabilityReportFileName: $vulnerabilityReportFileName
     ) {
       __typename
+      ... on VulnerabilityReport {
+        vulnerabilityReportId
+        fixReportId
+      }
     }
   }
 `

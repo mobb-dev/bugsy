@@ -1,7 +1,9 @@
+import { mobbCliCommand } from '@mobb/bugsy/types'
 import chalk from 'chalk'
 import yargs from 'yargs/yargs'
 
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
+import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
 
 export const parseArgs = async (args: readonly string[]) => {
@@ -23,7 +25,7 @@ export const parseArgs = async (args: readonly string[]) => {
     )
     .version(false)
     .command(
-      'scan',
+      mobbCliCommand.scan,
       chalk.bold(
         'Scan your code for vulnerabilities, get automated fixes right away.'
       ),
@@ -31,12 +33,20 @@ export const parseArgs = async (args: readonly string[]) => {
       scanHandler
     )
     .command(
-      'analyze',
+      mobbCliCommand.analyze,
       chalk.bold(
         'Provide a vulnerability report and relevant code repository, get automated fixes right away.'
       ),
       analyzeBuilder,
       analyzeHandler
+    )
+    .command(
+      mobbCliCommand.review,
+      chalk.bold(
+        '(beta) Mobb will review your github pull requests and provide comments with fixes '
+      ),
+      reviewBuilder,
+      reviewHandler
     )
     .example(
       '$0 scan -r https://github.com/WebGoat/WebGoat',

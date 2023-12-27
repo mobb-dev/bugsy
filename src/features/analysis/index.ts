@@ -5,10 +5,17 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
-import { SupportedScanners } from '@mobb/bugsy/constants'
-import { WEB_APP_URL } from '@mobb/bugsy/constants'
+import {
+  Scanner,
+  SCANNERS,
+  SupportedScanners,
+  SupportedScannersZ,
+  WEB_APP_URL,
+} from '@mobb/bugsy/constants'
+import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { sleep } from '@mobb/bugsy/utils'
+import { Octokit } from '@octokit/core'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -17,9 +24,11 @@ import fetch from 'node-fetch'
 import open from 'open'
 import semver from 'semver'
 import tmp from 'tmp'
+import { z } from 'zod'
 
 import { getGitInfo } from './git'
 import { GQLClient } from './graphql'
+import { handleFinishedAnalysis } from './handle_finished_analysis'
 import { pack } from './pack'
 import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
 import { getCheckmarxReport } from './scanners/checkmarx'
@@ -131,12 +140,15 @@ export type AnalysisParams = {
   srcPath?: string
   ref?: string
   commitHash?: string
-  scanner?: SupportedScanners
+  scanner?: Scanner
   mobbProjectName?: string
   y?: boolean
   yes?: boolean
   apiKey?: string
   ci: boolean
+  pullRequest?: number
+  githubToken?: string
+  command: MobbCliCommand
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -156,7 +168,10 @@ export async function runAnalysis(
 }
 
 export async function _scan(
-  {
+  params: AnalysisParams & { dirname: string; cxProjectName?: string },
+  { skipPrompts = false } = {}
+) {
+  const {
     dirname,
     repo,
     scanFile,
@@ -168,16 +183,16 @@ export async function _scan(
     scanner,
     cxProjectName,
     mobbProjectName,
-  }: AnalysisParams & { dirname: string; cxProjectName?: string },
-  { skipPrompts = false } = {}
-) {
+    githubToken: githubActionToken,
+    command,
+  } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
   skipPrompts = skipPrompts || ci
-
   let gqlClient = new GQLClient({
     apiKey: apiKey || config.get('apiToken'),
   })
+
   await handleMobbLogin()
 
   const { projectId, organizationId } = await gqlClient.getOrgAndProjectId(
@@ -248,6 +263,7 @@ export async function _scan(
     accessToken: token,
     scmType: scmLibType,
   })
+
   const reference = ref ?? (await scm.getRepoDefaultBranch())
   const { sha } = await scm.getReferenceData(reference)
   debug('org id %s', organizationId)
@@ -262,9 +278,10 @@ export async function _scan(
     downloadUrl: scm.getDownloadUrl(sha),
   })
 
-  if (scanner) {
-    reportPath = await getReport(scanner)
+  if (command === 'scan') {
+    reportPath = await getReport(SupportedScannersZ.parse(scanner))
   }
+
   if (!reportPath) {
     throw new Error('reportPath is null')
   }
@@ -280,20 +297,23 @@ export async function _scan(
     uploadReportSpinner.error({ text: '📁 Report upload failed' })
     throw e
   }
+
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
   const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
-  try {
-    await gqlClient.submitVulnerabilityReport({
-      fixReportId: reportUploadInfo.fixReportId,
-      repoUrl: repo,
-      reference,
-      projectId,
-      vulnerabilityReportFileName: 'report.json',
-      sha,
-    })
-  } catch (e) {
-    mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
-    throw e
+  const sendReportRes = await sendReport()
+  // in case we were provided with the github action token we assume we can create the github comments
+  if (command === 'review') {
+    await gqlClient.subscribeToAnalysis(
+      { analysisId: sendReportRes.submitVulnerabilityReport.fixReportId },
+      (analysisId) =>
+        handleFinishedAnalysis({
+          analysisId,
+          gqlClient,
+          scm,
+          githubActionOctokit: new Octokit({ auth: githubActionToken }),
+          scanner: z.nativeEnum(SCANNERS).parse(scanner),
+        })
+    )
   }
 
   mobbSpinner.success({
@@ -301,6 +321,30 @@ export async function _scan(
   })
 
   await askToOpenAnalysis()
+
+  async function sendReport() {
+    try {
+      const sumbitRes = await gqlClient.submitVulnerabilityReport({
+        fixReportId: reportUploadInfo.fixReportId,
+        repoUrl: z.string().parse(repo),
+        reference,
+        projectId,
+        vulnerabilityReportFileName: 'report.json',
+        sha,
+        pullRequest: params.pullRequest,
+      })
+      if (
+        sumbitRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
+      ) {
+        throw new Error('🕵️‍♂️ Mobb analysis failed')
+      }
+      return sumbitRes
+    } catch (e) {
+      mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
+      throw e
+    }
+  }
+
   async function getReport(scanner: SupportedScanners): Promise<string> {
     const reportPath = path.join(dirname, 'report.json')
     switch (scanner) {
@@ -332,7 +376,7 @@ export async function _scan(
       fixReportId: reportUploadInfo.fixReportId,
     })
     !ci && console.log('You can access the analysis at: \n')
-    console.log(chalk.bold(reportUrl))
+
     !skipPrompts && (await mobbAnalysisPrompt())
 
     !ci && open(reportUrl)

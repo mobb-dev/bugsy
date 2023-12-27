@@ -4,7 +4,7 @@ import {
   getGithubReferenceData,
   getGithubRepoDefaultBranch,
   parseOwnerAndRepo,
-} from '../github'
+} from '../github/github'
 
 const OWNER = 'facebook'
 const REPO = 'react'

@@ -60,6 +60,7 @@ export type SubmitVulnerabilityReportVariables = {
   sha: string
   vulnerabilityReportFileName?: string
   projectId: string
+  pullRequest?: number
 }
 
 export type MeQuery = {
@@ -138,11 +139,31 @@ export type DigestVulnerabilityReportQuery = z.infer<
   typeof DigestVulnerabilityReportZ
 >
 
+const AnalysisStateZ = z.enum([
+  'Created',
+  'Deleted',
+  'Digested',
+  'Expired',
+  'Failed',
+  'Finished',
+  'Initialized',
+  'Requested',
+])
+
 export const GetFixReportZ = z.object({
   fixReport_by_pk: z.object({
-    state: z.string(),
+    state: AnalysisStateZ,
   }),
 })
+
+export const GetFixReportSubscriptionZ = z.object({
+  analysis: z.object({
+    id: z.string(),
+    state: AnalysisStateZ,
+  }),
+})
+
+export type GetFixReportSubscription = z.infer<typeof GetFixReportSubscriptionZ>
 
 export type GetFixReportQuery = z.infer<typeof GetFixReportZ>
 
@@ -157,3 +178,63 @@ export const GetVulnerabilityReportPathsZ = z.object({
 export type GetVulnerabilityReportPathsQuery = z.infer<
   typeof GetVulnerabilityReportPathsZ
 >
+
+export const CreateUpdateFixReportMutationZ = z.object({
+  submitVulnerabilityReport: z.object({
+    __typename: z.literal('VulnerabilityReport'),
+    vulnerabilityReportId: z.string(),
+    fixReportId: z.string(),
+  }),
+})
+
+export type CreateUpdateFixReportMutation = z.infer<
+  typeof CreateUpdateFixReportMutationZ
+>
+
+export const GetAnalysisQueryZ = z.object({
+  analysis: z.object({
+    id: z.string(),
+    state: z.string(),
+    repo: z.object({
+      commitSha: z.string(),
+      pullRequest: z.number(),
+    }),
+    fixes: z.array(
+      z.object({
+        id: z.string(),
+        issueType: z.string(),
+        vulnerabilityReportIssues: z.array(
+          z.object({
+            issueLanguage: z.string(),
+            state: z.string(),
+            issueType: z.string(),
+            vendorIssueId: z.string(),
+          })
+        ),
+      })
+    ),
+    vulnerabilityReport: z.object({
+      projectId: z.string(),
+      project: z.object({
+        organizationId: z.string(),
+      }),
+      file: z.object({
+        signedFile: z.object({
+          url: z.string(),
+        }),
+      }),
+    }),
+  }),
+})
+
+export type GetAnalysisQuery = z.infer<typeof GetAnalysisQueryZ>
+
+export const GetFixQueryZ = z.object({
+  fix_by_pk: z.object({
+    patchAndQuestions: z.object({
+      patch: z.string(),
+    }),
+  }),
+})
+
+export type GetFixQuery = z.infer<typeof GetFixQueryZ>

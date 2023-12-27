@@ -1,5 +1,7 @@
 import type * as Yargs from 'yargs'
 
+import { Scanner } from '../constants'
+
 export type AnalyzeOptions = Yargs.ArgumentsCamelCase<BaseAnalyzeOptions>
 
 export type BaseAnalyzeOptions = {
@@ -14,7 +16,27 @@ export type BaseAnalyzeOptions = {
   yes?: boolean
   apiKey?: string
   ci: boolean
+  githubToken?: string
   mobbProjectName?: string
+}
+
+export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>
+
+export type BaseReviewOptions = {
+  f: string
+  scanFile?: string
+  scanner: Scanner
+  r: string
+  repo: string
+  ref: string
+  ['api-key']: string
+  apiKey?: string
+  ch: string
+  commitHash?: string
+  mobbProjectName?: string
+  'github-token': string
+  githubToken?: string
+  pullRequest?: number
 }
 
 export type ScanOptions = Yargs.ArgumentsCamelCase<BaseScanOptions>

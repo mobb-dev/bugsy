@@ -376,7 +376,7 @@ export async function _scan(
       fixReportId: reportUploadInfo.fixReportId,
     })
     !ci && console.log('You can access the analysis at: \n')
-
+    console.log(chalk.bold(reportUrl))
     !skipPrompts && (await mobbAnalysisPrompt())
 
     !ci && open(reportUrl)

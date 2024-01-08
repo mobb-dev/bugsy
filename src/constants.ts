@@ -20,7 +20,8 @@ export const SCANNERS = {
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])
 export type SupportedScanners = z.infer<typeof SupportedScannersZ>
 
-export type Scanner = (typeof SCANNERS)[keyof typeof SCANNERS]
+type ScannerType = typeof SCANNERS
+export type Scanner = ScannerType[keyof typeof SCANNERS]
 
 const envVariablesSchema = z
   .object({

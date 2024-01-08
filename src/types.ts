@@ -4,5 +4,5 @@ export const mobbCliCommand = {
   review: 'review',
 } as const
 
-export type MobbCliCommand =
-  (typeof mobbCliCommand)[keyof typeof mobbCliCommand]
+type MobbCliCommandType = typeof mobbCliCommand
+export type MobbCliCommand = MobbCliCommandType[keyof typeof mobbCliCommand]

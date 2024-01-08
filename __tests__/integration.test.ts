@@ -13,6 +13,11 @@ import {
 } from '../src/features/analysis/graphql/mutations'
 import * as ourPackModule from '../src/features/analysis/pack'
 
+const uuidRegex = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+const analysisRegex = new RegExp(
+  `organization/${uuidRegex}/project/${uuidRegex}/report/${uuidRegex}`
+)
+
 vi.mock('../src/utils/dirname.ts')
 
 vi.mock('open', () => ({
@@ -110,3 +115,21 @@ it.each(['assets', 'assets/simple', 'assets/simple/src'])(
     expect(uploadedRepoZip.getEntryCount()).toBe(1)
   }
 )
+
+it('Checks ci flag', async () => {
+  const consoleMock = vi.spyOn(console, 'log')
+  await analysisExports.runAnalysis(
+    {
+      repo: 'https://bitbucket.com/a/b',
+      ref: 'test',
+      commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+      scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
+      srcPath: path.join(__dirname, 'assets'),
+      ci: true,
+      command: 'analyze',
+    },
+    { skipPrompts: true }
+  )
+  expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
+  consoleMock.mockClear()
+})

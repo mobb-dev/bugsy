@@ -12,5 +12,7 @@ export const GET_PR_COMMENTS_PATH = 'GET /repos/{owner}/{repo}/pulls/comments'
 export const REPLY_TO_CODE_REVIEW_COMMENT_PATH =
   'POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies'
 
+export const GET_PR = 'GET /repos/{owner}/{repo}/pulls/{pull_number}'
+
 export const GET_COMMENT_PATH =
   'GET /repos/{owner}/{repo}/pulls/comments/{comment_id}'

@@ -3,6 +3,7 @@ import { Endpoints } from '@octokit/types'
 import {
   DELETE_COMMENT_PATH,
   GET_COMMENT_PATH,
+  GET_PR,
   GET_PR_COMMENTS_PATH,
   POST_COMMENT_PATH,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
@@ -39,6 +40,10 @@ export type UpdateCommentResponse =
 
 export type ReplyToCodeReviewCommentPathParams =
   Endpoints[typeof REPLY_TO_CODE_REVIEW_COMMENT_PATH]['parameters']
+
+export type GetPrParams = Endpoints[typeof GET_PR]['parameters']
+
+export type GetPrResponse = Endpoints[typeof GET_PR]['response']
 
 export type ReplyToCodeReviewCommentPathResponse =
   Endpoints[typeof REPLY_TO_CODE_REVIEW_COMMENT_PATH]['response']

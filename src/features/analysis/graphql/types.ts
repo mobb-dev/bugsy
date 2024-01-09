@@ -199,20 +199,7 @@ export const GetAnalysisQueryZ = z.object({
       commitSha: z.string(),
       pullRequest: z.number(),
     }),
-    fixes: z.array(
-      z.object({
-        id: z.string(),
-        issueType: z.string(),
-        vulnerabilityReportIssues: z.array(
-          z.object({
-            issueLanguage: z.string(),
-            state: z.string(),
-            issueType: z.string(),
-            vendorIssueId: z.string(),
-          })
-        ),
-      })
-    ),
+    vulnerabilityReportId: z.string(),
     vulnerabilityReport: z.object({
       projectId: z.string(),
       project: z.object({
@@ -231,6 +218,8 @@ export type GetAnalysisQuery = z.infer<typeof GetAnalysisQueryZ>
 
 export const GetFixQueryZ = z.object({
   fix_by_pk: z.object({
+    issueType: z.string(),
+    id: z.string(),
     patchAndQuestions: z.object({
       patch: z.string(),
     }),
@@ -238,3 +227,54 @@ export const GetFixQueryZ = z.object({
 })
 
 export type GetFixQuery = z.infer<typeof GetFixQueryZ>
+
+const VulnerabilityReportIssueCodeNodeZ = z.object({
+  vulnerabilityReportIssueId: z.string(),
+  path: z.string(),
+  startLine: z.number(),
+  vulnerabilityReportIssue: z.object({
+    fixId: z.string(),
+  }),
+})
+export type VulnerabilityReportIssueCodeNode = z.infer<
+  typeof VulnerabilityReportIssueCodeNodeZ
+>
+
+export const GetVulByNodesMetadataZ = z.object({
+  vulnerabilityReportIssueCodeNodes: z.array(VulnerabilityReportIssueCodeNodeZ),
+})
+
+export type GetVulByNodesMetadata = z.infer<typeof GetVulByNodesMetadataZ>
+
+export type GetVulByNodesMetadataFilter = {
+  path: {
+    _eq: string
+  }
+  _or: {
+    startLine: {
+      _gte: number
+      _lte: number
+    }
+    endLine: {
+      _gte: number
+      _lte: number
+    }
+  }[]
+}
+
+export type GetVulByNodeHunk = {
+  path: string
+  ranges: {
+    startLine: number
+    endLine: number
+  }[]
+}
+export type GetVulByNodesMetadataParams = {
+  vulnerabilityReportId: string
+  hunks: GetVulByNodeHunk[]
+}
+
+export type GetVulByNodesMetadataQueryParams = {
+  filters: { _or: GetVulByNodesMetadataFilter[] }
+  vulnerabilityReportId: string
+}

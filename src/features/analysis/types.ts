@@ -1,23 +1,3 @@
-import exampleReport from '@mobb/bugsy/../static/exmaple_reports/codeql.json'
-import { z } from 'zod'
-
-export const VulReportLocationZ = z.object({
-  physicalLocation: z.object({
-    artifactLocation: z.object({
-      uri: z.string(),
-      uriBaseId: z.string(),
-      index: z.number(),
-    }),
-    region: z.object({
-      startLine: z.number(),
-      startColumn: z.number(),
-      endColumn: z.number(),
-    }),
-  }),
-})
-
-export type CodeQLReport = typeof exampleReport
-
 export enum IssueType_Enum {
   /** Command Injection */
   CmDi = 'CMDi',

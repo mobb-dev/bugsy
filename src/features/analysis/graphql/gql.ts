@@ -17,6 +17,7 @@ import {
   GET_FIX,
   GET_FIX_REPORT_STATE,
   GET_ORG_AND_PROJECT_ID,
+  GET_VUL_BY_NODES_METADATA,
   GET_VULNERABILITY_REPORT_PATHS,
   ME,
   SUBSCRIBE_TO_ANALYSIS,
@@ -36,17 +37,24 @@ import {
   GetEncryptedApiTokenArgs,
   GetEncryptedApiTokenQuery,
   GetEncryptedApiTokenZ,
+  GetFixQuery,
   GetFixQueryZ,
   GetFixReportQuery,
   GetFixReportSubscription,
   GetFixReportZ,
   GetOrgAndProjectIdQuery,
   GetOrgAndProjectIdQueryZ,
+  GetVulByNodesMetadata,
+  GetVulByNodesMetadataFilter,
+  GetVulByNodesMetadataParams,
+  GetVulByNodesMetadataQueryParams,
+  GetVulByNodesMetadataZ,
   GetVulnerabilityReportPathsZ,
   MeQuery,
   SubmitVulnerabilityReportVariables,
   UploadS3BucketInfo,
   UploadS3BucketInfoZ,
+  VulnerabilityReportIssueCodeNode,
 } from './types'
 
 const debug = Debug('mobbdev:gql')
@@ -170,6 +178,50 @@ export class GQLClient {
     return UploadS3BucketInfoZ.parse(uploadS3BucketInfoResult)
   }
 
+  async getVulByNodesMetadata({
+    hunks,
+    vulnerabilityReportId,
+  }: GetVulByNodesMetadataParams) {
+    const filters = hunks.map((hunk) => {
+      const filter: GetVulByNodesMetadataFilter = {
+        path: { _eq: hunk.path },
+        _or: hunk.ranges.map(({ endLine, startLine }) => ({
+          startLine: { _gte: startLine, _lte: endLine },
+          endLine: { _gte: startLine, _lte: endLine },
+        })),
+      }
+      return filter
+    })
+    const getVulByNodesMetadataRes = await this._client.request<
+      GetVulByNodesMetadata,
+      GetVulByNodesMetadataQueryParams
+    >(GET_VUL_BY_NODES_METADATA, {
+      filters: { _or: filters },
+      vulnerabilityReportId,
+    })
+    const parsedGetVulByNodesMetadataRes = GetVulByNodesMetadataZ.parse(
+      getVulByNodesMetadataRes
+    )
+    const uniqueVulByNodesMetadata =
+      parsedGetVulByNodesMetadataRes.vulnerabilityReportIssueCodeNodes.reduce<
+        Record<string, VulnerabilityReportIssueCodeNode>
+      >((acc, vulnerabilityReportIssueCodeNode) => {
+        if (acc[vulnerabilityReportIssueCodeNode.vulnerabilityReportIssueId]) {
+          return acc
+        }
+        return {
+          ...acc,
+          [vulnerabilityReportIssueCodeNode.vulnerabilityReportIssueId]:
+            vulnerabilityReportIssueCodeNode,
+        }
+      }, {})
+    return {
+      vulnerabilityReportIssueCodeNodes: Object.values(
+        uniqueVulByNodesMetadata
+      ),
+    }
+  }
+
   async digestVulnerabilityReport({
     fixReportId,
     projectId,
@@ -280,9 +332,12 @@ export class GQLClient {
     return GetAnalysisQueryZ.parse(res)
   }
   async getFix(fixId: string) {
-    const res = await this._client.request<GetFixReportQuery>(GET_FIX, {
-      fixId,
-    })
+    const res = await this._client.request<GetFixQuery, { fixId: string }>(
+      GET_FIX,
+      {
+        fixId,
+      }
+    )
     return GetFixQueryZ.parse(res)
   }
 }

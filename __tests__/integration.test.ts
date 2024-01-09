@@ -70,7 +70,6 @@ vi.mock('../src/features/analysis/scanners/snyk', () => ({
     return true
   }),
 }))
-
 it('Full analyze flow', async () => {
   open.mockClear()
   const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')

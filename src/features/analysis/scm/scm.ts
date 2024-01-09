@@ -17,6 +17,7 @@ import {
 } from './github/github'
 import {
   deleteComment,
+  getPr,
   getPrComments,
   postPrComment,
   updatePrComment,
@@ -24,6 +25,7 @@ import {
 import {
   DeleteCommentParams,
   GetPrCommentsParams,
+  GetPrParams,
   PostCommentParams,
   UpdateCommentParams,
 } from './github/types'
@@ -566,6 +568,19 @@ export class GithubSCMLib extends SCMLib {
       owner,
       repo,
     })
+  }
+  async getPrDiff(params: Omit<GetPrParams, 'owner' | 'repo'>) {
+    if (!this.accessToken || !this.url) {
+      throw new Error('cannot get Pr Comments without access token or url')
+    }
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const prRes = await getPr(this.oktokit, {
+      ...params,
+      owner,
+      repo,
+    })
+    const diffUrl = prRes.data.diff_url
+    return this.oktokit.request('GET ' + diffUrl)
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {

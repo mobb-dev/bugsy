@@ -1,12 +1,18 @@
 import { Scanner } from '@mobb/bugsy/constants'
 import { Octokit } from '@octokit/core'
 import Debug from 'debug'
+import parseDiff, { AddChange } from 'parse-diff'
 import { z } from 'zod'
 
 import { GQLClient } from './graphql'
+import { GetVulByNodeHunk } from './graphql/types'
 import { GithubSCMLib, SCMLib } from './scm'
-import { CodeQLReport, VulReportLocationZ } from './types'
-import { getCommitUrl, getFixUrl, getIssueType } from './utils'
+import {
+  calculateRanges,
+  getCommitUrl,
+  getFixUrlWithRedirect,
+  getIssueType,
+} from './utils'
 
 const debug = Debug('mobbdev:handle-finished-analysis')
 
@@ -29,6 +35,39 @@ function scannerToFriendlyString(scanner: Scanner) {
   }
 }
 
+export async function getFixesFromDiff(params: {
+  gqlClient: GQLClient
+  diff: string
+  vulnerabilityReportId: string
+}) {
+  const { gqlClient, diff, vulnerabilityReportId } = params
+  const parsedDiff = parseDiff(diff)
+
+  const fileHunks = parsedDiff.map((file) => {
+    const fileNumbers = file.chunks
+      .flatMap((chunk) => chunk.changes)
+      // create a filter only for added lines
+      .filter((change) => change.type === 'add')
+      .map((_change) => {
+        const change = _change as AddChange
+        return change.ln
+      })
+    const lineAddedRanges = calculateRanges(fileNumbers)
+    const fileFilter: GetVulByNodeHunk = {
+      path: z.string().parse(file.to),
+      ranges: lineAddedRanges.map(([startLine, endLine]) => ({
+        endLine,
+        startLine,
+      })),
+    }
+    return fileFilter
+  })
+  return gqlClient.getVulByNodesMetadata({
+    hunks: fileHunks,
+    vulnerabilityReportId,
+  })
+}
+
 export async function handleFinishedAnalysis({
   analysisId,
   scm: _scm,
@@ -46,7 +85,21 @@ export async function handleFinishedAnalysis({
     return
   }
   const scm = _scm as GithubSCMLib
-  const res = await gqlClient.getAnalysis(analysisId)
+  const getAnalysis = await gqlClient.getAnalysis(analysisId)
+  const {
+    vulnerabilityReport: {
+      projectId,
+      project: { organizationId },
+    },
+  } = getAnalysis.analysis
+  const { commitSha, pullRequest } = getAnalysis.analysis.repo
+  const getPrDiff = await scm.getPrDiff({ pull_number: pullRequest })
+  const { vulnerabilityReportIssueCodeNodes } = await getFixesFromDiff({
+    diff: getPrDiff.data,
+    gqlClient,
+    vulnerabilityReportId: getAnalysis.analysis.vulnerabilityReportId,
+  })
+
   const comments = await scm.getPrComments({}, githubActionOctokit)
   // Delete all previus mobb comments
   await Promise.all(
@@ -66,81 +119,42 @@ export async function handleFinishedAnalysis({
         }
       })
   )
-  const {
-    vulnerabilityReport: {
-      file: {
-        signedFile: { url: vulReportUrl },
-      },
-    },
-    repo: { commitSha, pullRequest },
-  } = res.analysis
-  const {
-    projectId,
-    project: { organizationId },
-  } = res.analysis.vulnerabilityReport
-  const vulReportRes = await fetch(vulReportUrl)
-  const vulReport = (await vulReportRes.json()) as CodeQLReport
-  // recrate the fixes
   return Promise.all(
-    res.analysis.fixes
-      .map((fix) => {
-        const [vulnerabilityReportIssue] = fix.vulnerabilityReportIssues
-        const issueIndex = parseInt(
-          z.string().parse(vulnerabilityReportIssue?.vendorIssueId)
-        )
-        const results = vulReport.runs[0]?.results || []
-        const ruleId = results[issueIndex]?.ruleId
-        const location = VulReportLocationZ.parse(
-          results[issueIndex]?.locations[0]
-        )
-        const { uri: filePath } = location.physicalLocation.artifactLocation
-        const { startLine, startColumn, endColumn } =
-          location.physicalLocation.region
-        const fixLocation = {
-          filePath,
-          startLine,
-          startColumn,
-          endColumn,
-          ruleId,
-        }
-        return {
-          fix,
-          fixLocation,
-        }
-      })
-      .map(async ({ fix, fixLocation }) => {
-        const { filePath, startLine } = fixLocation
-        const getFixContent = await gqlClient.getFix(fix.id)
+    vulnerabilityReportIssueCodeNodes.map(
+      async (vulnerabilityReportIssueCodeNodes) => {
+        const { path, startLine, vulnerabilityReportIssue } =
+          vulnerabilityReportIssueCodeNodes
+        const { fixId } = vulnerabilityReportIssue
+        const { fix_by_pk } = await gqlClient.getFix(fixId)
         const {
-          fix_by_pk: {
-            patchAndQuestions: { patch },
-          },
-        } = getFixContent
+          patchAndQuestions: { patch },
+        } = fix_by_pk
         const commentRes = await scm.postPrComment(
           {
             body: 'empty',
             pull_number: pullRequest,
             commit_id: commitSha,
-            path: filePath,
+            path,
             line: startLine,
           },
           githubActionOctokit
         )
         const commitUrl = getCommitUrl({
-          fixId: fix.id,
+          fixId: fix_by_pk.id,
           projectId,
           analysisId,
           organizationId,
           redirectUrl: commentRes.data.html_url,
         })
-        const fixUrl = getFixUrl({
-          fixId: fix.id,
+        const fixUrl = getFixUrlWithRedirect({
+          fixId: fix_by_pk.id,
           projectId,
           analysisId,
           organizationId,
+          redirectUrl: commentRes.data.html_url,
         })
         const scanerString = scannerToFriendlyString(scanner)
-        const issueType = getIssueType(fix.issueType)
+        const issueType = getIssueType(fix_by_pk.issueType)
         const title = `# ${MOBB_ICON_IMG} ${issueType} fix by Mobb is ready`
         const subTitle = `### Apply the following code change to fix ${issueType} issue detected by ${scanerString}:`
         const diff = `\`\`\`diff\n${patch} \n\`\`\``
@@ -154,6 +168,7 @@ export async function handleFinishedAnalysis({
           },
           githubActionOctokit
         )
-      })
+      }
+    )
   )
 }

@@ -72,16 +72,7 @@ export const GET_ANALYSIS = gql`
         commitSha
         pullRequest
       }
-      fixes {
-        id
-        issueType
-        vulnerabilityReportIssues {
-          issueLanguage
-          state
-          issueType
-          vendorIssueId
-        }
-      }
+      vulnerabilityReportId
       vulnerabilityReport {
         projectId
         project {
@@ -100,8 +91,35 @@ export const GET_ANALYSIS = gql`
 export const GET_FIX = gql`
   query getFix($fixId: uuid!) {
     fix_by_pk(id: $fixId) {
+      issueType
+      id
       patchAndQuestions {
         patch
+      }
+    }
+  }
+`
+
+export const GET_VUL_BY_NODES_METADATA = gql`
+  query getVulByNodesMetadata(
+    $filters: [vulnerability_report_issue_code_node_bool_exp!]
+    $vulnerabilityReportId: uuid!
+  ) {
+    vulnerabilityReportIssueCodeNodes: vulnerability_report_issue_code_node(
+      order_by: { index: desc }
+      where: {
+        _or: $filters
+        vulnerabilityReportIssue: {
+          vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+        }
+      }
+    ) {
+      vulnerabilityReportIssueId
+      path
+      startLine
+      vulnerabilityReportIssue {
+        issueType
+        fixId
       }
     }
   }

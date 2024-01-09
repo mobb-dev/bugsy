@@ -151,9 +151,8 @@ async function validateCheckamxCredentials() {
     if (!tryAgain) {
       await throwCheckmarxConfigError()
     }
-    if (await tryCheckmarxConfiguarationAgain()) {
-      validateCheckamxCredentials()
-    }
+    await validateCheckamxCredentials()
+    return
   }
   await createSpinner('🔓 Checkmarx configured successfully!').start().success()
 }

@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/core'
 
 import {
   DELETE_COMMENT_PATH,
+  GET_PR,
   GET_PR_COMMENTS_PATH,
   POST_COMMENT_PATH,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
@@ -13,6 +14,8 @@ import {
   GetCommentParams,
   GetPrCommentsParams,
   GetPrCommentsResponse,
+  GetPrParams,
+  GetPrResponse,
   PostCommentParams,
   PostCommentReposnse,
   ReplyToCodeReviewCommentPathParams,
@@ -60,4 +63,10 @@ export function replyToCodeReviewComment(
   params: ReplyToCodeReviewCommentPathParams
 ): Promise<ReplyToCodeReviewCommentPathResponse> {
   return client.request(REPLY_TO_CODE_REVIEW_COMMENT_PATH, params)
+}
+export function getPr(
+  client: Octokit,
+  params: GetPrParams
+): Promise<GetPrResponse> {
+  return client.request(GET_PR, params)
 }

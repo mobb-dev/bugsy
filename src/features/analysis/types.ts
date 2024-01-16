@@ -39,6 +39,8 @@ export enum IssueType_Enum {
   Ssrf = 'SSRF',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
   SystemInformationLeak = 'SYSTEM_INFORMATION_LEAK',
+  /** Trust Boundary Violation */
+  TrustBoundaryViolation = 'TRUST_BOUNDARY_VIOLATION',
   /** HTTP request parameter may be either an array or a string */
   TypeConfusion = 'TYPE_CONFUSION',
   /** Unchecked loop condition */

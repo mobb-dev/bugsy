@@ -50,6 +50,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'Cookie is not HttpOnly'
     case IssueType_Enum.InsecureCookie:
       return 'Insecure Cookie'
+    case IssueType_Enum.TrustBoundaryViolation:
+      return 'Trust Boundary Violation'
     default: {
       return issueType ? issueType.replaceAll('_', ' ') : 'Other'
     }

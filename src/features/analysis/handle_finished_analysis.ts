@@ -1,4 +1,4 @@
-import { Scanner } from '@mobb/bugsy/constants'
+import { Scanner, WEB_APP_URL } from '@mobb/bugsy/constants'
 import { Octokit } from '@octokit/core'
 import Debug from 'debug'
 import parseDiff, { AddChange } from 'parse-diff'
@@ -7,18 +7,12 @@ import { z } from 'zod'
 import { GQLClient } from './graphql'
 import { GetVulByNodeHunk } from './graphql/types'
 import { GithubSCMLib, SCMLib } from './scm'
-import {
-  calculateRanges,
-  getCommitUrl,
-  getFixUrlWithRedirect,
-  getIssueType,
-} from './utils'
+import { COMMIT_FIX_SVG, MOBB_ICON_IMG } from './scm/constants'
+import { getCommitUrl, getFixUrlWithRedirect, getIssueType } from './scm/utils'
+import { calculateRanges } from './utils'
 
 const debug = Debug('mobbdev:handle-finished-analysis')
 
-const MOBB_ICON_IMG =
-  '![image](https://github.com/yhaggai/GitHub-Fixer-Demo/assets/1255845/30f566df-6544-4612-929e-2ee5e8b9d345)'
-const COMMIT_FIX_SVG = `https://felt-laptop-20190711103614-deployment.s3.us-east-1.amazonaws.com/commit-button.svg`
 const commitFixButton = (commitUrl: string) =>
   `<a href="${commitUrl}"><img src=${COMMIT_FIX_SVG}></a>`
 
@@ -93,19 +87,22 @@ export async function handleFinishedAnalysis({
     },
   } = getAnalysis.analysis
   const { commitSha, pullRequest } = getAnalysis.analysis.repo
-  const getPrDiff = await scm.getPrDiff({ pull_number: pullRequest })
+  const diff = await scm.getPrDiff({ pull_number: pullRequest })
   const { vulnerabilityReportIssueCodeNodes } = await getFixesFromDiff({
-    diff: getPrDiff.data,
+    diff,
     gqlClient,
     vulnerabilityReportId: getAnalysis.analysis.vulnerabilityReportId,
   })
 
-  const comments = await scm.getPrComments({}, githubActionOctokit)
+  const comments = await scm.getPrComments(
+    { pull_number: pullRequest },
+    githubActionOctokit
+  )
   // Delete all previus mobb comments
   await Promise.all(
     comments.data
       .filter((comment) => {
-        return comment.body.includes('fix by Mobb is ready')
+        return comment.body.includes(MOBB_ICON_IMG)
       })
       .map((comment) => {
         try {
@@ -139,32 +136,38 @@ export async function handleFinishedAnalysis({
           },
           githubActionOctokit
         )
+        const commentId = commentRes.data.id
         const commitUrl = getCommitUrl({
+          appBaseUrl: WEB_APP_URL,
           fixId: fix_by_pk.id,
           projectId,
           analysisId,
           organizationId,
           redirectUrl: commentRes.data.html_url,
+          commentId,
         })
         const fixUrl = getFixUrlWithRedirect({
+          appBaseUrl: WEB_APP_URL,
           fixId: fix_by_pk.id,
           projectId,
           analysisId,
           organizationId,
           redirectUrl: commentRes.data.html_url,
+          commentId,
         })
         const scanerString = scannerToFriendlyString(scanner)
         const issueType = getIssueType(fix_by_pk.issueType)
-        const title = `# ${MOBB_ICON_IMG} ${issueType} fix by Mobb is ready`
+        const title = `# ![image](${MOBB_ICON_IMG}) ${issueType} fix by Mobb is ready`
         const subTitle = `### Apply the following code change to fix ${issueType} issue detected by ${scanerString}:`
         const diff = `\`\`\`diff\n${patch} \n\`\`\``
         const fixPageLink = `[Learn more and fine tune the fix](${fixUrl})`
+
         await scm.updatePrComment(
           {
             body: `${title}\n${subTitle}\n${diff}\n${commitFixButton(
               commitUrl
             )}\n${fixPageLink}`,
-            comment_id: commentRes.data.id,
+            comment_id: commentId,
           },
           githubActionOctokit
         )

@@ -278,6 +278,20 @@ export async function createPullRequest(options: {
   return res.data.number
 }
 
+export async function forkRepo(options: {
+  accessToken: string
+  repoUrl: string
+}): Promise<{ url: string | null }> {
+  const { owner, repo } = parseOwnerAndRepo(options.repoUrl)
+  const oktoKit = getOktoKit({ githubAuthToken: options.accessToken })
+  const res = await oktoKit.rest.repos.createFork({
+    owner,
+    repo,
+    default_branch_only: false,
+  })
+  return { url: res.data.html_url ? String(res.data.html_url) : null }
+}
+
 async function getRepos(oktoKit: Octokit) {
   // For now limit is 100(maximum supported by github) if we will need more we need to implement pagination + search
   const res = await oktoKit.request('GET /user/repos?sort=updated', {

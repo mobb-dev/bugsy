@@ -185,6 +185,7 @@ export class GQLClient {
     const filters = hunks.map((hunk) => {
       const filter: GetVulByNodesMetadataFilter = {
         path: { _eq: hunk.path },
+        vulnerabilityReportIssue: { fixId: { _is_null: false } },
         _or: hunk.ranges.map(({ endLine, startLine }) => ({
           startLine: { _gte: startLine, _lte: endLine },
           endLine: { _gte: startLine, _lte: endLine },

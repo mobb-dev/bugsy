@@ -250,6 +250,7 @@ export type GetVulByNodesMetadataFilter = {
   path: {
     _eq: string
   }
+  vulnerabilityReportIssue: { fixId: { _is_null: false } }
   _or: {
     startLine: {
       _gte: number

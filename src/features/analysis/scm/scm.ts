@@ -1,7 +1,10 @@
 import { Octokit } from '@octokit/core'
+import { z } from 'zod'
 
+import { encryptSecret } from './github/encryptSecret'
 import {
   createPullRequest,
+  forkRepo,
   getGithubBlameRanges,
   getGithubBranchList,
   getGithubIsRemoteBranch,
@@ -16,18 +19,23 @@ import {
   parseOwnerAndRepo,
 } from './github/github'
 import {
+  createOrUpdateRepositorySecret,
   deleteComment,
-  getPr,
+  getARepositoryPublicKey,
+  getPrComment,
   getPrComments,
+  getPrDiff,
   postPrComment,
   updatePrComment,
 } from './github/github-v2'
 import {
   DeleteCommentParams,
+  GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrParams,
   PostCommentParams,
   UpdateCommentParams,
+  UpdateCommentResponse,
 } from './github/types'
 import {
   createMergeRequest,
@@ -204,6 +212,12 @@ export abstract class SCMLib {
 
   abstract getUsername(): Promise<string>
 
+  abstract forkRepo(repoUrl: string): Promise<{ url: string | null }>
+  abstract createOrUpdateRepositorySecret(
+    params: { value: string; name: string },
+    _oktokit?: Octokit
+  ): Promise<{ url: string | null }>
+
   abstract getSubmitRequestStatus(
     _scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus>
@@ -233,6 +247,7 @@ export abstract class SCMLib {
     sha: string
     date: Date | undefined
   }>
+  abstract getPrComment(commentId: number): Promise<GetPrCommentResponse>
 
   abstract getRepoDefaultBranch(): Promise<string>
 
@@ -289,6 +304,10 @@ export abstract class SCMLib {
 
     return new StubSCMLib(trimmedUrl)
   }
+  abstract updatePrComment(
+    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
+    _oktokit?: Octokit
+  ): Promise<UpdateCommentResponse>
 }
 
 export class GitlabSCMLib extends SCMLib {
@@ -319,6 +338,21 @@ export class GitlabSCMLib extends SCMLib {
       url: this.url,
       accessToken: this.accessToken,
     })
+  }
+  async forkRepo(): Promise<{ url: string | null }> {
+    if (!this.accessToken) {
+      console.error('no access token')
+      throw new Error('no access token')
+    }
+    throw new Error('not supported yet')
+  }
+
+  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
+    if (!this.accessToken) {
+      console.error('no access token')
+      throw new Error('no access token')
+    }
+    throw new Error('not supported yet')
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {
@@ -470,10 +504,20 @@ export class GitlabSCMLib extends SCMLib {
       gitlabAuthToken: this.accessToken,
     })
   }
+  getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
+    throw new Error('getPrComment not implemented.')
+  }
+  updatePrComment(
+    _params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
+    _oktokit?: Octokit
+  ): Promise<UpdateCommentResponse> {
+    throw new Error('updatePrComment not implemented.')
+  }
 }
 
 export class GithubSCMLib extends SCMLib {
   public readonly oktokit: Octokit
+  // we don't always need a url, what's important is that we have an access token
   constructor(url?: string, accessToken?: string) {
     super(url, accessToken)
     this.oktokit = new Octokit({ auth: accessToken })
@@ -498,6 +542,47 @@ export class GithubSCMLib extends SCMLib {
         accessToken: this.accessToken,
       })
     )
+  }
+
+  async forkRepo(repoUrl: string): Promise<{ url: string | null }> {
+    if (!this.accessToken) {
+      console.error('no access token')
+      throw new Error('no access token')
+    }
+
+    return forkRepo({
+      repoUrl: repoUrl,
+      accessToken: this.accessToken,
+    })
+  }
+
+  async createOrUpdateRepositorySecret(
+    params: { value: string; name: string },
+    _oktokit?: Octokit
+  ) {
+    if ((!_oktokit && !this.accessToken) || !this.url) {
+      throw new Error('cannot delete comment without access token or url')
+    }
+    const oktokit = _oktokit || this.oktokit
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { data: repositoryPublicKeyResponse } = await getARepositoryPublicKey(
+      oktokit,
+      {
+        owner,
+        repo,
+      }
+    )
+    const { key_id, key } = repositoryPublicKeyResponse
+
+    const encryptedValue = await encryptSecret(params.value, key)
+
+    return createOrUpdateRepositorySecret(oktokit, {
+      encrypted_value: encryptedValue,
+      secret_name: params.name,
+      key_id,
+      owner,
+      repo,
+    })
   }
 
   async validateParams() {
@@ -525,7 +610,7 @@ export class GithubSCMLib extends SCMLib {
   async updatePrComment(
     params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
     _oktokit?: Octokit
-  ) {
+  ): Promise<UpdateCommentResponse> {
     if ((!_oktokit && !this.accessToken) || !this.url) {
       throw new Error('cannot update on PR without access token or url')
     }
@@ -574,13 +659,14 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot get Pr Comments without access token or url')
     }
     const { owner, repo } = parseOwnerAndRepo(this.url)
-    const prRes = await getPr(this.oktokit, {
+    const prRes = await getPrDiff(this.oktokit, {
       ...params,
       owner,
       repo,
     })
-    const diffUrl = prRes.data.diff_url
-    return this.oktokit.request('GET ' + diffUrl)
+    // note: for some reasone ocktokit does not know to return response as string
+    // look at  'getPrDiff' implementation
+    return z.string().parse(prRes.data)
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {
@@ -706,6 +792,19 @@ export class GithubSCMLib extends SCMLib {
       }
     )
   }
+  async getPrComment(commentId: number): Promise<GetPrCommentResponse> {
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+
+    const { owner, repo } = parseOwnerAndRepo(this.url)
+    return await getPrComment(this.oktokit, {
+      repo,
+      owner,
+      comment_id: commentId,
+    })
+  }
 
   async getRepoDefaultBranch(): Promise<string> {
     if (!this.url) {
@@ -752,6 +851,15 @@ export class StubSCMLib extends SCMLib {
   async validateParams() {
     console.error('validateParams() not implemented')
     throw new Error('validateParams() not implemented')
+  }
+
+  async forkRepo(): Promise<{ url: string | null }> {
+    console.error('forkRepo() not implemented')
+    throw new Error('forkRepo() not implemented')
+  }
+  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
+    console.error('forkRepo() not implemented')
+    throw new Error('forkRepo() not implemented')
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {
@@ -809,5 +917,13 @@ export class StubSCMLib extends SCMLib {
   async getRepoDefaultBranch(): Promise<string> {
     console.error('getRepoDefaultBranch() not implemented')
     throw new Error('getRepoDefaultBranch() not implemented')
+  }
+  async getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
+    console.error('getPrComment() not implemented')
+    throw new Error('getPrComment() not implemented')
+  }
+  async updatePrComment(): Promise<UpdateCommentResponse> {
+    console.error('updatePrComment() not implemented')
+    throw new Error('updatePrComment() not implemented')
   }
 }

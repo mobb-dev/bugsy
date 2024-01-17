@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { calculateRanges } from '../index'
+import { calculateRanges } from '../calculate_ranges'
 
 describe('utils', () => {
   it('calculateRanges', () => {

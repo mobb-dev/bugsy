@@ -509,6 +509,9 @@ export async function createPr(
     path: '/' + sourceFilePath,
   })
 
+  const { data: repository } = await oktoKit.rest.repos.get({ owner, repo })
+  const defaultBranch = repository.default_branch
+
   // Create a new branch
   const newBranchName = `mobb/workflow-${Date.now()}`
   oktoKit.rest.git.createRef({
@@ -516,7 +519,7 @@ export async function createPr(
     repo,
     ref: `refs/heads/${newBranchName}`,
     sha: await oktoKit.rest.git
-      .getRef({ owner, repo, ref: 'heads/main' })
+      .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
       .then((response) => response.data.object.sha),
   })
 
@@ -531,7 +534,7 @@ export async function createPr(
     owner,
     repo,
     base_tree: await oktoKit.rest.git
-      .getRef({ owner, repo, ref: `heads/main` })
+      .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
       .then((response) => response.data.object.sha),
     tree: [
       {
@@ -550,7 +553,7 @@ export async function createPr(
     tree: createTreeResponse.data.sha,
     parents: [
       await oktoKit.rest.git
-        .getRef({ owner, repo, ref: `heads/main` })
+        .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
         .then((response) => response.data.object.sha),
     ],
   })

@@ -58,6 +58,7 @@ export type SubmitVulnerabilityReportVariables = {
   repoUrl: string
   reference: string
   sha: string
+  experimentalEnabled?: boolean
   vulnerabilityReportFileName?: string
   projectId: string
   pullRequest?: number

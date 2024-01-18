@@ -29,6 +29,7 @@ export async function review(
       apiKey,
       ci: true,
       commitHash,
+      experimentalEnabled: false,
       mobbProjectName,
       pullRequest,
       githubToken,

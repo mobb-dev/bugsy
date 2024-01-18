@@ -245,6 +245,7 @@ export class GQLClient {
       reference,
       projectId,
       sha,
+      experimentalEnabled,
       vulnerabilityReportFileName,
       pullRequest,
     } = params
@@ -259,6 +260,7 @@ export class GQLClient {
       projectId,
       pullRequest,
       sha: sha || '',
+      experimentalEnabled,
     })
     return CreateUpdateFixReportMutationZ.parse(res)
   }

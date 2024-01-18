@@ -481,3 +481,98 @@ export async function getGithubBlameRanges(
     login: range.commit.author.user.login,
   }))
 }
+export async function createPr(
+  {
+    sourceRepoUrl,
+    sourceFilePath,
+    targetFilePath,
+    userRepoUrl,
+    title,
+  }: {
+    sourceRepoUrl: string
+    sourceFilePath: string
+    targetFilePath: string
+    userRepoUrl: string
+    title: string
+  },
+  options?: ApiAuthOptions
+) {
+  const oktoKit = getOktoKit(options)
+
+  const { owner: sourceOwner, repo: sourceRepo } =
+    parseOwnerAndRepo(sourceRepoUrl)
+  const { owner, repo } = parseOwnerAndRepo(userRepoUrl)
+
+  const sourceFileContentResponse = await oktoKit.rest.repos.getContent({
+    owner: sourceOwner,
+    repo: sourceRepo,
+    path: '/' + sourceFilePath,
+  })
+
+  // Create a new branch
+  const newBranchName = `mobb/workflow-${Date.now()}`
+  oktoKit.rest.git.createRef({
+    owner,
+    repo,
+    ref: `refs/heads/${newBranchName}`,
+    sha: await oktoKit.rest.git
+      .getRef({ owner, repo, ref: 'heads/main' })
+      .then((response) => response.data.object.sha),
+  })
+
+  const decodedContent = Buffer.from(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    sourceFileContentResponse.data.content,
+    'base64'
+  ).toString('utf-8')
+  // Create a new commit with the file from the source repository
+  const createTreeResponse = await oktoKit.rest.git.createTree({
+    owner,
+    repo,
+    base_tree: await oktoKit.rest.git
+      .getRef({ owner, repo, ref: `heads/main` })
+      .then((response) => response.data.object.sha),
+    tree: [
+      {
+        path: targetFilePath,
+        mode: '100644',
+        type: 'blob',
+        content: decodedContent,
+      },
+    ],
+  })
+
+  const createCommitResponse = await oktoKit.rest.git.createCommit({
+    owner,
+    repo,
+    message: 'Add new yaml file',
+    tree: createTreeResponse.data.sha,
+    parents: [
+      await oktoKit.rest.git
+        .getRef({ owner, repo, ref: `heads/main` })
+        .then((response) => response.data.object.sha),
+    ],
+  })
+
+  // Update the branch reference to point to the new commit
+  await oktoKit.rest.git.updateRef({
+    owner,
+    repo,
+    ref: `heads/${newBranchName}`,
+    sha: createCommitResponse.data.sha,
+  })
+
+  // Create the Pull Request
+  const createPRResponse = await oktoKit.rest.pulls.create({
+    owner,
+    repo,
+    title,
+    head: newBranchName,
+    base: 'main',
+  })
+
+  return {
+    pull_request_url: createPRResponse.data.html_url,
+  }
+}

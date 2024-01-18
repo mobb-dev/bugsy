@@ -140,6 +140,7 @@ export type AnalysisParams = {
   srcPath?: string
   ref?: string
   commitHash?: string
+  experimentalEnabled?: boolean
   scanner?: Scanner
   mobbProjectName?: string
   y?: boolean
@@ -180,6 +181,7 @@ export async function _scan(
     srcPath,
     commitHash,
     ref,
+    experimentalEnabled,
     scanner,
     cxProjectName,
     mobbProjectName,
@@ -331,6 +333,7 @@ export async function _scan(
         projectId,
         vulnerabilityReportFileName: 'report.json',
         sha,
+        experimentalEnabled,
         pullRequest: params.pullRequest,
       })
       if (

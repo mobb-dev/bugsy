@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { encryptSecret } from './github/encryptSecret'
 import {
+  createPr,
   createPullRequest,
   forkRepo,
   getGithubBlameRanges,
@@ -213,10 +214,19 @@ export abstract class SCMLib {
   abstract getUsername(): Promise<string>
 
   abstract forkRepo(repoUrl: string): Promise<{ url: string | null }>
+
   abstract createOrUpdateRepositorySecret(
     params: { value: string; name: string },
     _oktokit?: Octokit
   ): Promise<{ url: string | null }>
+
+  abstract createPullRequestWithNewFile(
+    sourceRepoUrl: string,
+    sourceFilePath: string,
+    targetFilePath: string,
+    userRepoUrl: string,
+    title: string
+  ): Promise<{ pull_request_url: string }>
 
   abstract getSubmitRequestStatus(
     _scmSubmitRequestId: string
@@ -353,6 +363,16 @@ export class GitlabSCMLib extends SCMLib {
       throw new Error('no access token')
     }
     throw new Error('not supported yet')
+  }
+
+  async createPullRequestWithNewFile(
+    _sourceRepoUrl: string,
+    _sourceFilePath: string,
+    _targetFilePath: string,
+    _userRepoUrl: string,
+    _title: string
+  ): Promise<{ pull_request_url: string }> {
+    throw new Error('not implemented')
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {
@@ -583,6 +603,28 @@ export class GithubSCMLib extends SCMLib {
       owner,
       repo,
     })
+  }
+
+  async createPullRequestWithNewFile(
+    sourceRepoUrl: string,
+    sourceFilePath: string,
+    targetFilePath: string,
+    userRepoUrl: string,
+    title: string
+  ) {
+    const { pull_request_url } = await createPr(
+      {
+        sourceRepoUrl,
+        sourceFilePath,
+        targetFilePath,
+        userRepoUrl,
+        title,
+      },
+      {
+        githubAuthToken: this.accessToken,
+      }
+    )
+    return { pull_request_url: pull_request_url }
   }
 
   async validateParams() {
@@ -860,6 +902,17 @@ export class StubSCMLib extends SCMLib {
   async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
     console.error('forkRepo() not implemented')
     throw new Error('forkRepo() not implemented')
+  }
+
+  async createPullRequestWithNewFile(
+    _sourceRepoUrl: string,
+    _sourceFilePath: string,
+    _targetFilePath: string,
+    _userRepoUrl: string,
+    _title: string
+  ): Promise<{ pull_request_url: string }> {
+    console.error('createPullRequestWithNewFile() not implemented')
+    throw new Error('createPullRequestWithNewFile() not implemented')
   }
 
   async getRepoList(): Promise<ScmRepoInfo[]> {

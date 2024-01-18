@@ -60,6 +60,7 @@ export const SUBMIT_VULNERABILITY_REPORT = gql`
     $reference: String!
     $projectId: String!
     $sha: String
+    $experimentalEnabled: Boolean
     $vulnerabilityReportFileName: String
     $pullRequest: Int
   ) {
@@ -68,6 +69,7 @@ export const SUBMIT_VULNERABILITY_REPORT = gql`
       repoUrl: $repoUrl
       reference: $reference
       sha: $sha
+      experimentalEnabled: $experimentalEnabled
       pullRequest: $pullRequest
       projectId: $projectId
       vulnerabilityReportFileName: $vulnerabilityReportFileName

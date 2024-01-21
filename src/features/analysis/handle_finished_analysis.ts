@@ -157,7 +157,7 @@ export async function handleFinishedAnalysis({
         })
         const scanerString = scannerToFriendlyString(scanner)
         const issueType = getIssueType(fix_by_pk.issueType)
-        const title = `# ![image](${MOBB_ICON_IMG}) ${issueType} fix by Mobb is ready`
+        const title = `# ![image](${MOBB_ICON_IMG}) ${issueType} fix by Mobb is ready ✅`
         const subTitle = `### Apply the following code change to fix ${issueType} issue detected by ${scanerString}:`
         const diff = `\`\`\`diff\n${patch} \n\`\`\``
         const fixPageLink = `[Learn more and fine tune the fix](${fixUrl})`

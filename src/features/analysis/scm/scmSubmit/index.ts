@@ -81,13 +81,19 @@ const rebaseFix = async (params: {
   commitMessage: string
 }) => {
   const { git, branchName, baseCommitHash, commitMessage } = params
-  await git.rebase(['--onto', branchName, baseCommitHash, 'HEAD'])
-  const message = z.string().parse((await git.log(['-1'])).latest?.message)
-  const [commitMessageHeader] = message.split('\n')
-  //sometimes the rebase fails but the git command doesn't throw an error
-  //so we need to check that the fix was actually rebased
-  if (!commitMessageHeader?.includes(commitMessage)) {
-    throw new RebaseFailedError('rebase failed')
+  try {
+    await git.rebase(['--onto', branchName, baseCommitHash, 'HEAD'])
+    const message = z.string().parse((await git.log(['-1'])).latest?.message)
+    const [commitMessageHeader] = message.split('\n')
+    //sometimes the rebase fails but the git command doesn't throw an error
+    //so we need to check that the fix was actually rebased
+    if (!commitMessageHeader?.includes(commitMessage)) {
+      throw new RebaseFailedError('rebase failed')
+    }
+  } catch (e) {
+    throw new RebaseFailedError(
+      `rebasing ${baseCommitHash} with message ${commitMessage} failed `
+    )
   }
 }
 
@@ -216,19 +222,17 @@ export async function submitFixesToSameBranch(
     }
     return response
   } catch (e) {
-    console.log('error', e)
-    if (e instanceof RebaseFailedError) {
-      return {
-        ...response,
-        error: {
-          type: 'PushBranchError',
-          info: {
-            message: 'Failed to rebase fix',
-          },
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error'
+    console.error(`error submitting fixes: ${errorMessage}`)
+    return {
+      ...response,
+      error: {
+        type: 'PushBranchError',
+        info: {
+          message: errorMessage,
         },
-      }
+      },
     }
-    return response
   } finally {
     tmpDir.removeCallback()
   }

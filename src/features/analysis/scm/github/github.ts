@@ -484,16 +484,16 @@ export async function getGithubBlameRanges(
 export async function createPr(
   {
     sourceRepoUrl,
-    sourceFilePath,
-    targetFilePath,
+    filesPaths,
     userRepoUrl,
     title,
+    body,
   }: {
     sourceRepoUrl: string
-    sourceFilePath: string
-    targetFilePath: string
+    filesPaths: string[]
     userRepoUrl: string
     title: string
+    body: string
   },
   options?: ApiAuthOptions
 ) {
@@ -502,6 +502,8 @@ export async function createPr(
   const { owner: sourceOwner, repo: sourceRepo } =
     parseOwnerAndRepo(sourceRepoUrl)
   const { owner, repo } = parseOwnerAndRepo(userRepoUrl)
+
+  const [sourceFilePath, secondFilePath] = filesPaths
 
   const sourceFileContentResponse = await oktoKit.rest.repos.getContent({
     owner: sourceOwner,
@@ -529,6 +531,37 @@ export async function createPr(
     sourceFileContentResponse.data.content,
     'base64'
   ).toString('utf-8')
+
+  const tree = [
+    {
+      path: sourceFilePath,
+      mode: '100644',
+      type: 'blob',
+      content: decodedContent,
+    },
+  ]
+
+  if (secondFilePath) {
+    const secondFileContentResponse = await oktoKit.rest.repos.getContent({
+      owner: sourceOwner,
+      repo: sourceRepo,
+      path: '/' + secondFilePath,
+    })
+    const secondDecodedContent = Buffer.from(
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      secondFileContentResponse.data.content,
+      'base64'
+    ).toString('utf-8')
+
+    tree.push({
+      path: secondFilePath,
+      mode: '100644',
+      type: 'blob',
+      content: secondDecodedContent,
+    })
+  }
+
   // Create a new commit with the file from the source repository
   const createTreeResponse = await oktoKit.rest.git.createTree({
     owner,
@@ -536,14 +569,9 @@ export async function createPr(
     base_tree: await oktoKit.rest.git
       .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
       .then((response) => response.data.object.sha),
-    tree: [
-      {
-        path: targetFilePath,
-        mode: '100644',
-        type: 'blob',
-        content: decodedContent,
-      },
-    ],
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    tree,
   })
 
   const createCommitResponse = await oktoKit.rest.git.createCommit({
@@ -571,6 +599,7 @@ export async function createPr(
     owner,
     repo,
     title,
+    body,
     head: newBranchName,
     base: 'main',
   })

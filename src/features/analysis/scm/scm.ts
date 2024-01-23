@@ -222,10 +222,10 @@ export abstract class SCMLib {
 
   abstract createPullRequestWithNewFile(
     sourceRepoUrl: string,
-    sourceFilePath: string,
-    targetFilePath: string,
+    filesPaths: string[],
     userRepoUrl: string,
-    title: string
+    title: string,
+    body: string
   ): Promise<{ pull_request_url: string }>
 
   abstract getSubmitRequestStatus(
@@ -367,10 +367,10 @@ export class GitlabSCMLib extends SCMLib {
 
   async createPullRequestWithNewFile(
     _sourceRepoUrl: string,
-    _sourceFilePath: string,
-    _targetFilePath: string,
+    _filesPaths: string[],
     _userRepoUrl: string,
-    _title: string
+    _title: string,
+    _body: string
   ): Promise<{ pull_request_url: string }> {
     throw new Error('not implemented')
   }
@@ -607,18 +607,18 @@ export class GithubSCMLib extends SCMLib {
 
   async createPullRequestWithNewFile(
     sourceRepoUrl: string,
-    sourceFilePath: string,
-    targetFilePath: string,
+    filesPaths: string[],
     userRepoUrl: string,
-    title: string
+    title: string,
+    body: string
   ) {
     const { pull_request_url } = await createPr(
       {
         sourceRepoUrl,
-        sourceFilePath,
-        targetFilePath,
+        filesPaths,
         userRepoUrl,
         title,
+        body,
       },
       {
         githubAuthToken: this.accessToken,
@@ -906,10 +906,10 @@ export class StubSCMLib extends SCMLib {
 
   async createPullRequestWithNewFile(
     _sourceRepoUrl: string,
-    _sourceFilePath: string,
-    _targetFilePath: string,
+    _filesPaths: string[],
     _userRepoUrl: string,
-    _title: string
+    _title: string,
+    _body: string
   ): Promise<{ pull_request_url: string }> {
     console.error('createPullRequestWithNewFile() not implemented')
     throw new Error('createPullRequestWithNewFile() not implemented')

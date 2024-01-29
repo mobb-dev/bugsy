@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.74",
+  "version": "0.0.76",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
@@ -22,6 +22,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@gitbeaker/core": "39.13.0",
+    "@gitbeaker/requester-utils": "39.13.0",
     "@gitbeaker/rest": "39.13.0",
     "@octokit/core": "5.0.2",
     "@octokit/graphql": "5.0.5",
@@ -29,7 +31,7 @@
     "@octokit/request-error": "3.0.3",
     "@types/libsodium-wrappers": "0.7.13",
     "adm-zip": "0.5.10",
-    "axios": "1.5.0",
+    "axios": "1.6.5",
     "chalk": "5.3.0",
     "chalk-animation": "2.0.3",
     "configstore": "6.0.0",

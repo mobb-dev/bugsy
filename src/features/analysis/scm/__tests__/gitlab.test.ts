@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
-  parseOwnerAndRepo,
+  parseGitlabOwnerAndRepo,
 } from '../gitlab'
 
 const GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce'
@@ -74,7 +74,7 @@ describe('gitlab reference', () => {
 
 describe('parsing gitlab url', () => {
   it('should parse the url', () => {
-    expect(parseOwnerAndRepo(GITLAB_URL)).toMatchInlineSnapshot(`
+    expect(parseGitlabOwnerAndRepo(GITLAB_URL)).toMatchInlineSnapshot(`
       {
         "owner": "zj-gitlab",
         "projectPath": "zj-gitlab/gitlab-ce",
@@ -83,7 +83,7 @@ describe('parsing gitlab url', () => {
     `)
   })
   it('should work with trailing slash', () => {
-    expect(parseOwnerAndRepo(`${GITLAB_URL}/`)).toMatchInlineSnapshot(`
+    expect(parseGitlabOwnerAndRepo(`${GITLAB_URL}/`)).toMatchInlineSnapshot(`
       {
         "owner": "zj-gitlab",
         "projectPath": "zj-gitlab/gitlab-ce",
@@ -92,6 +92,6 @@ describe('parsing gitlab url', () => {
     `)
   })
   it('fail if the url is invalid', () => {
-    expect(() => parseOwnerAndRepo(INVALID_URL)).toThrow()
+    expect(() => parseGitlabOwnerAndRepo(INVALID_URL)).toThrow()
   })
 })

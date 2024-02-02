@@ -47,7 +47,7 @@ export async function gitlabValidateParams({
       await api.Users.showCurrentUser()
     }
     if (url) {
-      const { projectPath } = parseOwnerAndRepo(url)
+      const { projectPath } = parseGitlabOwnerAndRepo(url)
       await api.Projects.show(projectPath)
     }
   } catch (e) {
@@ -80,7 +80,7 @@ export async function gitlabValidateParams({
       description.includes('404') ||
       description.includes('Not Found')
     ) {
-      throw new InvalidRepoUrlError(`invalid gitlab repo Url ${url}`)
+      throw new InvalidRepoUrlError(`invalid gitlab repo URL: ${url}`)
     }
     throw e
   }
@@ -102,7 +102,7 @@ export async function getGitlabIsUserCollaborator({
   repoUrl: string
 }) {
   try {
-    const { projectPath } = parseOwnerAndRepo(repoUrl)
+    const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
     const api = getGitBeaker({ gitlabAuthToken: accessToken })
 
     const res = await api.Projects.show(projectPath)
@@ -130,7 +130,7 @@ export async function getGitlabMergeRequestStatus({
   repoUrl: string
   mrNumber: number
 }) {
-  const { projectPath } = parseOwnerAndRepo(repoUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ gitlabAuthToken: accessToken })
   const res = await api.MergeRequests.show(projectPath, mrNumber)
   switch (res.state) {
@@ -152,7 +152,7 @@ export async function getGitlabIsRemoteBranch({
   repoUrl: string
   branch: string
 }) {
-  const { projectPath } = parseOwnerAndRepo(repoUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ gitlabAuthToken: accessToken })
   try {
     const res = await api.Branches.show(projectPath, branch)
@@ -199,7 +199,7 @@ export async function getGitlabBranchList({
   accessToken: string
   repoUrl: string
 }) {
-  const { projectPath } = parseOwnerAndRepo(repoUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ gitlabAuthToken: accessToken })
   try {
     //TODO: JONATHANA need to play with the parameters here to get all branches as it is sometimes stuck
@@ -224,7 +224,7 @@ export async function createMergeRequest(options: {
   body: string
   repoUrl: string
 }) {
-  const { projectPath } = parseOwnerAndRepo(options.repoUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(options.repoUrl)
   const api = getGitBeaker({ gitlabAuthToken: options.accessToken })
   const res = await api.MergeRequests.create(
     projectPath,
@@ -243,7 +243,7 @@ export async function getGitlabRepoDefaultBranch(
   options?: ApiAuthOptions
 ): Promise<string> {
   const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
-  const { projectPath } = parseOwnerAndRepo(repoUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const project = await api.Projects.show(projectPath)
   if (!project.default_branch) {
     throw new Error('no default branch')
@@ -255,7 +255,7 @@ export async function getGitlabReferenceData(
   { ref, gitlabUrl }: { ref: string; gitlabUrl: string },
   options?: ApiAuthOptions
 ) {
-  const { projectPath } = parseOwnerAndRepo(gitlabUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(gitlabUrl)
   const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
   const results = await Promise.allSettled([
     (async () => {
@@ -300,7 +300,7 @@ export async function getGitlabReferenceData(
   throw new RefNotFoundError(`ref: ${ref} does not exist`)
 }
 
-export function parseOwnerAndRepo(gitlabUrl: string) {
+export function parseGitlabOwnerAndRepo(gitlabUrl: string) {
   gitlabUrl = removeTrailingSlash(gitlabUrl)
   const parsingResult = parseScmURL(gitlabUrl)
 
@@ -316,7 +316,7 @@ export async function getGitlabBlameRanges(
   { ref, gitlabUrl, path }: { ref: string; gitlabUrl: string; path: string },
   options?: ApiAuthOptions
 ) {
-  const { projectPath } = parseOwnerAndRepo(gitlabUrl)
+  const { projectPath } = parseGitlabOwnerAndRepo(gitlabUrl)
   const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
   const resp = await api.RepositoryFiles.allFileBlames(projectPath, path, ref)
   let lineNumber = 1

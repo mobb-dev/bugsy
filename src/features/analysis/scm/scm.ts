@@ -1,6 +1,22 @@
 import { Octokit } from '@octokit/core'
 import { z } from 'zod'
 
+import {
+  AdoPullRequestStatusEnum,
+  AdoTokenTypeEnum,
+  adoValidateParams,
+  createAdoPullRequest,
+  getAdoBlameRanges,
+  getAdoBranchList,
+  getAdoDownloadUrl,
+  getAdoIsRemoteBranch,
+  getAdoIsUserCollaborator,
+  getAdoPullRequestStatus,
+  getAdoReferenceData,
+  getAdoRepoDefaultBranch,
+  getAdoRepoList,
+  getAdoTokenType,
+} from './ado'
 import { encryptSecret } from './github/encryptSecret'
 import {
   createPr,
@@ -17,7 +33,7 @@ import {
   getGithubUsername,
   getUserInfo,
   githubValidateParams,
-  parseOwnerAndRepo,
+  parseGithubOwnerAndRepo,
 } from './github/github'
 import {
   createOrUpdateRepositorySecret,
@@ -65,6 +81,9 @@ export function getScmLibTypeFromUrl(url: string | undefined) {
   if (url.toLowerCase().startsWith('https://github.com/')) {
     return ScmLibScmType.GITHUB
   }
+  if (url.toLowerCase().startsWith('https://dev.azure.com/')) {
+    return ScmLibScmType.ADO
+  }
   return undefined
 }
 
@@ -72,10 +91,14 @@ export async function scmCanReachRepo({
   repoUrl,
   githubToken,
   gitlabToken,
+  adoToken,
+  scmOrg,
 }: {
   repoUrl: string
   githubToken: string | undefined
   gitlabToken: string | undefined
+  adoToken: string | undefined
+  scmOrg: string | undefined
 }) {
   try {
     const scmLibType = getScmLibTypeFromUrl(repoUrl)
@@ -86,8 +109,11 @@ export async function scmCanReachRepo({
           ? githubToken
           : scmLibType === ScmLibScmType.GITLAB
           ? gitlabToken
+          : scmLibType === ScmLibScmType.ADO
+          ? adoToken
           : '',
       scmType: scmLibType,
+      scmOrg,
     })
     return true
   } catch (e) {
@@ -111,6 +137,7 @@ export enum ScmSubmitRequestStatus {
 export enum ScmLibScmType {
   GITHUB = 'GITHUB',
   GITLAB = 'GITLAB',
+  ADO = 'ADO',
 }
 
 export type ScmRepoInfo = {
@@ -163,10 +190,16 @@ export class RebaseFailedError extends Error {}
 export abstract class SCMLib {
   protected readonly url?: string
   protected readonly accessToken?: string
+  protected readonly scmOrg?: string
 
-  protected constructor(url?: string, accessToken?: string) {
+  protected constructor(
+    url: string | undefined,
+    accessToken: string | undefined,
+    scmOrg: string | undefined
+  ) {
     this.accessToken = accessToken
     this.url = url
+    this.scmOrg = scmOrg
   }
 
   public async getUrlWithCredentials() {
@@ -178,9 +211,17 @@ export abstract class SCMLib {
     if (!this.accessToken) {
       return trimmedUrl
     }
-    const username = await this._getUsernameForAuthUrl()
+
+    const scmLibType = getScmLibTypeFromUrl(trimmedUrl)
+    if (scmLibType === ScmLibScmType.ADO) {
+      return `https://${this.accessToken}@${trimmedUrl
+        .toLowerCase()
+        .replace('https://', '')}`
+    }
+
     const is_http = trimmedUrl.toLowerCase().startsWith('http://')
     const is_https = trimmedUrl.toLowerCase().startsWith('https://')
+    const username = await this._getUsernameForAuthUrl()
     if (is_http) {
       return `http://${username}:${this.accessToken}@${trimmedUrl
         .toLowerCase()
@@ -205,7 +246,7 @@ export abstract class SCMLib {
 
   abstract validateParams(): Promise<void>
 
-  abstract getRepoList(): Promise<ScmRepoInfo[]>
+  abstract getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]>
 
   abstract getBranchList(): Promise<string[]>
 
@@ -259,6 +300,11 @@ export abstract class SCMLib {
   }>
   abstract getPrComment(commentId: number): Promise<GetPrCommentResponse>
 
+  abstract updatePrComment(
+    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
+    _oktokit?: Octokit
+  ): Promise<UpdateCommentResponse>
+
   abstract getRepoDefaultBranch(): Promise<string>
 
   public getAccessToken(): string {
@@ -286,10 +332,12 @@ export abstract class SCMLib {
     url,
     accessToken,
     scmType,
+    scmOrg,
   }: {
     url: string | undefined
     accessToken: string | undefined
     scmType: ScmLibScmType | undefined
+    scmOrg: string | undefined
   }): Promise<SCMLib> {
     let trimmedUrl = undefined
     if (url) {
@@ -297,12 +345,17 @@ export abstract class SCMLib {
     }
     try {
       if (ScmLibScmType.GITHUB === scmType) {
-        const scm = new GithubSCMLib(trimmedUrl, accessToken)
+        const scm = new GithubSCMLib(trimmedUrl, accessToken, scmOrg)
         await scm.validateParams()
         return scm
       }
       if (ScmLibScmType.GITLAB === scmType) {
-        const scm = new GitlabSCMLib(trimmedUrl, accessToken)
+        const scm = new GitlabSCMLib(trimmedUrl, accessToken, scmOrg)
+        await scm.validateParams()
+        return scm
+      }
+      if (ScmLibScmType.ADO === scmType) {
+        const scm = new AdoSCMLib(trimmedUrl, accessToken, scmOrg)
         await scm.validateParams()
         return scm
       }
@@ -312,12 +365,218 @@ export abstract class SCMLib {
       }
     }
 
-    return new StubSCMLib(trimmedUrl)
+    return new StubSCMLib(trimmedUrl, undefined, undefined)
   }
-  abstract updatePrComment(
-    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
+}
+
+export class AdoSCMLib extends SCMLib {
+  updatePrComment(
+    _params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
     _oktokit?: Octokit
-  ): Promise<UpdateCommentResponse>
+  ): Promise<UpdateCommentResponse> {
+    throw new Error('updatePrComment not implemented.')
+  }
+  getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
+    throw new Error('getPrComment not implemented.')
+  }
+  async forkRepo(): Promise<{ url: string | null }> {
+    throw new Error('forkRepo not supported yet')
+  }
+
+  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
+    throw new Error('createOrUpdateRepositorySecret not supported yet')
+  }
+
+  async createPullRequestWithNewFile(
+    _sourceRepoUrl: string,
+    _filesPaths: string[],
+    _userRepoUrl: string,
+    _title: string,
+    _body: string
+  ): Promise<{ pull_request_url: string }> {
+    throw new Error('createPullRequestWithNewFile not supported yet')
+  }
+  async createSubmitRequest(
+    targetBranchName: string,
+    sourceBranchName: string,
+    title: string,
+    body: string
+  ): Promise<string> {
+    if (!this.accessToken || !this.url) {
+      console.error('no access token or no url')
+      throw new Error('no access token or no url')
+    }
+    return String(
+      await createAdoPullRequest({
+        title,
+        body,
+        targetBranchName,
+        sourceBranchName,
+        repoUrl: this.url,
+        accessToken: this.accessToken,
+        tokenOrg: this.scmOrg,
+      })
+    )
+  }
+
+  async validateParams() {
+    return adoValidateParams({
+      url: this.url,
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+    })
+  }
+
+  async getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
+    if (!this.accessToken) {
+      console.error('no access token')
+      throw new Error('no access token')
+    }
+    return getAdoRepoList({
+      orgName: scmOrg,
+      tokenOrg: this.scmOrg,
+      accessToken: this.accessToken,
+    })
+  }
+
+  async getBranchList(): Promise<string[]> {
+    if (!this.accessToken || !this.url) {
+      console.error('no access token or no url')
+      throw new Error('no access token or no url')
+    }
+    return getAdoBranchList({
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+      repoUrl: this.url,
+    })
+  }
+
+  getAuthHeaders(): Record<string, string> {
+    if (this.accessToken) {
+      if (getAdoTokenType(this.accessToken) === AdoTokenTypeEnum.OAUTH) {
+        return {
+          authorization: `Bearer ${this.accessToken}`,
+        }
+      } else {
+        return {
+          authorization: `Basic ${Buffer.from(':' + this.accessToken).toString(
+            'base64'
+          )}`,
+        }
+      }
+    }
+    return {}
+  }
+
+  getDownloadUrl(sha: string): string {
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    return getAdoDownloadUrl({ repoUrl: this.url, branch: sha })
+  }
+
+  async _getUsernameForAuthUrl(): Promise<string> {
+    throw new Error('_getUsernameForAuthUrl() is not relevant for ADO')
+  }
+
+  async getIsRemoteBranch(branch: string): Promise<boolean> {
+    if (!this.accessToken || !this.url) {
+      console.error('no access token or no url')
+      throw new Error('no access token or no url')
+    }
+    return getAdoIsRemoteBranch({
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+      repoUrl: this.url,
+      branch,
+    })
+  }
+
+  async getUserHasAccessToRepo(): Promise<boolean> {
+    if (!this.accessToken || !this.url) {
+      console.error('no access token or no url')
+      throw new Error('no access token or no url')
+    }
+    return getAdoIsUserCollaborator({
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+      repoUrl: this.url,
+    })
+  }
+
+  async getUsername(): Promise<string> {
+    throw new Error('getUsername() is not relevant for ADO')
+  }
+
+  async getSubmitRequestStatus(
+    scmSubmitRequestId: string
+  ): Promise<ScmSubmitRequestStatus> {
+    if (!this.accessToken || !this.url) {
+      console.error('no access token or no url')
+      throw new Error('no access token or no url')
+    }
+    const state = await getAdoPullRequestStatus({
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+      repoUrl: this.url,
+      prNumber: Number(scmSubmitRequestId),
+    })
+    switch (state) {
+      case AdoPullRequestStatusEnum.completed:
+        return ScmSubmitRequestStatus.MERGED
+      case AdoPullRequestStatusEnum.active:
+        return ScmSubmitRequestStatus.OPEN
+      case AdoPullRequestStatusEnum.abandoned:
+        return ScmSubmitRequestStatus.CLOSED
+      default:
+        throw new Error(`unknown state ${state}`)
+    }
+  }
+
+  async getRepoBlameRanges(
+    _ref: string,
+    _path: string
+  ): Promise<
+    {
+      startingLine: number
+      endingLine: number
+      name: string
+      login: string
+      email: string
+    }[]
+  > {
+    return await getAdoBlameRanges()
+  }
+
+  async getReferenceData(ref: string): Promise<{
+    type: ReferenceType
+    sha: string
+    date: Date | undefined
+  }> {
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    return await getAdoReferenceData({
+      ref,
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+    })
+  }
+
+  async getRepoDefaultBranch(): Promise<string> {
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    return await getAdoRepoDefaultBranch({
+      repoUrl: this.url,
+      tokenOrg: this.scmOrg,
+      accessToken: this.accessToken,
+    })
+  }
 }
 
 export class GitlabSCMLib extends SCMLib {
@@ -375,7 +634,7 @@ export class GitlabSCMLib extends SCMLib {
     throw new Error('not implemented')
   }
 
-  async getRepoList(): Promise<ScmRepoInfo[]> {
+  async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     if (!this.accessToken) {
       console.error('no access token')
       throw new Error('no access token')
@@ -538,8 +797,12 @@ export class GitlabSCMLib extends SCMLib {
 export class GithubSCMLib extends SCMLib {
   public readonly oktokit: Octokit
   // we don't always need a url, what's important is that we have an access token
-  constructor(url?: string, accessToken?: string) {
-    super(url, accessToken)
+  constructor(
+    url: string | undefined,
+    accessToken: string | undefined,
+    scmOrg: string | undefined
+  ) {
+    super(url, accessToken, scmOrg)
     this.oktokit = new Octokit({ auth: accessToken })
   }
   async createSubmitRequest(
@@ -584,7 +847,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot delete comment without access token or url')
     }
     const oktokit = _oktokit || this.oktokit
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const { data: repositoryPublicKeyResponse } = await getARepositoryPublicKey(
       oktokit,
       {
@@ -641,7 +904,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot post on PR without access token or url')
     }
     const oktokit = _oktokit || this.oktokit
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
 
     return postPrComment(oktokit, {
       ...params,
@@ -657,7 +920,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot update on PR without access token or url')
     }
     const oktokit = _oktokit || this.oktokit
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
 
     return updatePrComment(oktokit, {
       ...params,
@@ -673,7 +936,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot delete comment without access token or url')
     }
     const oktokit = _oktokit || this.oktokit
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return deleteComment(oktokit, {
       ...params,
       owner,
@@ -688,7 +951,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('cannot get Pr Comments without access token or url')
     }
     const oktokit = _oktokit || this.oktokit
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return getPrComments(oktokit, {
       per_page: 100,
       ...params,
@@ -700,18 +963,18 @@ export class GithubSCMLib extends SCMLib {
     if (!this.accessToken || !this.url) {
       throw new Error('cannot get Pr Comments without access token or url')
     }
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const prRes = await getPrDiff(this.oktokit, {
       ...params,
       owner,
       repo,
     })
-    // note: for some reasone ocktokit does not know to return response as string
+    // note: for some reason ocktokit does not know to return response as string
     // look at  'getPrDiff' implementation
     return z.string().parse(prRes.data)
   }
 
-  async getRepoList(): Promise<ScmRepoInfo[]> {
+  async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     if (!this.accessToken) {
       console.error('no access token')
       throw new Error('no access token')
@@ -840,7 +1103,7 @@ export class GithubSCMLib extends SCMLib {
       throw new Error('no url')
     }
 
-    const { owner, repo } = parseOwnerAndRepo(this.url)
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return await getPrComment(this.oktokit, {
       repo,
       owner,
@@ -915,9 +1178,9 @@ export class StubSCMLib extends SCMLib {
     throw new Error('createPullRequestWithNewFile() not implemented')
   }
 
-  async getRepoList(): Promise<ScmRepoInfo[]> {
-    console.error('getBranchList() not implemented')
-    throw new Error('getBranchList() not implemented')
+  async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
+    console.error('getRepoList() not implemented')
+    throw new Error('getRepoList() not implemented')
   }
 
   async getBranchList(): Promise<string[]> {

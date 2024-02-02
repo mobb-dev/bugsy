@@ -6,7 +6,7 @@ export const repoOption = {
   alias: 'r',
   demandOption: true,
   type: 'string',
-  describe: chalk.bold('Github / GitLab repository URL'),
+  describe: chalk.bold('Github / GitLab / Azure DevOps repository URL'),
 } as const
 export const projectNameOption = {
   type: 'string',
@@ -53,5 +53,30 @@ export const apiKeyOption = {
 export const commitHashOption = {
   alias: 'ch',
   describe: chalk.bold('Hash of the commit'),
+  type: 'string',
+} as const
+
+export const scmTypeOption = {
+  describe: chalk.bold('SCM type (GitHub, GitLab, Ado)'),
+  type: 'string',
+} as const
+
+export const scmOrgOption = {
+  describe: chalk.bold('Organization name in SCM (used in Azure DevOps)'),
+  type: 'string',
+} as const
+
+export const scmUsernameOption = {
+  describe: chalk.bold('Username in SCM (used in GitHub)'),
+  type: 'string',
+} as const
+
+export const scmRefreshTokenOption = {
+  describe: chalk.bold('SCM refresh token (used in GitLab)'),
+  type: 'string',
+} as const
+
+export const scmTokenOption = {
+  describe: chalk.bold('SCM API token'),
   type: 'string',
 } as const

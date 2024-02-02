@@ -95,11 +95,11 @@ export type SubmitFixesToDifferentBranchResponseMessage = z.infer<
   typeof SubmitFixesToDifferentBranchResponseMessageZ
 >
 
-export const SubmitFixeResponseMessageZ = z.discriminatedUnion('type', [
+export const SubmitFixesResponseMessageZ = z.discriminatedUnion('type', [
   SubmitFixesToSameBranchResponseMessageZ,
   SubmitFixesToDifferentBranchResponseMessageZ,
 ])
 
 export type SubmitFixesResponseMessage = z.infer<
-  typeof SubmitFixeResponseMessageZ
+  typeof SubmitFixesResponseMessageZ
 >

@@ -30,10 +30,10 @@ Example: \n\tmobbdev ${command} -r ${chalk.bold(
 
 const UrlZ = z
   .string({
-    invalid_type_error: 'is not a valid GitHub / GitLab URL',
+    invalid_type_error: 'is not a valid GitHub / GitLab / ADO URL',
   })
   .refine((data) => !!parseScmURL(data), {
-    message: 'is not a valid GitHub / GitLab URL',
+    message: 'is not a valid GitHub / GitLab / ADO URL',
   })
 
 export function validateRepoUrl(

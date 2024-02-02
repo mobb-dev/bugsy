@@ -44,8 +44,6 @@ import { uploadFile } from './upload-file'
 const { CliError, Spinner, keypress, getDirName } = utils
 
 const webLoginUrl = `${WEB_APP_URL}/cli-login`
-const githubAuthUrl = `${WEB_APP_URL}/github-auth`
-const gitlabAuthUrl = `${WEB_APP_URL}/gitlab-auth`
 
 type DownloadRepoParams = {
   repoUrl: string
@@ -65,6 +63,7 @@ export async function downloadRepo({
   const repoSpinner = createSpinner('💾 Downloading Repo').start()
   debug('download repo %s %s %s', repoUrl, dirname)
   const zipFilePath = path.join(dirname, 'repo.zip')
+  debug('download URL: %s auth headers: %o', downloadUrl, authHeaders)
   const response = await fetch(downloadUrl, {
     method: 'GET',
     headers: {
@@ -168,6 +167,44 @@ export async function runAnalysis(
   }
 }
 
+function _getTokenAndUrlForScmType({
+  scmLibType,
+  githubToken,
+  gitlabToken,
+  adoToken,
+}: {
+  scmLibType: ScmLibScmType | undefined
+  githubToken: string | undefined
+  gitlabToken: string | undefined
+  adoToken: string | undefined
+}): { token: string | undefined; authUrl: string | undefined } {
+  const githubAuthUrl = `${WEB_APP_URL}/github-auth`
+  const gitlabAuthUrl = `${WEB_APP_URL}/gitlab-auth`
+  const adoAuthUrl = `${WEB_APP_URL}/ado-auth`
+  switch (scmLibType) {
+    case ScmLibScmType.GITHUB:
+      return {
+        token: githubToken,
+        authUrl: githubAuthUrl,
+      }
+    case ScmLibScmType.GITLAB:
+      return {
+        token: gitlabToken,
+        authUrl: gitlabAuthUrl,
+      }
+    case ScmLibScmType.ADO:
+      return {
+        token: adoToken,
+        authUrl: adoAuthUrl,
+      }
+    default:
+      return {
+        token: undefined,
+        authUrl: undefined,
+      }
+  }
+}
+
 export async function _scan(
   params: AnalysisParams & { dirname: string; cxProjectName?: string },
   { skipPrompts = false } = {}
@@ -213,27 +250,24 @@ export async function _scan(
     throw new Error('repo is required in case srcPath is not provided')
   }
   const userInfo = await gqlClient.getUserInfo()
-  const { githubToken, gitlabToken } = userInfo
+  const { githubToken, gitlabToken, adoToken, adoOrg } = userInfo
   const isRepoAvailable = await scmCanReachRepo({
     repoUrl: repo,
     githubToken,
     gitlabToken,
+    adoToken,
+    scmOrg: adoOrg,
   })
 
   const scmLibType = getScmLibTypeFromUrl(repo)
-  const scmAuthUrl =
-    scmLibType === ScmLibScmType.GITHUB
-      ? githubAuthUrl
-      : scmLibType === ScmLibScmType.GITLAB
-      ? gitlabAuthUrl
-      : undefined
+  const { authUrl: scmAuthUrl, token } = _getTokenAndUrlForScmType({
+    scmLibType,
+    githubToken,
+    gitlabToken,
+    adoToken,
+  })
 
-  let token =
-    scmLibType === ScmLibScmType.GITHUB
-      ? githubToken
-      : scmLibType === ScmLibScmType.GITLAB
-      ? gitlabToken
-      : undefined
+  let myToken = token
 
   if (!isRepoAvailable) {
     if (ci || !scmLibType || !scmAuthUrl) {
@@ -244,13 +278,16 @@ export async function _scan(
     }
 
     if (scmLibType && scmAuthUrl) {
-      token = (await handleScmIntegration(token, scmLibType, scmAuthUrl)) || ''
+      myToken =
+        (await handleScmIntegration(token, scmLibType, scmAuthUrl)) || ''
 
       // Check repo availability again after SCM token update.
       const isRepoAvailable = await scmCanReachRepo({
         repoUrl: repo,
-        githubToken: token,
-        gitlabToken: token,
+        githubToken: myToken,
+        gitlabToken: myToken,
+        adoToken: myToken,
+        scmOrg: adoOrg,
       })
 
       if (!isRepoAvailable) {
@@ -264,6 +301,7 @@ export async function _scan(
     url: repo,
     accessToken: token,
     scmType: scmLibType,
+    scmOrg: adoOrg,
   })
 
   const reference = ref ?? (await scm.getRepoDefaultBranch())
@@ -478,6 +516,8 @@ export async function _scan(
         ? 'Github'
         : scmLibType === ScmLibScmType.GITLAB
         ? 'Gitlab'
+        : scmLibType === ScmLibScmType.ADO
+        ? 'Azure DevOps'
         : ''
 
     const addScmIntegration = skipPrompts

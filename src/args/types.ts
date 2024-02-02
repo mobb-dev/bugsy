@@ -54,3 +54,15 @@ export type BaseScanOptions = {
   mobbProjectName?: string
   cxProjectName?: string
 }
+
+export type AddScmTokenOptions =
+  Yargs.ArgumentsCamelCase<BaseAddScmTokenOptions>
+
+export type BaseAddScmTokenOptions = {
+  scm: string
+  token: string
+  organization?: string
+  username?: string
+  refreshToken?: string
+  apiKey?: string
+}

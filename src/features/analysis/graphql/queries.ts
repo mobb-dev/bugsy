@@ -7,6 +7,8 @@ export const ME = gql`
       email
       githubToken
       gitlabToken
+      adoToken
+      adoOrg
     }
   }
 `

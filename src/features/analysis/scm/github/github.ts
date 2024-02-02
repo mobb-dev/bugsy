@@ -108,7 +108,7 @@ export async function githubValidateParams(
       await oktoKit.rest.users.getAuthenticated()
     }
     if (url) {
-      const { owner, repo } = parseOwnerAndRepo(url)
+      const { owner, repo } = parseGithubOwnerAndRepo(url)
       await oktoKit.rest.repos.get({ repo, owner })
     }
   } catch (e) {
@@ -146,7 +146,7 @@ export async function getGithubIsUserCollaborator(
   repoUrl: string
 ) {
   try {
-    const { owner, repo } = parseOwnerAndRepo(repoUrl)
+    const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
     const oktoKit = getOktoKit({ githubAuthToken: accessToken })
     const res = await oktoKit.rest.repos.checkCollaborator({
       owner,
@@ -167,7 +167,7 @@ export async function getGithubPullRequestStatus(
   repoUrl: string,
   prNumber: number
 ) {
-  const { owner, repo } = parseOwnerAndRepo(repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
   const oktoKit = getOktoKit({ githubAuthToken: accessToken })
   const res = await oktoKit.rest.pulls.get({
     owner,
@@ -188,7 +188,7 @@ export async function getGithubIsRemoteBranch(
   repoUrl: string,
   branch: string
 ) {
-  const { owner, repo } = parseOwnerAndRepo(repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
   const oktoKit = getOktoKit({ githubAuthToken: accessToken })
   try {
     const res = await oktoKit.rest.repos.getBranch({
@@ -244,7 +244,7 @@ export async function getGithubBranchList(
   accessToken: string,
   repoUrl: string
 ) {
-  const { owner, repo } = parseOwnerAndRepo(repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
   const oktoKit = getOktoKit({ githubAuthToken: accessToken })
   const res = await oktoKit.rest.repos.listBranches({
     owner,
@@ -263,7 +263,7 @@ export async function createPullRequest(options: {
   body: string
   repoUrl: string
 }) {
-  const { owner, repo } = parseOwnerAndRepo(options.repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(options.repoUrl)
   const oktoKit = getOktoKit({ githubAuthToken: options.accessToken })
   const res = await oktoKit.rest.pulls.create({
     owner,
@@ -282,7 +282,7 @@ export async function forkRepo(options: {
   accessToken: string
   repoUrl: string
 }): Promise<{ url: string | null }> {
-  const { owner, repo } = parseOwnerAndRepo(options.repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(options.repoUrl)
   const oktoKit = getOktoKit({ githubAuthToken: options.accessToken })
   const res = await oktoKit.rest.repos.createFork({
     owner,
@@ -308,7 +308,7 @@ export async function getGithubRepoDefaultBranch(
   options?: ApiAuthOptions
 ): Promise<string> {
   const oktoKit = getOktoKit(options)
-  const { owner, repo } = parseOwnerAndRepo(repoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
   return (await oktoKit.rest.repos.get({ repo, owner })).data.default_branch
 }
 
@@ -316,7 +316,7 @@ export async function getGithubReferenceData(
   { ref, gitHubUrl }: { ref: string; gitHubUrl: string },
   options?: ApiAuthOptions
 ) {
-  const { owner, repo } = parseOwnerAndRepo(gitHubUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(gitHubUrl)
   let res
   try {
     const oktoKit = getOktoKit(options)
@@ -406,7 +406,7 @@ async function getCommit(
   })
 }
 
-export function parseOwnerAndRepo(gitHubUrl: string): {
+export function parseGithubOwnerAndRepo(gitHubUrl: string): {
   owner: string
   repo: string
 } {
@@ -455,7 +455,7 @@ export async function getGithubBlameRanges(
   { ref, gitHubUrl, path }: { ref: string; gitHubUrl: string; path: string },
   options?: ApiAuthOptions
 ) {
-  const { owner, repo } = parseOwnerAndRepo(gitHubUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(gitHubUrl)
 
   const variables = {
     owner,
@@ -500,8 +500,8 @@ export async function createPr(
   const oktoKit = getOktoKit(options)
 
   const { owner: sourceOwner, repo: sourceRepo } =
-    parseOwnerAndRepo(sourceRepoUrl)
-  const { owner, repo } = parseOwnerAndRepo(userRepoUrl)
+    parseGithubOwnerAndRepo(sourceRepoUrl)
+  const { owner, repo } = parseGithubOwnerAndRepo(userRepoUrl)
 
   const [sourceFilePath, secondFilePath] = filesPaths
 

@@ -1,5 +1,28 @@
 import { gql } from 'graphql-request'
 
+export const UPDATE_SCM_TOKEN = gql`
+  mutation updateScmToken(
+    $type: ScmType!
+    $token: String!
+    $org: String
+    $username: String
+    $refreshToken: String
+  ) {
+    updateScmToken(
+      type: $type
+      token: $token
+      org: $org
+      username: $username
+      refreshToken: $refreshToken
+    ) {
+      id
+      adoAccessToken
+      gitlabAccessToken
+      gitHubAccessToken
+    }
+  }
+`
+
 export const UPLOAD_S3_BUCKET_INFO = gql`
   mutation uploadS3BucketInfo($fileName: String!) {
     uploadS3BucketInfo(fileName: $fileName) {

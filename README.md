@@ -14,7 +14,7 @@ Bugsy has two modes - Scan (no SAST report needed) & Analyze (the user needs to 
 
 Scan
 
-- Uses Checkmarx or Snyk CLI tools to run a SAST scan on a given open-source GitHub/GitLab repo
+- Uses Checkmarx or Snyk CLI tools to run a SAST scan on a given open-source GitHub/GitLab/ADO repo
 - Analyzes the vulnerability report to identify issues that can be remediated automatically
 - Produces the code fixes and redirects the user to the fix report page on the Mobb platform
 
@@ -29,12 +29,15 @@ This is a community edition version that only analyzes public GitHub repositorie
 Bugsy does not detect any vulnerabilities in your code, it uses findings detected by the SAST tools mentioned above.
 
 ## Usage
+
 You can simply run Bugsy from the command line, using npx:
+
 ```shell
 npx mobbdev
 ```
 
 This will show you Bugsy's usage help:
+
 ```shell
 Bugsy - Trusted, Automatic Vulnerability Fixer 🕵️‍♂️
 
@@ -56,6 +59,7 @@ Made with ❤️  by Mobb
 ```
 
 To run a new SAST scan on a repo and get fixes, run the **Bugsy Scan** command. Example:
+
 ```shell
 npx mobbdev scan --repo https://github.com/mobb-dev/simple-vulnerable-java-project
 ```
@@ -65,16 +69,18 @@ npx mobbdev analyze --scan-file sast_results.json --repo https://github.com/mobb
 
 Bugsy will automatically generate a fix for each supported vulnerability identified in the results, and refer the developer to review and commit the fixes to their code.
 
-
 To see all the options Bugsy allows, use the Scan or Analyze commands with the -h option:
+
 ```shell
 npx mobbdev scan -h
 npx mobbdev analyze -h
 ```
 
 ## Using Bugsy as part of a CI/CD pipeline
+
 If you utilize SAST scans as part of the CI/CD pipeline, Bugsy can be easiy added and provide immediate fix for every issue detected.
 Here is a simple example of a command line that will run Bugsy in your pipeline:
+
 ```shell
 npx mobbdev analyze --ci --scan-file $SAST_RESULTS_FILENAME --repo $CI_PROJECT_URL --ref $CI_COMMIT_REF_NAME --api-key $MOBB_API_KEY
 ```

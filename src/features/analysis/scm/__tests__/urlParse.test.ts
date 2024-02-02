@@ -12,6 +12,11 @@ const ALLOWED_URLS = [
   'https://github.com/gitlab-org/web.goat',
   'https://github.com/gitlab-org/webgoat.git',
   'https://github.com/gitlab-org/web.goat.git',
+
+  'https://dev.azure.com/azure-org/proj/_git/webgoat',
+  'https://dev.azure.com/azure-org/proj/_git/web.goat',
+  'https://dev.azure.com/azure-org/proj/_git/webgoat.git',
+  'https://dev.azure.com/azure-org/proj/_git/web.goat.git',
 ]
 const NEGATIVE_URLS = [
   'https://github.com/gitlab-org/security-products/tests/webgoat',
@@ -23,6 +28,7 @@ const NEGATIVE_URLS = [
 const GITHUB_TEST_URL = 'https://github.com/jerryhoff/WebGoat.NET.git'
 const GITLAB_TEST_URL =
   'https://gitlab.com/gitlab-org/security-products/tests/webgoat.git'
+const ADO_TEST_URL = 'https://dev.azure.com/azure-org/proj/_git/webgoat.git'
 const INVALID_TEST_URL = 'https://bitbucket.org/riyafukui/webgoat.git'
 
 describe('parseScmURL', () => {
@@ -36,16 +42,19 @@ describe('parseScmURL', () => {
   it('Should get valid hostname', async () => {
     expect(parseScmURL(GITHUB_TEST_URL)?.hostname).toBe('github.com')
     expect(parseScmURL(GITLAB_TEST_URL)?.hostname).toBe('gitlab.com')
+    expect(parseScmURL(ADO_TEST_URL)?.hostname).toBe('dev.azure.com')
     expect(parseScmURL(INVALID_TEST_URL)).toBe(null)
   })
   it('Should get valid repoName', async () => {
     expect(parseScmURL(GITHUB_TEST_URL)?.repoName).toBe('WebGoat.NET')
     expect(parseScmURL(GITLAB_TEST_URL)?.repoName).toBe('webgoat')
+    expect(parseScmURL(ADO_TEST_URL)?.repoName).toBe('webgoat')
     expect(parseScmURL(INVALID_TEST_URL)).toBe(null)
   })
   it('Should get valid org name', async () => {
     expect(parseScmURL(GITHUB_TEST_URL)?.organization).toBe('jerryhoff')
     expect(parseScmURL(GITLAB_TEST_URL)?.organization).toBe('gitlab-org')
+    expect(parseScmURL(ADO_TEST_URL)?.organization).toBe('azure-org')
     expect(parseScmURL(INVALID_TEST_URL)).toBe(null)
   })
   it('Should get valid org project path', async () => {
@@ -54,6 +63,9 @@ describe('parseScmURL', () => {
     )
     expect(parseScmURL(GITLAB_TEST_URL)?.projectPath).toBe(
       'gitlab-org/security-products/tests/webgoat'
+    )
+    expect(parseScmURL(ADO_TEST_URL)?.projectPath).toBe(
+      'azure-org/proj/_git/webgoat'
     )
     expect(parseScmURL(INVALID_TEST_URL)).toBe(null)
   })

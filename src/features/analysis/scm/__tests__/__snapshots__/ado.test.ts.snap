@@ -1,0 +1,109 @@
+// Vitest Snapshot v1
+
+exports[`ado reference > test if ref is correct for branch 1`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "b67eb441420675e0f107e2c1a3ba04900fc110fb",
+  "type": "BRANCH",
+}
+`;
+
+exports[`ado reference > test if ref is correct for branch 2`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "b67eb441420675e0f107e2c1a3ba04900fc110fb",
+  "type": "BRANCH",
+}
+`;
+
+exports[`ado reference > test if ref is correct for commit 1`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "e619caab398d5b75621dc8aab9e480eaee5ce42d",
+  "type": "COMMIT",
+}
+`;
+
+exports[`ado reference > test if ref is correct for commit 2`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "b67eb441420675e0f107e2c1a3ba04900fc110fb",
+  "type": "COMMIT",
+}
+`;
+
+exports[`ado reference > test if ref is correct for tag 1`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "9193050cf8c314dd52638d4bc2720b3ab48101a9",
+  "type": "TAG",
+}
+`;
+
+exports[`ado reference > test if ref is correct for tag 2`] = `
+{
+  "date": 1970-01-01T00:00:00.000Z,
+  "sha": "5357a65e054976cd7d79b81ef3906ded050ed921",
+  "type": "TAG",
+}
+`;
+
+exports[`parsing ado url > should parse the url 1`] = `
+{
+  "owner": "mobbtest",
+  "pathElements": [
+    "mobbtest",
+    "test",
+    "_git",
+    "repo1",
+  ],
+  "projectName": "test",
+  "projectPath": "mobbtest/test/_git/repo1",
+  "repo": "repo1",
+}
+`;
+
+exports[`parsing ado url > should parse the url 2`] = `
+{
+  "owner": "mobbtest",
+  "pathElements": [
+    "mobbtest",
+    "test-public",
+    "_git",
+    "repo-public",
+  ],
+  "projectName": "test-public",
+  "projectPath": "mobbtest/test-public/_git/repo-public",
+  "repo": "repo-public",
+}
+`;
+
+exports[`parsing ado url > should work with trailing slash 1`] = `
+{
+  "owner": "mobbtest",
+  "pathElements": [
+    "mobbtest",
+    "test",
+    "_git",
+    "repo1",
+  ],
+  "projectName": "test",
+  "projectPath": "mobbtest/test/_git/repo1",
+  "repo": "repo1",
+}
+`;
+
+exports[`parsing ado url > should work with trailing slash 2`] = `
+{
+  "owner": "mobbtest",
+  "pathElements": [
+    "mobbtest",
+    "test-public",
+    "_git",
+    "repo-public",
+  ],
+  "projectName": "test-public",
+  "projectPath": "mobbtest/test-public/_git/repo-public",
+  "repo": "repo-public",
+}
+`;

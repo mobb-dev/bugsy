@@ -1,14 +1,24 @@
 type Repo = {
   repoName: string | undefined
   organization: string | undefined
+  projectName: string | undefined
 } | null
 
 const pathnameParsingMap = {
+  'dev.azure.com': (pathname: string[]): Repo => {
+    if (pathname.length < 2) return null
+    return {
+      organization: pathname[0],
+      repoName: pathname[pathname.length - 1],
+      projectName: pathname[1],
+    }
+  },
   'gitlab.com': (pathname: string[]): Repo => {
     if (pathname.length < 2) return null
     return {
       organization: pathname[0],
       repoName: pathname[pathname.length - 1],
+      projectName: undefined,
     }
   },
   'github.com': (pathname: string[]): Repo => {
@@ -16,6 +26,7 @@ const pathnameParsingMap = {
     return {
       organization: pathname[0],
       repoName: pathname[1],
+      projectName: undefined,
     }
   },
 }
@@ -37,7 +48,7 @@ export const parseScmURL = (scmURL: string) => {
 
     if (!repo) return null
 
-    const { organization, repoName } = repo
+    const { organization, repoName, projectName } = repo
 
     if (!organization || !repoName) return null
     if (!organization.match(NAME_REGEX) || !repoName.match(NAME_REGEX))
@@ -48,6 +59,8 @@ export const parseScmURL = (scmURL: string) => {
       organization,
       projectPath,
       repoName,
+      projectName,
+      pathElements: projectPath.split('/'),
     }
   } catch (e) {
     return null

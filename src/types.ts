@@ -1,4 +1,5 @@
 export const mobbCliCommand = {
+  addScmToken: 'add-scm-token',
   scan: 'scan',
   analyze: 'analyze',
   review: 'review',

@@ -9,6 +9,7 @@ import {
   CREATE_COMMUNITY_USER,
   DIGEST_VULNERABILITY_REPORT,
   SUBMIT_VULNERABILITY_REPORT,
+  UPDATE_SCM_TOKEN,
   UPLOAD_S3_BUCKET_INFO,
 } from './mutations'
 import {
@@ -52,6 +53,8 @@ import {
   GetVulnerabilityReportPathsZ,
   MeQuery,
   SubmitVulnerabilityReportVariables,
+  UpdateScmToken,
+  UpdateScmTokenZ,
   UploadS3BucketInfo,
   UploadS3BucketInfoZ,
   VulnerabilityReportIssueCodeNode,
@@ -166,6 +169,33 @@ export class GQLClient {
       debug('create community user failed %o', e)
       // Ignore errors
     }
+  }
+
+  async updateScmToken(args: {
+    type: string
+    token: string
+    org: string | undefined
+    username: string | undefined
+    refreshToken: string | undefined
+  }) {
+    const { type, token, org, username, refreshToken } = args
+    const updateScmTokenResult = await this._client.request<
+      UpdateScmToken,
+      {
+        type: string
+        token: string
+        org: string | undefined
+        username: string | undefined
+        refreshToken: string | undefined
+      }
+    >(UPDATE_SCM_TOKEN, {
+      type,
+      token,
+      org,
+      username,
+      refreshToken,
+    })
+    return UpdateScmTokenZ.parse(updateScmTokenResult)
   }
 
   async uploadS3BucketInfo() {

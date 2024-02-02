@@ -1,10 +1,24 @@
-import { AnalyzeOptions, ReviewOptions, ScanOptions } from '@mobb/bugsy/args'
+import fs from 'node:fs'
+import path from 'node:path'
+
+import {
+  AddScmTokenOptions,
+  AnalyzeOptions,
+  ReviewOptions,
+  ScanOptions,
+} from '@mobb/bugsy/args'
 import { errorMessages, mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
+import * as utils from '@mobb/bugsy/utils'
 import { CliError, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
+import Configstore from 'configstore'
+
+import { GQLClient } from '../features/analysis/graphql'
+
+const { getDirName } = utils
 
 export async function review(
   params: ReviewOptions,
@@ -72,6 +86,26 @@ export async function analyze(
 }
 export type CommandOptions = {
   skipPrompts?: boolean
+}
+
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(getDirName(), '../package.json'), 'utf8')
+)
+const config = new Configstore(packageJson.name, { apiToken: '' })
+
+export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
+  const { apiKey, token, organization, scm, username, refreshToken } =
+    addScmTokenOptions
+  const gqlClient = new GQLClient({
+    apiKey: apiKey || config.get('apiToken'),
+  })
+  await gqlClient.updateScmToken({
+    type: scm,
+    token,
+    org: organization,
+    username,
+    refreshToken,
+  })
 }
 
 export async function scan(

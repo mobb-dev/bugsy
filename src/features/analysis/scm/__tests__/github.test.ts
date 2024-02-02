@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getGithubReferenceData,
   getGithubRepoDefaultBranch,
-  parseOwnerAndRepo,
+  parseGithubOwnerAndRepo,
 } from '../github/github'
 
 const OWNER = 'facebook'
@@ -76,7 +76,7 @@ describe('github reference', () => {
 
 describe('parsing github url', () => {
   it('should parse the url', () => {
-    expect(parseOwnerAndRepo(GITHUB_URL)).toMatchInlineSnapshot(`
+    expect(parseGithubOwnerAndRepo(GITHUB_URL)).toMatchInlineSnapshot(`
       {
         "owner": "facebook",
         "repo": "react",
@@ -84,7 +84,7 @@ describe('parsing github url', () => {
     `)
   })
   it('should work with trailing slash', () => {
-    expect(parseOwnerAndRepo(`${GITHUB_URL}/`)).toMatchInlineSnapshot(`
+    expect(parseGithubOwnerAndRepo(`${GITHUB_URL}/`)).toMatchInlineSnapshot(`
       {
         "owner": "facebook",
         "repo": "react",
@@ -92,6 +92,6 @@ describe('parsing github url', () => {
     `)
   })
   it('fail if the url is invalid', () => {
-    expect(() => parseOwnerAndRepo(INVALID_URL)).toThrow()
+    expect(() => parseGithubOwnerAndRepo(INVALID_URL)).toThrow()
   })
 })

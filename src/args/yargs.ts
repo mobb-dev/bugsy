@@ -5,6 +5,7 @@ import yargs from 'yargs/yargs'
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
 import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
+import { addScmTokenBuilder, addScmTokenHandler } from './commands/token'
 
 export const parseArgs = async (args: readonly string[]) => {
   const yargsInstance = yargs(args)
@@ -24,6 +25,14 @@ export const parseArgs = async (args: readonly string[]) => {
             `
     )
     .version(false)
+    .command(
+      mobbCliCommand.addScmToken,
+      chalk.bold(
+        'Add your SCM (Github, Gitlab, Azure DevOps) token to Mobb to enable automated fixes.'
+      ),
+      addScmTokenBuilder,
+      addScmTokenHandler
+    )
     .command(
       mobbCliCommand.scan,
       chalk.bold(

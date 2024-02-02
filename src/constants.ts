@@ -9,6 +9,13 @@ import { z } from 'zod'
 const debug = Debug('mobbdev:constants')
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '../.env') })
+
+export const ScmTypes = {
+  Github: 'GitHub',
+  Gitlab: 'GitLab',
+  AzureDevOps: 'Ado',
+} as const
+
 export const SCANNERS = {
   Checkmarx: 'checkmarx',
   Codeql: 'codeql',
@@ -72,4 +79,13 @@ export const errorMessages = {
   missingCxProjectName: `project name ${chalk.bold(
     '(--cx-project-name)'
   )} is needed if you're using checkmarx`,
+  missingScmType: `SCM type ${chalk.bold(
+    '(--scm-type)'
+  )} is needed if you're adding an SCM token`,
+  invalidScmType: `SCM type ${chalk.bold(
+    '(--scm-type)'
+  )} is invalid, please use one of: ${Object.values(ScmTypes).join(', ')}`,
+  missingToken: `SCM token ${chalk.bold(
+    '(--token)'
+  )} is needed if you're adding an SCM token`,
 } as const

@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+export const UpdateScmTokenZ = z.object({
+  updateScmToken: z.object({
+    id: z.string(),
+    gitHubAccessToken: z.string().nullable(),
+    gitlabAccessToken: z.string().nullable(),
+    adoAccessToken: z.string().nullable(),
+  }),
+})
+export type UpdateScmToken = z.infer<typeof UpdateScmTokenZ>
+
 const UploadFieldsZ = z.object({
   bucket: z.string(),
   'X-Amz-Algorithm': z.string(),
@@ -70,6 +80,8 @@ export type MeQuery = {
     email: string
     githubToken: string | undefined
     gitlabToken: string | undefined
+    adoToken: string | undefined
+    adoOrg: string | undefined
   }
 }
 

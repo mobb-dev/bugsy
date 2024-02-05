@@ -343,7 +343,7 @@ export abstract class SCMLib {
   }): Promise<SCMLib> {
     let trimmedUrl = undefined
     if (url) {
-      trimmedUrl = url.trim().replace(/\/$/, '')
+      trimmedUrl = url.trim().replace(/\/$/, '').replace(/.git$/i, '')
     }
     try {
       if (ScmLibScmType.GITHUB === scmType) {

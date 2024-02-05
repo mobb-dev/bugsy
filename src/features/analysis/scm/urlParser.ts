@@ -4,34 +4,65 @@ type Repo = {
   projectName: string | undefined
 } | null
 
-const pathnameParsingMap = {
-  'dev.azure.com': (pathname: string[]): Repo => {
-    if (pathname.length < 2) return null
-    return {
-      organization: pathname[0],
-      repoName: pathname[pathname.length - 1],
-      projectName: pathname[1],
+function getRepoInfo(pathname: string[], hostname: string): Repo {
+  const hostnameParts = hostname.split('.')
+  if (
+    hostnameParts.length === 3 &&
+    hostnameParts[1] === 'visualstudio' &&
+    hostnameParts[2] === 'com'
+  ) {
+    if (pathname.length === 2 && pathname[0] === '_git') {
+      return {
+        organization: hostnameParts[0],
+        projectName: pathname[1],
+        repoName: pathname[1],
+      }
     }
-  },
-  'gitlab.com': (pathname: string[]): Repo => {
-    if (pathname.length < 2) return null
-    return {
-      organization: pathname[0],
-      repoName: pathname[pathname.length - 1],
-      projectName: undefined,
+    if (pathname.length === 3 && pathname[1] === '_git') {
+      return {
+        organization: hostnameParts[0],
+        projectName: pathname[0],
+        repoName: pathname[2],
+      }
     }
-  },
-  'github.com': (pathname: string[]): Repo => {
-    if (pathname.length !== 2) return null
-    return {
-      organization: pathname[0],
-      repoName: pathname[1],
-      projectName: undefined,
+  }
+  if (hostname === 'dev.azure.com') {
+    if (pathname.length === 3 && pathname[1] === '_git') {
+      return {
+        organization: pathname[0],
+        projectName: pathname[2],
+        repoName: pathname[2],
+      }
     }
-  },
-}
+    if (pathname.length === 4 && pathname[2] === '_git') {
+      return {
+        organization: pathname[0],
+        projectName: pathname[1],
+        repoName: pathname[3],
+      }
+    }
+  }
+  if (hostname === 'github.com') {
+    if (pathname.length === 2) {
+      return {
+        organization: pathname[0],
+        projectName: undefined,
+        repoName: pathname[1],
+      }
+    }
+  }
+  if (hostname === 'gitlab.com') {
+    if (pathname.length >= 2) {
+      return {
+        organization: pathname[0],
+        projectName: undefined,
+        repoName: pathname[pathname.length - 1],
+      }
+    }
+  }
 
-type PathnameParsingMapType = typeof pathnameParsingMap
+  return null
+}
 
 const NAME_REGEX = /[a-z0-9\-_.+]+/i
 
@@ -39,12 +70,9 @@ export const parseScmURL = (scmURL: string) => {
   try {
     const url = new URL(scmURL)
     const hostname = url.hostname.toLowerCase()
-    if (!(hostname in pathnameParsingMap)) return null
     const projectPath = url.pathname.substring(1).replace(/.git$/i, '')
 
-    const repo = pathnameParsingMap[hostname as keyof PathnameParsingMapType](
-      projectPath.split('/')
-    )
+    const repo = getRepoInfo(projectPath.split('/'), hostname)
 
     if (!repo) return null
 
@@ -55,7 +83,7 @@ export const parseScmURL = (scmURL: string) => {
       return null
 
     return {
-      hostname: url.hostname as keyof PathnameParsingMapType,
+      hostname,
       organization,
       projectPath,
       repoName,

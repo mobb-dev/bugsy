@@ -110,7 +110,9 @@ it.each(['assets', 'assets/simple', 'assets/simple/src'])(
     expect(open).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
 
     // ensure that we filter only relevant files
-    const uploadedRepoZip = new AdmZip(Buffer.from(packSpy.returns[0]))
+    const uploadedRepoZip = new AdmZip(
+      Buffer.from(packSpy.mock.results[0].value)
+    )
     expect(uploadedRepoZip.getEntryCount()).toBe(1)
   }
 )

@@ -75,13 +75,15 @@ export function getScmLibTypeFromUrl(url: string | undefined) {
   if (!url) {
     return undefined
   }
-  if (url.toLowerCase().startsWith('https://gitlab.com/')) {
+  const urlObject = new URL(url)
+  const hostname = urlObject.hostname
+  if (hostname === 'gitlab.com') {
     return ScmLibScmType.GITLAB
   }
-  if (url.toLowerCase().startsWith('https://github.com/')) {
+  if (hostname === 'github.com') {
     return ScmLibScmType.GITHUB
   }
-  if (url.toLowerCase().startsWith('https://dev.azure.com/')) {
+  if (hostname === 'dev.azure.com' || hostname.endsWith('.visualstudio.com')) {
     return ScmLibScmType.ADO
   }
   return undefined

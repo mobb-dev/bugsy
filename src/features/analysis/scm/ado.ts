@@ -559,7 +559,11 @@ export function parseAdoOwnerAndRepo(adoUrl: string) {
   adoUrl = removeTrailingSlash(adoUrl)
   const parsingResult = parseScmURL(adoUrl)
 
-  if (!parsingResult || parsingResult.hostname !== 'dev.azure.com') {
+  if (
+    !parsingResult ||
+    (parsingResult.hostname !== 'dev.azure.com' &&
+      !parsingResult.hostname.endsWith('.visualstudio.com'))
+  ) {
     throw new InvalidUrlPatternError(`invalid ADO repo URL: ${adoUrl}`)
   }
 

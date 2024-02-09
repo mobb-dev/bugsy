@@ -516,7 +516,7 @@ export async function createPr(
 
   // Create a new branch
   const newBranchName = `mobb/workflow-${Date.now()}`
-  oktoKit.rest.git.createRef({
+  await oktoKit.rest.git.createRef({
     owner,
     repo,
     ref: `refs/heads/${newBranchName}`,
@@ -524,7 +524,6 @@ export async function createPr(
       .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
       .then((response) => response.data.object.sha),
   })
-
   const decodedContent = Buffer.from(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -599,9 +598,10 @@ export async function createPr(
     owner,
     repo,
     title,
-    body,
     head: newBranchName,
-    base: 'main',
+    head_repo: sourceRepo,
+    body,
+    base: defaultBranch,
   })
 
   return {

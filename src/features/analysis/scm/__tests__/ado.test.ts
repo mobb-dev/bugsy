@@ -12,7 +12,7 @@ import {
 
 dotenv.config({ path: path.join(__dirname, '../../../../../.env') })
 const envVariables = z
-  .object({ ADO_TEST_ACCESS_TOKEN: z.string().nonempty() })
+  .object({ ADO_TEST_ACCESS_TOKEN: z.string().min(1) })
   .required()
   .parse(process.env)
 

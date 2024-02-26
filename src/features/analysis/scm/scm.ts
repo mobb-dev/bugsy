@@ -39,6 +39,7 @@ import {
   createOrUpdateRepositorySecret,
   deleteComment,
   getARepositoryPublicKey,
+  getPr,
   getPrComment,
   getPrComments,
   getPrDiff,
@@ -50,6 +51,7 @@ import {
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrParams,
+  GetPrResponse,
   PostCommentParams,
   UpdateCommentParams,
   UpdateCommentResponse,
@@ -186,6 +188,7 @@ export class RepoNoTokenAccessError extends Error {
     super(m)
   }
 }
+type GetScmPrResponse = GetPrResponse
 
 export class RebaseFailedError extends Error {}
 
@@ -301,6 +304,7 @@ export abstract class SCMLib {
     date: Date | undefined
   }>
   abstract getPrComment(commentId: number): Promise<GetPrCommentResponse>
+  abstract getPr(prNumber: number): Promise<GetScmPrResponse>
 
   abstract updatePrComment(
     params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
@@ -579,6 +583,9 @@ export class AdoSCMLib extends SCMLib {
       accessToken: this.accessToken,
     })
   }
+  getPr(): Promise<GetScmPrResponse> {
+    throw new Error('Method not implemented.')
+  }
 }
 
 export class GitlabSCMLib extends SCMLib {
@@ -793,6 +800,9 @@ export class GitlabSCMLib extends SCMLib {
     _oktokit?: Octokit
   ): Promise<UpdateCommentResponse> {
     throw new Error('updatePrComment not implemented.')
+  }
+  getPr(): Promise<GetScmPrResponse> {
+    throw new Error('Method not implemented.')
   }
 }
 
@@ -1122,6 +1132,18 @@ export class GithubSCMLib extends SCMLib {
       githubAuthToken: this.accessToken,
     })
   }
+  async getPr(prNumber: number): Promise<GetScmPrResponse> {
+    if (!this.url || !this.oktokit) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+    return getPr(this.oktokit, {
+      owner,
+      repo,
+      pull_number: prNumber,
+    })
+  }
 }
 
 export class StubSCMLib extends SCMLib {
@@ -1243,5 +1265,9 @@ export class StubSCMLib extends SCMLib {
   async updatePrComment(): Promise<UpdateCommentResponse> {
     console.error('updatePrComment() not implemented')
     throw new Error('updatePrComment() not implemented')
+  }
+  async getPr(): Promise<GetScmPrResponse> {
+    console.error('getPr() not implemented')
+    throw new Error('getPr() not implemented')
   }
 }

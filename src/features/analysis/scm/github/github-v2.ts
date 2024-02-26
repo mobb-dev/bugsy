@@ -23,6 +23,7 @@ import {
   GetPrCommentsParams,
   GetPrCommentsResponse,
   GetPrParams,
+  GetPrResponse,
   PostCommentParams,
   PostCommentReposnse,
   ReplyToCodeReviewCommentPathParams,
@@ -74,6 +75,12 @@ export function getPrDiff(client: Octokit, params: GetPrParams) {
   // we're using the media type to get the diff
   //https://docs.github.com/en/rest/using-the-rest-api/media-types?apiVersion=2022-11-28#commits-commit-comparison-and-pull-requests
   return client.request(GET_PR, { ...params, mediaType: { format: 'diff' } })
+}
+export function getPr(
+  client: Octokit,
+  params: GetPrParams
+): Promise<GetPrResponse> {
+  return client.request(GET_PR, { ...params })
 }
 
 export function createOrUpdateRepositorySecret(

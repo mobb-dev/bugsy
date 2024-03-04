@@ -59,7 +59,8 @@ export type AddScmTokenOptions =
   Yargs.ArgumentsCamelCase<BaseAddScmTokenOptions>
 
 export type BaseAddScmTokenOptions = {
-  scm: string
+  scmType?: string
+  url: string
   token: string
   organization?: string
   username?: string

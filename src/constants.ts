@@ -79,8 +79,8 @@ export const errorMessages = {
   missingCxProjectName: `project name ${chalk.bold(
     '(--cx-project-name)'
   )} is needed if you're using checkmarx`,
-  missingScmType: `SCM type ${chalk.bold(
-    '(--scm-type)'
+  missingUrl: `url ${chalk.bold(
+    '(--url)'
   )} is needed if you're adding an SCM token`,
   invalidScmType: `SCM type ${chalk.bold(
     '(--scm-type)'

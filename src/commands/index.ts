@@ -94,13 +94,17 @@ const packageJson = JSON.parse(
 const config = new Configstore(packageJson.name, { apiToken: '' })
 
 export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
-  const { apiKey, token, organization, scm, username, refreshToken } =
+  const { apiKey, token, organization, scmType, url, username, refreshToken } =
     addScmTokenOptions
   const gqlClient = new GQLClient({
     apiKey: apiKey || config.get('apiToken'),
   })
+  if (!scmType) {
+    throw new CliError(errorMessages.invalidScmType)
+  }
   await gqlClient.updateScmToken({
-    type: scm,
+    scmType,
+    url,
     token,
     org: organization,
     username,

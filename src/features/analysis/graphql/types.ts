@@ -1,11 +1,10 @@
 import { z } from 'zod'
 
+import { ScmConfig } from '../scm'
+
 export const UpdateScmTokenZ = z.object({
   updateScmToken: z.object({
-    id: z.string(),
-    gitHubAccessToken: z.string().nullable(),
-    gitlabAccessToken: z.string().nullable(),
-    adoAccessToken: z.string().nullable(),
+    token: z.string(),
   }),
 })
 export type UpdateScmToken = z.infer<typeof UpdateScmTokenZ>
@@ -78,10 +77,7 @@ export type MeQuery = {
   me: {
     id: string
     email: string
-    githubToken: string | undefined
-    gitlabToken: string | undefined
-    adoToken: string | undefined
-    adoOrg: string | undefined
+    scmConfigs: ScmConfig[]
   }
 }
 

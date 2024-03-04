@@ -476,9 +476,9 @@ export async function getGithubBlameRanges(
   return res.repository.object.blame.ranges.map((range) => ({
     startingLine: range.startingLine,
     endingLine: range.endingLine,
-    email: range.commit.author.user.email,
-    name: range.commit.author.user.name,
-    login: range.commit.author.user.login,
+    email: range.commit.author.user?.email || '',
+    name: range.commit.author.user?.name || '',
+    login: range.commit.author.user?.login || '',
   }))
 }
 export async function createPr(

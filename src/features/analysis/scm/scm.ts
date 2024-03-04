@@ -72,8 +72,23 @@ import {
 } from './gitlab'
 import { isValidBranchName } from './scmSubmit'
 
+export type ScmConfig = {
+  id: string
+  isBroker: boolean
+  orgId?: string
+  refreshToken?: string | null
+  scmOrg?: string | null
+  scmType: string
+  scmUrl: string
+  scmUsername?: string | null
+  token?: string | null
+  tokenLastUpdate?: string | null
+  userId?: string | null
+  isTokenAvailable: boolean
+}
+
 export const ghGetUserInfo = getUserInfo
-export function getScmLibTypeFromUrl(url: string | undefined) {
+export function getCloudScmLibTypeFromUrl(url: string | undefined) {
   if (!url) {
     return undefined
   }
@@ -91,32 +106,122 @@ export function getScmLibTypeFromUrl(url: string | undefined) {
   return undefined
 }
 
+export enum ScmType {
+  GitLab = 'GitLab',
+  GitHub = 'GitHub',
+  Ado = 'Ado',
+}
+
+export enum ScmCloudUrl {
+  GitLab = 'https://gitlab.com',
+  GitHub = 'https://github.com',
+  Ado = 'https://dev.azure.com',
+}
+
+export function getScmTypeFromScmLibType(
+  scmLibType: string | null | undefined
+) {
+  if (scmLibType === ScmLibScmType.GITLAB) {
+    return ScmType.GitLab
+  }
+  if (scmLibType === ScmLibScmType.GITHUB) {
+    return ScmType.GitHub
+  }
+  if (scmLibType === ScmLibScmType.ADO) {
+    return ScmType.Ado
+  }
+  throw new Error(`unknown scm lib type: ${scmLibType}`)
+}
+
+export function getScmLibTypeFromScmType(scmType: string | null | undefined) {
+  if (scmType === ScmType.GitLab) {
+    return ScmLibScmType.GITLAB
+  }
+  if (scmType === ScmType.GitHub) {
+    return ScmLibScmType.GITHUB
+  }
+  if (scmType === ScmType.Ado) {
+    return ScmLibScmType.ADO
+  }
+  throw new Error(`unknown scm type: ${scmType}`)
+}
+
+export function getScmConfig({
+  url,
+  scmConfigs,
+  includeOrgTokens = true,
+}: {
+  url: string
+  scmConfigs: ScmConfig[]
+  includeOrgTokens?: boolean
+}) {
+  const filteredScmConfigs = scmConfigs.filter((scm) => {
+    const urlObject = new URL(url)
+    const configUrl = new URL(scm.scmUrl)
+    return (
+      //if we the user does an ADO oauth flow then the token is saved for dev.azure.com but
+      //sometimes the user uses the url dev.azure.com and sometimes the url visualstudio.com
+      //so we need to check both
+      (urlObject.hostname === configUrl.hostname ||
+        (urlObject.hostname.endsWith('.visualstudio.com') &&
+          configUrl.hostname === 'dev.azure.com')) &&
+      urlObject.protocol === configUrl.protocol &&
+      urlObject.port === configUrl.port
+    )
+  })
+  const scmOrgConfig = filteredScmConfigs.find((scm) => scm.orgId && scm.token)
+  if (scmOrgConfig && includeOrgTokens) {
+    return {
+      id: scmOrgConfig.id,
+      accessToken: scmOrgConfig.token || undefined,
+      scmLibType: getScmLibTypeFromScmType(scmOrgConfig.scmType),
+      scmOrg: scmOrgConfig.scmOrg || undefined,
+    }
+  }
+  const scmUserConfig = filteredScmConfigs.find(
+    (scm) => scm.userId && scm.token
+  )
+  if (scmUserConfig) {
+    return {
+      id: scmUserConfig.id,
+      accessToken: scmUserConfig.token || undefined,
+      scmLibType: getScmLibTypeFromScmType(scmUserConfig.scmType),
+      scmOrg: scmUserConfig.scmOrg || undefined,
+    }
+  }
+  const type = getCloudScmLibTypeFromUrl(url)
+  if (type) {
+    return {
+      id: undefined,
+      accessToken: undefined,
+      scmLibType: type,
+      scmOrg: undefined,
+    }
+  }
+  return {
+    id: undefined,
+    accessToken: undefined,
+    scmLibType: undefined,
+    scmOrg: undefined,
+  }
+}
+
 export async function scmCanReachRepo({
   repoUrl,
-  githubToken,
-  gitlabToken,
-  adoToken,
+  scmType,
+  accessToken,
   scmOrg,
 }: {
   repoUrl: string
-  githubToken: string | undefined
-  gitlabToken: string | undefined
-  adoToken: string | undefined
+  scmType: ScmType
+  accessToken: string | undefined
   scmOrg: string | undefined
 }) {
   try {
-    const scmLibType = getScmLibTypeFromUrl(repoUrl)
     await SCMLib.init({
       url: repoUrl,
-      accessToken:
-        scmLibType === ScmLibScmType.GITHUB
-          ? githubToken
-          : scmLibType === ScmLibScmType.GITLAB
-          ? gitlabToken
-          : scmLibType === ScmLibScmType.ADO
-          ? adoToken
-          : '',
-      scmType: scmLibType,
+      accessToken,
+      scmType: getScmLibTypeFromScmType(scmType),
       scmOrg,
     })
     return true
@@ -217,7 +322,7 @@ export abstract class SCMLib {
       return trimmedUrl
     }
 
-    const scmLibType = getScmLibTypeFromUrl(trimmedUrl)
+    const scmLibType = this.getScmLibType()
     if (scmLibType === ScmLibScmType.ADO) {
       return `https://${this.accessToken}@${trimmedUrl
         .toLowerCase()
@@ -240,6 +345,8 @@ export abstract class SCMLib {
       throw new Error(`invalid scm url ${trimmedUrl}`)
     }
   }
+
+  abstract getScmLibType(): ScmLibScmType
 
   abstract getAuthHeaders(): Record<string, string>
 
@@ -457,6 +564,10 @@ export class AdoSCMLib extends SCMLib {
     })
   }
 
+  getScmLibType(): ScmLibScmType {
+    return ScmLibScmType.ADO
+  }
+
   getAuthHeaders(): Record<string, string> {
     if (this.accessToken) {
       if (getAdoTokenType(this.accessToken) === AdoTokenTypeEnum.OAUTH) {
@@ -660,6 +771,10 @@ export class GitlabSCMLib extends SCMLib {
       accessToken: this.accessToken,
       repoUrl: this.url,
     })
+  }
+
+  getScmLibType(): ScmLibScmType {
+    return ScmLibScmType.GITLAB
   }
 
   getAuthHeaders(): Record<string, string> {
@@ -1002,6 +1117,10 @@ export class GithubSCMLib extends SCMLib {
     return getGithubBranchList(this.accessToken, this.url)
   }
 
+  getScmLibType(): ScmLibScmType {
+    return ScmLibScmType.GITHUB
+  }
+
   getAuthHeaders(): Record<string, string> {
     if (this.accessToken) {
       return { authorization: `Bearer ${this.accessToken}` }
@@ -1155,6 +1274,11 @@ export class StubSCMLib extends SCMLib {
   ): Promise<string> {
     console.error('createSubmitRequest() not implemented')
     throw new Error('createSubmitRequest() not implemented')
+  }
+
+  getScmLibType(): ScmLibScmType {
+    console.error('getScmLibType() not implemented')
+    throw new Error('getScmLibType() not implemented')
   }
 
   getAuthHeaders(): Record<string, string> {

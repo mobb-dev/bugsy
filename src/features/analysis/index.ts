@@ -34,7 +34,9 @@ import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
 import { getCheckmarxReport } from './scanners/checkmarx'
 import { getSnykReport } from './scanners/snyk'
 import {
-  getScmLibTypeFromUrl,
+  getCloudScmLibTypeFromUrl,
+  getScmConfig,
+  getScmTypeFromScmLibType,
   scmCanReachRepo,
   SCMLib,
   ScmLibScmType,
@@ -167,39 +169,29 @@ export async function runAnalysis(
   }
 }
 
-function _getTokenAndUrlForScmType({
+function _getUrlForScmType({
   scmLibType,
-  githubToken,
-  gitlabToken,
-  adoToken,
 }: {
   scmLibType: ScmLibScmType | undefined
-  githubToken: string | undefined
-  gitlabToken: string | undefined
-  adoToken: string | undefined
-}): { token: string | undefined; authUrl: string | undefined } {
+}): { authUrl: string | undefined } {
   const githubAuthUrl = `${WEB_APP_URL}/github-auth`
   const gitlabAuthUrl = `${WEB_APP_URL}/gitlab-auth`
   const adoAuthUrl = `${WEB_APP_URL}/ado-auth`
   switch (scmLibType) {
     case ScmLibScmType.GITHUB:
       return {
-        token: githubToken,
         authUrl: githubAuthUrl,
       }
     case ScmLibScmType.GITLAB:
       return {
-        token: gitlabToken,
         authUrl: gitlabAuthUrl,
       }
     case ScmLibScmType.ADO:
       return {
-        token: adoToken,
         authUrl: adoAuthUrl,
       }
     default:
       return {
-        token: undefined,
         authUrl: undefined,
       }
   }
@@ -250,44 +242,45 @@ export async function _scan(
     throw new Error('repo is required in case srcPath is not provided')
   }
   const userInfo = await gqlClient.getUserInfo()
-  const { githubToken, gitlabToken, adoToken, adoOrg } = userInfo
+  const tokenInfo = getScmConfig({
+    url: repo,
+    scmConfigs: userInfo.scmConfigs,
+    includeOrgTokens: false,
+  })
   const isRepoAvailable = await scmCanReachRepo({
     repoUrl: repo,
-    githubToken,
-    gitlabToken,
-    adoToken,
-    scmOrg: adoOrg,
+    accessToken: tokenInfo.accessToken,
+    scmOrg: tokenInfo.scmOrg,
+    scmType: getScmTypeFromScmLibType(tokenInfo.scmLibType),
   })
 
-  const scmLibType = getScmLibTypeFromUrl(repo)
-  const { authUrl: scmAuthUrl, token } = _getTokenAndUrlForScmType({
-    scmLibType,
-    githubToken,
-    gitlabToken,
-    adoToken,
+  //we can only do oauth to cloud SCM types so use this to make sure it is indeed a cloud URL
+  const cloudScmLibType = getCloudScmLibTypeFromUrl(repo)
+  const { authUrl: scmAuthUrl } = _getUrlForScmType({
+    scmLibType: cloudScmLibType,
   })
 
-  let myToken = token
+  let myToken = tokenInfo.accessToken
 
   if (!isRepoAvailable) {
-    if (ci || !scmLibType || !scmAuthUrl) {
+    if (ci || !cloudScmLibType || !scmAuthUrl) {
       const errorMessage = scmAuthUrl
         ? `Cannot access repo ${repo}`
         : `Cannot access repo ${repo} with the provided token, please visit ${scmAuthUrl} to refresh your source control management system token`
       throw new Error(errorMessage)
     }
 
-    if (scmLibType && scmAuthUrl) {
+    if (cloudScmLibType && scmAuthUrl) {
       myToken =
-        (await handleScmIntegration(token, scmLibType, scmAuthUrl)) || ''
+        (await handleScmIntegration(tokenInfo.accessToken, scmAuthUrl, repo)) ||
+        ''
 
       // Check repo availability again after SCM token update.
       const isRepoAvailable = await scmCanReachRepo({
         repoUrl: repo,
-        githubToken: myToken,
-        gitlabToken: myToken,
-        adoToken: myToken,
-        scmOrg: adoOrg,
+        accessToken: myToken,
+        scmOrg: tokenInfo.scmOrg,
+        scmType: getScmTypeFromScmLibType(tokenInfo.scmLibType),
       })
 
       if (!isRepoAvailable) {
@@ -299,9 +292,9 @@ export async function _scan(
   }
   const scm = await SCMLib.init({
     url: repo,
-    accessToken: token,
-    scmType: scmLibType,
-    scmOrg: adoOrg,
+    accessToken: myToken,
+    scmOrg: tokenInfo.scmOrg,
+    scmType: tokenInfo.scmLibType,
   })
 
   const reference = ref ?? (await scm.getRepoDefaultBranch())
@@ -508,9 +501,10 @@ export async function _scan(
   }
   async function handleScmIntegration(
     oldToken: string | undefined,
-    scmLibType: ScmLibScmType,
-    scmAuthUrl: string
+    scmAuthUrl: string,
+    repoUrl: string
   ) {
+    const scmLibType = getCloudScmLibTypeFromUrl(repoUrl)
     const scmName =
       scmLibType === ScmLibScmType.GITHUB
         ? 'Github'
@@ -538,16 +532,16 @@ export async function _scan(
     await open(scmAuthUrl)
 
     for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
-      const { githubToken, gitlabToken } = await gqlClient.getUserInfo()
+      const userInfo = await gqlClient.getUserInfo()
+      const tokenInfo = getScmConfig({
+        url: repoUrl,
+        scmConfigs: userInfo.scmConfigs,
+        includeOrgTokens: false,
+      })
 
-      if (scmLibType === ScmLibScmType.GITHUB && githubToken !== oldToken) {
-        scmSpinner.success({ text: '🔗 Github integration successful!' })
-        return githubToken
-      }
-
-      if (scmLibType === ScmLibScmType.GITLAB && gitlabToken !== oldToken) {
-        scmSpinner.success({ text: '🔗 Gitlab integration successful!' })
-        return gitlabToken
+      if (tokenInfo.accessToken && tokenInfo.accessToken !== oldToken) {
+        scmSpinner.success({ text: `🔗 ${scmName} integration successful!` })
+        return tokenInfo.accessToken
       }
 
       scmSpinner.spin()

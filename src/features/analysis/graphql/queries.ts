@@ -5,10 +5,20 @@ export const ME = gql`
     me {
       id
       email
-      githubToken
-      gitlabToken
-      adoToken
-      adoOrg
+      scmConfigs {
+        id
+        isBroker
+        orgId
+        refreshToken
+        scmType
+        scmUrl
+        scmUsername
+        token
+        tokenLastUpdate
+        userId
+        scmOrg
+        isTokenAvailable
+      }
     }
   }
 `

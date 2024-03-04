@@ -57,7 +57,15 @@ export const commitHashOption = {
 } as const
 
 export const scmTypeOption = {
+  demandOption: true,
   describe: chalk.bold('SCM type (GitHub, GitLab, Ado)'),
+  type: 'string',
+} as const
+
+export const urlOption = {
+  describe: chalk.bold(
+    'URL of the repository (used in GitHub, GitLab, Azure DevOps)'
+  ),
   type: 'string',
 } as const
 

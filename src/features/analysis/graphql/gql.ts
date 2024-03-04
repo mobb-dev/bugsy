@@ -172,24 +172,27 @@ export class GQLClient {
   }
 
   async updateScmToken(args: {
-    type: string
+    scmType: string
+    url: string
     token: string
     org: string | undefined
     username: string | undefined
     refreshToken: string | undefined
   }) {
-    const { type, token, org, username, refreshToken } = args
+    const { scmType, url, token, org, username, refreshToken } = args
     const updateScmTokenResult = await this._client.request<
       UpdateScmToken,
       {
-        type: string
+        scmType: string
+        url: string
         token: string
         org: string | undefined
         username: string | undefined
         refreshToken: string | undefined
       }
     >(UPDATE_SCM_TOKEN, {
-      type,
+      scmType,
+      url,
       token,
       org,
       username,

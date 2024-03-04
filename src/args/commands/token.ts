@@ -1,5 +1,6 @@
 import { addScmToken } from '@mobb/bugsy/commands'
-import { errorMessages, ScmTypes } from '@mobb/bugsy/constants'
+import { errorMessages } from '@mobb/bugsy/constants'
+import { ScmType } from '@mobb/bugsy/features/analysis/scm'
 import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
 
@@ -10,6 +11,7 @@ import {
   scmTokenOption,
   scmTypeOption,
   scmUsernameOption,
+  urlOption,
 } from '../options'
 import { AddScmTokenOptions, BaseAddScmTokenOptions } from '../types'
 
@@ -17,37 +19,49 @@ export function addScmTokenBuilder(
   args: Yargs.Argv<unknown>
 ): Yargs.Argv<BaseAddScmTokenOptions> {
   return args
-    .option('scm', scmTypeOption)
+    .option('scm-type', scmTypeOption)
+    .option('url', urlOption)
     .option('token', scmTokenOption)
     .option('organization', scmOrgOption)
     .option('username', scmUsernameOption)
     .option('refresh-token', scmRefreshTokenOption)
     .option('api-key', apiKeyOption)
     .example(
-      '$0 add-scm-token --scm ado --token abcdef0123456 --organization myOrg',
+      '$0 add-scm-token --scm-type Ado --url https://dev.azure.com/adoorg/test/_git/repo --token abcdef0123456 --organization myOrg',
       'Add your SCM (Github, Gitlab, Azure DevOps) token to Mobb to enable automated fixes.'
     )
     .help()
-    .demandOption(['scm', 'token'])
+    .demandOption(['url', 'token'])
 }
 
 export function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
-  if (!argv.scm) {
-    throw new CliError(errorMessages.missingScmType)
-  }
-  if (!(Object.values(ScmTypes) as string[]).includes(argv.scm)) {
-    throw new CliError(errorMessages.invalidScmType)
+  if (!argv.url) {
+    throw new CliError(errorMessages.missingUrl)
   }
   if (!argv.token) {
     throw new CliError(errorMessages.missingToken)
   }
-  if (argv.scm === ScmTypes.AzureDevOps && !argv.organization) {
+  if (
+    ScmType.GitHub !== argv.scmType &&
+    ScmType.Ado !== argv.scmType &&
+    ScmType.GitLab !== argv.scmType
+  ) {
+    throw new CliError(
+      '\nError: --scm-type must reference a valid SCM type (GitHub, GitLab, Ado)'
+    )
+  }
+  const urlObj = new URL(argv.url)
+  if (urlObj.hostname === 'github.com' && !argv.username) {
+    throw new CliError('\nError: --username flag is required for GitHub')
+  }
+  if (
+    (urlObj.hostname === 'dev.azure.com' ||
+      urlObj.hostname.endsWith('.visualstudio.com')) &&
+    !argv.organization
+  ) {
     throw new CliError(
       '\nError: --organization flag is required for Azure DevOps'
     )
-  }
-  if (argv.scm === ScmTypes.Github && !argv.username) {
-    throw new CliError('\nError: --username flag is required for GitHub')
   }
 }
 

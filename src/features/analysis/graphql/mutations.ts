@@ -2,23 +2,33 @@ import { gql } from 'graphql-request'
 
 export const UPDATE_SCM_TOKEN = gql`
   mutation updateScmToken(
-    $type: ScmType!
+    $scmType: String!
+    $url: String!
     $token: String!
     $org: String
     $username: String
     $refreshToken: String
   ) {
     updateScmToken(
-      type: $type
+      scmType: $scmType
+      url: $url
       token: $token
       org: $org
       username: $username
       refreshToken: $refreshToken
     ) {
-      id
-      adoAccessToken
-      gitlabAccessToken
-      gitHubAccessToken
+      __typename
+      ... on ScmAccessTokenUpdateSuccess {
+        token
+      }
+      ... on InvalidScmTypeError {
+        status
+        error
+      }
+      ... on BadScmCredentials {
+        status
+        error
+      }
     }
   }
 `

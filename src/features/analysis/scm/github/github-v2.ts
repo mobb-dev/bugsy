@@ -3,11 +3,14 @@ import { Octokit } from '@octokit/core'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,
   DELETE_COMMENT_PATH,
+  DELETE_GENERAL_PR_COMMENT,
   GET_A_REPOSITORY_PUBLIC_KEY,
+  GET_GENERAL_PR_COMMENTS,
   GET_PR,
   GET_PR_COMMENT_PATH,
   GET_PR_COMMENTS_PATH,
   POST_COMMENT_PATH,
+  POST_GENERAL_PR_COMMENT,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
   UPDATE_COMMENT_PATH,
 } from './consts'
@@ -16,16 +19,22 @@ import {
   CreateOrUpdateRepositorySecretResponse,
   DeleteCommentParams,
   DeleteCommentResponse,
+  DeleteGeneralPrCommentParams,
+  DeleteGeneralPrCommentResponse,
   GetARepositoryPublicKeyParams,
   GetARepositoryPublicKeyResponse,
+  GetGeneralPrCommentResponse,
   GetPrCommentParams,
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrCommentsResponse,
   GetPrParams,
   GetPrResponse,
+  GetPrReviewCommentsParams,
   PostCommentParams,
   PostCommentReposnse,
+  PostGeneralPrCommentParams,
+  PostGeneralPrCommentResponse,
   ReplyToCodeReviewCommentPathParams,
   ReplyToCodeReviewCommentPathResponse,
   UpdateCommentParams,
@@ -94,4 +103,23 @@ export function getARepositoryPublicKey(
   params: GetARepositoryPublicKeyParams
 ): Promise<GetARepositoryPublicKeyResponse> {
   return client.request(GET_A_REPOSITORY_PUBLIC_KEY, params)
+}
+
+export function postGeneralPrComment(
+  client: Octokit,
+  params: PostGeneralPrCommentParams
+): Promise<PostGeneralPrCommentResponse> {
+  return client.request(POST_GENERAL_PR_COMMENT, params)
+}
+export function getGeneralPrComments(
+  client: Octokit,
+  params: GetPrReviewCommentsParams
+): Promise<GetGeneralPrCommentResponse> {
+  return client.request(GET_GENERAL_PR_COMMENTS, params)
+}
+export function deleteGeneralPrComment(
+  client: Octokit,
+  params: DeleteGeneralPrCommentParams
+): Promise<DeleteGeneralPrCommentResponse> {
+  return client.request(DELETE_GENERAL_PR_COMMENT, params)
 }

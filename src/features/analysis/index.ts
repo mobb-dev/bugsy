@@ -15,7 +15,6 @@ import {
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { sleep } from '@mobb/bugsy/utils'
-import { Octokit } from '@octokit/core'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -343,7 +342,7 @@ export async function _scan(
           analysisId,
           gqlClient,
           scm,
-          githubActionOctokit: new Octokit({ auth: githubActionToken }),
+          githubActionToken: z.string().parse(githubActionToken),
           scanner: z.nativeEnum(SCANNERS).parse(scanner),
         })
     )

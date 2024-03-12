@@ -17,6 +17,7 @@ import {
   GET_ENCRYPTED_API_TOKEN,
   GET_FIX,
   GET_FIX_REPORT_STATE,
+  GET_FIXES,
   GET_ORG_AND_PROJECT_ID,
   GET_VUL_BY_NODES_METADATA,
   GET_VULNERABILITY_REPORT_PATHS,
@@ -38,6 +39,9 @@ import {
   GetEncryptedApiTokenArgs,
   GetEncryptedApiTokenQuery,
   GetEncryptedApiTokenZ,
+  GetFixesParams,
+  GetFixesQuery,
+  GetFixesQueryZ,
   GetFixQuery,
   GetFixQueryZ,
   GetFixReportQuery,
@@ -218,7 +222,6 @@ export class GQLClient {
     const filters = hunks.map((hunk) => {
       const filter: GetVulByNodesMetadataFilter = {
         path: { _eq: hunk.path },
-        vulnerabilityReportIssue: { fixId: { _is_null: false } },
         _or: hunk.ranges.map(({ endLine, startLine }) => ({
           startLine: { _gte: startLine, _lte: endLine },
           endLine: { _gte: startLine, _lte: endLine },
@@ -236,6 +239,9 @@ export class GQLClient {
     const parsedGetVulByNodesMetadataRes = GetVulByNodesMetadataZ.parse(
       getVulByNodesMetadataRes
     )
+
+    // We need to filter out duplicate vulnerabilities by metadata,
+    // the vulnerability nodes are ordered by index, so we can just take the first one
     const uniqueVulByNodesMetadata =
       parsedGetVulByNodesMetadataRes.vulnerabilityReportIssueCodeNodes.reduce<
         Record<string, VulnerabilityReportIssueCodeNode>
@@ -249,10 +255,24 @@ export class GQLClient {
             vulnerabilityReportIssueCodeNode,
         }
       }, {})
+    const nonFixablePrVuls =
+      parsedGetVulByNodesMetadataRes.nonFixablePrVuls.aggregate.count
+    const fixablePrVuls =
+      parsedGetVulByNodesMetadataRes.fixablePrVuls.aggregate.count
+    const totalScanVulnerabilities =
+      parsedGetVulByNodesMetadataRes.totalScanVulnerabilities.aggregate.count
+    const vulnerabilitiesOutsidePr =
+      totalScanVulnerabilities - nonFixablePrVuls - fixablePrVuls
+    const totalPrVulnerabilities = nonFixablePrVuls + fixablePrVuls
     return {
       vulnerabilityReportIssueCodeNodes: Object.values(
         uniqueVulByNodesMetadata
       ),
+      nonFixablePrVuls,
+      fixablePrVuls,
+      totalScanVulnerabilities,
+      vulnerabilitiesOutsidePr,
+      totalPrVulnerabilities,
     }
   }
 
@@ -375,6 +395,15 @@ export class GQLClient {
       }
     )
     return GetFixQueryZ.parse(res)
+  }
+  async getFixes(fixIds: string[]) {
+    const res = await this._client.request<GetFixesQuery, GetFixesParams>(
+      GET_FIXES,
+      {
+        filters: { id: { _in: fixIds } },
+      }
+    )
+    return GetFixesQueryZ.parse(res)
   }
 }
 

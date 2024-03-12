@@ -3,12 +3,15 @@ import { Endpoints } from '@octokit/types'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,
   DELETE_COMMENT_PATH,
+  DELETE_GENERAL_PR_COMMENT,
   GET_A_REPOSITORY_PUBLIC_KEY,
   GET_COMMENT_PATH,
+  GET_GENERAL_PR_COMMENTS,
   GET_PR,
   GET_PR_COMMENT_PATH,
   GET_PR_COMMENTS_PATH,
   POST_COMMENT_PATH,
+  POST_GENERAL_PR_COMMENT,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
   UPDATE_COMMENT_PATH,
 } from './consts'
@@ -51,6 +54,24 @@ export type ReplyToCodeReviewCommentPathParams =
 export type GetPrParams = Endpoints[typeof GET_PR]['parameters']
 
 export type GetPrResponse = Endpoints[typeof GET_PR]['response']
+
+export type PostGeneralPrCommentParams =
+  Endpoints[typeof POST_GENERAL_PR_COMMENT]['parameters']
+
+export type PostGeneralPrCommentResponse =
+  Endpoints[typeof POST_GENERAL_PR_COMMENT]['response']
+
+export type GetPrReviewCommentsParams =
+  Endpoints[typeof GET_GENERAL_PR_COMMENTS]['parameters']
+
+export type GetGeneralPrCommentResponse =
+  Endpoints[typeof GET_GENERAL_PR_COMMENTS]['response']
+
+export type DeleteGeneralPrCommentParams =
+  Endpoints[typeof DELETE_GENERAL_PR_COMMENT]['parameters']
+
+export type DeleteGeneralPrCommentResponse =
+  Endpoints[typeof DELETE_GENERAL_PR_COMMENT]['response']
 
 export type ReplyToCodeReviewCommentPathResponse =
   Endpoints[typeof REPLY_TO_CODE_REVIEW_COMMENT_PATH]['response']

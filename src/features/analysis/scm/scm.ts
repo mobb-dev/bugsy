@@ -38,21 +38,27 @@ import {
 import {
   createOrUpdateRepositorySecret,
   deleteComment,
+  deleteGeneralPrComment,
   getARepositoryPublicKey,
+  getGeneralPrComments,
   getPr,
   getPrComment,
   getPrComments,
   getPrDiff,
+  postGeneralPrComment,
   postPrComment,
   updatePrComment,
 } from './github/github-v2'
 import {
   DeleteCommentParams,
+  DeleteGeneralPrCommentResponse,
+  GetGeneralPrCommentResponse,
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrParams,
   GetPrResponse,
   PostCommentParams,
+  PostGeneralPrCommentResponse,
   UpdateCommentParams,
   UpdateCommentResponse,
 } from './github/types'
@@ -257,6 +263,21 @@ export type ScmRepoInfo = {
   repoIsPublic: boolean
   repoUpdatedAt: string
 }
+
+type PostPRReviewCommentParams = {
+  prNumber: number
+  body: string
+}
+type SCMGetPrReviewCommentsParams = {
+  prNumber: number
+}
+type SCMGetPrReviewCommentsResponse = Promise<GetGeneralPrCommentResponse>
+type SCMPostGeneralPrCommentsResponse = Promise<PostGeneralPrCommentResponse>
+type SCMDeleteGeneralPrCommentParams = {
+  commentId: number
+}
+
+type SCMDeleteGeneralPrReviewResponse = Promise<DeleteGeneralPrCommentResponse>
 
 export class InvalidRepoUrlError extends Error {
   constructor(m: string) {
@@ -480,6 +501,18 @@ export abstract class SCMLib {
 
     return new StubSCMLib(trimmedUrl, undefined, undefined)
   }
+  abstract postGeneralPrComment(
+    params: PostPRReviewCommentParams,
+    auth?: { authToken: string }
+  ): SCMPostGeneralPrCommentsResponse
+  abstract getGeneralPrComments(
+    params: SCMGetPrReviewCommentsParams,
+    auth?: { authToken: string }
+  ): SCMGetPrReviewCommentsResponse
+  abstract deleteGeneralPrComment(
+    params: SCMDeleteGeneralPrCommentParams,
+    auth?: { authToken: string }
+  ): SCMDeleteGeneralPrReviewResponse
 }
 
 export class AdoSCMLib extends SCMLib {
@@ -695,6 +728,15 @@ export class AdoSCMLib extends SCMLib {
     })
   }
   getPr(): Promise<GetScmPrResponse> {
+    throw new Error('Method not implemented.')
+  }
+  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
     throw new Error('Method not implemented.')
   }
 }
@@ -917,6 +959,15 @@ export class GitlabSCMLib extends SCMLib {
     throw new Error('updatePrComment not implemented.')
   }
   getPr(): Promise<GetScmPrResponse> {
+    throw new Error('Method not implemented.')
+  }
+  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
     throw new Error('Method not implemented.')
   }
 }
@@ -1263,6 +1314,58 @@ export class GithubSCMLib extends SCMLib {
       pull_number: prNumber,
     })
   }
+  async postGeneralPrComment(
+    params: PostPRReviewCommentParams,
+    auth?: { authToken: string }
+  ): SCMPostGeneralPrCommentsResponse {
+    const { prNumber, body } = params
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+    return await postGeneralPrComment(oktoKit, {
+      issue_number: prNumber,
+      owner,
+      repo,
+      body,
+    })
+  }
+
+  async getGeneralPrComments(
+    params: SCMGetPrReviewCommentsParams,
+    auth?: { authToken: string }
+  ): SCMGetPrReviewCommentsResponse {
+    const { prNumber } = params
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+    return await getGeneralPrComments(oktoKit, {
+      issue_number: prNumber,
+      owner,
+      repo,
+    })
+  }
+  async deleteGeneralPrComment(
+    { commentId }: SCMDeleteGeneralPrCommentParams,
+    auth?: { authToken: string }
+  ): SCMDeleteGeneralPrReviewResponse {
+    if (!this.url) {
+      console.error('no url')
+      throw new Error('no url')
+    }
+    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+    return deleteGeneralPrComment(oktoKit, {
+      owner,
+      repo,
+      comment_id: commentId,
+    })
+  }
 }
 
 export class StubSCMLib extends SCMLib {
@@ -1393,5 +1496,14 @@ export class StubSCMLib extends SCMLib {
   async getPr(): Promise<GetScmPrResponse> {
     console.error('getPr() not implemented')
     throw new Error('getPr() not implemented')
+  }
+  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
+    throw new Error('Method not implemented.')
+  }
+  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
+    throw new Error('Method not implemented.')
   }
 }

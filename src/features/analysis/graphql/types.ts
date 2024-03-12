@@ -225,17 +225,27 @@ export const GetAnalysisQueryZ = z.object({
 
 export type GetAnalysisQuery = z.infer<typeof GetAnalysisQueryZ>
 
-export const GetFixQueryZ = z.object({
-  fix_by_pk: z.object({
-    issueType: z.string(),
-    id: z.string(),
-    patchAndQuestions: z.object({
-      patch: z.string(),
-    }),
+const FixDataZ = z.object({
+  issueType: z.string(),
+  id: z.string(),
+  patchAndQuestions: z.object({
+    patch: z.string(),
   }),
 })
 
+export const GetFixQueryZ = z.object({
+  fix_by_pk: FixDataZ,
+})
+
+export const GetFixesQueryZ = z.object({ fixes: z.array(FixDataZ) })
+
 export type GetFixQuery = z.infer<typeof GetFixQueryZ>
+export type GetFixesQuery = z.infer<typeof GetFixesQueryZ>
+export type GetFixesParams = {
+  filters: {
+    id: { _in: string[] }
+  }
+}
 
 const VulnerabilityReportIssueCodeNodeZ = z.object({
   vulnerabilityReportIssueId: z.string(),
@@ -251,6 +261,21 @@ export type VulnerabilityReportIssueCodeNode = z.infer<
 
 export const GetVulByNodesMetadataZ = z.object({
   vulnerabilityReportIssueCodeNodes: z.array(VulnerabilityReportIssueCodeNodeZ),
+  nonFixablePrVuls: z.object({
+    aggregate: z.object({
+      count: z.number(),
+    }),
+  }),
+  fixablePrVuls: z.object({
+    aggregate: z.object({
+      count: z.number(),
+    }),
+  }),
+  totalScanVulnerabilities: z.object({
+    aggregate: z.object({
+      count: z.number(),
+    }),
+  }),
 })
 
 export type GetVulByNodesMetadata = z.infer<typeof GetVulByNodesMetadataZ>
@@ -259,7 +284,6 @@ export type GetVulByNodesMetadataFilter = {
   path: {
     _eq: string
   }
-  vulnerabilityReportIssue: { fixId: { _is_null: false } }
   _or: {
     startLine: {
       _gte: number

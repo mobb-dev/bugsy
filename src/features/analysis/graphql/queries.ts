@@ -111,6 +111,17 @@ export const GET_FIX = gql`
     }
   }
 `
+export const GET_FIXES = gql`
+  query getFixes($filters: fix_bool_exp!) {
+    fixes: fix(where: $filters) {
+      issueType
+      id
+      patchAndQuestions {
+        patch
+      }
+    }
+  }
+`
 
 export const GET_VUL_BY_NODES_METADATA = gql`
   query getVulByNodesMetadata(
@@ -122,6 +133,7 @@ export const GET_VUL_BY_NODES_METADATA = gql`
       where: {
         _or: $filters
         vulnerabilityReportIssue: {
+          fixId: { _is_null: false }
           vulnerabilityReportId: { _eq: $vulnerabilityReportId }
         }
       }
@@ -132,6 +144,35 @@ export const GET_VUL_BY_NODES_METADATA = gql`
       vulnerabilityReportIssue {
         issueType
         fixId
+      }
+    }
+    fixablePrVuls: vulnerability_report_issue_aggregate(
+      where: {
+        fixId: { _is_null: false }
+        vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+        codeNodes: { _or: $filters }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    nonFixablePrVuls: vulnerability_report_issue_aggregate(
+      where: {
+        fixId: { _is_null: true }
+        vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+        codeNodes: { _or: $filters }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    totalScanVulnerabilities: vulnerability_report_issue_aggregate(
+      where: { vulnerabilityReportId: { _eq: $vulnerabilityReportId } }
+    ) {
+      aggregate {
+        count
       }
     }
   }

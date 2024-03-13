@@ -4,7 +4,7 @@ import path from 'path'
 import type * as Yargs from 'yargs'
 import { z } from 'zod'
 
-import { parseScmURL } from '../features/analysis/scm/urlParser'
+import { sanityRepoURL } from '../features/analysis/scm/urlParser'
 
 type ThrowRepoUrlErrorMessageArgs = {
   error: z.ZodError<string>
@@ -32,7 +32,7 @@ const UrlZ = z
   .string({
     invalid_type_error: 'is not a valid GitHub / GitLab / ADO URL',
   })
-  .refine((data) => !!parseScmURL(data), {
+  .refine((data) => !!sanityRepoURL(data), {
     message: 'is not a valid GitHub / GitLab / ADO URL',
   })
 

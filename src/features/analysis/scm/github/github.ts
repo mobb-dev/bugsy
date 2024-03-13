@@ -9,6 +9,7 @@ import {
   InvalidUrlPatternError,
   ReferenceType,
   RefNotFoundError,
+  ScmType,
 } from '../scm'
 import { parseScmURL } from '../urlParser'
 
@@ -411,7 +412,7 @@ export function parseGithubOwnerAndRepo(gitHubUrl: string): {
   repo: string
 } {
   gitHubUrl = removeTrailingSlash(gitHubUrl)
-  const parsingResult = parseScmURL(gitHubUrl)
+  const parsingResult = parseScmURL(gitHubUrl, ScmType.GitHub)
   if (!parsingResult || parsingResult.hostname !== 'github.com') {
     throw new InvalidUrlPatternError(`invalid github repo Url ${gitHubUrl}`)
   }

@@ -1,6 +1,7 @@
 import querystring from 'node:querystring'
 
 import { Gitlab } from '@gitbeaker/rest'
+import { ProxyAgent } from 'undici'
 import { z } from 'zod'
 
 import {
@@ -9,6 +10,7 @@ import {
   InvalidUrlPatternError,
   ReferenceType,
   RefNotFoundError,
+  ScmType,
 } from './scm'
 import { parseScmURL } from './urlParser'
 
@@ -23,15 +25,18 @@ const EnvVariablesZod = z.object({
 const { GITLAB_API_TOKEN } = EnvVariablesZod.parse(process.env)
 
 type ApiAuthOptions = {
+  url: string | undefined
   gitlabAuthToken?: string | undefined
 }
 
-function getGitBeaker(options?: ApiAuthOptions) {
+function getGitBeaker(options: ApiAuthOptions) {
   const token = options?.gitlabAuthToken ?? GITLAB_API_TOKEN ?? ''
+  const url = options.url
+  const host = url ? new URL(url).origin : 'https://gitlab.com'
   if (token?.startsWith('glpat-') || token === '') {
-    return new Gitlab({ token })
+    return new Gitlab({ token, host })
   }
-  return new Gitlab({ oauthToken: token })
+  return new Gitlab({ oauthToken: token, host })
 }
 
 export async function gitlabValidateParams({
@@ -42,7 +47,7 @@ export async function gitlabValidateParams({
   accessToken: string | undefined
 }) {
   try {
-    const api = getGitBeaker({ gitlabAuthToken: accessToken })
+    const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
     if (accessToken) {
       await api.Users.showCurrentUser()
     }
@@ -86,8 +91,11 @@ export async function gitlabValidateParams({
   }
 }
 
-export async function getGitlabUsername(accessToken: string) {
-  const api = getGitBeaker({ gitlabAuthToken: accessToken })
+export async function getGitlabUsername(
+  url: string | undefined,
+  accessToken: string
+) {
+  const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
   const res = await api.Users.showCurrentUser()
   return res.username
 }
@@ -103,7 +111,7 @@ export async function getGitlabIsUserCollaborator({
 }) {
   try {
     const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-    const api = getGitBeaker({ gitlabAuthToken: accessToken })
+    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
 
     const res = await api.Projects.show(projectPath)
     const members = await api.ProjectMembers.all(res.id, {
@@ -131,7 +139,7 @@ export async function getGitlabMergeRequestStatus({
   mrNumber: number
 }) {
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-  const api = getGitBeaker({ gitlabAuthToken: accessToken })
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   const res = await api.MergeRequests.show(projectPath, mrNumber)
   switch (res.state) {
     case GitlabMergeRequestStatusEnum.merged:
@@ -153,7 +161,7 @@ export async function getGitlabIsRemoteBranch({
   branch: string
 }) {
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-  const api = getGitBeaker({ gitlabAuthToken: accessToken })
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   try {
     const res = await api.Branches.show(projectPath, branch)
     return res.name === branch
@@ -162,8 +170,11 @@ export async function getGitlabIsRemoteBranch({
   }
 }
 
-export async function getGitlabRepoList(accessToken: string) {
-  const api = getGitBeaker({ gitlabAuthToken: accessToken })
+export async function getGitlabRepoList(
+  url: string | undefined,
+  accessToken: string
+) {
+  const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
   const res = await api.Projects.all({
     membership: true,
     //TODO: a bug in the sorting mechanism of this api call
@@ -200,7 +211,7 @@ export async function getGitlabBranchList({
   repoUrl: string
 }) {
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-  const api = getGitBeaker({ gitlabAuthToken: accessToken })
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   try {
     //TODO: JONATHANA need to play with the parameters here to get all branches as it is sometimes stuck
     //depending on the parameters and the number of branches. It sometimes just hangs...
@@ -225,7 +236,10 @@ export async function createMergeRequest(options: {
   repoUrl: string
 }) {
   const { projectPath } = parseGitlabOwnerAndRepo(options.repoUrl)
-  const api = getGitBeaker({ gitlabAuthToken: options.accessToken })
+  const api = getGitBeaker({
+    url: options.repoUrl,
+    gitlabAuthToken: options.accessToken,
+  })
   const res = await api.MergeRequests.create(
     projectPath,
     options.sourceBranchName,
@@ -242,7 +256,10 @@ export async function getGitlabRepoDefaultBranch(
   repoUrl: string,
   options?: ApiAuthOptions
 ): Promise<string> {
-  const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
+  const api = getGitBeaker({
+    url: repoUrl,
+    gitlabAuthToken: options?.gitlabAuthToken,
+  })
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const project = await api.Projects.show(projectPath)
   if (!project.default_branch) {
@@ -256,7 +273,10 @@ export async function getGitlabReferenceData(
   options?: ApiAuthOptions
 ) {
   const { projectPath } = parseGitlabOwnerAndRepo(gitlabUrl)
-  const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
+  const api = getGitBeaker({
+    url: gitlabUrl,
+    gitlabAuthToken: options?.gitlabAuthToken,
+  })
   const results = await Promise.allSettled([
     (async () => {
       const res = await api.Branches.show(projectPath, ref)
@@ -302,9 +322,9 @@ export async function getGitlabReferenceData(
 
 export function parseGitlabOwnerAndRepo(gitlabUrl: string) {
   gitlabUrl = removeTrailingSlash(gitlabUrl)
-  const parsingResult = parseScmURL(gitlabUrl)
+  const parsingResult = parseScmURL(gitlabUrl, ScmType.GitLab)
 
-  if (!parsingResult || parsingResult.hostname !== 'gitlab.com') {
+  if (!parsingResult || !parsingResult.repoName) {
     throw new InvalidUrlPatternError(`invalid gitlab repo Url ${gitlabUrl}`)
   }
 
@@ -317,7 +337,10 @@ export async function getGitlabBlameRanges(
   options?: ApiAuthOptions
 ) {
   const { projectPath } = parseGitlabOwnerAndRepo(gitlabUrl)
-  const api = getGitBeaker({ gitlabAuthToken: options?.gitlabAuthToken })
+  const api = getGitBeaker({
+    url: gitlabUrl,
+    gitlabAuthToken: options?.gitlabAuthToken,
+  })
   const resp = await api.RepositoryFiles.allFileBlames(projectPath, path, ref)
   let lineNumber = 1
   return resp
@@ -384,3 +407,33 @@ export async function getGitlabToken({
   const authResult = await res.json()
   return GitlabAuthResultZ.parse(authResult)
 }
+
+function initGitlabFetchMock() {
+  const globalFetch = global.fetch
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function myFetch(input: any, init?: any): any {
+    const stack = new Error().stack
+    const parts = stack?.split('at ')
+    if (
+      parts?.length &&
+      parts?.length >= 3 &&
+      parts[2]?.startsWith('defaultRequestHandler (') &&
+      parts[2]?.includes('/@gitbeaker/rest/dist/index.js') &&
+      (/^https?:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\//i.test(
+        input?.url
+      ) ||
+        ('GITLAB_INTERNAL_DEV_HOST' in process.env &&
+          process.env['GITLAB_INTERNAL_DEV_HOST'] &&
+          input?.url?.startsWith(process.env['GITLAB_INTERNAL_DEV_HOST'])))
+    ) {
+      const dispatcher = new ProxyAgent(
+        process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
+      )
+      return globalFetch(input, { dispatcher } as RequestInit)
+    }
+    return globalFetch(input, init)
+  }
+  global.fetch = myFetch
+}
+
+initGitlabFetchMock()

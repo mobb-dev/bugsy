@@ -99,7 +99,7 @@ export function getCloudScmLibTypeFromUrl(url: string | undefined) {
     return undefined
   }
   const urlObject = new URL(url)
-  const hostname = urlObject.hostname
+  const hostname = urlObject.hostname.toLowerCase()
   if (hostname === 'gitlab.com') {
     return ScmLibScmType.GITLAB
   }
@@ -168,9 +168,9 @@ export function getScmConfig({
       //if we the user does an ADO oauth flow then the token is saved for dev.azure.com but
       //sometimes the user uses the url dev.azure.com and sometimes the url visualstudio.com
       //so we need to check both
-      (urlObject.hostname === configUrl.hostname ||
-        (urlObject.hostname.endsWith('.visualstudio.com') &&
-          configUrl.hostname === 'dev.azure.com')) &&
+      (urlObject.hostname.toLowerCase() === configUrl.hostname.toLowerCase() ||
+        (urlObject.hostname.toLowerCase().endsWith('.visualstudio.com') &&
+          configUrl.hostname.toLowerCase() === 'dev.azure.com')) &&
       urlObject.protocol === configUrl.protocol &&
       urlObject.port === configUrl.port
     )
@@ -801,7 +801,7 @@ export class GitlabSCMLib extends SCMLib {
       console.error('no access token')
       throw new Error('no access token')
     }
-    return getGitlabRepoList(this.accessToken)
+    return getGitlabRepoList(this.url, this.accessToken)
   }
 
   async getBranchList(): Promise<string[]> {
@@ -872,7 +872,7 @@ export class GitlabSCMLib extends SCMLib {
       console.error('no access token')
       throw new Error('no access token')
     }
-    return getGitlabUsername(this.accessToken)
+    return getGitlabUsername(this.url, this.accessToken)
   }
 
   async getSubmitRequestStatus(
@@ -918,6 +918,7 @@ export class GitlabSCMLib extends SCMLib {
     return await getGitlabBlameRanges(
       { ref, path, gitlabUrl: this.url },
       {
+        url: this.url,
         gitlabAuthToken: this.accessToken,
       }
     )
@@ -935,6 +936,7 @@ export class GitlabSCMLib extends SCMLib {
     return await getGitlabReferenceData(
       { ref, gitlabUrl: this.url },
       {
+        url: this.url,
         gitlabAuthToken: this.accessToken,
       }
     )
@@ -946,6 +948,7 @@ export class GitlabSCMLib extends SCMLib {
       throw new Error('no url')
     }
     return await getGitlabRepoDefaultBranch(this.url, {
+      url: this.url,
       gitlabAuthToken: this.accessToken,
     })
   }

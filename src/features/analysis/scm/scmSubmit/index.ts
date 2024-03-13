@@ -145,6 +145,25 @@ async function initGit(params: { dirName: string; repoUrl: string }) {
   await git.init()
   await git.addConfig('user.email', 'git@mobb.ai')
   await git.addConfig('user.name', 'Mobb autofixer')
+  const isDisableSslVerify =
+    'GIT_CLI_SKIP_SSL_VERIFICATION' in process.env &&
+    process.env['GIT_CLI_SKIP_SSL_VERIFICATION'] === 'true'
+  if (isDisableSslVerify) {
+    await git.addConfig('http.sslVerify', 'false')
+  }
+  if (
+    /^https?:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\//i.test(
+      repoUrl
+    ) ||
+    ('GITLAB_INTERNAL_DEV_HOST' in process.env &&
+      process.env['GITLAB_INTERNAL_DEV_HOST'] &&
+      repoUrl.startsWith(process.env['GITLAB_INTERNAL_DEV_HOST']))
+  ) {
+    await git.addConfig(
+      'http.proxy',
+      process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
+    )
+  }
   await git.addRemote('origin', repoUrl)
 
   return git

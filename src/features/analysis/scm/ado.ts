@@ -10,6 +10,7 @@ import {
   ReferenceType,
   RefNotFoundError,
   ScmRepoInfo,
+  ScmType,
 } from './scm'
 import { parseScmURL } from './urlParser'
 
@@ -355,7 +356,11 @@ export function getAdoDownloadUrl({
   branch: string
 }) {
   const { owner, repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-  return `https://dev.azure.com/${owner}/${projectName}/_apis/git/repositories/${repo}/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=${branch}&resolveLfs=true&$format=zip&api-version=5.0&download=true`
+  const url = new URL(repoUrl)
+  const origin = url.origin.toLowerCase().endsWith('.visualstudio.com')
+    ? 'https://dev.azure.com'
+    : url.origin.toLowerCase()
+  return `${origin}/${owner}/${projectName}/_apis/git/repositories/${repo}/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=${branch}&resolveLfs=true&$format=zip&api-version=5.0&download=true`
 }
 
 export async function getAdoBranchList({
@@ -557,7 +562,7 @@ export async function getAdoReferenceData({
 
 export function parseAdoOwnerAndRepo(adoUrl: string) {
   adoUrl = removeTrailingSlash(adoUrl)
-  const parsingResult = parseScmURL(adoUrl)
+  const parsingResult = parseScmURL(adoUrl, ScmType.Ado)
 
   if (
     !parsingResult ||

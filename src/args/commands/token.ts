@@ -51,12 +51,12 @@ export function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
     )
   }
   const urlObj = new URL(argv.url)
-  if (urlObj.hostname === 'github.com' && !argv.username) {
+  if (urlObj.hostname.toLowerCase() === 'github.com' && !argv.username) {
     throw new CliError('\nError: --username flag is required for GitHub')
   }
   if (
-    (urlObj.hostname === 'dev.azure.com' ||
-      urlObj.hostname.endsWith('.visualstudio.com')) &&
+    (urlObj.hostname.toLowerCase() === 'dev.azure.com' ||
+      urlObj.hostname.toLowerCase().endsWith('.visualstudio.com')) &&
     !argv.organization
   ) {
     throw new CliError(

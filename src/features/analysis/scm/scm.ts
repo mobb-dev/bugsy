@@ -83,7 +83,7 @@ export type ScmConfig = {
   isBroker: boolean
   orgId?: string
   refreshToken?: string | null
-  scmOrg?: string | null
+  scmOrg?: string | null | undefined
   scmType: string
   scmUrl: string
   scmUsername?: string | null

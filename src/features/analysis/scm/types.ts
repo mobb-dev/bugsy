@@ -19,6 +19,8 @@ export enum IssueType_Enum {
   InsecureCookie = 'INSECURE_COOKIE',
   /** Insecure Randomness */
   InsecureRandomness = 'INSECURE_RANDOMNESS',
+  /** A string is used in locale dependent comparison which can cause bugs */
+  LocaleDependentComparison = 'LOCALE_DEPENDENT_COMPARISON',
   /** Log Forging / Injection */
   LogForging = 'LOG_FORGING',
   /** The program might dereference a null-pointer because it does not check the return value of a function that might return null */

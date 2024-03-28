@@ -26,6 +26,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'Incomplete URL Sanitization'
     case IssueType_Enum.LogForging:
       return 'Log Forging'
+    case IssueType_Enum.LocaleDependentComparison:
+      return 'Locale Dependent Comparison'
     case IssueType_Enum.MissingCheckAgainstNull:
       return 'Missing Check against Null'
     case IssueType_Enum.PasswordInComment:

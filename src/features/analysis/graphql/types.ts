@@ -200,6 +200,14 @@ export type CreateUpdateFixReportMutation = z.infer<
   typeof CreateUpdateFixReportMutationZ
 >
 
+export const CreateProjectMutationZ = z.object({
+  createProject: z.object({
+    projectId: z.string(),
+  }),
+})
+
+export type CreateProjectMutation = z.infer<typeof CreateProjectMutationZ>
+
 export const GetAnalysisQueryZ = z.object({
   analysis: z.object({
     id: z.string(),

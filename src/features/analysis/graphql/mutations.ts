@@ -141,3 +141,11 @@ export const PERFORM_CLI_LOGIN = gql`
     }
   }
 `
+
+export const CREATE_PROJECT = gql`
+  mutation CreateProject($organizationId: String!, $projectName: String!) {
+    createProject(organizationId: $organizationId, projectName: $projectName) {
+      projectId
+    }
+  }
+`

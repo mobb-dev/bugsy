@@ -7,6 +7,7 @@ import { API_URL } from '../../../constants'
 import {
   CREATE_CLI_LOGIN,
   CREATE_COMMUNITY_USER,
+  CREATE_PROJECT,
   DIGEST_VULNERABILITY_REPORT,
   SUBMIT_VULNERABILITY_REPORT,
   UPDATE_SCM_TOKEN,
@@ -29,6 +30,7 @@ import {
   CreateCliLoginArgs,
   CreateCliLoginQuery,
   CreateCliLoginZ,
+  CreateProjectMutation,
   CreateUpdateFixReportMutation,
   CreateUpdateFixReportMutationZ,
   DigestVulnerabilityReportArgs,
@@ -142,13 +144,24 @@ export class GQLClient {
 
     const org = user.userOrganizationsAndUserOrganizationRoles[0].organization
     const project = projectName
-      ? org.projects.find((project) => project.name === projectName) ??
-        org.projects[0]
+      ? org.projects.find((project) => project.name === projectName) ?? null
       : org.projects[0]
+
+    let projectId = project?.id
+    if (!projectId) {
+      const createdProject = await this._client.request<CreateProjectMutation>(
+        CREATE_PROJECT,
+        {
+          organizationId: org.id,
+          projectName: projectName || 'My project',
+        }
+      )
+      projectId = createdProject.createProject.projectId
+    }
 
     return {
       organizationId: org.id,
-      projectId: project.id,
+      projectId: projectId,
     }
   }
 

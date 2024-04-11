@@ -4,7 +4,7 @@ import {
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
   parseGitlabOwnerAndRepo,
-} from '../gitlab'
+} from '../gitlab/gitlab'
 
 const GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce'
 const NON_EXISTING_GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce1111'

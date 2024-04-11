@@ -11,6 +11,7 @@ import {
   getAdoDownloadUrl,
   getAdoIsRemoteBranch,
   getAdoIsUserCollaborator,
+  getAdoPrUrl,
   getAdoPullRequestStatus,
   getAdoReferenceData,
   getAdoRepoDefaultBranch,
@@ -56,7 +57,6 @@ import {
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrParams,
-  GetPrResponse,
   PostCommentParams,
   PostGeneralPrCommentResponse,
   UpdateCommentParams,
@@ -68,6 +68,7 @@ import {
   getGitlabBranchList,
   getGitlabIsRemoteBranch,
   getGitlabIsUserCollaborator,
+  getGitlabMergeRequest,
   getGitlabMergeRequestStatus,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
@@ -75,7 +76,7 @@ import {
   getGitlabUsername,
   GitlabMergeRequestStatusEnum,
   gitlabValidateParams,
-} from './gitlab'
+} from './gitlab/gitlab'
 import { isValidBranchName } from './scmSubmit'
 
 export type ScmConfig = {
@@ -314,7 +315,6 @@ export class RepoNoTokenAccessError extends Error {
     super(m)
   }
 }
-type GetScmPrResponse = GetPrResponse
 
 export class RebaseFailedError extends Error {}
 
@@ -432,7 +432,7 @@ export abstract class SCMLib {
     date: Date | undefined
   }>
   abstract getPrComment(commentId: number): Promise<GetPrCommentResponse>
-  abstract getPr(prNumber: number): Promise<GetScmPrResponse>
+  abstract getPrUrl(prNumber: number): Promise<string>
 
   abstract updatePrComment(
     params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
@@ -513,6 +513,17 @@ export abstract class SCMLib {
     params: SCMDeleteGeneralPrCommentParams,
     auth?: { authToken: string }
   ): SCMDeleteGeneralPrReviewResponse
+  protected _validateAccessTokenAndUrl(): asserts this is this & {
+    accessToken: string
+    url: string
+  } {
+    if (!this.accessToken) {
+      throw new InvalidAccessTokenError('no access token')
+    }
+    if (!this.url) {
+      throw new InvalidRepoUrlError('no url')
+    }
+  }
 }
 
 export class AdoSCMLib extends SCMLib {
@@ -727,8 +738,9 @@ export class AdoSCMLib extends SCMLib {
       accessToken: this.accessToken,
     })
   }
-  getPr(): Promise<GetScmPrResponse> {
-    throw new Error('Method not implemented.')
+  getPrUrl(prNumber: number): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    return Promise.resolve(getAdoPrUrl({ prNumber, url: this.url }))
   }
   postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
     throw new Error('Method not implemented.')
@@ -961,8 +973,14 @@ export class GitlabSCMLib extends SCMLib {
   ): Promise<UpdateCommentResponse> {
     throw new Error('updatePrComment not implemented.')
   }
-  getPr(): Promise<GetScmPrResponse> {
-    throw new Error('Method not implemented.')
+  async getPrUrl(prNumber: number): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    const res = await getGitlabMergeRequest({
+      url: this.url,
+      prNumber: prNumber,
+      accessToken: this.accessToken,
+    })
+    return res.web_url
   }
   postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
     throw new Error('Method not implemented.')
@@ -1305,17 +1323,18 @@ export class GithubSCMLib extends SCMLib {
       githubAuthToken: this.accessToken,
     })
   }
-  async getPr(prNumber: number): Promise<GetScmPrResponse> {
+  async getPrUrl(prNumber: number): Promise<string> {
     if (!this.url || !this.oktokit) {
       console.error('no url')
       throw new Error('no url')
     }
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return getPr(this.oktokit, {
+    const getPrRes = await getPr(this.oktokit, {
       owner,
       repo,
       pull_number: prNumber,
     })
+    return getPrRes.data.html_url
   }
   async postGeneralPrComment(
     params: PostPRReviewCommentParams,
@@ -1496,7 +1515,7 @@ export class StubSCMLib extends SCMLib {
     console.error('updatePrComment() not implemented')
     throw new Error('updatePrComment() not implemented')
   }
-  async getPr(): Promise<GetScmPrResponse> {
+  async getPrUrl(_prNumber: number): Promise<string> {
     console.error('getPr() not implemented')
     throw new Error('getPr() not implemented')
   }

@@ -3,7 +3,24 @@ import { simpleGit } from 'simple-git'
 
 const debug = Debug('mobbdev:git')
 
-export async function getGitInfo(srcDirPath: string) {
+const GIT_NOT_INITIALIZED_ERROR_MESSAGE = 'not a git repository'
+
+type GetGitInfoResult =
+  | {
+      success: true
+      repoUrl: string
+      hash: string
+      reference: string
+    }
+  | {
+      success: false
+      repoUrl?: string
+      hash?: string
+      reference?: string
+    }
+export async function getGitInfo(
+  srcDirPath: string
+): Promise<GetGitInfoResult> {
   debug('getting git info for %s', srcDirPath)
 
   const git = simpleGit({
@@ -25,8 +42,14 @@ export async function getGitInfo(srcDirPath: string) {
       debug('failed to run git %o', e)
       if (e.message.includes(' spawn ')) {
         debug('git cli not installed')
-      } else if (e.message.includes(' not a git repository ')) {
+      } else if (e.message.includes(GIT_NOT_INITIALIZED_ERROR_MESSAGE)) {
         debug('folder is not a git repo')
+        return {
+          success: false,
+          hash: undefined,
+          reference: undefined,
+          repoUrl: undefined,
+        }
       } else {
         throw e
       }
@@ -45,6 +68,7 @@ export async function getGitInfo(srcDirPath: string) {
   }
 
   return {
+    success: true,
     repoUrl,
     hash,
     reference,

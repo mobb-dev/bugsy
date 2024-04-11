@@ -347,6 +347,16 @@ export async function getAdoRepoList({
   }, [] as ScmRepoInfo[])
   return repos
 }
+// todo integrate this url creation through the sdk
+export function getAdoPrUrl({
+  url,
+  prNumber,
+}: {
+  url: string
+  prNumber: number
+}) {
+  return `${url}/pullrequest/${prNumber}`
+}
 
 export function getAdoDownloadUrl({
   repoUrl,

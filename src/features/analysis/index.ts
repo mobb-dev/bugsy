@@ -14,7 +14,7 @@ import {
 } from '@mobb/bugsy/constants'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
-import { sleep } from '@mobb/bugsy/utils'
+import { getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -624,9 +624,9 @@ export async function _scan(
       await gqlClient.submitVulnerabilityReport({
         fixReportId: reportUploadInfo.fixReportId,
         projectId: projectId,
-        repoUrl: repo || gitInfo.repoUrl,
-        reference: gitInfo.reference,
-        sha: commitHash || gitInfo.hash,
+        repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
+        reference: gitInfo.reference || 'no-branch',
+        sha: commitHash || gitInfo.hash || '0123456789abcdef',
       })
     } catch (e) {
       mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })

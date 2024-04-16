@@ -158,6 +158,7 @@ const AnalysisStateZ = z.enum([
   'Initialized',
   'Requested',
 ])
+export type AnalysisState = z.infer<typeof AnalysisStateZ>
 
 export const GetFixReportZ = z.object({
   fixReport_by_pk: z.object({

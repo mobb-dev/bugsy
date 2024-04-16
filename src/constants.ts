@@ -89,3 +89,13 @@ export const errorMessages = {
     '(--token)'
   )} is needed if you're adding an SCM token`,
 } as const
+
+export const progressMassages = {
+  processingVulnerabilityReportSuccess:
+    '⚙️  Vulnerability report proccessed successfully',
+  processingVulnerabilityReport: '⚙️  Proccessing vulnerability report',
+  processingVulnerabilityReportFailed:
+    '⚙️  Error Proccessing vulnerability report',
+} as const
+
+export const VUL_REPORT_DIGEST_TIMEOUT_MS = 1000 * 60 * 20 // 20 minutes in msec

@@ -27,6 +27,7 @@ import {
 } from './queries'
 import { subscribe } from './subscirbe'
 import {
+  AnalysisState,
   CreateCliLoginArgs,
   CreateCliLoginQuery,
   CreateCliLoginZ,
@@ -372,25 +373,29 @@ export class GQLClient {
     ).vulnerability_report_path.map((p) => p.path)
   }
 
-  async subscribeToAnalysis(
-    params: SubscribeToAnalysisParams,
+  async subscribeToAnalysis(params: {
+    subscribeToAnalysisParams: SubscribeToAnalysisParams
     callback: (analysisId: string) => void
-  ) {
+    callbackStates: AnalysisState[]
+    timeoutInMs?: number
+  }) {
+    const { callbackStates } = params
     return subscribe<GetFixReportSubscription, SubscribeToAnalysisParams>(
       SUBSCRIBE_TO_ANALYSIS,
-      params,
+      params.subscribeToAnalysisParams,
       async (resolve, reject, data) => {
         if (data.analysis.state === 'Failed') {
           reject(data)
           throw new Error(`Analysis failed with id: ${data.analysis.id}`)
         }
-        if (data.analysis?.state === 'Finished') {
-          await callback(data.analysis.id)
+        if (callbackStates.includes(data.analysis?.state)) {
+          await params.callback(data.analysis.id)
           resolve(data)
         }
       },
       {
         apiKey: this._apiKey,
+        timeoutInMs: params.timeoutInMs,
       }
     )
   }

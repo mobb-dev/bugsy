@@ -6,10 +6,12 @@ import { pipeline } from 'node:stream/promises'
 
 import type { CommandOptions } from '@mobb/bugsy/commands'
 import {
+  progressMassages,
   Scanner,
   SCANNERS,
   SupportedScanners,
   SupportedScannersZ,
+  VUL_REPORT_DIGEST_TIMEOUT_MS,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
 import { MobbCliCommand } from '@mobb/bugsy/types'
@@ -41,6 +43,7 @@ import {
   ScmLibScmType,
 } from './scm'
 import { uploadFile } from './upload-file'
+import { sendReport } from './utils'
 
 const { CliError, Spinner, keypress, getDirName } = utils
 
@@ -332,20 +335,36 @@ export async function _scan(
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
   const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
-  const sendReportRes = await sendReport()
+  const sendReportRes = await sendReport({
+    gqlClient,
+    spinner: mobbSpinner,
+    submitVulnerabilityReportVariables: {
+      fixReportId: reportUploadInfo.fixReportId,
+      repoUrl: z.string().parse(repo),
+      reference,
+      projectId,
+      vulnerabilityReportFileName: 'report.json',
+      sha,
+      experimentalEnabled,
+      pullRequest: params.pullRequest,
+    },
+  })
   // in case we were provided with the github action token we assume we can create the github comments
   if (command === 'review') {
-    await gqlClient.subscribeToAnalysis(
-      { analysisId: sendReportRes.submitVulnerabilityReport.fixReportId },
-      (analysisId) =>
+    await gqlClient.subscribeToAnalysis({
+      subscribeToAnalysisParams: {
+        analysisId: sendReportRes.submitVulnerabilityReport.fixReportId,
+      },
+      callback: (analysisId) =>
         handleFinishedAnalysis({
           analysisId,
           gqlClient,
           scm,
           githubActionToken: z.string().parse(githubActionToken),
           scanner: z.nativeEnum(SCANNERS).parse(scanner),
-        })
-    )
+        }),
+      callbackStates: ['Finished'],
+    })
   }
 
   mobbSpinner.success({
@@ -353,30 +372,6 @@ export async function _scan(
   })
 
   await askToOpenAnalysis()
-
-  async function sendReport() {
-    try {
-      const sumbitRes = await gqlClient.submitVulnerabilityReport({
-        fixReportId: reportUploadInfo.fixReportId,
-        repoUrl: z.string().parse(repo),
-        reference,
-        projectId,
-        vulnerabilityReportFileName: 'report.json',
-        sha,
-        experimentalEnabled,
-        pullRequest: params.pullRequest,
-      })
-      if (
-        sumbitRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
-      ) {
-        throw new Error('🕵️‍♂️ Mobb analysis failed')
-      }
-      return sumbitRes
-    } catch (e) {
-      mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
-      throw e
-    }
-  }
 
   async function getReport(scanner: SupportedScanners): Promise<string> {
     const reportPath = path.join(dirname, 'report.json')
@@ -572,7 +567,9 @@ export async function _scan(
     uploadReportSpinner.success({
       text: '📁 Uploading Report successful!',
     })
-    const digestSpinner = createSpinner('🕵️‍♂️ Digesting report').start()
+    const digestSpinner = createSpinner(
+      progressMassages.processingVulnerabilityReport
+    ).start()
     let vulnFiles = []
     const gitInfo = await getGitInfo(srcPath)
     try {
@@ -581,12 +578,21 @@ export async function _scan(
           fixReportId: reportUploadInfo.fixReportId,
           projectId,
         })
-      const finalState = await gqlClient.waitFixReportInit(
-        reportUploadInfo.fixReportId,
-        true
-      )
-      if (finalState !== 'Digested') {
-        throw new Error('Digesting report failed')
+      try {
+        await gqlClient.subscribeToAnalysis({
+          subscribeToAnalysisParams: {
+            analysisId: reportUploadInfo.fixReportId,
+          },
+          callback: () =>
+            digestSpinner.update({
+              text: progressMassages.processingVulnerabilityReportSuccess,
+            }),
+
+          callbackStates: ['Digested', 'Finished'],
+          timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+        })
+      } catch (e) {
+        throw new Error(progressMassages.processingVulnerabilityReportFailed)
       }
       vulnFiles = await gqlClient.getVulnerabilityReportPaths(
         vulnerabilityReportId
@@ -596,7 +602,7 @@ export async function _scan(
       throw e
     }
     digestSpinner.success({
-      text: '🕵️‍♂️ Digesting report successful!',
+      text: progressMassages.processingVulnerabilityReportSuccess,
     })
 
     const zippingSpinner = createSpinner('📦 Zipping repo').start()
@@ -621,12 +627,16 @@ export async function _scan(
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
     try {
-      await gqlClient.submitVulnerabilityReport({
-        fixReportId: reportUploadInfo.fixReportId,
-        projectId: projectId,
-        repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
-        reference: gitInfo.reference || 'no-branch',
-        sha: commitHash || gitInfo.hash || '0123456789abcdef',
+      await sendReport({
+        gqlClient,
+        spinner: mobbSpinner,
+        submitVulnerabilityReportVariables: {
+          fixReportId: reportUploadInfo.fixReportId,
+          projectId: projectId,
+          repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
+          reference: gitInfo.reference || 'no-branch',
+          sha: commitHash || gitInfo.hash || '0123456789abcdef',
+        },
       })
     } catch (e) {
       mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })

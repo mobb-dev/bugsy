@@ -842,7 +842,8 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   getDownloadUrl(sha: string): string {
-    const repoName = this.url?.split('/')[-1]
+    const urlSplit: string[] = this.url?.split('/') || []
+    const repoName = urlSplit[urlSplit?.length - 1]
     return `${this.url}/-/archive/${sha}/${repoName}-${sha}.zip`
   }
 

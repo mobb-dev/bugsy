@@ -23,9 +23,14 @@ const GITLAB_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
 
 const EnvVariablesZod = z.object({
   GITLAB_API_TOKEN: z.string().optional(),
+  BROKERED_HOSTS: z
+    .string()
+    .toLowerCase()
+    .transform((x) => x.split(',').map((url) => url.trim(), []))
+    .default(''),
 })
 
-const { GITLAB_API_TOKEN } = EnvVariablesZod.parse(process.env)
+const { GITLAB_API_TOKEN, BROKERED_HOSTS } = EnvVariablesZod.parse(process.env)
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -425,23 +430,28 @@ function initGitlabFetchMock() {
   const globalFetch = global.fetch
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function myFetch(input: any, init?: any): any {
-    const stack = new Error().stack
-    const parts = stack?.split('at ')
-    if (
-      parts?.length &&
-      parts?.length >= 3 &&
-      parts[2]?.startsWith('defaultRequestHandler (') &&
-      parts[2]?.includes('/@gitbeaker/rest/dist/index.js') &&
-      (/^https?:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\//i.test(
-        input?.url
-      ) ||
-        ('GITLAB_INTERNAL_DEV_HOST' in process.env &&
-          process.env['GITLAB_INTERNAL_DEV_HOST'] &&
-          input?.url?.startsWith(process.env['GITLAB_INTERNAL_DEV_HOST'])))
-    ) {
-      const dispatcher = new ProxyAgent(
-        process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
+    let urlParsed = null
+    // this block is used for unit tests only. URL starts from local directory
+    try {
+      urlParsed = input?.url ? new URL(input?.url) : null
+    } catch (err) {
+      console.log(
+        `this block is used for unit tests only. URL ${input?.url} starts from local directory`
       )
+    }
+
+    if (
+      urlParsed &&
+      BROKERED_HOSTS.includes(
+        `${urlParsed.protocol?.toLowerCase()}//${urlParsed.host?.toLowerCase()}`
+      )
+    ) {
+      const dispatcher = new ProxyAgent({
+        uri: process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888',
+        requestTls: {
+          rejectUnauthorized: false,
+        },
+      })
       return globalFetch(input, { dispatcher } as RequestInit)
     }
     return globalFetch(input, init)

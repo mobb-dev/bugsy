@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.94",
+  "version": "0.0.96",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
@@ -62,7 +62,7 @@
     "uuid": "9.0.1",
     "ws": "8.10.0",
     "yargs": "17.7.2",
-    "zod": "3.22.4"
+    "zod": "3.22.5"
   },
   "devDependencies": {
     "@octokit/plugin-rest-endpoint-methods": "7.0.1",

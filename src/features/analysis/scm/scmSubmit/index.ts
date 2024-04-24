@@ -20,6 +20,16 @@ export * from './types'
 const APP_DIR_PREFIX = 'mobb'
 const MOBB_COMMIT_PREFIX = 'mobb fix commit:'
 
+const EnvVariablesZod = z.object({
+  BROKERED_HOSTS: z
+    .string()
+    .toLowerCase()
+    .transform((x) => x.split(',').map((url) => url.trim(), []))
+    .default(''),
+})
+
+const { BROKERED_HOSTS } = EnvVariablesZod.parse(process.env)
+
 export const isValidBranchName = async (branchName: string) => {
   const git = simpleGit()
   try {
@@ -145,22 +155,31 @@ async function initGit(params: { dirName: string; repoUrl: string }) {
   await git.init()
   await git.addConfig('user.email', 'git@mobb.ai')
   await git.addConfig('user.name', 'Mobb autofixer')
-  const isDisableSslVerify =
-    'GIT_CLI_SKIP_SSL_VERIFICATION' in process.env &&
-    process.env['GIT_CLI_SKIP_SSL_VERIFICATION'] === 'true'
-  if (isDisableSslVerify) {
-    await git.addConfig('http.sslVerify', 'false')
+
+  let repoUrlParsed = null
+  // this block is used for unit tests only. URL starts from local directory
+  try {
+    repoUrlParsed = repoUrl ? new URL(repoUrl) : null
+  } catch (err) {
+    console.log(
+      `this block is used for unit tests only. URL ${repoUrl} starts from local directory`
+    )
   }
+
   if (
-    /^https?:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\//i.test(
-      repoUrl
-    ) ||
-    ('GITLAB_INTERNAL_DEV_HOST' in process.env &&
-      process.env['GITLAB_INTERNAL_DEV_HOST'] &&
-      repoUrl.startsWith(process.env['GITLAB_INTERNAL_DEV_HOST']))
+    repoUrlParsed &&
+    BROKERED_HOSTS.includes(
+      `${repoUrlParsed.protocol?.toLowerCase()}//${repoUrlParsed.host?.toLowerCase()}`
+    )
   ) {
+    await git.addConfig('http.sslVerify', 'false')
+
     await git.addConfig(
       'http.proxy',
+      process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
+    )
+    await git.addConfig(
+      'https.proxy',
       process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
     )
   }

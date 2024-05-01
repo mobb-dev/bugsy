@@ -25,6 +25,8 @@ export enum IssueType_Enum {
   LogForging = 'LOG_FORGING',
   /** The program might dereference a null-pointer because it does not check the return value of a function that might return null */
   MissingCheckAgainstNull = 'MISSING_CHECK_AGAINST_NULL',
+  /** Missing equals or hashcode method */
+  MissingEqualsOrHashcode = 'MISSING_EQUALS_OR_HASHCODE',
   /** Open Redirect */
   OpenRedirect = 'OPEN_REDIRECT',
   /** The catch block handles a broad swath of exceptions, potentially trapping dissimilar issues or problems that should not be dealt with at this point in the program */

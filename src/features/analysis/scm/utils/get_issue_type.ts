@@ -54,6 +54,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'Insecure Cookie'
     case IssueType_Enum.TrustBoundaryViolation:
       return 'Trust Boundary Violation'
+    case IssueType_Enum.MissingEqualsOrHashcode:
+      return 'Missing equals or hashcode method'
     default: {
       return issueType ? issueType.replaceAll('_', ' ') : 'Other'
     }

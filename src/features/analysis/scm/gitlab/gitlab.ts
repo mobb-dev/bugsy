@@ -26,7 +26,12 @@ const EnvVariablesZod = z.object({
   BROKERED_HOSTS: z
     .string()
     .toLowerCase()
-    .transform((x) => x.split(',').map((url) => url.trim(), []))
+    .transform((x) =>
+      x
+        .split(',')
+        .map((url) => url.trim(), [])
+        .filter(Boolean)
+    )
     .default(''),
 })
 

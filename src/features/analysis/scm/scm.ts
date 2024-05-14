@@ -81,7 +81,6 @@ import { isValidBranchName } from './scmSubmit'
 
 export type ScmConfig = {
   id: string
-  isBroker: boolean
   orgId?: string
   refreshToken?: string | null
   scmOrg?: string | null | undefined

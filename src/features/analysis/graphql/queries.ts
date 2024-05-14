@@ -7,7 +7,6 @@ export const ME = gql`
       email
       scmConfigs {
         id
-        isBroker
         orgId
         refreshToken
         scmType

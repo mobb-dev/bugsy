@@ -156,7 +156,35 @@ const FixesZ = z
 
 async function initGit(params: { dirName: string; repoUrl: string }) {
   const { repoUrl, dirName } = params
-  const git = simpleGit(dirName)
+  const git = simpleGit(dirName).outputHandler((bin, stdout, stderr) => {
+    const errChunks: string[] = []
+    const outChunks: string[] = []
+    let isStdoutClosed = false
+    let isStderrClosed = false
+    stderr.on('data', (data) => errChunks.push(data.toString('utf8')))
+    stdout.on('data', (data) => outChunks.push(data.toString('utf8')))
+
+    function logData() {
+      if (!isStderrClosed || !isStdoutClosed) {
+        return
+      }
+      const logObj = {
+        bin,
+        err: errChunks.join(''),
+        out: outChunks.join(''),
+      }
+      console.log(JSON.stringify(logObj))
+    }
+
+    stderr.on('close', () => {
+      isStderrClosed = true
+      logData()
+    })
+    stdout.on('close', () => {
+      isStdoutClosed = true
+      logData()
+    })
+  })
   await git.init()
   await git.addConfig('user.email', 'git@mobb.ai')
   await git.addConfig('user.name', 'Mobb autofixer')

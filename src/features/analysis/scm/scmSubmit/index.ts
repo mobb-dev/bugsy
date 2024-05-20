@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises'
 
 import os from 'os'
-import parseDiff from 'parse-diff'
 import path from 'path'
 import { SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
@@ -123,13 +122,7 @@ const fetchInitialCommit = async (params: {
 }) => {
   const { git, reference, depth = 1, response } = params
   try {
-    await git.fetch([
-      '--depth',
-      `${depth}`,
-      '--filter=blob:none',
-      'origin',
-      reference,
-    ])
+    await git.fetch(['--depth', `${depth}`, 'origin', reference])
   } catch (e) {
     response.error = {
       type: 'InitialRepoAccessError',
@@ -161,12 +154,8 @@ const FixesZ = z
   .array(z.object({ fixId: z.string(), diff: z.string() }))
   .nonempty()
 
-async function initGit(params: {
-  dirName: string
-  repoUrl: string
-  changedFiles: string[]
-}) {
-  const { repoUrl, dirName, changedFiles } = params
+async function initGit(params: { dirName: string; repoUrl: string }) {
+  const { repoUrl, dirName } = params
   const git = simpleGit(dirName).outputHandler((bin, stdout, stderr) => {
     const errChunks: string[] = []
     const outChunks: string[] = []
@@ -229,29 +218,7 @@ async function initGit(params: {
   }
   await git.addRemote('origin', repoUrl)
 
-  await git.raw(['sparse-checkout', 'init', '--no-cone'])
-  await git.raw(['sparse-checkout', 'set', ''])
-
-  for (const file of changedFiles) {
-    await git.raw(['sparse-checkout', 'add', file])
-  }
-
-  await git.raw(['sparse-checkout', 'add', '!/*'])
-
   return git
-}
-
-function getListOfFilesFromDiffs(diffs: string[]) {
-  const files = []
-  for (const diff of diffs) {
-    const parsedDiff = parseDiff(diff)
-    for (const file of parsedDiff) {
-      if (file.from) {
-        files.push(file.from)
-      }
-    }
-  }
-  return files
 }
 
 const COMMIT_TO_SAME_BRNACH_FETCH_DEPTH = 10
@@ -278,10 +245,9 @@ export async function submitFixesToSameBranch(
     }
 
     const fixes = fixesParseRes.data
-    const changedFiles = getListOfFilesFromDiffs(fixes.map((fix) => fix.diff))
     const dirName = tmpDir.name
     const { branch: branchName, commitHash } = msg
-    const git = await initGit({ dirName, repoUrl: msg.repoUrl, changedFiles })
+    const git = await initGit({ dirName, repoUrl: msg.repoUrl })
     if (
       !(await fetchInitialCommit({
         git,
@@ -357,14 +323,7 @@ export const submitFixesToDifferentBranch = async (
   try {
     response.submitFixRequestId = msg.submitFixRequestId
     let submitBranch = msg.submitBranch
-    const changedFiles = getListOfFilesFromDiffs(
-      msg.fixes.map((fix) => fix.diff)
-    )
-    const git = await initGit({
-      dirName: tmpDir,
-      repoUrl: msg.repoUrl,
-      changedFiles,
-    })
+    const git = await initGit({ dirName: tmpDir, repoUrl: msg.repoUrl })
     if (!(await fetchInitialCommit({ git, reference: commitHash, response }))) {
       return response
     }

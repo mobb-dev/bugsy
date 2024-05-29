@@ -57,4 +57,6 @@ export enum IssueType_Enum {
   Xss = 'XSS',
   /** XXE */
   Xxe = 'XXE',
+  /** Zip Slip is a form of directory traversal that can be exploited by extracting files from an archive */
+  ZipSlip = 'ZIP_SLIP',
 }

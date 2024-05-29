@@ -14,6 +14,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'XSS'
     case IssueType_Enum.Pt:
       return 'Path Traversal'
+    case IssueType_Enum.ZipSlip:
+      return 'Zip Slip'
     case IssueType_Enum.InsecureRandomness:
       return 'Insecure Randomness'
     case IssueType_Enum.Ssrf:

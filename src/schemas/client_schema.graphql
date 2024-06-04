@@ -1,0 +1,290 @@
+query Me {
+  me {
+    id
+    email
+    scmConfigs {
+      id
+      orgId
+      refreshToken
+      scmType
+      scmUrl
+      scmUsername
+      token
+      tokenLastUpdate
+      userId
+      scmOrg
+      isTokenAvailable
+    }
+  }
+}
+
+query getOrgAndProjectId {
+  users: user {
+    userOrganizationsAndUserOrganizationRoles {
+      organization {
+        id
+        projects(order_by: { updatedAt: desc }) {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+query GetEncryptedApiToken($loginId: uuid!) {
+  cli_login_by_pk(id: $loginId) {
+    encryptedApiToken
+  }
+}
+
+query FixReportState($id: uuid!) {
+  fixReport_by_pk(id: $id) {
+    state
+  }
+}
+
+query GetVulnerabilityReportPaths($vulnerabilityReportId: uuid!) {
+  vulnerability_report_path(
+    where: { vulnerabilityReportId: { _eq: $vulnerabilityReportId } }
+  ) {
+    path
+  }
+}
+
+subscription getAnalysis($analysisId: uuid!) {
+  analysis: fixReport_by_pk(id: $analysisId) {
+    id
+    state
+  }
+}
+
+query getAnalsyis($analysisId: uuid!) {
+  analysis: fixReport_by_pk(id: $analysisId) {
+    id
+    state
+    repo {
+      commitSha
+      pullRequest
+    }
+    vulnerabilityReportId
+    vulnerabilityReport {
+      projectId
+      project {
+        organizationId
+      }
+      file {
+        signedFile {
+          url
+        }
+      }
+    }
+  }
+}
+
+query getFixes($filters: fix_bool_exp!) {
+  fixes: fix(where: $filters) {
+    issueType
+    id
+    patchAndQuestions {
+      __typename
+      ... on FixData {
+        patch
+      }
+    }
+  }
+}
+
+query getVulByNodesMetadata(
+  $filters: [vulnerability_report_issue_code_node_bool_exp!]
+  $vulnerabilityReportId: uuid!
+) {
+  vulnerabilityReportIssueCodeNodes: vulnerability_report_issue_code_node(
+    order_by: { index: desc }
+    where: {
+      _or: $filters
+      vulnerabilityReportIssue: {
+        fixId: { _is_null: false }
+        vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+      }
+    }
+  ) {
+    vulnerabilityReportIssueId
+    path
+    startLine
+    vulnerabilityReportIssue {
+      issueType
+      fixId
+    }
+  }
+  fixablePrVuls: vulnerability_report_issue_aggregate(
+    where: {
+      fixId: { _is_null: false }
+      vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+      codeNodes: { _or: $filters }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  nonFixablePrVuls: vulnerability_report_issue_aggregate(
+    where: {
+      fixId: { _is_null: true }
+      vulnerabilityReportId: { _eq: $vulnerabilityReportId }
+      codeNodes: { _or: $filters }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  totalScanVulnerabilities: vulnerability_report_issue_aggregate(
+    where: { vulnerabilityReportId: { _eq: $vulnerabilityReportId } }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
+
+mutation updateScmToken(
+  $scmType: String!
+  $url: String!
+  $token: String!
+  $org: String
+  $username: String
+  $refreshToken: String
+) {
+  updateScmToken(
+    scmType: $scmType
+    url: $url
+    token: $token
+    org: $org
+    username: $username
+    refreshToken: $refreshToken
+  ) {
+    __typename
+    ... on ScmAccessTokenUpdateSuccess {
+      token
+    }
+    ... on InvalidScmTypeError {
+      status
+      error
+    }
+    ... on BadScmCredentials {
+      status
+      error
+    }
+  }
+}
+
+mutation uploadS3BucketInfo($fileName: String!) {
+  uploadS3BucketInfo(fileName: $fileName) {
+    status
+    error
+    reportUploadInfo: uploadInfo {
+      url
+      fixReportId
+      uploadFieldsJSON
+      uploadKey
+    }
+    repoUploadInfo {
+      url
+      fixReportId
+      uploadFieldsJSON
+      uploadKey
+    }
+  }
+}
+
+mutation DigestVulnerabilityReport(
+  $vulnerabilityReportFileName: String!
+  $fixReportId: String!
+  $projectId: String!
+) {
+  digestVulnerabilityReport(
+    fixReportId: $fixReportId
+    vulnerabilityReportFileName: $vulnerabilityReportFileName
+    projectId: $projectId
+  ) {
+    __typename
+    ... on VulnerabilityReport {
+      vulnerabilityReportId
+      fixReportId
+    }
+    ... on RabbitSendError {
+      status
+      error
+    }
+    ... on ReportValidationError {
+      status
+      error
+    }
+    ... on ReferenceNotFoundError {
+      status
+      error
+    }
+  }
+}
+
+mutation SubmitVulnerabilityReport(
+  $fixReportId: String!
+  $repoUrl: String!
+  $reference: String!
+  $projectId: String!
+  $sha: String
+  $experimentalEnabled: Boolean
+  $vulnerabilityReportFileName: String
+  $pullRequest: Int
+) {
+  submitVulnerabilityReport(
+    fixReportId: $fixReportId
+    repoUrl: $repoUrl
+    reference: $reference
+    sha: $sha
+    experimentalEnabled: $experimentalEnabled
+    pullRequest: $pullRequest
+    projectId: $projectId
+    vulnerabilityReportFileName: $vulnerabilityReportFileName
+  ) {
+    __typename
+    ... on VulnerabilityReport {
+      vulnerabilityReportId
+      fixReportId
+    }
+  }
+}
+
+mutation CreateCommunityUser {
+  initOrganizationAndProject {
+    __typename
+    ... on InitOrganizationAndProjectGoodResponse {
+      projectId
+      userId
+      organizationId
+    }
+    ... on UserAlreadyInProjectError {
+      error
+      status
+    }
+  }
+}
+
+mutation CreateCliLogin($publicKey: String!) {
+  insert_cli_login_one(object: { publicKey: $publicKey }) {
+    id
+  }
+}
+
+mutation performCliLogin($loginId: String!) {
+  performCliLogin(loginId: $loginId) {
+    status
+  }
+}
+
+mutation CreateProject($organizationId: String!, $projectName: String!) {
+  createProject(organizationId: $organizationId, projectName: $projectName) {
+    projectId
+  }
+}

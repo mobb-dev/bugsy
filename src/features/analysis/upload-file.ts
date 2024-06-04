@@ -1,19 +1,19 @@
 import Debug from 'debug'
 import fetch, { File, fileFrom, FormData } from 'node-fetch'
 
-import { ReportUploadInfo } from './graphql/types'
-
 const debug = Debug('mobbdev:upload-file')
 
-type UploadFileArgs = Omit<ReportUploadInfo, 'fixReportId'> & {
-  file: string | Buffer
-}
 export async function uploadFile({
   file,
   url,
   uploadKey,
   uploadFields,
-}: UploadFileArgs) {
+}: {
+  file: string | Buffer
+  url: string
+  uploadKey: string
+  uploadFields: Record<string, string>
+}) {
   debug('upload file start %s', url)
   debug('upload fields %o', uploadFields)
   debug('upload key %s', uploadKey)

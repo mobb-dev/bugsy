@@ -33,6 +33,8 @@ const envVariablesSchema = z
   .object({
     WEB_APP_URL: z.string(),
     API_URL: z.string(),
+    HASURA_ACCESS_KEY: z.string(),
+    LOCAL_GRAPHQL_ENDPOINT: z.string(),
   })
   .required()
 
@@ -71,6 +73,8 @@ export const mobbAscii = `
 export const PROJECT_DEFAULT_NAME = 'My first project'
 export const WEB_APP_URL = envVariables.WEB_APP_URL
 export const API_URL = envVariables.API_URL
+export const HASURA_ACCESS_KEY = envVariables.HASURA_ACCESS_KEY
+export const LOCAL_GRAPHQL_ENDPOINT = envVariables.LOCAL_GRAPHQL_ENDPOINT
 
 export const PROJECT_PAGE_REGEX =
   /^http:\/\/(127\.0\.0\.1)|(localhost):5173\/organization\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/project\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/

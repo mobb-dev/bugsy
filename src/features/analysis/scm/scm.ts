@@ -81,7 +81,7 @@ import { isValidBranchName } from './scmSubmit'
 
 export type ScmConfig = {
   id: string
-  orgId?: string
+  orgId?: string | null
   refreshToken?: string | null
   scmOrg?: string | null | undefined
   scmType: string

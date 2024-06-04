@@ -14,6 +14,7 @@ import {
   VUL_REPORT_DIGEST_TIMEOUT_MS,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
+import { Fix_Report_State_Enum } from '@mobb/bugsy/generates/client_generates'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
@@ -39,11 +40,12 @@ import {
   getScmConfig,
   getScmTypeFromScmLibType,
   scmCanReachRepo,
+  ScmConfig,
   SCMLib,
   ScmLibScmType,
 } from './scm'
 import { uploadFile } from './upload-file'
-import { sendReport } from './utils'
+import { getFromArraySafe, sendReport } from './utils'
 
 const { CliError, Spinner, keypress, getDirName } = utils
 
@@ -234,6 +236,9 @@ export async function _scan(
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()
+  if (!reportUploadInfo || !repoUploadInfo) {
+    throw new Error('uploadS3BucketInfo is null')
+  }
   let reportPath = scanFile
 
   if (srcPath) {
@@ -244,9 +249,15 @@ export async function _scan(
     throw new Error('repo is required in case srcPath is not provided')
   }
   const userInfo = await gqlClient.getUserInfo()
+
+  if (!userInfo) {
+    throw new Error('userInfo is null')
+  }
+  const scmConfigs = getFromArraySafe<ScmConfig>(userInfo.scmConfigs)
+
   const tokenInfo = getScmConfig({
     url: repo,
-    scmConfigs: userInfo.scmConfigs,
+    scmConfigs,
     includeOrgTokens: false,
   })
   const isRepoAvailable = await scmCanReachRepo({
@@ -325,7 +336,10 @@ export async function _scan(
     await uploadFile({
       file: reportPath,
       url: reportUploadInfo.url,
-      uploadFields: reportUploadInfo.uploadFields,
+      uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
+        string,
+        string
+      >,
       uploadKey: reportUploadInfo.uploadKey,
     })
   } catch (e) {
@@ -349,6 +363,12 @@ export async function _scan(
       pullRequest: params.pullRequest,
     },
   })
+  if (
+    sendReportRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
+  ) {
+    mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
+    throw new Error('🕵️‍♂️ Mobb analysis failed')
+  }
   // in case we were provided with the github action token we assume we can create the github comments
   if (command === 'review') {
     await gqlClient.subscribeToAnalysis({
@@ -363,7 +383,7 @@ export async function _scan(
           githubActionToken: z.string().parse(githubActionToken),
           scanner: z.nativeEnum(SCANNERS).parse(scanner),
         }),
-      callbackStates: ['Finished'],
+      callbackStates: [Fix_Report_State_Enum.Finished],
     })
   }
 
@@ -398,6 +418,9 @@ export async function _scan(
   }
 
   async function askToOpenAnalysis() {
+    if (!repoUploadInfo || !reportUploadInfo) {
+      throw new Error('uploadS3BucketInfo is null')
+    }
     const reportUrl = getReportUrl({
       organizationId,
       projectId,
@@ -527,9 +550,14 @@ export async function _scan(
 
     for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
       const userInfo = await gqlClient.getUserInfo()
+      if (!userInfo) {
+        throw new CliError('User info not found')
+      }
+      const scmConfigs = getFromArraySafe<ScmConfig>(userInfo.scmConfigs)
+
       const tokenInfo = getScmConfig({
         url: repoUrl,
-        scmConfigs: userInfo.scmConfigs,
+        scmConfigs,
         includeOrgTokens: false,
       })
 
@@ -549,6 +577,9 @@ export async function _scan(
   }
 
   async function uploadExistingRepo() {
+    if (!repoUploadInfo || !reportUploadInfo) {
+      throw new Error('uploadS3BucketInfo is null')
+    }
     if (!srcPath || !reportPath) {
       throw new Error('src path and reportPath is required')
     }
@@ -557,7 +588,10 @@ export async function _scan(
       await uploadFile({
         file: reportPath,
         url: reportUploadInfo.url,
-        uploadFields: reportUploadInfo.uploadFields,
+        uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
+          string,
+          string
+        >,
         uploadKey: reportUploadInfo.uploadKey,
       })
     } catch (e) {
@@ -588,7 +622,10 @@ export async function _scan(
               text: progressMassages.processingVulnerabilityReportSuccess,
             }),
 
-          callbackStates: ['Digested', 'Finished'],
+          callbackStates: [
+            Fix_Report_State_Enum.Digested,
+            Fix_Report_State_Enum.Finished,
+          ],
           timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
         })
       } catch (e) {
@@ -615,7 +652,10 @@ export async function _scan(
       await uploadFile({
         file: zipBuffer,
         url: repoUploadInfo.url,
-        uploadFields: repoUploadInfo.uploadFields,
+        uploadFields: JSON.parse(repoUploadInfo.uploadFieldsJSON) as Record<
+          string,
+          string
+        >,
         uploadKey: repoUploadInfo.uploadKey,
       })
     } catch (e) {

@@ -9,8 +9,7 @@ import { GetVulByNodeHunk } from './graphql/types'
 import { GithubSCMLib, SCMLib } from './scm'
 import { COMMIT_FIX_SVG, MOBB_ICON_IMG } from './scm/constants'
 import { getCommitUrl, getFixUrlWithRedirect, getIssueType } from './scm/utils'
-import { keyBy } from './utils'
-import { calculateRanges } from './utils'
+import { calculateRanges, keyBy } from './utils'
 
 const debug = Debug('mobbdev:handle-finished-analysis')
 const contactUsMarkdown = `For specific requests [contact us](https://mobb.ai/contact) and we'll do the most to answer your need quickly.`
@@ -95,7 +94,7 @@ function buildAnalysisSummaryComment(params: {
         if (!fix) {
           throw new Error(`fix ${vulnerabilityReportIssue.fixId} not found`)
         }
-        const issueType = getIssueType(fix.issueType)
+        const issueType = getIssueType(fix.issueType ?? null)
         const vulnerabilityReportIssueCount = (result[issueType] || 0) + 1
         return {
           ...result,
@@ -133,13 +132,20 @@ export async function handleFinishedAnalysis({
       projectId,
       project: { organizationId },
     },
-  } = getAnalysis.analysis
-  const { commitSha, pullRequest } = getAnalysis.analysis.repo
+  } = getAnalysis
+  if (
+    !getAnalysis.repo ||
+    !getAnalysis.repo.commitSha ||
+    !getAnalysis.repo.pullRequest
+  ) {
+    throw new Error('repo not found')
+  }
+  const { commitSha, pullRequest } = getAnalysis.repo
   const diff = await scm.getPrDiff({ pull_number: pullRequest })
   const prVulenrabilities = await getRelevantVulenrabilitiesFromDiff({
     diff,
     gqlClient,
-    vulnerabilityReportId: getAnalysis.analysis.vulnerabilityReportId,
+    vulnerabilityReportId: getAnalysis.vulnerabilityReportId,
   })
   const { vulnerabilityReportIssueCodeNodes } = prVulenrabilities
   const fixesId = vulnerabilityReportIssueCodeNodes.map(
@@ -226,7 +232,7 @@ export async function handleFinishedAnalysis({
     } = vulnerabilityReportIssueCodeNode
 
     const fix = fixesById[fixId]
-    if (!fix) {
+    if (!fix || fix.patchAndQuestions.__typename !== 'FixData') {
       throw new Error(`fix ${fixId} not found`)
     }
     const {
@@ -263,7 +269,7 @@ export async function handleFinishedAnalysis({
       commentId,
     })
     const scanerString = scannerToFriendlyString(scanner)
-    const issueType = getIssueType(fix.issueType)
+    const issueType = getIssueType(fix.issueType ?? null)
     const title = `# ${MobbIconMarkdown} ${issueType} fix is ready`
     const subTitle = `### Apply the following code change to fix ${issueType} issue detected by **${scanerString}**:`
     const diff = `\`\`\`diff\n${patch} \n\`\`\``

@@ -1,0 +1,14 @@
+export declare const POST_COMMENT_PATH = "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments";
+export declare const DELETE_COMMENT_PATH = "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}";
+export declare const UPDATE_COMMENT_PATH = "PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}";
+export declare const GET_PR_COMMENTS_PATH = "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments";
+export declare const GET_PR_COMMENT_PATH = "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}";
+export declare const REPLY_TO_CODE_REVIEW_COMMENT_PATH = "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies";
+export declare const GET_PR = "GET /repos/{owner}/{repo}/pulls/{pull_number}";
+export declare const POST_GENERAL_PR_COMMENT = "POST /repos/{owner}/{repo}/issues/{issue_number}/comments";
+export declare const GET_GENERAL_PR_COMMENTS = "GET /repos/{owner}/{repo}/issues/{issue_number}/comments";
+export declare const DELETE_GENERAL_PR_COMMENT = "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}";
+export declare const GET_COMMENT_PATH = "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}";
+export declare const CREATE_OR_UPDATE_A_REPOSITORY_SECRET = "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}";
+export declare const GET_A_REPOSITORY_PUBLIC_KEY = "GET /repos/{owner}/{repo}/actions/secrets/public-key";
+//# sourceMappingURL=consts.d.ts.map

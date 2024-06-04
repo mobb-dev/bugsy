@@ -7,11 +7,11 @@ import { expect, it, vi } from 'vitest'
 
 import { API_URL, PROJECT_PAGE_REGEX, SCANNERS } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
-import {
-  CREATE_COMMUNITY_USER,
-  PERFORM_CLI_LOGIN,
-} from '../src/features/analysis/graphql/mutations'
 import * as ourPackModule from '../src/features/analysis/pack'
+import {
+  CreateCommunityUserDocument,
+  PerformCliLoginDocument,
+} from '../src/generates/client_generates'
 
 const uuidRegex = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 const analysisRegex = new RegExp(
@@ -32,7 +32,7 @@ vi.mock('open', () => ({
           authorization: `Bearer ${process.env.TOKEN}`,
         },
         body: JSON.stringify({
-          query: CREATE_COMMUNITY_USER,
+          query: CreateCommunityUserDocument,
         }),
         method: 'POST',
       })
@@ -44,7 +44,7 @@ vi.mock('open', () => ({
           authorization: `Bearer ${process.env.TOKEN}`,
         },
         body: JSON.stringify({
-          query: PERFORM_CLI_LOGIN,
+          query: PerformCliLoginDocument,
           variables: {
             loginId,
           },

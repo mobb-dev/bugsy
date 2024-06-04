@@ -1,12 +1,13 @@
 import { ReferenceType } from './scm';
-declare type ApiAuthOptions = {
+type ApiAuthOptions = {
+    url: string | undefined;
     gitlabAuthToken?: string | undefined;
 };
 export declare function gitlabValidateParams({ url, accessToken, }: {
     url: string | undefined;
     accessToken: string | undefined;
 }): Promise<void>;
-export declare function getGitlabUsername(accessToken: string): Promise<string>;
+export declare function getGitlabUsername(url: string | undefined, accessToken: string): Promise<string>;
 export declare function getGitlabIsUserCollaborator({ username, accessToken, repoUrl, }: {
     username: string;
     accessToken: string;
@@ -27,7 +28,7 @@ export declare function getGitlabIsRemoteBranch({ accessToken, repoUrl, branch, 
     repoUrl: string;
     branch: string;
 }): Promise<boolean>;
-export declare function getGitlabRepoList(accessToken: string): Promise<{
+export declare function getGitlabRepoList(url: string | undefined, accessToken: string): Promise<{
     repoName: string;
     repoUrl: string;
     repoOwner: string;
@@ -56,7 +57,7 @@ export declare function getGitlabReferenceData({ ref, gitlabUrl }: {
     type: ReferenceType;
     date: Date | undefined;
 }>;
-export declare function parseOwnerAndRepo(gitlabUrl: string): {
+export declare function parseGitlabOwnerAndRepo(gitlabUrl: string): {
     owner: string;
     repo: string;
     projectPath: string;

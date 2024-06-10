@@ -10,12 +10,9 @@ import {
   ReferenceType,
   RefNotFoundError,
   ScmType,
-} from '../scm'
+} from '../'
 import { parseScmURL } from '../urlParser'
-
-function removeTrailingSlash(str: string) {
-  return str.trim().replace(/\/+$/, '')
-}
+import { removeTrailingSlash } from '../utils'
 
 const EnvVariablesZod = z.object({
   GITHUB_API_TOKEN: z.string().optional(),

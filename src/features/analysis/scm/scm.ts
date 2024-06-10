@@ -3,21 +3,16 @@ import { z } from 'zod'
 
 import {
   AdoPullRequestStatusEnum,
+  AdoSdk,
   AdoTokenTypeEnum,
-  adoValidateParams,
-  createAdoPullRequest,
-  getAdoBlameRanges,
-  getAdoBranchList,
-  getAdoDownloadUrl,
-  getAdoIsRemoteBranch,
-  getAdoIsUserCollaborator,
   getAdoPrUrl,
-  getAdoPullRequestStatus,
-  getAdoReferenceData,
-  getAdoRepoDefaultBranch,
-  getAdoRepoList,
-  getAdoTokenType,
 } from './ado'
+import {
+  getBitbucketSdk,
+  getBitbucketToken,
+  parseBitbucketOrganizationAndRepo,
+  validateBitbucketParams,
+} from './bitbucket'
 import { encryptSecret } from './github/encryptSecret'
 import {
   createPr,
@@ -74,10 +69,19 @@ import {
   getGitlabRepoDefaultBranch,
   getGitlabRepoList,
   getGitlabUsername,
-  GitlabMergeRequestStatusEnum,
+  gitlabMergeRequestStatus,
   gitlabValidateParams,
 } from './gitlab/gitlab'
 import { isValidBranchName } from './scmSubmit'
+import {
+  GetGitBlameReponse,
+  ReferenceType,
+  scmCloudUrl,
+  ScmLibScmType,
+  ScmRepoInfo,
+  ScmSubmitRequestStatus,
+  ScmType,
+} from './types'
 
 export type ScmConfig = {
   id: string
@@ -93,63 +97,74 @@ export type ScmConfig = {
   isTokenAvailable: boolean
 }
 
+export const GetRefererenceResultZ = z.object({
+  date: z.date().optional(),
+  sha: z.string(),
+  type: z.nativeEnum(ReferenceType),
+})
+
+export type GetRefererenceResult = z.infer<typeof GetRefererenceResultZ>
+
 export const ghGetUserInfo = getUserInfo
-export function getCloudScmLibTypeFromUrl(url: string | undefined) {
+
+export function getCloudScmLibTypeFromUrl(
+  url: string | undefined
+): ScmLibScmType | undefined {
   if (!url) {
     return undefined
   }
   const urlObject = new URL(url)
   const hostname = urlObject.hostname.toLowerCase()
-  if (hostname === 'gitlab.com') {
+  if (hostname === scmCloudHostname.GitLab) {
     return ScmLibScmType.GITLAB
   }
-  if (hostname === 'github.com') {
+  if (hostname === scmCloudHostname.GitHub) {
     return ScmLibScmType.GITHUB
   }
-  if (hostname === 'dev.azure.com' || hostname.endsWith('.visualstudio.com')) {
+  if (
+    hostname === scmCloudHostname.Ado ||
+    hostname.endsWith('.visualstudio.com')
+  ) {
     return ScmLibScmType.ADO
   }
+  if (hostname === scmCloudHostname.Bitbucket) {
+    return ScmLibScmType.BITBUCKET
+  }
+
   return undefined
 }
 
-export enum ScmType {
-  GitLab = 'GitLab',
-  GitHub = 'GitHub',
-  Ado = 'Ado',
-}
+export const scmCloudHostname = {
+  GitLab: new URL(scmCloudUrl.GitLab).hostname,
+  GitHub: new URL(scmCloudUrl.GitHub).hostname,
+  Ado: new URL(scmCloudUrl.Ado).hostname,
+  Bitbucket: new URL(scmCloudUrl.Bitbucket).hostname,
+} as const
 
-export enum ScmCloudUrl {
-  GitLab = 'https://gitlab.com',
-  GitHub = 'https://github.com',
-  Ado = 'https://dev.azure.com',
-}
+const scmLibScmTypeToScmType: Record<ScmLibScmType, ScmType> = {
+  [ScmLibScmType.GITLAB]: ScmType.GitLab,
+  [ScmLibScmType.GITHUB]: ScmType.GitHub,
+  [ScmLibScmType.ADO]: ScmType.Ado,
+  [ScmLibScmType.BITBUCKET]: ScmType.Bitbucket,
+} as const
+
+const scmTypeToScmLibScmType: Record<ScmType, ScmLibScmType> = {
+  [ScmType.GitLab]: ScmLibScmType.GITLAB,
+  [ScmType.GitHub]: ScmLibScmType.GITHUB,
+  [ScmType.Ado]: ScmLibScmType.ADO,
+  [ScmType.Bitbucket]: ScmLibScmType.BITBUCKET,
+} as const
 
 export function getScmTypeFromScmLibType(
   scmLibType: string | null | undefined
 ) {
-  if (scmLibType === ScmLibScmType.GITLAB) {
-    return ScmType.GitLab
-  }
-  if (scmLibType === ScmLibScmType.GITHUB) {
-    return ScmType.GitHub
-  }
-  if (scmLibType === ScmLibScmType.ADO) {
-    return ScmType.Ado
-  }
-  throw new Error(`unknown scm lib type: ${scmLibType}`)
+  const parsedScmLibType = z.nativeEnum(ScmLibScmType).parse(scmLibType)
+  return scmLibScmTypeToScmType[parsedScmLibType]
 }
 
 export function getScmLibTypeFromScmType(scmType: string | null | undefined) {
-  if (scmType === ScmType.GitLab) {
-    return ScmLibScmType.GITLAB
-  }
-  if (scmType === ScmType.GitHub) {
-    return ScmLibScmType.GITHUB
-  }
-  if (scmType === ScmType.Ado) {
-    return ScmLibScmType.ADO
-  }
-  throw new Error(`unknown scm type: ${scmType}`)
+  const parsedScmType = z.nativeEnum(ScmType).parse(scmType)
+  return scmTypeToScmLibScmType[parsedScmType]
 }
 
 export function getScmConfig({
@@ -236,34 +251,6 @@ export async function scmCanReachRepo({
   }
 }
 
-export enum ReferenceType {
-  BRANCH = 'BRANCH',
-  COMMIT = 'COMMIT',
-  TAG = 'TAG',
-}
-
-export enum ScmSubmitRequestStatus {
-  MERGED = 'MERGED',
-  OPEN = 'OPEN',
-  CLOSED = 'CLOSED',
-  DRAFT = 'DRAFT',
-}
-
-export enum ScmLibScmType {
-  GITHUB = 'GITHUB',
-  GITLAB = 'GITLAB',
-  ADO = 'ADO',
-}
-
-export type ScmRepoInfo = {
-  repoName: string
-  repoUrl: string
-  repoOwner: string
-  repoLanguages: string[]
-  repoIsPublic: boolean
-  repoUpdatedAt: string
-}
-
 type PostPRReviewCommentParams = {
   prNumber: number
   body: string
@@ -315,6 +302,43 @@ export class RepoNoTokenAccessError extends Error {
   }
 }
 
+type CreateSubmitRequestParams = {
+  targetBranchName: string
+  sourceBranchName: string
+  title: string
+  body: string
+}
+export type ScmInitParams = {
+  url: string | undefined
+  accessToken: string | undefined
+  scmType: ScmLibScmType | undefined
+  scmOrg: string | undefined
+}
+
+function buildAuthrizedRepoUrl(args: {
+  url: string
+  username: string
+  password: string
+}) {
+  const { url, username, password } = args
+  const is_http = url.toLowerCase().startsWith('http://')
+  const is_https = url.toLowerCase().startsWith('https://')
+  // note: check the url when using the scm agent with personal access token
+
+  if (is_http) {
+    return `http://${username}:${password}@${url
+      .toLowerCase()
+      .replace('http://', '')}`
+  } else if (is_https) {
+    return `https://${username}:${password}@${url
+      .toLowerCase()
+      .replace('https://', '')}`
+  } else {
+    console.error(`invalid scm url ${url}`)
+    throw new Error(`invalid scm url ${url}`)
+  }
+}
+
 export class RebaseFailedError extends Error {}
 
 export abstract class SCMLib {
@@ -338,41 +362,56 @@ export abstract class SCMLib {
       throw new Error('no url')
     }
     const trimmedUrl = this.url.trim().replace(/\/$/, '')
-    if (!this.accessToken) {
+    const accessToken = this.getAccessToken()
+    if (!accessToken) {
       return trimmedUrl
     }
+    console.log(
+      'this instanceof BitbucketSCMLib',
+      this instanceof BitbucketSCMLib
+    )
 
     const scmLibType = this.getScmLibType()
     if (scmLibType === ScmLibScmType.ADO) {
-      return `https://${this.accessToken}@${trimmedUrl
+      return `https://${accessToken}@${trimmedUrl
         .toLowerCase()
         .replace('https://', '')}`
+    }
+    if (this instanceof BitbucketSCMLib) {
+      const authData = this.getAuthData()
+      switch (authData.authType) {
+        case 'public': {
+          return trimmedUrl
+        }
+        case 'token': {
+          const { token } = authData
+          const username = await this._getUsernameForAuthUrl()
+          return buildAuthrizedRepoUrl({
+            url: trimmedUrl,
+            username,
+            password: token,
+          })
+        }
+        case 'basic': {
+          const { username, password } = authData
+          return buildAuthrizedRepoUrl({ url: trimmedUrl, username, password })
+        }
+      }
     }
 
-    const is_http = trimmedUrl.toLowerCase().startsWith('http://')
-    const is_https = trimmedUrl.toLowerCase().startsWith('https://')
     const username = await this._getUsernameForAuthUrl()
-    if (is_http) {
-      return `http://${username}:${this.accessToken}@${trimmedUrl
-        .toLowerCase()
-        .replace('http://', '')}`
-    } else if (is_https) {
-      return `https://${username}:${this.accessToken}@${trimmedUrl
-        .toLowerCase()
-        .replace('https://', '')}`
-    } else {
-      console.error(`invalid scm url ${trimmedUrl}`)
-      throw new Error(`invalid scm url ${trimmedUrl}`)
-    }
+    return buildAuthrizedRepoUrl({
+      url: trimmedUrl,
+      username,
+      password: accessToken,
+    })
   }
 
   abstract getScmLibType(): ScmLibScmType
 
   abstract getAuthHeaders(): Record<string, string>
 
-  abstract getDownloadUrl(sha: string): string
-
-  abstract _getUsernameForAuthUrl(): Promise<string>
+  abstract getDownloadUrl(sha: string): Promise<string>
 
   abstract getIsRemoteBranch(_branch: string): Promise<boolean>
 
@@ -386,57 +425,21 @@ export abstract class SCMLib {
 
   abstract getUsername(): Promise<string>
 
-  abstract forkRepo(repoUrl: string): Promise<{ url: string | null }>
-
-  abstract createOrUpdateRepositorySecret(
-    params: { value: string; name: string },
-    _oktokit?: Octokit
-  ): Promise<{ url: string | null }>
-
-  abstract createPullRequestWithNewFile(
-    sourceRepoUrl: string,
-    filesPaths: string[],
-    userRepoUrl: string,
-    title: string,
-    body: string
-  ): Promise<{ pull_request_url: string }>
+  abstract _getUsernameForAuthUrl(): Promise<string>
 
   abstract getSubmitRequestStatus(
     _scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus>
 
-  abstract createSubmitRequest(
-    targetBranchName: string,
-    sourceBranchName: string,
-    title: string,
-    body: string
-  ): Promise<string>
+  abstract createSubmitRequest(args: CreateSubmitRequestParams): Promise<string>
 
   abstract getRepoBlameRanges(
     ref: string,
     path: string
-  ): Promise<
-    {
-      startingLine: number
-      endingLine: number
-      name: string
-      login: string
-      email: string
-    }[]
-  >
+  ): Promise<GetGitBlameReponse>
 
-  abstract getReferenceData(ref: string): Promise<{
-    type: ReferenceType
-    sha: string
-    date: Date | undefined
-  }>
-  abstract getPrComment(commentId: number): Promise<GetPrCommentResponse>
+  abstract getReferenceData(ref: string): Promise<GetRefererenceResult>
   abstract getPrUrl(prNumber: number): Promise<string>
-
-  abstract updatePrComment(
-    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
-    _oktokit?: Octokit
-  ): Promise<UpdateCommentResponse>
 
   abstract getRepoDefaultBranch(): Promise<string>
 
@@ -454,6 +457,12 @@ export abstract class SCMLib {
     }
     return this.url.split('/').at(-1) || ''
   }
+  protected _validateToken(): asserts this is this & { accessToken: string } {
+    if (!this.accessToken) {
+      console.error('no access token')
+      throw new Error('no access token')
+    }
+  }
 
   public static async getIsValidBranchName(
     branchName: string
@@ -466,31 +475,33 @@ export abstract class SCMLib {
     accessToken,
     scmType,
     scmOrg,
-  }: {
-    url: string | undefined
-    accessToken: string | undefined
-    scmType: ScmLibScmType | undefined
-    scmOrg: string | undefined
-  }): Promise<SCMLib> {
+  }: ScmInitParams): Promise<SCMLib> {
     let trimmedUrl = undefined
     if (url) {
       trimmedUrl = url.trim().replace(/\/$/, '').replace(/.git$/i, '')
     }
     try {
-      if (ScmLibScmType.GITHUB === scmType) {
-        const scm = new GithubSCMLib(trimmedUrl, accessToken, scmOrg)
-        await scm.validateParams()
-        return scm
-      }
-      if (ScmLibScmType.GITLAB === scmType) {
-        const scm = new GitlabSCMLib(trimmedUrl, accessToken, scmOrg)
-        await scm.validateParams()
-        return scm
-      }
-      if (ScmLibScmType.ADO === scmType) {
-        const scm = new AdoSCMLib(trimmedUrl, accessToken, scmOrg)
-        await scm.validateParams()
-        return scm
+      switch (scmType) {
+        case ScmLibScmType.GITHUB: {
+          const scm = new GithubSCMLib(trimmedUrl, accessToken, scmOrg)
+          await scm.validateParams()
+          return scm
+        }
+        case ScmLibScmType.GITLAB: {
+          const scm = new GitlabSCMLib(trimmedUrl, accessToken, scmOrg)
+          await scm.validateParams()
+          return scm
+        }
+        case ScmLibScmType.ADO: {
+          const scm = new AdoSCMLib(trimmedUrl, accessToken, scmOrg)
+          await scm.validateParams()
+          return scm
+        }
+        case ScmLibScmType.BITBUCKET: {
+          const scm = new BitbucketSCMLib(trimmedUrl, accessToken, scmOrg)
+          await scm.validateParams()
+          return scm
+        }
       }
     } catch (e) {
       if (e instanceof InvalidRepoUrlError && url) {
@@ -500,70 +511,35 @@ export abstract class SCMLib {
 
     return new StubSCMLib(trimmedUrl, undefined, undefined)
   }
-  abstract postGeneralPrComment(
-    params: PostPRReviewCommentParams,
-    auth?: { authToken: string }
-  ): SCMPostGeneralPrCommentsResponse
-  abstract getGeneralPrComments(
-    params: SCMGetPrReviewCommentsParams,
-    auth?: { authToken: string }
-  ): SCMGetPrReviewCommentsResponse
-  abstract deleteGeneralPrComment(
-    params: SCMDeleteGeneralPrCommentParams,
-    auth?: { authToken: string }
-  ): SCMDeleteGeneralPrReviewResponse
+
   protected _validateAccessTokenAndUrl(): asserts this is this & {
     accessToken: string
     url: string
   } {
     if (!this.accessToken) {
+      console.error('no access token')
       throw new InvalidAccessTokenError('no access token')
     }
+    this._validateUrl()
+  }
+  protected _validateUrl(): asserts this is this & {
+    url: string
+  } {
     if (!this.url) {
+      console.error('no url')
       throw new InvalidRepoUrlError('no url')
     }
   }
 }
 
 export class AdoSCMLib extends SCMLib {
-  updatePrComment(
-    _params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
-    _oktokit?: Octokit
-  ): Promise<UpdateCommentResponse> {
-    throw new Error('updatePrComment not implemented.')
-  }
-  getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
-    throw new Error('getPrComment not implemented.')
-  }
-  async forkRepo(): Promise<{ url: string | null }> {
-    throw new Error('forkRepo not supported yet')
-  }
-
-  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
-    throw new Error('createOrUpdateRepositorySecret not supported yet')
-  }
-
-  async createPullRequestWithNewFile(
-    _sourceRepoUrl: string,
-    _filesPaths: string[],
-    _userRepoUrl: string,
-    _title: string,
-    _body: string
-  ): Promise<{ pull_request_url: string }> {
-    throw new Error('createPullRequestWithNewFile not supported yet')
-  }
   async createSubmitRequest(
-    targetBranchName: string,
-    sourceBranchName: string,
-    title: string,
-    body: string
+    params: CreateSubmitRequestParams
   ): Promise<string> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
+    const { targetBranchName, sourceBranchName, title, body } = params
     return String(
-      await createAdoPullRequest({
+      await AdoSdk.createAdoPullRequest({
         title,
         body,
         targetBranchName,
@@ -576,7 +552,7 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async validateParams() {
-    return adoValidateParams({
+    return AdoSdk.adoValidateParams({
       url: this.url,
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
@@ -588,7 +564,7 @@ export class AdoSCMLib extends SCMLib {
       console.error('no access token')
       throw new Error('no access token')
     }
-    return getAdoRepoList({
+    return AdoSdk.getAdoRepoList({
       orgName: scmOrg,
       tokenOrg: this.scmOrg,
       accessToken: this.accessToken,
@@ -596,11 +572,8 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getBranchList(): Promise<string[]> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
-    return getAdoBranchList({
+    this._validateAccessTokenAndUrl()
+    return AdoSdk.getAdoBranchList({
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
       repoUrl: this.url,
@@ -613,7 +586,7 @@ export class AdoSCMLib extends SCMLib {
 
   getAuthHeaders(): Record<string, string> {
     if (this.accessToken) {
-      if (getAdoTokenType(this.accessToken) === AdoTokenTypeEnum.OAUTH) {
+      if (AdoSdk.getAdoTokenType(this.accessToken) === AdoTokenTypeEnum.OAUTH) {
         return {
           authorization: `Bearer ${this.accessToken}`,
         }
@@ -628,12 +601,11 @@ export class AdoSCMLib extends SCMLib {
     return {}
   }
 
-  getDownloadUrl(sha: string): string {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
-    return getAdoDownloadUrl({ repoUrl: this.url, branch: sha })
+  getDownloadUrl(sha: string): Promise<string> {
+    this._validateUrl()
+    return Promise.resolve(
+      AdoSdk.getAdoDownloadUrl({ repoUrl: this.url, branch: sha })
+    )
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
@@ -641,11 +613,8 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
-    return getAdoIsRemoteBranch({
+    this._validateAccessTokenAndUrl()
+    return AdoSdk.getAdoIsRemoteBranch({
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
       repoUrl: this.url,
@@ -654,11 +623,8 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getUserHasAccessToRepo(): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
-    return getAdoIsUserCollaborator({
+    this._validateAccessTokenAndUrl()
+    return AdoSdk.getAdoIsUserCollaborator({
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
       repoUrl: this.url,
@@ -672,11 +638,8 @@ export class AdoSCMLib extends SCMLib {
   async getSubmitRequestStatus(
     scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
-    const state = await getAdoPullRequestStatus({
+    this._validateAccessTokenAndUrl()
+    const state = await AdoSdk.getAdoPullRequestStatus({
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
       repoUrl: this.url,
@@ -684,11 +647,11 @@ export class AdoSCMLib extends SCMLib {
     })
     switch (state) {
       case AdoPullRequestStatusEnum.completed:
-        return ScmSubmitRequestStatus.MERGED
+        return 'merged'
       case AdoPullRequestStatusEnum.active:
-        return ScmSubmitRequestStatus.OPEN
+        return 'open'
       case AdoPullRequestStatusEnum.abandoned:
-        return ScmSubmitRequestStatus.CLOSED
+        return 'closed'
       default:
         throw new Error(`unknown state ${state}`)
     }
@@ -697,28 +660,13 @@ export class AdoSCMLib extends SCMLib {
   async getRepoBlameRanges(
     _ref: string,
     _path: string
-  ): Promise<
-    {
-      startingLine: number
-      endingLine: number
-      name: string
-      login: string
-      email: string
-    }[]
-  > {
-    return await getAdoBlameRanges()
+  ): Promise<GetGitBlameReponse> {
+    return await AdoSdk.getAdoBlameRanges()
   }
 
-  async getReferenceData(ref: string): Promise<{
-    type: ReferenceType
-    sha: string
-    date: Date | undefined
-  }> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
-    return await getAdoReferenceData({
+  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+    this._validateUrl()
+    return await AdoSdk.getAdoReferenceData({
       ref,
       repoUrl: this.url,
       accessToken: this.accessToken,
@@ -727,11 +675,8 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getRepoDefaultBranch(): Promise<string> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
-    return await getAdoRepoDefaultBranch({
+    this._validateUrl()
+    return await AdoSdk.getAdoRepoDefaultBranch({
       repoUrl: this.url,
       tokenOrg: this.scmOrg,
       accessToken: this.accessToken,
@@ -741,28 +686,14 @@ export class AdoSCMLib extends SCMLib {
     this._validateAccessTokenAndUrl()
     return Promise.resolve(getAdoPrUrl({ prNumber, url: this.url }))
   }
-  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
-    throw new Error('Method not implemented.')
-  }
-  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
-    throw new Error('Method not implemented.')
-  }
-  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
-    throw new Error('Method not implemented.')
-  }
 }
 
 export class GitlabSCMLib extends SCMLib {
   async createSubmitRequest(
-    targetBranchName: string,
-    sourceBranchName: string,
-    title: string,
-    body: string
+    params: CreateSubmitRequestParams
   ): Promise<string> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
+    const { targetBranchName, sourceBranchName, title, body } = params
     return String(
       await createMergeRequest({
         title,
@@ -781,31 +712,6 @@ export class GitlabSCMLib extends SCMLib {
       accessToken: this.accessToken,
     })
   }
-  async forkRepo(): Promise<{ url: string | null }> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
-    throw new Error('not supported yet')
-  }
-
-  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
-    throw new Error('not supported yet')
-  }
-
-  async createPullRequestWithNewFile(
-    _sourceRepoUrl: string,
-    _filesPaths: string[],
-    _userRepoUrl: string,
-    _title: string,
-    _body: string
-  ): Promise<{ pull_request_url: string }> {
-    throw new Error('not implemented')
-  }
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     if (!this.accessToken) {
@@ -816,10 +722,7 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   async getBranchList(): Promise<string[]> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     return getGitlabBranchList({
       accessToken: this.accessToken,
       repoUrl: this.url,
@@ -840,10 +743,12 @@ export class GitlabSCMLib extends SCMLib {
     }
   }
 
-  getDownloadUrl(sha: string): string {
+  getDownloadUrl(sha: string): Promise<string> {
     const urlSplit: string[] = this.url?.split('/') || []
     const repoName = urlSplit[urlSplit?.length - 1]
-    return `${this.url}/-/archive/${sha}/${repoName}-${sha}.zip`
+    return Promise.resolve(
+      `${this.url}/-/archive/${sha}/${repoName}-${sha}.zip`
+    )
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
@@ -855,10 +760,7 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     return getGitlabIsRemoteBranch({
       accessToken: this.accessToken,
       repoUrl: this.url,
@@ -867,10 +769,7 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   async getUserHasAccessToRepo(): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     const username = await this.getUsername()
     return getGitlabIsUserCollaborator({
       username,
@@ -880,32 +779,27 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   async getUsername(): Promise<string> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
+    this._validateAccessTokenAndUrl()
     return getGitlabUsername(this.url, this.accessToken)
   }
 
   async getSubmitRequestStatus(
     scmSubmitRequestId: string
-  ): Promise<ScmSubmitRequestStatus> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+  ): Promise<Partial<ScmSubmitRequestStatus>> {
+    this._validateAccessTokenAndUrl()
     const state = await getGitlabMergeRequestStatus({
       accessToken: this.accessToken,
       repoUrl: this.url,
       mrNumber: Number(scmSubmitRequestId),
     })
     switch (state) {
-      case GitlabMergeRequestStatusEnum.merged:
-        return ScmSubmitRequestStatus.MERGED
-      case GitlabMergeRequestStatusEnum.opened:
-        return ScmSubmitRequestStatus.OPEN
-      case GitlabMergeRequestStatusEnum.closed:
-        return ScmSubmitRequestStatus.CLOSED
+      case gitlabMergeRequestStatus.merged:
+        return 'merged'
+      case gitlabMergeRequestStatus.opened:
+        return 'open'
+      case gitlabMergeRequestStatus.closed:
+        return 'closed'
+
       default:
         throw new Error(`unknown state ${state}`)
     }
@@ -914,19 +808,8 @@ export class GitlabSCMLib extends SCMLib {
   async getRepoBlameRanges(
     ref: string,
     path: string
-  ): Promise<
-    {
-      startingLine: number
-      endingLine: number
-      name: string
-      login: string
-      email: string
-    }[]
-  > {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+  ): Promise<GetGitBlameReponse> {
+    this._validateUrl()
     return await getGitlabBlameRanges(
       { ref, path, gitlabUrl: this.url },
       {
@@ -936,15 +819,8 @@ export class GitlabSCMLib extends SCMLib {
     )
   }
 
-  async getReferenceData(ref: string): Promise<{
-    type: ReferenceType
-    sha: string
-    date: Date | undefined
-  }> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+    this._validateUrl()
     return await getGitlabReferenceData(
       { ref, gitlabUrl: this.url },
       {
@@ -955,24 +831,13 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   async getRepoDefaultBranch(): Promise<string> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateUrl()
     return await getGitlabRepoDefaultBranch(this.url, {
       url: this.url,
       gitlabAuthToken: this.accessToken,
     })
   }
-  getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
-    throw new Error('getPrComment not implemented.')
-  }
-  updatePrComment(
-    _params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
-    _oktokit?: Octokit
-  ): Promise<UpdateCommentResponse> {
-    throw new Error('updatePrComment not implemented.')
-  }
+
   async getPrUrl(prNumber: number): Promise<string> {
     this._validateAccessTokenAndUrl()
     const res = await getGitlabMergeRequest({
@@ -981,15 +846,6 @@ export class GitlabSCMLib extends SCMLib {
       accessToken: this.accessToken,
     })
     return res.web_url
-  }
-  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
-    throw new Error('Method not implemented.')
-  }
-  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
-    throw new Error('Method not implemented.')
-  }
-  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
-    throw new Error('Method not implemented.')
   }
 }
 
@@ -1005,15 +861,10 @@ export class GithubSCMLib extends SCMLib {
     this.oktokit = new Octokit({ auth: accessToken })
   }
   async createSubmitRequest(
-    targetBranchName: string,
-    sourceBranchName: string,
-    title: string,
-    body: string
+    params: CreateSubmitRequestParams
   ): Promise<string> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
+    const { targetBranchName, sourceBranchName, title, body } = params
     return String(
       await createPullRequest({
         title,
@@ -1027,11 +878,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async forkRepo(repoUrl: string): Promise<{ url: string | null }> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
-
+    this._validateToken()
     return forkRepo({
       repoUrl: repoUrl,
       accessToken: this.accessToken,
@@ -1182,10 +1029,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getBranchList(): Promise<string[]> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     return getGithubBranchList(this.accessToken, this.url)
   }
 
@@ -1200,8 +1044,8 @@ export class GithubSCMLib extends SCMLib {
     return {}
   }
 
-  getDownloadUrl(sha: string): string {
-    return `${this.url}/zipball/${sha}`
+  getDownloadUrl(sha: string): Promise<string> {
+    return Promise.resolve(`${this.url}/zipball/${sha}`)
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
@@ -1209,10 +1053,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     return getGithubIsRemoteBranch(this.accessToken, this.url, branch)
   }
 
@@ -1245,37 +1086,14 @@ export class GithubSCMLib extends SCMLib {
       this.url,
       Number(scmSubmitRequestId)
     )
-    if (state === 'merged') {
-      return ScmSubmitRequestStatus.MERGED
-    }
-    if (state === 'open') {
-      return ScmSubmitRequestStatus.OPEN
-    }
-    if (state === 'draft') {
-      return ScmSubmitRequestStatus.DRAFT
-    }
-    if (state === 'closed') {
-      return ScmSubmitRequestStatus.CLOSED
-    }
-    throw new Error(`unknown state ${state}`)
+    return state
   }
 
   async getRepoBlameRanges(
     ref: string,
     path: string
-  ): Promise<
-    {
-      startingLine: number
-      endingLine: number
-      name: string
-      login: string
-      email: string
-    }[]
-  > {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+  ): Promise<GetGitBlameReponse> {
+    this._validateUrl()
     return await getGithubBlameRanges(
       { ref, path, gitHubUrl: this.url },
       {
@@ -1284,15 +1102,8 @@ export class GithubSCMLib extends SCMLib {
     )
   }
 
-  async getReferenceData(ref: string): Promise<{
-    type: ReferenceType
-    sha: string
-    date: Date | undefined
-  }> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+    this._validateUrl()
     return await getGithubReferenceData(
       { ref, gitHubUrl: this.url },
       {
@@ -1301,11 +1112,7 @@ export class GithubSCMLib extends SCMLib {
     )
   }
   async getPrComment(commentId: number): Promise<GetPrCommentResponse> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
-
+    this._validateUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return await getPrComment(this.oktokit, {
       repo,
@@ -1315,10 +1122,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getRepoDefaultBranch(): Promise<string> {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateUrl()
     return await getGithubRepoDefaultBranch(this.url, {
       githubAuthToken: this.accessToken,
     })
@@ -1341,10 +1145,7 @@ export class GithubSCMLib extends SCMLib {
     auth?: { authToken: string }
   ): SCMPostGeneralPrCommentsResponse {
     const { prNumber, body } = params
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateUrl()
     const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return await postGeneralPrComment(oktoKit, {
@@ -1360,10 +1161,7 @@ export class GithubSCMLib extends SCMLib {
     auth?: { authToken: string }
   ): SCMGetPrReviewCommentsResponse {
     const { prNumber } = params
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateUrl()
     const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return await getGeneralPrComments(oktoKit, {
@@ -1376,10 +1174,7 @@ export class GithubSCMLib extends SCMLib {
     { commentId }: SCMDeleteGeneralPrCommentParams,
     auth?: { authToken: string }
   ): SCMDeleteGeneralPrReviewResponse {
-    if (!this.url) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateUrl()
     const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     return deleteGeneralPrComment(oktoKit, {
@@ -1392,10 +1187,7 @@ export class GithubSCMLib extends SCMLib {
 
 export class StubSCMLib extends SCMLib {
   async createSubmitRequest(
-    _targetBranchName: string,
-    _sourceBranchName: string,
-    _title: string,
-    _body: string
+    _params: CreateSubmitRequestParams
   ): Promise<string> {
     console.error('createSubmitRequest() not implemented')
     throw new Error('createSubmitRequest() not implemented')
@@ -1411,14 +1203,9 @@ export class StubSCMLib extends SCMLib {
     throw new Error('getAuthHeaders() not implemented')
   }
 
-  getDownloadUrl(_sha: string): string {
+  getDownloadUrl(_sha: string): Promise<string> {
     console.error('getDownloadUrl() not implemented')
     throw new Error('getDownloadUrl() not implemented')
-  }
-
-  async _getUsernameForAuthUrl(): Promise<string> {
-    console.error('_getUsernameForAuthUrl() not implemented')
-    throw new Error('_getUsernameForAuthUrl() not implemented')
   }
 
   async getIsRemoteBranch(_branch: string): Promise<boolean> {
@@ -1429,26 +1216,6 @@ export class StubSCMLib extends SCMLib {
   async validateParams() {
     console.error('validateParams() not implemented')
     throw new Error('validateParams() not implemented')
-  }
-
-  async forkRepo(): Promise<{ url: string | null }> {
-    console.error('forkRepo() not implemented')
-    throw new Error('forkRepo() not implemented')
-  }
-  async createOrUpdateRepositorySecret(): Promise<{ url: string | null }> {
-    console.error('forkRepo() not implemented')
-    throw new Error('forkRepo() not implemented')
-  }
-
-  async createPullRequestWithNewFile(
-    _sourceRepoUrl: string,
-    _filesPaths: string[],
-    _userRepoUrl: string,
-    _title: string,
-    _body: string
-  ): Promise<{ pull_request_url: string }> {
-    console.error('createPullRequestWithNewFile() not implemented')
-    throw new Error('createPullRequestWithNewFile() not implemented')
   }
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
@@ -1494,11 +1261,7 @@ export class StubSCMLib extends SCMLib {
     throw new Error('getRepoBlameRanges() not implemented')
   }
 
-  async getReferenceData(_ref: string): Promise<{
-    type: ReferenceType
-    sha: string
-    date: Date | undefined
-  }> {
+  async getReferenceData(_ref: string): Promise<GetRefererenceResult> {
     console.error('getReferenceData() not implemented')
     throw new Error('getReferenceData() not implemented')
   }
@@ -1507,25 +1270,219 @@ export class StubSCMLib extends SCMLib {
     console.error('getRepoDefaultBranch() not implemented')
     throw new Error('getRepoDefaultBranch() not implemented')
   }
-  async getPrComment(_commentId: number): Promise<GetPrCommentResponse> {
-    console.error('getPrComment() not implemented')
-    throw new Error('getPrComment() not implemented')
-  }
-  async updatePrComment(): Promise<UpdateCommentResponse> {
-    console.error('updatePrComment() not implemented')
-    throw new Error('updatePrComment() not implemented')
-  }
   async getPrUrl(_prNumber: number): Promise<string> {
     console.error('getPr() not implemented')
     throw new Error('getPr() not implemented')
   }
-  postGeneralPrComment(): SCMPostGeneralPrCommentsResponse {
+  _getUsernameForAuthUrl(): Promise<string> {
     throw new Error('Method not implemented.')
   }
-  getGeneralPrComments(): SCMGetPrReviewCommentsResponse {
-    throw new Error('Method not implemented.')
+}
+
+function getUserAndPassword(token: string) {
+  const [username, password] = token.split(':')
+  const safePasswordAndUsername = z
+    .object({ username: z.string(), password: z.string() })
+    .parse({ username, password })
+  return {
+    username: safePasswordAndUsername.username,
+    password: safePasswordAndUsername.password,
   }
-  deleteGeneralPrComment(): SCMDeleteGeneralPrReviewResponse {
-    throw new Error('Method not implemented.')
+}
+function createBitbucketSdk(token?: string) {
+  if (!token) {
+    return getBitbucketSdk({ authType: 'public' })
+  }
+  if (token.includes(':')) {
+    const { password, username } = getUserAndPassword(token)
+    return getBitbucketSdk({
+      authType: 'basic',
+      username,
+      password,
+    })
+  }
+  return getBitbucketSdk({ authType: 'token', token })
+}
+
+export class BitbucketSCMLib extends SCMLib {
+  private bitbucketSdk: ReturnType<typeof getBitbucketSdk>
+  constructor(
+    url: string | undefined,
+    accessToken: string | undefined,
+    scmOrg: string | undefined
+  ) {
+    super(url, accessToken, scmOrg)
+
+    const bitbucketSdk = createBitbucketSdk(accessToken)
+    this.bitbucketSdk = bitbucketSdk
+  }
+  getAuthData() {
+    const authType = this.bitbucketSdk.getAuthType()
+    switch (authType) {
+      case 'basic': {
+        this._validateToken()
+        const { username, password } = getUserAndPassword(this.accessToken)
+        return { username, password, authType }
+      }
+      case 'token': {
+        return { authType, token: z.string().parse(this.accessToken) }
+      }
+      case 'public':
+        return { authType }
+    }
+  }
+
+  async createSubmitRequest(
+    params: CreateSubmitRequestParams
+  ): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    const pullRequestRes = await this.bitbucketSdk.createPullRequest({
+      ...params,
+      repoUrl: this.url,
+    })
+    return String(z.number().parse(pullRequestRes.id))
+  }
+
+  async validateParams() {
+    return validateBitbucketParams({
+      bitbucketClient: this.bitbucketSdk,
+      url: this.url,
+    })
+  }
+
+  async getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
+    this._validateToken()
+    return this.bitbucketSdk.getRepos({
+      workspaceSlug: scmOrg,
+    })
+  }
+
+  async getBranchList(): Promise<string[]> {
+    this._validateAccessTokenAndUrl()
+    return this.bitbucketSdk.getBranchList({
+      repoUrl: this.url,
+    })
+  }
+
+  getScmLibType(): ScmLibScmType {
+    return ScmLibScmType.BITBUCKET
+  }
+
+  getAuthHeaders(): Record<string, string> {
+    const authType = this.bitbucketSdk.getAuthType()
+    switch (authType) {
+      case 'public':
+        return {}
+      case 'token':
+        return { authorization: `Bearer ${this.accessToken}` }
+      case 'basic': {
+        this._validateToken()
+        const { username, password } = getUserAndPassword(this.accessToken)
+
+        return {
+          authorization: `Basic ${Buffer.from(
+            username + ':' + password
+          ).toString('base64')}`,
+        }
+      }
+    }
+  }
+
+  async getDownloadUrl(sha: string): Promise<string> {
+    this._validateUrl()
+    return this.bitbucketSdk.getDownloadUrl({ url: this.url, sha })
+  }
+
+  async _getUsernameForAuthUrl(): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    const user = await this.bitbucketSdk.getUser()
+    if (!user.username) {
+      throw new Error('no username found')
+    }
+    return user.username
+  }
+
+  async getIsRemoteBranch(branch: string): Promise<boolean> {
+    this._validateAccessTokenAndUrl()
+    try {
+      const res = await this.bitbucketSdk.getBranch({
+        branchName: branch,
+        repoUrl: this.url,
+      })
+      return res.name === branch
+    } catch (e) {
+      return false
+    }
+  }
+
+  async getUserHasAccessToRepo(): Promise<boolean> {
+    this._validateAccessTokenAndUrl()
+    return this.bitbucketSdk.getIsUserCollaborator({ repoUrl: this.url })
+  }
+
+  async getUsername(): Promise<string> {
+    this._validateToken()
+    const res = await this.bitbucketSdk.getUser()
+    return z.string().parse(res.username)
+  }
+
+  async getSubmitRequestStatus(
+    _scmSubmitRequestId: string
+  ): Promise<ScmSubmitRequestStatus> {
+    this._validateAccessTokenAndUrl()
+    const pullRequestRes = await this.bitbucketSdk.getPullRequest({
+      prNumber: Number(_scmSubmitRequestId),
+      url: this.url,
+    })
+    switch (pullRequestRes.state) {
+      case 'OPEN':
+        return 'open'
+      case 'MERGED':
+        return 'merged'
+      case 'DECLINED':
+        return 'closed'
+      default:
+        throw new Error(`unknown state ${pullRequestRes.state} `)
+    }
+  }
+
+  async getRepoBlameRanges(
+    _ref: string,
+    _path: string
+  ): Promise<GetGitBlameReponse> {
+    // note: bitbucket does not have blame ranges support
+    return []
+  }
+
+  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+    this._validateUrl()
+    return this.bitbucketSdk.getReferenceData({ url: this.url, ref })
+  }
+
+  async getRepoDefaultBranch(): Promise<string> {
+    this._validateUrl()
+    const repoRes = await this.bitbucketSdk.getRepo({ repoUrl: this.url })
+    return z.string().parse(repoRes.mainbranch?.name)
+  }
+  getPrUrl(prNumber: number): Promise<string> {
+    this._validateUrl()
+    const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
+    return Promise.resolve(
+      `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${prNumber}`
+    )
+  }
+  async refreshToken(params: {
+    bitbucketClientId: string
+    bitbucketClientSecret: string
+    refreshToken: string
+  }): Promise<{ accessToken: string; refreshToken: string }> {
+    const getBitbucketTokenResponse = await getBitbucketToken({
+      authType: 'refresh_token',
+      ...params,
+    })
+    return {
+      accessToken: getBitbucketTokenResponse.access_token,
+      refreshToken: getBitbucketTokenResponse.refresh_token,
+    }
   }
 }

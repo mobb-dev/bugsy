@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.110",
+  "version": "0.0.112",
   "description": "Automated secure code remediation tool",
   "repository": "https://github.com/mobb-dev/bugsy",
   "main": "dist/index.js",
@@ -35,10 +35,11 @@
     "adm-zip": "0.5.10",
     "axios": "1.6.8",
     "azure-devops-node-api": "12.1.0",
+    "bitbucket": "2.11.0",
     "chalk": "5.3.0",
     "chalk-animation": "2.0.3",
     "configstore": "6.0.0",
-    "debug": "4.3.4",
+    "debug": "4.3.5",
     "dotenv": "16.4.5",
     "extract-zip": "2.0.1",
     "globby": "13.2.2",
@@ -55,7 +56,7 @@
     "octokit": "3.2.1",
     "open": "8.4.2",
     "parse-diff": "0.11.1",
-    "semver": "7.6.0",
+    "semver": "7.6.2",
     "simple-git": "3.24.0",
     "snyk": "1.1118.0",
     "supports-color": "9.4.0",
@@ -65,7 +66,7 @@
     "uuid": "9.0.1",
     "ws": "8.10.0",
     "yargs": "17.7.2",
-    "zod": "3.23.7"
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.16.5",
@@ -89,9 +90,9 @@
     "@typescript-eslint/parser": "5.44.0",
     "eslint": "8.56.0",
     "eslint-plugin-import": "2.27.5",
-    "eslint-plugin-prettier": "4.2.1",
+    "eslint-plugin-prettier": "5.1.3",
     "eslint-plugin-simple-import-sort": "10.0.0",
-    "prettier": "2.8.8",
+    "prettier": "3.3.1",
     "tsup": "7.2.0",
     "typescript": "4.9.5",
     "vitest": "0.34.6"

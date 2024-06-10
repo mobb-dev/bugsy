@@ -60,3 +60,62 @@ export enum IssueType_Enum {
   /** Zip Slip is a form of directory traversal that can be exploited by extracting files from an archive */
   ZipSlip = 'ZIP_SLIP',
 }
+
+export enum ReferenceType {
+  BRANCH = 'BRANCH',
+  COMMIT = 'COMMIT',
+  TAG = 'TAG',
+}
+
+export type GetReferenceDataResponse = {
+  type: ReferenceType
+  sha: string
+  date: Date | undefined
+}
+
+export type GetGitBlameReponse = {
+  startingLine: number
+  endingLine: number
+  name: string
+  login: string
+  email: string
+}[]
+
+export const scmSubmitRequestStatus = {
+  MERGED: 'merged',
+  OPEN: 'open',
+  CLOSED: 'closed',
+  DRAFT: 'draft',
+} as const
+export type ScmSubmitRequestStatus =
+  (typeof scmSubmitRequestStatus)[keyof typeof scmSubmitRequestStatus]
+
+export enum ScmLibScmType {
+  GITHUB = 'GITHUB',
+  GITLAB = 'GITLAB',
+  ADO = 'ADO',
+  BITBUCKET = 'BITBUCKET',
+}
+
+export type ScmRepoInfo = {
+  repoName: string
+  repoUrl: string
+  repoOwner: string
+  repoLanguages: string[]
+  repoIsPublic: boolean
+  repoUpdatedAt: string
+}
+
+export const scmCloudUrl = {
+  GitLab: 'https://gitlab.com',
+  GitHub: 'https://github.com',
+  Ado: 'https://dev.azure.com',
+  Bitbucket: 'https://bitbucket.org',
+} as const
+
+export enum ScmType {
+  GitHub = 'GitHub',
+  GitLab = 'GitLab',
+  Ado = 'Ado',
+  Bitbucket = 'Bitbucket',
+}

@@ -12,10 +12,9 @@ import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
-  ReferenceType,
   RefNotFoundError,
-  ScmType,
 } from '../scm'
+import { ReferenceType, ScmType } from '../types'
 import { parseScmURL } from '../urlParser'
 import { GitlabAuthResultZ, GitlabTokenRequestTypeEnum } from './types'
 
@@ -140,11 +139,14 @@ export async function getGitlabIsUserCollaborator({
   }
 }
 
-export enum GitlabMergeRequestStatusEnum {
-  merged = 'merged',
-  opened = 'opened',
-  closed = 'closed',
-}
+export const gitlabMergeRequestStatus = {
+  merged: 'merged',
+  opened: 'opened',
+  closed: 'closed',
+} as const
+
+export type GitlabMergeRequestStatus =
+  (typeof gitlabMergeRequestStatus)[keyof typeof gitlabMergeRequestStatus]
 
 export async function getGitlabMergeRequestStatus({
   accessToken,
@@ -154,14 +156,14 @@ export async function getGitlabMergeRequestStatus({
   accessToken: string
   repoUrl: string
   mrNumber: number
-}) {
+}): Promise<GitlabMergeRequestStatus> {
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   const res = await api.MergeRequests.show(projectPath, mrNumber)
   switch (res.state) {
-    case GitlabMergeRequestStatusEnum.merged:
-    case GitlabMergeRequestStatusEnum.opened:
-    case GitlabMergeRequestStatusEnum.closed:
+    case gitlabMergeRequestStatus.merged:
+    case gitlabMergeRequestStatus.opened:
+    case gitlabMergeRequestStatus.closed:
       return res.state
     default:
       throw new Error(`unknown merge request state ${res.state}`)

@@ -1,8 +1,8 @@
 import { addScmToken } from '@mobb/bugsy/commands'
-import { errorMessages } from '@mobb/bugsy/constants'
-import { ScmType } from '@mobb/bugsy/features/analysis/scm'
+import { scmCloudHostname, ScmType } from '@mobb/bugsy/features/analysis/scm'
 import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
+import { z } from 'zod'
 
 import {
   apiKeyOption,
@@ -35,27 +35,47 @@ export function addScmTokenBuilder(
 }
 
 export function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
-  if (!argv.url) {
-    throw new CliError(errorMessages.missingUrl)
-  }
-  if (!argv.token) {
-    throw new CliError(errorMessages.missingToken)
-  }
-  if (
-    ScmType.GitHub !== argv.scmType &&
-    ScmType.Ado !== argv.scmType &&
-    ScmType.GitLab !== argv.scmType
-  ) {
+  if (!z.nativeEnum(ScmType).safeParse(argv.scmType).success) {
     throw new CliError(
-      '\nError: --scm-type must reference a valid SCM type (GitHub, GitLab, Ado)'
+      '\nError: --scm-type must reference a valid SCM type (GitHub, GitLab, Ado, Bitbutcket)'
     )
   }
+  Object.values(scmValidationMap).forEach((validate) => validate(argv))
+}
+
+const scmValidationMap: Record<ScmType, (argv: AddScmTokenOptions) => void> = {
+  [ScmType.GitHub]: validateGithub,
+  [ScmType.GitLab]: () => {
+    return
+  },
+  [ScmType.Ado]: validateAdo,
+  [ScmType.Bitbucket]: validateBitbucket,
+}
+
+function validateBitbucket(argv: AddScmTokenOptions) {
   const urlObj = new URL(argv.url)
-  if (urlObj.hostname.toLowerCase() === 'github.com' && !argv.username) {
+  if (
+    urlObj.hostname.toLowerCase() === scmCloudHostname.Bitbucket &&
+    !argv.username
+  ) {
+    throw new CliError('\nError: --username flag is required for Bitbucket')
+  }
+}
+
+function validateGithub(argv: AddScmTokenOptions) {
+  const urlObj = new URL(argv.url)
+  if (
+    urlObj.hostname.toLowerCase() === scmCloudHostname.GitHub &&
+    !argv.username
+  ) {
     throw new CliError('\nError: --username flag is required for GitHub')
   }
+}
+
+function validateAdo(argv: AddScmTokenOptions) {
+  const urlObj = new URL(argv.url)
   if (
-    (urlObj.hostname.toLowerCase() === 'dev.azure.com' ||
+    (urlObj.hostname.toLowerCase() === scmCloudHostname.Ado ||
       urlObj.hostname.toLowerCase().endsWith('.visualstudio.com')) &&
     !argv.organization
   ) {

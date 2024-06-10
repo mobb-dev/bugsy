@@ -58,15 +58,16 @@ export const commitHashOption = {
 
 export const scmTypeOption = {
   demandOption: true,
-  describe: chalk.bold('SCM type (GitHub, GitLab, Ado)'),
+  describe: chalk.bold('SCM type (GitHub, GitLab, Ado, Bitbucket)'),
   type: 'string',
 } as const
 
 export const urlOption = {
   describe: chalk.bold(
-    'URL of the repository (used in GitHub, GitLab, Azure DevOps)'
+    'URL of the repository (used in GitHub, GitLab, Azure DevOps, Bitbucket)'
   ),
   type: 'string',
+  demandOption: true,
 } as const
 
 export const scmOrgOption = {
@@ -75,7 +76,7 @@ export const scmOrgOption = {
 } as const
 
 export const scmUsernameOption = {
-  describe: chalk.bold('Username in SCM (used in GitHub)'),
+  describe: chalk.bold('Username in SCM (used in GitHub, Bitbucket)'),
   type: 'string',
 } as const
 
@@ -87,4 +88,5 @@ export const scmRefreshTokenOption = {
 export const scmTokenOption = {
   describe: chalk.bold('SCM API token'),
   type: 'string',
+  demandOption: true,
 } as const

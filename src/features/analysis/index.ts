@@ -230,9 +230,8 @@ export async function _scan(
 
   await handleMobbLogin()
 
-  const { projectId, organizationId } = await gqlClient.getOrgAndProjectId(
-    mobbProjectName
-  )
+  const { projectId, organizationId } =
+    await gqlClient.getOrgAndProjectId(mobbProjectName)
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()
@@ -312,6 +311,7 @@ export async function _scan(
 
   const reference = ref ?? (await scm.getRepoDefaultBranch())
   const { sha } = await scm.getReferenceData(reference)
+  const downloadUrl = await scm.getDownloadUrl(sha)
   debug('org id %s', organizationId)
   debug('project id %s', projectId)
   debug('default branch %s', reference)
@@ -321,7 +321,7 @@ export async function _scan(
     dirname,
     ci,
     authHeaders: scm.getAuthHeaders(),
-    downloadUrl: scm.getDownloadUrl(sha),
+    downloadUrl,
   })
 
   if (command === 'scan') {
@@ -526,10 +526,10 @@ export async function _scan(
       scmLibType === ScmLibScmType.GITHUB
         ? 'Github'
         : scmLibType === ScmLibScmType.GITLAB
-        ? 'Gitlab'
-        : scmLibType === ScmLibScmType.ADO
-        ? 'Azure DevOps'
-        : ''
+          ? 'Gitlab'
+          : scmLibType === ScmLibScmType.ADO
+            ? 'Azure DevOps'
+            : ''
 
     const addScmIntegration = skipPrompts
       ? true

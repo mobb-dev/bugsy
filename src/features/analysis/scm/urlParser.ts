@@ -1,4 +1,4 @@
-import { ScmType } from './scm'
+import { scmCloudUrl, ScmType } from './types'
 
 type Repo = {
   repoName: string | undefined
@@ -6,12 +6,10 @@ type Repo = {
   projectName: string | undefined
 } | null
 
-function getRepoInfo(
-  pathname: string[],
-  hostname: string,
-  scmType?: ScmType
-): Repo {
+function detectAdoUrl(args: GetRepoInfoArgs): Repo {
+  const { pathname, hostname, scmType } = args
   const hostnameParts = hostname.split('.')
+  const adoHostname = new URL(scmCloudUrl.Ado).hostname
   if (
     hostnameParts.length === 3 &&
     hostnameParts[1] === 'visualstudio' &&
@@ -32,7 +30,7 @@ function getRepoInfo(
       }
     }
   }
-  if (hostname === 'dev.azure.com' || scmType === ScmType.Ado) {
+  if (hostname === adoHostname || scmType === ScmType.Ado) {
     if (pathname.length === 3 && pathname[1] === '_git') {
       return {
         organization: pathname[0],
@@ -48,7 +46,13 @@ function getRepoInfo(
       }
     }
   }
-  if (hostname === 'github.com' || scmType === ScmType.GitHub) {
+  return null
+}
+
+function detectGithubUrl(args: GetRepoInfoArgs): Repo {
+  const { pathname, hostname, scmType } = args
+  const githubHostname = new URL(scmCloudUrl.GitHub).hostname
+  if (hostname === githubHostname || scmType === ScmType.GitHub) {
     if (pathname.length === 2) {
       return {
         organization: pathname[0],
@@ -57,7 +61,12 @@ function getRepoInfo(
       }
     }
   }
-  if (hostname === 'gitlab.com' || scmType === ScmType.GitLab) {
+  return null
+}
+function detectGitlabUrl(args: GetRepoInfoArgs): Repo {
+  const { pathname, hostname, scmType } = args
+  const gitlabHostname = new URL(scmCloudUrl.GitLab).hostname
+  if (hostname === gitlabHostname || scmType === ScmType.GitLab) {
     if (pathname.length >= 2) {
       return {
         organization: pathname[0],
@@ -66,7 +75,48 @@ function getRepoInfo(
       }
     }
   }
+  return null
+}
 
+function detectBitbucketUrl(args: GetRepoInfoArgs): Repo {
+  const { pathname, hostname, scmType } = args
+  const bitbucketHostname = new URL(scmCloudUrl.Bitbucket).hostname
+  if (hostname === bitbucketHostname || scmType === ScmType.Bitbucket) {
+    if (pathname.length === 2) {
+      return {
+        organization: pathname[0],
+        projectName: undefined,
+        repoName: pathname[1],
+      }
+    }
+  }
+  return null
+}
+
+type GetRepoInfoArgs = {
+  pathname: string[]
+  hostname: string
+  scmType?: ScmType
+}
+
+export const getRepoUrlFunctionMap: Record<
+  ScmType,
+  (args: GetRepoInfoArgs) => Repo
+> = {
+  [ScmType.GitLab]: detectGitlabUrl,
+  [ScmType.GitHub]: detectGithubUrl,
+  [ScmType.Ado]: detectAdoUrl,
+  [ScmType.Bitbucket]: detectBitbucketUrl,
+} as const
+
+function getRepoInfo(args: GetRepoInfoArgs): Repo {
+  // check the url against all the possible scm types
+  for (const detectUrl of Object.values(getRepoUrlFunctionMap)) {
+    const detectUrlRes = detectUrl(args)
+    if (detectUrlRes) {
+      return detectUrlRes
+    }
+  }
   return null
 }
 
@@ -78,7 +128,11 @@ export const parseScmURL = (scmURL: string, scmType?: ScmType) => {
     const hostname = url.hostname.toLowerCase()
     const projectPath = url.pathname.substring(1).replace(/.git$/i, '')
 
-    const repo = getRepoInfo(projectPath.split('/'), hostname, scmType)
+    const repo = getRepoInfo({
+      pathname: projectPath.split('/'),
+      hostname,
+      scmType,
+    })
 
     if (!repo) return null
 

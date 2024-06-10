@@ -11,7 +11,7 @@ import {
   RefNotFoundError,
   ScmRepoInfo,
   ScmType,
-} from './scm'
+} from './'
 import { parseScmURL } from './urlParser'
 
 function removeTrailingSlash(str: string) {
@@ -641,4 +641,22 @@ export async function getAdoToken({
   })
   const authResult = await res.json()
   return AdoAuthResultZ.parse(authResult)
+}
+
+export const AdoSdk = {
+  getAdoApiClient,
+  adoValidateParams,
+  getAdoIsUserCollaborator,
+  getAdoPullRequestStatus,
+  getAdoIsRemoteBranch,
+  getAdoRepoList,
+  getAdoDownloadUrl,
+  getAdoBranchList,
+  createAdoPullRequest,
+  getAdoRepoDefaultBranch,
+  getAdoReferenceData,
+  parseAdoOwnerAndRepo,
+  getAdoBlameRanges,
+  getAdoToken,
+  getAdoTokenType,
 }

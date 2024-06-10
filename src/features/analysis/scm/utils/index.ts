@@ -65,3 +65,7 @@ export function getCommitUrl(params: GetCommitUrlParam) {
     analysisId,
   })}/commit?${searchParams.toString()}`
 }
+
+export function removeTrailingSlash(str: string) {
+  return str.trim().replace(/\/+$/, '')
+}

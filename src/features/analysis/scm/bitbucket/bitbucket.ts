@@ -266,19 +266,21 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       ref: string
       url: string
     }): Promise<GetRefererenceResult> {
-      try {
-        return await Promise.any([
-          this.getBranchRef({ repoUrl: url, branchName: ref }),
-          this.getTagRef({ repoUrl: url, tagName: ref }),
-          this.getCommitRef({ repoUrl: url, commitSha: ref }),
-        ])
-      } catch (e) {
-        console.log('e', e)
-        if (e instanceof AggregateError) {
+      return Promise.allSettled([
+        this.getTagRef({ repoUrl: url, tagName: ref }),
+        this.getBranchRef({ repoUrl: url, branchName: ref }),
+        this.getCommitRef({ repoUrl: url, commitSha: ref }),
+      ]).then((promisesResult) => {
+        // note: tag is being retrevied by getCommitRef as well, so we take the first one which is getTagRef
+        const [refPromise] = promisesResult.filter(
+          (promise): promise is PromiseFulfilledResult<GetRefererenceResult> =>
+            promise.status === 'fulfilled'
+        )
+        if (!refPromise) {
           throw new RefNotFoundError(`Invalid reference ${ref} for ${url}`)
         }
-        throw e
-      }
+        return refPromise.value
+      })
     },
     async getTagRef(params: { repoUrl: string; tagName: string }) {
       const { tagName, repoUrl } = params
@@ -337,7 +339,6 @@ export async function validateBitbucketParams(params: {
 }) {
   const { bitbucketClient } = params
   const authType = bitbucketClient.getAuthType()
-  console.log('authType', authType, params.url)
   try {
     if (authType !== 'public') {
       await bitbucketClient.getUser()

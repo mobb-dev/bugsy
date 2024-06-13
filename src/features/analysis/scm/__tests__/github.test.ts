@@ -5,6 +5,9 @@ import {
   getGithubRepoDefaultBranch,
   parseGithubOwnerAndRepo,
 } from '../github/github'
+import { SCMLib } from '../scm'
+import { ScmLibScmType } from '../types'
+import { env } from './env'
 
 const OWNER = 'facebook'
 const REPO = 'react'
@@ -15,6 +18,7 @@ const EXISTING_COMMIT = 'c7967b194b41cb16907eed718b78d89120089f6a'
 const EXISTING_BRANCH = 'portals'
 const NON_EXISTING_BRANCH = 'non-existing-branch'
 const EXISTING_TAG = 'v18.2.0'
+const TEST_REPO_URL = 'https://github.com/mobbgeneraldev/WebGoat'
 
 describe('github reference', () => {
   it('test non existing repo', async () => {
@@ -71,6 +75,21 @@ describe('github reference', () => {
         ref: NON_EXISTING_BRANCH,
       })
     ).rejects.toThrow()
+  })
+})
+
+describe('scm intance tests', () => {
+  it('should return the correct headers for basic auth type ', async () => {
+    const scmLib = await SCMLib.init({
+      url: TEST_REPO_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN,
+      scmOrg: undefined,
+    })
+    const authHeaders = scmLib.getAuthHeaders()
+    expect(authHeaders).toStrictEqual({
+      authorization: `Bearer ${env.TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN}`,
+    })
   })
 })
 

@@ -9,6 +9,11 @@ import {
   getAdoRepoDefaultBranch,
   parseAdoOwnerAndRepo,
 } from '../ado'
+import { SCMLib } from '../scm'
+import { ScmLibScmType } from '../types'
+import { env } from './env'
+
+const TEST_ADO_REPO = 'https://dev.azure.com/mobbtest/test/_git/repo1'
 
 dotenv.config({ path: path.join(__dirname, '../../../../../.env') })
 const envVariables = z
@@ -115,6 +120,24 @@ describe.each([
     })
   }
 )
+
+describe('Ado scm instance', () => {
+  it('should return the correct headers for basic auth type ', async () => {
+    const scmLib = await SCMLib.init({
+      url: TEST_ADO_REPO,
+      scmType: ScmLibScmType.ADO,
+      accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
+      scmOrg: undefined,
+    })
+    const authHeaders = scmLib.getAuthHeaders()
+    const encodedAccessToken = Buffer.from(
+      ':' + env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN
+    ).toString('base64')
+    expect(authHeaders).toStrictEqual({
+      authorization: `Basic ${encodedAccessToken}`,
+    })
+  })
+})
 
 describe.each([
   {

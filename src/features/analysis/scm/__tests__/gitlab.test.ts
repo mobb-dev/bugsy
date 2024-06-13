@@ -5,6 +5,9 @@ import {
   getGitlabRepoDefaultBranch,
   parseGitlabOwnerAndRepo,
 } from '../gitlab/gitlab'
+import { SCMLib } from '../scm'
+import { ScmLibScmType } from '../types'
+import { env } from './env'
 
 const GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce'
 const NON_EXISTING_GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce1111'
@@ -13,6 +16,7 @@ const EXISTING_COMMIT = '4298a28a993363f4ab6b63c14820492393a3ae94'
 const EXISTING_BRANCH = 'zj-commit-caching'
 const NON_EXISTING_BRANCH = 'non-existing-branch'
 const EXISTING_TAG = 'v8.17.8'
+const TEST_GITLAB_REPO = 'https://gitlab.com/generaldev1/WebGoat'
 
 describe('gitlab reference', () => {
   it('test non existing repo', async () => {
@@ -69,6 +73,20 @@ describe('gitlab reference', () => {
         ref: NON_EXISTING_BRANCH,
       })
     ).rejects.toThrow()
+  })
+})
+describe('scm intance tests', () => {
+  it('should return the correct headers for basic auth type ', async () => {
+    const scmLib = await SCMLib.init({
+      url: TEST_GITLAB_REPO,
+      scmType: ScmLibScmType.GITLAB,
+      accessToken: env.TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN,
+      scmOrg: undefined,
+    })
+    const authHeaders = scmLib.getAuthHeaders()
+    expect(authHeaders).toStrictEqual({
+      'Private-Token': env.TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN,
+    })
   })
 })
 

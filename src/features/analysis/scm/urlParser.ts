@@ -148,6 +148,7 @@ export const parseScmURL = (scmURL: string, scmType?: ScmType) => {
       projectPath,
       repoName,
       projectName,
+      protocol: url.protocol,
       pathElements: projectPath.split('/'),
     }
   } catch (e) {

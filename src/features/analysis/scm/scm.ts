@@ -82,6 +82,7 @@ import {
   ScmSubmitRequestStatus,
   ScmType,
 } from './types'
+import { parseScmURL } from './urlParser'
 
 export type ScmConfig = {
   id: string
@@ -366,10 +367,6 @@ export abstract class SCMLib {
     if (!accessToken) {
       return trimmedUrl
     }
-    console.log(
-      'this instanceof BitbucketSCMLib',
-      this instanceof BitbucketSCMLib
-    )
 
     const scmLibType = this.getScmLibType()
     if (scmLibType === ScmLibScmType.ADO) {
@@ -379,6 +376,12 @@ export abstract class SCMLib {
     }
     if (this instanceof BitbucketSCMLib) {
       const authData = this.getAuthData()
+      const parseScmURLRes = parseScmURL(trimmedUrl, ScmType.Bitbucket)
+      if (!parseScmURLRes) {
+        throw new InvalidRepoUrlError('invalid repo url')
+      }
+      const { protocol, hostname, organization, repoName } = parseScmURLRes
+      const url = `${protocol}//${hostname}/${organization}/${repoName}`
       switch (authData.authType) {
         case 'public': {
           return trimmedUrl
@@ -386,15 +389,16 @@ export abstract class SCMLib {
         case 'token': {
           const { token } = authData
           const username = await this._getUsernameForAuthUrl()
+
           return buildAuthrizedRepoUrl({
-            url: trimmedUrl,
+            url,
             username,
             password: token,
           })
         }
         case 'basic': {
           const { username, password } = authData
-          return buildAuthrizedRepoUrl({ url: trimmedUrl, username, password })
+          return buildAuthrizedRepoUrl({ url, username, password })
         }
       }
     }

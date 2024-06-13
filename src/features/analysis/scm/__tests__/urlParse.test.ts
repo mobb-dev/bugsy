@@ -22,6 +22,7 @@ const ALLOWED_URLS = [
   'https://bitbucket.org/workspace/repo.slug',
   'https://bitbucket.org/workspace/repo_slug.git',
   'https://bitbucket.org/workspace/repo.slug.git',
+  'https://haggai-mobb@bitbucket.org/workspace/repo.slug.git',
 ]
 const NEGATIVE_URLS = [
   'https://github.com/gitlab-org/security-products/tests/webgoat',

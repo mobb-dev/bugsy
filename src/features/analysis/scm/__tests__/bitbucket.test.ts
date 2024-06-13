@@ -1,7 +1,5 @@
-import path from 'node:path'
 import { describe } from 'node:test'
 
-import * as dotenv from 'dotenv'
 import { expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -15,6 +13,7 @@ import {
   SCMLib,
 } from '../scm'
 import { ScmLibScmType } from '../types'
+import { env } from './env'
 
 const EXPIRED_TOKEN =
   'XMT7WlQLoZpzpcExU-iwaBbKmsmDuejjY9m1_hppLlU4JN6tJBUlMiucmUaf4PgF6GBXoAChSA2QLEnf2VC6SAg9YLq6j85qWAUQlTnMWw4HfWqIHWB4Q_uZjE_PP8B7Wf1pXqGS1mgFke-8DDkFV6OO23iX'
@@ -28,16 +27,12 @@ const REPO = {
   TAG: 'vtest9',
 } as const
 
-dotenv.config({
-  path: path.join(__dirname, '../../../../../../../__tests__/.env'),
-})
-const env = z
-  .object({
-    TEST_MINIMAL_WEBGOAT_BITBUCKET_USERNAME: z.string().min(1),
-    TEST_MINIMAL_WEBGOAT_BITBUCKET_PASSWORD: z.string().min(1),
-  })
-  .required()
-  .parse(process.env)
+const ALLOWED_URLS = [
+  REPO.URL,
+  'https://bitbucket.org/mobb-dev/webgoat.git',
+  'https://mobb-dev-admin@bitbucket.org/mobb-dev/webgoat.git',
+]
+
 const authUsername = env.TEST_MINIMAL_WEBGOAT_BITBUCKET_USERNAME
 const authPassword = env.TEST_MINIMAL_WEBGOAT_BITBUCKET_PASSWORD
 
@@ -221,29 +216,35 @@ describe('bitbucket sdk function', async () => {
       validateBitbucketParams({ bitbucketClient: bitbucketSdk })
     ).rejects.toThrowError(InvalidAccessTokenError)
   })
-  it('should return the correct headers for basic auth type', async () => {
-    const scmLib = await SCMLib.init({
-      url: REPO.URL,
-      scmType: ScmLibScmType.BITBUCKET,
-      accessToken: `${authUsername}:${authPassword}`,
-      scmOrg: undefined,
-    })
-    const headersZ = z.object({ authorization: z.string() })
-    const authHeaders = scmLib.getAuthHeaders()
-    const safeHeaders = headersZ.parse(authHeaders)
-    const [_, token] = safeHeaders.authorization.split(' ')
-    const userAndPasswordString = Buffer.from(
-      z.string().parse(token),
-      'base64'
-    ).toString()
-    const [parsedUser, parsedPassword] = userAndPasswordString.split(':')
-    expect(parsedUser).toBe(authUsername)
-    expect(parsedPassword).toBe(authPassword)
-    const authoriazedUrl = await scmLib.getUrlWithCredentials()
-    expect(authoriazedUrl).toBe(
-      `https://${authUsername}:${authPassword}@bitbucket.org/mobb-dev/webgoat`
-    )
-  })
+})
+
+describe('scm instance tests', () => {
+  it.each(ALLOWED_URLS)(
+    'should return the correct headers for basic auth type %s',
+    async (url: string) => {
+      const scmLib = await SCMLib.init({
+        url,
+        scmType: ScmLibScmType.BITBUCKET,
+        accessToken: `${authUsername}:${authPassword}`,
+        scmOrg: undefined,
+      })
+      const headersZ = z.object({ authorization: z.string() })
+      const authHeaders = scmLib.getAuthHeaders()
+      const safeHeaders = headersZ.parse(authHeaders)
+      const [_, token] = safeHeaders.authorization.split(' ')
+      const userAndPasswordString = Buffer.from(
+        z.string().parse(token),
+        'base64'
+      ).toString()
+      const [parsedUser, parsedPassword] = userAndPasswordString.split(':')
+      expect(parsedUser).toBe(authUsername)
+      expect(parsedPassword).toBe(authPassword)
+      const authoriazedUrl = await scmLib.getUrlWithCredentials()
+      expect(authoriazedUrl).toBe(
+        `https://${authUsername}:${authPassword}@bitbucket.org/mobb-dev/webgoat`
+      )
+    }
+  )
   it('should return the correct headers for token auth type', async () => {
     const scmLib = await SCMLib.init({
       url: PUBLIC_URL,
@@ -255,7 +256,6 @@ describe('bitbucket sdk function', async () => {
     expect(scmLib.getAuthHeaders()).toMatchInlineSnapshot('{}')
     const authoriazedUrl = await scmLib.getUrlWithCredentials()
     expect(authoriazedUrl).toBe(PUBLIC_URL)
-    // await expect(scmLib.getUrlWithCredentials()).rejects.toThrowError()
   })
   it('should be stub scm in case repo in unreachable ', async () => {
     await expect(

@@ -7,10 +7,17 @@ import { API_KEY_HEADER_NAME } from './gql'
 
 const SUBSCRIPTION_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes in ms
 
-type BaseWsOptions = {
-  apiKey: string
-  timeoutInMs?: number
-}
+type BaseWsOptions =
+  | {
+      type: 'apiKey'
+      apiKey: string
+      timeoutInMs?: number
+    }
+  | {
+      type: 'token'
+      token: string
+      timeoutInMs?: number
+    }
 
 type WsOptions = BaseWsOptions & {
   websocket: typeof WebsocketNode | typeof WebSocket
@@ -23,9 +30,12 @@ function createWSClient(options: WsOptions) {
     webSocketImpl: options.websocket || WebSocket,
     connectionParams: () => {
       return {
-        headers: {
-          [API_KEY_HEADER_NAME]: options.apiKey,
-        },
+        headers:
+          options.type === 'apiKey'
+            ? {
+                [API_KEY_HEADER_NAME]: options.apiKey,
+              }
+            : { authorization: `Bearer ${options.token}` },
       }
     },
   })

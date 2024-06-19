@@ -1,19 +1,24 @@
 import { z } from 'zod'
 
+type LineFilter =
+  | {
+      startLine: {
+        _gte: number
+        _lte: number
+      }
+    }
+  | {
+      endLine: {
+        _gte: number
+        _lte: number
+      }
+    }
+
 export type GetVulByNodesMetadataFilter = {
   path: {
     _eq: string
   }
-  _or: {
-    startLine: {
-      _gte: number
-      _lte: number
-    }
-    endLine: {
-      _gte: number
-      _lte: number
-    }
-  }[]
+  _or: LineFilter[]
 }
 
 export type GetVulByNodeHunk = {

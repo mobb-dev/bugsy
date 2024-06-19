@@ -122,6 +122,7 @@ export async function handleFinishedAnalysis({
   scanner: Scanner
 }) {
   const githubActionOctokit = new Octokit({ auth: githubActionToken })
+
   if (_scm instanceof GithubSCMLib === false) {
     return
   }
@@ -152,7 +153,6 @@ export async function handleFinishedAnalysis({
     ({ vulnerabilityReportIssue: { fixId } }) => fixId
   )
   const fixesById = await getFixesData({ fixesId, gqlClient })
-
   const [comments, generalPrComments] = await Promise.all([
     scm.getPrComments({ pull_number: pullRequest }, githubActionOctokit),
     scm.getGeneralPrComments(
@@ -274,8 +274,7 @@ export async function handleFinishedAnalysis({
     const subTitle = `### Apply the following code change to fix ${issueType} issue detected by **${scanerString}**:`
     const diff = `\`\`\`diff\n${patch} \n\`\`\``
     const fixPageLink = `[Learn more and fine tune the fix](${fixUrl})`
-
-    await scm.updatePrComment(
+    return await scm.updatePrComment(
       {
         body: `${title}\n${subTitle}\n${diff}\n${commitFixButton(
           commitUrl

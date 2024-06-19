@@ -16,6 +16,11 @@ function endsWithAny(str: string, suffixes: string[]): boolean {
   })
 }
 
+//For now we only support package.json files
+function _get_manifest_files_suffixes() {
+  return ['package.json']
+}
+
 export async function pack(srcDirPath: string, vulnFiles: string[]) {
   debug('pack folder %s', srcDirPath)
   const filepaths = await globby('**', {
@@ -31,6 +36,9 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
   debug('compressing files')
   for (const filepath of filepaths) {
     const absFilepath = path.join(srcDirPath, filepath.toString())
+
+    //make sure we send manifest files of the code the Mobb server for analysis
+    vulnFiles = vulnFiles.concat(_get_manifest_files_suffixes())
 
     // the server returns relative paths in unix style
     if (

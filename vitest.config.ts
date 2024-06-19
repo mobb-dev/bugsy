@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     exclude: ['node_modules', './build'],
+    setupFiles: ['./__tests__/setupTests.ts'],
     testTimeout: 60000,
     hookTimeout: 60000,
   },

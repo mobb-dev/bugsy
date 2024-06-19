@@ -28,21 +28,31 @@ const debug = Debug('mobbdev:gql')
 export const API_KEY_HEADER_NAME = 'x-mobb-key'
 const REPORT_STATE_CHECK_DELAY = 5 * 1000 // 5 sec
 
-type GQLClientArgs = {
-  apiKey: string
-}
+type GQLClientArgs =
+  | {
+      apiKey: string
+      type: 'apiKey'
+    }
+  | {
+      token: string
+      type: 'token'
+    }
 
 export class GQLClient {
   _client: GraphQLClient
-  _apiKey: string
   _clientSdk: Sdk
 
+  _auth: GQLClientArgs
   constructor(args: GQLClientArgs) {
-    const { apiKey } = args
-    this._apiKey = apiKey
-    debug(`init with apiKey ${apiKey}`)
+    debug(`init with  ${args}`)
+    this._auth = args
     this._client = new GraphQLClient(API_URL, {
-      headers: { [API_KEY_HEADER_NAME]: apiKey || '' },
+      headers:
+        args.type === 'apiKey'
+          ? { [API_KEY_HEADER_NAME]: args.apiKey || '' }
+          : {
+              Authorization: `Bearer ${args.token}`,
+            },
       requestMiddleware: (request) => {
         const requestId = uuidv4()
         debug(
@@ -170,10 +180,12 @@ export class GQLClient {
     const filters = hunks.map((hunk) => {
       const filter: GetVulByNodesMetadataFilter = {
         path: { _eq: hunk.path },
-        _or: hunk.ranges.map(({ endLine, startLine }) => ({
-          startLine: { _gte: startLine, _lte: endLine },
-          endLine: { _gte: startLine, _lte: endLine },
-        })),
+        _or: hunk.ranges.flatMap(({ endLine, startLine }) => {
+          return [
+            { startLine: { _gte: startLine, _lte: endLine } },
+            { endLine: { _gte: startLine, _lte: endLine } },
+          ]
+        }),
       }
       return filter
     })
@@ -327,10 +339,17 @@ export class GQLClient {
           resolve(data)
         }
       },
-      {
-        apiKey: this._apiKey,
-        timeoutInMs: params.timeoutInMs,
-      }
+      this._auth.type === 'apiKey'
+        ? {
+            apiKey: this._auth.apiKey,
+            type: 'apiKey',
+            timeoutInMs: params.timeoutInMs,
+          }
+        : {
+            token: this._auth.token,
+            type: 'token',
+            timeoutInMs: params.timeoutInMs,
+          }
     )
   }
   async getAnalysis(analysisId: string) {

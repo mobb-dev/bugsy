@@ -17,7 +17,7 @@ import {
 import { Fix_Report_State_Enum } from '@mobb/bugsy/generates/client_generates'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
-import { getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
+import { getDirName, getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -47,7 +47,7 @@ import {
 import { uploadFile } from './upload-file'
 import { getFromArraySafe, sendReport } from './utils'
 
-const { CliError, Spinner, keypress, getDirName } = utils
+const { CliError, Spinner, keypress } = utils
 
 const webLoginUrl = `${WEB_APP_URL}/cli-login`
 
@@ -108,9 +108,6 @@ const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
 const MOBB_LOGIN_REQUIRED_MSG = `🔓 Login to Mobb is Required, you will be redirected to our login page, once the authorization is complete return to this prompt, ${chalk.bgBlue(
   'press any key to continue'
 )};`
-const tmpObj = tmp.dirSync({
-  unsafeCleanup: true,
-})
 
 type ReportUrlParam = {
   organizationId: string
@@ -159,9 +156,12 @@ export type AnalysisParams = {
 export async function runAnalysis(
   params: AnalysisParams,
   options: CommandOptions
-) {
+): Promise<string> {
+  const tmpObj = tmp.dirSync({
+    unsafeCleanup: true,
+  })
   try {
-    await _scan(
+    return await _scan(
       {
         ...params,
         dirname: tmpObj.name,
@@ -226,6 +226,7 @@ export async function _scan(
   skipPrompts = skipPrompts || ci
   let gqlClient = new GQLClient({
     apiKey: apiKey || config.get('apiToken'),
+    type: 'apiKey',
   })
 
   await handleMobbLogin()
@@ -248,7 +249,6 @@ export async function _scan(
     throw new Error('repo is required in case srcPath is not provided')
   }
   const userInfo = await gqlClient.getUserInfo()
-
   if (!userInfo) {
     throw new Error('userInfo is null')
   }
@@ -392,6 +392,7 @@ export async function _scan(
   })
 
   await askToOpenAnalysis()
+  return reportUploadInfo.fixReportId
 
   async function getReport(scanner: SupportedScanners): Promise<string> {
     const reportPath = path.join(dirname, 'report.json')
@@ -503,7 +504,7 @@ export async function _scan(
       throw new CliError()
     }
 
-    gqlClient = new GQLClient({ apiKey: newApiToken })
+    gqlClient = new GQLClient({ apiKey: newApiToken, type: 'apiKey' })
 
     if (await gqlClient.verifyToken()) {
       debug('set api token %s', newApiToken)
@@ -686,6 +687,8 @@ export async function _scan(
     mobbSpinner.success({
       text: '🕵️‍♂️ Generating fixes...',
     })
+
     await askToOpenAnalysis()
+    return reportUploadInfo.fixReportId
   }
 }

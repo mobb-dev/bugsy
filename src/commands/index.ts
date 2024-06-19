@@ -11,14 +11,11 @@ import { errorMessages, mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
-import * as utils from '@mobb/bugsy/utils'
-import { CliError, sleep } from '@mobb/bugsy/utils'
+import { CliError, getDirName, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
 import Configstore from 'configstore'
 
 import { GQLClient } from '../features/analysis/graphql'
-
-const { getDirName } = utils
 
 export async function review(
   params: ReviewOptions,
@@ -91,6 +88,7 @@ export type CommandOptions = {
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(getDirName(), '../package.json'), 'utf8')
 )
+
 const config = new Configstore(packageJson.name, { apiToken: '' })
 
 export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
@@ -98,6 +96,7 @@ export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
     addScmTokenOptions
   const gqlClient = new GQLClient({
     apiKey: apiKey || config.get('apiToken'),
+    type: 'apiKey',
   })
   if (!scmType) {
     throw new CliError(errorMessages.invalidScmType)

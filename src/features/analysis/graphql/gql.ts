@@ -237,14 +237,17 @@ export class GQLClient {
   async digestVulnerabilityReport({
     fixReportId,
     projectId,
+    scanSource,
   }: {
     fixReportId: string
     projectId: string
+    scanSource: string
   }) {
     const res = await this._clientSdk.DigestVulnerabilityReport({
       fixReportId,
       vulnerabilityReportFileName: 'report.json',
       projectId,
+      scanSource,
     })
     if (res.digestVulnerabilityReport.__typename !== 'VulnerabilityReport') {
       throw new Error('Digesting vulnerability report failed')
@@ -265,7 +268,7 @@ export class GQLClient {
       vulnerabilityReportFileName,
       pullRequest,
     } = params
-    const res = await this._clientSdk.SubmitVulnerabilityReport({
+    return await this._clientSdk.SubmitVulnerabilityReport({
       fixReportId,
       repoUrl,
       reference,
@@ -274,8 +277,8 @@ export class GQLClient {
       pullRequest,
       sha: sha || '',
       experimentalEnabled,
+      scanSource: params.scanSource,
     })
-    return res
   }
 
   async getFixReportState(fixReportId: string) {

@@ -202,11 +202,13 @@ mutation DigestVulnerabilityReport(
   $vulnerabilityReportFileName: String!
   $fixReportId: String!
   $projectId: String!
+  $scanSource: String!
 ) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     projectId: $projectId
+    scanSource: $scanSource
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -233,6 +235,7 @@ mutation SubmitVulnerabilityReport(
   $repoUrl: String!
   $reference: String!
   $projectId: String!
+  $scanSource: String!
   $sha: String
   $experimentalEnabled: Boolean
   $vulnerabilityReportFileName: String
@@ -247,6 +250,7 @@ mutation SubmitVulnerabilityReport(
     pullRequest: $pullRequest
     projectId: $projectId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
+    scanSource: $scanSource
   ) {
     __typename
     ... on VulnerabilityReport {

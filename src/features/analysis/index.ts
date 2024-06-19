@@ -14,7 +14,10 @@ import {
   VUL_REPORT_DIGEST_TIMEOUT_MS,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
-import { Fix_Report_State_Enum } from '@mobb/bugsy/generates/client_generates'
+import {
+  Fix_Report_State_Enum,
+  Scan_Source_Enum,
+} from '@mobb/bugsy/generates/client_generates'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { getDirName, getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
@@ -58,6 +61,13 @@ type DownloadRepoParams = {
   authHeaders: Record<string, string>
   downloadUrl: string
 }
+
+function _getScanSource(command: MobbCliCommand): Scan_Source_Enum {
+  // `review` comes from the GitHub action https://github.com/mobb-dev/action/blob/b5dfbbe1e005a46b135421c2481a6bff2a3f46fe/review/action.yml#L37
+  if (command === 'review') return Scan_Source_Enum.AutoFixer
+  return Scan_Source_Enum.Cli
+}
+
 export async function downloadRepo({
   repoUrl,
   authHeaders,
@@ -349,6 +359,7 @@ export async function _scan(
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
   const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
+
   const sendReportRes = await sendReport({
     gqlClient,
     spinner: mobbSpinner,
@@ -361,6 +372,7 @@ export async function _scan(
       sha,
       experimentalEnabled,
       pullRequest: params.pullRequest,
+      scanSource: _getScanSource(command),
     },
   })
   if (
@@ -612,6 +624,7 @@ export async function _scan(
         await gqlClient.digestVulnerabilityReport({
           fixReportId: reportUploadInfo.fixReportId,
           projectId,
+          scanSource: _getScanSource(command),
         })
       try {
         await gqlClient.subscribeToAnalysis({
@@ -677,6 +690,7 @@ export async function _scan(
           repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
           reference: gitInfo.reference || 'no-branch',
           sha: commitHash || gitInfo.hash || '0123456789abcdef',
+          scanSource: _getScanSource(command),
         },
       })
     } catch (e) {

@@ -1049,7 +1049,17 @@ export class GithubSCMLib extends SCMLib {
   }
 
   getDownloadUrl(sha: string): Promise<string> {
-    return Promise.resolve(`${this.url}/zipball/${sha}`)
+    this.url
+    this._validateUrl()
+
+    const res = parseScmURL(this.url, ScmType.GitHub)
+    if (!res) {
+      throw new InvalidRepoUrlError('invalid repo url')
+    }
+    const { hostname, organization, repoName } = res
+    return Promise.resolve(
+      `https://api.${hostname}/repos/${organization}/${repoName}/zipball/${sha}`
+    )
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {

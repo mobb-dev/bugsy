@@ -264,11 +264,18 @@ export async function _scan(
   }
   const scmConfigs = getFromArraySafe<ScmConfig>(userInfo.scmConfigs)
 
-  const tokenInfo = getScmConfig({
-    url: repo,
-    scmConfigs,
-    includeOrgTokens: false,
-  })
+  const tokenInfo: ReturnType<typeof getScmConfig> = githubActionToken
+    ? {
+        accessToken: githubActionToken,
+        scmLibType: ScmLibScmType.GITHUB,
+        scmOrg: undefined,
+        id: '',
+      }
+    : getScmConfig({
+        url: repo,
+        scmConfigs,
+        includeOrgTokens: false,
+      })
   const isRepoAvailable = await scmCanReachRepo({
     repoUrl: repo,
     accessToken: tokenInfo.accessToken,

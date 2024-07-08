@@ -197,7 +197,7 @@ describe('Basic Analyze tests', () => {
     expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
     consoleMock.mockClear()
   })
-  it('should run the github fixer command', async () => {
+  it('Should run the github fixer command', async () => {
     const reportPath = path.join(
       __dirname,
       'assets/github_fixer_demo/snyk_report.json'

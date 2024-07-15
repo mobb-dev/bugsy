@@ -13,7 +13,7 @@ import {
 } from '../scm'
 import { ReferenceType, ScmRepoInfo, ScmType } from '../types'
 import { parseScmURL } from '../urlParser'
-import { removeTrailingSlash } from '../utils'
+import { normalizeUrl } from '../utils'
 import {
   CreatePullRequestParams,
   GetBitbucketTokenArgs,
@@ -55,7 +55,7 @@ export function parseBitbucketOrganizationAndRepo(bitbucketUrl: string): {
   workspace: string
   repoSlug: string
 } {
-  const parsedGitHubUrl = removeTrailingSlash(bitbucketUrl)
+  const parsedGitHubUrl = normalizeUrl(bitbucketUrl)
   const parsingResult = parseScmURL(parsedGitHubUrl, ScmType.Bitbucket)
   const validatedBitbucketResult = BitbucketParseResultZ.parse(parsingResult)
 

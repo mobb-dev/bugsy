@@ -66,6 +66,27 @@ export function getCommitUrl(params: GetCommitUrlParam) {
   })}/commit?${searchParams.toString()}`
 }
 
-export function removeTrailingSlash(str: string) {
-  return str.trim().replace(/\/+$/, '')
+// username patteren such as 'https://haggai-mobb@bitbucket.org/workspace/repo_slug.git'
+const userNamePattern = /^(https?:\/\/)([^@]+@)?([^/]+\/.+)$/
+
+// ssh path pattern such as 'git@bitbucket.org:workspace/repo_slug.git'
+const sshPattern = /^git@([\w.-]+):([\w./-]+)$/
+
+export function normalizeUrl(repoUrl: string) {
+  let trimmedUrl = repoUrl.trim().replace(/\/+$/, '')
+  if (repoUrl.endsWith('.git')) {
+    trimmedUrl = trimmedUrl.slice(0, -'.git'.length)
+  }
+
+  const usernameMatch = trimmedUrl.match(userNamePattern)
+  if (usernameMatch) {
+    const [_all, protocol, _username, repoPath] = usernameMatch
+    trimmedUrl = `${protocol}${repoPath}`
+  }
+  const sshMatch = trimmedUrl.match(sshPattern)
+  if (sshMatch) {
+    const [_all, hostname, reporPath] = sshMatch
+    trimmedUrl = `https://${hostname}/${reporPath}`
+  }
+  return trimmedUrl
 }

@@ -12,7 +12,7 @@ import {
   ScmType,
 } from '../'
 import { parseScmURL } from '../urlParser'
-import { removeTrailingSlash } from '../utils'
+import { normalizeUrl } from '../utils'
 
 const EnvVariablesZod = z.object({
   GITHUB_API_TOKEN: z.string().optional(),
@@ -408,7 +408,7 @@ export function parseGithubOwnerAndRepo(gitHubUrl: string): {
   owner: string
   repo: string
 } {
-  gitHubUrl = removeTrailingSlash(gitHubUrl)
+  gitHubUrl = normalizeUrl(gitHubUrl)
   const parsingResult = parseScmURL(gitHubUrl, ScmType.GitHub)
   if (!parsingResult || parsingResult.hostname !== 'github.com') {
     throw new InvalidUrlPatternError(`invalid github repo Url ${gitHubUrl}`)

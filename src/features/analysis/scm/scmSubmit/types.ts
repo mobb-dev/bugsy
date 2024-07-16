@@ -5,7 +5,7 @@ const BaseSubmitToScmMessageZ = z.object({
   fixes: z.array(
     z.object({
       fixId: z.string().uuid(),
-      diff: z.string(),
+      patches: z.array(z.string()),
     })
   ),
   commitHash: z.string(),

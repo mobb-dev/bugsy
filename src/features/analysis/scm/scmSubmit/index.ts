@@ -1,13 +1,11 @@
 import fs from 'node:fs/promises'
 
-import os from 'os'
 import parseDiff from 'parse-diff'
 import path from 'path'
 import { SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
 import { z } from 'zod'
 
-import { RebaseFailedError } from '../scm'
 import {
   CommitToSameBranchParams,
   FixResponseArray,
@@ -18,7 +16,6 @@ import {
 
 export * from './types'
 
-const APP_DIR_PREFIX = 'mobb'
 const MOBB_COMMIT_PREFIX = 'mobb fix commit:'
 
 const EnvVariablesZod = z.object({
@@ -49,7 +46,7 @@ export const isValidBranchName = async (branchName: string) => {
   }
 }
 
-const pushBranch = async (
+const _pushBranch = async (
   git: SimpleGit,
   branchName: string,
   fixArray: FixResponseArray,
@@ -81,46 +78,54 @@ const pushBranch = async (
   return true
 }
 
-const abortRebase = async (git: SimpleGit) => {
+const _abortCherryPick = async (git: SimpleGit) => {
   try {
-    await git.rebase(['--abort'])
+    await git.raw(['cherry-pick', '--abort'])
   } catch (e) {
     //ignore
   }
   await git.reset(['--hard', 'HEAD'])
 }
 
-const rebaseFix = async (params: {
-  git: SimpleGit
-  branchName: string
-  baseCommitHash: string
-  commitMessage: string
-}) => {
-  const { git, branchName, baseCommitHash, commitMessage } = params
+const _cherryPickFix = async (params: { git: SimpleGit; commit: string }) => {
+  const { git, commit } = params
   try {
-    await git.rebase(['--onto', branchName, baseCommitHash, 'HEAD'])
-    const message = z.string().parse((await git.log(['-1'])).latest?.message)
-    const [commitMessageHeader] = message.split('\n')
-    //sometimes the rebase fails but the git command doesn't throw an error
-    //so we need to check that the fix was actually rebased
-    if (!commitMessageHeader?.includes(commitMessage)) {
-      throw new RebaseFailedError('rebase failed')
-    }
+    // Here we cherry pick the latest commit from the input brach (which we previously configured and contains a single fix group over the base commit).
+    // We cherry pick it into the current target brach one by one because this way, git showed the based intenal strategy to resolve conflicts automatically
+    // and merge changes that touch the same lines.
+    // In any case we first filter change groups (patches) that are exactly the same from different fixes, even before getting here.
+    // We use the flag --keep-redundant-commits to make sure it creates empty commit for patches that contain code that is already applied in the target branch instead of failing.
+    await git.raw(['cherry-pick', '--keep-redundant-commits', commit])
+    return true
   } catch (e) {
-    throw new RebaseFailedError(
-      `rebasing ${baseCommitHash} with message ${commitMessage} failed `
-    )
+    await _abortCherryPick(git)
+    return false
   }
 }
 
-const getCommitMessage = (fixId: string) => `${MOBB_COMMIT_PREFIX} ${fixId}`
+function _getCommitMessage({
+  fixId,
+  commitMessage,
+  commitDescription,
+}: {
+  fixId: string
+  commitMessage?: string | null
+  commitDescription?: string | null
+}) {
+  if (commitMessage) {
+    return `${commitMessage}-${fixId}${
+      commitDescription ? `\n\n${commitDescription}` : ''
+    }`
+  }
+  return `${MOBB_COMMIT_PREFIX} ${fixId}`
+}
 
-const fetchInitialCommit = async (params: {
+async function _fetchInitialCommit(params: {
   git: SimpleGit
   reference: string
   response: SubmitFixesResponseMessage
   depth?: number
-}) => {
+}) {
   const { git, reference, depth = 1, response } = params
   try {
     await git.fetch([
@@ -142,29 +147,19 @@ const fetchInitialCommit = async (params: {
   return true
 }
 
-//This function receives a message and applies the fixes to the repo.
-//The message is receives includes fixes diff, the commit hash to apply the fixes to
-//and the branch name to push the fixes to.
-
-//It first fetches the commit from the origin and creates a new branch from it.
-//Then it applies the fixes to the branch and pushes it to the origin.
-//If there are multiple fixes with conflicting changes, it will create a
-//new branch (ending with "-x" where x is the branch index) for each conflict it encounters.
-
-//Each time a branch is pushed to the origin, the function adds the branch name and the
-//fixes ids to the response message.
-
-//If an error occurs, the function will add the error to the response message and
-//delete the branch that failed to push from origin.
-
 const FixesZ = z
-  .array(z.object({ fixId: z.string(), diff: z.string() }))
+  .array(
+    z.object({
+      fixId: z.string(),
+      patches: z.array(z.string()),
+    })
+  )
   .nonempty()
 
-async function initGit(params: {
+async function _initGit(params: {
   dirName: string
   repoUrl: string
-  changedFiles: string[]
+  changedFiles: Set<string>
 }) {
   const { repoUrl, dirName, changedFiles } = params
   const git = simpleGit(dirName).outputHandler((bin, stdout, stderr) => {
@@ -239,20 +234,166 @@ async function initGit(params: {
   return git
 }
 
-function getListOfFilesFromDiffs(diffs: string[]) {
-  const files = []
+function _getSetOfFilesFromDiffs(diffs: string[]) {
+  const files = new Set<string>()
   for (const diff of diffs) {
     const parsedDiff = parseDiff(diff)
     for (const file of parsedDiff) {
       if (file.from) {
-        files.push(file.from)
+        files.add(file.from)
       }
     }
   }
   return files
 }
 
-const COMMIT_TO_SAME_BRNACH_FETCH_DEPTH = 10
+//This function recieves a git patch (diff) string, writes it to a temp patch file and applies it to the current working dir
+async function _applyPatch(git: SimpleGit, patch: string) {
+  const fixTmpDir = tmp.dirSync({ unsafeCleanup: true })
+  try {
+    await fs.writeFile(path.join(fixTmpDir.name, 'mobb.patch'), patch)
+    await git.applyPatch(path.join(fixTmpDir.name, 'mobb.patch'))
+  } finally {
+    fixTmpDir.removeCallback()
+  }
+}
+
+//This function receives a patch string, a fix id, a commit message and a commit description, applied the patch to
+//the current work dir and commits it with the commit message and description to the current branch
+async function _commitPatch(
+  git: SimpleGit,
+  patch: string,
+  fixId: string,
+  commitMessage: string | undefined | null,
+  commitDescription: string | undefined | null
+) {
+  await _applyPatch(git, patch)
+
+  await git.add('.')
+  const newCommitMessage = _getCommitMessage({
+    fixId,
+    commitMessage,
+    commitDescription,
+  })
+  await git.commit(newCommitMessage)
+}
+
+const COMMIT_TO_SAME_BRANCH_FETCH_DEPTH = 10
+
+//This function receives a message and applies all the fix groups (patches) of all the fixes, each to a new commit on a new special brach.
+//All of them are based on the same base commit.
+//This is so that they can later be cherry picked to the target branch from these special branches.
+async function _createBranchesForAllFixPatches({
+  git,
+  commitHash,
+  fixes,
+}: {
+  git: SimpleGit
+  commitHash: string
+  fixes: {
+    fixId: string
+    patches: string[]
+  }[]
+}) {
+  await git.checkout([commitHash])
+  await git.reset(['--hard', commitHash])
+  for (const fix of fixes) {
+    for (const [patchIndex, patch] of fix.patches.entries()) {
+      await git.checkout([commitHash])
+      await _commitPatch(git, patch, fix.fixId, undefined, undefined)
+      await git.checkout(['-b', `mobb-fix-${fix.fixId}-${patchIndex}`, 'HEAD'])
+    }
+  }
+}
+
+//The goal of this function is to all the fix groups (patches) of a single fix to a target branch while skipping patches that have already been applied in other fixes.
+//It leaves the target branch in the state of the last patch of the fix and returns true if successful, false otherwise (and returns the target branch to the original state)
+//All the patches of the fix are squashed into a single commit with the commit message and description.
+//It relies on the fact the the special branches created by _createBranchesForAllFixPatches are still available and contain the patches of the fix.
+async function _cherryPickFixToBranch({
+  git,
+  fix,
+  targetBranch,
+  commitMessage,
+  commitDescription,
+  appliedPatches = {},
+  appliedFixes = [],
+}: {
+  git: SimpleGit
+  fix: { fixId: string; patches: string[] }
+  targetBranch: string
+  commitMessage?: string | null
+  commitDescription?: string | null
+  appliedPatches?: { [id: string]: boolean }
+  appliedFixes?: FixResponseArray
+}) {
+  await git.checkout([targetBranch])
+  await git.reset(['--hard', targetBranch])
+  await git.checkout([
+    '-b',
+    `mobb-temp-fix-${fix.fixId}-${targetBranch}`,
+    'HEAD',
+  ])
+  let appliedPatchesCount = 0
+  for (const [patchIndex, patch] of fix.patches.entries()) {
+    //skip patches that have already been applied in other fixes
+    if (appliedPatches[patch] === true) {
+      continue
+    }
+    const res = await _cherryPickFix({
+      git,
+      commit: `mobb-fix-${fix.fixId}-${patchIndex}`,
+    })
+    if (!res) {
+      //rollback the cherry-pick and reset the branch to the commit before the failed fix
+      await git.checkout([targetBranch])
+      await git.reset(['--hard', targetBranch])
+      return false
+    }
+    appliedPatchesCount += 1
+  }
+  //squash all the patches of the fix into a single commit
+  await git.reset(['--soft', `HEAD~${appliedPatchesCount}`])
+  await git.commit(
+    _getCommitMessage({ fixId: fix.fixId, commitDescription, commitMessage })
+  )
+  //advance the target branch to the new commit
+  await git.branch(['-f', targetBranch, 'HEAD'])
+  for (const patch of fix.patches) {
+    appliedPatches[patch] = true
+  }
+  //if the fix was applied successfully on the branch, add it to the list of applied fixes
+  appliedFixes.push({ fixId: fix.fixId })
+  await git.checkout([targetBranch])
+  await git.reset(['--hard', targetBranch])
+  return true
+}
+
+async function _initGitAndFiles({
+  fixes,
+  dirName,
+  repoUrl,
+}: {
+  fixes: {
+    fixId: string
+    patches: string[]
+  }[]
+  dirName: string
+  repoUrl: string
+}) {
+  const changedFiles = _getSetOfFilesFromDiffs(
+    fixes.reduce((acc, fix) => {
+      acc.push(...fix.patches)
+      return acc
+    }, [] as string[])
+  )
+  const git = await _initGit({
+    dirName,
+    repoUrl,
+    changedFiles,
+  })
+  return git
+}
 
 export async function submitFixesToSameBranch(
   msg: Omit<CommitToSameBranchParams, 'type'>
@@ -275,50 +416,39 @@ export async function submitFixesToSameBranch(
       return response
     }
 
-    const fixes = fixesParseRes.data
-    const changedFiles = getListOfFilesFromDiffs(fixes.map((fix) => fix.diff))
-    const dirName = tmpDir.name
     const { branch: branchName, commitHash } = msg
-    const git = await initGit({ dirName, repoUrl: msg.repoUrl, changedFiles })
+    const fixes = fixesParseRes.data
+    const git = await _initGitAndFiles({
+      fixes: msg.fixes,
+      dirName: tmpDir.name,
+      repoUrl: msg.repoUrl,
+    })
     if (
-      !(await fetchInitialCommit({
+      !(await _fetchInitialCommit({
         git,
         reference: branchName,
         response,
-        depth: COMMIT_TO_SAME_BRNACH_FETCH_DEPTH,
+        depth: COMMIT_TO_SAME_BRANCH_FETCH_DEPTH,
       }))
     ) {
       return response
     }
-    await git.checkout([commitHash])
-    await git.checkout(['-b', branchName, 'HEAD'])
+    await _createBranchesForAllFixPatches({
+      git,
+      commitHash,
+      fixes: msg.fixes,
+    })
 
     const [fix] = fixes
-    const fixTmpDir = await tmp.dirSync({ unsafeCleanup: true })
-    try {
-      await fs.writeFile(path.join(fixTmpDir.name, 'mobb.patch'), fix.diff)
-      await git.applyPatch(path.join(fixTmpDir.name, 'mobb.patch'))
-    } finally {
-      fixTmpDir.removeCallback()
-    }
-
-    await git.add('.')
-    await git.commit(
-      `${commitMessage}-${fix.fixId}${
-        commitDescription ? `\n\n${commitDescription}` : ''
-      }`
-    )
-
-    await rebaseFix({
+    await _cherryPickFixToBranch({
       git,
-      branchName: `origin/${branchName}`,
+      fix,
+      targetBranch: branchName,
+      commitDescription,
       commitMessage,
-      baseCommitHash: 'HEAD~1',
     })
-    await git.branch(['-f', branchName, 'HEAD'])
-    await git.checkout([branchName])
     if (
-      !(await pushBranch(git, branchName, [{ fixId: fix.fixId }], response))
+      !(await _pushBranch(git, branchName, [{ fixId: fix.fixId }], response))
     ) {
       console.log('pushBranch failed')
       return response
@@ -341,6 +471,20 @@ export async function submitFixesToSameBranch(
   }
 }
 
+//This function receives a message and applies the fixes to the repo.
+//The message is receives includes fixes diff, the commit hash to apply the fixes to
+//and the branch name to push the fixes to.
+
+//It first fetches the commit from the origin and creates a new branch from it.
+//Then it applies the fixes to the branch and pushes it to the origin.
+//If there are multiple fixes with conflicting changes, it will create a
+//new branch (ending with "-x" where x is the branch index) for each conflict it encounters.
+
+//Each time a branch is pushed to the origin, the function adds the branch name and the
+//fixes ids to the response message.
+
+//If an error occurs, the function will add the error to the response message and
+//delete the branch that failed to push from origin.
 export const submitFixesToDifferentBranch = async (
   msg: Omit<SubmitFixesToDifferentBranchParams, 'type'>
 ) => {
@@ -351,91 +495,74 @@ export const submitFixesToDifferentBranch = async (
   }
   const { commitHash } = msg
   //create a new temp dir for the repo
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), APP_DIR_PREFIX))
+  const tmpDir = tmp.dirSync({
+    unsafeCleanup: true,
+  })
   try {
     response.submitFixRequestId = msg.submitFixRequestId
     let submitBranch = msg.submitBranch
-    const changedFiles = getListOfFilesFromDiffs(
-      msg.fixes.map((fix) => fix.diff)
-    )
-    const git = await initGit({
-      dirName: tmpDir,
+    const git = await _initGitAndFiles({
+      fixes: msg.fixes,
+      dirName: tmpDir.name,
       repoUrl: msg.repoUrl,
-      changedFiles,
     })
-    if (!(await fetchInitialCommit({ git, reference: commitHash, response }))) {
+    if (
+      !(await _fetchInitialCommit({ git, reference: commitHash, response }))
+    ) {
       return response
     }
+    await _createBranchesForAllFixPatches({
+      git,
+      commitHash,
+      fixes: msg.fixes,
+    })
     await git.checkout([commitHash])
     await git.checkout(['-b', submitBranch, 'HEAD'])
     //create a new branch from the commit to apply the fixes on
-    let branchIndex = 0
+    let branchIndex = 1
     let fixArray: FixResponseArray = []
+    const appliedPatches: { [id: string]: boolean } = {}
     for (const fix of msg.fixes) {
-      //for each fix, create a temp dir with the patch file and apply the patch on the input commit (hash)
-      await git.checkout([msg.commitHash])
-      const fixTmpDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), `${APP_DIR_PREFIX}-fix-${fix.fixId}`)
-      )
-      try {
-        await fs.writeFile(path.join(fixTmpDir, 'mobb.patch'), fix.diff)
-        await git.applyPatch(path.join(fixTmpDir, 'mobb.patch'))
-      } finally {
-        await fs.rm(fixTmpDir, { recursive: true })
-      }
-      //commit each fix on its own branch
-      await git.add('.')
-      const commitMessage = getCommitMessage(fix.fixId)
-      await git.commit(commitMessage)
-      await git.checkout(['-b', `mobb-fix-${fix.fixId}`, 'HEAD'])
-      try {
-        //rebase the fix branch on the branch we created from the input commit (the PR branch saved in branchName)
-        await rebaseFix({
-          git,
-          branchName: submitBranch,
-          commitMessage,
-          baseCommitHash: msg.commitHash,
-        })
-        //if the rebase succeeded, push the fix id into the fix array that goes into the response
-        fixArray.push({ fixId: fix.fixId })
-        //move the PR branch to the new fix commit that was rebased on the PR branch
-        await git.branch(['-f', submitBranch, 'HEAD'])
-      } catch (e) {
-        //sometimes rebase fails and leaves the repo in a bad state and sometimes it doesn't
-        await abortRebase(git)
-        //check if we encountered a first conflict as the current PR branch name matches the input branch name exactly
-        if (msg.submitBranch === submitBranch) {
-          //move the current PR branch name to have a "-1" suffix
-          submitBranch = `${submitBranch}-1`
-          await git.checkout([msg.submitBranch])
-          await git.checkout(['-b', submitBranch, 'HEAD'])
-        }
-        //checkout the current PR branch
-        await git.checkout([submitBranch])
+      const fixRes = await _cherryPickFixToBranch({
+        git,
+        fix,
+        targetBranch: submitBranch,
+        appliedPatches,
+        appliedFixes: fixArray,
+      })
+      if (!fixRes) {
+        submitBranch = `${submitBranch}-${branchIndex}`
+        //create a new branch with the same name as the PR branch but with a "-x" suffix where x is the branch index
+        //as we now know there will be more than a single PR branch
+        await git.checkout(['-b', submitBranch, 'HEAD'])
         //push the branch to the origin and add the branch name and the fixes ids to the response
-        if (!(await pushBranch(git, submitBranch, fixArray, response))) {
+        if (!(await _pushBranch(git, submitBranch, fixArray, response))) {
           return response
         }
         fixArray = []
         branchIndex++
         //start a new branch for the next fixes in the input
         //create a new branch with the same name as the PR branch but with a "-x" suffix where x is the branch index
-        submitBranch = `${msg.submitBranch}-${branchIndex + 1}`
-        await git.checkout([`mobb-fix-${fix.fixId}`])
+        submitBranch = `${msg.submitBranch}-${branchIndex}`
+        await git.checkout([commitHash])
         await git.checkout(['-b', submitBranch, 'HEAD'])
-        fixArray.push({ fixId: fix.fixId })
+        //cherry pick the patches of the current fix on the new branch for the next PR
+        //not testing the return value as it can't fail because this is a new branch straight from the base commit
+        await _cherryPickFixToBranch({
+          git,
+          fix,
+          targetBranch: submitBranch,
+          appliedPatches,
+          appliedFixes: fixArray,
+        })
       }
-      //checkout the current PR branch
-      await git.checkout([submitBranch])
-      await git.reset(['--hard', 'HEAD'])
     }
     //push the branch to the origin and add the branch name and the fixes ids to the response
-    if (!(await pushBranch(git, submitBranch, fixArray, response))) {
+    if (!(await _pushBranch(git, submitBranch, fixArray, response))) {
       return response
     }
-    fixArray = []
     return response
   } finally {
-    await fs.rm(tmpDir, { recursive: true })
+    tmpDir.removeCallback()
   }
 }

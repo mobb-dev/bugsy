@@ -340,8 +340,6 @@ function buildAuthrizedRepoUrl(args: {
   }
 }
 
-export class RebaseFailedError extends Error {}
-
 export abstract class SCMLib {
   protected readonly url?: string
   protected readonly accessToken?: string

@@ -107,7 +107,7 @@ export class GQLClient {
       throw new Error('Organization not found')
     }
     const project = projectName
-      ? org?.projects.find((project) => project.name === projectName) ?? null
+      ? (org?.projects.find((project) => project.name === projectName) ?? null)
       : org?.projects[0]
     if (!project?.id) {
       throw new Error('Project not found')

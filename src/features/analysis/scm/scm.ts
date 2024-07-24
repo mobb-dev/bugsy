@@ -142,7 +142,7 @@ export const scmCloudHostname = {
   Bitbucket: new URL(scmCloudUrl.Bitbucket).hostname,
 } as const
 
-const scmLibScmTypeToScmType: Record<ScmLibScmType, ScmType> = {
+export const scmLibScmTypeToScmType: Record<ScmLibScmType, ScmType> = {
   [ScmLibScmType.GITLAB]: ScmType.GitLab,
   [ScmLibScmType.GITHUB]: ScmType.GitHub,
   [ScmLibScmType.ADO]: ScmType.Ado,
@@ -298,7 +298,10 @@ export class RefNotFoundError extends Error {
 }
 
 export class RepoNoTokenAccessError extends Error {
-  constructor(m: string) {
+  constructor(
+    m: string,
+    public scmType: ScmType
+  ) {
     super(m)
   }
 }
@@ -507,7 +510,10 @@ export abstract class SCMLib {
       }
     } catch (e) {
       if (e instanceof InvalidRepoUrlError && url) {
-        throw new RepoNoTokenAccessError('no access to repo')
+        throw new RepoNoTokenAccessError(
+          'no access to repo',
+          scmLibScmTypeToScmType[z.nativeEnum(ScmLibScmType).parse(scmType)]
+        )
       }
     }
 
@@ -1153,14 +1159,12 @@ export class GithubSCMLib extends SCMLib {
     return getPrRes.data.html_url
   }
   async postGeneralPrComment(
-    params: PostPRReviewCommentParams,
-    auth?: { authToken: string }
+    params: PostPRReviewCommentParams
   ): SCMPostGeneralPrCommentsResponse {
     const { prNumber, body } = params
     this._validateUrl()
-    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return await postGeneralPrComment(oktoKit, {
+    return await postGeneralPrComment(this.oktokit, {
       issue_number: prNumber,
       owner,
       repo,
@@ -1182,14 +1186,13 @@ export class GithubSCMLib extends SCMLib {
       repo,
     })
   }
-  async deleteGeneralPrComment(
-    { commentId }: SCMDeleteGeneralPrCommentParams,
-    auth?: { authToken: string }
-  ): SCMDeleteGeneralPrReviewResponse {
+  async deleteGeneralPrComment({
+    commentId,
+  }: SCMDeleteGeneralPrCommentParams): SCMDeleteGeneralPrReviewResponse {
     this._validateUrl()
-    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
+
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return deleteGeneralPrComment(oktoKit, {
+    return deleteGeneralPrComment(this.oktokit, {
       owner,
       repo,
       comment_id: commentId,

@@ -37,6 +37,8 @@ export type BaseReviewOptions = {
   'github-token': string
   githubToken?: string
   pullRequest?: number
+  p: string
+  srcPath?: string
 }
 
 export type ScanOptions = Yargs.ArgumentsCamelCase<BaseScanOptions>

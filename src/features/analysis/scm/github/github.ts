@@ -95,6 +95,9 @@ export function getUserInfo({
   const oktoKit = getOktoKit({ githubAuthToken: accessToken })
   return oktoKit.request('GET /user')
 }
+function isGithbActionActionToken(token: string) {
+  return token.startsWith('ghs_')
+}
 
 export async function githubValidateParams(
   url: string | undefined,
@@ -103,13 +106,23 @@ export async function githubValidateParams(
   try {
     const oktoKit = getOktoKit({ githubAuthToken: accessToken })
     if (accessToken) {
-      await oktoKit.rest.users.getAuthenticated()
+      // if token is github action token we can't get user info
+      isGithbActionActionToken(accessToken)
+        ? null
+        : await oktoKit.rest.users.getAuthenticated()
     }
     if (url) {
       const { owner, repo } = parseGithubOwnerAndRepo(url)
-      await oktoKit.rest.repos.get({ repo, owner })
+      // NOTE: we used to fetch general repo information here,
+      // but for some reason github action token didn't have access to it
+      await oktoKit.request('GET /repos/{owner}/{repo}/branches', {
+        owner,
+        repo,
+        per_page: 1,
+      })
     }
   } catch (e) {
+    console.log('could not init github scm', e)
     const error = e as {
       code?: string
       status?: number

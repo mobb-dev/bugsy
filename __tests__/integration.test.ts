@@ -4,8 +4,8 @@ import path from 'node:path'
 
 import { API_URL, SCANNERS, WEB_APP_URL } from '@mobb/bugsy/constants'
 import { runAnalysis } from '@mobb/bugsy/features/analysis'
+import { getRelevantVulenrabilitiesFromDiff } from '@mobb/bugsy/features/analysis/add_fix_comments_for_pr'
 import { GQLClient } from '@mobb/bugsy/features/analysis/graphql'
-import { getRelevantVulenrabilitiesFromDiff } from '@mobb/bugsy/features/analysis/handle_finished_analysis'
 import {
   GithubSCMLib,
   MOBB_ICON_IMG,
@@ -80,7 +80,6 @@ vi.mock('open', () => ({
         scmOrg: undefined,
       })
       const username = await scm.getUsername()
-
       await gqlClient.updateScmToken({
         scmType: ScmType.GitHub,
         url: scmCloudUrl.GitHub,
@@ -224,6 +223,7 @@ describe('Basic Analyze tests', () => {
         githubToken: TEST_GITHUB_TOKEN,
         scanFile: reportPath,
         command: mobbCliCommand.review,
+        srcPath: path.join(__dirname, 'assets/github_fixer_demo/repo'),
         ci: true,
       },
       { skipPrompts: true }

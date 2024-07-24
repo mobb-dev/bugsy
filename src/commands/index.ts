@@ -31,6 +31,7 @@ export async function review(
     pullRequest,
     githubToken,
     scanner,
+    srcPath,
   } = params
   await runAnalysis(
     {
@@ -46,6 +47,7 @@ export async function review(
       githubToken,
       scanner,
       command: 'review',
+      srcPath,
     },
     { skipPrompts }
   )

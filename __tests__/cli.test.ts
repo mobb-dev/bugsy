@@ -39,6 +39,7 @@ vi.mock('@mobb/bugsy/features/analysis', async () => {
 
 describe('github fixer command', () => {
   it('should run the github fixer command', async () => {
+    const srcPath = path.join(__dirname, 'assets')
     const baseReviewOptions = {
       apiKey: TEST_REPO.API_KEY,
       repo: TEST_REPO.URL,
@@ -48,6 +49,7 @@ describe('github fixer command', () => {
       pullRequest: TEST_REPO.PR_NUMBER,
       githubToken: TEST_GITHUB_TOKEN,
       scanFile: reportPath,
+      srcPath,
     }
     const rawArgs = Object.entries(baseReviewOptions).flatMap(
       ([key, value]) => {
@@ -71,6 +73,7 @@ describe('github fixer command', () => {
         repo: TEST_REPO.URL,
         scanFile: reportPath,
         scanner: 'snyk',
+        srcPath,
       },
       {
         skipPrompts: true,

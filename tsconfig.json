@@ -38,5 +38,5 @@
     "skipDefaultLibCheck": true
   },
   "include": ["src", "__tests__"],
-  "exclude": ["node_modules", "dist", "static", "**/*.json"]
+  "exclude": ["node_modules", "dist", "static", "**/*.json", "__tests__/assets/github_fixer_demo/repo/xss-example.js"]
 }

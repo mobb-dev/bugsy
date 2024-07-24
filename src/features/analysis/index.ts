@@ -31,9 +31,9 @@ import semver from 'semver'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { getGitInfo } from './git'
 import { GQLClient } from './graphql'
-import { handleFinishedAnalysis } from './handle_finished_analysis'
 import { pack } from './pack'
 import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
 import { getCheckmarxReport } from './scanners/checkmarx'
@@ -381,23 +381,6 @@ export async function _scan(
     mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
     throw new Error('🕵️‍♂️ Mobb analysis failed')
   }
-  // in case we were provided with the github action token we assume we can create the github comments
-  if (command === 'review') {
-    await gqlClient.subscribeToAnalysis({
-      subscribeToAnalysisParams: {
-        analysisId: sendReportRes.submitVulnerabilityReport.fixReportId,
-      },
-      callback: (analysisId) =>
-        handleFinishedAnalysis({
-          analysisId,
-          gqlClient,
-          scm,
-          githubActionToken: z.string().parse(githubActionToken),
-          scanner: z.nativeEnum(SCANNERS).parse(scanner),
-        }),
-      callbackStates: [Fix_Report_State_Enum.Finished],
-    })
-  }
 
   mobbSpinner.success({
     text: '🕵️‍♂️ Generating fixes...',
@@ -688,11 +671,41 @@ export async function _scan(
           fixReportId: reportUploadInfo.fixReportId,
           projectId: projectId,
           repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
-          reference: gitInfo.reference || 'no-branch',
+          reference: ref || gitInfo.reference || 'no-branch',
           sha: commitHash || gitInfo.hash || '0123456789abcdef',
           scanSource: _getScanSource(command),
+          pullRequest: params.pullRequest,
         },
       })
+      if (command === 'review') {
+        const params = z
+          .object({
+            repo: z.string().url(),
+            githubActionToken: z.string(),
+          })
+          .parse({ repo, githubActionToken })
+
+        const scm = await SCMLib.init({
+          url: params.repo,
+          accessToken: params.githubActionToken,
+          scmOrg: '',
+          scmType: ScmLibScmType.GITHUB,
+        })
+        await gqlClient.subscribeToAnalysis({
+          subscribeToAnalysisParams: {
+            analysisId: reportUploadInfo.fixReportId,
+          },
+          callback: (analysisId) => {
+            return addFixCommentsForPr({
+              analysisId,
+              gqlClient,
+              scm,
+              scanner: z.nativeEnum(SCANNERS).parse(scanner),
+            })
+          },
+          callbackStates: [Fix_Report_State_Enum.Finished],
+        })
+      }
     } catch (e) {
       mobbSpinner.error({ text: '🕵️‍♂️ Mobb analysis failed' })
       throw e

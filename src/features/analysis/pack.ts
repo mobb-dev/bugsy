@@ -28,6 +28,7 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
     onlyFiles: true,
     cwd: srcDirPath,
     followSymbolicLinks: false,
+    dot: true,
   })
   debug('files found %d', filepaths.length)
 

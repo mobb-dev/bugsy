@@ -457,15 +457,14 @@ export async function getAdoRepoDefaultBranch({
     orgName: owner,
   })
   const git = await api.getGitApi()
-  const branches = await git.getBranches(repo, projectName)
-  if (!branches || branches.length === 0) {
-    throw new InvalidRepoUrlError('no branches')
-  }
-  const res = branches.find((branch) => branch.isBaseVersion)
-  if (!res || !res.name) {
+  const getRepositoryRes = await git.getRepository(
+    decodeURI(repo),
+    projectName ? decodeURI(projectName) : undefined
+  )
+  if (!getRepositoryRes?.defaultBranch) {
     throw new InvalidRepoUrlError('no default branch')
   }
-  return res.name
+  return getRepositoryRes.defaultBranch.replace('refs/heads/', '')
 }
 
 export async function getAdoReferenceData({
@@ -584,10 +583,12 @@ export function parseAdoOwnerAndRepo(adoUrl: string) {
 
   const { organization, repoName, projectName, projectPath, pathElements } =
     parsingResult
+  // note: the reason we decode the values is because 'azure-devops-node-api' decode the values on his side.
+  // if we decode the values twice we might result the wrong output. see MOBB-2084
   return {
-    owner: organization,
-    repo: repoName,
-    projectName,
+    owner: decodeURI(organization),
+    repo: decodeURI(repoName),
+    projectName: projectName ? decodeURI(projectName) : undefined,
     projectPath,
     pathElements,
   }

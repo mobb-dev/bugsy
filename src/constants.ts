@@ -21,6 +21,7 @@ export const SCANNERS = {
   Codeql: 'codeql',
   Fortify: 'fortify',
   Snyk: 'snyk',
+  Sonarqube: 'sonarqube',
 } as const
 
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])

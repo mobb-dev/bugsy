@@ -120,6 +120,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'Privacy Violation'
     case IssueType_Enum.IncompleteUrlSchemeCheck:
       return 'Incomplete URL Scheme Check'
+    case IssueType_Enum.ValueNeverRead:
+      return 'Value Never Read'
     case IssueType_Enum.ValueShadowing:
       return 'Value Shadowing'
     default: {

@@ -105,6 +105,8 @@ export enum IssueType_Enum {
   UselessRegexpCharEscape = 'USELESS_REGEXP_CHAR_ESCAPE',
   /** Printing logs in assorted way to the sys out/err */
   UseOfSystemOutputStream = 'USE_OF_SYSTEM_OUTPUT_STREAM',
+  /** A variable is assigned a value that is never read */
+  ValueNeverRead = 'VALUE_NEVER_READ',
   /** Value Shadowing */
   ValueShadowing = 'VALUE_SHADOWING',
   /** WCF Misconfiguration: Insufficient Logging */

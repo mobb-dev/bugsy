@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  getGithubReferenceData,
-  getGithubRepoDefaultBranch,
-  parseGithubOwnerAndRepo,
-} from '../github/github'
+import { getGithubSdk, parseGithubOwnerAndRepo } from '../github'
 import { SCMLib } from '../scm'
 import { ScmLibScmType } from '../types'
 import { env } from './env'
@@ -12,6 +8,7 @@ import { env } from './env'
 const OWNER = 'facebook'
 const REPO = 'react'
 const GITHUB_URL = `https://github.com/${OWNER}/${REPO}`
+const GITHUB_ON_PREM_URL = `https://my.custom-onprem-domain.com/${OWNER}/${REPO}`
 const NON_EXISTING_GITHUB_URL = 'https://github.com/facebook/react1111'
 const INVALID_URL = 'https://invalid.com/facebook'
 const EXISTING_COMMIT = 'c7967b194b41cb16907eed718b78d89120089f6a'
@@ -23,15 +20,17 @@ const TEST_REPO_URL = 'https://github.com/mobbgeneraldev/WebGoat'
 describe('github reference', () => {
   it('test non existing repo', async () => {
     await expect(() =>
-      getGithubRepoDefaultBranch(NON_EXISTING_GITHUB_URL)
+      getGithubSdk().getGithubRepoDefaultBranch(NON_EXISTING_GITHUB_URL)
     ).rejects.toThrow()
   })
   it('test existing repo', async () => {
-    expect(await getGithubRepoDefaultBranch(GITHUB_URL)).toEqual('main')
+    expect(await getGithubSdk().getGithubRepoDefaultBranch(GITHUB_URL)).toEqual(
+      'main'
+    )
   })
   it('test if date is correct for commit', async () => {
     expect(
-      await getGithubReferenceData({
+      await getGithubSdk().getGithubReferenceData({
         gitHubUrl: GITHUB_URL,
         ref: EXISTING_COMMIT,
       })
@@ -45,7 +44,7 @@ describe('github reference', () => {
   })
   it('test if date is correct for branch', async () => {
     expect(
-      await getGithubReferenceData({
+      await getGithubSdk().getGithubReferenceData({
         gitHubUrl: GITHUB_URL,
         ref: EXISTING_BRANCH,
       })
@@ -59,7 +58,10 @@ describe('github reference', () => {
   })
   it('test if date is correct for tag', async () => {
     expect(
-      await getGithubReferenceData({ gitHubUrl: GITHUB_URL, ref: EXISTING_TAG })
+      await getGithubSdk().getGithubReferenceData({
+        gitHubUrl: GITHUB_URL,
+        ref: EXISTING_TAG,
+      })
     ).toMatchInlineSnapshot(`
       {
         "date": 2022-06-14T19:51:27.000Z,
@@ -70,7 +72,7 @@ describe('github reference', () => {
   })
   it('test we get an error for incorrect tag', async () => {
     await expect(
-      getGithubReferenceData({
+      getGithubSdk().getGithubReferenceData({
         gitHubUrl: GITHUB_URL,
         ref: NON_EXISTING_BRANCH,
       })
@@ -94,13 +96,11 @@ describe('scm intance tests', () => {
 })
 
 describe('parsing github url', () => {
-  it('should parse the url', () => {
-    expect(parseGithubOwnerAndRepo(GITHUB_URL)).toMatchInlineSnapshot(`
-      {
-        "owner": "facebook",
-        "repo": "react",
-      }
-    `)
+  it.each([GITHUB_ON_PREM_URL, GITHUB_URL])('should parse the url', (url) => {
+    expect(parseGithubOwnerAndRepo(url)).toEqual({
+      owner: 'facebook',
+      repo: 'react',
+    })
   })
   it('should work with trailing slash', () => {
     expect(parseGithubOwnerAndRepo(`${GITHUB_URL}/`)).toMatchInlineSnapshot(`

@@ -75,11 +75,6 @@ export const scmOrgOption = {
   type: 'string',
 } as const
 
-export const scmUsernameOption = {
-  describe: chalk.bold('Username in SCM (used in GitHub, Bitbucket)'),
-  type: 'string',
-} as const
-
 export const scmRefreshTokenOption = {
   describe: chalk.bold('SCM refresh token (used in GitLab)'),
   type: 'string',

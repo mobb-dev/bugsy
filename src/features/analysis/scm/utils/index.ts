@@ -90,3 +90,15 @@ export function normalizeUrl(repoUrl: string) {
   }
   return trimmedUrl
 }
+
+const isUrlHasPath = (url: string) => {
+  return new URL(url).origin !== url
+}
+
+// note: in some cases we want to use non repo related calls for on prem urls,
+// e.g. we want to fetch the user info.
+// so we don't need to validate the url, otherwise it will fail
+// in case the url does contain extends beyond the origin, we do want to validate it
+export function shouldValidateUrl(repoUrl?: string | null) {
+  return repoUrl && isUrlHasPath(repoUrl)
+}

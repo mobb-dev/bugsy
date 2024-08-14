@@ -165,7 +165,7 @@ export type ScmRepoInfo = {
   repoOwner: string
   repoLanguages: string[]
   repoIsPublic: boolean
-  repoUpdatedAt: string
+  repoUpdatedAt: string | null
 }
 
 export const scmCloudUrl = {

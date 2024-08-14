@@ -153,7 +153,6 @@ mutation updateScmToken(
   $url: String!
   $token: String!
   $org: String
-  $username: String
   $refreshToken: String
 ) {
   updateScmToken(
@@ -161,7 +160,6 @@ mutation updateScmToken(
     url: $url
     token: $token
     org: $org
-    username: $username
     refreshToken: $refreshToken
   ) {
     __typename

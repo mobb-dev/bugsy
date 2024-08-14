@@ -10,7 +10,6 @@ import {
   scmRefreshTokenOption,
   scmTokenOption,
   scmTypeOption,
-  scmUsernameOption,
   urlOption,
 } from '../options'
 import { AddScmTokenOptions, BaseAddScmTokenOptions } from '../types'
@@ -23,7 +22,6 @@ export function addScmTokenBuilder(
     .option('url', urlOption)
     .option('token', scmTokenOption)
     .option('organization', scmOrgOption)
-    .option('username', scmUsernameOption)
     .option('refresh-token', scmRefreshTokenOption)
     .option('api-key', apiKeyOption)
     .example(
@@ -44,32 +42,16 @@ export function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
 }
 
 const scmValidationMap: Record<ScmType, (argv: AddScmTokenOptions) => void> = {
-  [ScmType.GitHub]: validateGithub,
+  [ScmType.GitHub]: () => {
+    return
+  },
   [ScmType.GitLab]: () => {
     return
   },
   [ScmType.Ado]: validateAdo,
-  [ScmType.Bitbucket]: validateBitbucket,
-}
-
-function validateBitbucket(argv: AddScmTokenOptions) {
-  const urlObj = new URL(argv.url)
-  if (
-    urlObj.hostname.toLowerCase() === scmCloudHostname.Bitbucket &&
-    !argv.username
-  ) {
-    throw new CliError('\nError: --username flag is required for Bitbucket')
-  }
-}
-
-function validateGithub(argv: AddScmTokenOptions) {
-  const urlObj = new URL(argv.url)
-  if (
-    urlObj.hostname.toLowerCase() === scmCloudHostname.GitHub &&
-    !argv.username
-  ) {
-    throw new CliError('\nError: --username flag is required for GitHub')
-  }
+  [ScmType.Bitbucket]: () => {
+    return
+  },
 }
 
 function validateAdo(argv: AddScmTokenOptions) {

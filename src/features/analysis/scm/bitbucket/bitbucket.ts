@@ -13,7 +13,7 @@ import {
 } from '../scm'
 import { ReferenceType, ScmRepoInfo, ScmType } from '../types'
 import { parseScmURL } from '../urlParser'
-import { normalizeUrl } from '../utils'
+import { normalizeUrl, shouldValidateUrl } from '../utils'
 import {
   CreatePullRequestParams,
   GetBitbucketTokenArgs,
@@ -343,7 +343,7 @@ export async function validateBitbucketParams(params: {
     if (authType !== 'public') {
       await bitbucketClient.getUser()
     }
-    if (params.url) {
+    if (params.url && shouldValidateUrl(params.url)) {
       await bitbucketClient.getRepo({ repoUrl: params.url })
     }
   } catch (e) {

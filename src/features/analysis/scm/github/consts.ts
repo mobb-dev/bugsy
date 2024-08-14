@@ -33,3 +33,44 @@ export const CREATE_OR_UPDATE_A_REPOSITORY_SECRET =
 
 export const GET_A_REPOSITORY_PUBLIC_KEY =
   'GET /repos/{owner}/{repo}/actions/secrets/public-key'
+
+export const GET_USER = 'GET /user'
+export const GET_USER_REPOS = 'GET /user/repos'
+
+export const GET_REPO_BRANCHES = 'GET /repos/{owner}/{repo}/branches'
+
+export const GET_BLAME_DOCUMENT = `
+      query GetBlame(
+        $owner: String!
+        $repo: String!
+        $ref: String!
+        $path: String!
+      ) {
+        repository(name: $repo, owner: $owner) {
+          # branch name
+          object(expression: $ref) {
+            # cast Target to a Commit
+            ... on Commit {
+              # full repo-relative path to blame file
+              blame(path: $path) {
+                ranges {
+                  commit {
+                    author {
+                      user {
+                        name
+                        login
+                      }
+                    }
+                    authoredDate
+                  }
+                  startingLine
+                  endingLine
+                  age
+                }
+              }
+            }
+            
+          }
+        }
+      }
+    `

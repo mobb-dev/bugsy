@@ -1,4 +1,3 @@
-import { Octokit } from '@octokit/core'
 import { z } from 'zod'
 
 import {
@@ -13,38 +12,12 @@ import {
   parseBitbucketOrganizationAndRepo,
   validateBitbucketParams,
 } from './bitbucket'
-import { encryptSecret } from './github/encryptSecret'
 import {
-  createPr,
-  createPullRequest,
-  forkRepo,
-  getGithubBlameRanges,
-  getGithubBranchList,
-  getGithubIsRemoteBranch,
-  getGithubIsUserCollaborator,
-  getGithubPullRequestStatus,
-  getGithubReferenceData,
-  getGithubRepoDefaultBranch,
-  getGithubRepoList,
-  getGithubUsername,
-  getUserInfo,
+  getGithubSdk,
   githubValidateParams,
+  isGithubOnPrem,
   parseGithubOwnerAndRepo,
-} from './github/github'
-import {
-  createOrUpdateRepositorySecret,
-  deleteComment,
-  deleteGeneralPrComment,
-  getARepositoryPublicKey,
-  getGeneralPrComments,
-  getPr,
-  getPrComment,
-  getPrComments,
-  getPrDiff,
-  postGeneralPrComment,
-  postPrComment,
-  updatePrComment,
-} from './github/github-v2'
+} from './github'
 import {
   DeleteCommentParams,
   DeleteGeneralPrCommentResponse,
@@ -57,6 +30,7 @@ import {
   UpdateCommentParams,
   UpdateCommentResponse,
 } from './github/types'
+import { encryptSecret } from './github/utils/encrypt_secret'
 import {
   createMergeRequest,
   getGitlabBlameRanges,
@@ -106,8 +80,6 @@ export const GetRefererenceResultZ = z.object({
 
 export type GetRefererenceResult = z.infer<typeof GetRefererenceResultZ>
 
-export const ghGetUserInfo = getUserInfo
-
 export function getCloudScmLibTypeFromUrl(
   url: string | undefined
 ): ScmLibScmType | undefined {
@@ -149,7 +121,7 @@ export const scmLibScmTypeToScmType: Record<ScmLibScmType, ScmType> = {
   [ScmLibScmType.BITBUCKET]: ScmType.Bitbucket,
 } as const
 
-const scmTypeToScmLibScmType: Record<ScmType, ScmLibScmType> = {
+export const scmTypeToScmLibScmType: Record<ScmType, ScmLibScmType> = {
   [ScmType.GitLab]: ScmLibScmType.GITLAB,
   [ScmType.GitHub]: ScmLibScmType.GITHUB,
   [ScmType.Ado]: ScmLibScmType.ADO,
@@ -481,10 +453,9 @@ export abstract class SCMLib {
     scmType,
     scmOrg,
   }: ScmInitParams): Promise<SCMLib> {
-    let trimmedUrl = undefined
-    if (url) {
-      trimmedUrl = url.trim().replace(/\/$/, '').replace(/.git$/i, '')
-    }
+    const trimmedUrl = url
+      ? url.trim().replace(/\/$/, '').replace(/.git$/i, '')
+      : undefined
     try {
       switch (scmType) {
         case ScmLibScmType.GITHUB: {
@@ -858,7 +829,7 @@ export class GitlabSCMLib extends SCMLib {
 }
 
 export class GithubSCMLib extends SCMLib {
-  public readonly oktokit: Octokit
+  public readonly githubSdk: ReturnType<typeof getGithubSdk>
   // we don't always need a url, what's important is that we have an access token
   constructor(
     url: string | undefined,
@@ -866,54 +837,45 @@ export class GithubSCMLib extends SCMLib {
     scmOrg: string | undefined
   ) {
     super(url, accessToken, scmOrg)
-    this.oktokit = new Octokit({ auth: accessToken })
+    this.githubSdk = getGithubSdk({
+      auth: accessToken,
+      url,
+    })
   }
   async createSubmitRequest(
     params: CreateSubmitRequestParams
   ): Promise<string> {
     this._validateAccessTokenAndUrl()
     const { targetBranchName, sourceBranchName, title, body } = params
-    return String(
-      await createPullRequest({
-        title,
-        body,
-        targetBranchName,
-        sourceBranchName,
-        repoUrl: this.url,
-        accessToken: this.accessToken,
-      })
-    )
+    const pullRequestResult = await this.githubSdk.createPullRequest({
+      title,
+      body,
+      targetBranchName,
+      sourceBranchName,
+      repoUrl: this.url,
+    })
+    return String(pullRequestResult.data.number)
   }
 
   async forkRepo(repoUrl: string): Promise<{ url: string | null }> {
     this._validateToken()
-    return forkRepo({
+    return this.githubSdk.forkRepo({
       repoUrl: repoUrl,
-      accessToken: this.accessToken,
     })
   }
 
-  async createOrUpdateRepositorySecret(
-    params: { value: string; name: string },
-    _oktokit?: Octokit
-  ) {
-    if ((!_oktokit && !this.accessToken) || !this.url) {
-      throw new Error('cannot delete comment without access token or url')
-    }
-    const oktokit = _oktokit || this.oktokit
+  async createOrUpdateRepositorySecret(params: {
+    value: string
+    name: string
+  }) {
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    const { data: repositoryPublicKeyResponse } = await getARepositoryPublicKey(
-      oktokit,
-      {
-        owner,
-        repo,
-      }
-    )
+    const { data: repositoryPublicKeyResponse } =
+      await this.githubSdk.getRepositoryPublicKey({ owner, repo })
     const { key_id, key } = repositoryPublicKeyResponse
 
     const encryptedValue = await encryptSecret(params.value, key)
-
-    return createOrUpdateRepositorySecret(oktokit, {
+    return this.githubSdk.createOrUpdateRepositorySecret({
       encrypted_value: encryptedValue,
       secret_name: params.name,
       key_id,
@@ -929,18 +891,13 @@ export class GithubSCMLib extends SCMLib {
     title: string,
     body: string
   ) {
-    const { pull_request_url } = await createPr(
-      {
-        sourceRepoUrl,
-        filesPaths,
-        userRepoUrl,
-        title,
-        body,
-      },
-      {
-        githubAuthToken: this.accessToken,
-      }
-    )
+    const { pull_request_url } = await this.githubSdk.createPr({
+      sourceRepoUrl,
+      filesPaths,
+      userRepoUrl,
+      title,
+      body,
+    })
     return { pull_request_url: pull_request_url }
   }
 
@@ -951,62 +908,40 @@ export class GithubSCMLib extends SCMLib {
     params: Pick<
       PostCommentParams,
       'body' | 'commit_id' | 'pull_number' | 'path' | 'line'
-    >,
-    _oktokit?: Octokit
+    >
   ) {
-    if ((!_oktokit && !this.accessToken) || !this.url) {
-      throw new Error('cannot post on PR without access token or url')
-    }
-    const oktokit = _oktokit || this.oktokit
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-
-    return postPrComment(oktokit, {
+    return this.githubSdk.postPrComment({
       ...params,
       owner,
       repo,
     })
   }
   async updatePrComment(
-    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>,
-    _oktokit?: Octokit
+    params: Pick<UpdateCommentParams, 'body' | 'comment_id'>
   ): Promise<UpdateCommentResponse> {
-    if ((!_oktokit && !this.accessToken) || !this.url) {
-      throw new Error('cannot update on PR without access token or url')
-    }
-    const oktokit = _oktokit || this.oktokit
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-
-    return updatePrComment(oktokit, {
+    return this.githubSdk.updatePrComment({
       ...params,
       owner,
       repo,
     })
   }
-  async deleteComment(
-    params: Pick<DeleteCommentParams, 'comment_id'>,
-    _oktokit?: Octokit
-  ) {
-    if ((!_oktokit && !this.accessToken) || !this.url) {
-      throw new Error('cannot delete comment without access token or url')
-    }
-    const oktokit = _oktokit || this.oktokit
+  async deleteComment(params: Pick<DeleteCommentParams, 'comment_id'>) {
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return deleteComment(oktokit, {
+    return this.githubSdk.deleteComment({
       ...params,
       owner,
       repo,
     })
   }
-  async getPrComments(
-    params: Omit<GetPrCommentsParams, 'owner' | 'repo'>,
-    _oktokit?: Octokit
-  ) {
-    if ((!_oktokit && !this.accessToken) || !this.url) {
-      throw new Error('cannot get Pr Comments without access token or url')
-    }
-    const oktokit = _oktokit || this.oktokit
+  async getPrComments(params: Omit<GetPrCommentsParams, 'owner' | 'repo'>) {
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return getPrComments(oktokit, {
+    return this.githubSdk.getPrComments({
       per_page: 100,
       ...params,
       owner,
@@ -1014,11 +949,9 @@ export class GithubSCMLib extends SCMLib {
     })
   }
   async getPrDiff(params: Omit<GetPrParams, 'owner' | 'repo'>) {
-    if (!this.accessToken || !this.url) {
-      throw new Error('cannot get Pr Comments without access token or url')
-    }
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    const prRes = await getPrDiff(this.oktokit, {
+    const prRes = await this.githubSdk.getPrDiff({
       ...params,
       owner,
       repo,
@@ -1029,16 +962,14 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
-    return getGithubRepoList(this.accessToken)
+    this._validateToken()
+    return this.githubSdk.getGithubRepoList()
   }
 
   async getBranchList(): Promise<string[]> {
     this._validateAccessTokenAndUrl()
-    return getGithubBranchList(this.accessToken, this.url)
+    const branches = await this.githubSdk.getGithubBranchList(this.url)
+    return branches.data.map((branch) => branch.name)
   }
 
   getScmLibType(): ScmLibScmType {
@@ -1051,19 +982,18 @@ export class GithubSCMLib extends SCMLib {
     }
     return {}
   }
-
   getDownloadUrl(sha: string): Promise<string> {
-    this.url
     this._validateUrl()
 
     const res = parseScmURL(this.url, ScmType.GitHub)
     if (!res) {
       throw new InvalidRepoUrlError('invalid repo url')
     }
-    const { hostname, organization, repoName } = res
-    return Promise.resolve(
-      `https://api.${hostname}/repos/${organization}/${repoName}/zipball/${sha}`
-    )
+    const { protocol, hostname, organization, repoName } = res
+    const downloadUrl = isGithubOnPrem(this.url)
+      ? `${protocol}//${hostname}/api/v3/repos/${organization}/${repoName}/zipball/${sha}`
+      : `https://api.${hostname}/repos/${organization}/${repoName}/zipball/${sha}`
+    return Promise.resolve(downloadUrl)
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
@@ -1071,40 +1001,32 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
-    this._validateAccessTokenAndUrl()
-    return getGithubIsRemoteBranch(this.accessToken, this.url, branch)
+    this._validateUrl()
+    return this.githubSdk.getGithubIsRemoteBranch({ branch, repoUrl: this.url })
   }
 
   async getUserHasAccessToRepo(): Promise<boolean> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
+    this._validateAccessTokenAndUrl()
     const username = await this.getUsername()
-    return getGithubIsUserCollaborator(username, this.accessToken, this.url)
+    return this.githubSdk.getGithubIsUserCollaborator({
+      repoUrl: this.url,
+      username,
+    })
   }
 
   async getUsername(): Promise<string> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
-    }
-    return getGithubUsername(this.accessToken)
+    this._validateToken()
+    return this.githubSdk.getGithubUsername()
   }
 
   async getSubmitRequestStatus(
     scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus> {
-    if (!this.accessToken || !this.url) {
-      console.error('no access token or no url')
-      throw new Error('no access token or no url')
-    }
-    const state = await getGithubPullRequestStatus(
-      this.accessToken,
-      this.url,
-      Number(scmSubmitRequestId)
-    )
-    return state
+    this._validateAccessTokenAndUrl()
+    return this.githubSdk.getGithubPullRequestStatus({
+      repoUrl: this.url,
+      prNumber: Number(scmSubmitRequestId),
+    })
   }
 
   async getRepoBlameRanges(
@@ -1112,46 +1034,35 @@ export class GithubSCMLib extends SCMLib {
     path: string
   ): Promise<GetGitBlameReponse> {
     this._validateUrl()
-    return await getGithubBlameRanges(
-      { ref, path, gitHubUrl: this.url },
-      {
-        githubAuthToken: this.accessToken,
-      }
-    )
+    return await this.githubSdk.getGithubBlameRanges({
+      ref,
+      path,
+      gitHubUrl: this.url,
+    })
   }
 
   async getReferenceData(ref: string): Promise<GetRefererenceResult> {
     this._validateUrl()
-    return await getGithubReferenceData(
-      { ref, gitHubUrl: this.url },
-      {
-        githubAuthToken: this.accessToken,
-      }
-    )
+    return this.githubSdk.getGithubReferenceData({ ref, gitHubUrl: this.url })
   }
+
   async getPrComment(commentId: number): Promise<GetPrCommentResponse> {
     this._validateUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return await getPrComment(this.oktokit, {
+    return await this.githubSdk.getPrComment({
       repo,
       owner,
       comment_id: commentId,
     })
   }
-
   async getRepoDefaultBranch(): Promise<string> {
     this._validateUrl()
-    return await getGithubRepoDefaultBranch(this.url, {
-      githubAuthToken: this.accessToken,
-    })
+    return await this.githubSdk.getGithubRepoDefaultBranch(this.url)
   }
   async getPrUrl(prNumber: number): Promise<string> {
-    if (!this.url || !this.oktokit) {
-      console.error('no url')
-      throw new Error('no url')
-    }
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    const getPrRes = await getPr(this.oktokit, {
+    const getPrRes = await this.githubSdk.getPr({
       owner,
       repo,
       pull_number: prNumber,
@@ -1162,9 +1073,9 @@ export class GithubSCMLib extends SCMLib {
     params: PostPRReviewCommentParams
   ): SCMPostGeneralPrCommentsResponse {
     const { prNumber, body } = params
-    this._validateUrl()
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return await postGeneralPrComment(this.oktokit, {
+    return await this.githubSdk.postGeneralPrComment({
       issue_number: prNumber,
       owner,
       repo,
@@ -1173,14 +1084,13 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getGeneralPrComments(
-    params: SCMGetPrReviewCommentsParams,
-    auth?: { authToken: string }
+    params: SCMGetPrReviewCommentsParams
   ): SCMGetPrReviewCommentsResponse {
     const { prNumber } = params
-    this._validateUrl()
-    const oktoKit = auth ? new Octokit({ auth: auth.authToken }) : this.oktokit
+    this._validateAccessTokenAndUrl()
+
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return await getGeneralPrComments(oktoKit, {
+    return await this.githubSdk.getGeneralPrComments({
       issue_number: prNumber,
       owner,
       repo,
@@ -1189,10 +1099,9 @@ export class GithubSCMLib extends SCMLib {
   async deleteGeneralPrComment({
     commentId,
   }: SCMDeleteGeneralPrCommentParams): SCMDeleteGeneralPrReviewResponse {
-    this._validateUrl()
-
+    this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return deleteGeneralPrComment(this.oktokit, {
+    return this.githubSdk.deleteGeneralPrComment({
       owner,
       repo,
       comment_id: commentId,

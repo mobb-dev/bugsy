@@ -6,8 +6,8 @@ import {
   GitlabAPIResponse,
 } from '@gitbeaker/rest'
 import { ProxyAgent } from 'undici'
-import { z } from 'zod'
 
+import { BROKERED_HOSTS, GITLAB_API_TOKEN } from '../env'
 import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
@@ -16,25 +16,10 @@ import {
 } from '../scm'
 import { ReferenceType, ScmType } from '../types'
 import { parseScmURL } from '../urlParser'
+import { shouldValidateUrl } from '../utils'
 import { GitlabAuthResultZ, GitlabTokenRequestTypeEnum } from './types'
 
 const GITLAB_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
-
-const EnvVariablesZod = z.object({
-  GITLAB_API_TOKEN: z.string().optional(),
-  BROKERED_HOSTS: z
-    .string()
-    .toLowerCase()
-    .transform((x) =>
-      x
-        .split(',')
-        .map((url) => url.trim(), [])
-        .filter(Boolean)
-    )
-    .default(''),
-})
-
-const { GITLAB_API_TOKEN, BROKERED_HOSTS } = EnvVariablesZod.parse(process.env)
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -67,7 +52,7 @@ export async function gitlabValidateParams({
     if (accessToken) {
       await api.Users.showCurrentUser()
     }
-    if (url) {
+    if (url && shouldValidateUrl(url)) {
       const { projectPath } = parseGitlabOwnerAndRepo(url)
       await api.Projects.show(projectPath)
     }

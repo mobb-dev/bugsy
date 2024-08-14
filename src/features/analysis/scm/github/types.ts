@@ -10,6 +10,7 @@ import {
   GET_PR,
   GET_PR_COMMENT_PATH,
   GET_PR_COMMENTS_PATH,
+  GET_USER,
   POST_COMMENT_PATH,
   POST_GENERAL_PR_COMMENT,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
@@ -87,3 +88,27 @@ export type GetARepositoryPublicKeyParams =
 
 export type GetARepositoryPublicKeyResponse =
   Endpoints[typeof GET_A_REPOSITORY_PUBLIC_KEY]['response']
+
+export type GetUserResponse = Endpoints[typeof GET_USER]['response']
+export type GithubBlameResponse = {
+  repository: {
+    object: {
+      blame: {
+        ranges: Array<{
+          age: number
+          endingLine: number
+          startingLine: number
+          commit: {
+            author: {
+              user: {
+                email: string
+                name: string
+                login: string
+              }
+            }
+          }
+        }>
+      }
+    }
+  }
+}

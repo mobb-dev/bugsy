@@ -151,16 +151,14 @@ export class GQLClient {
     url: string
     token: string
     org: string | undefined
-    username: string | undefined
     refreshToken: string | undefined
   }) {
-    const { scmType, url, token, org, username, refreshToken } = args
+    const { scmType, url, token, org, refreshToken } = args
     const updateScmTokenResult = await this._clientSdk.updateScmToken({
       scmType,
       url,
       token,
       org,
-      username,
       refreshToken,
     })
     return updateScmTokenResult

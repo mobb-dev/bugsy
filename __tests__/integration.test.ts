@@ -73,20 +73,12 @@ vi.mock('open', () => ({
         method: 'POST',
       })
       expect(performLoginRes.status).toStrictEqual(200)
-      const scm = await SCMLib.init({
-        url: undefined,
-        scmType: ScmLibScmType.GITHUB,
-        accessToken: TEST_GITHUB_TOKEN,
-        scmOrg: undefined,
-      })
-      const username = await scm.getUsername()
       await gqlClient.updateScmToken({
         scmType: ScmType.GitHub,
         url: scmCloudUrl.GitHub,
         org: undefined,
         refreshToken: undefined,
         token: TEST_GITHUB_TOKEN,
-        username,
       })
     }
   }),
@@ -243,10 +235,7 @@ describe('Basic Analyze tests', () => {
     } = getAnalysis
     const [comments, generalPrComments] = await Promise.all([
       castedScm.getPrComments({ pull_number: pullRequestNumber }),
-      castedScm.getGeneralPrComments(
-        { prNumber: pullRequestNumber },
-        { authToken: TEST_GITHUB_TOKEN }
-      ),
+      castedScm.getGeneralPrComments({ prNumber: pullRequestNumber }),
     ])
     const diff = await castedScm.getPrDiff({ pull_number: pullRequestNumber })
     const prVulenrabilities = await getRelevantVulenrabilitiesFromDiff({

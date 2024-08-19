@@ -162,6 +162,7 @@ export type AnalysisParams = {
   pullRequest?: number
   githubToken?: string
   command: MobbCliCommand
+  organizationId?: string
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -230,6 +231,7 @@ export async function _scan(
     mobbProjectName,
     githubToken: githubActionToken,
     command,
+    organizationId: userOrganizationId,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -241,8 +243,10 @@ export async function _scan(
 
   await handleMobbLogin()
 
-  const { projectId, organizationId } =
-    await gqlClient.getOrgAndProjectId(mobbProjectName)
+  const { projectId, organizationId } = await gqlClient.getOrgAndProjectId({
+    projectName: mobbProjectName,
+    userDefinedOrganizationId: userOrganizationId,
+  })
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()

@@ -24,6 +24,12 @@ export const refOption = {
   type: 'string',
   demandOption: false,
 } as const
+export const organizationIdOptions = {
+  describe: chalk.bold('Organization id'),
+  alias: 'organization-id',
+  type: 'string',
+  demandOption: false,
+} as const
 
 export const scannerOptions = {
   alias: 's',

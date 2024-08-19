@@ -10,12 +10,17 @@ import {
   ciOption,
   commitHashOption,
   mobbProjectNameOption,
+  organizationIdOptions,
   refOption,
   repoOption,
   yesOption,
 } from '../options'
 import { AnalyzeOptions, BaseAnalyzeOptions } from '../types'
-import { validateReportFileFormat, validateRepoUrl } from '../validation'
+import {
+  validateOrganizationId,
+  validateReportFileFormat,
+  validateRepoUrl,
+} from '../validation'
 
 export function analyzeBuilder(
   yargs: Yargs.Argv<unknown>
@@ -46,6 +51,7 @@ export function analyzeBuilder(
     .option('mobb-project-name', mobbProjectNameOption)
     .option('y', yesOption)
     .option('ci', ciOption)
+    .option('org', organizationIdOptions)
     .option('api-key', apiKeyOption)
     .option('commit-hash', commitHashOption)
     .example(
@@ -59,7 +65,7 @@ function validateAnalyzeOptions(argv: AnalyzeOptions) {
   if (!fs.existsSync(argv.f)) {
     throw new CliError(`\nCan't access ${chalk.bold(argv.f)}`)
   }
-
+  validateOrganizationId(argv.organizationId)
   if (!argv.srcPath && !argv.repo) {
     throw new CliError('You must supply either --src-path or --repo')
   }

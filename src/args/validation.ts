@@ -36,6 +36,13 @@ const UrlZ = z
     message: 'is not a valid GitHub / GitLab / ADO URL',
   })
 
+export function validateOrganizationId(organizationId?: string) {
+  const orgIdValidation = z.string().uuid().nullish().safeParse(organizationId)
+
+  if (!orgIdValidation.success) {
+    throw new CliError(`organizationId: ${organizationId} is not a valid UUID`)
+  }
+}
 export function validateRepoUrl(
   args: Yargs.ArgumentsCamelCase<{ repo?: string }>
 ) {

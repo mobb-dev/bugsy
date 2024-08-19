@@ -18,15 +18,20 @@ query Me {
   }
 }
 
-query getOrgAndProjectId {
-  users: user {
-    userOrganizationsAndUserOrganizationRoles {
-      organization {
+query getOrgAndProjectId(
+  $filters: organization_to_organization_role_bool_exp
+  $limit: Int
+) {
+  organization_to_organization_role(
+    where: $filters
+    order_by: { organization: { createdOn: desc } }
+    limit: $limit
+  ) {
+    organization {
+      id
+      projects(order_by: { updatedAt: desc }) {
         id
-        projects(order_by: { updatedAt: desc }) {
-          id
-          name
-        }
+        name
       }
     }
   }

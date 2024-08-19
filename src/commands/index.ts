@@ -63,6 +63,7 @@ export async function analyze(
     commitHash,
     srcPath,
     mobbProjectName,
+    organizationId,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -78,6 +79,7 @@ export async function analyze(
       commitHash,
       mobbProjectName,
       srcPath,
+      organizationId,
       command: 'analyze',
     },
     { skipPrompts }

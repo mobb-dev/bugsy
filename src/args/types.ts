@@ -18,6 +18,7 @@ export type BaseAnalyzeOptions = {
   ci: boolean
   githubToken?: string
   mobbProjectName?: string
+  organizationId?: string
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>
@@ -55,6 +56,7 @@ export type BaseScanOptions = {
   ci: boolean
   mobbProjectName?: string
   cxProjectName?: string
+  organizationId?: string
 }
 
 export type AddScmTokenOptions =

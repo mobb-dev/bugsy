@@ -8,6 +8,7 @@ import {
   apiKeyOption,
   ciOption,
   mobbProjectNameOption,
+  organizationIdOptions,
   projectNameOption,
   refOption,
   repoOption,
@@ -15,7 +16,7 @@ import {
   yesOption,
 } from '../options'
 import { BaseScanOptions, ScanOptions } from '../types'
-import { validateRepoUrl } from '../validation'
+import { validateOrganizationId, validateRepoUrl } from '../validation'
 
 export function scanBuilder(
   args: Yargs.Argv<unknown>
@@ -27,6 +28,7 @@ export function scanBuilder(
       .option('repo', repoOption)
       .option('ref', refOption)
       .option('scanner', scannerOptions)
+      .option('org', organizationIdOptions)
       .option('mobb-project-name', mobbProjectNameOption)
       .option('y', yesOption)
       .option('ci', ciOption)
@@ -42,6 +44,7 @@ export function scanBuilder(
 
 export function validateScanOptions(argv: ScanOptions) {
   validateRepoUrl(argv)
+  validateOrganizationId(argv.organizationId)
   argv.scanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()
   if (argv.scanner === SCANNERS.Checkmarx && !argv.cxProjectName) {
     throw new CliError(errorMessages.missingCxProjectName)

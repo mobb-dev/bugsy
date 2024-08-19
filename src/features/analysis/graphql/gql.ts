@@ -98,14 +98,25 @@ export class GQLClient {
     return true
   }
 
-  async getOrgAndProjectId(projectName?: string) {
-    const getOrgAndProjectIdResult = await this._clientSdk.getOrgAndProjectId()
-    const org = getOrgAndProjectIdResult?.users
-      ?.at(0)
-      ?.userOrganizationsAndUserOrganizationRoles?.at(0)?.organization
-    if (!org?.id) {
+  async getOrgAndProjectId(
+    params: {
+      projectName?: string
+      userDefinedOrganizationId?: string
+    } = {}
+  ) {
+    const { projectName, userDefinedOrganizationId } = params
+    const getOrgAndProjectIdResult = await this._clientSdk.getOrgAndProjectId({
+      filters: userDefinedOrganizationId
+        ? { organizationId: { _eq: userDefinedOrganizationId } }
+        : {},
+      limit: 1,
+    })
+    const [organizationToOrganizationRole] =
+      getOrgAndProjectIdResult.organization_to_organization_role
+    if (!organizationToOrganizationRole) {
       throw new Error('Organization not found')
     }
+    const { organization: org } = organizationToOrganizationRole
     const project = projectName
       ? (org?.projects.find((project) => project.name === projectName) ?? null)
       : org?.projects[0]

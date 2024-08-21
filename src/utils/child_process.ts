@@ -27,7 +27,7 @@ export function createFork(
 ) {
   const child = cp.fork(processPath, args, {
     stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-    env: { FORCE_COLOR: stdout ? '1' : '0' },
+    env: { ...process.env, FORCE_COLOR: stdout ? '1' : '0' },
   })
   return createChildProcess({ childProcess: child, name }, options)
 }
@@ -37,7 +37,7 @@ export function createSpwan(
 ) {
   const child = cp.spawn(processPath, args, {
     stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-    env: { FORCE_COLOR: stdout ? '1' : '0' },
+    env: { ...process.env, FORCE_COLOR: stdout ? '1' : '0' },
   })
   return createChildProcess({ childProcess: child, name }, options)
 }

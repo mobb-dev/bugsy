@@ -14,16 +14,13 @@ const require = createRequire(import.meta.url)
 const SNYK_PATH = require.resolve('snyk/bin/snyk')
 
 const SNYK_ARTICLE_URL =
-  'https://docs.snyk.io/scan-application-code/snyk-code/getting-started-with-snyk-code/activating-snyk-code-using-the-web-ui/step-1-enabling-the-snyk-code-option'
+  'https://docs.snyk.io/scan-using-snyk/snyk-code/configure-snyk-code#enable-snyk-code'
 
 debug('snyk executable path %s', SNYK_PATH)
 
 async function forkSnyk(args: string[], { display }: { display: boolean }) {
   debug('fork snyk with args %o %s', args, display)
-  return createFork(
-    { args, processPath: SNYK_PATH, name: 'checkmarx' },
-    { display }
-  )
+  return createFork({ args, processPath: SNYK_PATH, name: 'snyk' }, { display })
 }
 
 export async function getSnykReport(
@@ -57,11 +54,7 @@ export async function getSnykReport(
     { display: true }
   )
 
-  if (
-    scanOutput.includes(
-      'Snyk Code is not supported for org: enable in Settings > Snyk Code'
-    )
-  ) {
+  if (scanOutput.includes('Snyk Code is not supported for org')) {
     debug('snyk code is not enabled %s', scanOutput)
     snykSpinner.error({ text: '🔍 Snyk configuration needed' })
     const answer = await snykArticlePrompt()

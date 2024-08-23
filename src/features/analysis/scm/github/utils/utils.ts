@@ -4,6 +4,7 @@ import { fetch, ProxyAgent, RequestInfo, RequestInit } from 'undici'
 
 import {
   BROKERED_HOSTS,
+  GIT_PROXY_HOST,
   GITHUB_API_TOKEN,
   InvalidAccessTokenError,
   InvalidRepoUrlError,
@@ -44,7 +45,7 @@ export function isGithubOnPrem(url: string | null | undefined): boolean {
 function getFetch(url?: string) {
   if (url && BROKERED_HOSTS.includes(new URL(url).origin)) {
     const dispatcher = new ProxyAgent({
-      uri: process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888',
+      uri: GIT_PROXY_HOST,
       requestTls: {
         rejectUnauthorized: false,
       },

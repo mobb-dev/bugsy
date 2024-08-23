@@ -1,6 +1,7 @@
 import querystring from 'node:querystring'
 
-import * as bitbucketPkg from 'bitbucket'
+import bitbucketPkg from 'bitbucket'
+import * as bitbucketPkgNode from 'bitbucket'
 import { APIClient, Schema } from 'bitbucket'
 import { z } from 'zod'
 
@@ -19,8 +20,6 @@ import {
   GetBitbucketTokenArgs,
   GetReposParam,
 } from './types'
-
-const { Bitbucket } = bitbucketPkg
 
 const BITBUCKET_HOSTNAME = 'bitbucket.org'
 
@@ -110,13 +109,18 @@ type GetBitbucketSdkParams =
   | { authType: 'basic'; username: string; password: string }
 
 function getBitbucketIntance(params: GetBitbucketSdkParams) {
+  // we have an issue importing the bitbucket package both in bugsy and node - https://linear.app/mobb/issue/MOBB-2190
+  const BitbucketContstructor =
+    bitbucketPkg && 'Bitbucket' in bitbucketPkg
+      ? bitbucketPkg.Bitbucket
+      : bitbucketPkgNode.Bitbucket
   switch (params.authType) {
     case 'public':
-      return new Bitbucket()
+      return new BitbucketContstructor()
     case 'token':
-      return new Bitbucket({ auth: { token: params.token } })
+      return new BitbucketContstructor({ auth: { token: params.token } })
     case 'basic':
-      return new Bitbucket({
+      return new BitbucketContstructor({
         auth: {
           password: params.password,
           username: params.username,

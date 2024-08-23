@@ -37,7 +37,7 @@ vi.mock('@mobb/bugsy/features/analysis', async () => {
   return { ...actual, ...mocks }
 })
 
-describe('github fixer command', () => {
+describe('cli commands', () => {
   it('should run the github fixer command', async () => {
     const srcPath = path.join(__dirname, 'assets')
     const baseReviewOptions = {

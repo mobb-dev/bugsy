@@ -1,3 +1,5 @@
+import { getAdoSdk } from './ado'
+
 export enum IssueType_Enum {
   /** Command Injection */
   CmDi = 'CMDi',
@@ -181,3 +183,5 @@ export enum ScmType {
   Ado = 'Ado',
   Bitbucket = 'Bitbucket',
 }
+
+export type GetAdoSdkPromise = ReturnType<typeof getAdoSdk>

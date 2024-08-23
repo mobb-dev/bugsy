@@ -10,6 +10,7 @@ const BaseSubmitToScmMessageZ = z.object({
   ),
   commitHash: z.string(),
   repoUrl: z.string(),
+  extraHeaders: z.record(z.string(), z.string()).default({}),
 })
 
 export const submitToScmMessageType = {
@@ -103,3 +104,20 @@ export const SubmitFixesResponseMessageZ = z.discriminatedUnion('type', [
 export type SubmitFixesResponseMessage = z.infer<
   typeof SubmitFixesResponseMessageZ
 >
+
+type BaseGitInitParams = {
+  dirName: string
+  repoUrl: string
+  extraHeaders?: Record<string, string>
+}
+
+export type InitGitParmas = BaseGitInitParams & {
+  changedFiles: Set<string>
+}
+
+export type InitGitAndFilesParams = BaseGitInitParams & {
+  fixes: {
+    fixId: string
+    patches: string[]
+  }[]
+}

@@ -9,6 +9,8 @@ import { z } from 'zod'
 import {
   CommitToSameBranchParams,
   FixResponseArray,
+  InitGitAndFilesParams,
+  InitGitParmas,
   SubmitFixesResponseMessage,
   SubmitFixesToDifferentBranchParams,
   submitToScmMessageType,
@@ -156,12 +158,8 @@ const FixesZ = z
   )
   .nonempty()
 
-async function _initGit(params: {
-  dirName: string
-  repoUrl: string
-  changedFiles: Set<string>
-}) {
-  const { repoUrl, dirName, changedFiles } = params
+async function _initGit(params: InitGitParmas) {
+  const { repoUrl, dirName, changedFiles, extraHeaders = {} } = params
   const git = simpleGit(dirName).outputHandler((bin, stdout, stderr) => {
     const errChunks: string[] = []
     const outChunks: string[] = []
@@ -194,6 +192,11 @@ async function _initGit(params: {
   await git.init()
   await git.addConfig('user.email', 'git@mobb.ai')
   await git.addConfig('user.name', 'Mobb autofixer')
+  await Promise.all(
+    Object.entries(extraHeaders).map(([headerKey, headerValue]) =>
+      git.addConfig('http.extraheader', `${headerKey}: ${headerValue}`)
+    )
+  )
 
   let repoUrlParsed = null
   // this block is used for unit tests only. URL starts from local directory
@@ -373,14 +376,8 @@ async function _initGitAndFiles({
   fixes,
   dirName,
   repoUrl,
-}: {
-  fixes: {
-    fixId: string
-    patches: string[]
-  }[]
-  dirName: string
-  repoUrl: string
-}) {
+  extraHeaders,
+}: InitGitAndFilesParams) {
   const changedFiles = _getSetOfFilesFromDiffs(
     fixes.reduce((acc, fix) => {
       acc.push(...fix.patches)
@@ -391,6 +388,7 @@ async function _initGitAndFiles({
     dirName,
     repoUrl,
     changedFiles,
+    extraHeaders,
   })
   return git
 }
@@ -422,6 +420,7 @@ export async function submitFixesToSameBranch(
       fixes: msg.fixes,
       dirName: tmpDir.name,
       repoUrl: msg.repoUrl,
+      extraHeaders: msg.extraHeaders,
     })
     if (
       !(await _fetchInitialCommit({
@@ -493,7 +492,7 @@ export const submitFixesToDifferentBranch = async (
     submitFixRequestId: '',
     type: submitToScmMessageType.submitFixesForDifferentBranch,
   }
-  const { commitHash } = msg
+  const { commitHash, extraHeaders } = msg
   //create a new temp dir for the repo
   const tmpDir = tmp.dirSync({
     unsafeCleanup: true,
@@ -505,6 +504,7 @@ export const submitFixesToDifferentBranch = async (
       fixes: msg.fixes,
       dirName: tmpDir.name,
       repoUrl: msg.repoUrl,
+      extraHeaders,
     })
     if (
       !(await _fetchInitialCommit({ git, reference: commitHash, response }))

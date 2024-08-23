@@ -1,11 +1,12 @@
 import { z } from 'zod'
 
 import {
-  AdoPullRequestStatusEnum,
-  AdoSdk,
-  AdoTokenTypeEnum,
-  getAdoPrUrl,
+  AdoPullRequestStatus,
+  adoValidateParams,
+  getAdoClientParams,
+  getAdoTokenInfo,
 } from './ado'
+import { getAdoRepoList, getAdoSdk } from './ado/ado'
 import {
   getBitbucketSdk,
   getBitbucketToken,
@@ -48,6 +49,7 @@ import {
 } from './gitlab/gitlab'
 import { isValidBranchName } from './scmSubmit'
 import {
+  GetAdoSdkPromise,
   GetGitBlameReponse,
   ReferenceType,
   scmCloudUrl,
@@ -343,9 +345,9 @@ export abstract class SCMLib {
 
     const scmLibType = this.getScmLibType()
     if (scmLibType === ScmLibScmType.ADO) {
-      return `https://${accessToken}@${trimmedUrl
-        .toLowerCase()
-        .replace('https://', '')}`
+      const { host, protocol, pathname } = new URL(trimmedUrl)
+
+      return `${protocol}//${accessToken}@${host}${pathname}`
     }
     if (this instanceof BitbucketSCMLib) {
       const authData = this.getAuthData()
@@ -434,7 +436,9 @@ export abstract class SCMLib {
     }
     return this.url.split('/').at(-1) || ''
   }
-  protected _validateToken(): asserts this is this & { accessToken: string } {
+  protected _validateAccessToken(): asserts this is this & {
+    accessToken: string
+  } {
     if (!this.accessToken) {
       console.error('no access token')
       throw new Error('no access token')
@@ -486,6 +490,7 @@ export abstract class SCMLib {
           scmLibScmTypeToScmType[z.nativeEnum(ScmLibScmType).parse(scmType)]
         )
       }
+      console.error(`error validating scm: ${scmType} `, e)
     }
 
     return new StubSCMLib(trimmedUrl, undefined, undefined)
@@ -495,10 +500,7 @@ export abstract class SCMLib {
     accessToken: string
     url: string
   } {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new InvalidAccessTokenError('no access token')
-    }
+    this._validateAccessToken()
     this._validateUrl()
   }
   protected _validateUrl(): asserts this is this & {
@@ -511,27 +513,55 @@ export abstract class SCMLib {
   }
 }
 
+async function initAdoSdk(params: {
+  url: string | undefined
+  accessToken: string | undefined
+  scmOrg: string | undefined
+}) {
+  const { url, accessToken, scmOrg } = params
+  const adoClientParams = await getAdoClientParams({
+    tokenOrg: scmOrg,
+    accessToken,
+    url,
+  })
+  return getAdoSdk(adoClientParams)
+}
 export class AdoSCMLib extends SCMLib {
+  public readonly _adoSdkPromise?: GetAdoSdkPromise
+
+  constructor(
+    url: string | undefined,
+    accessToken: string | undefined,
+    scmOrg: string | undefined
+  ) {
+    super(url, accessToken, scmOrg)
+    this._adoSdkPromise = initAdoSdk({ accessToken, url, scmOrg })
+  }
+  protected async getAdoSdk(): GetAdoSdkPromise {
+    if (!this._adoSdkPromise) {
+      console.error('ado sdk was not initialized')
+      throw new InvalidAccessTokenError('ado sdk was not initialized')
+    }
+    return this._adoSdkPromise
+  }
   async createSubmitRequest(
     params: CreateSubmitRequestParams
   ): Promise<string> {
     this._validateAccessTokenAndUrl()
     const { targetBranchName, sourceBranchName, title, body } = params
-    return String(
-      await AdoSdk.createAdoPullRequest({
-        title,
-        body,
-        targetBranchName,
-        sourceBranchName,
-        repoUrl: this.url,
-        accessToken: this.accessToken,
-        tokenOrg: this.scmOrg,
-      })
-    )
+    const adoSdk = await this.getAdoSdk()
+    const pullRequestId = await adoSdk.createAdoPullRequest({
+      title,
+      body,
+      targetBranchName,
+      sourceBranchName,
+      repoUrl: this.url,
+    })
+    return String(pullRequestId)
   }
 
   async validateParams() {
-    return AdoSdk.adoValidateParams({
+    return adoValidateParams({
       url: this.url,
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
@@ -539,22 +569,23 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
-    if (!this.accessToken) {
-      console.error('no access token')
-      throw new Error('no access token')
+    this._validateAccessToken()
+    if (this.url && new URL(this.url).origin !== scmCloudUrl.Ado) {
+      throw new Error(
+        `Oauth token is not supported for ADO on prem - ${origin} `
+      )
     }
-    return AdoSdk.getAdoRepoList({
+    return getAdoRepoList({
       orgName: scmOrg,
-      tokenOrg: this.scmOrg,
       accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
     })
   }
 
   async getBranchList(): Promise<string[]> {
     this._validateAccessTokenAndUrl()
-    return AdoSdk.getAdoBranchList({
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoBranchList({
       repoUrl: this.url,
     })
   }
@@ -565,7 +596,7 @@ export class AdoSCMLib extends SCMLib {
 
   getAuthHeaders(): Record<string, string> {
     if (this.accessToken) {
-      if (AdoSdk.getAdoTokenType(this.accessToken) === AdoTokenTypeEnum.OAUTH) {
+      if (getAdoTokenInfo(this.accessToken).type === 'OAUTH') {
         return {
           authorization: `Bearer ${this.accessToken}`,
         }
@@ -580,11 +611,10 @@ export class AdoSCMLib extends SCMLib {
     return {}
   }
 
-  getDownloadUrl(sha: string): Promise<string> {
+  async getDownloadUrl(sha: string): Promise<string> {
     this._validateUrl()
-    return Promise.resolve(
-      AdoSdk.getAdoDownloadUrl({ repoUrl: this.url, branch: sha })
-    )
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoDownloadUrl({ repoUrl: this.url, branch: sha })
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
@@ -593,9 +623,8 @@ export class AdoSCMLib extends SCMLib {
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
     this._validateAccessTokenAndUrl()
-    return AdoSdk.getAdoIsRemoteBranch({
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoIsRemoteBranch({
       repoUrl: this.url,
       branch,
     })
@@ -603,9 +632,8 @@ export class AdoSCMLib extends SCMLib {
 
   async getUserHasAccessToRepo(): Promise<boolean> {
     this._validateAccessTokenAndUrl()
-    return AdoSdk.getAdoIsUserCollaborator({
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoIsUserCollaborator({
       repoUrl: this.url,
     })
   }
@@ -618,18 +646,17 @@ export class AdoSCMLib extends SCMLib {
     scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus> {
     this._validateAccessTokenAndUrl()
-    const state = await AdoSdk.getAdoPullRequestStatus({
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
+    const adoSdk = await this.getAdoSdk()
+    const state = await adoSdk.getAdoPullRequestStatus({
       repoUrl: this.url,
       prNumber: Number(scmSubmitRequestId),
     })
     switch (state) {
-      case AdoPullRequestStatusEnum.completed:
+      case AdoPullRequestStatus.Completed:
         return 'merged'
-      case AdoPullRequestStatusEnum.active:
+      case AdoPullRequestStatus.Active:
         return 'open'
-      case AdoPullRequestStatusEnum.abandoned:
+      case AdoPullRequestStatus.Abandoned:
         return 'closed'
       default:
         throw new Error(`unknown state ${state}`)
@@ -640,30 +667,33 @@ export class AdoSCMLib extends SCMLib {
     _ref: string,
     _path: string
   ): Promise<GetGitBlameReponse> {
-    return await AdoSdk.getAdoBlameRanges()
+    const adoSdk = await this.getAdoSdk()
+    return await adoSdk.getAdoBlameRanges()
   }
 
   async getReferenceData(ref: string): Promise<GetRefererenceResult> {
     this._validateUrl()
-    return await AdoSdk.getAdoReferenceData({
+    const adoSdk = await this.getAdoSdk()
+    return await adoSdk.getAdoReferenceData({
       ref,
       repoUrl: this.url,
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
     })
   }
 
   async getRepoDefaultBranch(): Promise<string> {
     this._validateUrl()
-    return await AdoSdk.getAdoRepoDefaultBranch({
+    const adoSdk = await this.getAdoSdk()
+    return await adoSdk.getAdoRepoDefaultBranch({
       repoUrl: this.url,
-      tokenOrg: this.scmOrg,
-      accessToken: this.accessToken,
     })
   }
-  getPrUrl(prNumber: number): Promise<string> {
-    this._validateAccessTokenAndUrl()
-    return Promise.resolve(getAdoPrUrl({ prNumber, url: this.url }))
+  async getPrUrl(prNumber: number): Promise<string> {
+    this._validateUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoPrUrl({
+      url: this.url,
+      prNumber,
+    })
   }
 }
 
@@ -858,7 +888,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async forkRepo(repoUrl: string): Promise<{ url: string | null }> {
-    this._validateToken()
+    this._validateAccessToken()
     return this.githubSdk.forkRepo({
       repoUrl: repoUrl,
     })
@@ -962,7 +992,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
-    this._validateToken()
+    this._validateAccessToken()
     return this.githubSdk.getGithubRepoList()
   }
 
@@ -1015,7 +1045,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async getUsername(): Promise<string> {
-    this._validateToken()
+    this._validateAccessToken()
     return this.githubSdk.getGithubUsername()
   }
 
@@ -1244,7 +1274,7 @@ export class BitbucketSCMLib extends SCMLib {
     const authType = this.bitbucketSdk.getAuthType()
     switch (authType) {
       case 'basic': {
-        this._validateToken()
+        this._validateAccessToken()
         const { username, password } = getUserAndPassword(this.accessToken)
         return { username, password, authType }
       }
@@ -1275,7 +1305,7 @@ export class BitbucketSCMLib extends SCMLib {
   }
 
   async getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
-    this._validateToken()
+    this._validateAccessToken()
     return this.bitbucketSdk.getRepos({
       workspaceSlug: scmOrg,
     })
@@ -1300,7 +1330,7 @@ export class BitbucketSCMLib extends SCMLib {
       case 'token':
         return { authorization: `Bearer ${this.accessToken}` }
       case 'basic': {
-        this._validateToken()
+        this._validateAccessToken()
         const { username, password } = getUserAndPassword(this.accessToken)
 
         return {
@@ -1345,7 +1375,7 @@ export class BitbucketSCMLib extends SCMLib {
   }
 
   async getUsername(): Promise<string> {
-    this._validateToken()
+    this._validateAccessToken()
     const res = await this.bitbucketSdk.getUser()
     return z.string().parse(res.username)
   }

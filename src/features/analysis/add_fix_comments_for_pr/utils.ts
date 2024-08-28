@@ -139,7 +139,7 @@ export async function postFixComment(params: PostFixCommentParams) {
   } = fix
 
   const commentRes = await scm.postPrComment({
-    body: 'empty',
+    body: `# ${MobbIconMarkdown} Your fix is ready!\nRefresh the page in order to see the changes.`,
     pull_number: pullRequest,
     commit_id: commitSha,
     path,

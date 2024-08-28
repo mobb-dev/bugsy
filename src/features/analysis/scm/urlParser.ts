@@ -31,18 +31,24 @@ function detectAdoUrl(args: GetRepoInfoArgs): Repo {
     }
   }
   if (hostname === adoHostname || scmType === ScmType.Ado) {
-    if (pathname.length === 3 && pathname[1] === '_git') {
-      return {
-        organization: pathname[0],
-        projectName: pathname[2],
-        repoName: pathname[2],
+    if (pathname[pathname.length - 2] === '_git') {
+      if (pathname.length === 3) {
+        return {
+          organization: pathname[0],
+          projectName: pathname[2],
+          repoName: pathname[2],
+        }
       }
-    }
-    if (pathname.length === 4 && pathname[2] === '_git') {
-      return {
-        organization: pathname[0],
-        projectName: pathname[1],
-        repoName: pathname[3],
+
+      // TODO: resolve inconsistency
+      // Ex1: tfs/orgName/_git/repoProjName where tfs is a static ado path
+      // Ex2: orgName/projName/_git/repoName
+      if (pathname.length > 3) {
+        return {
+          organization: pathname[pathname.length - 4],
+          projectName: pathname[pathname.length - 3],
+          repoName: pathname[pathname.length - 1],
+        }
       }
     }
   }

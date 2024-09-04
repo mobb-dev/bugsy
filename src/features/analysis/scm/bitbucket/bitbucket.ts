@@ -12,8 +12,8 @@ import {
   InvalidRepoUrlError,
   RefNotFoundError,
 } from '../scm'
-import { ReferenceType, ScmRepoInfo, ScmType } from '../types'
-import { parseScmURL } from '../urlParser'
+import { parseScmURL, ScmType } from '../shared/src'
+import { ReferenceType, ScmRepoInfo } from '../types'
 import { normalizeUrl, shouldValidateUrl } from '../utils'
 import {
   CreatePullRequestParams,

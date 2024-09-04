@@ -57,10 +57,10 @@ const testInputs: Record<TestNames, TestInput> = {
     ADO_URL: 'https://dev.azure.com/mobbtest/test-public/_git/repo-public',
     NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo2',
     EXISTING_COMMIT: 'b67eb441420675e0f107e2c1a3ba04900fc110fb',
-    EXISTING_BRANCH: 'pt',
+    EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
     EXISTING_TAG: 'v2023.8',
-    EXISTING_BRANCH_SHA: 'b67eb441420675e0f107e2c1a3ba04900fc110fb',
+    EXISTING_BRANCH_SHA: 'f7534d521f1abc7a5a5ace657b63763d1a7fce4c',
     EXISTING_TAG_SHA: '5357a65e054976cd7d79b81ef3906ded050ed921',
   },
   publicRepoWithPat: {
@@ -94,7 +94,7 @@ const testInputs: Record<TestNames, TestInput> = {
   // onPremTestParams: {
   //   ADO_PAT: '*****',
   //   PAT_ORG: 'DefaultCollection',
-  //   ADO_URL: 'https://test1/DefaultCollection/_git/Antony%20Test%20Project',
+  //   ADO_URL: 'https://test1/software%20development/_git/Sample.Repo.ABC.Test',
   //   NON_EXISTING_ADO_URL:
   //     'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
   //   EXISTING_COMMIT: 'ccf9c908745139a819c53dc296f593ab2f987728',
@@ -103,6 +103,20 @@ const testInputs: Record<TestNames, TestInput> = {
   //   EXISTING_TAG: 'test-tag',
   //   EXISTING_BRANCH_SHA: 'de2e157e4d3aa4467240436fe8be7535b2bbc8c7',
   //   EXISTING_TAG_SHA: 'ccf9c908745139a819c53dc296f593ab2f987728',
+  // },
+  // onPremTestParamsSingleProject: {
+  //   ADO_PAT: '****',
+  //   PAT_ORG: 'DefaultCollection',
+  //   // ADO_URL: 'https://test1/DefaultCollection/_git/Antony%20Test%20Project',
+  //   ADO_URL: 'https://test1/software%20development/_git/Sample.Repo.ABC.Test',
+  //   NON_EXISTING_ADO_URL:
+  //     'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
+  //   EXISTING_COMMIT: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
+  //   EXISTING_BRANCH: 'Checkmarx',
+  //   NON_EXISTING_BRANCH: 'non-existing-branch',
+  //   EXISTING_TAG: 'test-tag',
+  //   EXISTING_BRANCH_SHA: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
+  //   EXISTING_TAG_SHA: 'e656ff682b1b029c38db1d6a930d2eaed3e7c1d2',
   // },
 } as const
 
@@ -146,7 +160,7 @@ describe.each(Object.entries(testInputs))(
         await adoSdk.getAdoRepoDefaultBranch({
           repoUrl: ADO_URL,
         })
-      ).toEqual('main')
+      ).toEqual(EXISTING_BRANCH)
     })
     it(`${chalk.green.underline.bold(testName)}: test non existing repo`, async () => {
       const adoSdk = await getAdoSk(adoSdkPromise)
@@ -199,6 +213,17 @@ describe.each(Object.entries(testInputs))(
         })
       ).rejects.toThrow()
     })
+    it.each(downloadTestParams)(
+      'test donwload url for $url',
+      async ({ url, expectedDownloadUrl }) => {
+        const adoSdk = await getAdoSk(adoSdkPromise)
+        const downloadUrl = await adoSdk.getAdoDownloadUrl({
+          repoUrl: url,
+          branch: 'main',
+        })
+        expect(downloadUrl).toBe(expectedDownloadUrl)
+      }
+    )
   }
 )
 
@@ -209,23 +234,82 @@ const scmTestParams = {
     scmOrg: 'mobbtest',
   },
   // todo: add when we set an environment for on-prem add this test params back
-  // onPremTestParams: {
-  //   url: testInputs.onPremTestParams.ADO_URL,
-  //   accessToken: testInputs.onPremTestParams.ADO_ACCESS_TOKEN,
-  //   scmOrg: 'DefaultCollection',
-  // },
 }
+
+const ADO_PATHS = {
+  multiProjectPath: 'azure-org/webgoat/_git/webgoat.git',
+  singleProjectPath: 'azure-org/_git/webgoat.git',
+  tfsMultiPath: 'tfs/azure-org/webgoat/_git/webgoat.git',
+  tfsSinglePath: 'tfs/azure-org/_git/webgoat.git',
+} as const
+
+const ADO_TEST_CLOUD_URLS = {
+  multiProjectPath: `https://dev.azure.com/${ADO_PATHS.multiProjectPath}`,
+  singleProjectPath: `https://dev.azure.com/${ADO_PATHS.singleProjectPath}`,
+  tfsSinglePath: `https://dev.azure.com/${ADO_PATHS.tfsSinglePath}`,
+  tfsMultiPath: `https://dev.azure.com/${ADO_PATHS.tfsMultiPath}`,
+} as const
+
+const CUSTOM_DOMAIN = 'https://custom-domain.com'
+const ADO_TEST_ON_PREM_URLS = {
+  multiProjectPath: `${CUSTOM_DOMAIN}/${ADO_PATHS.multiProjectPath}`,
+  singleProjectPath: `${CUSTOM_DOMAIN}/${ADO_PATHS.singleProjectPath}`,
+  tfsSinglePath: `${CUSTOM_DOMAIN}/${ADO_PATHS.tfsSinglePath}`,
+  tfsMultiPath: `${CUSTOM_DOMAIN}/${ADO_PATHS.tfsMultiPath}`,
+} as const
+
+const downloadTestParams: { url: string; expectedDownloadUrl: string }[] = [
+  {
+    url: ADO_TEST_CLOUD_URLS.multiProjectPath,
+    expectedDownloadUrl:
+      'https://dev.azure.com/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true',
+  },
+  {
+    url: ADO_TEST_CLOUD_URLS.singleProjectPath,
+    expectedDownloadUrl:
+      'https://dev.azure.com/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true',
+  },
+  {
+    url: ADO_TEST_CLOUD_URLS.tfsSinglePath,
+    expectedDownloadUrl:
+      'https://dev.azure.com/tfs/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true',
+  },
+  {
+    url: ADO_TEST_CLOUD_URLS.tfsMultiPath,
+    expectedDownloadUrl:
+      'https://dev.azure.com/tfs/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true',
+  },
+  {
+    url: ADO_TEST_ON_PREM_URLS.multiProjectPath,
+    expectedDownloadUrl: `${CUSTOM_DOMAIN}/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true`,
+  },
+  {
+    url: ADO_TEST_ON_PREM_URLS.singleProjectPath,
+    expectedDownloadUrl: `${CUSTOM_DOMAIN}/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true`,
+  },
+  {
+    url: ADO_TEST_ON_PREM_URLS.tfsMultiPath,
+    expectedDownloadUrl: `${CUSTOM_DOMAIN}/tfs/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true`,
+  },
+  {
+    url: ADO_TEST_ON_PREM_URLS.tfsSinglePath,
+    expectedDownloadUrl: `${CUSTOM_DOMAIN}/tfs/azure-org/webgoat/_apis/git/repositories/webgoat/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=main&resolveLfs=true&$format=zip&api-version=5.0&download=true`,
+  },
+]
 
 describe.each(Object.entries(scmTestParams))(
   'Ado scm instance',
   (testName, { url, accessToken, scmOrg }) => {
     it(`${chalk.green.bold(testName)} should return the correct headers for basic auth type `, async () => {
-      const scmLib = await SCMLib.init({
-        url,
-        scmType: ScmLibScmType.ADO,
-        accessToken,
-        scmOrg,
-      })
+      const scmLib = await SCMLib.init(
+        {
+          url,
+          scmType: ScmLibScmType.ADO,
+          accessToken,
+          scmOrg,
+        },
+        { propagateExceptions: true }
+      )
       const authHeaders = scmLib.getAuthHeaders()
       const encodedAccessToken = Buffer.from(':' + accessToken).toString(
         'base64'
@@ -252,6 +336,7 @@ describe('Ado check all assisoated repos', () => {
       accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
       scmOrg: testInputs.accessTokenTest.PAT_ORG,
     })
+
     const repoList = await scmLib.getRepoList(
       testInputs.accessTokenTest.PAT_ORG
     )
@@ -319,6 +404,7 @@ describe.each([
       projectPath: EXPECTED.projectPath,
       pathElements: EXPECTED.pathElements,
       origin: EXPECTED.origin,
+      prefixPath: '',
     })
   })
   it('should work with trailing slash', () => {
@@ -329,6 +415,7 @@ describe.each([
       projectPath: EXPECTED.projectPath,
       pathElements: EXPECTED.pathElements,
       origin: EXPECTED.origin,
+      prefixPath: '',
     })
   })
   it('fail if the url is invalid', () => {

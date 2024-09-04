@@ -89,13 +89,29 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       repoUrl: string
       branch: string
     }) {
-      const { owner, repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const { owner, repo, projectName, prefixPath } =
+        parseAdoOwnerAndRepo(repoUrl)
       const url = new URL(repoUrl)
       const origin = url.origin.toLowerCase().endsWith('.visualstudio.com')
         ? DEFUALT_ADO_ORIGIN
         : url.origin.toLowerCase()
-      // todo: refactor to use 'URLSearchParams'ß
-      return `${origin}/${owner}/${projectName}/_apis/git/repositories/${repo}/items/items?path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=${branch}&resolveLfs=true&$format=zip&api-version=5.0&download=true`
+      // note wer can't use encode url params since we have encoding issue with the []
+      const params = `path=/&versionDescriptor[versionOptions]=0&versionDescriptor[versionType]=commit&versionDescriptor[version]=${branch}&resolveLfs=true&$format=zip&api-version=5.0&download=true`
+      const path = [
+        prefixPath,
+        owner,
+        projectName,
+        '_apis',
+        'git',
+        'repositories',
+        repo,
+        'items',
+        'items',
+      ]
+        // we use filter since prefix path can be empty string
+        .filter(Boolean)
+        .join('/')
+      return new URL(`${path}?${params}`, origin).toString()
     },
     async getAdoBranchList({ repoUrl }: { repoUrl: string }) {
       const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)

@@ -48,17 +48,15 @@ import {
   gitlabValidateParams,
 } from './gitlab/gitlab'
 import { isValidBranchName } from './scmSubmit'
+import { parseScmURL, scmCloudUrl, ScmType } from './shared/src'
 import {
   GetAdoSdkPromise,
   GetGitBlameReponse,
   ReferenceType,
-  scmCloudUrl,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
-  ScmType,
 } from './types'
-import { parseScmURL } from './urlParser'
 
 export type ScmConfig = {
   id: string
@@ -109,11 +107,11 @@ export function getCloudScmLibTypeFromUrl(
   return undefined
 }
 
-export const scmCloudHostname = {
-  GitLab: new URL(scmCloudUrl.GitLab).hostname,
-  GitHub: new URL(scmCloudUrl.GitHub).hostname,
-  Ado: new URL(scmCloudUrl.Ado).hostname,
-  Bitbucket: new URL(scmCloudUrl.Bitbucket).hostname,
+export const scmCloudHostname: Record<ScmType, string> = {
+  [ScmType.GitLab]: new URL(scmCloudUrl.GitLab).hostname,
+  [ScmType.GitHub]: new URL(scmCloudUrl.GitHub).hostname,
+  [ScmType.Ado]: new URL(scmCloudUrl.Ado).hostname,
+  [ScmType.Bitbucket]: new URL(scmCloudUrl.Bitbucket).hostname,
 } as const
 
 export const scmLibScmTypeToScmType: Record<ScmLibScmType, ScmType> = {
@@ -199,30 +197,6 @@ export function getScmConfig({
     accessToken: undefined,
     scmLibType: undefined,
     scmOrg: undefined,
-  }
-}
-
-export async function scmCanReachRepo({
-  repoUrl,
-  scmType,
-  accessToken,
-  scmOrg,
-}: {
-  repoUrl: string
-  scmType: ScmType
-  accessToken: string | undefined
-  scmOrg: string | undefined
-}) {
-  try {
-    await SCMLib.init({
-      url: repoUrl,
-      accessToken,
-      scmType: getScmLibTypeFromScmType(scmType),
-      scmOrg,
-    })
-    return true
-  } catch (e) {
-    return false
   }
 }
 
@@ -451,12 +425,10 @@ export abstract class SCMLib {
     return isValidBranchName(branchName)
   }
 
-  public static async init({
-    url,
-    accessToken,
-    scmType,
-    scmOrg,
-  }: ScmInitParams): Promise<SCMLib> {
+  public static async init(
+    { url, accessToken, scmType, scmOrg }: ScmInitParams,
+    { propagateExceptions = false } = {}
+  ): Promise<SCMLib> {
     const trimmedUrl = url
       ? url.trim().replace(/\/$/, '').replace(/.git$/i, '')
       : undefined
@@ -491,6 +463,9 @@ export abstract class SCMLib {
         )
       }
       console.error(`error validating scm: ${scmType} `, e)
+      if (propagateExceptions) {
+        throw e
+      }
     }
 
     return new StubSCMLib(trimmedUrl, undefined, undefined)

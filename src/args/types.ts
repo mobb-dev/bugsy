@@ -1,6 +1,7 @@
 import type * as Yargs from 'yargs'
 
 import { Scanner } from '../constants'
+import { ScmType } from '../features/analysis/scm'
 
 export type AnalyzeOptions = Yargs.ArgumentsCamelCase<BaseAnalyzeOptions>
 
@@ -63,7 +64,8 @@ export type AddScmTokenOptions =
   Yargs.ArgumentsCamelCase<BaseAddScmTokenOptions>
 
 export type BaseAddScmTokenOptions = {
-  scmType?: string
+  scmType?: ScmType
+  ['scm-type']: ScmType
   url: string
   token: string
   organization?: string

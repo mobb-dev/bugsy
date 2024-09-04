@@ -10,11 +10,9 @@ import {
   InvalidRepoUrlError,
   InvalidUrlPatternError,
   normalizeUrl,
-  scmCloudUrl,
-  ScmType,
   shouldValidateUrl,
 } from '../..'
-import { parseScmURL } from '../../urlParser'
+import { parseScmURL, scmCloudUrl, ScmType } from '../../shared/src'
 import { GET_REPO_BRANCHES } from '../consts'
 
 export function parseGithubOwnerAndRepo(gitHubUrl: string): {

@@ -1,0 +1,8 @@
+{
+  "name": "@mobb/scm-shared",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

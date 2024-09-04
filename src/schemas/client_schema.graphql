@@ -295,3 +295,41 @@ mutation CreateProject($organizationId: String!, $projectName: String!) {
     projectId
   }
 }
+
+query validateRepoUrl($repoUrl: String!) {
+  validateRepoUrl(repoUrl: $repoUrl) {
+    __typename
+    ... on RepoValidationSuccess {
+      status
+      defaultBranch
+      defaultBranchLastModified
+      defaultBranchSha
+      scmType
+    }
+    ... on RepoUnreachableError {
+      status
+      error
+      scmType
+    }
+    ... on BadScmCredentials {
+      status
+      error
+      scmType
+    }
+  }
+}
+
+query gitReference($repoUrl: String!, $reference: String!) {
+  gitReference(repoUrl: $repoUrl, reference: $reference) {
+    __typename
+    ... on GitReferenceData {
+      status
+      sha
+      date
+    }
+    ... on ReferenceNotFoundError {
+      status
+      error
+    }
+  }
+}

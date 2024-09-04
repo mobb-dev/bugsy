@@ -9,8 +9,7 @@ import {
   InvalidRepoUrlError,
   InvalidUrlPatternError,
 } from '../scm'
-import { ScmType } from '../types'
-import { parseScmURL } from '../urlParser'
+import { parseScmURL, ScmType } from '../shared/src'
 import {
   ADO_ACCESS_TOKEN_URL,
   AdoTokenTypeEnum,
@@ -48,8 +47,7 @@ function removeTrailingSlash(str: string) {
 export function parseAdoOwnerAndRepo(adoUrl: string) {
   adoUrl = removeTrailingSlash(adoUrl)
   const parsingResult = parseScmURL(adoUrl, ScmType.Ado)
-
-  if (!parsingResult) {
+  if (!parsingResult || parsingResult.scmType !== ScmType.Ado) {
     throw new InvalidUrlPatternError(`
       : ${adoUrl}`)
   }
@@ -70,7 +68,7 @@ export function parseAdoOwnerAndRepo(adoUrl: string) {
     projectName: projectName ? decodeURI(projectName) : undefined,
     projectPath,
     pathElements,
-
+    prefixPath: parsingResult.prefixPath,
     origin: `${protocol}//${hostname}`,
   }
 }
@@ -84,11 +82,22 @@ export async function getAdoConnectData({
   url: string | undefined
   adoTokenInfo: AdoTokenInfo
 }): Promise<{ org: string; origin: string }> {
-  if (url && new URL(url).origin !== url) {
-    const { owner, origin } = parseAdoOwnerAndRepo(url)
+  if (url) {
+    const urlObject = new URL(url)
+    if (
+      tokenOrg &&
+      (urlObject.origin === url || `${urlObject.origin}/tfs` === url)
+    ) {
+      return {
+        origin: url,
+        org: tokenOrg,
+      }
+    }
+    const { owner, origin, prefixPath } = parseAdoOwnerAndRepo(url)
+
     return {
       org: owner,
-      origin,
+      origin: prefixPath ? `${origin}/${prefixPath}` : origin,
     }
   }
   if (!tokenOrg) {
@@ -110,19 +119,29 @@ export async function getAdoConnectData({
   }
 }
 
+function isAdoOnCloud(url: string) {
+  const urlObj = new URL(url)
+  return (
+    urlObj.origin.toLowerCase() === DEFUALT_ADO_ORIGIN ||
+    urlObj.hostname.toLowerCase().endsWith('.visualstudio.com')
+  )
+}
+
 export async function getAdoApiClient(params: GetAdoApiClientParams) {
   const { origin = DEFUALT_ADO_ORIGIN, orgName } = params
   if (
     params.tokenType === AdoTokenTypeEnum.NONE ||
-    // move to public client if the token is not associated with the PAT org
+    // note: move to public client if the token is not associated with the PAT org
+    // we're only doing it the ado on the cloud
     (params.tokenType === AdoTokenTypeEnum.PAT &&
-      params.patTokenOrg !== orgName)
+      params.patTokenOrg !== orgName &&
+      isAdoOnCloud(origin))
   ) {
     return _getPublicAdoClient({ orgName, origin })
   }
   const orgUrl = `${origin}/${orgName}`
   if (params.tokenType === AdoTokenTypeEnum.OAUTH) {
-    if (origin !== DEFUALT_ADO_ORIGIN) {
+    if (isAdoOnCloud(origin)) {
       throw new Error(
         `Oauth token is not supported for ADO on prem - ${origin} `
       )
@@ -135,6 +154,7 @@ export async function getAdoApiClient(params: GetAdoApiClientParams) {
     return connection
   }
   // PAT handling
+
   const authHandler = api.getPersonalAccessTokenHandler(params.accessToken)
   const isBroker = BROKERED_HOSTS.includes(new URL(orgUrl).origin)
   const connection = new api.WebApi(

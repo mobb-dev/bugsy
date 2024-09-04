@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 
 import { PROJECT_DEFAULT_NAME, SCANNERS } from '../constants'
+import { ScmType } from '../features/analysis/scm'
 
 export const repoOption = {
   alias: 'r',
@@ -64,13 +65,13 @@ export const commitHashOption = {
 
 export const scmTypeOption = {
   demandOption: true,
-  describe: chalk.bold('SCM type (GitHub, GitLab, Ado, Bitbucket)'),
-  type: 'string',
+  describe: chalk.bold('SCM type'),
+  choices: Object.values(ScmType),
 } as const
 
 export const urlOption = {
   describe: chalk.bold(
-    'URL of the repository (used in GitHub, GitLab, Azure DevOps, Bitbucket)'
+    `URL of the repository (used in ${Object.values(ScmType).join(', ')})`
   ),
   type: 'string',
   demandOption: true,

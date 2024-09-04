@@ -1,4 +1,4 @@
-import { scmCloudUrl } from '../types'
+import { scmCloudUrl } from '../shared/src/types'
 
 export const ADO_ACCESS_TOKEN_URL =
   'https://app.vssps.visualstudio.com/oauth2/token'

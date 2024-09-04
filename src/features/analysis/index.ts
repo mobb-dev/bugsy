@@ -41,8 +41,6 @@ import { getSnykReport } from './scanners/snyk'
 import {
   getCloudScmLibTypeFromUrl,
   getScmConfig,
-  getScmTypeFromScmLibType,
-  scmCanReachRepo,
   ScmConfig,
   SCMLib,
   ScmLibScmType,
@@ -212,6 +210,86 @@ function _getUrlForScmType({
   }
 }
 
+async function getScmTokenInfo(params: { gqlClient: GQLClient; repo: string }) {
+  const { gqlClient, repo } = params
+  const userInfo = await gqlClient.getUserInfo()
+  if (!userInfo) {
+    throw new Error('userInfo is null')
+  }
+  const scmConfigs = getFromArraySafe<ScmConfig>(userInfo.scmConfigs)
+
+  return getScmConfig({
+    url: repo,
+    scmConfigs,
+    includeOrgTokens: false,
+  })
+}
+
+async function getReport(
+  params: {
+    scanner: SupportedScanners
+    repoUrl: string
+    sha: string
+    gqlClient: GQLClient
+    cxProjectName?: string
+    dirname: string
+    reference: string
+    ci: boolean
+  },
+  { skipPrompts }: { skipPrompts: boolean }
+): Promise<string> {
+  const {
+    scanner,
+    repoUrl,
+    gqlClient,
+    sha,
+    dirname,
+    reference,
+    cxProjectName,
+    ci,
+  } = params
+  const tokenInfo = await getScmTokenInfo({ gqlClient, repo: repoUrl })
+  const scm = await SCMLib.init(
+    {
+      url: repoUrl,
+      accessToken: tokenInfo.accessToken,
+      scmOrg: tokenInfo.scmOrg,
+      scmType: tokenInfo.scmLibType,
+    },
+    { propagateExceptions: true }
+  )
+
+  const downloadUrl = await scm.getDownloadUrl(sha)
+  const repositoryRoot = await downloadRepo({
+    repoUrl,
+    dirname,
+    ci,
+    authHeaders: scm.getAuthHeaders(),
+    downloadUrl,
+  })
+  const reportPath = path.join(dirname, 'report.json')
+  switch (scanner) {
+    case 'snyk':
+      await getSnykReport(reportPath, repositoryRoot, { skipPrompts })
+      break
+    case 'checkmarx':
+      if (!cxProjectName) {
+        throw new Error('cxProjectName is required for checkmarx scanner')
+      }
+      await getCheckmarxReport(
+        {
+          reportPath,
+          repositoryRoot,
+          branch: reference,
+          projectName: cxProjectName,
+        },
+        { skipPrompts }
+      )
+      break
+  }
+  return reportPath
+}
+
 export async function _scan(
   params: AnalysisParams & { dirname: string; cxProjectName?: string },
   { skipPrompts = false } = {}
@@ -262,31 +340,17 @@ export async function _scan(
   if (!repo) {
     throw new Error('repo is required in case srcPath is not provided')
   }
-  const userInfo = await gqlClient.getUserInfo()
-  if (!userInfo) {
-    throw new Error('userInfo is null')
-  }
-  const scmConfigs = getFromArraySafe<ScmConfig>(userInfo.scmConfigs)
+  const tokenInfo = await getScmTokenInfo({ gqlClient, repo })
 
-  const tokenInfo = getScmConfig({
-    url: repo,
-    scmConfigs,
-    includeOrgTokens: false,
-  })
-  const isRepoAvailable = await scmCanReachRepo({
-    repoUrl: repo,
-    accessToken: tokenInfo.accessToken,
-    scmOrg: tokenInfo.scmOrg,
-    scmType: getScmTypeFromScmLibType(tokenInfo.scmLibType),
-  })
+  const validateRes = await gqlClient.validateRepoUrl({ repoUrl: repo })
+  const isRepoAvailable =
+    validateRes.validateRepoUrl?.__typename === 'RepoValidationSuccess'
 
   //we can only do oauth to cloud SCM types so use this to make sure it is indeed a cloud URL
   const cloudScmLibType = getCloudScmLibTypeFromUrl(repo)
   const { authUrl: scmAuthUrl } = _getUrlForScmType({
     scmLibType: cloudScmLibType,
   })
-
-  let myToken = tokenInfo.accessToken
 
   if (!isRepoAvailable) {
     if (ci || !cloudScmLibType || !scmAuthUrl) {
@@ -297,49 +361,58 @@ export async function _scan(
     }
 
     if (cloudScmLibType && scmAuthUrl) {
-      myToken =
-        (await handleScmIntegration(tokenInfo.accessToken, scmAuthUrl, repo)) ||
-        ''
+      await handleScmIntegration(tokenInfo.accessToken, scmAuthUrl, repo)
 
       // Check repo availability again after SCM token update.
-      const isRepoAvailable = await scmCanReachRepo({
+      const repoValidationResponse = await gqlClient.validateRepoUrl({
         repoUrl: repo,
-        accessToken: myToken,
-        scmOrg: tokenInfo.scmOrg,
-        scmType: getScmTypeFromScmLibType(tokenInfo.scmLibType),
       })
+      const isRepoAvailable =
+        repoValidationResponse.validateRepoUrl?.__typename ===
+        'RepoValidationSuccess'
 
       if (!isRepoAvailable) {
         throw new Error(
-          `Cannot access repo ${repo} with the provided credentials`
+          `Cannot access repo ${repo} with the provided credentials: ${repoValidationResponse.validateRepoUrl?.__typename}`
         )
       }
     }
   }
-  const scm = await SCMLib.init({
-    url: repo,
-    accessToken: myToken,
-    scmOrg: tokenInfo.scmOrg,
-    scmType: tokenInfo.scmLibType,
-  })
+  const revalidateRes = await gqlClient.validateRepoUrl({ repoUrl: repo })
+  if (revalidateRes.validateRepoUrl?.__typename !== 'RepoValidationSuccess') {
+    throw new Error(
+      `could not reach repo ${repo}: ${revalidateRes.validateRepoUrl?.__typename}`
+    )
+  }
 
-  const reference = ref ?? (await scm.getRepoDefaultBranch())
-  const { sha } = await scm.getReferenceData(reference)
-  const downloadUrl = await scm.getDownloadUrl(sha)
-  debug('org id %s', organizationId)
+  const reference = ref ?? revalidateRes.validateRepoUrl.defaultBranch
+  const getReferenceDataRes = await gqlClient.getReferenceData({
+    reference,
+    repoUrl: repo,
+  })
+  if (getReferenceDataRes.gitReference?.__typename !== 'GitReferenceData') {
+    throw new Error(
+      `Could not get reference data for ${reference}: ${getReferenceDataRes.gitReference?.__typename}`
+    )
+  }
+  const { sha } = getReferenceDataRes.gitReference
   debug('project id %s', projectId)
   debug('default branch %s', reference)
 
-  const repositoryRoot = await downloadRepo({
-    repoUrl: repo,
-    dirname,
-    ci,
-    authHeaders: scm.getAuthHeaders(),
-    downloadUrl,
-  })
-
   if (command === 'scan') {
-    reportPath = await getReport(SupportedScannersZ.parse(scanner))
+    reportPath = await getReport(
+      {
+        scanner: SupportedScannersZ.parse(scanner),
+        repoUrl: repo,
+        sha,
+        gqlClient,
+        cxProjectName,
+        dirname,
+        reference,
+        ci,
+      },
+      { skipPrompts }
+    )
   }
 
   if (!reportPath) {
@@ -392,30 +465,6 @@ export async function _scan(
 
   await askToOpenAnalysis()
   return reportUploadInfo.fixReportId
-
-  async function getReport(scanner: SupportedScanners): Promise<string> {
-    const reportPath = path.join(dirname, 'report.json')
-    switch (scanner) {
-      case 'snyk':
-        await getSnykReport(reportPath, repositoryRoot, { skipPrompts })
-        break
-      case 'checkmarx':
-        if (!cxProjectName) {
-          throw new Error('cxProjectName is required for checkmarx scanner')
-        }
-        await getCheckmarxReport(
-          {
-            reportPath,
-            repositoryRoot,
-            branch: reference,
-            projectName: cxProjectName,
-          },
-          { skipPrompts }
-        )
-        break
-    }
-    return reportPath
-  }
 
   async function askToOpenAnalysis() {
     if (!repoUploadInfo || !reportUploadInfo) {
@@ -689,12 +738,17 @@ export async function _scan(
           })
           .parse({ repo, githubActionToken })
 
-        const scm = await SCMLib.init({
-          url: params.repo,
-          accessToken: params.githubActionToken,
-          scmOrg: '',
-          scmType: ScmLibScmType.GITHUB,
-        })
+        const scm = await SCMLib.init(
+          {
+            url: params.repo,
+            accessToken: params.githubActionToken,
+            scmOrg: '',
+            scmType: ScmLibScmType.GITHUB,
+          },
+          {
+            propagateExceptions: true,
+          }
+        )
         await gqlClient.subscribeToAnalysis({
           subscribeToAnalysisParams: {
             analysisId: reportUploadInfo.fixReportId,

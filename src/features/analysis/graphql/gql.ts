@@ -6,8 +6,10 @@ import {
   GetAnalysisSubscriptionVariables,
   GetEncryptedApiTokenQueryVariables,
   getSdk,
+  GitReferenceQueryVariables,
   Sdk,
   SubmitVulnerabilityReportMutationVariables,
+  ValidateRepoUrlQueryVariables,
 } from '@mobb/bugsy/generates/client_generates'
 import { sleep } from '@mobb/bugsy/utils'
 import Debug from 'debug'
@@ -378,5 +380,11 @@ export class GQLClient {
       filters: { id: { _in: fixIds } },
     })
     return res
+  }
+  async validateRepoUrl(args: ValidateRepoUrlQueryVariables) {
+    return this._clientSdk.validateRepoUrl(args)
+  }
+  async getReferenceData(args: GitReferenceQueryVariables) {
+    return this._clientSdk.gitReference(args)
   }
 }

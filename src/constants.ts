@@ -6,16 +6,18 @@ import Debug from 'debug'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
 
+import { ScmType } from './features/analysis/scm'
+
 const debug = Debug('mobbdev:constants')
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '../.env') })
 
-export const ScmTypes = {
-  Github: 'GitHub',
-  Gitlab: 'GitLab',
-  AzureDevOps: 'Ado',
-} as const
-
+export const scmFriendlyText: Record<ScmType, string> = {
+  [ScmType.Ado]: 'Azure DevOps',
+  [ScmType.Bitbucket]: 'Bitbucket',
+  [ScmType.GitHub]: 'GitGub',
+  [ScmType.GitLab]: 'GitLab',
+}
 export const SCANNERS = {
   Checkmarx: 'checkmarx',
   Codeql: 'codeql',
@@ -89,7 +91,7 @@ export const errorMessages = {
   )} is needed if you're adding an SCM token`,
   invalidScmType: `SCM type ${chalk.bold(
     '(--scm-type)'
-  )} is invalid, please use one of: ${Object.values(ScmTypes).join(', ')}`,
+  )} is invalid, please use one of: ${Object.values(ScmType).join(', ')}`,
   missingToken: `SCM token ${chalk.bold(
     '(--token)'
   )} is needed if you're adding an SCM token`,

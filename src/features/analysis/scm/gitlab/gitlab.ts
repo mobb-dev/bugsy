@@ -14,8 +14,8 @@ import {
   InvalidUrlPatternError,
   RefNotFoundError,
 } from '../scm'
-import { ReferenceType, ScmType } from '../types'
-import { parseScmURL } from '../urlParser'
+import { parseScmURL, ScmType } from '../shared/src'
+import { ReferenceType } from '../types'
 import { shouldValidateUrl } from '../utils'
 import { GitlabAuthResultZ, GitlabTokenRequestTypeEnum } from './types'
 

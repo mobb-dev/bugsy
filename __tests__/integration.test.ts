@@ -12,7 +12,7 @@ import {
   SCMLib,
   ScmLibScmType,
 } from '@mobb/bugsy/features/analysis/scm'
-import { scmCloudUrl, ScmType } from '@mobb/bugsy/features/analysis/scm/types'
+import { scmCloudUrl, ScmType } from '@mobb/bugsy/features/analysis/scm'
 import { PerformCliLoginDocument } from '@mobb/bugsy/generates/client_generates'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'

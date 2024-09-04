@@ -1,8 +1,8 @@
 import { addScmToken } from '@mobb/bugsy/commands'
-import { scmCloudHostname, ScmType } from '@mobb/bugsy/features/analysis/scm'
+import { scmFriendlyText } from '@mobb/bugsy/constants'
+import { ScmType } from '@mobb/bugsy/features/analysis/scm'
 import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
-import { z } from 'zod'
 
 import {
   apiKeyOption,
@@ -26,19 +26,15 @@ export function addScmTokenBuilder(
     .option('api-key', apiKeyOption)
     .example(
       '$0 add-scm-token --scm-type Ado --url https://dev.azure.com/adoorg/test/_git/repo --token abcdef0123456 --organization myOrg',
-      'Add your SCM (Github, Gitlab, Azure DevOps) token to Mobb to enable automated fixes.'
+      `Add your SCM (${Object.values(scmFriendlyText).join(', ')}) token to Mobb to enable automated fixes.`
     )
     .help()
     .demandOption(['url', 'token'])
 }
 
-export function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
-  if (!z.nativeEnum(ScmType).safeParse(argv.scmType).success) {
-    throw new CliError(
-      '\nError: --scm-type must reference a valid SCM type (GitHub, GitLab, Ado, Bitbutcket)'
-    )
-  }
-  Object.values(scmValidationMap).forEach((validate) => validate(argv))
+export async function validateAddScmTokenOptions(argv: AddScmTokenOptions) {
+  const scmType = argv['scm-type']
+  scmValidationMap[scmType]
 }
 
 const scmValidationMap: Record<ScmType, (argv: AddScmTokenOptions) => void> = {
@@ -55,12 +51,7 @@ const scmValidationMap: Record<ScmType, (argv: AddScmTokenOptions) => void> = {
 }
 
 function validateAdo(argv: AddScmTokenOptions) {
-  const urlObj = new URL(argv.url)
-  if (
-    (urlObj.hostname.toLowerCase() === scmCloudHostname.Ado ||
-      urlObj.hostname.toLowerCase().endsWith('.visualstudio.com')) &&
-    !argv.organization
-  ) {
+  if (!argv.organization) {
     throw new CliError(
       '\nError: --organization flag is required for Azure DevOps'
     )
@@ -68,6 +59,6 @@ function validateAdo(argv: AddScmTokenOptions) {
 }
 
 export async function addScmTokenHandler(args: AddScmTokenOptions) {
-  validateAddScmTokenOptions(args)
+  await validateAddScmTokenOptions(args)
   await addScmToken(args)
 }

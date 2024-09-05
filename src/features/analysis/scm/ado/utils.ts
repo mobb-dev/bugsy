@@ -105,6 +105,7 @@ export async function getAdoConnectData({
       const [org] = await _getOrgsForOauthToken({
         oauthToken: adoTokenInfo.accessToken,
       })
+
       return {
         org: z.string().parse(org),
         origin: DEFUALT_ADO_ORIGIN,
@@ -141,7 +142,7 @@ export async function getAdoApiClient(params: GetAdoApiClientParams) {
   }
   const orgUrl = `${origin}/${orgName}`
   if (params.tokenType === AdoTokenTypeEnum.OAUTH) {
-    if (isAdoOnCloud(origin)) {
+    if (!isAdoOnCloud(origin)) {
       throw new Error(
         `Oauth token is not supported for ADO on prem - ${origin} `
       )

@@ -446,6 +446,10 @@ export abstract class SCMLib {
         }
         case ScmLibScmType.ADO: {
           const scm = new AdoSCMLib(trimmedUrl, accessToken, scmOrg)
+          // we make async contrator here, which can cause uncaught promise rejection
+          // we consume the promise here to make sure we catch the error
+          // todo: we should move this async logic out of the contructor
+          await scm.getAdoSdk()
           await scm.validateParams()
           return scm
         }
@@ -512,7 +516,7 @@ export class AdoSCMLib extends SCMLib {
     super(url, accessToken, scmOrg)
     this._adoSdkPromise = initAdoSdk({ accessToken, url, scmOrg })
   }
-  protected async getAdoSdk(): GetAdoSdkPromise {
+  async getAdoSdk(): GetAdoSdkPromise {
     if (!this._adoSdkPromise) {
       console.error('ado sdk was not initialized')
       throw new InvalidAccessTokenError('ado sdk was not initialized')

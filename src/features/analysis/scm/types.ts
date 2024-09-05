@@ -15,6 +15,8 @@ export enum IssueType_Enum {
   DeprecatedFunction = 'DEPRECATED_FUNCTION',
   /** A denial of service by exploiting string builder */
   DosStringBuilder = 'DOS_STRING_BUILDER',
+  /** Erroneous string compare */
+  ErroneousStringCompare = 'ERRONEOUS_STRING_COMPARE',
   /** Error Condition Without Action */
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
   /** GraphQl Depth Limit */

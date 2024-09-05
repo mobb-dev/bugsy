@@ -124,6 +124,8 @@ export const getIssueType = (issueType: string | null): string => {
       return 'Value Never Read'
     case IssueType_Enum.ValueShadowing:
       return 'Value Shadowing'
+    case IssueType_Enum.ErroneousStringCompare:
+      return 'Erroneous String Compare'
     default: {
       return issueType ? issueType.replaceAll('_', ' ') : 'Other'
     }

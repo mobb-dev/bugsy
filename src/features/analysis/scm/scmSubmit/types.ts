@@ -10,6 +10,7 @@ const BaseSubmitToScmMessageZ = z.object({
   ),
   commitHash: z.string(),
   repoUrl: z.string(),
+  mobbUserEmail: z.string(),
   extraHeaders: z.record(z.string(), z.string()).default({}),
 })
 
@@ -53,6 +54,7 @@ const FixResponseArrayZ = z.array(
 export type FixResponseArray = z.infer<typeof FixResponseArrayZ>
 
 export const SubmitFixesBaseResponseMessageZ = z.object({
+  mobbUserEmail: z.string(),
   submitFixRequestId: z.string().uuid(),
   submitBranches: z.array(
     z.object({
@@ -111,7 +113,7 @@ type BaseGitInitParams = {
   extraHeaders?: Record<string, string>
 }
 
-export type InitGitParmas = BaseGitInitParams & {
+export type InitGitParams = BaseGitInitParams & {
   changedFiles: Set<string>
 }
 

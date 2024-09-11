@@ -7,11 +7,12 @@ import {
 } from '@gitbeaker/rest'
 import { ProxyAgent } from 'undici'
 
-import { BROKERED_HOSTS, GITLAB_API_TOKEN } from '../env'
+import { GITLAB_API_TOKEN } from '../env'
 import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
+  isBrokerUrl,
   RefNotFoundError,
 } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
@@ -432,12 +433,7 @@ function initGitlabFetchMock() {
       )
     }
 
-    if (
-      urlParsed &&
-      BROKERED_HOSTS.includes(
-        `${urlParsed.protocol?.toLowerCase()}//${urlParsed.host?.toLowerCase()}`
-      )
-    ) {
+    if (urlParsed && isBrokerUrl(urlParsed.href)) {
       const dispatcher = new ProxyAgent({
         uri: process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888',
         requestTls: {

@@ -6,11 +6,12 @@ import { SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import { isBrokerUrl } from '../scm'
 import {
   CommitToSameBranchParams,
   FixResponseArray,
   InitGitAndFilesParams,
-  InitGitParmas,
+  InitGitParams,
   SubmitFixesResponseMessage,
   SubmitFixesToDifferentBranchParams,
   submitToScmMessageType,
@@ -19,21 +20,6 @@ import {
 export * from './types'
 
 const MOBB_COMMIT_PREFIX = 'mobb fix commit:'
-
-const EnvVariablesZod = z.object({
-  BROKERED_HOSTS: z
-    .string()
-    .toLowerCase()
-    .transform((x) =>
-      x
-        .split(',')
-        .map((url) => url.trim(), [])
-        .filter(Boolean)
-    )
-    .default(''),
-})
-
-const { BROKERED_HOSTS } = EnvVariablesZod.parse(process.env)
 
 export const isValidBranchName = async (branchName: string) => {
   const git = simpleGit()
@@ -158,7 +144,7 @@ const FixesZ = z
   )
   .nonempty()
 
-async function _initGit(params: InitGitParmas) {
+async function _initGit(params: InitGitParams) {
   const { repoUrl, dirName, changedFiles, extraHeaders = {} } = params
   const git = simpleGit(dirName).outputHandler((bin, stdout, stderr) => {
     const errChunks: string[] = []
@@ -208,12 +194,7 @@ async function _initGit(params: InitGitParmas) {
     )
   }
 
-  if (
-    repoUrlParsed &&
-    BROKERED_HOSTS.includes(
-      `${repoUrlParsed.protocol?.toLowerCase()}//${repoUrlParsed.host?.toLowerCase()}`
-    )
-  ) {
+  if (repoUrlParsed && isBrokerUrl(repoUrlParsed.href)) {
     await git.addConfig('http.sslVerify', 'false')
 
     await git.addConfig(
@@ -398,6 +379,7 @@ export async function submitFixesToSameBranch(
 ): Promise<SubmitFixesResponseMessage> {
   const { commitDescription, commitMessage } = msg
   const response: SubmitFixesResponseMessage = {
+    mobbUserEmail: msg.mobbUserEmail,
     githubCommentId: msg.githubCommentId,
     submitBranches: [],
     submitFixRequestId: '',
@@ -488,6 +470,7 @@ export const submitFixesToDifferentBranch = async (
   msg: Omit<SubmitFixesToDifferentBranchParams, 'type'>
 ) => {
   const response: SubmitFixesResponseMessage = {
+    mobbUserEmail: msg.mobbUserEmail,
     submitBranches: [],
     submitFixRequestId: '',
     type: submitToScmMessageType.submitFixesForDifferentBranch,

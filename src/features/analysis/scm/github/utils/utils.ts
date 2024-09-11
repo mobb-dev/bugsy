@@ -3,12 +3,12 @@ import { Octokit } from 'octokit'
 import { fetch, ProxyAgent, RequestInfo, RequestInit } from 'undici'
 
 import {
-  BROKERED_HOSTS,
   GIT_PROXY_HOST,
   GITHUB_API_TOKEN,
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
+  isBrokerUrl,
   normalizeUrl,
   shouldValidateUrl,
 } from '../..'
@@ -41,7 +41,7 @@ export function isGithubOnPrem(url: string | null | undefined): boolean {
 }
 
 function getFetch(url?: string) {
-  if (url && BROKERED_HOSTS.includes(new URL(url).origin)) {
+  if (url && isBrokerUrl(url)) {
     const dispatcher = new ProxyAgent({
       uri: GIT_PROXY_HOST,
       requestTls: {

@@ -58,6 +58,10 @@ import {
   ScmSubmitRequestStatus,
 } from './types'
 
+export function isBrokerUrl(url: string) {
+  return z.string().uuid().safeParse(new URL(url).host).success
+}
+
 export type ScmConfig = {
   id: string
   orgId?: string | null
@@ -143,14 +147,19 @@ export function getScmLibTypeFromScmType(scmType: string | null | undefined) {
 export function getScmConfig({
   url,
   scmConfigs,
+  brokerHosts,
   includeOrgTokens = true,
 }: {
   url: string
   scmConfigs: ScmConfig[]
+  brokerHosts: {
+    virtualDomain: string
+    realDomain: string
+  }[]
   includeOrgTokens?: boolean
 }) {
+  const urlObject = new URL(url)
   const filteredScmConfigs = scmConfigs.filter((scm) => {
-    const urlObject = new URL(url)
     const configUrl = new URL(scm.scmUrl)
     return (
       //if we the user does an ADO oauth flow then the token is saved for dev.azure.com but
@@ -163,6 +172,19 @@ export function getScmConfig({
       urlObject.port === configUrl.port
     )
   })
+  const filteredBrokerHosts = brokerHosts.filter((broker) => {
+    const urlObject = new URL(url)
+    return urlObject.hostname.toLowerCase() === broker.realDomain.toLowerCase()
+  })
+  //TODO: This is a hack for now. We go over the broker hosts configurations for all the organizations the user is part of.
+  //It doesn't match the organization context of the current user action with the broker host configuration as we don't have organization context
+  //in most API calls. We have to fix it and provide organization context to the API calls.
+  //It is even more critical if the unlikely situation happens that the user is part of multiple organizations with different broker configurations for the same target host.
+  //In this case, we will return the first broker host configuration that matches the target host regardless of the organization context.
+  const virtualDomain = filteredBrokerHosts[0]?.virtualDomain
+  const virtualUrl = virtualDomain
+    ? `https://${virtualDomain}${urlObject.pathname}${urlObject.search}`
+    : undefined
   const scmOrgConfig = filteredScmConfigs.find((scm) => scm.orgId && scm.token)
   if (scmOrgConfig && includeOrgTokens) {
     return {
@@ -170,6 +192,7 @@ export function getScmConfig({
       accessToken: scmOrgConfig.token || undefined,
       scmLibType: getScmLibTypeFromScmType(scmOrgConfig.scmType),
       scmOrg: scmOrgConfig.scmOrg || undefined,
+      virtualUrl,
     }
   }
   const scmUserConfig = filteredScmConfigs.find(
@@ -181,6 +204,7 @@ export function getScmConfig({
       accessToken: scmUserConfig.token || undefined,
       scmLibType: getScmLibTypeFromScmType(scmUserConfig.scmType),
       scmOrg: scmUserConfig.scmOrg || undefined,
+      virtualUrl,
     }
   }
   const type = getCloudScmLibTypeFromUrl(url)
@@ -190,6 +214,7 @@ export function getScmConfig({
       accessToken: undefined,
       scmLibType: type,
       scmOrg: undefined,
+      virtualUrl,
     }
   }
   return {
@@ -197,6 +222,7 @@ export function getScmConfig({
     accessToken: undefined,
     scmLibType: undefined,
     scmOrg: undefined,
+    virtualUrl,
   }
 }
 
@@ -267,7 +293,7 @@ export type ScmInitParams = {
   scmOrg: string | undefined
 }
 
-function buildAuthrizedRepoUrl(args: {
+function buildAuthorizedRepoUrl(args: {
   url: string
   username: string
   password: string
@@ -339,7 +365,7 @@ export abstract class SCMLib {
           const { token } = authData
           const username = await this._getUsernameForAuthUrl()
 
-          return buildAuthrizedRepoUrl({
+          return buildAuthorizedRepoUrl({
             url,
             username,
             password: token,
@@ -347,14 +373,20 @@ export abstract class SCMLib {
         }
         case 'basic': {
           const { username, password } = authData
-          return buildAuthrizedRepoUrl({ url, username, password })
+          return buildAuthorizedRepoUrl({ url, username, password })
         }
       }
     }
 
+    //In Gitlab, when using a repo URL without the .git suffix, the server will return a redirect to the URL with the .git suffix.
+    //In case we are using a broker, then we use virtual domain/host but the redirect is still to the real domain/host.
+    //Therefore, we need to add the .git suffix to the URL in order to avoid this redirect in the first place.
+    const finalUrl =
+      scmLibType === ScmLibScmType.GITLAB ? `${trimmedUrl}.git` : trimmedUrl
+
     const username = await this._getUsernameForAuthUrl()
-    return buildAuthrizedRepoUrl({
-      url: trimmedUrl,
+    return buildAuthorizedRepoUrl({
+      url: finalUrl,
       username,
       password: accessToken,
     })

@@ -2,6 +2,14 @@ query Me {
   me {
     id
     email
+    userOrganizationsAndUserOrganizationRoles {
+      organization {
+        brokerHosts {
+          realDomain
+          virtualDomain
+        }
+      }
+    }
     scmConfigs {
       id
       orgId

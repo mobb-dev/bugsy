@@ -3,11 +3,12 @@ import querystring from 'node:querystring'
 import * as api from 'azure-devops-node-api'
 import { z } from 'zod'
 
-import { BROKERED_HOSTS, GIT_PROXY_HOST } from '../env'
+import { GIT_PROXY_HOST } from '../env'
 import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
+  isBrokerUrl,
 } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
 import {
@@ -157,7 +158,7 @@ export async function getAdoApiClient(params: GetAdoApiClientParams) {
   // PAT handling
 
   const authHandler = api.getPersonalAccessTokenHandler(params.accessToken)
-  const isBroker = BROKERED_HOSTS.includes(new URL(orgUrl).origin)
+  const isBroker = isBrokerUrl(orgUrl)
   const connection = new api.WebApi(
     orgUrl,
     authHandler,

@@ -16,6 +16,7 @@ import {
 } from '@mobb/bugsy/constants'
 import {
   Fix_Report_State_Enum,
+  OrganizationToRoleType,
   Scan_Source_Enum,
 } from '@mobb/bugsy/generates/client_generates'
 import { MobbCliCommand } from '@mobb/bugsy/types'
@@ -210,6 +211,29 @@ function _getUrlForScmType({
   }
 }
 
+function getBrokerHosts(
+  userOrgsAnUserOrgRoles:
+    | (null | undefined | OrganizationToRoleType)[]
+    | null
+    | undefined
+) {
+  const brokerHosts: {
+    realDomain: string
+    virtualDomain: string
+  }[] = []
+  if (!userOrgsAnUserOrgRoles) {
+    return brokerHosts
+  }
+  userOrgsAnUserOrgRoles.forEach((org) => {
+    org?.organization?.brokerHosts.forEach((brokerHost) => {
+      if (brokerHost) {
+        brokerHosts.push(brokerHost)
+      }
+    })
+  })
+  return brokerHosts
+}
+
 async function getScmTokenInfo(params: { gqlClient: GQLClient; repo: string }) {
   const { gqlClient, repo } = params
   const userInfo = await gqlClient.getUserInfo()
@@ -222,6 +246,9 @@ async function getScmTokenInfo(params: { gqlClient: GQLClient; repo: string }) {
     url: repo,
     scmConfigs,
     includeOrgTokens: false,
+    brokerHosts: getBrokerHosts(
+      userInfo.userOrganizationsAndUserOrganizationRoles
+    ),
   })
 }
 
@@ -607,6 +634,9 @@ export async function _scan(
       const tokenInfo = getScmConfig({
         url: repoUrl,
         scmConfigs,
+        brokerHosts: getBrokerHosts(
+          userInfo.userOrganizationsAndUserOrganizationRoles
+        ),
         includeOrgTokens: false,
       })
 

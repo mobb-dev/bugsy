@@ -1,3 +1,9 @@
+import { sleep } from '@mobb/bugsy/utils'
+import Debug from 'debug'
+import { GraphQLClient } from 'graphql-request'
+import { v4 as uuidv4 } from 'uuid'
+
+import { API_URL } from '../../../constants'
 import {
   CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
@@ -10,13 +16,7 @@ import {
   Sdk,
   SubmitVulnerabilityReportMutationVariables,
   ValidateRepoUrlQueryVariables,
-} from '@mobb/bugsy/generates/client_generates'
-import { sleep } from '@mobb/bugsy/utils'
-import Debug from 'debug'
-import { GraphQLClient } from 'graphql-request'
-import { v4 as uuidv4 } from 'uuid'
-
-import { API_URL } from '../../../constants'
+} from '../scm/generates/client_generates'
 import { subscribe } from './subscribe'
 import {
   GetVulByNodesMetadataFilter,
@@ -374,6 +374,11 @@ export class GQLClient {
       throw new Error(`Analysis not found: ${analysisId}`)
     }
     return res.analysis
+  }
+  async autoPrAnalysis(analysisId: string) {
+    return this._clientSdk.autoPrAnalysis({
+      analysisId,
+    })
   }
   async getFixes(fixIds: string[]) {
     const res = await this._clientSdk.getFixes({

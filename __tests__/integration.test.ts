@@ -13,7 +13,7 @@ import {
   ScmLibScmType,
 } from '@mobb/bugsy/features/analysis/scm'
 import { scmCloudUrl, ScmType } from '@mobb/bugsy/features/analysis/scm'
-import { PerformCliLoginDocument } from '@mobb/bugsy/generates/client_generates'
+import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
@@ -125,18 +125,20 @@ describe('Basic Analyze tests', () => {
   it('Full analyze flow', async () => {
     mockedOpen.mockClear()
     const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
-
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
     await analysisExports.runAnalysis(
       {
         repo: 'https://github.com/mobb-dev/simple-vulnerable-java-project',
         scanner: SCANNERS.Snyk,
         ci: false,
         command: 'scan',
+        autoPr: true,
       },
       { skipPrompts: true }
     )
 
     expect(runAnalysisSpy).toHaveBeenCalled()
+    expect(autoPrAnalysisSpy).toHaveBeenCalled()
     expect(mockedOpen).toHaveBeenCalledTimes(2)
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
   }, 30000)
@@ -145,6 +147,7 @@ describe('Basic Analyze tests', () => {
     'Direct repo upload',
     async (srcPath) => {
       const packSpy = vi.spyOn(ourPackModule, 'pack')
+      const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
       mockedOpen.mockClear()
       await analysisExports.runAnalysis(
         {
@@ -159,6 +162,7 @@ describe('Basic Analyze tests', () => {
         { skipPrompts: true }
       )
       expect(mockedOpen).toHaveBeenCalledTimes(2)
+      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
       expect(mockedOpen).toBeCalledWith(
         expect.stringMatching(PROJECT_PAGE_REGEX)
       )
@@ -173,6 +177,7 @@ describe('Basic Analyze tests', () => {
 
   it('Checks ci flag', async () => {
     const consoleMock = vi.spyOn(console, 'log')
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
     await analysisExports.runAnalysis(
       {
         repo: 'https://bitbucket.com/a/b',
@@ -182,9 +187,11 @@ describe('Basic Analyze tests', () => {
         srcPath: path.join(__dirname, 'assets'),
         ci: true,
         command: 'analyze',
+        autoPr: true,
       },
       { skipPrompts: true }
     )
+    expect(autoPrAnalysisSpy).toHaveBeenCalled()
     expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
     consoleMock.mockClear()
   })
@@ -193,6 +200,7 @@ describe('Basic Analyze tests', () => {
       __dirname,
       'assets/github_fixer_demo/snyk_report.json'
     )
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
     const scm = await SCMLib.init({
       url: GITHUB_FIXER_REPO.URL,
       scmType: ScmLibScmType.GITHUB,
@@ -224,6 +232,7 @@ describe('Basic Analyze tests', () => {
       token,
       type: 'token',
     })
+    expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
 
     const pullRequestNumber = GITHUB_FIXER_REPO.PR_NUMBER
     const getAnalysis = await gqlClient.getAnalysis(analysisId)

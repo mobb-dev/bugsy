@@ -341,3 +341,17 @@ query gitReference($repoUrl: String!, $reference: String!) {
     }
   }
 }
+
+mutation autoPrAnalysis($analysisId: String!) {
+  autoPrAnalysis(analysisId: $analysisId) {
+    __typename
+    ... on AutoPrSuccess {
+      status
+      appliedAutoPrIssueTypes
+    }
+    ... on AutoPrError {
+      status
+      error
+    }
+  }
+}

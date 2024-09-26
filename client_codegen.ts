@@ -10,7 +10,7 @@ const config: CodegenConfig = {
   },
   documents: './src/schemas/client_schema.graphql',
   generates: {
-    './src/generates/client_generates.ts': {
+    './src/features/analysis/scm/generates/client_generates.ts': {
       plugins: [
         'typescript',
         'typescript-operations',

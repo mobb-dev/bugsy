@@ -1,6 +1,7 @@
 import { ADO_PREFIX_PATH, NAME_REGEX } from '../shared/src'
 
-export * from './get_issue_type'
+export * from './broker'
+
 type GetFixUrlParam = {
   appBaseUrl: string
   fixId: string

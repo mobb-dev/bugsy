@@ -2,14 +2,14 @@ import {
   progressMassages,
   VUL_REPORT_DIGEST_TIMEOUT_MS,
 } from '@mobb/bugsy/constants'
-import {
-  Fix_Report_State_Enum,
-  SubmitVulnerabilityReportMutationVariables,
-} from '@mobb/bugsy/generates/client_generates'
 import Debug from 'debug'
 import { createSpinner } from 'nanospinner'
 
 import { GQLClient } from '../graphql'
+import {
+  Fix_Report_State_Enum,
+  SubmitVulnerabilityReportMutationVariables,
+} from '../scm/generates/client_generates'
 
 const debug = Debug('mobbdev:index')
 

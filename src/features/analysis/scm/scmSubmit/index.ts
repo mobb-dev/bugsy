@@ -6,6 +6,7 @@ import { SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import { GIT_PROXY_HOST } from '../env'
 import { isBrokerUrl } from '../scm'
 import {
   CommitToSameBranchParams,
@@ -197,14 +198,8 @@ async function _initGit(params: InitGitParams) {
   if (repoUrlParsed && isBrokerUrl(repoUrlParsed.href)) {
     await git.addConfig('http.sslVerify', 'false')
 
-    await git.addConfig(
-      'http.proxy',
-      process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
-    )
-    await git.addConfig(
-      'https.proxy',
-      process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888'
-    )
+    await git.addConfig('http.proxy', GIT_PROXY_HOST)
+    await git.addConfig('https.proxy', GIT_PROXY_HOST)
   }
   await git.addRemote('origin', repoUrl)
 

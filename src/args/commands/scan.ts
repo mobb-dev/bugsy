@@ -6,6 +6,7 @@ import type * as Yargs from 'yargs'
 
 import {
   apiKeyOption,
+  autoPrOption,
   ciOption,
   mobbProjectNameOption,
   organizationIdOptions,
@@ -25,6 +26,7 @@ export function scanBuilder(
     args
       // handles scanner case insensitive
       .coerce('scanner', (arg) => arg.toLowerCase())
+
       .option('repo', repoOption)
       .option('ref', refOption)
       .option('scanner', scannerOptions)
@@ -34,6 +36,7 @@ export function scanBuilder(
       .option('ci', ciOption)
       .option('api-key', apiKeyOption)
       .option('cx-project-name', projectNameOption)
+      .option('auto-pr', autoPrOption)
       .example(
         '$0 scan -r https://github.com/WebGoat/WebGoat',
         'Scan an existing repository'

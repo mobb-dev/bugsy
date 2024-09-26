@@ -16,6 +16,10 @@ const mockSpinner: Spinner = {
   spin: () => mockSpinner,
 }
 
+export type CreateSpinner = (
+  text?: string,
+  options?: NanoSpinnerOptions
+) => Spinner
 export function Spinner({ ci = false } = {}) {
   return {
     createSpinner: (text?: string, options?: NanoSpinnerOptions) =>

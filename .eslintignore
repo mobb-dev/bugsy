@@ -1,5 +1,5 @@
 node_modules
 dist
 build
-src/generates/client_generates.ts
+src/features/analysis/scm/generates/client_generates.ts
 __tests__/assets/github_fixer_demo/repo/xss-example.js

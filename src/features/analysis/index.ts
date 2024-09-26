@@ -14,11 +14,6 @@ import {
   VUL_REPORT_DIGEST_TIMEOUT_MS,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
-import {
-  Fix_Report_State_Enum,
-  OrganizationToRoleType,
-  Scan_Source_Enum,
-} from '@mobb/bugsy/generates/client_generates'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { getDirName, getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
@@ -33,6 +28,7 @@ import tmp from 'tmp'
 import { z } from 'zod'
 
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
+import { handleAutoPr } from './auto_pr_handler'
 import { getGitInfo } from './git'
 import { GQLClient } from './graphql'
 import { pack } from './pack'
@@ -46,6 +42,11 @@ import {
   SCMLib,
   ScmLibScmType,
 } from './scm'
+import {
+  Fix_Report_State_Enum,
+  OrganizationToRoleType,
+  Scan_Source_Enum,
+} from './scm/generates/client_generates'
 import { uploadFile } from './upload-file'
 import { getFromArraySafe, sendReport } from './utils'
 
@@ -162,6 +163,7 @@ export type AnalysisParams = {
   githubToken?: string
   command: MobbCliCommand
   organizationId?: string
+  autoPr?: boolean
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -337,6 +339,7 @@ export async function _scan(
     githubToken: githubActionToken,
     command,
     organizationId: userOrganizationId,
+    autoPr,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -489,6 +492,13 @@ export async function _scan(
   mobbSpinner.success({
     text: '🕵️‍♂️ Generating fixes...',
   })
+  if (autoPr) {
+    await handleAutoPr({
+      gqlClient,
+      analysisId: reportUploadInfo.fixReportId,
+      createSpinner,
+    })
+  }
 
   await askToOpenAnalysis()
   return reportUploadInfo.fixReportId
@@ -760,6 +770,7 @@ export async function _scan(
           pullRequest: params.pullRequest,
         },
       })
+
       if (command === 'review') {
         const params = z
           .object({
@@ -802,6 +813,13 @@ export async function _scan(
     mobbSpinner.success({
       text: '🕵️‍♂️ Generating fixes...',
     })
+    if (autoPr) {
+      await handleAutoPr({
+        gqlClient,
+        analysisId: reportUploadInfo.fixReportId,
+        createSpinner,
+      })
+    }
 
     await askToOpenAnalysis()
     return reportUploadInfo.fixReportId

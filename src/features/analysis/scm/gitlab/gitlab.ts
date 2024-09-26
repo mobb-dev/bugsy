@@ -7,7 +7,7 @@ import {
 } from '@gitbeaker/rest'
 import { ProxyAgent } from 'undici'
 
-import { GITLAB_API_TOKEN } from '../env'
+import { GIT_PROXY_HOST, GITLAB_API_TOKEN } from '../env'
 import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
@@ -15,12 +15,11 @@ import {
   isBrokerUrl,
   RefNotFoundError,
 } from '../scm'
-import { parseScmURL, ScmType } from '../shared/src'
+import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { ReferenceType } from '../types'
 import { shouldValidateUrl } from '../utils'
+import { getBrokerEffectiveUrl } from '../utils/broker'
 import { GitlabAuthResultZ, GitlabTokenRequestTypeEnum } from './types'
-
-const GITLAB_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -391,14 +390,36 @@ export async function getGitlabToken({
   gitlabClientSecret,
   callbackUrl,
   tokenType,
+  scmUrl,
+  brokerHosts,
 }: {
   token: string
   gitlabClientId: string
   gitlabClientSecret: string
   callbackUrl: string
   tokenType: GitlabTokenRequestTypeEnum
+  scmUrl?: string
+  brokerHosts?: { virtualDomain: string; realDomain: string }[]
 }) {
-  const res = await fetch(GITLAB_ACCESS_TOKEN_URL, {
+  const scmFinalUrl = scmUrl ? scmUrl : scmCloudUrl.GitLab
+  const effectiveUrl = getBrokerEffectiveUrl({
+    url: scmFinalUrl,
+    brokerHosts,
+  })
+
+  let dispatcher = undefined
+  if (isBrokerUrl(effectiveUrl)) {
+    dispatcher = new ProxyAgent({
+      uri: GIT_PROXY_HOST,
+      requestTls: {
+        rejectUnauthorized: false,
+      },
+    })
+  }
+
+  const tokenUrl = `${effectiveUrl}/oauth/token`
+  const res = await fetch(tokenUrl, {
+    dispatcher,
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -414,7 +435,7 @@ export async function getGitlabToken({
           : 'refresh_token',
       redirect_uri: callbackUrl,
     }),
-  })
+  } as RequestInit)
   const authResult = await res.json()
   return GitlabAuthResultZ.parse(authResult)
 }
@@ -435,7 +456,7 @@ function initGitlabFetchMock() {
 
     if (urlParsed && isBrokerUrl(urlParsed.href)) {
       const dispatcher = new ProxyAgent({
-        uri: process.env['GIT_PROXY_HOST'] || 'http://tinyproxy:8888',
+        uri: GIT_PROXY_HOST,
         requestTls: {
           rejectUnauthorized: false,
         },

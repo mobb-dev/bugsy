@@ -20,6 +20,8 @@ export type BaseAnalyzeOptions = {
   githubToken?: string
   mobbProjectName?: string
   organizationId?: string
+  autoPr?: boolean
+  'auto-pr': boolean
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>
@@ -58,6 +60,8 @@ export type BaseScanOptions = {
   mobbProjectName?: string
   cxProjectName?: string
   organizationId?: string
+  autoPr?: boolean
+  'auto-pr': boolean
 }
 
 export type AddScmTokenOptions =

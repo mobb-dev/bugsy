@@ -63,6 +63,12 @@ export const commitHashOption = {
   type: 'string',
 } as const
 
+export const autoPrOption = {
+  describe: chalk.bold('Enable automatic pull requests for new fixes'),
+  type: 'boolean',
+  default: false,
+} as const
+
 export const scmTypeOption = {
   demandOption: true,
   describe: chalk.bold('SCM type'),

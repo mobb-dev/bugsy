@@ -64,6 +64,7 @@ export async function analyze(
     srcPath,
     mobbProjectName,
     organizationId,
+    autoPr,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -81,6 +82,7 @@ export async function analyze(
       srcPath,
       organizationId,
       command: 'analyze',
+      autoPr,
     },
     { skipPrompts }
   )

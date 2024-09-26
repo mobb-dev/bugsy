@@ -7,6 +7,7 @@ import type * as Yargs from 'yargs'
 
 import {
   apiKeyOption,
+  autoPrOption,
   ciOption,
   commitHashOption,
   mobbProjectNameOption,
@@ -54,6 +55,7 @@ export function analyzeBuilder(
     .option('org', organizationIdOptions)
     .option('api-key', apiKeyOption)
     .option('commit-hash', commitHashOption)
+    .option('auto-pr', autoPrOption)
     .example(
       '$0 analyze -r https://github.com/WebGoat/WebGoat -f <your_vulirabitliy_report_path>',
       'analyze an existing repository'

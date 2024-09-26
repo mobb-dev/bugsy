@@ -6,7 +6,7 @@ import Debug from 'debug'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
 
-import { ScmType } from './features/analysis/scm'
+import { ScmType } from './features/analysis/scm/shared/src/types'
 
 const debug = Debug('mobbdev:constants')
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

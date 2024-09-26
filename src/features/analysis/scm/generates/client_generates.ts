@@ -280,7 +280,7 @@ export type InitOrganizationAndProjectGoodResponse = {
   userId: Scalars['String'];
 };
 
-export type InitOrganizationAndProjectResponse = InitOrganizationAndProjectGoodResponse | UserAlreadyInProjectError;
+export type InitOrganizationAndProjectResponse = InitOrganizationAndProjectGoodResponse | UserAlreadyInProjectError | UserHasNoPermissionInProjectError;
 
 /** Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'. */
 export type Int_Comparison_Exp = {
@@ -751,6 +751,12 @@ export type UrlNotConnectedToScmError = {
 
 export type UserAlreadyInProjectError = {
   __typename?: 'UserAlreadyInProjectError';
+  error?: Maybe<Scalars['String']>;
+  status: Status;
+};
+
+export type UserHasNoPermissionInProjectError = {
+  __typename?: 'UserHasNoPermissionInProjectError';
   error?: Maybe<Scalars['String']>;
   status: Status;
 };
@@ -21374,7 +21380,7 @@ export type SubmitVulnerabilityReportMutation = { __typename?: 'mutation_root', 
 export type CreateCommunityUserMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateCommunityUserMutation = { __typename?: 'mutation_root', initOrganizationAndProject?: { __typename: 'InitOrganizationAndProjectGoodResponse', projectId: string, userId: string, organizationId: string } | { __typename: 'UserAlreadyInProjectError', error?: string | null, status: Status } | null };
+export type CreateCommunityUserMutation = { __typename?: 'mutation_root', initOrganizationAndProject?: { __typename: 'InitOrganizationAndProjectGoodResponse', projectId: string, userId: string, organizationId: string } | { __typename: 'UserAlreadyInProjectError', error?: string | null, status: Status } | { __typename: 'UserHasNoPermissionInProjectError', error?: string | null, status: Status } | null };
 
 export type CreateCliLoginMutationVariables = Exact<{
   publicKey: Scalars['String'];
@@ -21676,6 +21682,10 @@ export const CreateCommunityUserDocument = `
       organizationId
     }
     ... on UserAlreadyInProjectError {
+      error
+      status
+    }
+    ... on UserHasNoPermissionInProjectError {
       error
       status
     }

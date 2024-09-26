@@ -283,6 +283,10 @@ mutation CreateCommunityUser {
       error
       status
     }
+    ... on UserHasNoPermissionInProjectError {
+      error
+      status
+    }
   }
 }
 

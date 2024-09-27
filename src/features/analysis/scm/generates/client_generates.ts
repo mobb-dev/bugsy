@@ -21324,7 +21324,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', issueType?: IssueType_Enum | null, id: any, patchAndQuestions: { __typename: 'FixData', patch: string } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', issueType?: IssueType_Enum | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, issueLanguage?: IssueLanguage_Enum | null, patchAndQuestions: { __typename: 'FixData', patch: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -21533,10 +21533,49 @@ export const GetFixesDocument = `
   fixes: fix(where: $filters) {
     issueType
     id
+    vulnerabilitySeverity
+    issueLanguage
     patchAndQuestions {
       __typename
       ... on FixData {
         patch
+        questions {
+          defaultValue
+          extraContext {
+            key
+            value
+          }
+          index
+          inputType
+          key
+          name
+          options
+          value
+          __typename
+        }
+        extraContext {
+          extraContext {
+            key
+            value
+            __typename
+          }
+          fixDescription
+          manifestActionsRequired {
+            action
+            lib {
+              name
+              version
+            }
+            language
+            typesLib {
+              envName
+              name
+              version
+            }
+            __typename
+          }
+          __typename
+        }
       }
     }
   }

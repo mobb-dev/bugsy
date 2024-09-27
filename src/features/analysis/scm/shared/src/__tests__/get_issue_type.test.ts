@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { IssueType_Enum } from '../../../generates/client_generates'
-import { getIssueType, issueTypeMap } from '../get_issue_type'
+import { getIssueType, issueTypeMap } from '../getIssueType'
 
 describe('getIssueType', () => {
   it('should handle undefined/null input', () => {

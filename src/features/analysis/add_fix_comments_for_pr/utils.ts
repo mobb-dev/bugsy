@@ -6,12 +6,21 @@ import { z } from 'zod'
 import { GQLClient } from '../graphql'
 import { GetVulByNodeHunk } from '../graphql/types'
 import {
+  getCommitDescription,
   getCommitUrl,
   getFixUrlWithRedirect,
+  getGuidances,
   getIssueType,
   GithubSCMLib,
+  PatchAndQuestionsZ,
+  toQuestion,
 } from '../scm'
 import { MOBB_ICON_IMG } from '../scm'
+import {
+  IssueLanguage_Enum,
+  Vulnerability_Report_Vendor_Enum,
+  Vulnerability_Severity_Enum,
+} from '../scm/generates/client_generates'
 import {
   GetGeneralPrCommentResponse,
   GetPrCommentsResponse,
@@ -164,10 +173,24 @@ export async function postFixComment(params: PostFixCommentParams) {
     redirectUrl: commentRes.data.html_url,
     commentId,
   })
-  const scanerString = scannerToFriendlyString[scanner]
   const issueType = getIssueType(fix.issueType ?? null)
   const title = `# ${MobbIconMarkdown} ${issueType} fix is ready`
-  const subTitle = `### Apply the following code change to fix ${issueType} issue detected by **${scanerString}**:`
+
+  const patchAndQuestions = await PatchAndQuestionsZ.parseAsync(
+    fix.patchAndQuestions
+  )
+  const subTitle = getCommitDescription({
+    issueType: fix.issueType,
+    vendor: scanner as Vulnerability_Report_Vendor_Enum,
+    severity: fix.vulnerabilitySeverity as Vulnerability_Severity_Enum,
+    issueLanguage: fix.issueLanguage as IssueLanguage_Enum,
+    guidances: getGuidances({
+      questions: patchAndQuestions.questions.map(toQuestion),
+      issueType: fix.issueType!,
+      issueLanguage: fix.issueLanguage!,
+      fixExtraContext: patchAndQuestions.extraContext,
+    }),
+  })
   const diff = `\`\`\`diff\n${patch} \n\`\`\``
   const fixPageLink = `[Learn more and fine tune the fix](${fixUrl})`
 

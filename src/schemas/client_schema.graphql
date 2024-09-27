@@ -99,10 +99,49 @@ query getFixes($filters: fix_bool_exp!) {
   fixes: fix(where: $filters) {
     issueType
     id
+    vulnerabilitySeverity
+    issueLanguage
     patchAndQuestions {
       __typename
       ... on FixData {
         patch
+        questions {
+          defaultValue
+          extraContext {
+            key
+            value
+          }
+          index
+          inputType
+          key
+          name
+          options
+          value
+          __typename
+        }
+        extraContext {
+          extraContext {
+            key
+            value
+            __typename
+          }
+          fixDescription
+          manifestActionsRequired {
+            action
+            lib {
+              name
+              version
+            }
+            language
+            typesLib {
+              envName
+              name
+              version
+            }
+            __typename
+          }
+          __typename
+        }
       }
     }
   }

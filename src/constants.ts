@@ -18,6 +18,7 @@ export const scmFriendlyText: Record<ScmType, string> = {
   [ScmType.GitHub]: 'GitGub',
   [ScmType.GitLab]: 'GitLab',
 }
+
 export const SCANNERS = {
   Checkmarx: 'checkmarx',
   Codeql: 'codeql',

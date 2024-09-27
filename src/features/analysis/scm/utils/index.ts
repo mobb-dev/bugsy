@@ -1,4 +1,4 @@
-import { ADO_PREFIX_PATH, NAME_REGEX } from '../shared/src'
+import { ADO_PREFIX_PATH, getFixUrl, NAME_REGEX } from '../shared/src'
 
 export * from './broker'
 
@@ -30,16 +30,6 @@ export function getFixUrlWithRedirect(params: GetCommitUrlParam) {
     organizationId,
     analysisId,
   })}?${searchParams.toString()}`
-}
-
-export function getFixUrl({
-  appBaseUrl,
-  fixId,
-  projectId,
-  organizationId,
-  analysisId,
-}: GetFixUrlParam) {
-  return `${appBaseUrl}/organization/${organizationId}/project/${projectId}/report/${analysisId}/fix/${fixId}`
 }
 
 type GetCommitUrlParam = GetFixUrlParam & {

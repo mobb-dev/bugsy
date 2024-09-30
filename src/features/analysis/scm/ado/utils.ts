@@ -312,6 +312,10 @@ export async function getAdoToken({
   tokenType: AdoOAuthTokenType
   redirectUri: string
 }) {
+  console.debug('getAdoToken', {
+    tokenType,
+    redirectUri,
+  })
   const res = await fetch(ADO_ACCESS_TOKEN_URL, {
     method: 'POST',
     headers: {
@@ -331,5 +335,6 @@ export async function getAdoToken({
     }),
   })
   const authResult = await res.json()
+  console.debug('authResult', authResult)
   return AdoAuthResultZ.parse(authResult)
 }

@@ -5,7 +5,7 @@ export function getBrokerEffectiveUrl({
   url: string
   brokerHosts?: { virtualDomain: string; realDomain: string }[]
 }) {
-  if (!brokerHosts) {
+  if (!brokerHosts || brokerHosts.length === 0) {
     return url
   }
 

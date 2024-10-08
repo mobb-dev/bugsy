@@ -5,7 +5,13 @@ import * as dotenv from 'dotenv'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { getAdoClientParams, getAdoSdk, parseAdoOwnerAndRepo } from '../ado'
+import {
+  AdoOAuthTokenType,
+  getAdoClientParams,
+  getAdoSdk,
+  getAdoToken,
+  parseAdoOwnerAndRepo,
+} from '../ado'
 import { SCMLib } from '../scm'
 import { ReferenceType, ScmLibScmType } from '../types'
 import { env } from './env'
@@ -421,4 +427,19 @@ describe.each([
   it('fail if the url is invalid', () => {
     expect(() => parseAdoOwnerAndRepo(INVALID_URL)).toThrow()
   })
+  it.each<{ tokenType: AdoOAuthTokenType }>([
+    { tokenType: 'code' },
+    { tokenType: 'refresh_token' },
+  ])(
+    'should return {success: false} for bad $tokenType',
+    async ({ tokenType }) => {
+      const getTokenRes = await getAdoToken({
+        token: 'bad-token',
+        adoClientSecret: 'secret',
+        tokenType,
+        redirectUri: 'https://example.com',
+      })
+      expect(getTokenRes.success).toBe(false)
+    }
+  )
 })

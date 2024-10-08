@@ -3,6 +3,7 @@ import querystring from 'node:querystring'
 import bitbucketPkg from 'bitbucket'
 import * as bitbucketPkgNode from 'bitbucket'
 import { APIClient, Schema } from 'bitbucket'
+import Debug from 'debug'
 import { z } from 'zod'
 
 import {
@@ -18,8 +19,12 @@ import { normalizeUrl, shouldValidateUrl } from '../utils'
 import {
   CreatePullRequestParams,
   GetBitbucketTokenArgs,
+  GetBitbucketTokenRes,
   GetReposParam,
 } from './types'
+import { BitbucketAuthResultZ } from './validation'
+
+const debug = Debug('scm:bitbucket')
 
 const BITBUCKET_HOSTNAME = 'bitbucket.org'
 
@@ -34,12 +39,6 @@ const TokenExpiredErrorZ = z.object({
 })
 
 const BITBUCKET_ACCESS_TOKEN_URL = `https://${BITBUCKET_HOSTNAME}/site/oauth2/access_token`
-
-const BitbucketAuthResultZ = z.object({
-  access_token: z.string(),
-  token_type: z.string(),
-  refresh_token: z.string(),
-})
 
 type BitbucketRequestTypeKeys = keyof typeof bitbucketRequestType
 export type BitbucketRequestType =
@@ -68,7 +67,9 @@ const bitbucketRequestType = {
   REFRESH_TOKEN: 'refresh_token',
 } as const
 
-export async function getBitbucketToken(params: GetBitbucketTokenArgs) {
+export async function getBitbucketToken(
+  params: GetBitbucketTokenArgs
+): Promise<GetBitbucketTokenRes> {
   const { bitbucketClientId, bitbucketClientSecret, authType } = params
   const res = await fetch(BITBUCKET_ACCESS_TOKEN_URL, {
     method: 'POST',
@@ -90,7 +91,21 @@ export async function getBitbucketToken(params: GetBitbucketTokenArgs) {
     ),
   })
   const authResult = await res.json()
-  return BitbucketAuthResultZ.parse(authResult)
+
+  const parseResult = BitbucketAuthResultZ.safeParse(authResult)
+  if (!parseResult.success) {
+    debug(
+      `failed to parse bitbucket auth result for: ${authType}`,
+      parseResult.error
+    )
+    return {
+      success: false,
+    }
+  }
+  return {
+    success: true,
+    authResult: parseResult.data,
+  }
 }
 
 type GetBranchParams = {

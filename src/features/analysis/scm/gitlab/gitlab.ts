@@ -19,7 +19,12 @@ import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { ReferenceType } from '../types'
 import { shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
-import { GitlabAuthResultZ, GitlabTokenRequestTypeEnum } from './types'
+import {
+  GetGitlabTokenParams,
+  GitlabAuthResult,
+  GitlabAuthResultZ,
+  GitlabTokenRequestTypeEnum,
+} from './types'
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -31,6 +36,7 @@ type ApiAuthOptions = {
 }
 
 function getGitBeaker(options: ApiAuthOptions) {
+  console.log('getGitBeaker starting')
   const token = options?.gitlabAuthToken ?? GITLAB_API_TOKEN ?? ''
   const url = options.url
   const host = url ? new URL(url).origin : 'https://gitlab.com'
@@ -383,6 +389,14 @@ export async function getGitlabBlameRanges(
       }
     })
 }
+type GetGitlabTokenRes =
+  | {
+      success: true
+      authResult: GitlabAuthResult
+    }
+  | {
+      success: false
+    }
 
 export async function getGitlabToken({
   token,
@@ -392,15 +406,7 @@ export async function getGitlabToken({
   tokenType,
   scmUrl,
   brokerHosts,
-}: {
-  token: string
-  gitlabClientId: string
-  gitlabClientSecret: string
-  callbackUrl: string
-  tokenType: GitlabTokenRequestTypeEnum
-  scmUrl?: string
-  brokerHosts?: { virtualDomain: string; realDomain: string }[]
-}) {
+}: GetGitlabTokenParams): Promise<GetGitlabTokenRes> {
   const scmFinalUrl = scmUrl ? scmUrl : scmCloudUrl.GitLab
   const effectiveUrl = getBrokerEffectiveUrl({
     url: scmFinalUrl,
@@ -437,13 +443,29 @@ export async function getGitlabToken({
     }),
   } as RequestInit)
   const authResult = await res.json()
-  return GitlabAuthResultZ.parse(authResult)
+  const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
+  if (!parsedAuthResult.success) {
+    console.debug(`error using: ${tokenType} for gitlab`, authResult)
+    return {
+      success: false,
+    }
+  }
+  return {
+    success: true,
+    authResult: parsedAuthResult.data,
+  }
 }
 
 function initGitlabFetchMock() {
+  console.log('initGitlabFetchMock starting')
   const globalFetch = global.fetch
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function myFetch(input: any, init?: any): any {
+    console.log(
+      `myFetch called with input: ${input} ${JSON.stringify(input)} ${JSON.stringify(init)}`,
+      input,
+      input?.url
+    )
     let urlParsed = null
     // this block is used for unit tests only. URL starts from local directory
     try {
@@ -454,7 +476,10 @@ function initGitlabFetchMock() {
       )
     }
 
+    console.log(`urlParsed: ${urlParsed} ${urlParsed?.href}`)
+
     if (urlParsed && isBrokerUrl(urlParsed.href)) {
+      console.log(`urlParsed is broker url: ${urlParsed.href}`)
       const dispatcher = new ProxyAgent({
         uri: GIT_PROXY_HOST,
         requestTls: {
@@ -463,9 +488,11 @@ function initGitlabFetchMock() {
       })
       return globalFetch(input, { dispatcher } as RequestInit)
     }
+    console.log('urlParsed is not broker url')
     return globalFetch(input, init)
   }
   global.fetch = myFetch
+  console.log('initGitlabFetchMock finished')
 }
 
 initGitlabFetchMock()

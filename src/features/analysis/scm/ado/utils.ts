@@ -1,6 +1,7 @@
 import querystring from 'node:querystring'
 
 import * as api from 'azure-devops-node-api'
+import Debug from 'debug'
 import { z } from 'zod'
 
 import { GIT_PROXY_HOST } from '../env'
@@ -24,6 +25,7 @@ import {
 } from './types'
 import { accountsZ, AdoAuthResultZ, profileZ } from './validation'
 
+const debug = Debug('mobbdev:scm:ado')
 function _getPublicAdoClient({
   orgName,
   origin,
@@ -312,10 +314,6 @@ export async function getAdoToken({
   tokenType: AdoOAuthTokenType
   redirectUri: string
 }) {
-  console.debug('getAdoToken', {
-    tokenType,
-    redirectUri,
-  })
   const res = await fetch(ADO_ACCESS_TOKEN_URL, {
     method: 'POST',
     headers: {
@@ -335,6 +333,9 @@ export async function getAdoToken({
     }),
   })
   const authResult = await res.json()
-  console.debug('authResult', authResult)
-  return AdoAuthResultZ.parse(authResult)
+  const parsedAuthResult = AdoAuthResultZ.safeParse(authResult)
+  if (!parsedAuthResult.success) {
+    debug('ado refresh token error', { authResult, redirectUri })
+  }
+  return parsedAuthResult
 }

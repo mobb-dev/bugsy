@@ -9,7 +9,6 @@ import {
 import { getAdoRepoList, getAdoSdk } from './ado/ado'
 import {
   getBitbucketSdk,
-  getBitbucketToken,
   parseBitbucketOrganizationAndRepo,
   validateBitbucketParams,
 } from './bitbucket'
@@ -1435,19 +1434,5 @@ export class BitbucketSCMLib extends SCMLib {
     return Promise.resolve(
       `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${prNumber}`
     )
-  }
-  async refreshToken(params: {
-    bitbucketClientId: string
-    bitbucketClientSecret: string
-    refreshToken: string
-  }): Promise<{ accessToken: string; refreshToken: string }> {
-    const getBitbucketTokenResponse = await getBitbucketToken({
-      authType: 'refresh_token',
-      ...params,
-    })
-    return {
-      accessToken: getBitbucketTokenResponse.access_token,
-      refreshToken: getBitbucketTokenResponse.refresh_token,
-    }
   }
 }

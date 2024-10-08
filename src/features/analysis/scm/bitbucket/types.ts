@@ -1,3 +1,7 @@
+import { z } from 'zod'
+
+import { BitbucketAuthResultZ } from './validation'
+
 export type GetReposParam = {
   workspaceSlug?: string
 }
@@ -28,4 +32,15 @@ export type GetBitbucketTokenArgs =
       bitbucketClientId: string
       bitbucketClientSecret: string
       authType: 'refresh_token'
+    }
+
+export type BitbucketAuthResult = z.infer<typeof BitbucketAuthResultZ>
+
+export type GetBitbucketTokenRes =
+  | {
+      success: false
+    }
+  | {
+      success: true
+      authResult: BitbucketAuthResult
     }

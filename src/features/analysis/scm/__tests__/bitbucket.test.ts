@@ -3,7 +3,12 @@ import { describe } from 'node:test'
 import { expect, it } from 'vitest'
 import { z } from 'zod'
 
-import { getBitbucketSdk, validateBitbucketParams } from '../bitbucket'
+import {
+  getBitbucketSdk,
+  getBitbucketToken,
+  validateBitbucketParams,
+} from '../bitbucket'
+import { GetBitbucketTokenArgs } from '../bitbucket/types'
 import {
   BitbucketSCMLib,
   InvalidAccessTokenError,
@@ -267,4 +272,24 @@ describe('scm instance tests', () => {
       })
     ).rejects.toThrowError(RepoNoTokenAccessError)
   })
+  it.each<GetBitbucketTokenArgs>([
+    {
+      refreshToken: 'bad-refresh-token',
+      bitbucketClientId: 'bad-client-id',
+      bitbucketClientSecret: 'bad-client-secret',
+      authType: 'refresh_token',
+    },
+    {
+      code: 'bad-code',
+      bitbucketClientId: 'bad-client-id',
+      bitbucketClientSecret: 'bad-client-secret',
+      authType: 'authorization_code',
+    },
+  ])(
+    'should return {success: false} for bad $authType',
+    async (getBitbucketTokenArgs) => {
+      const getTokenRes = await getBitbucketToken(getBitbucketTokenArgs)
+      expect(getTokenRes.success).toBe(false)
+    }
+  )
 })

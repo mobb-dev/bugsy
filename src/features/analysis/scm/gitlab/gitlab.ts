@@ -1,11 +1,21 @@
 import querystring from 'node:querystring'
+import { setTimeout } from 'node:timers/promises'
 
+import {
+  createRequesterFn,
+  type RequestOptions,
+  ResourceOptions,
+} from '@gitbeaker/requester-utils'
 import {
   ExpandedMergeRequestSchema,
   Gitlab,
   GitlabAPIResponse,
 } from '@gitbeaker/rest'
-import { ProxyAgent } from 'undici'
+import {
+  fetch as undiciFetch,
+  ProxyAgent,
+  Response as UndiciResponse,
+} from 'undici'
 
 import { GIT_PROXY_HOST, GITLAB_API_TOKEN } from '../env'
 import {
@@ -41,9 +51,23 @@ function getGitBeaker(options: ApiAuthOptions) {
   const url = options.url
   const host = url ? new URL(url).origin : 'https://gitlab.com'
   if (token?.startsWith('glpat-') || token === '') {
-    return new Gitlab({ token, host })
+    return new Gitlab({
+      token,
+      host,
+      requesterFn: createRequesterFn(
+        (_: ResourceOptions, reqo: RequestOptions) => Promise.resolve(reqo),
+        brokerRequestHandler
+      ),
+    })
   }
-  return new Gitlab({ oauthToken: token, host })
+  return new Gitlab({
+    oauthToken: token,
+    host,
+    requesterFn: createRequesterFn(
+      (_: ResourceOptions, reqo: RequestOptions) => Promise.resolve(reqo),
+      brokerRequestHandler
+    ),
+  })
 }
 
 export async function gitlabValidateParams({
@@ -424,7 +448,7 @@ export async function getGitlabToken({
   }
 
   const tokenUrl = `${effectiveUrl}/oauth/token`
-  const res = await fetch(tokenUrl, {
+  const res = await undiciFetch(tokenUrl, {
     dispatcher,
     method: 'POST',
     headers: {
@@ -441,7 +465,7 @@ export async function getGitlabToken({
           : 'refresh_token',
       redirect_uri: callbackUrl,
     }),
-  } as RequestInit)
+  })
   const authResult = await res.json()
   const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
   if (!parsedAuthResult.success) {
@@ -456,43 +480,80 @@ export async function getGitlabToken({
   }
 }
 
-function initGitlabFetchMock() {
-  console.log('initGitlabFetchMock starting')
-  const globalFetch = global.fetch
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function myFetch(input: any, init?: any): any {
-    console.log(
-      `myFetch called with input: ${input} ${JSON.stringify(input)} ${JSON.stringify(init)}`,
-      input,
-      input?.url
-    )
-    let urlParsed = null
-    // this block is used for unit tests only. URL starts from local directory
-    try {
-      urlParsed = input?.url ? new URL(input?.url) : null
-    } catch (err) {
-      console.log(
-        `this block is used for unit tests only. URL ${input?.url} starts from local directory`
-      )
-    }
+async function processBody(response: UndiciResponse) {
+  // Split to remove potential charset info from the content type
+  const headers = response.headers
+  const type = headers.get('content-type')?.split(';')[0]?.trim()
 
-    console.log(`urlParsed: ${urlParsed} ${urlParsed?.href}`)
-
-    if (urlParsed && isBrokerUrl(urlParsed.href)) {
-      console.log(`urlParsed is broker url: ${urlParsed.href}`)
-      const dispatcher = new ProxyAgent({
-        uri: GIT_PROXY_HOST,
-        requestTls: {
-          rejectUnauthorized: false,
-        },
-      })
-      return globalFetch(input, { dispatcher } as RequestInit)
-    }
-    console.log('urlParsed is not broker url')
-    return globalFetch(input, init)
+  if (type === 'application/json') {
+    return (await response.json()) as Record<string, unknown>
   }
-  global.fetch = myFetch
-  console.log('initGitlabFetchMock finished')
+
+  return await response.text()
 }
 
-initGitlabFetchMock()
+//as we need to change the gitlab client to support using an HTTP proxy (to support the broker),
+//we added this function which is mostly copied from the gitbeaker library (the original default request handler).
+//The main change is the addition of the dispatcher parameter to the undiciFetch call instead of just calling the original fetch function
+//without the dispatcher (HTTP proxy) parameter.
+async function brokerRequestHandler(
+  endpoint: string,
+  options?: RequestOptions
+) {
+  const retryCodes = [429, 502]
+  const maxRetries = 10
+  const { prefixUrl, searchParams } = options || {}
+  let baseUrl: string | undefined
+
+  if (prefixUrl) baseUrl = prefixUrl.endsWith('/') ? prefixUrl : `${prefixUrl}/`
+
+  const url = new URL(endpoint, baseUrl)
+
+  url.search = searchParams || ''
+
+  const dispatcher =
+    url && isBrokerUrl(url.href)
+      ? new ProxyAgent({
+          uri: GIT_PROXY_HOST,
+          requestTls: {
+            rejectUnauthorized: false,
+          },
+        })
+      : undefined
+
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < maxRetries; i += 1) {
+    const response = await undiciFetch(url, {
+      headers: options?.headers,
+      method: options?.method,
+      body: options?.body ? String(options?.body) : undefined,
+      dispatcher,
+    }).catch((e) => {
+      if (e.name === 'TimeoutError' || e.name === 'AbortError') {
+        throw new Error('Query timeout was reached')
+      }
+
+      throw e
+    })
+
+    if (response.ok)
+      return {
+        body: await processBody(response),
+        headers: Object.fromEntries(response.headers.entries()),
+        status: response.status,
+      }
+    if (!retryCodes.includes(response.status))
+      throw new Error(`gitbeaker: ${response.statusText}`)
+
+    // Retry
+    await setTimeout(2 ** i * 0.25)
+
+    // eslint-disable-next-line
+    continue
+  }
+  /* eslint-enable */
+
+  throw new Error(
+    `Could not successfully complete this request due to Error 429. Check the applicable rate limits for this endpoint.`
+  )
+}

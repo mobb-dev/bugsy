@@ -1,3 +1,4 @@
+import { fetch as undiciFetch } from 'undici'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getGitlabToken, GitlabTokenRequestTypeEnum } from '../../gitlab'
@@ -7,13 +8,11 @@ import * as scmUtils from '../../scm'
 
 vi.mock('undici', () => ({
   ProxyAgent: vi.fn(),
+  fetch: vi.fn(),
 }))
 
 describe('getGitlabToken', () => {
-  const mockFetch = vi.fn()
-
   beforeEach(() => {
-    vi.stubGlobal('fetch', mockFetch)
     vi.stubGlobal('GIT_PROXY_HOST', 'http://proxy.example.com')
   })
 
@@ -31,7 +30,9 @@ describe('getGitlabToken', () => {
       created_at: 1234567890,
     }
 
-    mockFetch.mockResolvedValueOnce({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    undiciFetch.mockResolvedValueOnce({
       json: () => Promise.resolve(mockResponse),
     })
 
@@ -52,7 +53,7 @@ describe('getGitlabToken', () => {
       },
     })
 
-    expect(mockFetch).toHaveBeenCalledWith(
+    expect(undiciFetch).toHaveBeenCalledWith(
       'https://gitlab.com/oauth/token',
       expect.objectContaining({
         method: 'POST',
@@ -66,7 +67,9 @@ describe('getGitlabToken', () => {
   })
 
   it('should use ProxyAgent when isBrokerUrl returns true', async () => {
-    mockFetch.mockResolvedValueOnce({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    undiciFetch.mockResolvedValueOnce({
       json: () => Promise.resolve({}),
     })
     const isBrokerUrlSpy = vi.spyOn(scmUtils, 'isBrokerUrl')
@@ -87,7 +90,7 @@ describe('getGitlabToken', () => {
     })
     expect(isBrokerUrlSpy).toHaveReturnedWith(true)
 
-    expect(mockFetch).toHaveBeenCalledWith(
+    expect(undiciFetch).toHaveBeenCalledWith(
       `https://${onPremDoamain}/oauth/token`,
       expect.objectContaining({
         dispatcher: expect.any(Object),
@@ -96,7 +99,9 @@ describe('getGitlabToken', () => {
   })
 
   it('should return unsuccessful response when GitlabAuthResultZ parse fails', async () => {
-    mockFetch.mockResolvedValueOnce({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    undiciFetch.mockResolvedValueOnce({
       json: () => Promise.resolve({ invalid: 'response' }),
     })
     const result = await getGitlabToken({
@@ -113,7 +118,9 @@ describe('getGitlabToken', () => {
   })
 
   it('should use refresh_token grant type when tokenType is REFRESH_TOKEN', async () => {
-    mockFetch.mockResolvedValueOnce({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    undiciFetch.mockResolvedValueOnce({
       json: () => Promise.resolve({}),
     })
 
@@ -125,7 +132,7 @@ describe('getGitlabToken', () => {
       tokenType: GitlabTokenRequestTypeEnum.REFRESH_TOKEN,
     })
 
-    expect(mockFetch).toHaveBeenCalledWith(
+    expect(undiciFetch).toHaveBeenCalledWith(
       'https://gitlab.com/oauth/token',
       expect.objectContaining({
         body: expect.stringContaining('grant_type=refresh_token'),

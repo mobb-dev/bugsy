@@ -8,10 +8,10 @@ import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
-  isBrokerUrl,
   normalizeUrl,
   shouldValidateUrl,
 } from '../..'
+import { isBrokerUrl } from '../../scm'
 import { parseScmURL, scmCloudUrl, ScmType } from '../../shared/src'
 import { GET_REPO_BRANCHES } from '../consts'
 
@@ -57,11 +57,11 @@ function getFetch(url?: string) {
   }
   return fetch
 }
-export function getOktoKit(
+export function getOctoKit(
   options?: OctokitOptions & { url?: string }
 ): Octokit {
-  // note: wer're using GITHUB_API_TOKEN in order to increase
-  //  the rate limit instead of annonimous requests
+  // Note: We're using GITHUB_API_TOKEN to increase
+  // the rate limit instead of anonymous requests
   // this is only relevant for github.com
   const token =
     !options?.auth && !isGithubOnPrem(options?.url)
@@ -92,7 +92,7 @@ export async function githubValidateParams(
   accessToken: string | undefined
 ) {
   try {
-    const oktoKit = getOktoKit({ auth: accessToken, url })
+    const oktoKit = getOctoKit({ auth: accessToken, url })
     // if token is github action token we can't get user info
     if (accessToken && !isGithubActionActionToken(accessToken)) {
       await oktoKit.rest.users.getAuthenticated()

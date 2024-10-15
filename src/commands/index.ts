@@ -130,7 +130,7 @@ export async function scan(
   ) {
     // we can't use includes when using 'as const', weird
     throw new CliError(
-      'Vulnerability scanning via Bugsy is available only with Snyk at the moment. Additional scanners will follow soon.'
+      'Vulnerability scanning via Bugsy is available only with Snyk and Checkmarx at the moment. Additional scanners will follow soon.'
     )
   }
   selectedScanner === SCANNERS.Checkmarx && validateCheckmarxInstallation()

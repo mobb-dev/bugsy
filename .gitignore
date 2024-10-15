@@ -7,3 +7,4 @@ snyk
 node_modules
 dist
 .eslintcache
+html

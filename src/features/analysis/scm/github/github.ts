@@ -48,10 +48,10 @@ import {
   UpdateCommentParams,
   UpdateCommentResponse,
 } from './types'
-import { getOktoKit, parseGithubOwnerAndRepo } from './utils'
+import { getOctoKit, parseGithubOwnerAndRepo } from './utils'
 
-export function getGithubSdk(parmas: OctokitOptions = {}) {
-  const octokit = getOktoKit(parmas)
+export function getGithubSdk(params: OctokitOptions = {}) {
+  const octokit = getOctoKit(params)
   return {
     async postPrComment(
       params: PostCommentParams

@@ -1,8 +1,8 @@
 {
   "name": "mobbdev",
-  "version": "0.0.168",
+  "version": "0.0.169",
   "description": "Automated secure code remediation tool",
-  "repository": "https://github.com/mobb-dev/bugsy",
+  "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
@@ -12,12 +12,14 @@
     "build": "tsc && tsup-node --env.NODE_ENV production",
     "build:dev": "tsup-node --env.NODE_ENV development",
     "test": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run",
+    "test:coverage": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --coverage ",
     "test:watch": "TOKEN=$(../../scripts/login_auth0.sh) vitest",
     "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx .",
     "lint:fix": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx .",
     "lint:fix:files": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx",
     "prepack": "dotenv-vault pull production .env && pnpm build",
-    "generate": "pnpm run env -- graphql-codegen -r dotenv/config --config client_codegen.ts"
+    "generate": "pnpm run env -- graphql-codegen -r dotenv/config --config client_codegen.ts",
+    "test:e2e": "cd ./__e2e__ && npm i && npm run test"
   },
   "bin": {
     "mobbdev": "bin/cli.mjs"
@@ -63,19 +65,19 @@
     "supports-color": "9.4.0",
     "tar": "6.2.1",
     "tmp": "0.2.3",
-    "undici": "6.19.8",
+    "undici": "6.20.0",
     "uuid": "10.0.0",
     "ws": "8.18.0",
     "yargs": "17.7.2",
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.2",
-    "@graphql-codegen/typescript": "4.0.9",
+    "@graphql-codegen/cli": "5.0.3",
+    "@graphql-codegen/typescript": "4.1.0",
     "@graphql-codegen/typescript-graphql-request": "6.2.0",
-    "@graphql-codegen/typescript-operations": "4.2.3",
+    "@graphql-codegen/typescript-operations": "4.3.0",
     "@octokit/request-error": "3.0.3",
-    "@octokit/types": "13.6.0",
+    "@octokit/types": "13.6.1",
     "@types/adm-zip": "0.5.5",
     "@types/chalk-animation": "1.6.3",
     "@types/configstore": "6.0.2",
@@ -89,14 +91,16 @@
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.17.0",
     "@typescript-eslint/parser": "7.17.0",
+    "@vitest/coverage-istanbul": "2.1.2",
+    "@vitest/ui": "^2.1.2",
     "eslint": "8.57.0",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-simple-import-sort": "10.0.0",
     "prettier": "3.3.3",
     "tsup": "7.2.0",
     "typescript": "4.9.5",
-    "vitest": "0.34.6"
+    "vitest": "2.1.2"
   },
   "engines": {
     "node": ">=18.18.0"

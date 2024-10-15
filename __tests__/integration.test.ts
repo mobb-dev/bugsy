@@ -166,11 +166,9 @@ describe('Basic Analyze tests', () => {
       expect(mockedOpen).toBeCalledWith(
         expect.stringMatching(PROJECT_PAGE_REGEX)
       )
-
       // ensure that we filter only relevant files
-      const uploadedRepoZip = new AdmZip(
-        Buffer.from(packSpy.mock.results[0]?.value)
-      )
+      const packedResult = await packSpy.mock.results[0]?.value
+      const uploadedRepoZip = new AdmZip(Buffer.from(packedResult))
       expect(uploadedRepoZip.getEntryCount()).toBe(1)
     }
   )

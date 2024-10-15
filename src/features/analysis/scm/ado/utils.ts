@@ -1,6 +1,7 @@
 import querystring from 'node:querystring'
 
 import * as api from 'azure-devops-node-api'
+import { GitApi } from 'azure-devops-node-api/GitApi'
 import Debug from 'debug'
 import { z } from 'zod'
 
@@ -26,6 +27,7 @@ import {
 import { accountsZ, AdoAuthResultZ, profileZ } from './validation'
 
 const debug = Debug('mobbdev:scm:ado')
+
 function _getPublicAdoClient({
   orgName,
   origin,
@@ -233,6 +235,10 @@ export async function adoValidateParams({
       await getAdoClientParams({ url, accessToken, tokenOrg })
     )
     await api.connect()
+    if (url) {
+      const git = await api.getGitApi()
+      await validateAdoRepo({ git, repoUrl: url })
+    }
   } catch (e) {
     console.log('adoValidateParams error', e)
     const error = e as {
@@ -338,4 +344,22 @@ export async function getAdoToken({
     debug('ado refresh token error', { authResult, redirectUri })
   }
   return parsedAuthResult
+}
+
+export async function validateAdoRepo({
+  git,
+  repoUrl,
+}: {
+  git: GitApi
+  repoUrl: string
+}) {
+  const isAdoRepo = !!parseScmURL(repoUrl, ScmType.Ado)
+  if (!isAdoRepo) {
+    return
+  }
+  const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+  const branches = await git.getBranches(repo, projectName)
+  if (!branches || branches.length === 0) {
+    throw new InvalidRepoUrlError('no branches')
+  }
 }

@@ -17,6 +17,7 @@ import {
   getAdoClientParams,
   getAdoTokenInfo,
   parseAdoOwnerAndRepo,
+  validateAdoRepo,
 } from './utils'
 import { ValidPullRequestStatusZ } from './validation'
 
@@ -25,12 +26,8 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
   return {
     async getAdoIsUserCollaborator({ repoUrl }: { repoUrl: string }) {
       try {
-        const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
         const git = await api.getGitApi()
-        const branches = await git.getBranches(repo, projectName)
-        if (!branches || branches.length === 0) {
-          throw new InvalidRepoUrlError('no branches')
-        }
+        await validateAdoRepo({ git, repoUrl })
         return true
       } catch (e) {
         return false
@@ -175,6 +172,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       if (!getRepositoryRes?.defaultBranch) {
         throw new InvalidRepoUrlError('no default branch')
       }
+
       return getRepositoryRes.defaultBranch.replace('refs/heads/', '')
     },
     // todo: refactor this function

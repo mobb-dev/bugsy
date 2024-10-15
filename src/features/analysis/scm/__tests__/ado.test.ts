@@ -1,9 +1,5 @@
-import path from 'node:path'
-
 import chalk from 'chalk'
-import * as dotenv from 'dotenv'
-import { beforeAll, describe, expect, it } from 'vitest'
-import { z } from 'zod'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
   AdoOAuthTokenType,
@@ -12,17 +8,11 @@ import {
   getAdoToken,
   parseAdoOwnerAndRepo,
 } from '../ado'
-import { SCMLib } from '../scm'
+import { RepoNoTokenAccessError, SCMLib } from '../scm'
 import { ReferenceType, ScmLibScmType } from '../types'
 import { env } from './env'
 
 const TEST_ADO_REPO = 'https://dev.azure.com/mobbtest/test/_git/repo1'
-dotenv.config({ path: path.join(__dirname, '../../../../../.env') })
-
-const envVariables = z
-  .object({ ADO_TEST_ACCESS_TOKEN: z.string().min(1) })
-  .required()
-  .parse(process.env)
 
 type TestInput = {
   ADO_PAT: string | undefined
@@ -41,12 +31,14 @@ const testNames = {
   publicRepoTest: 'publicRepoTest',
   repoWithSpacesTest: 'repoWithSpacesTest',
   publicRepoWithPat: 'publicRepoWithPat',
+  onPremTestParams: 'onPremTestParams',
+  onPremTestParamsSingleProject: 'onPremTestParamsSingleProject',
 } as const
 type TestNames = (typeof testNames)[keyof typeof testNames]
 
 const testInputs: Record<TestNames, TestInput> = {
   accessTokenTest: {
-    ADO_PAT: envVariables.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo1',
     NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo2',
@@ -61,7 +53,7 @@ const testInputs: Record<TestNames, TestInput> = {
     ADO_PAT: undefined,
     PAT_ORG: undefined,
     ADO_URL: 'https://dev.azure.com/mobbtest/test-public/_git/repo-public',
-    NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo2',
+    NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo1',
     EXISTING_COMMIT: 'b67eb441420675e0f107e2c1a3ba04900fc110fb',
     EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
@@ -70,7 +62,7 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: '5357a65e054976cd7d79b81ef3906ded050ed921',
   },
   publicRepoWithPat: {
-    ADO_PAT: envVariables.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL: 'https://dev.azure.com/yhaggai/_git/hello_public',
     NON_EXISTING_ADO_URL:
@@ -83,7 +75,7 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: '208ca7e6189b8c90bf4a9d3179f27f19a6c98940',
   },
   repoWithSpacesTest: {
-    ADO_PAT: envVariables.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL:
       'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces',
@@ -96,34 +88,32 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_BRANCH_SHA: 'd14918a74b1dd2c26726f71cb85059e63e033988',
     EXISTING_TAG_SHA: 'd14918a74b1dd2c26726f71cb85059e63e033988',
   },
-  // todo: add when we set an environment for on-prem add this test params back
-  // onPremTestParams: {
-  //   ADO_PAT: '*****',
-  //   PAT_ORG: 'DefaultCollection',
-  //   ADO_URL: 'https://test1/software%20development/_git/Sample.Repo.ABC.Test',
-  //   NON_EXISTING_ADO_URL:
-  //     'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
-  //   EXISTING_COMMIT: 'ccf9c908745139a819c53dc296f593ab2f987728',
-  //   EXISTING_BRANCH: 'main',
-  //   NON_EXISTING_BRANCH: 'non-existing-branch',
-  //   EXISTING_TAG: 'test-tag',
-  //   EXISTING_BRANCH_SHA: 'de2e157e4d3aa4467240436fe8be7535b2bbc8c7',
-  //   EXISTING_TAG_SHA: 'ccf9c908745139a819c53dc296f593ab2f987728',
-  // },
-  // onPremTestParamsSingleProject: {
-  //   ADO_PAT: '****',
-  //   PAT_ORG: 'DefaultCollection',
-  //   // ADO_URL: 'https://test1/DefaultCollection/_git/Antony%20Test%20Project',
-  //   ADO_URL: 'https://test1/software%20development/_git/Sample.Repo.ABC.Test',
-  //   NON_EXISTING_ADO_URL:
-  //     'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
-  //   EXISTING_COMMIT: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
-  //   EXISTING_BRANCH: 'Checkmarx',
-  //   NON_EXISTING_BRANCH: 'non-existing-branch',
-  //   EXISTING_TAG: 'test-tag',
-  //   EXISTING_BRANCH_SHA: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
-  //   EXISTING_TAG_SHA: 'e656ff682b1b029c38db1d6a930d2eaed3e7c1d2',
-  // },
+  onPremTestParams: {
+    ADO_PAT: env.PLAYWRIGHT_ADO_ON_PREM_PAT,
+    PAT_ORG: 'DefaultCollection',
+    ADO_URL: env.PLAYWRIGHT_ADO_ON_PREM_REPO_URL,
+    NON_EXISTING_ADO_URL:
+      'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
+    EXISTING_COMMIT: '33aee0d1b11766ce68ce23eb34f14be683ab9770',
+    EXISTING_BRANCH: 'main',
+    NON_EXISTING_BRANCH: 'non-existing-branch',
+    EXISTING_TAG: '7.0.1',
+    EXISTING_BRANCH_SHA: '33aee0d1b11766ce68ce23eb34f14be683ab9770',
+    EXISTING_TAG_SHA: 'f825bead8b47cfc8f3ef95bf41275a724b2b8582',
+  },
+  onPremTestParamsSingleProject: {
+    ADO_PAT: env.PLAYWRIGHT_ADO_ON_PREM_PAT,
+    PAT_ORG: 'DefaultCollection',
+    ADO_URL: `${env.PLAYWRIGHT_ADO_ON_PREM_URL}/software%20development/_git/Sample.Repo.ABC.Test`,
+    NON_EXISTING_ADO_URL:
+      'https://test1/DefaultCollection/_git/Antony%20Test%20Project1',
+    EXISTING_COMMIT: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
+    EXISTING_BRANCH: 'Checkmarx',
+    NON_EXISTING_BRANCH: 'non-existing-branch',
+    EXISTING_TAG: 'test-tag',
+    EXISTING_BRANCH_SHA: 'ab2f1b0b20334c728a27d5d2833e02f8376a0bc9',
+    EXISTING_TAG_SHA: 'e656ff682b1b029c38db1d6a930d2eaed3e7c1d2',
+  },
 } as const
 
 let adoSdkPromise: ReturnType<typeof getAdoSdk> | undefined
@@ -152,6 +142,8 @@ describe.each(Object.entries(testInputs))(
     }
   ) => {
     beforeAll(async () => {
+      // Disable the certificate check when calling a resource and avoids the 'self-signed certificate' error.
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
       adoSdkPromise = getAdoSdk(
         await getAdoClientParams({
           tokenOrg: ADO_MOBB_ORG,
@@ -159,6 +151,10 @@ describe.each(Object.entries(testInputs))(
           url: ADO_URL,
         })
       )
+    })
+    afterAll(async () => {
+      // Enabling it again, just in case. The certificate check gets disabled on the `beforeAll` clause.
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
     })
     it(`${chalk.green.underline.bold(testName)}: test existing repo`, async () => {
       const adoSdk = await getAdoSk(adoSdkPromise)
@@ -219,6 +215,14 @@ describe.each(Object.entries(testInputs))(
         })
       ).rejects.toThrow()
     })
+    it(`${chalk.green.underline.bold(testName)}:get the correct default branch `, async () => {
+      const adoSdk = await getAdoSk(adoSdkPromise)
+      const defaultBranch = await adoSdk.getAdoRepoDefaultBranch({
+        repoUrl: ADO_URL,
+      })
+      expect(defaultBranch).toBe(EXISTING_BRANCH)
+    })
+
     it.each(downloadTestParams)(
       'test donwload url for $url',
       async ({ url, expectedDownloadUrl }) => {
@@ -334,7 +338,7 @@ describe.each(Object.entries(scmTestParams))(
   }
 )
 
-describe('Ado check all assisoated repos', () => {
+describe('Ado scm general checks', () => {
   it('should return the correct repo list', async () => {
     const scmLib = await SCMLib.init({
       url: undefined,
@@ -373,6 +377,16 @@ describe('Ado check all assisoated repos', () => {
         }),
       ])
     )
+  })
+  it('should throw RepoNoTokenAccessError when repo is not accessible', async () => {
+    await expect(
+      SCMLib.init({
+        url: 'https://dev.azure.com/mobbtest/test/_git/repo11',
+        accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
+        scmType: ScmLibScmType.ADO,
+        scmOrg: testInputs.accessTokenTest.PAT_ORG,
+      })
+    ).rejects.toThrow(RepoNoTokenAccessError)
   })
 })
 

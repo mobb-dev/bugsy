@@ -1,0 +1,17 @@
+{
+  "name": "bugsy-e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test index.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-pty": "1.0.0",
+    "npm": "10.9.0",
+    "verdaccio": "6.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

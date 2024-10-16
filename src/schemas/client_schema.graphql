@@ -97,7 +97,7 @@ query getAnalsyis($analysisId: uuid!) {
 
 query getFixes($filters: fix_bool_exp!) {
   fixes: fix(where: $filters) {
-    issueType
+    safeIssueType
     id
     vulnerabilitySeverity
     issueLanguage

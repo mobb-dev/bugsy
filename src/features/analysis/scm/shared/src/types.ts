@@ -7,7 +7,6 @@ import {
   Fix_State_Enum,
   FixQuestionInputType,
   IssueLanguage_Enum,
-  IssueType_Enum,
   Language,
   ManifestAction,
   Project_Role_Type_Enum,
@@ -116,7 +115,7 @@ export const ReportQueryResultZ = z.object({
       z.object({
         id: z.string().uuid(),
         issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
-        issueType: z.nativeEnum(IssueType_Enum).nullable(),
+        safeIssueType: z.string(),
         confidence: z.number(),
         effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
         modifiedBy: z.string().nullable(),
@@ -217,7 +216,7 @@ export const ReportFixesQueryZ = z.array(
     gitBlameLogin: z.string().nullable(),
     effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
     issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
-    issueType: z.nativeEnum(IssueType_Enum).nullable(),
+    safeIssueType: z.string(),
     vulnerabilitySeverity: z
       .nativeEnum(Vulnerability_Severity_Enum)
       .nullable()
@@ -301,7 +300,8 @@ export const FixQueryZ = z.object({
   modifiedBy: z.string().nullable(),
   gitBlameLogin: z.string().nullable(),
   issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
-  issueType: z.nativeEnum(IssueType_Enum).nullable(),
+  safeIssueType: z.string(),
+  // issueType: z.nativeEnum(IssueType_Enum).nullable(),
   confidence: z.number(),
   fixReportId: z.string().uuid(),
   isExpired: z.boolean().default(false),
@@ -320,7 +320,6 @@ export const FixQueryZ = z.object({
   vulnerabilityReportIssues: z.array(
     z.object({
       vendorIssueId: z.string(),
-      issueType: z.string(),
       issueLanguage: z.string(),
     })
   ),
@@ -396,7 +395,17 @@ export const FixScreenQueryResultZ = z.object({
         .array(),
     }),
   }),
-  fix_by_pk: FixQueryZ,
+  fix_by_pk: FixQueryZ.merge(
+    z.object({
+      vulnerabilityReportIssues: z.array(
+        z.object({
+          vendorIssueId: z.string(),
+          issueType: z.string(),
+          issueLanguage: z.string(),
+        })
+      ),
+    })
+  ),
   fixesWithSameIssueType: z.object({
     fix: z.array(z.object({ id: z.string().uuid() })),
   }),

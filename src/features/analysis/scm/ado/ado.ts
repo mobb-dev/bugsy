@@ -63,10 +63,12 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       try {
         const branchStatus = await git.getBranch(repo, branch, projectName)
         if (!branchStatus || !branchStatus.commit) {
+          console.log(`no branch status: ${JSON.stringify(branchStatus)}`)
           throw new InvalidRepoUrlError('no branch status')
         }
         return branchStatus.name === branch
       } catch (e) {
+        console.error(`error in getAdoIsRemoteBranch: ${JSON.stringify(e)}`)
         return false
       }
     },

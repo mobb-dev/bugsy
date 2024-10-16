@@ -7,7 +7,7 @@ import {
   Vulnerability_Severity_Enum,
 } from '../../generates/client_generates'
 import { fixDetailsData } from './fixDetailsData'
-import { getIssueType } from './getIssueType'
+import { getIssueTypeFriendlyString } from './getIssueType'
 
 function capitalizeFirstLetter(str: string) {
   return str?.length ? str[0]!.toUpperCase() + str.slice(1) : ''
@@ -32,7 +32,7 @@ export const getCommitDescription = ({
   guidances,
   fixUrl,
 }: {
-  issueType?: IssueType_Enum | null
+  issueType: string
   vendor: Vulnerability_Report_Vendor_Enum
   severity: Vulnerability_Severity_Enum
   issueLanguage: IssueLanguage_Enum | null
@@ -49,7 +49,7 @@ export const getCommitDescription = ({
   if (!staticData) {
     return ''
   }
-  const issueTypeString = getIssueType(issueType)
+  const issueTypeString = getIssueTypeFriendlyString(issueType)
 
   let description = `This change fixes a **${severity} severity** (${
     severityToEmoji[severity]

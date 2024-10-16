@@ -10,7 +10,7 @@ import {
   getCommitUrl,
   getFixUrlWithRedirect,
   getGuidances,
-  getIssueType,
+  getIssueTypeFriendlyString,
   GithubSCMLib,
   PatchAndQuestionsZ,
   toQuestion,
@@ -18,6 +18,7 @@ import {
 import { MOBB_ICON_IMG } from '../scm'
 import {
   IssueLanguage_Enum,
+  IssueType_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
 } from '../scm/generates/client_generates'
@@ -173,21 +174,37 @@ export async function postFixComment(params: PostFixCommentParams) {
     redirectUrl: commentRes.data.html_url,
     commentId,
   })
-  const issueType = getIssueType(fix.issueType ?? null)
+  const issueType = getIssueTypeFriendlyString(fix.safeIssueType)
   const title = `# ${MobbIconMarkdown} ${issueType} fix is ready`
 
   const patchAndQuestions = await PatchAndQuestionsZ.parseAsync(
     fix.patchAndQuestions
   )
+  const validFixParseRes = z
+    .object({
+      vulnerabilitySeverity: z.nativeEnum(Vulnerability_Severity_Enum),
+      issueLanguage: z.nativeEnum(IssueLanguage_Enum),
+      safeIssueType: z.nativeEnum(IssueType_Enum),
+    })
+    .safeParse(fix)
+  if (!validFixParseRes.success) {
+    debug(
+      `fix ${fixId} does not have all the required fields to create a comment`,
+      validFixParseRes.error
+    )
+    return
+  }
+  const validFix = validFixParseRes.data
+
   const subTitle = getCommitDescription({
-    issueType: fix.issueType,
+    issueType: validFix.safeIssueType,
     vendor: scanner as Vulnerability_Report_Vendor_Enum,
-    severity: fix.vulnerabilitySeverity as Vulnerability_Severity_Enum,
-    issueLanguage: fix.issueLanguage as IssueLanguage_Enum,
+    severity: validFix.vulnerabilitySeverity,
+    issueLanguage: validFix.issueLanguage,
     guidances: getGuidances({
       questions: patchAndQuestions.questions.map(toQuestion),
-      issueType: fix.issueType!,
-      issueLanguage: fix.issueLanguage!,
+      issueType: validFix.safeIssueType,
+      issueLanguage: validFix.issueLanguage,
       fixExtraContext: patchAndQuestions.extraContext,
     }),
   })
@@ -220,7 +237,7 @@ export function buildAnalysisSummaryComment(params: {
         if (!fix) {
           throw new Error(`fix ${vulnerabilityReportIssue.fixId} not found`)
         }
-        const issueType = getIssueType(fix.issueType ?? null)
+        const issueType = getIssueTypeFriendlyString(fix.safeIssueType)
         const vulnerabilityReportIssueCount = (result[issueType] || 0) + 1
         return {
           ...result,

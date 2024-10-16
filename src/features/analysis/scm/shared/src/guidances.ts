@@ -66,7 +66,7 @@ export function curriedQuestionInformationByQuestion({
     })
 }
 
-function getPackageFixGuidance(
+export function getPackageFixGuidance(
   actionsRequired: ManifestActionRequired[]
 ): string[] {
   const actionRequiredStrings = actionsRequired.map((action) => {
@@ -132,18 +132,27 @@ export function getFixGuidances({
   return libGuidances.concat(fixGuidance).filter((guidance) => !!guidance)
 }
 
+const IssueTypeAndLanguageZ = z.object({
+  issueType: z.nativeEnum(IssueType_Enum),
+  issueLanguage: z.nativeEnum(IssueLanguage_Enum),
+})
+
 // Note: we're merging the guidance from specific questions and from the fix general guidance
-export function getGuidances({
-  questions,
-  issueType,
-  issueLanguage,
-  fixExtraContext,
-}: {
+export function getGuidances(args: {
   questions: Question[]
-  issueType: IssueType_Enum | null
-  issueLanguage: IssueLanguage_Enum | null
+  issueType: string | null
+  issueLanguage: string | null
   fixExtraContext: FixExtraContext
 }) {
+  const safeIssueTypeAndLanguage = IssueTypeAndLanguageZ.safeParse({
+    issueType: args.issueType,
+    issueLanguage: args.issueLanguage,
+  })
+  if (!safeIssueTypeAndLanguage.success) {
+    return []
+  }
+  const { questions, fixExtraContext } = args
+  const { issueType, issueLanguage } = safeIssueTypeAndLanguage.data
   const fixGuidances = getFixGuidances({
     issueType,
     issueLanguage,
@@ -155,8 +164,8 @@ export function getGuidances({
       let questionGuidance = question.guidance
       if (!questionGuidance && issueType && issueLanguage) {
         const getFixInformation = curriedQuestionInformationByQuestion({
-          issueType: z.nativeEnum(IssueType_Enum).parse(issueType),
-          language: z.nativeEnum(IssueLanguage_Enum).parse(issueLanguage),
+          issueType,
+          language: issueLanguage,
         })
         const { guidance } = getFixInformation(question)
 

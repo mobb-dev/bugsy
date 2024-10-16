@@ -90,7 +90,9 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)
-export const getIssueType = (issueType: string | null | undefined): string => {
+export const getIssueTypeFriendlyString = (
+  issueType: string | null | undefined
+): string => {
   const issueTypeZParseRes = issueTypeZ.safeParse(issueType)
   if (!issueTypeZParseRes.success) {
     return issueType ? issueType.replaceAll('_', ' ') : 'Other'

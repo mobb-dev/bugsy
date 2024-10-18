@@ -87,6 +87,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.UnvalidatedPublicMethodArgument]:
     'Unvalidated Public Method Argument',
   [IssueType_Enum.AutoEscapeFalse]: 'Auto-escape False',
+  [IssueType_Enum.MissingCspHeader]: 'Missing CSP Header',
+  [IssueType_Enum.HardcodedDomainInHtml]: 'Hardcoded Domain in HTML',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

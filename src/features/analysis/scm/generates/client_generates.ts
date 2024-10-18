@@ -6612,6 +6612,8 @@ export enum IssueType_Enum {
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
   /** GraphQl Depth Limit */
   GraphqlDepthLimit = 'GRAPHQL_DEPTH_LIMIT',
+  /** Hardcoded Domain in HTML */
+  HardcodedDomainInHtml = 'HARDCODED_DOMAIN_IN_HTML',
   /** Hardcoded Secrets */
   HardcodedSecrets = 'HARDCODED_SECRETS',
   /** Header Manipulation */
@@ -6656,6 +6658,8 @@ export enum IssueType_Enum {
   MissingAntiforgeryValidation = 'MISSING_ANTIFORGERY_VALIDATION',
   /** The program might dereference a null-pointer because it does not check the return value of a function that might return null */
   MissingCheckAgainstNull = 'MISSING_CHECK_AGAINST_NULL',
+  /** Missing CSP Header */
+  MissingCspHeader = 'MISSING_CSP_HEADER',
   /** Missing equals or hashcode method */
   MissingEqualsOrHashcode = 'MISSING_EQUALS_OR_HASHCODE',
   /** Missing HSTS Header */

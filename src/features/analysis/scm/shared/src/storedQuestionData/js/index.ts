@@ -1,11 +1,13 @@
 import { IssueType_Enum } from '../../../../generates/client_generates'
 import { commandInjection } from './commandInjection'
 import { graphqlDepthLimit } from './graphqlDepthLimit'
+import { hardcodedDomainInHtml } from './hardcodedDomainInHtml'
 import { hardcodedSecrets } from './hardcodedSecrets'
 import { iframeWithoutSandbox } from './iframeWithoutSandbox'
 import { incompleteUrlSanitization } from './incompleteUrlSanitization'
 import { insecureRandomness } from './insecureRandomness'
 import { logForging } from './logForging'
+import { cspHeaderValue } from './missingCSPHeader'
 import { headerMaxAge } from './missingHSTSHeader'
 import { noLimitsOrThrottling } from './noLimitsOrThrottling'
 import { openRedirect } from './openRedirect'
@@ -36,6 +38,8 @@ const vulnerabilities = {
   [IssueType_Enum.MissingHstsHeader as string]: headerMaxAge,
   [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
   [IssueType_Enum.NoLimitsOrThrottling as string]: noLimitsOrThrottling,
+  [IssueType_Enum.MissingCspHeader as string]: cspHeaderValue,
+  [IssueType_Enum.HardcodedDomainInHtml as string]: hardcodedDomainInHtml,
 }
 
 export default vulnerabilities

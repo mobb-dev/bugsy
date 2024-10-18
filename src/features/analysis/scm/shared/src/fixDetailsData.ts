@@ -315,4 +315,6 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'The lack of a rate limit can allow denial-of-service attacks, in which an attacker can cause the application to crash or become unresponsive by issuing a large number of requests simultaneously.',
     fixInstructions: 'Use express-rate-limit npm package to set a rate limit.',
   },
+  [IssueType_Enum.MissingCspHeader]: undefined,
+  [IssueType_Enum.HardcodedDomainInHtml]: undefined,
 }

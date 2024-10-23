@@ -5,7 +5,7 @@ import WebSocket from 'ws'
 
 import { API_KEY_HEADER_NAME } from './gql'
 
-const SUBSCRIPTION_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes in ms
+const SUBSCRIPTION_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes in ms
 
 type BaseWsOptions =
   | {

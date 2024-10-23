@@ -5,6 +5,7 @@ import AdmZip from 'adm-zip'
 import Debug from 'debug'
 import { globby } from 'globby'
 import { isBinary } from 'istextorbinary'
+import { simpleGit } from 'simple-git'
 
 const debug = Debug('mobbdev:pack')
 
@@ -23,6 +24,29 @@ function _get_manifest_files_suffixes() {
 
 export async function pack(srcDirPath: string, vulnFiles: string[]) {
   debug('pack folder %s', srcDirPath)
+  let git = undefined
+  try {
+    git = simpleGit({
+      baseDir: srcDirPath,
+      maxConcurrentProcesses: 1,
+      trimmed: true,
+    })
+    await git.status()
+  } catch (e) {
+    debug('failed to run git %o', e)
+    git = undefined
+    if (e instanceof Error) {
+      if (e.message.includes(' spawn ')) {
+        debug('git cli not installed')
+      } else if (e.message.includes('not a git repository')) {
+        debug('folder is not a git repo')
+      } else {
+        throw e
+      }
+    } else {
+      throw e
+    }
+  }
   const filepaths = await globby('**', {
     gitignore: true,
     onlyFiles: true,
@@ -57,7 +81,9 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
       continue
     }
 
-    const data = fs.readFileSync(absFilepath)
+    const data = git
+      ? await git.showBuffer([`HEAD:./${filepath}`])
+      : fs.readFileSync(absFilepath)
 
     if (isBinary(null, data)) {
       debug('ignoring %s because is seems to be a binary file', filepath)

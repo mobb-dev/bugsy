@@ -38,7 +38,7 @@ See more details about safe and unsafe HTML attributes:
     content: () => 'Which HTML escaping library would you like to use?',
     description: () => `
   - If you use the Spring framework, you likely already have \`org.springframework.web.util.HtmlUtils\`
-  - Another \`option is org.apache.commons.text.StringEscapeUtils\``,
+  - Another option is \`org.apache.commons.text.StringEscapeUtils\``,
     guidance: () => '',
   },
 }

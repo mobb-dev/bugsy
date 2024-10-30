@@ -114,7 +114,7 @@ export const ReportQueryResultZ = z.object({
     fixes: z.array(
       z.object({
         id: z.string().uuid(),
-        issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
+        safeIssueLanguage: z.string(),
         safeIssueType: z.string(),
         confidence: z.number(),
         effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
@@ -215,7 +215,7 @@ export const ReportFixesQueryZ = z.array(
     confidence: z.number(),
     gitBlameLogin: z.string().nullable(),
     effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
-    issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
+    safeIssueLanguage: z.string(),
     safeIssueType: z.string(),
     vulnerabilitySeverity: z
       .nativeEnum(Vulnerability_Severity_Enum)
@@ -299,9 +299,8 @@ export const FixQueryZ = z.object({
   state: z.nativeEnum(Fix_State_Enum),
   modifiedBy: z.string().nullable(),
   gitBlameLogin: z.string().nullable(),
-  issueLanguage: z.nativeEnum(IssueLanguage_Enum).nullable(),
+  safeIssueLanguage: z.string(),
   safeIssueType: z.string(),
-  // issueType: z.nativeEnum(IssueType_Enum).nullable(),
   confidence: z.number(),
   fixReportId: z.string().uuid(),
   isExpired: z.boolean().default(false),

@@ -6,6 +6,7 @@ import Debug from 'debug'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
 
+import { Vulnerability_Report_Vendor_Enum } from './features/analysis/scm/generates/client_generates'
 import { ScmType } from './features/analysis/scm/shared/src/types'
 
 const debug = Debug('mobbdev:constants')
@@ -25,6 +26,14 @@ export const SCANNERS = {
   Fortify: 'fortify',
   Snyk: 'snyk',
   Sonarqube: 'sonarqube',
+} as const
+
+export const scannerToVulnerability_Report_Vendor_Enum = {
+  [SCANNERS.Checkmarx]: Vulnerability_Report_Vendor_Enum.Checkmarx,
+  [SCANNERS.Snyk]: Vulnerability_Report_Vendor_Enum.Snyk,
+  [SCANNERS.Sonarqube]: Vulnerability_Report_Vendor_Enum.Sonarqube,
+  [SCANNERS.Codeql]: Vulnerability_Report_Vendor_Enum.Codeql,
+  [SCANNERS.Fortify]: Vulnerability_Report_Vendor_Enum.Fortify,
 } as const
 
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])

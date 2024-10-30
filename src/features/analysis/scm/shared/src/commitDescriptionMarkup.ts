@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 import {
-  IssueLanguage_Enum,
   IssueType_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
@@ -35,7 +34,6 @@ export const getCommitDescription = ({
   issueType: string
   vendor: Vulnerability_Report_Vendor_Enum
   severity: Vulnerability_Severity_Enum
-  issueLanguage: IssueLanguage_Enum | null
   guidances: Guidances
   fixUrl?: string
 }): string => {
@@ -44,7 +42,6 @@ export const getCommitDescription = ({
     return ''
   }
 
-  if (!issueType) return ''
   const staticData = fixDetailsData[parseIssueTypeRes.data]
   if (!staticData) {
     return ''

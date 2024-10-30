@@ -2392,6 +2392,8 @@ export type Fix = {
   patchFile?: Maybe<File>;
   /** this a deprecated relationship */
   patchFileId?: Maybe<Scalars['uuid']['output']>;
+  /** A computed field, executes function "get_issue_language" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
@@ -3637,6 +3639,7 @@ export type Fix_Bool_Exp = {
   numberOfVulnerabilityIssues?: InputMaybe<Int_Comparison_Exp>;
   patchFile?: InputMaybe<File_Bool_Exp>;
   patchFileId?: InputMaybe<Uuid_Comparison_Exp>;
+  safeIssueLanguage?: InputMaybe<String_Comparison_Exp>;
   safeIssueType?: InputMaybe<String_Comparison_Exp>;
   scmSubmitFixRequests?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
   scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
@@ -3716,6 +3719,8 @@ export type Fix_Max_Fields = {
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
   /** this a deprecated relationship */
   patchFileId?: Maybe<Scalars['uuid']['output']>;
+  /** A computed field, executes function "get_issue_language" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
@@ -3759,6 +3764,8 @@ export type Fix_Min_Fields = {
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
   /** this a deprecated relationship */
   patchFileId?: Maybe<Scalars['uuid']['output']>;
+  /** A computed field, executes function "get_issue_language" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
@@ -3832,6 +3839,7 @@ export type Fix_Order_By = {
   numberOfVulnerabilityIssues?: InputMaybe<Order_By>;
   patchFile?: InputMaybe<File_Order_By>;
   patchFileId?: InputMaybe<Order_By>;
+  safeIssueLanguage?: InputMaybe<Order_By>;
   safeIssueType?: InputMaybe<Order_By>;
   scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
   severityValue?: InputMaybe<Order_By>;
@@ -21338,7 +21346,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, issueLanguage?: IssueLanguage_Enum | null, patchAndQuestions: { __typename: 'FixData', patch: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -21548,7 +21556,7 @@ export const GetFixesDocument = `
     safeIssueType
     id
     vulnerabilitySeverity
-    issueLanguage
+    safeIssueLanguage
     patchAndQuestions {
       __typename
       ... on FixData {

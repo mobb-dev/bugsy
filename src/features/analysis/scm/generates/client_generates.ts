@@ -231,6 +231,7 @@ export type GetCheckmarxIntegrationDataSuccess = {
   ast?: Maybe<Scalars['String']['output']>;
   astBaseAuthUrl?: Maybe<Scalars['String']['output']>;
   astBaseUrl?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
 };
 
 export type GetCheckmarxProjectsError = {
@@ -769,8 +770,16 @@ export type UserInNotInTheOrganizationError = {
   status: Status;
 };
 
-export type ValidateCheckmarxConnectionResponse = {
-  __typename?: 'ValidateCheckmarxConnectionResponse';
+export type ValidateCheckmarxConnectionError = {
+  __typename?: 'ValidateCheckmarxConnectionError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type ValidateCheckmarxConnectionResponse = ValidateCheckmarxConnectionError | ValidateCheckmarxConnectionSuccess;
+
+export type ValidateCheckmarxConnectionSuccess = {
+  __typename?: 'ValidateCheckmarxConnectionSuccess';
   status: Status;
 };
 
@@ -5351,8 +5360,12 @@ export type Integration = {
   __typename?: 'integration';
   accessToken?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization?: Maybe<Organization>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   type: Integration_Type_Enum;
+  /** An object relationship */
+  user: User;
   userId: Scalars['uuid']['output'];
   values?: Maybe<Scalars['jsonb']['output']>;
 };
@@ -5422,8 +5435,10 @@ export type Integration_Bool_Exp = {
   _or?: InputMaybe<Array<Integration_Bool_Exp>>;
   accessToken?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   type?: InputMaybe<Integration_Type_Enum_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
   userId?: InputMaybe<Uuid_Comparison_Exp>;
   values?: InputMaybe<Jsonb_Comparison_Exp>;
 };
@@ -5453,8 +5468,10 @@ export type Integration_Delete_Key_Input = {
 export type Integration_Insert_Input = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   type?: InputMaybe<Integration_Type_Enum>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
   values?: InputMaybe<Scalars['jsonb']['input']>;
 };
@@ -5513,8 +5530,10 @@ export type Integration_On_Conflict = {
 export type Integration_Order_By = {
   accessToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
   userId?: InputMaybe<Order_By>;
   values?: InputMaybe<Order_By>;
 };
@@ -13885,6 +13904,7 @@ export type Query_Root = {
   /** fetch data from the table: "user" using primary key columns */
   user_by_pk?: Maybe<User>;
   validateCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
+  validateExistingCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateRepoUrl?: Maybe<RepoValidationResponse>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
@@ -15040,6 +15060,11 @@ export type Query_RootValidateCheckmarxConnectionArgs = {
   ast: Scalars['String']['input'];
   astBaseAuthUrl: Scalars['String']['input'];
   astBaseUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootValidateExistingCheckmarxConnectionArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 

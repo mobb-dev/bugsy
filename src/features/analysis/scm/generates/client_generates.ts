@@ -7022,6 +7022,10 @@ export type Mutation_Root = {
   delete_organization?: Maybe<Organization_Mutation_Response>;
   /** delete single row from the table: "organization" */
   delete_organization_by_pk?: Maybe<Organization>;
+  /** delete data from the table: "organization_files_matching_settings" */
+  delete_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
+  /** delete single row from the table: "organization_files_matching_settings" */
+  delete_organization_files_matching_settings_by_pk?: Maybe<Organization_Files_Matching_Settings>;
   /** delete data from the table: "organization_issue_type_settings" */
   delete_organization_issue_type_settings?: Maybe<Organization_Issue_Type_Settings_Mutation_Response>;
   /** delete single row from the table: "organization_issue_type_settings" */
@@ -7110,6 +7114,14 @@ export type Mutation_Root = {
   delete_vulnerability_report_issue_state?: Maybe<Vulnerability_Report_Issue_State_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_state" */
   delete_vulnerability_report_issue_state_by_pk?: Maybe<Vulnerability_Report_Issue_State>;
+  /** delete data from the table: "vulnerability_report_issue_tag" */
+  delete_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_report_issue_tag" */
+  delete_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_Tag>;
+  /** delete data from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  delete_vulnerability_report_issue_to_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  delete_vulnerability_report_issue_to_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
   /** delete data from the table: "vulnerability_report_path" */
   delete_vulnerability_report_path?: Maybe<Vulnerability_Report_Path_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_path" */
@@ -7225,6 +7237,10 @@ export type Mutation_Root = {
   insert_on_prem_scm_oauth_config_one?: Maybe<On_Prem_Scm_Oauth_Config>;
   /** insert data into the table: "organization" */
   insert_organization?: Maybe<Organization_Mutation_Response>;
+  /** insert data into the table: "organization_files_matching_settings" */
+  insert_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
+  /** insert a single row into the table: "organization_files_matching_settings" */
+  insert_organization_files_matching_settings_one?: Maybe<Organization_Files_Matching_Settings>;
   /** insert data into the table: "organization_issue_type_settings" */
   insert_organization_issue_type_settings?: Maybe<Organization_Issue_Type_Settings_Mutation_Response>;
   /** insert a single row into the table: "organization_issue_type_settings" */
@@ -7313,6 +7329,14 @@ export type Mutation_Root = {
   insert_vulnerability_report_issue_state?: Maybe<Vulnerability_Report_Issue_State_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_report_issue_state" */
   insert_vulnerability_report_issue_state_one?: Maybe<Vulnerability_Report_Issue_State>;
+  /** insert data into the table: "vulnerability_report_issue_tag" */
+  insert_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_report_issue_tag" */
+  insert_vulnerability_report_issue_tag_one?: Maybe<Vulnerability_Report_Issue_Tag>;
+  /** insert data into the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  insert_vulnerability_report_issue_to_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  insert_vulnerability_report_issue_to_vulnerability_report_issue_tag_one?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
   /** insert a single row into the table: "vulnerability_report" */
   insert_vulnerability_report_one?: Maybe<Vulnerability_Report>;
   /** insert data into the table: "vulnerability_report_path" */
@@ -7495,6 +7519,12 @@ export type Mutation_Root = {
   update_organization?: Maybe<Organization_Mutation_Response>;
   /** update single row of the table: "organization" */
   update_organization_by_pk?: Maybe<Organization>;
+  /** update data of the table: "organization_files_matching_settings" */
+  update_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
+  /** update single row of the table: "organization_files_matching_settings" */
+  update_organization_files_matching_settings_by_pk?: Maybe<Organization_Files_Matching_Settings>;
+  /** update multiples rows of table: "organization_files_matching_settings" */
+  update_organization_files_matching_settings_many?: Maybe<Array<Maybe<Organization_Files_Matching_Settings_Mutation_Response>>>;
   /** update data of the table: "organization_issue_type_settings" */
   update_organization_issue_type_settings?: Maybe<Organization_Issue_Type_Settings_Mutation_Response>;
   /** update single row of the table: "organization_issue_type_settings" */
@@ -7627,6 +7657,18 @@ export type Mutation_Root = {
   update_vulnerability_report_issue_state_by_pk?: Maybe<Vulnerability_Report_Issue_State>;
   /** update multiples rows of table: "vulnerability_report_issue_state" */
   update_vulnerability_report_issue_state_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_State_Mutation_Response>>>;
+  /** update data of the table: "vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** update single row of the table: "vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_Tag>;
+  /** update multiples rows of table: "vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_tag_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Tag_Mutation_Response>>>;
+  /** update data of the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_to_vulnerability_report_issue_tag?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Mutation_Response>;
+  /** update single row of the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_to_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+  /** update multiples rows of table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  update_vulnerability_report_issue_to_vulnerability_report_issue_tag_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Mutation_Response>>>;
   /** update multiples rows of table: "vulnerability_report" */
   update_vulnerability_report_many?: Maybe<Array<Maybe<Vulnerability_Report_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report_path" */
@@ -8076,6 +8118,18 @@ export type Mutation_RootDelete_Organization_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Organization_Files_Matching_SettingsArgs = {
+  where: Organization_Files_Matching_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Organization_Files_Matching_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Organization_Issue_Type_SettingsArgs = {
   where: Organization_Issue_Type_Settings_Bool_Exp;
 };
@@ -8337,6 +8391,30 @@ export type Mutation_RootDelete_Vulnerability_Report_Issue_StateArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Vulnerability_Report_Issue_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_TagArgs = {
+  where: Vulnerability_Report_Issue_Tag_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_TagArgs = {
+  where: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -8749,6 +8827,20 @@ export type Mutation_RootInsert_OrganizationArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Organization_Files_Matching_SettingsArgs = {
+  objects: Array<Organization_Files_Matching_Settings_Insert_Input>;
+  on_conflict?: InputMaybe<Organization_Files_Matching_Settings_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Organization_Files_Matching_Settings_OneArgs = {
+  object: Organization_Files_Matching_Settings_Insert_Input;
+  on_conflict?: InputMaybe<Organization_Files_Matching_Settings_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Organization_Issue_Type_SettingsArgs = {
   objects: Array<Organization_Issue_Type_Settings_Insert_Input>;
   on_conflict?: InputMaybe<Organization_Issue_Type_Settings_On_Conflict>;
@@ -9053,6 +9145,34 @@ export type Mutation_RootInsert_Vulnerability_Report_Issue_StateArgs = {
 export type Mutation_RootInsert_Vulnerability_Report_Issue_State_OneArgs = {
   object: Vulnerability_Report_Issue_State_Insert_Input;
   on_conflict?: InputMaybe<Vulnerability_Report_Issue_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_TagArgs = {
+  objects: Array<Vulnerability_Report_Issue_Tag_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Tag_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_Tag_OneArgs = {
+  object: Vulnerability_Report_Issue_Tag_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Tag_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_TagArgs = {
+  objects: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_OneArgs = {
+  object: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conflict>;
 };
 
 
@@ -9767,6 +9887,26 @@ export type Mutation_RootUpdate_Organization_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Organization_Files_Matching_SettingsArgs = {
+  _set?: InputMaybe<Organization_Files_Matching_Settings_Set_Input>;
+  where: Organization_Files_Matching_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Files_Matching_Settings_By_PkArgs = {
+  _set?: InputMaybe<Organization_Files_Matching_Settings_Set_Input>;
+  pk_columns: Organization_Files_Matching_Settings_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Files_Matching_Settings_ManyArgs = {
+  updates: Array<Organization_Files_Matching_Settings_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Organization_Issue_Type_SettingsArgs = {
   _set?: InputMaybe<Organization_Issue_Type_Settings_Set_Input>;
   where: Organization_Issue_Type_Settings_Bool_Exp;
@@ -10223,6 +10363,46 @@ export type Mutation_RootUpdate_Vulnerability_Report_Issue_State_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_TagArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Tag_Set_Input>;
+  where: Vulnerability_Report_Issue_Tag_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Tag_Set_Input>;
+  pk_columns: Vulnerability_Report_Issue_Tag_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Tag_ManyArgs = {
+  updates: Array<Vulnerability_Report_Issue_Tag_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_TagArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Set_Input>;
+  where: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Set_Input>;
+  pk_columns: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_ManyArgs = {
+  updates: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Vulnerability_Report_ManyArgs = {
   updates: Array<Vulnerability_Report_Updates>;
 };
@@ -10536,6 +10716,10 @@ export type Organization = {
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
   name: Scalars['String']['output'];
   /** An array relationship */
+  organizationFilesMatchingSettings: Array<Organization_Files_Matching_Settings>;
+  /** An aggregate relationship */
+  organizationFilesMatchingSettings_aggregate: Organization_Files_Matching_Settings_Aggregate;
+  /** An array relationship */
   organizationRoles: Array<Organization_To_Organization_Role>;
   /** An aggregate relationship */
   organizationRoles_aggregate: Organization_To_Organization_Role_Aggregate;
@@ -10637,6 +10821,26 @@ export type OrganizationIssueTypeSettings_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Organization_Issue_Type_Settings_Order_By>>;
   where?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationOrganizationFilesMatchingSettingsArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationOrganizationFilesMatchingSettings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
 };
 
 
@@ -10806,6 +11010,8 @@ export type Organization_Bool_Exp = {
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
+  organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+  organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Bool_Exp>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Bool_Exp>;
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Bool_Exp>;
   organizationUsers?: InputMaybe<Organization_To_User_Bool_Exp>;
@@ -10844,6 +11050,235 @@ export type Organization_Delete_Key_Input = {
   allowedIssueTypes?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** columns and relationships of "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings = {
+  __typename?: 'organization_files_matching_settings';
+  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  organization_id: Scalars['uuid']['output'];
+  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Aggregate = {
+  __typename?: 'organization_files_matching_settings_aggregate';
+  aggregate?: Maybe<Organization_Files_Matching_Settings_Aggregate_Fields>;
+  nodes: Array<Organization_Files_Matching_Settings>;
+};
+
+export type Organization_Files_Matching_Settings_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Bool_Exp_Count>;
+};
+
+export type Organization_Files_Matching_Settings_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Aggregate_Fields = {
+  __typename?: 'organization_files_matching_settings_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Organization_Files_Matching_Settings_Max_Fields>;
+  min?: Maybe<Organization_Files_Matching_Settings_Min_Fields>;
+};
+
+
+/** aggregate fields of "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Organization_Files_Matching_Settings_Max_Order_By>;
+  min?: InputMaybe<Organization_Files_Matching_Settings_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Arr_Rel_Insert_Input = {
+  data: Array<Organization_Files_Matching_Settings_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Organization_Files_Matching_Settings_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "organization_files_matching_settings". All fields are combined with a logical 'AND'. */
+export type Organization_Files_Matching_Settings_Bool_Exp = {
+  _and?: InputMaybe<Array<Organization_Files_Matching_Settings_Bool_Exp>>;
+  _not?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+  _or?: InputMaybe<Array<Organization_Files_Matching_Settings_Bool_Exp>>;
+  autogenerated_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+  auxiliary_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  testing_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+  vendor_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "organization_files_matching_settings" */
+export enum Organization_Files_Matching_Settings_Constraint {
+  /** unique or primary key constraint on columns "organization_id" */
+  OrganizationFilesMatchingSettingsOrganizationIdKey = 'organization_files_matching_settings_organization_id_key',
+  /** unique or primary key constraint on columns "id" */
+  OrganizationFilesMatchingSettingsPkey = 'organization_files_matching_settings_pkey'
+}
+
+/** input type for inserting data into table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Insert_Input = {
+  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Organization_Files_Matching_Settings_Max_Fields = {
+  __typename?: 'organization_files_matching_settings_max_fields';
+  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Max_Order_By = {
+  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
+  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  testing_code_glob_pattern?: InputMaybe<Order_By>;
+  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Organization_Files_Matching_Settings_Min_Fields = {
+  __typename?: 'organization_files_matching_settings_min_fields';
+  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Min_Order_By = {
+  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
+  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  testing_code_glob_pattern?: InputMaybe<Order_By>;
+  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Mutation_Response = {
+  __typename?: 'organization_files_matching_settings_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Organization_Files_Matching_Settings>;
+};
+
+/** on_conflict condition type for table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_On_Conflict = {
+  constraint: Organization_Files_Matching_Settings_Constraint;
+  update_columns?: Array<Organization_Files_Matching_Settings_Update_Column>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "organization_files_matching_settings". */
+export type Organization_Files_Matching_Settings_Order_By = {
+  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
+  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  testing_code_glob_pattern?: InputMaybe<Order_By>;
+  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: organization_files_matching_settings */
+export type Organization_Files_Matching_Settings_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "organization_files_matching_settings" */
+export enum Organization_Files_Matching_Settings_Select_Column {
+  /** column name */
+  AutogeneratedCodeGlobPattern = 'autogenerated_code_glob_pattern',
+  /** column name */
+  AuxiliaryCodeGlobPattern = 'auxiliary_code_glob_pattern',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  TestingCodeGlobPattern = 'testing_code_glob_pattern',
+  /** column name */
+  VendorCodeGlobPattern = 'vendor_code_glob_pattern'
+}
+
+/** input type for updating data in table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Set_Input = {
+  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "organization_files_matching_settings" */
+export type Organization_Files_Matching_Settings_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Organization_Files_Matching_Settings_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Organization_Files_Matching_Settings_Stream_Cursor_Value_Input = {
+  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "organization_files_matching_settings" */
+export enum Organization_Files_Matching_Settings_Update_Column {
+  /** column name */
+  AutogeneratedCodeGlobPattern = 'autogenerated_code_glob_pattern',
+  /** column name */
+  AuxiliaryCodeGlobPattern = 'auxiliary_code_glob_pattern',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  TestingCodeGlobPattern = 'testing_code_glob_pattern',
+  /** column name */
+  VendorCodeGlobPattern = 'vendor_code_glob_pattern'
+}
+
+export type Organization_Files_Matching_Settings_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Organization_Files_Matching_Settings_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Organization_Files_Matching_Settings_Bool_Exp;
+};
+
 /** input type for incrementing numeric columns in table "organization" */
 export type Organization_Inc_Input = {
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
@@ -10868,6 +11303,7 @@ export type Organization_Insert_Input = {
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
+  organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Arr_Rel_Insert_Input>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
   projects?: InputMaybe<Project_Arr_Rel_Insert_Input>;
@@ -11181,6 +11617,7 @@ export type Organization_Order_By = {
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
+  organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Order_By>;
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Order_By>;
@@ -13790,6 +14227,12 @@ export type Query_Root = {
   organization_aggregate: Organization_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
+  /** fetch data from the table: "organization_files_matching_settings" */
+  organization_files_matching_settings: Array<Organization_Files_Matching_Settings>;
+  /** fetch aggregated fields from the table: "organization_files_matching_settings" */
+  organization_files_matching_settings_aggregate: Organization_Files_Matching_Settings_Aggregate;
+  /** fetch data from the table: "organization_files_matching_settings" using primary key columns */
+  organization_files_matching_settings_by_pk?: Maybe<Organization_Files_Matching_Settings>;
   /** fetch data from the table: "organization_issue_type_settings" */
   organization_issue_type_settings: Array<Organization_Issue_Type_Settings>;
   /** fetch aggregated fields from the table: "organization_issue_type_settings" */
@@ -13930,6 +14373,18 @@ export type Query_Root = {
   vulnerability_report_issue_state_aggregate: Vulnerability_Report_Issue_State_Aggregate;
   /** fetch data from the table: "vulnerability_report_issue_state" using primary key columns */
   vulnerability_report_issue_state_by_pk?: Maybe<Vulnerability_Report_Issue_State>;
+  /** fetch data from the table: "vulnerability_report_issue_tag" */
+  vulnerability_report_issue_tag: Array<Vulnerability_Report_Issue_Tag>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_tag" */
+  vulnerability_report_issue_tag_aggregate: Vulnerability_Report_Issue_Tag_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_tag" using primary key columns */
+  vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_Tag>;
+  /** fetch data from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag_aggregate: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" using primary key columns */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
   /** fetch data from the table: "vulnerability_report_path" */
   vulnerability_report_path: Array<Vulnerability_Report_Path>;
   /** fetch aggregated fields from the table: "vulnerability_report_path" */
@@ -14613,6 +15068,29 @@ export type Query_RootOrganization_By_PkArgs = {
 };
 
 
+export type Query_RootOrganization_Files_Matching_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Files_Matching_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Files_Matching_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootOrganization_Issue_Type_SettingsArgs = {
   distinct_on?: InputMaybe<Array<Organization_Issue_Type_Settings_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -15162,6 +15640,52 @@ export type Query_RootVulnerability_Report_Issue_State_AggregateArgs = {
 
 export type Query_RootVulnerability_Report_Issue_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootVulnerability_Report_Issue_TagArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Tag_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Tag_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_TagArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -17119,6 +17643,14 @@ export type Subscription_Root = {
   organization_aggregate: Organization_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
+  /** fetch data from the table: "organization_files_matching_settings" */
+  organization_files_matching_settings: Array<Organization_Files_Matching_Settings>;
+  /** fetch aggregated fields from the table: "organization_files_matching_settings" */
+  organization_files_matching_settings_aggregate: Organization_Files_Matching_Settings_Aggregate;
+  /** fetch data from the table: "organization_files_matching_settings" using primary key columns */
+  organization_files_matching_settings_by_pk?: Maybe<Organization_Files_Matching_Settings>;
+  /** fetch data from the table in a streaming manner: "organization_files_matching_settings" */
+  organization_files_matching_settings_stream: Array<Organization_Files_Matching_Settings>;
   /** fetch data from the table: "organization_issue_type_settings" */
   organization_issue_type_settings: Array<Organization_Issue_Type_Settings>;
   /** fetch aggregated fields from the table: "organization_issue_type_settings" */
@@ -17295,6 +17827,22 @@ export type Subscription_Root = {
   vulnerability_report_issue_state_stream: Array<Vulnerability_Report_Issue_State>;
   /** fetch data from the table in a streaming manner: "vulnerability_report_issue" */
   vulnerability_report_issue_stream: Array<Vulnerability_Report_Issue>;
+  /** fetch data from the table: "vulnerability_report_issue_tag" */
+  vulnerability_report_issue_tag: Array<Vulnerability_Report_Issue_Tag>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_tag" */
+  vulnerability_report_issue_tag_aggregate: Vulnerability_Report_Issue_Tag_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_tag" using primary key columns */
+  vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_Tag>;
+  /** fetch data from the table in a streaming manner: "vulnerability_report_issue_tag" */
+  vulnerability_report_issue_tag_stream: Array<Vulnerability_Report_Issue_Tag>;
+  /** fetch data from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag_aggregate: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_to_vulnerability_report_issue_tag" using primary key columns */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag_by_pk?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+  /** fetch data from the table in a streaming manner: "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+  vulnerability_report_issue_to_vulnerability_report_issue_tag_stream: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
   /** fetch data from the table: "vulnerability_report_path" */
   vulnerability_report_path: Array<Vulnerability_Report_Path>;
   /** fetch aggregated fields from the table: "vulnerability_report_path" */
@@ -18117,6 +18665,36 @@ export type Subscription_RootOrganization_By_PkArgs = {
 };
 
 
+export type Subscription_RootOrganization_Files_Matching_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Files_Matching_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Files_Matching_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Files_Matching_Settings_Order_By>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Files_Matching_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOrganization_Files_Matching_Settings_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Organization_Files_Matching_Settings_Stream_Cursor_Input>>;
+  where?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
+};
+
+
 export type Subscription_RootOrganization_Issue_Type_SettingsArgs = {
   distinct_on?: InputMaybe<Array<Organization_Issue_Type_Settings_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -18775,6 +19353,66 @@ export type Subscription_RootVulnerability_Report_Issue_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Vulnerability_Report_Issue_Stream_Cursor_Input>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_TagArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Tag_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Tag_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Tag_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Report_Issue_Tag_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_TagArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
 };
 
 
@@ -19482,6 +20120,10 @@ export type Vulnerability_Report_Issue = {
   /** An object relationship */
   vulnerabilityReport: Vulnerability_Report;
   vulnerabilityReportId: Scalars['uuid']['output'];
+  /** An array relationship */
+  vulnerabilityReportIssueTags: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+  /** An aggregate relationship */
+  vulnerabilityReportIssueTags_aggregate: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate;
 };
 
 
@@ -19508,6 +20150,26 @@ export type Vulnerability_Report_IssueCodeNodes_AggregateArgs = {
 /** columns and relationships of "vulnerability_report_issue" */
 export type Vulnerability_Report_IssueExtraDataArgs = {
   path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue" */
+export type Vulnerability_Report_IssueVulnerabilityReportIssueTagsArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue" */
+export type Vulnerability_Report_IssueVulnerabilityReportIssueTags_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
 };
 
 /** aggregated selection of "vulnerability_report_issue" */
@@ -19599,6 +20261,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+  vulnerabilityReportIssueTags_aggregate?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp>;
 };
 
 /** columns and relationships of "vulnerability_report_issue_code_node" */
@@ -20142,6 +20806,7 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -20238,6 +20903,7 @@ export type Vulnerability_Report_Issue_Order_By = {
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueTags_aggregate?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: vulnerability_report_issue */
@@ -20490,6 +21156,345 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** columns and relationships of "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag = {
+  __typename?: 'vulnerability_report_issue_tag';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Aggregate = {
+  __typename?: 'vulnerability_report_issue_tag_aggregate';
+  aggregate?: Maybe<Vulnerability_Report_Issue_Tag_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Report_Issue_Tag>;
+};
+
+/** aggregate fields of "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Aggregate_Fields = {
+  __typename?: 'vulnerability_report_issue_tag_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Report_Issue_Tag_Max_Fields>;
+  min?: Maybe<Vulnerability_Report_Issue_Tag_Min_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_report_issue_tag". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Report_Issue_Tag_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_Tag_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  VulnerabilityReportIssueTagPkey = 'vulnerability_report_issue_tag_pkey'
+}
+
+export enum Vulnerability_Report_Issue_Tag_Enum {
+  /** Autogenerated code */
+  AutogeneratedCode = 'AUTOGENERATED_CODE',
+  /** Auxiliary code */
+  AuxiliaryCode = 'AUXILIARY_CODE',
+  /** False positive */
+  FalsePositive = 'FALSE_POSITIVE',
+  /** Test code */
+  TestCode = 'TEST_CODE',
+  /** Vendor code */
+  VendorCode = 'VENDOR_CODE'
+}
+
+/** Boolean expression to compare columns of type "vulnerability_report_issue_tag_enum". All fields are combined with logical 'AND'. */
+export type Vulnerability_Report_Issue_Tag_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+  _in?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+  _nin?: InputMaybe<Array<Vulnerability_Report_Issue_Tag_Enum>>;
+};
+
+/** input type for inserting data into table "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Report_Issue_Tag_Max_Fields = {
+  __typename?: 'vulnerability_report_issue_tag_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Report_Issue_Tag_Min_Fields = {
+  __typename?: 'vulnerability_report_issue_tag_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Mutation_Response = {
+  __typename?: 'vulnerability_report_issue_tag_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Report_Issue_Tag>;
+};
+
+/** on_conflict condition type for table "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_On_Conflict = {
+  constraint: Vulnerability_Report_Issue_Tag_Constraint;
+  update_columns?: Array<Vulnerability_Report_Issue_Tag_Update_Column>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_report_issue_tag". */
+export type Vulnerability_Report_Issue_Tag_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_report_issue_tag */
+export type Vulnerability_Report_Issue_Tag_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_Tag_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_Tag_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Report_Issue_Tag_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Report_Issue_Tag_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_Tag_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Vulnerability_Report_Issue_Tag_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Report_Issue_Tag_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Report_Issue_Tag_Bool_Exp;
+};
+
+/** columns and relationships of "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag';
+  id: Scalars['uuid']['output'];
+  vulnerability_report_issue_id: Scalars['uuid']['output'];
+  vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum;
+};
+
+/** aggregated selection of "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_aggregate';
+  aggregate?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+};
+
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp_Count>;
+};
+
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Fields = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Fields>;
+  min?: Maybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Order_By>;
+  min?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Arr_Rel_Insert_Input = {
+  data: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_report_issue_to_vulnerability_report_issue_tag". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerability_report_issue_id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  VulnerabilityReportIssueToVulnerabilityReportIssueTPkey = 'vulnerability_report_issue_to_vulnerability_report_issue_t_pkey',
+  /** unique or primary key constraint on columns "vulnerability_report_issue_tag_value", "vulnerability_report_issue_id" */
+  VulnerabilityReportIssueToVulnerabilityReportIssueTagVu = 'vulnerability_report_issue_to_vulnerability_report_issue_tag_vu'
+}
+
+/** input type for inserting data into table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Fields = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_report_issue_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  vulnerability_report_issue_id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Fields = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_report_issue_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  vulnerability_report_issue_id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Mutation_Response = {
+  __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
+};
+
+/** on_conflict condition type for table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conflict = {
+  constraint: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Constraint;
+  update_columns?: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Update_Column>;
+  where?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_report_issue_to_vulnerability_report_issue_tag". */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By = {
+  id?: InputMaybe<Order_By>;
+  vulnerability_report_issue_id?: InputMaybe<Order_By>;
+  vulnerability_report_issue_tag_value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_report_issue_to_vulnerability_report_issue_tag */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  VulnerabilityReportIssueId = 'vulnerability_report_issue_id',
+  /** column name */
+  VulnerabilityReportIssueTagValue = 'vulnerability_report_issue_tag_value'
+}
+
+/** input type for updating data in table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Set_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** Streaming cursor of the table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** update columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
+export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Update_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  VulnerabilityReportIssueId = 'vulnerability_report_issue_id',
+  /** column name */
+  VulnerabilityReportIssueTagValue = 'vulnerability_report_issue_tag_value'
+}
+
+export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp;
 };
 
 /** update columns of table "vulnerability_report_issue" */

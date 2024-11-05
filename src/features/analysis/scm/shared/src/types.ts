@@ -573,7 +573,7 @@ export type Question = {
   guidance?: string
 } & FixQuestionData
 
-export const scmCloudUrl = {
+export const scmCloudUrl: Record<ScmType, string> = {
   GitLab: 'https://gitlab.com',
   GitHub: 'https://github.com',
   Ado: 'https://dev.azure.com',

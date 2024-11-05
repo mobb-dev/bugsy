@@ -24,7 +24,12 @@ import {
   AdoValidateParamsArgs,
   GetAdoApiClientParams,
 } from './types'
-import { accountsZ, AdoAuthResultZ, profileZ } from './validation'
+import {
+  accountsZ,
+  AdoAuthResultWithOrgsZ,
+  AdoAuthResultZ,
+  profileZ,
+} from './validation'
 
 const debug = Debug('mobbdev:scm:ado')
 
@@ -78,6 +83,18 @@ export function parseAdoOwnerAndRepo(adoUrl: string) {
   }
 }
 
+function isValidAdoRepo(url: string | undefined): url is string {
+  if (!url) {
+    return false
+  }
+  try {
+    const parsed = parseAdoOwnerAndRepo(url)
+    return Boolean(parsed.repo && parsed.projectName)
+  } catch (e) {
+    return false
+  }
+}
+
 export async function getAdoConnectData({
   url,
   tokenOrg,
@@ -107,7 +124,7 @@ export async function getAdoConnectData({
   }
   if (!tokenOrg) {
     if (adoTokenInfo.type === AdoTokenTypeEnum.OAUTH) {
-      const [org] = await _getOrgsForOauthToken({
+      const [org] = await getOrgsForOauthToken({
         oauthToken: adoTokenInfo.accessToken,
       })
 
@@ -235,7 +252,7 @@ export async function adoValidateParams({
       await getAdoClientParams({ url, accessToken, tokenOrg })
     )
     await api.connect()
-    if (url) {
+    if (isValidAdoRepo(url)) {
       const git = await api.getGitApi()
       await validateAdoRepo({ git, repoUrl: url })
     }
@@ -276,7 +293,7 @@ export async function adoValidateParams({
   }
 }
 
-export async function _getOrgsForOauthToken({
+export async function getOrgsForOauthToken({
   oauthToken,
 }: {
   oauthToken: string
@@ -343,7 +360,16 @@ export async function getAdoToken({
   if (!parsedAuthResult.success) {
     debug('ado refresh token error', { authResult, redirectUri })
   }
-  return parsedAuthResult
+  const scmOrgs = parsedAuthResult.success
+    ? await getOrgsForOauthToken({
+        oauthToken: parsedAuthResult.data.access_token,
+      })
+    : null
+
+  return AdoAuthResultWithOrgsZ.safeParse({
+    ...parsedAuthResult.data,
+    scmOrgs,
+  })
 }
 
 export async function validateAdoRepo({

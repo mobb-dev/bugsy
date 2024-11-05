@@ -269,6 +269,11 @@ export class RefNotFoundError extends Error {
     super(m)
   }
 }
+export class ScmBadCredentialsError extends Error {
+  constructor(m: string) {
+    super(m)
+  }
+}
 
 export class RepoNoTokenAccessError extends Error {
   constructor(
@@ -406,8 +411,6 @@ export abstract class SCMLib {
   abstract getBranchList(): Promise<string[]>
 
   abstract getUserHasAccessToRepo(): Promise<boolean>
-
-  abstract getUsername(): Promise<string>
 
   abstract _getUsernameForAuthUrl(): Promise<string>
 
@@ -646,10 +649,6 @@ export class AdoSCMLib extends SCMLib {
     return adoSdk.getAdoIsUserCollaborator({
       repoUrl: this.url,
     })
-  }
-
-  async getUsername(): Promise<string> {
-    throw new Error('getUsername() is not relevant for ADO')
   }
 
   async getSubmitRequestStatus(

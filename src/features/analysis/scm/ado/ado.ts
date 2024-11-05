@@ -12,10 +12,10 @@ import {
   ValidAdoPullRequestStatus,
 } from './types'
 import {
-  _getOrgsForOauthToken,
   getAdoApiClient,
   getAdoClientParams,
   getAdoTokenInfo,
+  getOrgsForOauthToken,
   parseAdoOwnerAndRepo,
   validateAdoRepo,
 } from './utils'
@@ -292,7 +292,7 @@ export async function getAdoRepoList({
     return []
   }
   if (adoTokenInfo.type === AdoTokenTypeEnum.OAUTH) {
-    orgs = await _getOrgsForOauthToken({ oauthToken: accessToken })
+    orgs = await getOrgsForOauthToken({ oauthToken: accessToken })
   }
   if (orgs.length === 0 && !orgName) {
     throw new Error(`no orgs for ADO`)

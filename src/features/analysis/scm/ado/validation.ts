@@ -13,7 +13,9 @@ export const AdoAuthResultZ = z.object({
   token_type: z.string().min(1),
   refresh_token: z.string().min(1),
 })
-
+export const AdoAuthResultWithOrgsZ = AdoAuthResultZ.extend({
+  scmOrgs: z.array(z.string()),
+})
 export const profileZ = z.object({
   displayName: z.string(),
   publicAlias: z.string().min(1),

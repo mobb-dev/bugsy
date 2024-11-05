@@ -627,6 +627,21 @@ export type ScmUnsupportedScmTypeError = ScmBaseError & {
   status: Status;
 };
 
+export type ScmUserInfo = {
+  __typename?: 'ScmUserInfo';
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+export type ScmValidateTokenResponse = ScmError | ScmRepoNoTokenAccessError | ScmValidateTokenSuccess;
+
+export type ScmValidateTokenSuccess = {
+  __typename?: 'ScmValidateTokenSuccess';
+  scmConfigId: Scalars['String']['output'];
+  scmType: Scalars['String']['output'];
+  status: Status;
+  userInfo: ScmUserInfo;
+};
+
 export type SendInvitationError = InvitationBaseError & {
   __typename?: 'SendInvitationError';
   error?: Maybe<Scalars['String']['output']>;
@@ -14167,6 +14182,7 @@ export type Query_Root = {
   getFix: RegisterUserResponse;
   getGitBlame: GetGitBlameResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
+  getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
   gitReference?: Maybe<GitReferenceResponse>;
   /** fetch data from the table: "integration" */
@@ -14840,6 +14856,12 @@ export type Query_RootGetGitBlameArgs = {
 
 export type Query_RootGetScmReposArgs = {
   url: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetScmUserInformationArgs = {
+  scmType: Scalars['String']['input'];
+  scmUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -16242,6 +16264,8 @@ export type Scm_Config = {
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  user?: Maybe<User>;
   userId?: Maybe<Scalars['uuid']['output']>;
 };
 
@@ -16323,6 +16347,7 @@ export type Scm_Config_Bool_Exp = {
   scmUsername?: InputMaybe<String_Comparison_Exp>;
   token?: InputMaybe<String_Comparison_Exp>;
   tokenLastUpdate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
   userId?: InputMaybe<Uuid_Comparison_Exp>;
 };
 
@@ -16344,6 +16369,7 @@ export type Scm_Config_Insert_Input = {
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -16429,6 +16455,7 @@ export type Scm_Config_Order_By = {
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
   userId?: InputMaybe<Order_By>;
 };
 

@@ -7,6 +7,7 @@ import { insufficientLogging } from './insufficientLogging'
 import { logForging } from './logForging'
 import { overlyBroadCatch } from './overlyBroadCatch'
 import { pt } from './pt'
+import { sqlInjection } from './sqlInjection'
 import { ssrf } from './ssrf'
 import { sysLeak } from './sysLeak'
 import { trustBoundaryViolation } from './trustBoundaryViolation'
@@ -35,6 +36,7 @@ const vulnerabilities = {
   [IssueType_Enum.ValueShadowing as string]: valueShadowing,
   [IssueType_Enum.InsecureRandomness as string]: insecureRandomness,
   [IssueType_Enum.InsufficientLogging as string]: insufficientLogging,
+  [IssueType_Enum.SqlInjection as string]: sqlInjection,
 }
 
 export default vulnerabilities

@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.181",
+  "version": "0.0.182",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -61,11 +61,11 @@
     "parse-diff": "0.11.1",
     "semver": "7.6.3",
     "simple-git": "3.27.0",
-    "snyk": "1.1293.1",
+    "snyk": "1.1294.0",
     "supports-color": "9.4.0",
     "tar": "6.2.1",
     "tmp": "0.2.3",
-    "undici": "6.20.0",
+    "undici": "6.20.1",
     "uuid": "10.0.0",
     "ws": "8.18.0",
     "yargs": "17.7.2",
@@ -73,9 +73,9 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.3",
-    "@graphql-codegen/typescript": "4.1.0",
+    "@graphql-codegen/typescript": "4.1.1",
     "@graphql-codegen/typescript-graphql-request": "6.2.0",
-    "@graphql-codegen/typescript-operations": "4.3.0",
+    "@graphql-codegen/typescript-operations": "4.3.1",
     "@octokit/request-error": "3.0.3",
     "@octokit/types": "13.6.1",
     "@types/adm-zip": "0.5.5",
@@ -87,11 +87,11 @@
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
     "@types/uuid": "10.0.0",
-    "@types/ws": "8.5.12",
+    "@types/ws": "8.5.13",
     "@types/yargs": "17.0.33",
     "@typescript-eslint/eslint-plugin": "7.17.0",
     "@typescript-eslint/parser": "7.17.0",
-    "@vitest/coverage-istanbul": "2.1.2",
+    "@vitest/coverage-istanbul": "2.1.4",
     "@vitest/ui": "^2.1.2",
     "eslint": "8.57.0",
     "eslint-plugin-import": "2.31.0",
@@ -100,7 +100,7 @@
     "prettier": "3.3.3",
     "tsup": "7.2.0",
     "typescript": "4.9.5",
-    "vitest": "2.1.2"
+    "vitest": "2.1.4"
   },
   "engines": {
     "node": ">=18.18.0"

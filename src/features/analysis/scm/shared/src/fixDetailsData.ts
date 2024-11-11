@@ -317,4 +317,9 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   },
   [IssueType_Enum.MissingCspHeader]: undefined,
   [IssueType_Enum.HardcodedDomainInHtml]: undefined,
+  [IssueType_Enum.HeapInspection]: {
+    issueDescription:
+      'All variables stored by the application in unencrypted memory can be read by an attacker. This can lead to the exposure of sensitive information, such as passwords, credit card numbers, and personal data.',
+    fixInstructions: 'Use secure storage methods to store secrets in memory.',
+  },
 }

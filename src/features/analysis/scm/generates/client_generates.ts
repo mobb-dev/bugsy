@@ -6660,6 +6660,8 @@ export enum IssueType_Enum {
   HardcodedSecrets = 'HARDCODED_SECRETS',
   /** Header Manipulation */
   HeaderManipulation = 'HEADER_MANIPULATION',
+  /** Heap Inspection by an attacker to discover secrets in memory */
+  HeapInspection = 'HEAP_INSPECTION',
   /** System Information Leak: HTML Comment in JSP */
   HtmlCommentInJsp = 'HTML_COMMENT_IN_JSP',
   /** HTTP only cookie */

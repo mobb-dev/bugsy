@@ -570,6 +570,7 @@ export type ScmListBranchesResponse = ScmAdminError | ScmError | ScmListBranches
 export type ScmListBranchesSuccess = {
   __typename?: 'ScmListBranchesSuccess';
   branchList: Array<Scalars['String']['output']>;
+  defaultBranch?: Maybe<Scalars['String']['output']>;
   status: Status;
 };
 
@@ -7067,6 +7068,10 @@ export type Mutation_Root = {
   delete_project?: Maybe<Project_Mutation_Response>;
   /** delete single row from the table: "project" */
   delete_project_by_pk?: Maybe<Project>;
+  /** delete data from the table: "project_issue_type_settings" */
+  delete_project_issue_type_settings?: Maybe<Project_Issue_Type_Settings_Mutation_Response>;
+  /** delete single row from the table: "project_issue_type_settings" */
+  delete_project_issue_type_settings_by_pk?: Maybe<Project_Issue_Type_Settings>;
   /** delete data from the table: "project_role" */
   delete_project_role?: Maybe<Project_Role_Mutation_Response>;
   /** delete single row from the table: "project_role" */
@@ -7282,6 +7287,10 @@ export type Mutation_Root = {
   insert_organization_to_user_one?: Maybe<Organization_To_User>;
   /** insert data into the table: "project" */
   insert_project?: Maybe<Project_Mutation_Response>;
+  /** insert data into the table: "project_issue_type_settings" */
+  insert_project_issue_type_settings?: Maybe<Project_Issue_Type_Settings_Mutation_Response>;
+  /** insert a single row into the table: "project_issue_type_settings" */
+  insert_project_issue_type_settings_one?: Maybe<Project_Issue_Type_Settings>;
   /** insert a single row into the table: "project" */
   insert_project_one?: Maybe<Project>;
   /** insert data into the table: "project_role" */
@@ -7578,6 +7587,12 @@ export type Mutation_Root = {
   update_project?: Maybe<Project_Mutation_Response>;
   /** update single row of the table: "project" */
   update_project_by_pk?: Maybe<Project>;
+  /** update data of the table: "project_issue_type_settings" */
+  update_project_issue_type_settings?: Maybe<Project_Issue_Type_Settings_Mutation_Response>;
+  /** update single row of the table: "project_issue_type_settings" */
+  update_project_issue_type_settings_by_pk?: Maybe<Project_Issue_Type_Settings>;
+  /** update multiples rows of table: "project_issue_type_settings" */
+  update_project_issue_type_settings_many?: Maybe<Array<Maybe<Project_Issue_Type_Settings_Mutation_Response>>>;
   /** update multiples rows of table: "project" */
   update_project_many?: Maybe<Array<Maybe<Project_Mutation_Response>>>;
   /** update data of the table: "project_role" */
@@ -7780,6 +7795,7 @@ export type Mutation_RootCommitToSameBranchArgs = {
   commitMessage: Scalars['String']['input'];
   fixId: Scalars['String']['input'];
   prCommentId?: InputMaybe<Scalars['Int']['input']>;
+  submitBranch?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8214,6 +8230,18 @@ export type Mutation_RootDelete_ProjectArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Project_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Project_Issue_Type_SettingsArgs = {
+  where: Project_Issue_Type_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Project_Issue_Type_Settings_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -8938,6 +8966,20 @@ export type Mutation_RootInsert_Organization_To_User_OneArgs = {
 export type Mutation_RootInsert_ProjectArgs = {
   objects: Array<Project_Insert_Input>;
   on_conflict?: InputMaybe<Project_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Project_Issue_Type_SettingsArgs = {
+  objects: Array<Project_Issue_Type_Settings_Insert_Input>;
+  on_conflict?: InputMaybe<Project_Issue_Type_Settings_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Project_Issue_Type_Settings_OneArgs = {
+  object: Project_Issue_Type_Settings_Insert_Input;
+  on_conflict?: InputMaybe<Project_Issue_Type_Settings_On_Conflict>;
 };
 
 
@@ -10040,6 +10082,26 @@ export type Mutation_RootUpdate_ProjectArgs = {
 export type Mutation_RootUpdate_Project_By_PkArgs = {
   _set?: InputMaybe<Project_Set_Input>;
   pk_columns: Project_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Project_Issue_Type_SettingsArgs = {
+  _set?: InputMaybe<Project_Issue_Type_Settings_Set_Input>;
+  where: Project_Issue_Type_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Project_Issue_Type_Settings_By_PkArgs = {
+  _set?: InputMaybe<Project_Issue_Type_Settings_Set_Input>;
+  pk_columns: Project_Issue_Type_Settings_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Project_Issue_Type_Settings_ManyArgs = {
+  updates: Array<Project_Issue_Type_Settings_Updates>;
 };
 
 
@@ -12687,8 +12749,16 @@ export type Project = {
   __typename?: 'project';
   /** A computed field, executes function "project_aggregated_resolved_vulnerability_severities" */
   aggregatedResolvedVulnerabilities?: Maybe<Array<Aggregated_Severities>>;
+  /** An array relationship */
+  aggregatedResolvedVulnerabilitiesView: Array<View_Project_Resolved_Vulnerabilities>;
+  /** An aggregate relationship */
+  aggregatedResolvedVulnerabilitiesView_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
   /** A computed field, executes function "project_aggregated_vulnerability_severities" */
   aggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
+  /** An array relationship */
+  aggregatedVulnerabilitySeveritiesView: Array<View_Project_Vulnerability_Severities>;
+  /** An aggregate relationship */
+  aggregatedVulnerabilitySeveritiesView_aggregate: View_Project_Vulnerability_Severities_Aggregate;
   createdOn: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   isDefault?: Maybe<Scalars['Boolean']['output']>;
@@ -12700,6 +12770,10 @@ export type Project = {
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
   /** An array relationship */
+  projectIssueTypeSettings: Array<Project_Issue_Type_Settings>;
+  /** An aggregate relationship */
+  projectIssueTypeSettings_aggregate: Project_Issue_Type_Settings_Aggregate;
+  /** An array relationship */
   projectRoles: Array<Project_To_Project_Role>;
   /** An aggregate relationship */
   projectRoles_aggregate: Project_To_Project_Role_Aggregate;
@@ -12709,8 +12783,12 @@ export type Project = {
   projectUsers_aggregate: Project_To_User_Aggregate;
   /** A computed field, executes function "total_resolved_vulnerabilities" */
   totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  totalResolvedVulnerabilitiesView?: Maybe<View_Project_Total_Resolved_Vulnerabilities>;
   /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
   totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  totalUniqueUnresolvedVulnerabilitiesView?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities>;
   updatedAt: Scalars['timestamptz']['output'];
   /** An array relationship */
   vulnerabilityReports: Array<Vulnerability_Report>;
@@ -12730,6 +12808,26 @@ export type ProjectAggregatedResolvedVulnerabilitiesArgs = {
 
 
 /** columns and relationships of "project" */
+export type ProjectAggregatedResolvedVulnerabilitiesViewArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectAggregatedResolvedVulnerabilitiesView_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
 export type ProjectAggregatedVulnerabilitySeveritiesArgs = {
   args: AggregatedVulnerabilitySeverities_Project_Args;
   distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
@@ -12741,12 +12839,52 @@ export type ProjectAggregatedVulnerabilitySeveritiesArgs = {
 
 
 /** columns and relationships of "project" */
+export type ProjectAggregatedVulnerabilitySeveritiesViewArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectAggregatedVulnerabilitySeveritiesView_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
 export type ProjectLastAnalysedVulReportsArgs = {
   distinct_on?: InputMaybe<Array<Vulnerability_Report_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Vulnerability_Report_Order_By>>;
   where?: InputMaybe<Vulnerability_Report_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectProjectIssueTypeSettingsArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectProjectIssueTypeSettings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
 };
 
 
@@ -12907,6 +13045,10 @@ export type Project_Bool_Exp = {
   _not?: InputMaybe<Project_Bool_Exp>;
   _or?: InputMaybe<Array<Project_Bool_Exp>>;
   aggregatedResolvedVulnerabilities?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+  aggregatedResolvedVulnerabilitiesView?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+  aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp>;
+  aggregatedVulnerabilitySeveritiesView?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+  aggregatedVulnerabilitySeveritiesView_aggregate?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Bool_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isDefault?: InputMaybe<Boolean_Comparison_Exp>;
@@ -12915,11 +13057,15 @@ export type Project_Bool_Exp = {
   name?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+  projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Bool_Exp>;
   projectRoles?: InputMaybe<Project_To_Project_Role_Bool_Exp>;
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Bool_Exp>;
   projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
   totalResolvedVulnerabilities?: InputMaybe<Int_Comparison_Exp>;
+  totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+  totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   vulnerabilityReports?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Bool_Exp>;
@@ -12935,6 +13081,8 @@ export enum Project_Constraint {
 
 /** input type for inserting data into table "project" */
 export type Project_Insert_Input = {
+  aggregatedResolvedVulnerabilitiesView?: InputMaybe<View_Project_Resolved_Vulnerabilities_Arr_Rel_Insert_Input>;
+  aggregatedVulnerabilitySeveritiesView?: InputMaybe<View_Project_Vulnerability_Severities_Arr_Rel_Insert_Input>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
@@ -12942,10 +13090,253 @@ export type Project_Insert_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   projectRoles?: InputMaybe<Project_To_Project_Role_Arr_Rel_Insert_Input>;
   projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Obj_Rel_Insert_Input>;
+  totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Obj_Rel_Insert_Input>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   vulnerabilityReports?: InputMaybe<Vulnerability_Report_Arr_Rel_Insert_Input>;
+};
+
+/** Many-to-many table for managing issue type setting inside the project */
+export type Project_Issue_Type_Settings = {
+  __typename?: 'project_issue_type_settings';
+  autoPrEnabled: Scalars['Boolean']['output'];
+  enabled: Scalars['Boolean']['output'];
+  id: Scalars['uuid']['output'];
+  issueType: IssueType_Enum;
+  /** An object relationship */
+  project: Project;
+  projectId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Aggregate = {
+  __typename?: 'project_issue_type_settings_aggregate';
+  aggregate?: Maybe<Project_Issue_Type_Settings_Aggregate_Fields>;
+  nodes: Array<Project_Issue_Type_Settings>;
+};
+
+export type Project_Issue_Type_Settings_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Bool_Exp_Count>;
+};
+
+export type Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Project_Issue_Type_Settings_Select_Column_Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Project_Issue_Type_Settings_Select_Column_Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Project_Issue_Type_Settings_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Aggregate_Fields = {
+  __typename?: 'project_issue_type_settings_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Project_Issue_Type_Settings_Max_Fields>;
+  min?: Maybe<Project_Issue_Type_Settings_Min_Fields>;
+};
+
+
+/** aggregate fields of "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Project_Issue_Type_Settings_Max_Order_By>;
+  min?: InputMaybe<Project_Issue_Type_Settings_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Arr_Rel_Insert_Input = {
+  data: Array<Project_Issue_Type_Settings_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Project_Issue_Type_Settings_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "project_issue_type_settings". All fields are combined with a logical 'AND'. */
+export type Project_Issue_Type_Settings_Bool_Exp = {
+  _and?: InputMaybe<Array<Project_Issue_Type_Settings_Bool_Exp>>;
+  _not?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+  _or?: InputMaybe<Array<Project_Issue_Type_Settings_Bool_Exp>>;
+  autoPrEnabled?: InputMaybe<Boolean_Comparison_Exp>;
+  enabled?: InputMaybe<Boolean_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  issueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "project_issue_type_settings" */
+export enum Project_Issue_Type_Settings_Constraint {
+  /** unique or primary key constraint on columns "project_id", "issue_type" */
+  ProjectIssueTypeSettingsIssueTypeProjectIdKey = 'project_issue_type_settings_issue_type_project_id_key',
+  /** unique or primary key constraint on columns "id" */
+  ProjectIssueTypeSettingsPkey = 'project_issue_type_settings_pkey'
+}
+
+/** input type for inserting data into table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Insert_Input = {
+  autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  issueType?: InputMaybe<IssueType_Enum>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Project_Issue_Type_Settings_Max_Fields = {
+  __typename?: 'project_issue_type_settings_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Project_Issue_Type_Settings_Min_Fields = {
+  __typename?: 'project_issue_type_settings_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Mutation_Response = {
+  __typename?: 'project_issue_type_settings_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Project_Issue_Type_Settings>;
+};
+
+/** on_conflict condition type for table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_On_Conflict = {
+  constraint: Project_Issue_Type_Settings_Constraint;
+  update_columns?: Array<Project_Issue_Type_Settings_Update_Column>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "project_issue_type_settings". */
+export type Project_Issue_Type_Settings_Order_By = {
+  autoPrEnabled?: InputMaybe<Order_By>;
+  enabled?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: project_issue_type_settings */
+export type Project_Issue_Type_Settings_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "project_issue_type_settings" */
+export enum Project_Issue_Type_Settings_Select_Column {
+  /** column name */
+  AutoPrEnabled = 'autoPrEnabled',
+  /** column name */
+  Enabled = 'enabled',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IssueType = 'issueType',
+  /** column name */
+  ProjectId = 'projectId'
+}
+
+/** select "project_issue_type_settings_aggregate_bool_exp_bool_and_arguments_columns" columns of table "project_issue_type_settings" */
+export enum Project_Issue_Type_Settings_Select_Column_Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  AutoPrEnabled = 'autoPrEnabled',
+  /** column name */
+  Enabled = 'enabled'
+}
+
+/** select "project_issue_type_settings_aggregate_bool_exp_bool_or_arguments_columns" columns of table "project_issue_type_settings" */
+export enum Project_Issue_Type_Settings_Select_Column_Project_Issue_Type_Settings_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  AutoPrEnabled = 'autoPrEnabled',
+  /** column name */
+  Enabled = 'enabled'
+}
+
+/** input type for updating data in table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Set_Input = {
+  autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  issueType?: InputMaybe<IssueType_Enum>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "project_issue_type_settings" */
+export type Project_Issue_Type_Settings_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Project_Issue_Type_Settings_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Project_Issue_Type_Settings_Stream_Cursor_Value_Input = {
+  autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  issueType?: InputMaybe<IssueType_Enum>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "project_issue_type_settings" */
+export enum Project_Issue_Type_Settings_Update_Column {
+  /** column name */
+  AutoPrEnabled = 'autoPrEnabled',
+  /** column name */
+  Enabled = 'enabled',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IssueType = 'issueType',
+  /** column name */
+  ProjectId = 'projectId'
+}
+
+export type Project_Issue_Type_Settings_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Project_Issue_Type_Settings_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Project_Issue_Type_Settings_Bool_Exp;
 };
 
 /** aggregate max on columns */
@@ -13031,7 +13422,9 @@ export type Project_On_Conflict = {
 
 /** Ordering options when selecting data from "project". */
 export type Project_Order_By = {
+  aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Order_By>;
   aggregatedResolvedVulnerabilities_aggregate?: InputMaybe<Aggregated_Severities_Aggregate_Order_By>;
+  aggregatedVulnerabilitySeveritiesView_aggregate?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Order_By>;
   createdOn?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isDefault?: InputMaybe<Order_By>;
@@ -13040,9 +13433,12 @@ export type Project_Order_By = {
   name?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Order_By>;
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Order_By>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
   totalResolvedVulnerabilities?: InputMaybe<Order_By>;
+  totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Order_By>;
+  totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>;
   updatedAt?: InputMaybe<Order_By>;
   vulnerabilityReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Order_By>;
 };
@@ -14287,6 +14683,12 @@ export type Query_Root = {
   project_aggregate: Project_Aggregate;
   /** fetch data from the table: "project" using primary key columns */
   project_by_pk?: Maybe<Project>;
+  /** fetch data from the table: "project_issue_type_settings" */
+  project_issue_type_settings: Array<Project_Issue_Type_Settings>;
+  /** fetch aggregated fields from the table: "project_issue_type_settings" */
+  project_issue_type_settings_aggregate: Project_Issue_Type_Settings_Aggregate;
+  /** fetch data from the table: "project_issue_type_settings" using primary key columns */
+  project_issue_type_settings_by_pk?: Maybe<Project_Issue_Type_Settings>;
   /** fetch data from the table: "project_role" */
   project_role: Array<Project_Role>;
   /** fetch aggregated fields from the table: "project_role" */
@@ -14367,6 +14769,22 @@ export type Query_Root = {
   validateCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateExistingCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateRepoUrl?: Maybe<RepoValidationResponse>;
+  /** fetch data from the table: "view_project_resolved_vulnerabilities" */
+  view_project_resolved_vulnerabilities: Array<View_Project_Resolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_project_resolved_vulnerabilities" */
+  view_project_resolved_vulnerabilities_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table: "view_project_total_resolved_vulnerabilities" */
+  view_project_total_resolved_vulnerabilities: Array<View_Project_Total_Resolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_project_total_resolved_vulnerabilities" */
+  view_project_total_resolved_vulnerabilities_aggregate: View_Project_Total_Resolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table: "view_project_vulnerability_severities" */
+  view_project_vulnerability_severities: Array<View_Project_Vulnerability_Severities>;
+  /** fetch aggregated fields from the table: "view_project_vulnerability_severities" */
+  view_project_vulnerability_severities_aggregate: View_Project_Vulnerability_Severities_Aggregate;
+  /** fetch data from the table: "view_total_unique_unresolved_vulnerabilities" */
+  view_total_unique_unresolved_vulnerabilities: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_total_unique_unresolved_vulnerabilities" */
+  view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -15253,6 +15671,29 @@ export type Query_RootProject_By_PkArgs = {
 };
 
 
+export type Query_RootProject_Issue_Type_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootProject_Issue_Type_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootProject_Issue_Type_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootProject_RoleArgs = {
   distinct_on?: InputMaybe<Array<Project_Role_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -15572,6 +16013,78 @@ export type Query_RootValidateExistingCheckmarxConnectionArgs = {
 
 export type Query_RootValidateRepoUrlArgs = {
   repoUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootView_Project_Resolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Project_Resolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Project_Total_Resolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Project_Total_Resolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Project_Vulnerability_SeveritiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Project_Vulnerability_Severities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Total_Unique_Unresolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Total_Unique_Unresolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
 };
 
 
@@ -16578,6 +17091,7 @@ export type Scm_Config_Updates = {
 /** columns and relationships of "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request = {
   __typename?: 'scm_submit_fix_request';
+  commitUrl?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   fixes: Array<Fix_To_Scm_Submit_Fix_Request>;
   /** An aggregate relationship */
@@ -16663,6 +17177,7 @@ export type Scm_Submit_Fix_Request_Bool_Exp = {
   _and?: InputMaybe<Array<Scm_Submit_Fix_Request_Bool_Exp>>;
   _not?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
   _or?: InputMaybe<Array<Scm_Submit_Fix_Request_Bool_Exp>>;
+  commitUrl?: InputMaybe<String_Comparison_Exp>;
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -16681,6 +17196,7 @@ export enum Scm_Submit_Fix_Request_Constraint {
 
 /** input type for inserting data into table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Insert_Input = {
+  commitUrl?: InputMaybe<Scalars['String']['input']>;
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Arr_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
@@ -16693,6 +17209,7 @@ export type Scm_Submit_Fix_Request_Insert_Input = {
 /** aggregate max on columns */
 export type Scm_Submit_Fix_Request_Max_Fields = {
   __typename?: 'scm_submit_fix_request_max_fields';
+  commitUrl?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
@@ -16702,6 +17219,7 @@ export type Scm_Submit_Fix_Request_Max_Fields = {
 
 /** order by max() on columns of table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Max_Order_By = {
+  commitUrl?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
@@ -16712,6 +17230,7 @@ export type Scm_Submit_Fix_Request_Max_Order_By = {
 /** aggregate min on columns */
 export type Scm_Submit_Fix_Request_Min_Fields = {
   __typename?: 'scm_submit_fix_request_min_fields';
+  commitUrl?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
@@ -16721,6 +17240,7 @@ export type Scm_Submit_Fix_Request_Min_Fields = {
 
 /** order by min() on columns of table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Min_Order_By = {
+  commitUrl?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
@@ -16753,6 +17273,7 @@ export type Scm_Submit_Fix_Request_On_Conflict = {
 
 /** Ordering options when selecting data from "scm_submit_fix_request". */
 export type Scm_Submit_Fix_Request_Order_By = {
+  commitUrl?: InputMaybe<Order_By>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
   id?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
@@ -16770,6 +17291,8 @@ export type Scm_Submit_Fix_Request_Pk_Columns_Input = {
 /** select columns of table "scm_submit_fix_request" */
 export enum Scm_Submit_Fix_Request_Select_Column {
   /** column name */
+  CommitUrl = 'commitUrl',
+  /** column name */
   Id = 'id',
   /** column name */
   PrUrl = 'prUrl',
@@ -16783,6 +17306,7 @@ export enum Scm_Submit_Fix_Request_Select_Column {
 
 /** input type for updating data in table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Set_Input = {
+  commitUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
   scmId?: InputMaybe<Scalars['String']['input']>;
@@ -16800,6 +17324,7 @@ export type Scm_Submit_Fix_Request_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
+  commitUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
   scmId?: InputMaybe<Scalars['String']['input']>;
@@ -16809,6 +17334,8 @@ export type Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
 
 /** update columns of table "scm_submit_fix_request" */
 export enum Scm_Submit_Fix_Request_Update_Column {
+  /** column name */
+  CommitUrl = 'commitUrl',
   /** column name */
   Id = 'id',
   /** column name */
@@ -17728,6 +18255,14 @@ export type Subscription_Root = {
   project_aggregate: Project_Aggregate;
   /** fetch data from the table: "project" using primary key columns */
   project_by_pk?: Maybe<Project>;
+  /** fetch data from the table: "project_issue_type_settings" */
+  project_issue_type_settings: Array<Project_Issue_Type_Settings>;
+  /** fetch aggregated fields from the table: "project_issue_type_settings" */
+  project_issue_type_settings_aggregate: Project_Issue_Type_Settings_Aggregate;
+  /** fetch data from the table: "project_issue_type_settings" using primary key columns */
+  project_issue_type_settings_by_pk?: Maybe<Project_Issue_Type_Settings>;
+  /** fetch data from the table in a streaming manner: "project_issue_type_settings" */
+  project_issue_type_settings_stream: Array<Project_Issue_Type_Settings>;
   /** fetch data from the table: "project_role" */
   project_role: Array<Project_Role>;
   /** fetch aggregated fields from the table: "project_role" */
@@ -17826,6 +18361,30 @@ export type Subscription_Root = {
   user_by_pk?: Maybe<User>;
   /** fetch data from the table in a streaming manner: "user" */
   user_stream: Array<User>;
+  /** fetch data from the table: "view_project_resolved_vulnerabilities" */
+  view_project_resolved_vulnerabilities: Array<View_Project_Resolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_project_resolved_vulnerabilities" */
+  view_project_resolved_vulnerabilities_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_project_resolved_vulnerabilities" */
+  view_project_resolved_vulnerabilities_stream: Array<View_Project_Resolved_Vulnerabilities>;
+  /** fetch data from the table: "view_project_total_resolved_vulnerabilities" */
+  view_project_total_resolved_vulnerabilities: Array<View_Project_Total_Resolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_project_total_resolved_vulnerabilities" */
+  view_project_total_resolved_vulnerabilities_aggregate: View_Project_Total_Resolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_project_total_resolved_vulnerabilities" */
+  view_project_total_resolved_vulnerabilities_stream: Array<View_Project_Total_Resolved_Vulnerabilities>;
+  /** fetch data from the table: "view_project_vulnerability_severities" */
+  view_project_vulnerability_severities: Array<View_Project_Vulnerability_Severities>;
+  /** fetch aggregated fields from the table: "view_project_vulnerability_severities" */
+  view_project_vulnerability_severities_aggregate: View_Project_Vulnerability_Severities_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_project_vulnerability_severities" */
+  view_project_vulnerability_severities_stream: Array<View_Project_Vulnerability_Severities>;
+  /** fetch data from the table: "view_total_unique_unresolved_vulnerabilities" */
+  view_total_unique_unresolved_vulnerabilities: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
+  /** fetch aggregated fields from the table: "view_total_unique_unresolved_vulnerabilities" */
+  view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_total_unique_unresolved_vulnerabilities" */
+  view_total_unique_unresolved_vulnerabilities_stream: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -18904,6 +19463,36 @@ export type Subscription_RootProject_By_PkArgs = {
 };
 
 
+export type Subscription_RootProject_Issue_Type_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootProject_Issue_Type_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_Issue_Type_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_Issue_Type_Settings_Order_By>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootProject_Issue_Type_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootProject_Issue_Type_Settings_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Project_Issue_Type_Settings_Stream_Cursor_Input>>;
+  where?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
+};
+
+
 export type Subscription_RootProject_RoleArgs = {
   distinct_on?: InputMaybe<Array<Project_Role_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -19269,6 +19858,106 @@ export type Subscription_RootUser_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<User_Stream_Cursor_Input>>;
   where?: InputMaybe<User_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Resolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Resolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Resolved_Vulnerabilities_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Project_Resolved_Vulnerabilities_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Total_Resolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Total_Resolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Total_Resolved_Vulnerabilities_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Vulnerability_SeveritiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Vulnerability_Severities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Project_Vulnerability_Severities_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Project_Vulnerability_Severities_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Total_Unique_Unresolved_VulnerabilitiesArgs = {
+  distinct_on?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Total_Unique_Unresolved_Vulnerabilities_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Total_Unique_Unresolved_Vulnerabilities_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
 };
 
 
@@ -19926,6 +20615,964 @@ export type Uuid_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['uuid']['input']>;
   _neq?: InputMaybe<Scalars['uuid']['input']>;
   _nin?: InputMaybe<Array<Scalars['uuid']['input']>>;
+};
+
+/** columns and relationships of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities = {
+  __typename?: 'view_project_resolved_vulnerabilities';
+  count?: Maybe<Scalars['bigint']['output']>;
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  project?: Maybe<Project>;
+  /** An array relationship */
+  projectUsers: Array<Project_To_User>;
+  /** An aggregate relationship */
+  projectUsers_aggregate: Project_To_User_Aggregate;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** columns and relationships of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_VulnerabilitiesProjectUsersArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_VulnerabilitiesProjectUsers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+/** aggregated selection of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Aggregate = {
+  __typename?: 'view_project_resolved_vulnerabilities_aggregate';
+  aggregate?: Maybe<View_Project_Resolved_Vulnerabilities_Aggregate_Fields>;
+  nodes: Array<View_Project_Resolved_Vulnerabilities>;
+};
+
+export type View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp = {
+  count?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp_Count>;
+};
+
+export type View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Aggregate_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_aggregate_fields';
+  avg?: Maybe<View_Project_Resolved_Vulnerabilities_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Project_Resolved_Vulnerabilities_Max_Fields>;
+  min?: Maybe<View_Project_Resolved_Vulnerabilities_Min_Fields>;
+  stddev?: Maybe<View_Project_Resolved_Vulnerabilities_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Project_Resolved_Vulnerabilities_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Project_Resolved_Vulnerabilities_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Project_Resolved_Vulnerabilities_Sum_Fields>;
+  var_pop?: Maybe<View_Project_Resolved_Vulnerabilities_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Project_Resolved_Vulnerabilities_Var_Samp_Fields>;
+  variance?: Maybe<View_Project_Resolved_Vulnerabilities_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Aggregate_Order_By = {
+  avg?: InputMaybe<View_Project_Resolved_Vulnerabilities_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<View_Project_Resolved_Vulnerabilities_Max_Order_By>;
+  min?: InputMaybe<View_Project_Resolved_Vulnerabilities_Min_Order_By>;
+  stddev?: InputMaybe<View_Project_Resolved_Vulnerabilities_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<View_Project_Resolved_Vulnerabilities_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<View_Project_Resolved_Vulnerabilities_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<View_Project_Resolved_Vulnerabilities_Sum_Order_By>;
+  var_pop?: InputMaybe<View_Project_Resolved_Vulnerabilities_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<View_Project_Resolved_Vulnerabilities_Var_Samp_Order_By>;
+  variance?: InputMaybe<View_Project_Resolved_Vulnerabilities_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Arr_Rel_Insert_Input = {
+  data: Array<View_Project_Resolved_Vulnerabilities_Insert_Input>;
+};
+
+/** aggregate avg on columns */
+export type View_Project_Resolved_Vulnerabilities_Avg_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Avg_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "view_project_resolved_vulnerabilities". All fields are combined with a logical 'AND'. */
+export type View_Project_Resolved_Vulnerabilities_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Bool_Exp>>;
+  _not?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
+  project_id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerability_severity?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** input type for inserting data into table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Insert_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type View_Project_Resolved_Vulnerabilities_Max_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Max_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type View_Project_Resolved_Vulnerabilities_Min_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Min_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** Ordering options when selecting data from "view_project_resolved_vulnerabilities". */
+export type View_Project_Resolved_Vulnerabilities_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_project_resolved_vulnerabilities" */
+export enum View_Project_Resolved_Vulnerabilities_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  ProjectId = 'project_id',
+  /** column name */
+  VulnerabilitySeverity = 'vulnerability_severity'
+}
+
+/** aggregate stddev on columns */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Pop_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Pop_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Samp_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Stddev_Samp_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Project_Resolved_Vulnerabilities_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Project_Resolved_Vulnerabilities_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Project_Resolved_Vulnerabilities_Sum_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Sum_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Project_Resolved_Vulnerabilities_Var_Pop_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Var_Pop_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Project_Resolved_Vulnerabilities_Var_Samp_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Var_Samp_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type View_Project_Resolved_Vulnerabilities_Variance_Fields = {
+  __typename?: 'view_project_resolved_vulnerabilities_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "view_project_resolved_vulnerabilities" */
+export type View_Project_Resolved_Vulnerabilities_Variance_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities = {
+  __typename?: 'view_project_total_resolved_vulnerabilities';
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  project?: Maybe<Project>;
+  /** An array relationship */
+  projectUsers: Array<Project_To_User>;
+  /** An aggregate relationship */
+  projectUsers_aggregate: Project_To_User_Aggregate;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_resolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+
+/** columns and relationships of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_VulnerabilitiesProjectUsersArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_VulnerabilitiesProjectUsers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+/** aggregated selection of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Aggregate = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_aggregate';
+  aggregate?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Aggregate_Fields>;
+  nodes: Array<View_Project_Total_Resolved_Vulnerabilities>;
+};
+
+/** aggregate fields of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Aggregate_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_aggregate_fields';
+  avg?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Max_Fields>;
+  min?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Min_Fields>;
+  stddev?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Sum_Fields>;
+  var_pop?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Var_Samp_Fields>;
+  variance?: Maybe<View_Project_Total_Resolved_Vulnerabilities_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Avg_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_avg_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_project_total_resolved_vulnerabilities". All fields are combined with a logical 'AND'. */
+export type View_Project_Total_Resolved_Vulnerabilities_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>>;
+  _not?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
+  project_id?: InputMaybe<Uuid_Comparison_Exp>;
+  total_resolved_vulnerabilities?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** input type for inserting data into table "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Insert_Input = {
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  total_resolved_vulnerabilities?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate max on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Max_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_max_fields';
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_resolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Min_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_min_fields';
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_resolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** input type for inserting object relation for remote table "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Obj_Rel_Insert_Input = {
+  data: View_Project_Total_Resolved_Vulnerabilities_Insert_Input;
+};
+
+/** Ordering options when selecting data from "view_project_total_resolved_vulnerabilities". */
+export type View_Project_Total_Resolved_Vulnerabilities_Order_By = {
+  organization?: InputMaybe<Organization_Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  total_resolved_vulnerabilities?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_project_total_resolved_vulnerabilities" */
+export enum View_Project_Total_Resolved_Vulnerabilities_Select_Column {
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  ProjectId = 'project_id',
+  /** column name */
+  TotalResolvedVulnerabilities = 'total_resolved_vulnerabilities'
+}
+
+/** aggregate stddev on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Stddev_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_stddev_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Stddev_Pop_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_stddev_pop_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Stddev_Samp_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_stddev_samp_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_project_total_resolved_vulnerabilities" */
+export type View_Project_Total_Resolved_Vulnerabilities_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Project_Total_Resolved_Vulnerabilities_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Project_Total_Resolved_Vulnerabilities_Stream_Cursor_Value_Input = {
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  total_resolved_vulnerabilities?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Sum_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_sum_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Var_Pop_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_var_pop_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Var_Samp_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_var_samp_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Project_Total_Resolved_Vulnerabilities_Variance_Fields = {
+  __typename?: 'view_project_total_resolved_vulnerabilities_variance_fields';
+  total_resolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities = {
+  __typename?: 'view_project_vulnerability_severities';
+  count?: Maybe<Scalars['bigint']['output']>;
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  project?: Maybe<Project>;
+  /** An array relationship */
+  projectUsers: Array<Project_To_User>;
+  /** An aggregate relationship */
+  projectUsers_aggregate: Project_To_User_Aggregate;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** columns and relationships of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_SeveritiesProjectUsersArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_SeveritiesProjectUsers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+/** aggregated selection of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Aggregate = {
+  __typename?: 'view_project_vulnerability_severities_aggregate';
+  aggregate?: Maybe<View_Project_Vulnerability_Severities_Aggregate_Fields>;
+  nodes: Array<View_Project_Vulnerability_Severities>;
+};
+
+export type View_Project_Vulnerability_Severities_Aggregate_Bool_Exp = {
+  count?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Bool_Exp_Count>;
+};
+
+export type View_Project_Vulnerability_Severities_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Aggregate_Fields = {
+  __typename?: 'view_project_vulnerability_severities_aggregate_fields';
+  avg?: Maybe<View_Project_Vulnerability_Severities_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Project_Vulnerability_Severities_Max_Fields>;
+  min?: Maybe<View_Project_Vulnerability_Severities_Min_Fields>;
+  stddev?: Maybe<View_Project_Vulnerability_Severities_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Project_Vulnerability_Severities_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Project_Vulnerability_Severities_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Project_Vulnerability_Severities_Sum_Fields>;
+  var_pop?: Maybe<View_Project_Vulnerability_Severities_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Project_Vulnerability_Severities_Var_Samp_Fields>;
+  variance?: Maybe<View_Project_Vulnerability_Severities_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Aggregate_Order_By = {
+  avg?: InputMaybe<View_Project_Vulnerability_Severities_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<View_Project_Vulnerability_Severities_Max_Order_By>;
+  min?: InputMaybe<View_Project_Vulnerability_Severities_Min_Order_By>;
+  stddev?: InputMaybe<View_Project_Vulnerability_Severities_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<View_Project_Vulnerability_Severities_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<View_Project_Vulnerability_Severities_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<View_Project_Vulnerability_Severities_Sum_Order_By>;
+  var_pop?: InputMaybe<View_Project_Vulnerability_Severities_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<View_Project_Vulnerability_Severities_Var_Samp_Order_By>;
+  variance?: InputMaybe<View_Project_Vulnerability_Severities_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Arr_Rel_Insert_Input = {
+  data: Array<View_Project_Vulnerability_Severities_Insert_Input>;
+};
+
+/** aggregate avg on columns */
+export type View_Project_Vulnerability_Severities_Avg_Fields = {
+  __typename?: 'view_project_vulnerability_severities_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Avg_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "view_project_vulnerability_severities". All fields are combined with a logical 'AND'. */
+export type View_Project_Vulnerability_Severities_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Project_Vulnerability_Severities_Bool_Exp>>;
+  _not?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Project_Vulnerability_Severities_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
+  project_id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerability_severity?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** input type for inserting data into table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Insert_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type View_Project_Vulnerability_Severities_Max_Fields = {
+  __typename?: 'view_project_vulnerability_severities_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Max_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type View_Project_Vulnerability_Severities_Min_Fields = {
+  __typename?: 'view_project_vulnerability_severities_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  vulnerability_severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Min_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** Ordering options when selecting data from "view_project_vulnerability_severities". */
+export type View_Project_Vulnerability_Severities_Order_By = {
+  count?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  vulnerability_severity?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_project_vulnerability_severities" */
+export enum View_Project_Vulnerability_Severities_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  ProjectId = 'project_id',
+  /** column name */
+  VulnerabilitySeverity = 'vulnerability_severity'
+}
+
+/** aggregate stddev on columns */
+export type View_Project_Vulnerability_Severities_Stddev_Fields = {
+  __typename?: 'view_project_vulnerability_severities_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Stddev_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Project_Vulnerability_Severities_Stddev_Pop_Fields = {
+  __typename?: 'view_project_vulnerability_severities_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Stddev_Pop_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Project_Vulnerability_Severities_Stddev_Samp_Fields = {
+  __typename?: 'view_project_vulnerability_severities_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Stddev_Samp_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Project_Vulnerability_Severities_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Project_Vulnerability_Severities_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerability_severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Project_Vulnerability_Severities_Sum_Fields = {
+  __typename?: 'view_project_vulnerability_severities_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Sum_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Project_Vulnerability_Severities_Var_Pop_Fields = {
+  __typename?: 'view_project_vulnerability_severities_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Var_Pop_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Project_Vulnerability_Severities_Var_Samp_Fields = {
+  __typename?: 'view_project_vulnerability_severities_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Var_Samp_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type View_Project_Vulnerability_Severities_Variance_Fields = {
+  __typename?: 'view_project_vulnerability_severities_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "view_project_vulnerability_severities" */
+export type View_Project_Vulnerability_Severities_Variance_Order_By = {
+  count?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities';
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  project?: Maybe<Project>;
+  /** An array relationship */
+  projectUsers: Array<Project_To_User>;
+  /** An aggregate relationship */
+  projectUsers_aggregate: Project_To_User_Aggregate;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+
+/** columns and relationships of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_VulnerabilitiesProjectUsersArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_VulnerabilitiesProjectUsers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Project_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Project_To_User_Order_By>>;
+  where?: InputMaybe<Project_To_User_Bool_Exp>;
+};
+
+/** aggregated selection of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Aggregate = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_aggregate';
+  aggregate?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Aggregate_Fields>;
+  nodes: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
+};
+
+/** aggregate fields of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Aggregate_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_aggregate_fields';
+  avg?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Max_Fields>;
+  min?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Min_Fields>;
+  stddev?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Sum_Fields>;
+  var_pop?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Var_Samp_Fields>;
+  variance?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Avg_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_avg_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_total_unique_unresolved_vulnerabilities". All fields are combined with a logical 'AND'. */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>>;
+  _not?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
+  project_id?: InputMaybe<Uuid_Comparison_Exp>;
+  total_unique_unresolved_vulnerabilities?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** input type for inserting data into table "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Insert_Input = {
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  total_unique_unresolved_vulnerabilities?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate max on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Max_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_max_fields';
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Min_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_min_fields';
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  project_id?: Maybe<Scalars['uuid']['output']>;
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** input type for inserting object relation for remote table "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Obj_Rel_Insert_Input = {
+  data: View_Total_Unique_Unresolved_Vulnerabilities_Insert_Input;
+};
+
+/** Ordering options when selecting data from "view_total_unique_unresolved_vulnerabilities". */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Order_By = {
+  organization?: InputMaybe<Organization_Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
+  project_id?: InputMaybe<Order_By>;
+  total_unique_unresolved_vulnerabilities?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_total_unique_unresolved_vulnerabilities" */
+export enum View_Total_Unique_Unresolved_Vulnerabilities_Select_Column {
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  ProjectId = 'project_id',
+  /** column name */
+  TotalUniqueUnresolvedVulnerabilities = 'total_unique_unresolved_vulnerabilities'
+}
+
+/** aggregate stddev on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_stddev_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Pop_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_stddev_pop_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Stddev_Samp_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_stddev_samp_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_total_unique_unresolved_vulnerabilities" */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Total_Unique_Unresolved_Vulnerabilities_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Stream_Cursor_Value_Input = {
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  project_id?: InputMaybe<Scalars['uuid']['input']>;
+  total_unique_unresolved_vulnerabilities?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Sum_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_sum_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Var_Pop_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_var_pop_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Var_Samp_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_var_samp_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Total_Unique_Unresolved_Vulnerabilities_Variance_Fields = {
+  __typename?: 'view_total_unique_unresolved_vulnerabilities_variance_fields';
+  total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "vulnerability_report" */

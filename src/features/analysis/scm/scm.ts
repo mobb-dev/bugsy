@@ -35,6 +35,7 @@ import {
   createMergeRequest,
   getGitlabBlameRanges,
   getGitlabBranchList,
+  getGitlabCommitUrl,
   getGitlabIsRemoteBranch,
   getGitlabIsUserCollaborator,
   getGitlabMergeRequest,
@@ -427,6 +428,7 @@ export abstract class SCMLib {
 
   abstract getReferenceData(ref: string): Promise<GetRefererenceResult>
   abstract getPrUrl(prNumber: number): Promise<string>
+  abstract getCommitUrl(commitId: string): Promise<string>
 
   abstract getRepoDefaultBranch(): Promise<string>
 
@@ -704,6 +706,14 @@ export class AdoSCMLib extends SCMLib {
       prNumber,
     })
   }
+  async getCommitUrl(commitId: string): Promise<string> {
+    this._validateUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoCommitUrl({
+      url: this.url,
+      commitId,
+    })
+  }
 }
 
 export class GitlabSCMLib extends SCMLib {
@@ -861,6 +871,16 @@ export class GitlabSCMLib extends SCMLib {
     const res = await getGitlabMergeRequest({
       url: this.url,
       prNumber: prNumber,
+      accessToken: this.accessToken,
+    })
+    return res.web_url
+  }
+
+  async getCommitUrl(commitId: string): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    const res = await getGitlabCommitUrl({
+      url: this.url,
+      commitSha: commitId,
       accessToken: this.accessToken,
     })
     return res.web_url
@@ -1108,6 +1128,16 @@ export class GithubSCMLib extends SCMLib {
     })
     return getPrRes.data.html_url
   }
+  async getCommitUrl(commitId: string): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+    const getCommitRes = await this.githubSdk.getCommit({
+      owner,
+      repo,
+      commitSha: commitId,
+    })
+    return getCommitRes.data.html_url
+  }
   async postGeneralPrComment(
     params: PostPRReviewCommentParams
   ): SCMPostGeneralPrCommentsResponse {
@@ -1236,6 +1266,10 @@ export class StubSCMLib extends SCMLib {
   async getPrUrl(_prNumber: number): Promise<string> {
     console.error('getPr() not implemented')
     throw new Error('getPr() not implemented')
+  }
+  async getCommitUrl(_commitId: string): Promise<string> {
+    console.error('getCommitUrl() not implemented')
+    throw new Error('getCommitUrl() not implemented')
   }
   _getUsernameForAuthUrl(): Promise<string> {
     throw new Error('Method not implemented.')
@@ -1432,6 +1466,13 @@ export class BitbucketSCMLib extends SCMLib {
     const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
     return Promise.resolve(
       `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${prNumber}`
+    )
+  }
+  getCommitUrl(commitId: string): Promise<string> {
+    this._validateUrl()
+    const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
+    return Promise.resolve(
+      `https://bitbucket.org/${workspace}/${repoSlug}/commits/${commitId}`
     )
   }
 }

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 
 import parseDiff from 'parse-diff'
 import path from 'path'
-import { SimpleGit, simpleGit } from 'simple-git'
+import { CommitResult, SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
 import { z } from 'zod'
 
@@ -305,7 +305,7 @@ async function _cherryPickFixToBranch({
   commitDescription?: string | null
   appliedPatches?: { [id: string]: boolean }
   appliedFixes?: FixResponseArray
-}) {
+}): Promise<{ success: boolean; commit: CommitResult | null }> {
   await git.checkout([targetBranch])
   await git.reset(['--hard', targetBranch])
   await git.checkout([
@@ -327,13 +327,13 @@ async function _cherryPickFixToBranch({
       //rollback the cherry-pick and reset the branch to the commit before the failed fix
       await git.checkout([targetBranch])
       await git.reset(['--hard', targetBranch])
-      return false
+      return { success: false, commit: null }
     }
     appliedPatchesCount += 1
   }
   //squash all the patches of the fix into a single commit
   await git.reset(['--soft', `HEAD~${appliedPatchesCount}`])
-  await git.commit(
+  const commit = await git.commit(
     _getCommitMessage({ fixId: fix.fixId, commitDescription, commitMessage })
   )
   //advance the target branch to the new commit
@@ -345,7 +345,10 @@ async function _cherryPickFixToBranch({
   appliedFixes.push({ fixId: fix.fixId })
   await git.checkout([targetBranch])
   await git.reset(['--hard', targetBranch])
-  return true
+  return {
+    success: true,
+    commit,
+  }
 }
 
 async function _initGitAndFiles({
@@ -379,6 +382,7 @@ export async function submitFixesToSameBranch(
     submitBranches: [],
     submitFixRequestId: '',
     type: submitToScmMessageType.commitToSameBranch,
+    commit: null,
   }
 
   const tmpDir = tmp.dirSync({
@@ -416,7 +420,7 @@ export async function submitFixesToSameBranch(
     })
 
     const [fix] = fixes
-    await _cherryPickFixToBranch({
+    const { commit } = await _cherryPickFixToBranch({
       git,
       fix,
       targetBranch: branchName,
@@ -429,6 +433,7 @@ export async function submitFixesToSameBranch(
       console.log('pushBranch failed')
       return response
     }
+    response.commit = commit
     return response
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : 'Unknown error'
@@ -508,7 +513,7 @@ export const submitFixesToDifferentBranch = async (
         appliedPatches,
         appliedFixes: fixArray,
       })
-      if (!fixRes) {
+      if (!fixRes.success) {
         submitBranch = `${submitBranch}-${branchIndex}`
         //create a new branch with the same name as the PR branch but with a "-x" suffix where x is the branch index
         //as we now know there will be more than a single PR branch

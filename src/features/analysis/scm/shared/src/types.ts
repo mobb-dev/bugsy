@@ -13,6 +13,7 @@ import {
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
 } from '../../generates/client_generates'
+import { IssueTypeSettingZ } from './validations'
 
 export type Unpacked<T> = T extends (infer U)[] ? U : T
 
@@ -47,6 +48,7 @@ const ScmSubmitFixRequestsZ = z.array(
         }),
       }),
       prUrl: z.string().nullable(),
+      commitUrl: z.string().nullable(),
       scmId: z.string(),
     }),
   })
@@ -515,6 +517,9 @@ export const ProjectPageQueryResultZ = z.object({
   isDefault: z.boolean().default(false),
   organizationId: z.string().uuid(),
   vulnerabilityReports: z.array(ProjectVulnerabilityReport),
+  projectIssueTypeSettings: z.array(
+    IssueTypeSettingZ.merge(z.object({ id: z.string() }))
+  ),
 })
 
 export type PatchAndQuestions = z.infer<typeof PatchAndQuestionsZ>

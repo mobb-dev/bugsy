@@ -172,6 +172,14 @@ describe.each(Object.entries(testInputs))(
         })
       ).rejects.toThrow()
     })
+    it(`${chalk.green.underline.bold(testName)}: branch list on non existing repo`, async () => {
+      const adoSdk = await getAdoSk(adoSdkPromise)
+      await expect(
+        adoSdk.getAdoBranchList({
+          repoUrl: NON_EXISTING_ADO_URL,
+        })
+      ).resolves.toEqual([])
+    })
     it(`${chalk.green.underline.bold(testName)}: test if ref is correct for commit`, async () => {
       const adoSdk = await getAdoSk(adoSdkPromise)
       const ref = await adoSdk.getAdoReferenceData({
@@ -183,6 +191,14 @@ describe.each(Object.entries(testInputs))(
       ref.date = new Date(0)
       expect(ref.sha).toBe(EXISTING_COMMIT)
       expect(ref.type).toBe(ReferenceType.COMMIT)
+    })
+    it(`${chalk.green.underline.bold(testName)}: commit URL`, async () => {
+      const adoSdk = await getAdoSk(adoSdkPromise)
+      const url = await adoSdk.getAdoCommitUrl({
+        url: ADO_URL,
+        commitId: EXISTING_COMMIT,
+      })
+      expect(url).toContain(`/commit/${EXISTING_COMMIT}`)
     })
     it(`${chalk.green.underline.bold(testName)}: test if ref is correct for branch`, async () => {
       const adoSdk = await getAdoSk(adoSdkPromise)
@@ -222,9 +238,16 @@ describe.each(Object.entries(testInputs))(
       })
       expect(defaultBranch).toBe(EXISTING_BRANCH)
     })
+    it(`${chalk.green.underline.bold(testName)}:get the correct branch list `, async () => {
+      const adoSdk = await getAdoSk(adoSdkPromise)
+      const brachList = await adoSdk.getAdoBranchList({
+        repoUrl: ADO_URL,
+      })
+      expect(brachList.length).toBeLessThanOrEqual(100)
+    })
 
     it.each(downloadTestParams)(
-      'test donwload url for $url',
+      'test download url for $url',
       async ({ url, expectedDownloadUrl }) => {
         const adoSdk = await getAdoSk(adoSdkPromise)
         const downloadUrl = await adoSdk.getAdoDownloadUrl({

@@ -1,6 +1,7 @@
 import {
   InvalidRepoUrlError,
   InvalidUrlPatternError,
+  MAX_BRANCHES_FETCH,
   ReferenceType,
   RefNotFoundError,
   ScmRepoInfo,
@@ -81,6 +82,21 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       )
       return `${getRepositoryRes.webUrl}/pullrequest/${prNumber}`
     },
+    async getAdoCommitUrl({
+      url,
+      commitId,
+    }: {
+      url: string
+      commitId: string
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(url)
+      const git = await api.getGitApi()
+      const getRepositoryRes = await git.getRepository(
+        decodeURI(repo),
+        projectName ? decodeURI(projectName) : undefined
+      )
+      return `${getRepositoryRes.webUrl}/commit/${commitId}`
+    },
     getAdoDownloadUrl({
       repoUrl,
       branch,
@@ -113,9 +129,9 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       return new URL(`${path}?${params}`, origin).toString()
     },
     async getAdoBranchList({ repoUrl }: { repoUrl: string }) {
-      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-      const git = await api.getGitApi()
       try {
+        const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+        const git = await api.getGitApi()
         const res = await git.getBranches(repo, projectName)
         res.sort((a, b) => {
           if (!a.commit?.committer?.date || !b.commit?.committer?.date) {
@@ -126,13 +142,15 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
             a.commit?.committer?.date.getTime()
           )
         })
-        return res.reduce((acc, branch) => {
-          if (!branch.name) {
+        return res
+          .reduce((acc, branch) => {
+            if (!branch.name) {
+              return acc
+            }
+            acc.push(branch.name)
             return acc
-          }
-          acc.push(branch.name)
-          return acc
-        }, [] as string[])
+          }, [] as string[])
+          .slice(0, MAX_BRANCHES_FETCH)
       } catch (e) {
         return []
       }

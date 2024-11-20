@@ -77,10 +77,34 @@ export const SubmitFixesBaseResponseMessageZ = z.object({
     .optional(),
 })
 
+const authorSchemaZ = z
+  .object({
+    email: z.string(),
+    name: z.string(),
+  })
+  .nullable()
+
+const summarySchemaZ = z.object({
+  changes: z.number(),
+  insertions: z.number(),
+  deletions: z.number(),
+})
+
+const GitCommitZ = z
+  .object({
+    author: authorSchemaZ,
+    branch: z.string(),
+    commit: z.string(),
+    root: z.boolean(),
+    summary: summarySchemaZ,
+  })
+  .nullable()
+
 export const SubmitFixesToSameBranchResponseMessageZ = z
   .object({
     type: z.literal(submitToScmMessageType.commitToSameBranch),
     githubCommentId: z.number().nullish(),
+    commit: GitCommitZ,
   })
   .merge(SubmitFixesBaseResponseMessageZ)
 

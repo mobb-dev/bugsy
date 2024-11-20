@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "0.0.183",
+  "version": "0.0.184",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -12,6 +12,7 @@
     "build": "tsc && tsup-node --env.NODE_ENV production",
     "build:dev": "tsup-node --env.NODE_ENV development",
     "test": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run",
+    "test:ado": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run ado.test",
     "test:coverage": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --coverage ",
     "test:watch": "TOKEN=$(../../scripts/login_auth0.sh) vitest",
     "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx .",
@@ -27,9 +28,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@gitbeaker/core": "39.13.0",
-    "@gitbeaker/requester-utils": "39.13.0",
-    "@gitbeaker/rest": "39.13.0",
+    "@gitbeaker/core": "41.1.1",
+    "@gitbeaker/requester-utils": "41.1.1",
+    "@gitbeaker/rest": "41.1.1",
     "@octokit/core": "5.2.0",
     "@octokit/graphql": "5.0.6",
     "@octokit/plugin-rest-endpoint-methods": "7.2.3",

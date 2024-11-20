@@ -164,7 +164,7 @@ describe('bitbucket sdk function', async () => {
     const res = await bitbucketSdk.getBranchList({
       repoUrl: REPO.URL,
     })
-    expect(res.length).toMatchInlineSnapshot('10')
+    expect(res.length).toMatchInlineSnapshot('100')
   })
   it("it checks if it's a remote branch", async () => {
     const bitbucketSdk = getBitbucketSdk({

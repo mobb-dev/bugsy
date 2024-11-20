@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { GetGitlabTokenParams, GitlabTokenRequestTypeEnum } from '../../gitlab'
 import {
+  getGitlabBranchList,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
   getGitlabToken,
@@ -59,7 +60,7 @@ const reposConfig: RepoConfig[] = [
 ]
 
 describe.each(Object.entries(reposConfig))(
-  'Github reference',
+  'Gitlab reference',
   (_, repoConfig: RepoConfig) => {
     beforeAll(async () => {
       // Disable the certificate check when calling a resource and avoids the 'self-signed certificate' error.
@@ -84,6 +85,22 @@ describe.each(Object.entries(reposConfig))(
           url: repoConfig.url.valid,
         })
       ).toEqual(repoConfig.branch.name)
+    })
+    it('branch list non existing repo', async () => {
+      await expect(
+        getGitlabBranchList({
+          repoUrl: repoConfig.url.nonExisting,
+          accessToken: repoConfig.accessToken!,
+        })
+      ).resolves.toEqual([])
+    })
+    it('branch list existing repo', async () => {
+      expect(
+        await getGitlabBranchList({
+          repoUrl: repoConfig.url.valid,
+          accessToken: repoConfig.accessToken!,
+        })
+      ).toEqual(expect.arrayContaining([repoConfig.branch.name]))
     })
     it('test if date is correct for commit', async () => {
       const response = await getGitlabReferenceData(
@@ -157,7 +174,7 @@ const GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce'
 const INVALID_URL = 'https://invalid.com/zj-gitlab'
 const TEST_GITLAB_REPO = 'https://gitlab.com/generaldev1/WebGoat'
 
-describe('scm intance tests', () => {
+describe('scm instance tests', () => {
   it('should return the correct headers for basic auth type ', async () => {
     const scmLib = await SCMLib.init({
       url: TEST_GITLAB_REPO,

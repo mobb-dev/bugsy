@@ -25,14 +25,7 @@ export const parseArgs = async (args: readonly string[]) => {
             `
     )
     .version(false)
-    .command(
-      mobbCliCommand.addScmToken,
-      chalk.bold(
-        'Add your SCM (Github, Gitlab, Azure DevOps) token to Mobb to enable automated fixes.'
-      ),
-      addScmTokenBuilder,
-      addScmTokenHandler
-    )
+
     .command(
       mobbCliCommand.scan,
       chalk.bold(
@@ -52,10 +45,18 @@ export const parseArgs = async (args: readonly string[]) => {
     .command(
       mobbCliCommand.review,
       chalk.bold(
-        '(beta) Mobb will review your github pull requests and provide comments with fixes '
+        'Mobb will review your github pull requests and provide comments with fixes '
       ),
       reviewBuilder,
       reviewHandler
+    )
+    .command(
+      mobbCliCommand.addScmToken,
+      chalk.bold(
+        'Add your SCM (Github, Gitlab, Azure DevOps) token to Mobb to enable automated fixes.'
+      ),
+      addScmTokenBuilder,
+      addScmTokenHandler
     )
     .example(
       '$0 scan -r https://github.com/WebGoat/WebGoat',

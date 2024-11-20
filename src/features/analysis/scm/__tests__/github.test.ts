@@ -79,6 +79,23 @@ describe.each(Object.entries(reposConfig))(
         }).getGithubRepoDefaultBranch(repoConfig.url.valid)
       ).toEqual('main')
     })
+    it('branch list non existing repo', async () => {
+      await expect(() =>
+        getGithubSdk({
+          auth: repoConfig.accessToken,
+          url: repoConfig.url.valid,
+        }).getGithubBranchList(repoConfig.url.nonExisting)
+      ).rejects.toThrow('Not Found')
+    })
+    it('branch list existing repo', async () => {
+      const response = await getGithubSdk({
+        auth: repoConfig.accessToken,
+        url: repoConfig.url.valid,
+      }).getGithubBranchList(repoConfig.url.valid)
+      console.log(response.data[0])
+      expect(response.data.length).toEqual(100)
+    })
+
     it('test if date is correct for commit', async () => {
       const response = await getGithubSdk({
         auth: repoConfig.accessToken,

@@ -1,6 +1,7 @@
 import { OctokitOptions } from '@octokit/core'
 import { RequestError } from '@octokit/request-error'
 
+import { MAX_BRANCHES_FETCH } from '../constants'
 import { RefNotFoundError } from '../scm'
 import { ReferenceType, ScmRepoInfo } from '../types'
 import {
@@ -459,7 +460,7 @@ export function getGithubSdk(params: OctokitOptions = {}) {
       return octokit.rest.repos.listBranches({
         owner,
         repo,
-        per_page: 1000,
+        per_page: MAX_BRANCHES_FETCH,
         page: 1,
       })
     },

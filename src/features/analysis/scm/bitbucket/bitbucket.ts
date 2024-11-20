@@ -6,6 +6,7 @@ import { APIClient, Schema } from 'bitbucket'
 import Debug from 'debug'
 import { z } from 'zod'
 
+import { MAX_BRANCHES_FETCH } from '../constants'
 import {
   GetRefererenceResult,
   GetRefererenceResultZ,
@@ -180,6 +181,8 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       const res = await bitbucketClient.refs.listBranches({
         repo_slug: repoSlug,
         workspace,
+        pagelen: MAX_BRANCHES_FETCH,
+        sort: '-target.date',
       })
       if (!res.data.values) {
         return []

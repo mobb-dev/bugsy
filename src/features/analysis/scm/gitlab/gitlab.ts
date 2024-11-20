@@ -7,6 +7,7 @@ import {
   ResourceOptions,
 } from '@gitbeaker/requester-utils'
 import {
+  ExpandedCommitSchema,
   ExpandedMergeRequestSchema,
   Gitlab,
   GitlabAPIResponse,
@@ -17,6 +18,7 @@ import {
   Response as UndiciResponse,
 } from 'undici'
 
+import { MAX_BRANCHES_FETCH } from '../constants'
 import { GIT_PROXY_HOST, GITLAB_API_TOKEN } from '../env'
 import {
   InvalidAccessTokenError,
@@ -46,7 +48,6 @@ type ApiAuthOptions = {
 }
 
 function getGitBeaker(options: ApiAuthOptions) {
-  console.log('getGitBeaker starting')
   const token = options?.gitlabAuthToken ?? GITLAB_API_TOKEN ?? ''
   const url = options.url
   const host = url ? new URL(url).origin : 'https://gitlab.com'
@@ -247,13 +248,8 @@ export async function getGitlabBranchList({
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   try {
-    //TODO: JONATHANA need to play with the parameters here to get all branches as it is sometimes stuck
-    //depending on the parameters and the number of branches. It sometimes just hangs...
     const res = await api.Branches.all(projectPath, {
-      perPage: 100,
-      pagination: 'keyset',
-      orderBy: 'updated_at',
-      sort: 'dec',
+      perPage: MAX_BRANCHES_FETCH,
     })
     return res.map((branch) => branch.name)
   } catch (e) {
@@ -290,6 +286,7 @@ type GetGitlabMergeRequestParams = {
   prNumber: number
   accessToken?: string
 }
+
 export async function getGitlabMergeRequest({
   url,
   prNumber,
@@ -303,6 +300,28 @@ export async function getGitlabMergeRequest({
     gitlabAuthToken: accessToken,
   })
   return await api.MergeRequests.show(projectPath, prNumber)
+}
+
+type GetGitlabCommitUrlParams = {
+  url: string
+  commitSha: string
+  accessToken?: string
+}
+
+export async function getGitlabCommitUrl({
+  url,
+  commitSha,
+  accessToken,
+}: GetGitlabCommitUrlParams): Promise<
+  GitlabAPIResponse<ExpandedCommitSchema, false, false, void>
+> {
+  const { projectPath } = parseGitlabOwnerAndRepo(url)
+  const api = getGitBeaker({
+    url,
+    gitlabAuthToken: accessToken,
+  })
+
+  return await api.Commits.show(projectPath, commitSha)
 }
 
 export async function getGitlabRepoDefaultBranch(

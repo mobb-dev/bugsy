@@ -27,6 +27,8 @@ const reposConfig: RepoConfig[] = [
       date: new Date('2022-06-14T19:51:27.000Z'),
       sha: '8cab1b4d64ca7f52e5e1b45c4e6a6a99cc1ed591',
     },
+    //We need a real token to have better rate limits, even though it is a public repo
+    accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
   },
   {
     url: {
@@ -92,7 +94,6 @@ describe.each(Object.entries(reposConfig))(
         auth: repoConfig.accessToken,
         url: repoConfig.url.valid,
       }).getGithubBranchList(repoConfig.url.valid)
-      console.log(response.data[0])
       expect(response.data.length).toEqual(100)
     })
 

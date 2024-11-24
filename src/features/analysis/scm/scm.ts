@@ -1,3 +1,5 @@
+import { setTimeout } from 'node:timers/promises'
+
 import { z } from 'zod'
 
 import {
@@ -1333,11 +1335,24 @@ export class BitbucketSCMLib extends SCMLib {
     params: CreateSubmitRequestParams
   ): Promise<string> {
     this._validateAccessTokenAndUrl()
-    const pullRequestRes = await this.bitbucketSdk.createPullRequest({
-      ...params,
-      repoUrl: this.url,
-    })
-    return String(z.number().parse(pullRequestRes.id))
+    //do 5 retries before giving up - we noticed that the bitbucket API sometimes is not responsive
+    for (let i = 0; i < 5; i++) {
+      try {
+        const pullRequestRes = await this.bitbucketSdk.createPullRequest({
+          ...params,
+          repoUrl: this.url,
+        })
+        return String(z.number().parse(pullRequestRes.id))
+      } catch (e) {
+        console.warn(`error creating pull request. Try number ${i + 1}`, e)
+        await setTimeout(1000)
+        if (4 === i) {
+          console.error('error creating pull request', e)
+          throw e
+        }
+      }
+    }
+    throw new Error('error creating pull request, should not reach here')
   }
 
   async validateParams() {

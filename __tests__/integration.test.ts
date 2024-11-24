@@ -9,10 +9,11 @@ import { GQLClient } from '@mobb/bugsy/features/analysis/graphql'
 import {
   GithubSCMLib,
   MOBB_ICON_IMG,
+  scmCloudUrl,
   SCMLib,
   ScmLibScmType,
+  ScmType,
 } from '@mobb/bugsy/features/analysis/scm'
-import { scmCloudUrl, ScmType } from '@mobb/bugsy/features/analysis/scm'
 import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
@@ -250,6 +251,12 @@ describe('Basic Analyze tests', () => {
       gqlClient,
       vulnerabilityReportId: getAnalysis.vulnerabilityReportId,
     })
+
+    //TODO: JONATHANA delete me after we find the problem
+    console.log(
+      `test debug: pr number: ${pullRequestNumber}\n\n\n${JSON.stringify(comments)}\n\n\n${JSON.stringify(generalPrComments)}\n\n\n${JSON.stringify(prVulenrabilities)}\n\n\n${JSON.stringify(diff)}`
+    )
+
     expect(prVulenrabilities.fixablePrVuls).toBe(1)
     expect(prVulenrabilities.nonFixablePrVuls).toBe(0)
     expect(prVulenrabilities.totalPrVulnerabilities).toBe(1)

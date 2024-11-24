@@ -251,7 +251,16 @@ export async function getGitlabBranchList({
     const res = await api.Branches.all(projectPath, {
       perPage: MAX_BRANCHES_FETCH,
     })
-    return res.map((branch) => branch.name)
+    res.sort((a, b) => {
+      if (!a.commit?.committed_date || !b.commit?.committed_date) {
+        return 0
+      }
+      return (
+        new Date(b.commit?.committed_date).getTime() -
+        new Date(a.commit?.committed_date).getTime()
+      )
+    })
+    return res.map((branch) => branch.name).slice(0, MAX_BRANCHES_FETCH)
   } catch (e) {
     return []
   }

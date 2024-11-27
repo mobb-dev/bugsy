@@ -322,4 +322,10 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'All variables stored by the application in unencrypted memory can be read by an attacker. This can lead to the exposure of sensitive information, such as passwords, credit card numbers, and personal data.',
     fixInstructions: 'Use secure storage methods to store secrets in memory.',
   },
+  [IssueType_Enum.ClientDomStoredCodeInjection]: {
+    issueDescription:
+      'Client DOM Stored Code Injection is a client-side security vulnerability where malicious JavaScript code gets stored in the DOM and later executed when retrieved by legitimate scripts.',
+    fixInstructions:
+      'Update the code to avoid the possibility for malicious JavaScript code to get stored in the DOM.',
+  },
 }

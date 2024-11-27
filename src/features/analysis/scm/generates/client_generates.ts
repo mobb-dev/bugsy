@@ -6631,6 +6631,8 @@ export enum IssueType_Constraint {
 export enum IssueType_Enum {
   /** Disabling auto-escaping makes the code more vulnerable to XSS */
   AutoEscapeFalse = 'AUTO_ESCAPE_FALSE',
+  /** Client DOM Stored Code Injection */
+  ClientDomStoredCodeInjection = 'CLIENT_DOM_STORED_CODE_INJECTION',
   /** Command Injection */
   CmDi = 'CMDi',
   /** Command Injection: relative path command */

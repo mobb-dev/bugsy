@@ -1,7 +1,6 @@
-import chalk from 'chalk'
 import { describe, expect, it } from 'vitest'
 
-import { normalizeUrl, sanityRepoURL } from '../'
+import { normalizeUrl } from '../'
 
 const github = {
   urls: [
@@ -34,25 +33,4 @@ describe('normalizeUrl', () => {
       normalizeUrl('https://dev.azure.com/azure-org/proj/_git/webgoat.git')
     ).toBe('https://dev.azure.com/azure-org/proj/_git/webgoat')
   })
-})
-
-const testUrls = [
-  'https://github.com/WebGoat/WebGoat',
-  'https://on-prem-ado.com/tfs/software%20development/TaxAct/_git/InternalTools.CSS.Billing.Support',
-]
-
-const badUrls = [
-  'https://github.com/only-org',
-  'https://on-prem-ado.com/random-prefix/software%20development/TaxAct/_git/InternalTools.CSS.Billing.Support',
-]
-describe('sanityRepoURL', () => {
-  it.each(testUrls)(`Should support ${chalk.underline('%s')}`, (url) => {
-    expect(sanityRepoURL(url)).toBe(true)
-  })
-  it.each(badUrls)(
-    `Should ${chalk.bold('NOT')} support ${chalk.underline('%s')}`,
-    (url) => {
-      expect(sanityRepoURL(url)).toBe(false)
-    }
-  )
 })

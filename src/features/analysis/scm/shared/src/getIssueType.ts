@@ -90,6 +90,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.MissingCspHeader]: 'Missing CSP Header',
   [IssueType_Enum.HardcodedDomainInHtml]: 'Hardcoded Domain in HTML',
   [IssueType_Enum.HeapInspection]: 'Heap Inspection',
+  [IssueType_Enum.ClientDomStoredCodeInjection]: 'Client Code Injection',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

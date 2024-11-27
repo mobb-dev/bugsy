@@ -1,4 +1,4 @@
-import { ADO_PREFIX_PATH, getFixUrl, NAME_REGEX } from '../shared/src'
+import { getFixUrl } from '../shared/src'
 
 export * from './broker'
 
@@ -93,23 +93,4 @@ const isUrlHasPath = (url: string) => {
 // in case the url does contain extends beyond the origin, we do want to validate it
 export function shouldValidateUrl(repoUrl?: string | null) {
   return repoUrl && isUrlHasPath(repoUrl)
-}
-
-//check in general that the URL is a valid repo URL (GH, GL, ADO, on prem options as well)
-//make sure that it has a user/org and a repo name but that the path doesn't have more than 4 parts
-//make sure that the path parts are valid names for repo/user/org names
-export const sanityRepoURL = (scmURL: string) => {
-  try {
-    const url = new URL(scmURL)
-    const projectPath = url.pathname.substring(1).replace(/.git$/i, '')
-    const pathParts = projectPath.split('/')
-
-    if (pathParts.length < 2) return false
-    if (pathParts.length > 4 && pathParts.at(0) !== ADO_PREFIX_PATH)
-      return false
-    if (pathParts.some((part) => !part.match(NAME_REGEX))) return false
-    return true
-  } catch (e) {
-    return null
-  }
 }

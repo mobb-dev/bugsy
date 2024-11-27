@@ -565,16 +565,34 @@ export class AdoSCMLib extends SCMLib {
     params: CreateSubmitRequestParams
   ): Promise<string> {
     this._validateAccessTokenAndUrl()
-    const { targetBranchName, sourceBranchName, title, body } = params
-    const adoSdk = await this.getAdoSdk()
-    const pullRequestId = await adoSdk.createAdoPullRequest({
-      title,
-      body,
-      targetBranchName,
-      sourceBranchName,
-      repoUrl: this.url,
-    })
-    return String(pullRequestId)
+    //do 5 retries before giving up - we noticed that the ADO API sometimes is not responsive
+    for (let i = 0; i < 5; i++) {
+      try {
+        const { targetBranchName, sourceBranchName, title, body } = params
+        const adoSdk = await this.getAdoSdk()
+        const pullRequestId = await adoSdk.createAdoPullRequest({
+          title,
+          body,
+          targetBranchName,
+          sourceBranchName,
+          repoUrl: this.url,
+        })
+        return String(pullRequestId)
+      } catch (e) {
+        console.warn(
+          `error creating pull request for ADO. Try number ${i + 1}`,
+          e
+        )
+        await setTimeout(1000)
+        if (4 === i) {
+          console.error('error creating pull request for ADO', e)
+          throw e
+        }
+      }
+    }
+    throw new Error(
+      'error creating pull request for ADO, should not reach here'
+    )
   }
 
   async validateParams() {
@@ -1344,15 +1362,18 @@ export class BitbucketSCMLib extends SCMLib {
         })
         return String(z.number().parse(pullRequestRes.id))
       } catch (e) {
-        console.warn(`error creating pull request. Try number ${i + 1}`, e)
+        console.warn(
+          `error creating pull request for BB. Try number ${i + 1}`,
+          e
+        )
         await setTimeout(1000)
         if (4 === i) {
-          console.error('error creating pull request', e)
+          console.error('error creating pull request for BB', e)
           throw e
         }
       }
     }
-    throw new Error('error creating pull request, should not reach here')
+    throw new Error('error creating pull request for BB, should not reach here')
   }
 
   async validateParams() {

@@ -4,7 +4,7 @@ import path from 'path'
 import type * as Yargs from 'yargs'
 import { z } from 'zod'
 
-import { sanityRepoURL, ScmType } from '../features/analysis/scm'
+import { ScmType } from '../features/analysis/scm'
 
 type ThrowRepoUrlErrorMessageArgs = {
   error: z.ZodError<string>
@@ -28,13 +28,9 @@ Example: \n\tmobbdev ${command} -r ${chalk.bold(
   throw new CliError(formattedErrorMessage)
 }
 
-const UrlZ = z
-  .string({
-    invalid_type_error: `is not a valid ${Object.values(ScmType).join('/ ')} URL`,
-  })
-  .refine((data) => !!sanityRepoURL(data), {
-    message: `is not a valid ${Object.values(ScmType).join(' / ')} URL`,
-  })
+const UrlZ = z.string({
+  invalid_type_error: `is not a valid ${Object.values(ScmType).join('/ ')} URL`,
+})
 
 export function validateOrganizationId(organizationId?: string) {
   const orgIdValidation = z.string().uuid().nullish().safeParse(organizationId)

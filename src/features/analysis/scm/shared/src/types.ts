@@ -280,6 +280,7 @@ const FixExtraContextZ = z.object({
 export const PatchAndQuestionsZ = z.object({
   __typename: z.literal('FixData'),
   patch: z.string(),
+  patchOriginalEncodingBase64: z.string(),
   questions: z.array(
     z.object({
       name: z.string(),

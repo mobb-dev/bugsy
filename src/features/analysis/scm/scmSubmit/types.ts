@@ -5,6 +5,7 @@ const BaseSubmitToScmMessageZ = z.object({
   fixes: z.array(
     z.object({
       fixId: z.string().uuid(),
+      patchesOriginalEncodingBase64: z.array(z.string()),
       patches: z.array(z.string()),
     })
   ),

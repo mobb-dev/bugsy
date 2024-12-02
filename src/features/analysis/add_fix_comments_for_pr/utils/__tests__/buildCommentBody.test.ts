@@ -15,6 +15,7 @@ const params: BuildCommentBodyParams = {
     patchAndQuestions: {
       __typename: 'FixData',
       patch: 'test patch',
+      patchOriginalEncodingBase64: Buffer.from('test patch').toString('base64'),
       questions: [],
       extraContext: {
         __typename: 'FixExtraContextResponse',

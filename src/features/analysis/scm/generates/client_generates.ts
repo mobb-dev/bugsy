@@ -163,6 +163,7 @@ export type FixData = {
   __typename?: 'FixData';
   extraContext: FixExtraContextResponse;
   patch: Scalars['String']['output'];
+  patchOriginalEncodingBase64: Scalars['String']['output'];
   questions: Array<FixQuestion>;
 };
 
@@ -666,6 +667,7 @@ export type SplitFixData = {
   __typename?: 'SplitFixData';
   extraContext: FixExtraContextResponse;
   patches: Array<Scalars['String']['output']>;
+  patchesOriginalEncodingBase64: Array<Scalars['String']['output']>;
   questions: Array<FixQuestion>;
 };
 
@@ -24054,7 +24056,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -24269,6 +24271,7 @@ export const GetFixesDocument = `
       __typename
       ... on FixData {
         patch
+        patchOriginalEncodingBase64
         questions {
           defaultValue
           extraContext {

@@ -140,7 +140,7 @@ const FixesZ = z
   .array(
     z.object({
       fixId: z.string(),
-      patches: z.array(z.string()),
+      patchesOriginalEncodingBase64: z.array(z.string()),
     })
   )
   .nonempty()
@@ -226,11 +226,15 @@ function _getSetOfFilesFromDiffs(diffs: string[]) {
   return files
 }
 
-//This function recieves a git patch (diff) string, writes it to a temp patch file and applies it to the current working dir
-async function _applyPatch(git: SimpleGit, patch: string) {
+//This function receives a git patch (diff) string, writes it to a temp patch file and applies it to the current working dir
+async function _applyPatch(git: SimpleGit, patchBase64: string) {
   const fixTmpDir = tmp.dirSync({ unsafeCleanup: true })
   try {
-    await fs.writeFile(path.join(fixTmpDir.name, 'mobb.patch'), patch)
+    console.log(fixTmpDir.name)
+    await fs.writeFile(
+      path.join(fixTmpDir.name, 'mobb.patch'),
+      Buffer.from(patchBase64, 'base64')
+    )
     await git.applyPatch(path.join(fixTmpDir.name, 'mobb.patch'))
   } finally {
     fixTmpDir.removeCallback()
@@ -241,12 +245,12 @@ async function _applyPatch(git: SimpleGit, patch: string) {
 //the current work dir and commits it with the commit message and description to the current branch
 async function _commitPatch(
   git: SimpleGit,
-  patch: string,
+  patchBase64: string,
   fixId: string,
   commitMessage: string | undefined | null,
   commitDescription: string | undefined | null
 ) {
-  await _applyPatch(git, patch)
+  await _applyPatch(git, patchBase64)
 
   await git.add('.')
   const newCommitMessage = _getCommitMessage({
@@ -271,15 +275,18 @@ async function _createBranchesForAllFixPatches({
   commitHash: string
   fixes: {
     fixId: string
-    patches: string[]
+    patchesOriginalEncodingBase64: string[]
   }[]
 }) {
   await git.checkout([commitHash])
   await git.reset(['--hard', commitHash])
   for (const fix of fixes) {
-    for (const [patchIndex, patch] of fix.patches.entries()) {
+    for (const [
+      patchIndex,
+      patchBase64,
+    ] of fix.patchesOriginalEncodingBase64.entries()) {
       await git.checkout([commitHash])
-      await _commitPatch(git, patch, fix.fixId, undefined, undefined)
+      await _commitPatch(git, patchBase64, fix.fixId, undefined, undefined)
       await git.checkout(['-b', `mobb-fix-${fix.fixId}-${patchIndex}`, 'HEAD'])
     }
   }
@@ -299,7 +306,7 @@ async function _cherryPickFixToBranch({
   appliedFixes = [],
 }: {
   git: SimpleGit
-  fix: { fixId: string; patches: string[] }
+  fix: { fixId: string; patchesOriginalEncodingBase64: string[] }
   targetBranch: string
   commitMessage?: string | null
   commitDescription?: string | null
@@ -314,9 +321,12 @@ async function _cherryPickFixToBranch({
     'HEAD',
   ])
   let appliedPatchesCount = 0
-  for (const [patchIndex, patch] of fix.patches.entries()) {
+  for (const [
+    patchIndex,
+    patchBase64,
+  ] of fix.patchesOriginalEncodingBase64.entries()) {
     //skip patches that have already been applied in other fixes
-    if (appliedPatches[patch] === true) {
+    if (appliedPatches[patchBase64] === true) {
       continue
     }
     const res = await _cherryPickFix({
@@ -338,8 +348,8 @@ async function _cherryPickFixToBranch({
   )
   //advance the target branch to the new commit
   await git.branch(['-f', targetBranch, 'HEAD'])
-  for (const patch of fix.patches) {
-    appliedPatches[patch] = true
+  for (const patchBase64 of fix.patchesOriginalEncodingBase64) {
+    appliedPatches[patchBase64] = true
   }
   //if the fix was applied successfully on the branch, add it to the list of applied fixes
   appliedFixes.push({ fixId: fix.fixId })

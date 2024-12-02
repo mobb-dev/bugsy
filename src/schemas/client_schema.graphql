@@ -105,6 +105,7 @@ query getFixes($filters: fix_bool_exp!) {
       __typename
       ... on FixData {
         patch
+        patchOriginalEncodingBase64
         questions {
           defaultValue
           extraContext {

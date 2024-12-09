@@ -55,7 +55,7 @@ Options:
 Examples:
   mobbdev scan -r https://github.com/WebGoat/WebGoat  Scan an existing repository
 
-Made with ❤️  by Mobb
+Made with ❤️ by Mobb
 ```
 
 To run a new SAST scan on a repo and get fixes, run the **Bugsy Scan** command. Example:

@@ -16,14 +16,13 @@ import {
 } from '@mobb/bugsy/constants'
 import { MobbCliCommand } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
-import { getDirName, getTopLevelDirName, sleep } from '@mobb/bugsy/utils'
+import { getTopLevelDirName, packageJson, sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
 import extract from 'extract-zip'
 import fetch from 'node-fetch'
 import open from 'open'
-import semver from 'semver'
 import tmp from 'tmp'
 import { z } from 'zod'
 
@@ -132,16 +131,6 @@ const getReportUrl = ({
   `${WEB_APP_URL}/organization/${organizationId}/project/${projectId}/report/${fixReportId}`
 
 const debug = Debug('mobbdev:index')
-
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(getDirName(), '../package.json'), 'utf8')
-)
-
-if (!semver.satisfies(process.version, packageJson.engines.node)) {
-  throw new CliError(
-    `${packageJson.name} requires node version ${packageJson.engines.node}, but running ${process.version}.`
-  )
-}
 
 const config = new Configstore(packageJson.name, { apiToken: '' })
 debug('config %o', config)

@@ -71,7 +71,7 @@ export const parseArgs = async (args: readonly string[]) => {
     .strictOptions()
     .help('h')
     .alias('h', 'help')
-    .epilog(chalk.bgBlue('Made with ❤️  by Mobb'))
+    .epilog(chalk.bgBlue('Made with ❤️ by Mobb'))
     .showHelpOnFail(true)
     .wrap(Math.min(120, yargsInstance.terminalWidth()))
     .parse()

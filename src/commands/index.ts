@@ -1,6 +1,3 @@
-import fs from 'node:fs'
-import path from 'node:path'
-
 import {
   AddScmTokenOptions,
   AnalyzeOptions,
@@ -8,10 +5,10 @@ import {
   ScanOptions,
 } from '@mobb/bugsy/args'
 import { errorMessages, mobbAscii, SCANNERS } from '@mobb/bugsy/constants'
-import { runAnalysis } from '@mobb/bugsy/features/analysis/index'
+import { runAnalysis } from '@mobb/bugsy/features/analysis'
 import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
 import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
-import { CliError, getDirName, sleep } from '@mobb/bugsy/utils'
+import { CliError, packageJson, sleep } from '@mobb/bugsy/utils'
 import chalkAnimation from 'chalk-animation'
 import Configstore from 'configstore'
 
@@ -90,10 +87,6 @@ export async function analyze(
 export type CommandOptions = {
   skipPrompts?: boolean
 }
-
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(getDirName(), '../package.json'), 'utf8')
-)
 
 const config = new Configstore(packageJson.name, { apiToken: '' })
 

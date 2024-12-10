@@ -37,15 +37,6 @@ export const getCommitDescription = ({
   guidances: Guidances
   fixUrl?: string
 }): string => {
-  const parseIssueTypeRes = z.nativeEnum(IssueType_Enum).safeParse(issueType)
-  if (!parseIssueTypeRes.success) {
-    return ''
-  }
-
-  const staticData = fixDetailsData[parseIssueTypeRes.data]
-  if (!staticData) {
-    return ''
-  }
   const issueTypeString = getIssueTypeFriendlyString(issueType)
 
   let description = `This change fixes a **${severity} severity** (${
@@ -54,12 +45,22 @@ export const getCommitDescription = ({
     vendor
   )}**.
 
-## Issue description
+`
+
+  const parseIssueTypeRes = z.nativeEnum(IssueType_Enum).safeParse(issueType)
+  if (issueType && parseIssueTypeRes.success) {
+    const staticData = fixDetailsData[parseIssueTypeRes.data]
+    if (staticData) {
+      description += `## Issue description
 ${staticData.issueDescription}
  
 ## Fix instructions
 ${staticData.fixInstructions}
+`
+    }
+  }
 
+  description += `
 ${guidances
   .map(({ guidance }) => `## Additional actions required\n ${guidance}\n`)
   .join('')}

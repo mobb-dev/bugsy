@@ -377,6 +377,11 @@ export type OrganizationType = {
   brokerHosts: Array<Maybe<BrokerHostsType>>;
 };
 
+export enum PrStrategy {
+  Condense = 'CONDENSE',
+  Spread = 'SPREAD'
+}
+
 export type PackageInfoResponse = {
   __typename?: 'PackageInfoResponse';
   envName?: Maybe<Scalars['String']['output']>;
@@ -733,7 +738,7 @@ export type SubmitToScmResponse = ScmAdminError | ScmCommitHashError | ScmError 
 export type SubmitToScmSuccess = {
   __typename?: 'SubmitToScmSuccess';
   status: Status;
-  submitFixRequestId: Scalars['String']['output'];
+  submitFixRequestIds: Array<Scalars['String']['output']>;
 };
 
 export type UnstructuredFixExtraContext = {
@@ -7787,6 +7792,7 @@ export type Mutation_RootCommitToDifferentBranchArgs = {
   baseBranch: Scalars['String']['input'];
   fixIds: Array<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
+  prStrategy?: InputMaybe<PrStrategy>;
   submitBranch: Scalars['String']['input'];
   submitDescription: Scalars['String']['input'];
   submitMessage: Scalars['String']['input'];

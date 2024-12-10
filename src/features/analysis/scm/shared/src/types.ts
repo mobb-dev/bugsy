@@ -565,7 +565,7 @@ export const GetProjectMembersDataZ = z.object({
 
 export type GetProjectMembersData = z.infer<typeof GetProjectMembersDataZ>
 
-export const RepoArgs = z.object({
+export const RepoArgsZ = z.object({
   originalUrl: z.string().url(),
   branch: z.string(),
   commitSha: z.string(),

@@ -806,6 +806,11 @@ export type ValidateCheckmarxConnectionSuccess = {
   status: Status;
 };
 
+export type ValidationSuccess = {
+  __typename?: 'ValidationSuccess';
+  status: Status;
+};
+
 export enum Vendors {
   Checkmarx = 'Checkmarx',
   CodeQl = 'CodeQL',
@@ -14506,6 +14511,8 @@ export type Query_Root = {
   broker_token_aggregate: Broker_Token_Aggregate;
   /** fetch data from the table: "broker_token" using primary key columns */
   broker_token_by_pk?: Maybe<Broker_Token>;
+  checkScmConnectionStatus?: Maybe<ValidationSuccess>;
+  checkScmConnectionStatusAdmin?: Maybe<ValidationSuccess>;
   /** fetch data from the table: "cli_login" */
   cli_login: Array<Cli_Login>;
   /** fetch aggregated fields from the table: "cli_login" */
@@ -14954,6 +14961,16 @@ export type Query_RootBroker_Token_AggregateArgs = {
 
 export type Query_RootBroker_Token_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootCheckScmConnectionStatusArgs = {
+  scmUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootCheckScmConnectionStatusAdminArgs = {
+  scmUuid: Scalars['String']['input'];
 };
 
 

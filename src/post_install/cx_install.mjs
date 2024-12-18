@@ -32,20 +32,26 @@ const supportedPlatforms = [
 ]
 
 function installBinary() {
-  const supportedPlatform = getPlatformMetadata()
-  if (!supportedPlatform) {
-    console.warn(cxOperatingSystemSupportMessage)
+  try {
+    const supportedPlatform = getPlatformMetadata()
+    if (!supportedPlatform) {
+      console.warn(cxOperatingSystemSupportMessage)
+      console.warn(
+        'The rest of Bugsy features and scanners will be available for use'
+      )
+      return
+    }
+    const { target } = supportedPlatform
+
+    const url = `https://github.com/Checkmarx/ast-cli/releases/download/2.0.55/ast-cli_${target}`
+    const binaryName = supportedPlatform.type === 'Windows_NT' ? 'cx.exe' : 'cx'
+
+    install({ binaryName, url })
+  } catch (err) {
     console.warn(
-      'The rest of Bugsy features and scanners will be available for use'
+      "Optional Checkmarx dependency was not installed. If you don't require this functionality, you can safely ignore this message."
     )
-    return
   }
-  const { target } = supportedPlatform
-
-  const url = `https://github.com/Checkmarx/ast-cli/releases/download/2.0.55/ast-cli_${target}`
-  const binaryName = supportedPlatform.type === 'Windows_NT' ? 'cx.exe' : 'cx'
-
-  install({ binaryName, url })
 }
 
 export function getPlatformMetadata() {

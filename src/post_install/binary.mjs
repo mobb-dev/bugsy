@@ -43,8 +43,8 @@ export async function install({ binaryName, url }) {
   mkdirSync(installDirectory, { recursive: true })
   console.log(`Downloading release from ${url}`)
   archiveType === 'zip'
-    ? installZip({ binaryName, url, installDirectory })
-    : installTar({ binaryName, url, installDirectory })
+    ? await installZip({ binaryName, url, installDirectory })
+    : await installTar({ binaryName, url, installDirectory })
 
   console.log(`${binaryName} has been installed!`)
 }

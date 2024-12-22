@@ -293,11 +293,16 @@ type CreateSubmitRequestParams = {
   title: string
   body: string
 }
+
+// todo: scmOrg is only relevant for ADO
+// we should covert this to union type
+
 export type ScmInitParams = {
   url: string | undefined
   accessToken: string | undefined
   scmType: ScmLibScmType | undefined
-  scmOrg: string | undefined
+
+  scmOrg?: string
 }
 
 function buildAuthorizedRepoUrl(args: {

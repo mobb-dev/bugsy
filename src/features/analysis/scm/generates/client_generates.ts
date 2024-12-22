@@ -806,6 +806,13 @@ export type ValidateCheckmarxConnectionSuccess = {
   status: Status;
 };
 
+export type ValidateScmTokenResponse = BadScmCredentials | InvalidScmTypeError | ValidateScmTokenSuccess;
+
+export type ValidateScmTokenSuccess = {
+  __typename?: 'ValidateScmTokenSuccess';
+  status: Status;
+};
+
 export type ValidationSuccess = {
   __typename?: 'ValidationSuccess';
   status: Status;
@@ -1433,6 +1440,7 @@ export type Broker_Host = {
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
   realDomain: Scalars['String']['output'];
+  scmType?: Maybe<Submit_Fix_Request_Scm_Type_Enum>;
   virtualDomain: Scalars['uuid']['output'];
 };
 
@@ -1514,6 +1522,7 @@ export type Broker_Host_Bool_Exp = {
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   realDomain?: InputMaybe<String_Comparison_Exp>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum_Comparison_Exp>;
   virtualDomain?: InputMaybe<Uuid_Comparison_Exp>;
 };
 
@@ -1536,6 +1545,7 @@ export type Broker_Host_Insert_Input = {
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   realDomain?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   virtualDomain?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -1603,6 +1613,7 @@ export type Broker_Host_Order_By = {
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   realDomain?: InputMaybe<Order_By>;
+  scmType?: InputMaybe<Order_By>;
   virtualDomain?: InputMaybe<Order_By>;
 };
 
@@ -1620,6 +1631,8 @@ export enum Broker_Host_Select_Column {
   /** column name */
   RealDomain = 'realDomain',
   /** column name */
+  ScmType = 'scmType',
+  /** column name */
   VirtualDomain = 'virtualDomain'
 }
 
@@ -1628,6 +1641,7 @@ export type Broker_Host_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   realDomain?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   virtualDomain?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -1644,6 +1658,7 @@ export type Broker_Host_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   realDomain?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   virtualDomain?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -1655,6 +1670,8 @@ export enum Broker_Host_Update_Column {
   OrganizationId = 'organizationId',
   /** column name */
   RealDomain = 'realDomain',
+  /** column name */
+  ScmType = 'scmType',
   /** column name */
   VirtualDomain = 'virtualDomain'
 }
@@ -10587,7 +10604,7 @@ export type On_Prem_Scm_Oauth_Config = {
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
-  scmType: Scalars['String']['output'];
+  scmType: Submit_Fix_Request_Scm_Type_Enum;
   scmUrl: Scalars['String']['output'];
 };
 
@@ -10596,6 +10613,17 @@ export type On_Prem_Scm_Oauth_Config_Aggregate = {
   __typename?: 'on_prem_scm_oauth_config_aggregate';
   aggregate?: Maybe<On_Prem_Scm_Oauth_Config_Aggregate_Fields>;
   nodes: Array<On_Prem_Scm_Oauth_Config>;
+};
+
+export type On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp = {
+  count?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp_Count>;
+};
+
+export type On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
 };
 
 /** aggregate fields of "on_prem_scm_oauth_config" */
@@ -10613,6 +10641,20 @@ export type On_Prem_Scm_Oauth_Config_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** order by aggregate values of table "on_prem_scm_oauth_config" */
+export type On_Prem_Scm_Oauth_Config_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<On_Prem_Scm_Oauth_Config_Max_Order_By>;
+  min?: InputMaybe<On_Prem_Scm_Oauth_Config_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "on_prem_scm_oauth_config" */
+export type On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input = {
+  data: Array<On_Prem_Scm_Oauth_Config_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<On_Prem_Scm_Oauth_Config_On_Conflict>;
+};
+
 /** Boolean expression to filter rows from the table "on_prem_scm_oauth_config". All fields are combined with a logical 'AND'. */
 export type On_Prem_Scm_Oauth_Config_Bool_Exp = {
   _and?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Bool_Exp>>;
@@ -10623,7 +10665,7 @@ export type On_Prem_Scm_Oauth_Config_Bool_Exp = {
   oauthClientSecret?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
-  scmType?: InputMaybe<String_Comparison_Exp>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum_Comparison_Exp>;
   scmUrl?: InputMaybe<String_Comparison_Exp>;
 };
 
@@ -10640,7 +10682,7 @@ export type On_Prem_Scm_Oauth_Config_Insert_Input = {
   oauthClientSecret?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   scmUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -10651,8 +10693,16 @@ export type On_Prem_Scm_Oauth_Config_Max_Fields = {
   oauthClientId?: Maybe<Scalars['String']['output']>;
   oauthClientSecret?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  scmType?: Maybe<Scalars['String']['output']>;
   scmUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "on_prem_scm_oauth_config" */
+export type On_Prem_Scm_Oauth_Config_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  oauthClientId?: InputMaybe<Order_By>;
+  oauthClientSecret?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  scmUrl?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -10662,8 +10712,16 @@ export type On_Prem_Scm_Oauth_Config_Min_Fields = {
   oauthClientId?: Maybe<Scalars['String']['output']>;
   oauthClientSecret?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  scmType?: Maybe<Scalars['String']['output']>;
   scmUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "on_prem_scm_oauth_config" */
+export type On_Prem_Scm_Oauth_Config_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  oauthClientId?: InputMaybe<Order_By>;
+  oauthClientSecret?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  scmUrl?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "on_prem_scm_oauth_config" */
@@ -10720,7 +10778,7 @@ export type On_Prem_Scm_Oauth_Config_Set_Input = {
   oauthClientId?: InputMaybe<Scalars['String']['input']>;
   oauthClientSecret?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   scmUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -10738,7 +10796,7 @@ export type On_Prem_Scm_Oauth_Config_Stream_Cursor_Value_Input = {
   oauthClientId?: InputMaybe<Scalars['String']['input']>;
   oauthClientSecret?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   scmUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -10809,6 +10867,10 @@ export type Organization = {
   /** An aggregate relationship */
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
   name: Scalars['String']['output'];
+  /** An array relationship */
+  onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
+  /** An aggregate relationship */
+  onPremScmOauthConfigs_aggregate: On_Prem_Scm_Oauth_Config_Aggregate;
   /** An array relationship */
   organizationFilesMatchingSettings: Array<Organization_Files_Matching_Settings>;
   /** An aggregate relationship */
@@ -10915,6 +10977,26 @@ export type OrganizationIssueTypeSettings_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Organization_Issue_Type_Settings_Order_By>>;
   where?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationOnPremScmOauthConfigsArgs = {
+  distinct_on?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Order_By>>;
+  where?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationOnPremScmOauthConfigs_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<On_Prem_Scm_Oauth_Config_Order_By>>;
+  where?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
 };
 
 
@@ -11104,6 +11186,8 @@ export type Organization_Bool_Exp = {
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
+  onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
+  onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Bool_Exp>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Bool_Exp>;
@@ -11397,6 +11481,7 @@ export type Organization_Insert_Input = {
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
+  onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Arr_Rel_Insert_Input>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
@@ -11711,6 +11796,7 @@ export type Organization_Order_By = {
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
+  onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Order_By>;
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
@@ -14786,6 +14872,7 @@ export type Query_Root = {
   validateCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateExistingCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateRepoUrl?: Maybe<RepoValidationResponse>;
+  validateScmToken: ValidateScmTokenResponse;
   /** fetch data from the table: "view_project_resolved_vulnerabilities" */
   view_project_resolved_vulnerabilities: Array<View_Project_Resolved_Vulnerabilities>;
   /** fetch aggregated fields from the table: "view_project_resolved_vulnerabilities" */
@@ -16040,6 +16127,14 @@ export type Query_RootValidateExistingCheckmarxConnectionArgs = {
 
 export type Query_RootValidateRepoUrlArgs = {
   repoUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootValidateScmTokenArgs = {
+  scmOrg?: InputMaybe<Scalars['String']['input']>;
+  scmType: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+  url: Scalars['String']['input'];
 };
 
 

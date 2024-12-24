@@ -72,6 +72,7 @@ export type BaseAddScmTokenOptions = {
   ['scm-type']: ScmType
   url: string
   token: string
+  ci?: boolean
   organization?: string
   refreshToken?: string
   apiKey?: string

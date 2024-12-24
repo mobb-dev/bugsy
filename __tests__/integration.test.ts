@@ -22,6 +22,7 @@ import * as openExport from 'open'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
+import * as commandsExports from '../src/commands'
 import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
@@ -142,6 +143,53 @@ describe('Basic Analyze tests', () => {
     expect(autoPrAnalysisSpy).toHaveBeenCalled()
     expect(mockedOpen).toHaveBeenCalledTimes(2)
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+  }, 30000)
+
+  it('add-scm-token good token', async () => {
+    mockedOpen.mockClear()
+    const addScmTokenSpy = vi.spyOn(commandsExports, 'addScmToken')
+    await commandsExports.addScmToken({
+      token: TEST_GITHUB_TOKEN,
+      scmType: ScmType.GitHub,
+      url: scmCloudUrl.GitHub,
+      'scm-type': ScmType.GitHub,
+      ci: true,
+      _: [],
+      $0: '',
+    })
+
+    expect(addScmTokenSpy).toHaveBeenCalled()
+    expect(addScmTokenSpy).not.toThrowError()
+  }, 30000)
+
+  it('add-scm-token bad token', async () => {
+    mockedOpen.mockClear()
+    await expect(
+      commandsExports.addScmToken({
+        token: 'bad-token',
+        scmType: ScmType.GitHub,
+        url: scmCloudUrl.GitHub,
+        'scm-type': ScmType.GitHub,
+        ci: true,
+        _: [],
+        $0: '',
+      })
+    ).rejects.toThrowError('Invalid SCM credentials')
+  }, 30000)
+
+  it('add-scm-token bad cloud url', async () => {
+    mockedOpen.mockClear()
+    await expect(
+      commandsExports.addScmToken({
+        token: TEST_GITHUB_TOKEN,
+        scmType: ScmType.GitHub,
+        url: 'https://gitbadscmdomain.com/a/b',
+        'scm-type': ScmType.GitHub,
+        ci: true,
+        _: [],
+        $0: '',
+      })
+    ).rejects.toThrowError('Mobb could not reach the repository')
   }, 30000)
 
   it.each(['assets', 'assets/simple', 'assets/simple/src'])(

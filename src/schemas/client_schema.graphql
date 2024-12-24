@@ -227,6 +227,9 @@ mutation updateScmToken(
       status
       error
     }
+    ... on RepoUnreachableError {
+      status
+    }
   }
 }
 

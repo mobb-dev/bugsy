@@ -91,6 +91,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.HardcodedDomainInHtml]: 'Hardcoded Domain in HTML',
   [IssueType_Enum.HeapInspection]: 'Heap Inspection',
   [IssueType_Enum.ClientDomStoredCodeInjection]: 'Client Code Injection',
+  [IssueType_Enum.StringFormatMisuse]: 'String Format Misuse',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

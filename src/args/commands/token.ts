@@ -6,6 +6,7 @@ import type * as Yargs from 'yargs'
 
 import {
   apiKeyOption,
+  ciOption,
   scmOrgOption,
   scmRefreshTokenOption,
   scmTokenOption,
@@ -24,6 +25,7 @@ export function addScmTokenBuilder(
     .option('organization', scmOrgOption)
     .option('refresh-token', scmRefreshTokenOption)
     .option('api-key', apiKeyOption)
+    .option('ci', ciOption)
     .example(
       '$0 add-scm-token --scm-type Ado --url https://dev.azure.com/adoorg/test/_git/repo --token abcdef0123456 --organization myOrg',
       `Add your SCM (${Object.values(scmFriendlyText).join(', ')}) token to Mobb to enable automated fixes.`

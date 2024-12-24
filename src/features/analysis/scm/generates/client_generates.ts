@@ -473,7 +473,7 @@ export type SaveCheckmarxIntegrationSuccess = {
   status: Status;
 };
 
-export type ScmAccessTokenUpdateResponse = BadScmCredentials | InvalidScmTypeError | ScmAccessTokenUpdateSuccess;
+export type ScmAccessTokenUpdateResponse = BadScmCredentials | InvalidScmTypeError | RepoUnreachableError | ScmAccessTokenUpdateSuccess;
 
 export type ScmAccessTokenUpdateSuccess = {
   __typename?: 'ScmAccessTokenUpdateSuccess';
@@ -6772,6 +6772,8 @@ export enum IssueType_Enum {
   SqlInjection = 'SQL_Injection',
   /** Server Side Request Forgery */
   Ssrf = 'SSRF',
+  /** Composite format strings should be used correctly */
+  StringFormatMisuse = 'STRING_FORMAT_MISUSE',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
   SystemInformationLeak = 'SYSTEM_INFORMATION_LEAK',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
@@ -24193,7 +24195,7 @@ export type UpdateScmTokenMutationVariables = Exact<{
 }>;
 
 
-export type UpdateScmTokenMutation = { __typename?: 'mutation_root', updateScmToken?: { __typename: 'BadScmCredentials', status: Status, error?: string | null } | { __typename: 'InvalidScmTypeError', status: Status, error?: string | null } | { __typename: 'ScmAccessTokenUpdateSuccess', token: string } | null };
+export type UpdateScmTokenMutation = { __typename?: 'mutation_root', updateScmToken?: { __typename: 'BadScmCredentials', status: Status, error?: string | null } | { __typename: 'InvalidScmTypeError', status: Status, error?: string | null } | { __typename: 'RepoUnreachableError', status: Status } | { __typename: 'ScmAccessTokenUpdateSuccess', token: string } | null };
 
 export type UploadS3BucketInfoMutationVariables = Exact<{
   fileName: Scalars['String']['input'];
@@ -24489,6 +24491,9 @@ export const UpdateScmTokenDocument = `
     ... on BadScmCredentials {
       status
       error
+    }
+    ... on RepoUnreachableError {
+      status
     }
   }
 }

@@ -329,4 +329,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'Update the code to avoid the possibility for malicious JavaScript code to get stored in the DOM.',
   },
   [IssueType_Enum.StringFormatMisuse]: undefined,
+  [IssueType_Enum.NonReadonlyField]: undefined,
 }

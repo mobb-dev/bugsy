@@ -24,6 +24,7 @@ import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
 import extract from 'extract-zip'
+import { createSpinner } from 'nanospinner'
 import fetch from 'node-fetch'
 import open from 'open'
 import tmp from 'tmp'
@@ -372,7 +373,7 @@ export async function _scan(
   if (!isRepoAvailable) {
     if (ci || !cloudScmLibType || !scmAuthUrl) {
       const errorMessage = scmAuthUrl
-        ? `Cannot access repo ${repo}`
+        ? `Cannot access repo ${repo}. Make sure that the repo is accessible and the SCM token configured on Mobb is correct.`
         : `Cannot access repo ${repo} with the provided token, please visit ${scmAuthUrl} to refresh your source control management system token`
       throw new Error(errorMessage)
     }
@@ -450,6 +451,13 @@ export async function _scan(
     uploadReportSpinner.error({ text: '📁 Report upload failed' })
     throw e
   }
+
+  await _digestReport({
+    gqlClient,
+    fixReportId: reportUploadInfo.fixReportId,
+    projectId,
+    command,
+  })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
   const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
@@ -598,47 +606,14 @@ export async function _scan(
     uploadReportSpinner.success({
       text: '📁 Uploading Report successful!',
     })
-    const digestSpinner = createSpinner(
-      progressMassages.processingVulnerabilityReport
-    ).start()
-    let vulnFiles = []
-    const gitInfo = await getGitInfo(srcPath)
-    try {
-      const { vulnerabilityReportId } =
-        await gqlClient.digestVulnerabilityReport({
-          fixReportId: reportUploadInfo.fixReportId,
-          projectId,
-          scanSource: _getScanSource(command),
-        })
-      try {
-        await gqlClient.subscribeToAnalysis({
-          subscribeToAnalysisParams: {
-            analysisId: reportUploadInfo.fixReportId,
-          },
-          callback: () =>
-            digestSpinner.update({
-              text: progressMassages.processingVulnerabilityReportSuccess,
-            }),
 
-          callbackStates: [
-            Fix_Report_State_Enum.Digested,
-            Fix_Report_State_Enum.Finished,
-          ],
-          timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
-        })
-      } catch (e) {
-        throw new Error(progressMassages.processingVulnerabilityReportFailed)
-      }
-      vulnFiles = await gqlClient.getVulnerabilityReportPaths(
-        vulnerabilityReportId
-      )
-    } catch (e) {
-      digestSpinner.error({ text: '🕵️‍♂️ Digesting report failed' })
-      throw e
-    }
-    digestSpinner.success({
-      text: progressMassages.processingVulnerabilityReportSuccess,
+    const vulnFiles = await _digestReport({
+      gqlClient,
+      fixReportId: reportUploadInfo.fixReportId,
+      projectId,
+      command,
     })
+    const gitInfo = await getGitInfo(srcPath)
 
     const zippingSpinner = createSpinner('📦 Zipping repo').start()
 
@@ -731,5 +706,61 @@ export async function _scan(
 
     await askToOpenAnalysis()
     return reportUploadInfo.fixReportId
+  }
+}
+
+export async function _digestReport({
+  gqlClient,
+  fixReportId,
+  projectId,
+  command,
+}: {
+  gqlClient: GQLClient
+  fixReportId: string
+  projectId: string
+  command: MobbCliCommand
+}) {
+  const digestSpinner = createSpinner(
+    progressMassages.processingVulnerabilityReport
+  ).start()
+  try {
+    const { vulnerabilityReportId } = await gqlClient.digestVulnerabilityReport(
+      {
+        fixReportId,
+        projectId,
+        scanSource: _getScanSource(command),
+      }
+    )
+    try {
+      await gqlClient.subscribeToAnalysis({
+        subscribeToAnalysisParams: {
+          analysisId: fixReportId,
+        },
+        callback: () =>
+          digestSpinner.update({
+            text: progressMassages.processingVulnerabilityReportSuccess,
+          }),
+
+        callbackStates: [
+          Fix_Report_State_Enum.Digested,
+          Fix_Report_State_Enum.Finished,
+        ],
+        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+      })
+    } catch (e) {
+      throw new Error(progressMassages.processingVulnerabilityReportFailed)
+    }
+    const vulnFiles = await gqlClient.getVulnerabilityReportPaths(
+      vulnerabilityReportId
+    )
+    digestSpinner.success({
+      text: progressMassages.processingVulnerabilityReportSuccess,
+    })
+    return vulnFiles
+  } catch (e) {
+    digestSpinner.error({
+      text: '🕵️‍♂️ Digesting report failed. Please verify that the file provided is of a valid supported report format.',
+    })
+    throw e
   }
 }

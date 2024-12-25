@@ -289,7 +289,10 @@ export async function adoValidateParams({
     ) {
       throw new InvalidRepoUrlError(`invalid ADO repo URL ${url}`)
     }
-    throw e
+    console.log('adoValidateParams error', e)
+    throw new InvalidRepoUrlError(
+      `cannot access ADO repo URL: ${url} with the provided access token`
+    )
   }
 }
 

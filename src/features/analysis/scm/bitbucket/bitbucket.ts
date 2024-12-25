@@ -1,8 +1,7 @@
 import querystring from 'node:querystring'
 
-import bitbucketPkg from 'bitbucket'
 import * as bitbucketPkgNode from 'bitbucket'
-import { APIClient, Schema } from 'bitbucket'
+import bitbucketPkg, { APIClient, Schema } from 'bitbucket'
 import Debug from 'debug'
 import { z } from 'zod'
 
@@ -380,7 +379,10 @@ export async function validateBitbucketParams(params: {
           throw new InvalidRepoUrlError(safeParseError.data.error.error.message)
       }
     }
-    throw e
+    console.log('validateBitbucketParams error', e)
+    throw new InvalidRepoUrlError(
+      `cannot access BB repo URL: ${params.url} with the provided access token`
+    )
   }
 }
 

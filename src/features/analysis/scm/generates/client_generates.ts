@@ -6742,6 +6742,8 @@ export enum IssueType_Enum {
   MissingHstsHeader = 'MISSING_HSTS_HEADER',
   /** Non-final public static field */
   NonFinalPublicStaticField = 'NON_FINAL_PUBLIC_STATIC_FIELD',
+  /** Fields that are only assigned in the constructor should be readonly */
+  NonReadonlyField = 'NON_READONLY_FIELD',
   /** No equals method */
   NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
   /** Missing rate limiting */

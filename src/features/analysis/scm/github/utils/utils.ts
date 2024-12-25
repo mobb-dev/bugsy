@@ -127,6 +127,9 @@ export async function githubValidateParams(
     if (code === 404) {
       throw new InvalidRepoUrlError(`invalid github repo Url ${url}`)
     }
-    throw e
+    console.log('githubValidateParams error', e)
+    throw new InvalidRepoUrlError(
+      `cannot access GH repo URL: ${url} with the provided access token`
+    )
   }
 }

@@ -119,7 +119,10 @@ export async function gitlabValidateParams({
     ) {
       throw new InvalidRepoUrlError(`invalid gitlab repo URL: ${url}`)
     }
-    throw e
+    console.log('gitlabValidateParams error', e)
+    throw new InvalidRepoUrlError(
+      `cannot access gitlab repo URL: ${url} with the provided access token`
+    )
   }
 }
 

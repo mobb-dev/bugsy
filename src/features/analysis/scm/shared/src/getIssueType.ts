@@ -92,6 +92,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.HeapInspection]: 'Heap Inspection',
   [IssueType_Enum.ClientDomStoredCodeInjection]: 'Client Code Injection',
   [IssueType_Enum.StringFormatMisuse]: 'String Format Misuse',
+  [IssueType_Enum.NonReadonlyField]: 'Non Readonly Field',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

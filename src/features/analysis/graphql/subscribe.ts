@@ -26,6 +26,9 @@ type WsOptions = BaseWsOptions & {
 
 function createWSClient(options: WsOptions) {
   return createClient({
+    //this is needed to prevent AWS from killing the connection
+    //currently our load balancer has a 29s idle timeout
+    keepAlive: 10000,
     url: options.url,
     webSocketImpl: options.websocket || WebSocket,
     connectionParams: () => {

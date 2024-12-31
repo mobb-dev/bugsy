@@ -21916,6 +21916,9 @@ export type Vulnerability_Report_Issue = {
   isSuppressed: Scalars['Boolean']['output'];
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
+  parsed_issue_language?: Maybe<IssueLanguage_Enum>;
+  parsed_issue_type?: Maybe<IssueType_Enum>;
+  parsed_severity?: Maybe<Vulnerability_Severity_Enum>;
   severity?: Maybe<Scalars['String']['output']>;
   state: Vulnerability_Report_Issue_State_Enum;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
@@ -22058,6 +22061,9 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   isSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguage?: InputMaybe<String_Comparison_Exp>;
   issueType?: InputMaybe<String_Comparison_Exp>;
+  parsed_issue_language?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
+  parsed_issue_type?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
   severity?: InputMaybe<String_Comparison_Exp>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum_Comparison_Exp>;
   vendorInstanceId?: InputMaybe<String_Comparison_Exp>;
@@ -22603,6 +22609,9 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
+  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
+  parsed_issue_type?: InputMaybe<IssueType_Enum>;
+  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
@@ -22700,6 +22709,9 @@ export type Vulnerability_Report_Issue_Order_By = {
   isSuppressed?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
+  parsed_issue_language?: InputMaybe<Order_By>;
+  parsed_issue_type?: InputMaybe<Order_By>;
+  parsed_severity?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
@@ -22736,6 +22748,12 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   IssueType = 'issueType',
   /** column name */
+  ParsedIssueLanguage = 'parsed_issue_language',
+  /** column name */
+  ParsedIssueType = 'parsed_issue_type',
+  /** column name */
+  ParsedSeverity = 'parsed_severity',
+  /** column name */
   Severity = 'severity',
   /** column name */
   State = 'state',
@@ -22768,6 +22786,9 @@ export type Vulnerability_Report_Issue_Set_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
+  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
+  parsed_issue_type?: InputMaybe<IssueType_Enum>;
+  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
@@ -22954,6 +22975,9 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
+  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
+  parsed_issue_type?: InputMaybe<IssueType_Enum>;
+  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
@@ -23316,6 +23340,12 @@ export enum Vulnerability_Report_Issue_Update_Column {
   IssueLanguage = 'issueLanguage',
   /** column name */
   IssueType = 'issueType',
+  /** column name */
+  ParsedIssueLanguage = 'parsed_issue_language',
+  /** column name */
+  ParsedIssueType = 'parsed_issue_type',
+  /** column name */
+  ParsedSeverity = 'parsed_severity',
   /** column name */
   Severity = 'severity',
   /** column name */

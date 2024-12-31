@@ -25,7 +25,7 @@ export function reviewBuilder(
       demandOption: true,
       type: 'string',
       describe: chalk.bold(
-        'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL, Sonarqube)'
+        'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL, Sonarqube, Semgrep)'
       ),
     })
     .option('repo', { ...repoOption, demandOption: true })

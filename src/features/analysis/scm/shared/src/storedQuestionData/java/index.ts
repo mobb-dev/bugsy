@@ -30,7 +30,7 @@ const vulnerabilities = {
   [IssueType_Enum.ErrorCondtionWithoutAction]: errorConditionWithoutAction,
   [IssueType_Enum.Xxe as string]: xxe,
   [IssueType_Enum.Xss as string]: xss,
-  [IssueType_Enum.PrivacyViolation]: privacyViolation,
+  [IssueType_Enum.PrivacyViolation as string]: privacyViolation,
   [IssueType_Enum.Pt as string]: pt,
   [IssueType_Enum.Ssrf as string]: ssrf,
   [IssueType_Enum.LogForging as string]: logForging,

@@ -26,6 +26,7 @@ export const SCANNERS = {
   Fortify: 'fortify',
   Snyk: 'snyk',
   Sonarqube: 'sonarqube',
+  Semgrep: 'semgrep',
 } as const
 
 export const scannerToVulnerability_Report_Vendor_Enum = {
@@ -34,6 +35,7 @@ export const scannerToVulnerability_Report_Vendor_Enum = {
   [SCANNERS.Sonarqube]: Vulnerability_Report_Vendor_Enum.Sonarqube,
   [SCANNERS.Codeql]: Vulnerability_Report_Vendor_Enum.Codeql,
   [SCANNERS.Fortify]: Vulnerability_Report_Vendor_Enum.Fortify,
+  [SCANNERS.Semgrep]: Vulnerability_Report_Vendor_Enum.Semgrep,
 } as const
 
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])

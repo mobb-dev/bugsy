@@ -14,4 +14,5 @@ export const scannerToFriendlyString: Record<Scanner, string> = {
   fortify: 'Fortify',
   snyk: 'Snyk',
   sonarqube: 'Sonarqube',
+  semgrep: 'Semgrep',
 } as const

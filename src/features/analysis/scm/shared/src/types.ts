@@ -46,6 +46,7 @@ const ScmSubmitFixRequestsZ = z.array(
         createdByUser: z.object({
           email: z.string(),
         }),
+        targetBranchName: z.string().default(''),
       }),
       prUrl: z.string().nullable(),
       commitUrl: z.string().nullable(),
@@ -53,6 +54,8 @@ const ScmSubmitFixRequestsZ = z.array(
     }),
   })
 )
+
+export type ScmSubmitFixRequests = z.infer<typeof ScmSubmitFixRequestsZ>
 
 // Note: we're using zod here becasue we need to assue we have all the data ready for rendering the page
 // This saves null chekcing on the internal components
@@ -409,7 +412,9 @@ export const FixScreenQueryResultZ = z.object({
     })
   ),
   fixesWithSameIssueType: z.object({
-    fix: z.array(z.object({ id: z.string().uuid() })),
+    fix: z.array(
+      z.object({ id: z.string().uuid(), state: z.nativeEnum(Fix_State_Enum) })
+    ),
   }),
 })
 

@@ -16,6 +16,7 @@ const scannerChoices: ScannerChoice[] = [
   { name: 'Codeql', value: SCANNERS.Codeql },
   { name: 'Fortify', value: SCANNERS.Fortify },
   { name: 'Sonarqube', value: SCANNERS.Sonarqube },
+  { name: 'Semgrep', value: SCANNERS.Semgrep },
 ]
 
 export async function choseScanner(): Promise<ScannerValue> {

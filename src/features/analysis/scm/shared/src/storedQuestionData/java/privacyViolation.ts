@@ -1,5 +1,5 @@
 export const privacyViolation = {
-  remediation_option: {
+  remediationOption: {
     content: () => 'Preferred fix solution',
     description: () => `
       - Completely Remove the log message

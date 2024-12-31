@@ -822,6 +822,7 @@ export enum Vendors {
   Checkmarx = 'Checkmarx',
   CodeQl = 'CodeQL',
   Fortify = 'Fortify',
+  Semgrep = 'Semgrep',
   Snyk = 'Snyk',
   SonarQube = 'SonarQube'
 }
@@ -23866,6 +23867,8 @@ export enum Vulnerability_Report_Vendor_Enum {
   Codeql = 'codeql',
   /** fortify */
   Fortify = 'fortify',
+  /** semgrep */
+  Semgrep = 'semgrep',
   /** snyk */
   Snyk = 'snyk',
   /** sonarqube */

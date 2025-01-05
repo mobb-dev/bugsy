@@ -2437,8 +2437,9 @@ export type Fix = {
   id: Scalars['uuid']['output'];
   isArchived?: Maybe<Scalars['Boolean']['output']>;
   isExpired: Scalars['Boolean']['output'];
-  issueLanguage?: Maybe<IssueLanguage_Enum>;
-  issueType?: Maybe<IssueType_Enum>;
+  /** This field is deprecated */
+  issueLanguageOld?: Maybe<IssueLanguage_Enum>;
+  issueTypeOld?: Maybe<IssueType_Enum>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "fix_number_of_vulnerability_issue" */
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
@@ -2467,7 +2468,7 @@ export type Fix = {
   vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
   /** An aggregate relationship */
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
-  vulnerabilitySeverity?: Maybe<Vulnerability_Severity_Enum>;
+  vulnerabilitySeverityOld?: Maybe<Vulnerability_Severity_Enum>;
 };
 
 
@@ -3688,8 +3689,8 @@ export type Fix_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
   isExpired?: InputMaybe<Boolean_Comparison_Exp>;
-  issueLanguage?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
-  issueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  issueLanguageOld?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
+  issueTypeOld?: InputMaybe<IssueType_Enum_Comparison_Exp>;
   modifiedBy?: InputMaybe<String_Comparison_Exp>;
   numberOfVulnerabilityIssues?: InputMaybe<Int_Comparison_Exp>;
   patchFile?: InputMaybe<File_Bool_Exp>;
@@ -3704,7 +3705,7 @@ export type Fix_Bool_Exp = {
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Bool_Exp>;
   vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Bool_Exp>;
-  vulnerabilitySeverity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
+  vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "fix" */
@@ -3742,8 +3743,9 @@ export type Fix_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
-  issueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  /** This field is deprecated */
+  issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
+  issueTypeOld?: InputMaybe<IssueType_Enum>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   patchFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   /** this a deprecated relationship */
@@ -3752,7 +3754,7 @@ export type Fix_Insert_Input = {
   state?: InputMaybe<Fix_State_Enum>;
   submitFixRequests?: InputMaybe<Fix_To_Submit_Fix_Request_Arr_Rel_Insert_Input>;
   vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Arr_Rel_Insert_Input>;
-  vulnerabilitySeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
 };
 
 /** aggregate max on columns */
@@ -3888,8 +3890,8 @@ export type Fix_Order_By = {
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
   isExpired?: InputMaybe<Order_By>;
-  issueLanguage?: InputMaybe<Order_By>;
-  issueType?: InputMaybe<Order_By>;
+  issueLanguageOld?: InputMaybe<Order_By>;
+  issueTypeOld?: InputMaybe<Order_By>;
   modifiedBy?: InputMaybe<Order_By>;
   numberOfVulnerabilityIssues?: InputMaybe<Order_By>;
   patchFile?: InputMaybe<File_Order_By>;
@@ -3901,7 +3903,7 @@ export type Fix_Order_By = {
   state?: InputMaybe<Order_By>;
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Order_By>;
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Order_By>;
-  vulnerabilitySeverity?: InputMaybe<Order_By>;
+  vulnerabilitySeverityOld?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: fix */
@@ -4614,9 +4616,9 @@ export enum Fix_Select_Column {
   /** column name */
   IsExpired = 'isExpired',
   /** column name */
-  IssueLanguage = 'issueLanguage',
+  IssueLanguageOld = 'issueLanguageOld',
   /** column name */
-  IssueType = 'issueType',
+  IssueTypeOld = 'issueTypeOld',
   /** column name */
   ModifiedBy = 'modifiedBy',
   /** column name */
@@ -4624,7 +4626,7 @@ export enum Fix_Select_Column {
   /** column name */
   State = 'state',
   /** column name */
-  VulnerabilitySeverity = 'vulnerabilitySeverity'
+  VulnerabilitySeverityOld = 'vulnerabilitySeverityOld'
 }
 
 /** select "fix_aggregate_bool_exp_bool_and_arguments_columns" columns of table "fix" */
@@ -4659,13 +4661,14 @@ export type Fix_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
-  issueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  /** This field is deprecated */
+  issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
+  issueTypeOld?: InputMaybe<IssueType_Enum>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Fix_State_Enum>;
-  vulnerabilitySeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
 };
 
 /** columns and relationships of "fix_state" */
@@ -4893,13 +4896,14 @@ export type Fix_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
-  issueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  /** This field is deprecated */
+  issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
+  issueTypeOld?: InputMaybe<IssueType_Enum>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Fix_State_Enum>;
-  vulnerabilitySeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
 };
 
 /** aggregate sum on columns */
@@ -5334,9 +5338,9 @@ export enum Fix_Update_Column {
   /** column name */
   IsExpired = 'isExpired',
   /** column name */
-  IssueLanguage = 'issueLanguage',
+  IssueLanguageOld = 'issueLanguageOld',
   /** column name */
-  IssueType = 'issueType',
+  IssueTypeOld = 'issueTypeOld',
   /** column name */
   ModifiedBy = 'modifiedBy',
   /** column name */
@@ -5344,7 +5348,7 @@ export enum Fix_Update_Column {
   /** column name */
   State = 'state',
   /** column name */
-  VulnerabilitySeverity = 'vulnerabilitySeverity'
+  VulnerabilitySeverityOld = 'vulnerabilitySeverityOld'
 }
 
 export type Fix_Updates = {
@@ -6667,8 +6671,12 @@ export enum IssueType_Enum {
   CmDi = 'CMDi',
   /** Command Injection: relative path command */
   CmDiRelativePathCommand = 'CMDi_relative_path_command',
+  /** Sections of code should not be commented out */
+  CodeInComment = 'CODE_IN_COMMENT',
   /** A data member and a function have the same name which can be confusing to the developer */
   ConfusingNaming = 'CONFUSING_NAMING',
+  /** Cross-Site Request Forgery (CSRF) occurs when an attacker tricks a user into performing actions they did not intend on a web application in which they are authenticated, potentially leading to unauthorized actions or data manipulation */
+  Csrf = 'CSRF',
   /** Use of dangerous function */
   DangerousFunctionOverflow = 'DANGEROUS_FUNCTION_OVERFLOW',
   /** Dead Code: Unused Field */
@@ -6805,6 +6813,8 @@ export enum IssueType_Enum {
   WcfMisconfigurationInsufficientLogging = 'WCF_MISCONFIGURATION_INSUFFICIENT_LOGGING',
   /** WCF Misconfiguration: Throttling Not Enabled */
   WcfMisconfigurationThrottlingNotEnabled = 'WCF_MISCONFIGURATION_THROTTLING_NOT_ENABLED',
+  /** Encryption mechanisms are insufficiently secure due to outdated algorithms, short key lengths, or poor implementation, making sensitive data vulnerable to decryption by attackers */
+  WeakEncryption = 'WEAK_ENCRYPTION',
   /** Unbounded occurrences can lead to resources exhaustion and ultimately a denial of service */
   WeakXmlSchemaUnboundedOccurrences = 'WEAK_XML_SCHEMA_UNBOUNDED_OCCURRENCES',
   /** Cross Site Scripting */
@@ -21916,10 +21926,12 @@ export type Vulnerability_Report_Issue = {
   isSuppressed: Scalars['Boolean']['output'];
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
-  parsed_issue_language?: Maybe<IssueLanguage_Enum>;
-  parsed_issue_type?: Maybe<IssueType_Enum>;
-  parsed_severity?: Maybe<Vulnerability_Severity_Enum>;
+  parsedIssueLanguage?: Maybe<IssueLanguage_Enum>;
+  parsedIssueType?: Maybe<IssueType_Enum>;
+  parsedSeverity?: Maybe<Vulnerability_Severity_Enum>;
   severity?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
   state: Vulnerability_Report_Issue_State_Enum;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId: Scalars['String']['output'];
@@ -22015,9 +22027,17 @@ export type Vulnerability_Report_Issue_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Aggregate_Fields = {
   __typename?: 'vulnerability_report_issue_aggregate_fields';
+  avg?: Maybe<Vulnerability_Report_Issue_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Vulnerability_Report_Issue_Max_Fields>;
   min?: Maybe<Vulnerability_Report_Issue_Min_Fields>;
+  stddev?: Maybe<Vulnerability_Report_Issue_Stddev_Fields>;
+  stddev_pop?: Maybe<Vulnerability_Report_Issue_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Vulnerability_Report_Issue_Stddev_Samp_Fields>;
+  sum?: Maybe<Vulnerability_Report_Issue_Sum_Fields>;
+  var_pop?: Maybe<Vulnerability_Report_Issue_Var_Pop_Fields>;
+  var_samp?: Maybe<Vulnerability_Report_Issue_Var_Samp_Fields>;
+  variance?: Maybe<Vulnerability_Report_Issue_Variance_Fields>;
 };
 
 
@@ -22046,6 +22066,13 @@ export type Vulnerability_Report_Issue_Arr_Rel_Insert_Input = {
   on_conflict?: InputMaybe<Vulnerability_Report_Issue_On_Conflict>;
 };
 
+/** aggregate avg on columns */
+export type Vulnerability_Report_Issue_Avg_Fields = {
+  __typename?: 'vulnerability_report_issue_avg_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
 /** Boolean expression to filter rows from the table "vulnerability_report_issue". All fields are combined with a logical 'AND'. */
 export type Vulnerability_Report_Issue_Bool_Exp = {
   _and?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
@@ -22061,10 +22088,11 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   isSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguage?: InputMaybe<String_Comparison_Exp>;
   issueType?: InputMaybe<String_Comparison_Exp>;
-  parsed_issue_language?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
-  parsed_issue_type?: InputMaybe<IssueType_Enum_Comparison_Exp>;
-  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
+  parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
+  parsedIssueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
   severity?: InputMaybe<String_Comparison_Exp>;
+  severityValue?: InputMaybe<Int_Comparison_Exp>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum_Comparison_Exp>;
   vendorInstanceId?: InputMaybe<String_Comparison_Exp>;
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
@@ -22609,9 +22637,9 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
-  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
-  parsed_issue_type?: InputMaybe<IssueType_Enum>;
-  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
+  parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
+  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
@@ -22630,6 +22658,8 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
   severity?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -22657,6 +22687,8 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
   severity?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -22709,10 +22741,11 @@ export type Vulnerability_Report_Issue_Order_By = {
   isSuppressed?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
-  parsed_issue_language?: InputMaybe<Order_By>;
-  parsed_issue_type?: InputMaybe<Order_By>;
-  parsed_severity?: InputMaybe<Order_By>;
+  parsedIssueLanguage?: InputMaybe<Order_By>;
+  parsedIssueType?: InputMaybe<Order_By>;
+  parsedSeverity?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
+  severityValue?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
@@ -22748,11 +22781,11 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   IssueType = 'issueType',
   /** column name */
-  ParsedIssueLanguage = 'parsed_issue_language',
+  ParsedIssueLanguage = 'parsedIssueLanguage',
   /** column name */
-  ParsedIssueType = 'parsed_issue_type',
+  ParsedIssueType = 'parsedIssueType',
   /** column name */
-  ParsedSeverity = 'parsed_severity',
+  ParsedSeverity = 'parsedSeverity',
   /** column name */
   Severity = 'severity',
   /** column name */
@@ -22786,9 +22819,9 @@ export type Vulnerability_Report_Issue_Set_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
-  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
-  parsed_issue_type?: InputMaybe<IssueType_Enum>;
-  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
+  parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
+  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
@@ -22845,6 +22878,8 @@ export enum Vulnerability_Report_Issue_State_Enum {
   Digested = 'Digested',
   /** Encountered an error while generating the fix */
   Error = 'Error',
+  /** This vulnerability is a false positive */
+  FalsePositive = 'FalsePositive',
   /** This vulnerability was filtered and not analyzed */
   Filtered = 'Filtered',
   /** This vulnerability was filtered due to ai quota */
@@ -22958,6 +22993,27 @@ export type Vulnerability_Report_Issue_State_Updates = {
   where: Vulnerability_Report_Issue_State_Bool_Exp;
 };
 
+/** aggregate stddev on columns */
+export type Vulnerability_Report_Issue_Stddev_Fields = {
+  __typename?: 'vulnerability_report_issue_stddev_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Vulnerability_Report_Issue_Stddev_Pop_Fields = {
+  __typename?: 'vulnerability_report_issue_stddev_pop_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Vulnerability_Report_Issue_Stddev_Samp_Fields = {
+  __typename?: 'vulnerability_report_issue_stddev_samp_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
 /** Streaming cursor of the table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Stream_Cursor_Input = {
   /** Stream column input with initial value */
@@ -22975,14 +23031,21 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
-  parsed_issue_language?: InputMaybe<IssueLanguage_Enum>;
-  parsed_issue_type?: InputMaybe<IssueType_Enum>;
-  parsed_severity?: InputMaybe<Vulnerability_Severity_Enum>;
+  parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
+  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Vulnerability_Report_Issue_Sum_Fields = {
+  __typename?: 'vulnerability_report_issue_sum_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
 };
 
 /** columns and relationships of "vulnerability_report_issue_tag" */
@@ -23341,11 +23404,11 @@ export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
   IssueType = 'issueType',
   /** column name */
-  ParsedIssueLanguage = 'parsed_issue_language',
+  ParsedIssueLanguage = 'parsedIssueLanguage',
   /** column name */
-  ParsedIssueType = 'parsed_issue_type',
+  ParsedIssueType = 'parsedIssueType',
   /** column name */
-  ParsedSeverity = 'parsed_severity',
+  ParsedSeverity = 'parsedSeverity',
   /** column name */
   Severity = 'severity',
   /** column name */
@@ -23373,6 +23436,27 @@ export type Vulnerability_Report_Issue_Updates = {
   _set?: InputMaybe<Vulnerability_Report_Issue_Set_Input>;
   /** filter the rows which have to be updated */
   where: Vulnerability_Report_Issue_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Vulnerability_Report_Issue_Var_Pop_Fields = {
+  __typename?: 'vulnerability_report_issue_var_pop_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Vulnerability_Report_Issue_Var_Samp_Fields = {
+  __typename?: 'vulnerability_report_issue_var_samp_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Vulnerability_Report_Issue_Variance_Fields = {
+  __typename?: 'vulnerability_report_issue_variance_fields';
+  /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
+  severityValue?: Maybe<Scalars['Int']['output']>;
 };
 
 /** aggregate max on columns */
@@ -24211,7 +24295,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, vulnerabilitySeverity?: Vulnerability_Severity_Enum | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, safeIssueLanguage?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedSeverity?: Vulnerability_Severity_Enum | null }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -24420,7 +24504,9 @@ export const GetFixesDocument = `
   fixes: fix(where: $filters) {
     safeIssueType
     id
-    vulnerabilitySeverity
+    vulnerabilityReportIssues(limit: 1) {
+      parsedSeverity
+    }
     safeIssueLanguage
     patchAndQuestions {
       __typename

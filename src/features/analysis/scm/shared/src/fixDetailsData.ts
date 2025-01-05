@@ -330,4 +330,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   },
   [IssueType_Enum.StringFormatMisuse]: undefined,
   [IssueType_Enum.NonReadonlyField]: undefined,
+  [IssueType_Enum.Csrf]: undefined,
+  [IssueType_Enum.WeakEncryption]: undefined,
+  [IssueType_Enum.CodeInComment]: undefined,
 }

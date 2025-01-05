@@ -21,6 +21,12 @@ export const OrganizationScreenQueryParamsZ = z.object({
   organizationId: z.string().uuid(),
 })
 
+// note: we can't use default since it will fail when the value is null
+export const ParsedSeverityZ = z
+  .nativeEnum(Vulnerability_Severity_Enum)
+  .nullish()
+  .transform((i) => i ?? Vulnerability_Severity_Enum.Low)
+
 export const PermissionsScreenQueryParamsZ = OrganizationScreenQueryParamsZ
 
 export const ProjectPageQueryParamsZ = z.object({
@@ -126,10 +132,6 @@ export const ReportQueryResultZ = z.object({
         modifiedBy: z.string().nullable(),
         gitBlameLogin: z.string().nullable(),
         fixReportId: z.string().uuid(),
-        vulnerabilitySeverity: z
-          .nativeEnum(Vulnerability_Severity_Enum)
-          .nullable()
-          .transform((i) => i ?? Vulnerability_Severity_Enum.Low),
         filePaths: z.array(
           z.object({
             fileRepoRelativePath: z.string(),
@@ -141,6 +143,7 @@ export const ReportQueryResultZ = z.object({
           z.object({
             issueType: z.string(),
             issueLanguage: z.string(),
+            parsedSeverity: ParsedSeverityZ,
           })
         ),
         scmSubmitFixRequests: ScmSubmitFixRequestsZ,
@@ -222,10 +225,6 @@ export const ReportFixesQueryZ = z.array(
     effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
     safeIssueLanguage: z.string(),
     safeIssueType: z.string(),
-    vulnerabilitySeverity: z
-      .nativeEnum(Vulnerability_Severity_Enum)
-      .nullable()
-      .transform((i) => i ?? Vulnerability_Severity_Enum.Low),
     fixReportId: z.string().uuid(),
     filePaths: z.array(
       z.object({
@@ -233,12 +232,15 @@ export const ReportFixesQueryZ = z.array(
       })
     ),
     numberOfVulnerabilityIssues: z.number(),
-    vulnerabilityReportIssues: z.array(
-      z.object({
-        issueType: z.string(),
-        issueLanguage: z.string(),
-      })
-    ),
+    vulnerabilityReportIssues: z
+      .array(
+        z.object({
+          issueType: z.string(),
+          issueLanguage: z.string(),
+          parsedSeverity: ParsedSeverityZ,
+        })
+      )
+      .min(1),
     scmSubmitFixRequests: ScmSubmitFixRequestsZ,
     fixRatings: z.array(FixRatingZ).default([]),
   })
@@ -311,11 +313,6 @@ export const FixQueryZ = z.object({
   fixReportId: z.string().uuid(),
   isExpired: z.boolean().default(false),
   isArchived: z.boolean().nullable(),
-  // TODO: remove nullish once the data on the backend is ready
-  vulnerabilitySeverity: z
-    .nativeEnum(Vulnerability_Severity_Enum)
-    .nullable()
-    .transform((i) => i ?? Vulnerability_Severity_Enum.Low),
   fixFiles: z.array(
     z.object({
       fileRepoRelativePath: z.string(),
@@ -326,6 +323,7 @@ export const FixQueryZ = z.object({
     z.object({
       vendorIssueId: z.string(),
       issueLanguage: z.string(),
+      parsedSeverity: ParsedSeverityZ,
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,
@@ -407,6 +405,7 @@ export const FixScreenQueryResultZ = z.object({
           vendorIssueId: z.string(),
           issueType: z.string(),
           issueLanguage: z.string(),
+          parsedSeverity: ParsedSeverityZ,
         })
       ),
     })

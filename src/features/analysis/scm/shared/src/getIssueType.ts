@@ -93,6 +93,9 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.ClientDomStoredCodeInjection]: 'Client Code Injection',
   [IssueType_Enum.StringFormatMisuse]: 'String Format Misuse',
   [IssueType_Enum.NonReadonlyField]: 'Non Readonly Field',
+  [IssueType_Enum.Csrf]: 'Cross-Site Request Forgery (CSRF)',
+  [IssueType_Enum.WeakEncryption]: 'Weak Encryption Mechanism',
+  [IssueType_Enum.CodeInComment]: 'Code in Comment',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

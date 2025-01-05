@@ -99,7 +99,9 @@ query getFixes($filters: fix_bool_exp!) {
   fixes: fix(where: $filters) {
     safeIssueType
     id
-    vulnerabilitySeverity
+    vulnerabilityReportIssues(limit: 1) {
+      parsedSeverity
+    }
     safeIssueLanguage
     patchAndQuestions {
       __typename

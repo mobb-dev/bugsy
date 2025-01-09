@@ -747,6 +747,11 @@ export type UnstructuredFixExtraContext = {
   value: Scalars['JSON']['output'];
 };
 
+export type UpdateFixAcrhiveStateResponse = {
+  __typename?: 'UpdateFixAcrhiveStateResponse';
+  status: Status;
+};
+
 export type UpdateGithubTokenFromAuth0 = {
   __typename?: 'UpdateGithubTokenFromAuth0';
   status: Status;
@@ -6779,6 +6784,8 @@ export enum IssueType_Enum {
   RaceConditionFormatFlaw = 'RACE_CONDITION_FORMAT_FLAW',
   /** Regular Expression Injection */
   RegexInjection = 'REGEX_INJECTION',
+  /** REGEX_MISSING_TIMEOUT */
+  RegexMissingTimeout = 'REGEX_MISSING_TIMEOUT',
   /** SQL Injection */
   SqlInjection = 'SQL_Injection',
   /** Server Side Request Forgery */
@@ -7439,6 +7446,7 @@ export type Mutation_Root = {
   updateBitbucketToken: ScmAccessToken;
   updateBitbucketTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateDownloadedFixData?: Maybe<StatusQueryResponse>;
+  updateFixAcrhiveState?: Maybe<UpdateFixAcrhiveStateResponse>;
   updateGithubToken: ScmAccessToken;
   updateGithubTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateGitlabToken: ScmAccessToken;
@@ -9443,6 +9451,14 @@ export type Mutation_RootUpdateBitbucketTokenArgs = {
 /** mutation root */
 export type Mutation_RootUpdateDownloadedFixDataArgs = {
   fixId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdateFixAcrhiveStateArgs = {
+  fixId: Scalars['String']['input'];
+  isArchived: Scalars['Boolean']['input'];
+  projectId: Scalars['String']['input'];
 };
 
 

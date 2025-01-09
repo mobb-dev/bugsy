@@ -96,6 +96,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.Csrf]: 'Cross-Site Request Forgery (CSRF)',
   [IssueType_Enum.WeakEncryption]: 'Weak Encryption Mechanism',
   [IssueType_Enum.CodeInComment]: 'Code in Comment',
+  [IssueType_Enum.RegexMissingTimeout]: 'Regex Missing Timeout',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

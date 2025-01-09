@@ -333,4 +333,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.Csrf]: undefined,
   [IssueType_Enum.WeakEncryption]: undefined,
   [IssueType_Enum.CodeInComment]: undefined,
+  [IssueType_Enum.RegexMissingTimeout]: undefined,
 }

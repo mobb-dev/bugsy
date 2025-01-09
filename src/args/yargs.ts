@@ -59,7 +59,7 @@ export const parseArgs = async (args: readonly string[]) => {
       addScmTokenHandler
     )
     .example(
-      '$0 scan -r https://github.com/WebGoat/WebGoat',
+      'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',
       'Scan an existing repository'
     )
     .command({

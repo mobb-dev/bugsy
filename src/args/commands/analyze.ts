@@ -57,7 +57,7 @@ export function analyzeBuilder(
     .option('commit-hash', commitHashOption)
     .option('auto-pr', autoPrOption)
     .example(
-      '$0 analyze -r https://github.com/WebGoat/WebGoat -f <your_vulirabitliy_report_path>',
+      'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'
     )
     .help()

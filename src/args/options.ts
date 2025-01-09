@@ -21,7 +21,7 @@ export const yesOption = {
 } as const
 
 export const refOption = {
-  describe: chalk.bold('reference of the repository (branch, tag, commit)'),
+  describe: chalk.bold('Reference of the repository (branch, tag, commit)'),
   type: 'string',
   demandOption: false,
 } as const

@@ -61,7 +61,7 @@ export function reviewBuilder(
       demandOption: true,
     })
     .example(
-      '$0 review -r https://github.com/WebGoat/WebGoat -f <your_vulirabitliy_report_path>  --ch <pr_last_commit>   --pr <pr_number> --ref <pr_branch_name>  --api-key <api_key> --src-path <your_repo_path>',
+      'npx mobbdev@latest review -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>  --ch <pr_last_commit>   --pr <pr_number> --ref <pr_branch_name>  --api-key <api_key> --src-path <your_repo_path>',
       'add fixes to your pr'
     )
     .help()

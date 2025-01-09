@@ -7,6 +7,7 @@ import { insufficientLogging } from './insufficientLogging'
 import { logForging } from './logForging'
 import { overlyBroadCatch } from './overlyBroadCatch'
 import { pt } from './pt'
+import { regexMissingTimeout } from './regexMissingTimeout'
 import { sqlInjection } from './sqlInjection'
 import { ssrf } from './ssrf'
 import { sysLeak } from './sysLeak'
@@ -27,6 +28,7 @@ const vulnerabilities = {
   [IssueType_Enum.OverlyBroadCatch as string]: overlyBroadCatch,
   [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
   [IssueType_Enum.Pt as string]: pt,
+  [IssueType_Enum.RegexMissingTimeout as string]: regexMissingTimeout,
   [IssueType_Enum.HttpOnlyCookie as string]: httpOnlyCookie,
   [IssueType_Enum.InsecureCookie as string]: insecureCookie,
   [IssueType_Enum.WcfMisconfigurationThrottlingNotEnabled]:

@@ -27,7 +27,7 @@ export function addScmTokenBuilder(
     .option('api-key', apiKeyOption)
     .option('ci', ciOption)
     .example(
-      '$0 add-scm-token --scm-type Ado --url https://dev.azure.com/adoorg/test/_git/repo --token abcdef0123456 --organization myOrg',
+      'npx mobbdev@latest add-scm-token --scm-type Ado --url https://dev.azure.com/adoorg/test/_git/repo --token abcdef0123456 --organization myOrg',
       `Add your SCM (${Object.values(scmFriendlyText).join(', ')}) token to Mobb to enable automated fixes.`
     )
     .help()

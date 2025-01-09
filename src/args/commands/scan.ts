@@ -38,7 +38,7 @@ export function scanBuilder(
       .option('cx-project-name', projectNameOption)
       .option('auto-pr', autoPrOption)
       .example(
-        '$0 scan -r https://github.com/WebGoat/WebGoat',
+        'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',
         'Scan an existing repository'
       )
       .help()

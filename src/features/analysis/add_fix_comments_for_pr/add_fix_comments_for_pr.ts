@@ -2,7 +2,8 @@ import { Scanner } from '@mobb/bugsy/constants'
 import Debug from 'debug'
 
 import { GQLClient } from '../graphql'
-import { GithubSCMLib, SCMLib } from '../scm'
+import { SCMLib } from '../scm'
+import { GithubSCMLib } from '../scm/github'
 import {
   deleteAllPreviousComments,
   deleteAllPreviousGeneralPrComments,

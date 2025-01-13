@@ -5,14 +5,16 @@ import { fetch, ProxyAgent, RequestInfo, RequestInit } from 'undici'
 import {
   GIT_PROXY_HOST,
   GITHUB_API_TOKEN,
-  InvalidAccessTokenError,
-  InvalidRepoUrlError,
-  InvalidUrlPatternError,
   normalizeUrl,
   shouldValidateUrl,
 } from '../..'
-import { isBrokerUrl } from '../../scm'
+import {
+  InvalidAccessTokenError,
+  InvalidRepoUrlError,
+  InvalidUrlPatternError,
+} from '../../errors'
 import { parseScmURL, scmCloudUrl, ScmType } from '../../shared/src'
+import { isBrokerUrl } from '../../utils'
 import { GET_REPO_BRANCHES } from '../consts'
 
 export function parseGithubOwnerAndRepo(gitHubUrl: string): {

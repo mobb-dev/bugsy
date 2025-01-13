@@ -7,7 +7,7 @@ import tmp from 'tmp'
 import { z } from 'zod'
 
 import { GIT_PROXY_HOST } from '../env'
-import { isBrokerUrl } from '../scm'
+import { isBrokerUrl } from '../utils'
 import {
   CommitToSameBranchParams,
   FixResponseArray,

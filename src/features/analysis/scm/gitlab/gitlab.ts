@@ -24,12 +24,11 @@ import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
-  isBrokerUrl,
   RefNotFoundError,
-} from '../scm'
+} from '../errors'
 import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { ReferenceType } from '../types'
-import { shouldValidateUrl } from '../utils'
+import { isBrokerUrl, shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
 import {
   GetGitlabTokenParams,
@@ -252,7 +251,11 @@ export async function getGitlabBranchList({
   const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   try {
     const res = await api.Branches.all(projectPath, {
+      //keyset API pagination is not supported by GL for the branch list (at least not the on-prem version)
+      //so for now we stick with the default pagination and just return the first page and limit the results to 1000 entries.
+      //This is a temporary solution until we implement list branches with name search.
       perPage: MAX_BRANCHES_FETCH,
+      page: 1,
     })
     res.sort((a, b) => {
       if (!a.commit?.committed_date || !b.commit?.committed_date) {

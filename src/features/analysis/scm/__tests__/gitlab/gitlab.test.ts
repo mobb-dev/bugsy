@@ -8,7 +8,7 @@ import {
   getGitlabToken,
   parseGitlabOwnerAndRepo,
 } from '../../gitlab/gitlab'
-import { SCMLib } from '../../scm'
+import { createScmLib } from '../../scmFactory'
 import { ScmLibScmType } from '../../types'
 import { RepoConfig } from '../common'
 import { env } from '../env'
@@ -181,7 +181,7 @@ const TEST_GITLAB_REPO = 'https://gitlab.com/generaldev1/WebGoat'
 
 describe('scm instance tests', () => {
   it('should return the correct headers for basic auth type ', async () => {
-    const scmLib = await SCMLib.init({
+    const scmLib = await createScmLib({
       url: TEST_GITLAB_REPO,
       scmType: ScmLibScmType.GITLAB,
       accessToken: env.TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN,

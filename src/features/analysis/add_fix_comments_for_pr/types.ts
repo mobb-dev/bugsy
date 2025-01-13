@@ -1,6 +1,6 @@
 import { Scanner } from '@mobb/bugsy/constants'
 
-import { GithubSCMLib } from '../scm'
+import { GithubSCMLib } from '../scm/github'
 import { getFixesData, getRelevantVulenrabilitiesFromDiff } from './utils'
 
 export type PrVulenrabilities = Awaited<

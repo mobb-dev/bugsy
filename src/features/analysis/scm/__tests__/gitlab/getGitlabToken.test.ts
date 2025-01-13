@@ -2,7 +2,7 @@ import { fetch as undiciFetch } from 'undici'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getGitlabToken, GitlabTokenRequestTypeEnum } from '../../gitlab'
-import * as scmUtils from '../../scm'
+import * as scmUtils from '../../utils'
 
 // Mock the external dependencies
 

@@ -42,7 +42,6 @@ import {
   getCloudScmLibTypeFromUrl,
   getScmConfig,
   ScmConfig,
-  SCMLib,
   ScmLibScmType,
 } from './scm'
 import {
@@ -50,6 +49,7 @@ import {
   OrganizationToRoleType,
   Scan_Source_Enum,
 } from './scm/generates/client_generates'
+import { createScmLib } from './scm/scmFactory'
 import { uploadFile } from './upload-file'
 import { getFromArraySafe, sendReport } from './utils'
 
@@ -262,7 +262,7 @@ async function getReport(
     ci,
   } = params
   const tokenInfo = await getScmTokenInfo({ gqlClient, repo: repoUrl })
-  const scm = await SCMLib.init(
+  const scm = await createScmLib(
     {
       url: repoUrl,
       accessToken: tokenInfo.accessToken,
@@ -662,7 +662,7 @@ export async function _scan(
           })
           .parse({ repo, githubActionToken })
 
-        const scm = await SCMLib.init(
+        const scm = await createScmLib(
           {
             url: params.repo,
             accessToken: params.githubActionToken,

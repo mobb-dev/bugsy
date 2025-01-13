@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getGithubSdk, parseGithubOwnerAndRepo } from '../github'
-import { SCMLib } from '../scm'
+import { createScmLib } from '../scmFactory'
 import { ScmLibScmType } from '../types'
 import { RepoConfig } from './common'
 import { env } from './env'
@@ -162,7 +162,7 @@ const TEST_REPO_URL = 'https://github.com/mobbgeneraldev/WebGoat'
 
 describe('scm instance tests', () => {
   it('should return the correct headers for basic auth type ', async () => {
-    const scmLib = await SCMLib.init({
+    const scmLib = await createScmLib({
       url: TEST_REPO_URL,
       scmType: ScmLibScmType.GITHUB,
       accessToken: env.TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN,
@@ -191,7 +191,7 @@ describe('parsing github url', () => {
   })
   it('fail if the url is invalid', () => {
     expect(() => parseGithubOwnerAndRepo(INVALID_URL)).toThrow(
-      'InvalidUrlPatternError is not a constructor'
+      `invalid github repo Url ${INVALID_URL}`
     )
   })
 })

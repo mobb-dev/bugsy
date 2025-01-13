@@ -39,6 +39,34 @@ export enum AdoPullRequestStatus {
    */
   All = 4,
 }
+
+export enum AdoPullRequestMergeStatus {
+  /**
+   * Status is not set. Default state.
+   */
+  NotSet = 0,
+  /**
+   * Pull request merge is queued.
+   */
+  Queued = 1,
+  /**
+   * Pull request merge failed due to conflicts.
+   */
+  Conflicts = 2,
+  /**
+   * Pull request merge succeeded.
+   */
+  Succeeded = 3,
+  /**
+   * Pull request merge rejected by policy.
+   */
+  RejectedByPolicy = 4,
+  /**
+   * Pull request merge failed.
+   */
+  Failure = 5,
+}
+
 export type AdoValidateParamsArgs = {
   url: string | undefined
   accessToken: string | undefined

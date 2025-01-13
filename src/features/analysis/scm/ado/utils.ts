@@ -10,9 +10,9 @@ import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
-  isBrokerUrl,
-} from '../scm'
+} from '../errors'
 import { parseScmURL, ScmType } from '../shared/src'
+import { isBrokerUrl } from '../utils'
 import {
   ADO_ACCESS_TOKEN_URL,
   AdoTokenTypeEnum,

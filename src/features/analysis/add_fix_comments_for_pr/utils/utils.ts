@@ -4,11 +4,8 @@ import { z } from 'zod'
 
 import { GQLClient } from '../../graphql'
 import { GetVulByNodeHunk } from '../../graphql/types'
-import {
-  getIssueTypeFriendlyString,
-  GithubSCMLib,
-  MOBB_ICON_IMG,
-} from '../../scm'
+import { getIssueTypeFriendlyString, MOBB_ICON_IMG } from '../../scm'
+import { GithubSCMLib } from '../../scm/github'
 import {
   GetGeneralPrCommentResponse,
   GetPrCommentsResponse,

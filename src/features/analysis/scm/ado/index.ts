@@ -1,4 +1,5 @@
 export * from './ado'
+export * from './AdoSCMLib'
 export * from './constants'
 export * from './types'
 export * from './utils'

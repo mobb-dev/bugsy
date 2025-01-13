@@ -2,7 +2,7 @@ import { OctokitOptions } from '@octokit/core'
 import { RequestError } from '@octokit/request-error'
 
 import { MAX_BRANCHES_FETCH } from '../constants'
-import { RefNotFoundError } from '../scm'
+import { RefNotFoundError } from '../errors'
 import { ReferenceType, ScmRepoInfo } from '../types'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,

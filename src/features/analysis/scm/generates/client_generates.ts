@@ -7117,6 +7117,10 @@ export type Mutation_Root = {
   delete_organization_to_user?: Maybe<Organization_To_User_Mutation_Response>;
   /** delete single row from the table: "organization_to_user" */
   delete_organization_to_user_by_pk?: Maybe<Organization_To_User>;
+  /** delete data from the table: "pr_status" */
+  delete_pr_status?: Maybe<Pr_Status_Mutation_Response>;
+  /** delete single row from the table: "pr_status" */
+  delete_pr_status_by_pk?: Maybe<Pr_Status>;
   /** delete data from the table: "project" */
   delete_project?: Maybe<Project_Mutation_Response>;
   /** delete single row from the table: "project" */
@@ -7338,6 +7342,10 @@ export type Mutation_Root = {
   insert_organization_to_user?: Maybe<Organization_To_User_Mutation_Response>;
   /** insert a single row into the table: "organization_to_user" */
   insert_organization_to_user_one?: Maybe<Organization_To_User>;
+  /** insert data into the table: "pr_status" */
+  insert_pr_status?: Maybe<Pr_Status_Mutation_Response>;
+  /** insert a single row into the table: "pr_status" */
+  insert_pr_status_one?: Maybe<Pr_Status>;
   /** insert data into the table: "project" */
   insert_project?: Maybe<Project_Mutation_Response>;
   /** insert data into the table: "project_issue_type_settings" */
@@ -7637,6 +7645,12 @@ export type Mutation_Root = {
   update_organization_to_user_by_pk?: Maybe<Organization_To_User>;
   /** update multiples rows of table: "organization_to_user" */
   update_organization_to_user_many?: Maybe<Array<Maybe<Organization_To_User_Mutation_Response>>>;
+  /** update data of the table: "pr_status" */
+  update_pr_status?: Maybe<Pr_Status_Mutation_Response>;
+  /** update single row of the table: "pr_status" */
+  update_pr_status_by_pk?: Maybe<Pr_Status>;
+  /** update multiples rows of table: "pr_status" */
+  update_pr_status_many?: Maybe<Array<Maybe<Pr_Status_Mutation_Response>>>;
   /** update data of the table: "project" */
   update_project?: Maybe<Project_Mutation_Response>;
   /** update single row of the table: "project" */
@@ -8274,6 +8288,18 @@ export type Mutation_RootDelete_Organization_To_UserArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Organization_To_User_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Pr_StatusArgs = {
+  where: Pr_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Pr_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -9014,6 +9040,20 @@ export type Mutation_RootInsert_Organization_To_UserArgs = {
 export type Mutation_RootInsert_Organization_To_User_OneArgs = {
   object: Organization_To_User_Insert_Input;
   on_conflict?: InputMaybe<Organization_To_User_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Pr_StatusArgs = {
+  objects: Array<Pr_Status_Insert_Input>;
+  on_conflict?: InputMaybe<Pr_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Pr_Status_OneArgs = {
+  object: Pr_Status_Insert_Input;
+  on_conflict?: InputMaybe<Pr_Status_On_Conflict>;
 };
 
 
@@ -10131,6 +10171,26 @@ export type Mutation_RootUpdate_Organization_To_User_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Organization_To_User_ManyArgs = {
   updates: Array<Organization_To_User_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_StatusArgs = {
+  _set?: InputMaybe<Pr_Status_Set_Input>;
+  where: Pr_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_Status_By_PkArgs = {
+  _set?: InputMaybe<Pr_Status_Set_Input>;
+  pk_columns: Pr_Status_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_Status_ManyArgs = {
+  updates: Array<Pr_Status_Updates>;
 };
 
 
@@ -12876,6 +12936,158 @@ export type Organization_Variance_Fields = {
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "pr_status" */
+export type Pr_Status = {
+  __typename?: 'pr_status';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "pr_status" */
+export type Pr_Status_Aggregate = {
+  __typename?: 'pr_status_aggregate';
+  aggregate?: Maybe<Pr_Status_Aggregate_Fields>;
+  nodes: Array<Pr_Status>;
+};
+
+/** aggregate fields of "pr_status" */
+export type Pr_Status_Aggregate_Fields = {
+  __typename?: 'pr_status_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Pr_Status_Max_Fields>;
+  min?: Maybe<Pr_Status_Min_Fields>;
+};
+
+
+/** aggregate fields of "pr_status" */
+export type Pr_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Pr_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "pr_status". All fields are combined with a logical 'AND'. */
+export type Pr_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Pr_Status_Bool_Exp>>;
+  _not?: InputMaybe<Pr_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Pr_Status_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "pr_status" */
+export enum Pr_Status_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  PrStatusPkey = 'pr_status_pkey'
+}
+
+export enum Pr_Status_Enum {
+  /** PR is open and active */
+  Active = 'ACTIVE',
+  /** PR was closed without merging */
+  Closed = 'CLOSED',
+  /** PR was successfully merged */
+  Merged = 'MERGED'
+}
+
+/** Boolean expression to compare columns of type "pr_status_enum". All fields are combined with logical 'AND'. */
+export type Pr_Status_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Pr_Status_Enum>;
+  _in?: InputMaybe<Array<Pr_Status_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Pr_Status_Enum>;
+  _nin?: InputMaybe<Array<Pr_Status_Enum>>;
+};
+
+/** input type for inserting data into table "pr_status" */
+export type Pr_Status_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Pr_Status_Max_Fields = {
+  __typename?: 'pr_status_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Pr_Status_Min_Fields = {
+  __typename?: 'pr_status_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "pr_status" */
+export type Pr_Status_Mutation_Response = {
+  __typename?: 'pr_status_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Pr_Status>;
+};
+
+/** on_conflict condition type for table "pr_status" */
+export type Pr_Status_On_Conflict = {
+  constraint: Pr_Status_Constraint;
+  update_columns?: Array<Pr_Status_Update_Column>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "pr_status". */
+export type Pr_Status_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: pr_status */
+export type Pr_Status_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "pr_status" */
+export enum Pr_Status_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "pr_status" */
+export type Pr_Status_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "pr_status" */
+export type Pr_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Pr_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Pr_Status_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "pr_status" */
+export enum Pr_Status_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Pr_Status_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Pr_Status_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Pr_Status_Bool_Exp;
+};
+
 /** columns and relationships of "project" */
 export type Project = {
   __typename?: 'project';
@@ -14811,6 +15023,12 @@ export type Query_Root = {
   organization_to_user_aggregate: Organization_To_User_Aggregate;
   /** fetch data from the table: "organization_to_user" using primary key columns */
   organization_to_user_by_pk?: Maybe<Organization_To_User>;
+  /** fetch data from the table: "pr_status" */
+  pr_status: Array<Pr_Status>;
+  /** fetch aggregated fields from the table: "pr_status" */
+  pr_status_aggregate: Pr_Status_Aggregate;
+  /** fetch data from the table: "pr_status" using primary key columns */
+  pr_status_by_pk?: Maybe<Pr_Status>;
   /** fetch data from the table: "project" */
   project: Array<Project>;
   /** fetch aggregated fields from the table: "project" */
@@ -15790,6 +16008,29 @@ export type Query_RootOrganization_To_User_AggregateArgs = {
 
 export type Query_RootOrganization_To_User_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootPr_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Status_Order_By>>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
+};
+
+
+export type Query_RootPr_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Status_Order_By>>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
+};
+
+
+export type Query_RootPr_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -17250,6 +17491,8 @@ export type Scm_Submit_Fix_Request = {
   /** An aggregate relationship */
   fixes_aggregate: Fix_To_Scm_Submit_Fix_Request_Aggregate;
   id: Scalars['uuid']['output'];
+  prId?: Maybe<Scalars['String']['output']>;
+  prStatus?: Maybe<Pr_Status_Enum>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId: Scalars['String']['output'];
   submitBranchName: Scalars['String']['output'];
@@ -17334,6 +17577,8 @@ export type Scm_Submit_Fix_Request_Bool_Exp = {
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  prId?: InputMaybe<String_Comparison_Exp>;
+  prStatus?: InputMaybe<Pr_Status_Enum_Comparison_Exp>;
   prUrl?: InputMaybe<String_Comparison_Exp>;
   scmId?: InputMaybe<String_Comparison_Exp>;
   submitBranchName?: InputMaybe<String_Comparison_Exp>;
@@ -17352,6 +17597,8 @@ export type Scm_Submit_Fix_Request_Insert_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Arr_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
   scmId?: InputMaybe<Scalars['String']['input']>;
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
@@ -17364,6 +17611,7 @@ export type Scm_Submit_Fix_Request_Max_Fields = {
   __typename?: 'scm_submit_fix_request_max_fields';
   commitUrl?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
   submitBranchName?: Maybe<Scalars['String']['output']>;
@@ -17374,6 +17622,7 @@ export type Scm_Submit_Fix_Request_Max_Fields = {
 export type Scm_Submit_Fix_Request_Max_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  prId?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
   submitBranchName?: InputMaybe<Order_By>;
@@ -17385,6 +17634,7 @@ export type Scm_Submit_Fix_Request_Min_Fields = {
   __typename?: 'scm_submit_fix_request_min_fields';
   commitUrl?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
   submitBranchName?: Maybe<Scalars['String']['output']>;
@@ -17395,6 +17645,7 @@ export type Scm_Submit_Fix_Request_Min_Fields = {
 export type Scm_Submit_Fix_Request_Min_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  prId?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
   submitBranchName?: InputMaybe<Order_By>;
@@ -17429,6 +17680,8 @@ export type Scm_Submit_Fix_Request_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
   id?: InputMaybe<Order_By>;
+  prId?: InputMaybe<Order_By>;
+  prStatus?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
   submitBranchName?: InputMaybe<Order_By>;
@@ -17448,6 +17701,10 @@ export enum Scm_Submit_Fix_Request_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  PrId = 'prId',
+  /** column name */
+  PrStatus = 'prStatus',
+  /** column name */
   PrUrl = 'prUrl',
   /** column name */
   ScmId = 'scmId',
@@ -17461,6 +17718,8 @@ export enum Scm_Submit_Fix_Request_Select_Column {
 export type Scm_Submit_Fix_Request_Set_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
   scmId?: InputMaybe<Scalars['String']['input']>;
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
@@ -17479,6 +17738,8 @@ export type Scm_Submit_Fix_Request_Stream_Cursor_Input = {
 export type Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
   scmId?: InputMaybe<Scalars['String']['input']>;
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
@@ -17491,6 +17752,10 @@ export enum Scm_Submit_Fix_Request_Update_Column {
   CommitUrl = 'commitUrl',
   /** column name */
   Id = 'id',
+  /** column name */
+  PrId = 'prId',
+  /** column name */
+  PrStatus = 'prStatus',
   /** column name */
   PrUrl = 'prUrl',
   /** column name */
@@ -18402,6 +18667,14 @@ export type Subscription_Root = {
   organization_to_user_by_pk?: Maybe<Organization_To_User>;
   /** fetch data from the table in a streaming manner: "organization_to_user" */
   organization_to_user_stream: Array<Organization_To_User>;
+  /** fetch data from the table: "pr_status" */
+  pr_status: Array<Pr_Status>;
+  /** fetch aggregated fields from the table: "pr_status" */
+  pr_status_aggregate: Pr_Status_Aggregate;
+  /** fetch data from the table: "pr_status" using primary key columns */
+  pr_status_by_pk?: Maybe<Pr_Status>;
+  /** fetch data from the table in a streaming manner: "pr_status" */
+  pr_status_stream: Array<Pr_Status>;
   /** fetch data from the table: "project" */
   project: Array<Project>;
   /** fetch aggregated fields from the table: "project" */
@@ -19590,6 +19863,36 @@ export type Subscription_RootOrganization_To_User_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Organization_To_User_Stream_Cursor_Input>>;
   where?: InputMaybe<Organization_To_User_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Status_Order_By>>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Status_Order_By>>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootPr_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Pr_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Pr_Status_Bool_Exp>;
 };
 
 

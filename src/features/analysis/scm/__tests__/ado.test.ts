@@ -8,7 +8,8 @@ import {
   getAdoToken,
   parseAdoOwnerAndRepo,
 } from '../ado'
-import { RepoNoTokenAccessError, SCMLib } from '../scm'
+import { RepoNoTokenAccessError } from '../errors'
+import { createScmLib } from '../scmFactory'
 import { ReferenceType, ScmLibScmType } from '../types'
 import { env } from './env'
 
@@ -243,7 +244,7 @@ describe.each(Object.entries(testInputs))(
       const brachList = await adoSdk.getAdoBranchList({
         repoUrl: ADO_URL,
       })
-      expect(brachList.length).toBeLessThanOrEqual(100)
+      expect(brachList.length).toBeLessThanOrEqual(1000)
     })
 
     it.each(downloadTestParams)(
@@ -334,7 +335,7 @@ describe.each(Object.entries(scmTestParams))(
   'Ado scm instance',
   (testName, { url, accessToken, scmOrg }) => {
     it(`${chalk.green.bold(testName)} should return the correct headers for basic auth type `, async () => {
-      const scmLib = await SCMLib.init(
+      const scmLib = await createScmLib(
         {
           url,
           scmType: ScmLibScmType.ADO,
@@ -351,6 +352,9 @@ describe.each(Object.entries(scmTestParams))(
         authorization: `Basic ${encodedAccessToken}`,
       })
       const signedRepoUrl = await scmLib.getUrlWithCredentials()
+      if (!signedRepoUrl) {
+        throw new Error('signedRepoUrl is undefined')
+      }
       const { protocol, pathname, hostname } = new URL(signedRepoUrl)
       expect(signedRepoUrl).toBe(
         `${protocol}//${accessToken}@${hostname}${pathname}`
@@ -363,7 +367,7 @@ describe.each(Object.entries(scmTestParams))(
 
 describe('Ado scm general checks', () => {
   it('should return the correct repo list', async () => {
-    const scmLib = await SCMLib.init({
+    const scmLib = await createScmLib({
       url: undefined,
       scmType: ScmLibScmType.ADO,
       accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
@@ -403,7 +407,7 @@ describe('Ado scm general checks', () => {
   })
   it('should throw RepoNoTokenAccessError when repo is not accessible', async () => {
     await expect(
-      SCMLib.init({
+      createScmLib({
         url: 'https://dev.azure.com/mobbtest/test/_git/repo11',
         accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
         scmType: ScmLibScmType.ADO,

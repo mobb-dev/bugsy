@@ -5,16 +5,18 @@ import bitbucketPkg, { APIClient, Schema } from 'bitbucket'
 import Debug from 'debug'
 import { z } from 'zod'
 
-import { MAX_BRANCHES_FETCH } from '../constants'
 import {
-  GetRefererenceResult,
-  GetRefererenceResultZ,
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   RefNotFoundError,
-} from '../scm'
+} from '../errors'
 import { parseScmURL, ScmType } from '../shared/src'
-import { ReferenceType, ScmRepoInfo } from '../types'
+import {
+  GetRefererenceResult,
+  GetRefererenceResultZ,
+  ReferenceType,
+  ScmRepoInfo,
+} from '../types'
 import { normalizeUrl, shouldValidateUrl } from '../utils'
 import {
   CreatePullRequestParams,
@@ -180,7 +182,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       const res = await bitbucketClient.refs.listBranches({
         repo_slug: repoSlug,
         workspace,
-        pagelen: MAX_BRANCHES_FETCH,
+        pagelen: 100, //It seems to not work with very large numbers like 1000 (MAX_BRANCHES_FETCH) and returns a bad request response
         sort: '-target.date',
       })
       if (!res.data.values) {

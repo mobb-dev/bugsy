@@ -7,14 +7,14 @@ import { runAnalysis } from '@mobb/bugsy/features/analysis'
 import { getRelevantVulenrabilitiesFromDiff } from '@mobb/bugsy/features/analysis/add_fix_comments_for_pr'
 import { GQLClient } from '@mobb/bugsy/features/analysis/graphql'
 import {
-  GithubSCMLib,
   MOBB_ICON_IMG,
   scmCloudUrl,
-  SCMLib,
   ScmLibScmType,
   ScmType,
 } from '@mobb/bugsy/features/analysis/scm'
 import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
+import { GithubSCMLib } from '@mobb/bugsy/features/analysis/scm/github'
+import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
@@ -248,7 +248,7 @@ describe('Basic Analyze tests', () => {
       'assets/github_fixer_demo/snyk_report.json'
     )
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
-    const scm = await SCMLib.init({
+    const scm = await createScmLib({
       url: GITHUB_FIXER_REPO.URL,
       scmType: ScmLibScmType.GITHUB,
       accessToken: TEST_GITHUB_TOKEN,

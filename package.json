@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -13,6 +13,7 @@
     "build:dev": "tsup-node --env.NODE_ENV development",
     "test": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run",
     "test:ado": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run ado.test",
+    "test:github": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run github.test",
     "test:coverage": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --coverage ",
     "test:watch": "TOKEN=$(../../scripts/login_auth0.sh) vitest",
     "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx .",

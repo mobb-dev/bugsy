@@ -4,19 +4,19 @@ import { expect, it } from 'vitest'
 import { z } from 'zod'
 
 import {
+  BitbucketSCMLib,
   getBitbucketSdk,
   getBitbucketToken,
   validateBitbucketParams,
 } from '../bitbucket'
 import { GetBitbucketTokenArgs } from '../bitbucket/types'
 import {
-  BitbucketSCMLib,
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   RefNotFoundError,
   RepoNoTokenAccessError,
-  SCMLib,
-} from '../scm'
+} from '../errors'
+import { createScmLib } from '../scmFactory'
 import { ScmLibScmType } from '../types'
 import { env } from './env'
 
@@ -227,7 +227,7 @@ describe('scm instance tests', () => {
   it.each(ALLOWED_URLS)(
     'should return the correct headers for basic auth type %s',
     async (url: string) => {
-      const scmLib = await SCMLib.init({
+      const scmLib = await createScmLib({
         url,
         scmType: ScmLibScmType.BITBUCKET,
         accessToken: `${authUsername}:${authPassword}`,
@@ -251,7 +251,7 @@ describe('scm instance tests', () => {
     }
   )
   it('should return the correct headers for token auth type', async () => {
-    const scmLib = await SCMLib.init({
+    const scmLib = await createScmLib({
       url: PUBLIC_URL,
       scmType: ScmLibScmType.BITBUCKET,
       accessToken: undefined,
@@ -264,7 +264,7 @@ describe('scm instance tests', () => {
   })
   it('should be stub scm in case repo in unreachable ', async () => {
     await expect(
-      SCMLib.init({
+      createScmLib({
         url: REPO.URL,
         scmType: ScmLibScmType.BITBUCKET,
         accessToken: undefined,

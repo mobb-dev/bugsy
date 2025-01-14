@@ -275,6 +275,10 @@ export class GithubSCMLib extends SCMLib {
     })
     return getPrRes.data.html_url
   }
+  async getPrId(prUrl: string): Promise<string> {
+    const match = prUrl.match(/\/pull\/(\d+)/)
+    return match?.[1] || ''
+  }
   async getCommitUrl(commitId: string): Promise<string> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)

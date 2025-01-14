@@ -217,6 +217,10 @@ export class AdoSCMLib extends SCMLib {
       prNumber,
     })
   }
+  async getPrId(prUrl: string): Promise<string> {
+    const match = prUrl.match(/\/pullrequest\/(\d+)/)
+    return match?.[1] || ''
+  }
   async getCommitUrl(commitId: string): Promise<string> {
     this._validateUrl()
     const adoSdk = await this.getAdoSdk()

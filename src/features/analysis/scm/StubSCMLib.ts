@@ -109,6 +109,10 @@ export class StubSCMLib extends SCMLib {
     console.error('getPr() not implemented')
     throw new Error('getPr() not implemented')
   }
+  async getPrId(_prUrl: string): Promise<string> {
+    console.error('getPrId() not implemented')
+    throw new Error('getPrId() not implemented')
+  }
   async getCommitUrl(_commitId: string): Promise<string> {
     console.error('getCommitUrl() not implemented')
     throw new Error('getCommitUrl() not implemented')

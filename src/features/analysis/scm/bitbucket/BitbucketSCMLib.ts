@@ -268,6 +268,10 @@ export class BitbucketSCMLib extends SCMLib {
       `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${prNumber}`
     )
   }
+  async getPrId(prUrl: string): Promise<string> {
+    const match = prUrl.match(/\/pull-requests\/(\d+)/)
+    return match?.[1] || ''
+  }
   getCommitUrl(commitId: string): Promise<string> {
     this._validateUrl()
     const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)

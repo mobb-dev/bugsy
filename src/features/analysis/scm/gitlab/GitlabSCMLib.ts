@@ -205,6 +205,11 @@ export class GitlabSCMLib extends SCMLib {
     return res.web_url
   }
 
+  async getPrId(prUrl: string): Promise<string> {
+    const match = prUrl.match(/\/merge_requests\/(\d+)/)
+    return match?.[1] || ''
+  }
+
   async getCommitUrl(commitId: string): Promise<string> {
     this._validateAccessTokenAndUrl()
     const res = await getGitlabCommitUrl({

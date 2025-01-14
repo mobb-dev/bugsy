@@ -17486,6 +17486,7 @@ export type Scm_Config_Updates = {
 export type Scm_Submit_Fix_Request = {
   __typename?: 'scm_submit_fix_request';
   commitUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['timestamptz']['output'];
   /** An array relationship */
   fixes: Array<Fix_To_Scm_Submit_Fix_Request>;
   /** An aggregate relationship */
@@ -17499,6 +17500,7 @@ export type Scm_Submit_Fix_Request = {
   /** An object relationship */
   submitFixRequest: Submit_Fix_Request;
   submitFixRequestId: Scalars['uuid']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
 };
 
 
@@ -17574,6 +17576,7 @@ export type Scm_Submit_Fix_Request_Bool_Exp = {
   _not?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
   _or?: InputMaybe<Array<Scm_Submit_Fix_Request_Bool_Exp>>;
   commitUrl?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -17584,6 +17587,7 @@ export type Scm_Submit_Fix_Request_Bool_Exp = {
   submitBranchName?: InputMaybe<String_Comparison_Exp>;
   submitFixRequest?: InputMaybe<Submit_Fix_Request_Bool_Exp>;
   submitFixRequestId?: InputMaybe<Uuid_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "scm_submit_fix_request" */
@@ -17595,6 +17599,7 @@ export enum Scm_Submit_Fix_Request_Constraint {
 /** input type for inserting data into table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Insert_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   fixes?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Arr_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
@@ -17604,52 +17609,61 @@ export type Scm_Submit_Fix_Request_Insert_Input = {
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
   submitFixRequest?: InputMaybe<Submit_Fix_Request_Obj_Rel_Insert_Input>;
   submitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** aggregate max on columns */
 export type Scm_Submit_Fix_Request_Max_Fields = {
   __typename?: 'scm_submit_fix_request_max_fields';
   commitUrl?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
   submitBranchName?: Maybe<Scalars['String']['output']>;
   submitFixRequestId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
 
 /** order by max() on columns of table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Max_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   prId?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
   submitBranchName?: InputMaybe<Order_By>;
   submitFixRequestId?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type Scm_Submit_Fix_Request_Min_Fields = {
   __typename?: 'scm_submit_fix_request_min_fields';
   commitUrl?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prUrl?: Maybe<Scalars['String']['output']>;
   scmId?: Maybe<Scalars['String']['output']>;
   submitBranchName?: Maybe<Scalars['String']['output']>;
   submitFixRequestId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
 
 /** order by min() on columns of table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Min_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   prId?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
   scmId?: InputMaybe<Order_By>;
   submitBranchName?: InputMaybe<Order_By>;
   submitFixRequestId?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "scm_submit_fix_request" */
@@ -17678,6 +17692,7 @@ export type Scm_Submit_Fix_Request_On_Conflict = {
 /** Ordering options when selecting data from "scm_submit_fix_request". */
 export type Scm_Submit_Fix_Request_Order_By = {
   commitUrl?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
   fixes_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
   id?: InputMaybe<Order_By>;
   prId?: InputMaybe<Order_By>;
@@ -17687,6 +17702,7 @@ export type Scm_Submit_Fix_Request_Order_By = {
   submitBranchName?: InputMaybe<Order_By>;
   submitFixRequest?: InputMaybe<Submit_Fix_Request_Order_By>;
   submitFixRequestId?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: scm_submit_fix_request */
@@ -17698,6 +17714,8 @@ export type Scm_Submit_Fix_Request_Pk_Columns_Input = {
 export enum Scm_Submit_Fix_Request_Select_Column {
   /** column name */
   CommitUrl = 'commitUrl',
+  /** column name */
+  CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */
@@ -17711,12 +17729,15 @@ export enum Scm_Submit_Fix_Request_Select_Column {
   /** column name */
   SubmitBranchName = 'submitBranchName',
   /** column name */
-  SubmitFixRequestId = 'submitFixRequestId'
+  SubmitFixRequestId = 'submitFixRequestId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
 }
 
 /** input type for updating data in table "scm_submit_fix_request" */
 export type Scm_Submit_Fix_Request_Set_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
@@ -17724,6 +17745,7 @@ export type Scm_Submit_Fix_Request_Set_Input = {
   scmId?: InputMaybe<Scalars['String']['input']>;
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
   submitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** Streaming cursor of the table "scm_submit_fix_request" */
@@ -17737,6 +17759,7 @@ export type Scm_Submit_Fix_Request_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
   commitUrl?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
@@ -17744,12 +17767,15 @@ export type Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
   scmId?: InputMaybe<Scalars['String']['input']>;
   submitBranchName?: InputMaybe<Scalars['String']['input']>;
   submitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** update columns of table "scm_submit_fix_request" */
 export enum Scm_Submit_Fix_Request_Update_Column {
   /** column name */
   CommitUrl = 'commitUrl',
+  /** column name */
+  CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */
@@ -17763,7 +17789,9 @@ export enum Scm_Submit_Fix_Request_Update_Column {
   /** column name */
   SubmitBranchName = 'submitBranchName',
   /** column name */
-  SubmitFixRequestId = 'submitFixRequestId'
+  SubmitFixRequestId = 'submitFixRequestId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
 }
 
 export type Scm_Submit_Fix_Request_Updates = {

@@ -92,6 +92,7 @@ export abstract class SCMLib {
 
   abstract getReferenceData(ref: string): Promise<GetRefererenceResult>
   abstract getPrUrl(prNumber: number): Promise<string>
+  abstract getPrId(prUrl: string): Promise<string>
   abstract getCommitUrl(commitId: string): Promise<string>
 
   abstract getRepoDefaultBranch(): Promise<string>

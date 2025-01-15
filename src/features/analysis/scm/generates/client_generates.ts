@@ -321,6 +321,7 @@ export enum Language {
   Csharp = 'CSHARP',
   Java = 'JAVA',
   Js = 'JS',
+  Php = 'PHP',
   Python = 'PYTHON',
   Sql = 'SQL',
   Xml = 'XML'
@@ -2469,6 +2470,8 @@ export type Fix = {
   submitFixRequests: Array<Fix_To_Submit_Fix_Request>;
   /** An aggregate relationship */
   submitFixRequests_aggregate: Fix_To_Submit_Fix_Request_Aggregate;
+  /** A computed field, executes function "get_fix_url_path" */
+  urlPath?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
   /** An aggregate relationship */
@@ -3708,6 +3711,7 @@ export type Fix_Bool_Exp = {
   state?: InputMaybe<Fix_State_Enum_Comparison_Exp>;
   submitFixRequests?: InputMaybe<Fix_To_Submit_Fix_Request_Bool_Exp>;
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Bool_Exp>;
+  urlPath?: InputMaybe<String_Comparison_Exp>;
   vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Bool_Exp>;
   vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
@@ -3787,6 +3791,8 @@ export type Fix_Max_Fields = {
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_fix_url_path" */
+  urlPath?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "fix" */
@@ -3832,6 +3838,8 @@ export type Fix_Min_Fields = {
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_fix_url_path" */
+  urlPath?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "fix" */
@@ -3907,6 +3915,7 @@ export type Fix_Order_By = {
   severityValue?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Order_By>;
+  urlPath?: InputMaybe<Order_By>;
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Order_By>;
   vulnerabilitySeverityOld?: InputMaybe<Order_By>;
 };
@@ -6488,6 +6497,8 @@ export enum IssueLanguage_Enum {
   Java = 'Java',
   /** JavaScript */
   JavaScript = 'JavaScript',
+  /** PHP */
+  Php = 'PHP',
   /** Python */
   Python = 'Python',
   /** SQL */

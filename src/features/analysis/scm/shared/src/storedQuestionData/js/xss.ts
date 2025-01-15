@@ -9,4 +9,11 @@ export const xss = {
     description: () => '',
     guidance: () => '',
   },
+  isSanitized: {
+    content: ({ expression }: { expression: string }) =>
+      `Is the expression \`${expression}\` supposed to be not sanitized in this context?`,
+    description: () =>
+      'You are using unsafe string substitution in the template. This means that if the expression can contain maliciously crafted data, it may lead to XSS injection. To apply the fix, you have to make sure the expression is not sanitized on the backend already, and it does not represent an HTML code block.',
+    guidance: () => '',
+  },
 }

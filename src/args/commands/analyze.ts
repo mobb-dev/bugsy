@@ -9,6 +9,7 @@ import {
   apiKeyOption,
   autoPrOption,
   ciOption,
+  commitDirectlyOption,
   commitHashOption,
   mobbProjectNameOption,
   organizationIdOptions,
@@ -56,6 +57,7 @@ export function analyzeBuilder(
     .option('api-key', apiKeyOption)
     .option('commit-hash', commitHashOption)
     .option('auto-pr', autoPrOption)
+    .option('commit-directly', commitDirectlyOption)
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'
@@ -77,6 +79,11 @@ function validateAnalyzeOptions(argv: AnalyzeOptions) {
 
   if (argv.ci && !argv.apiKey) {
     throw new CliError('--ci flag requires --api-key to be provided as well')
+  }
+  if (argv.commitDirectly && !argv['auto-pr']) {
+    throw new CliError(
+      '--commit-directly flag requires --auto-pr to be provided as well'
+    )
   }
   validateReportFileFormat(argv.f)
 }

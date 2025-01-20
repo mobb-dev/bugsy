@@ -147,6 +147,14 @@ export type CreateTokenResponse = {
   token: Scalars['String']['output'];
 };
 
+export type FalsePositiveData = {
+  __typename?: 'FalsePositiveData';
+  extraContext: Array<UnstructuredFixExtraContext>;
+  fixDescription: Scalars['String']['output'];
+  isFalsePositive: Scalars['Boolean']['output'];
+  manifestActionsRequired: Array<FixExtraContextManifestActionRequiredResponse>;
+};
+
 export type FileDiffsResponse = {
   __typename?: 'FileDiffsResponse';
   downloadLink: Scalars['String']['output'];
@@ -179,6 +187,7 @@ export type FixExtraContextResponse = {
   __typename?: 'FixExtraContextResponse';
   extraContext: Array<UnstructuredFixExtraContext>;
   fixDescription: Scalars['String']['output'];
+  isFalsePositive: Scalars['Boolean']['output'];
   manifestActionsRequired: Array<FixExtraContextManifestActionRequiredResponse>;
 };
 
@@ -242,6 +251,8 @@ export type GetCheckmarxProjectsError = {
 };
 
 export type GetCheckmarxProjectsResponse = GetCheckmarxProjectsError | ListOfProjectsSuccess;
+
+export type GetFalsePositiveResponseUnion = FalsePositiveData | GetFixNoFixError;
 
 export type GetFixNoFixError = {
   __typename?: 'GetFixNoFixError';
@@ -2241,6 +2252,227 @@ export type Effort_To_Apply_Fix_Updates = {
   where: Effort_To_Apply_Fix_Bool_Exp;
 };
 
+/** a table which stores the false positives where we have fix info object */
+export type False_Positive = {
+  __typename?: 'false_positive';
+  created_on: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  fixInfoFile: File;
+  /** An object relationship */
+  fixReport: FixReport;
+  /** An object relationship */
+  fpInfoFile?: Maybe<File>;
+  fpInfoFileId: Scalars['uuid']['output'];
+  fpReportId: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "false_positive" */
+export type False_Positive_Aggregate = {
+  __typename?: 'false_positive_aggregate';
+  aggregate?: Maybe<False_Positive_Aggregate_Fields>;
+  nodes: Array<False_Positive>;
+};
+
+export type False_Positive_Aggregate_Bool_Exp = {
+  count?: InputMaybe<False_Positive_Aggregate_Bool_Exp_Count>;
+};
+
+export type False_Positive_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<False_Positive_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<False_Positive_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "false_positive" */
+export type False_Positive_Aggregate_Fields = {
+  __typename?: 'false_positive_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<False_Positive_Max_Fields>;
+  min?: Maybe<False_Positive_Min_Fields>;
+};
+
+
+/** aggregate fields of "false_positive" */
+export type False_Positive_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<False_Positive_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "false_positive" */
+export type False_Positive_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<False_Positive_Max_Order_By>;
+  min?: InputMaybe<False_Positive_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "false_positive" */
+export type False_Positive_Arr_Rel_Insert_Input = {
+  data: Array<False_Positive_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<False_Positive_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "false_positive". All fields are combined with a logical 'AND'. */
+export type False_Positive_Bool_Exp = {
+  _and?: InputMaybe<Array<False_Positive_Bool_Exp>>;
+  _not?: InputMaybe<False_Positive_Bool_Exp>;
+  _or?: InputMaybe<Array<False_Positive_Bool_Exp>>;
+  created_on?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixInfoFile?: InputMaybe<File_Bool_Exp>;
+  fixReport?: InputMaybe<FixReport_Bool_Exp>;
+  fpInfoFile?: InputMaybe<File_Bool_Exp>;
+  fpInfoFileId?: InputMaybe<Uuid_Comparison_Exp>;
+  fpReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "false_positive" */
+export enum False_Positive_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FalsePositivePkey = 'false_positive_pkey'
+}
+
+/** input type for inserting data into table "false_positive" */
+export type False_Positive_Insert_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
+  fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  fpInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
+  fpInfoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  fpReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type False_Positive_Max_Fields = {
+  __typename?: 'false_positive_max_fields';
+  created_on?: Maybe<Scalars['timestamptz']['output']>;
+  fpInfoFileId?: Maybe<Scalars['uuid']['output']>;
+  fpReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "false_positive" */
+export type False_Positive_Max_Order_By = {
+  created_on?: InputMaybe<Order_By>;
+  fpInfoFileId?: InputMaybe<Order_By>;
+  fpReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type False_Positive_Min_Fields = {
+  __typename?: 'false_positive_min_fields';
+  created_on?: Maybe<Scalars['timestamptz']['output']>;
+  fpInfoFileId?: Maybe<Scalars['uuid']['output']>;
+  fpReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "false_positive" */
+export type False_Positive_Min_Order_By = {
+  created_on?: InputMaybe<Order_By>;
+  fpInfoFileId?: InputMaybe<Order_By>;
+  fpReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "false_positive" */
+export type False_Positive_Mutation_Response = {
+  __typename?: 'false_positive_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<False_Positive>;
+};
+
+/** input type for inserting object relation for remote table "false_positive" */
+export type False_Positive_Obj_Rel_Insert_Input = {
+  data: False_Positive_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<False_Positive_On_Conflict>;
+};
+
+/** on_conflict condition type for table "false_positive" */
+export type False_Positive_On_Conflict = {
+  constraint: False_Positive_Constraint;
+  update_columns?: Array<False_Positive_Update_Column>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "false_positive". */
+export type False_Positive_Order_By = {
+  created_on?: InputMaybe<Order_By>;
+  fixInfoFile?: InputMaybe<File_Order_By>;
+  fixReport?: InputMaybe<FixReport_Order_By>;
+  fpInfoFile?: InputMaybe<File_Order_By>;
+  fpInfoFileId?: InputMaybe<Order_By>;
+  fpReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: false_positive */
+export type False_Positive_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "false_positive" */
+export enum False_Positive_Select_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  FpInfoFileId = 'fpInfoFileId',
+  /** column name */
+  FpReportId = 'fpReportId',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "false_positive" */
+export type False_Positive_Set_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  fpInfoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  fpReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "false_positive" */
+export type False_Positive_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: False_Positive_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type False_Positive_Stream_Cursor_Value_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  fpInfoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  fpReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "false_positive" */
+export enum False_Positive_Update_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  FpInfoFileId = 'fpInfoFileId',
+  /** column name */
+  FpReportId = 'fpReportId',
+  /** column name */
+  Id = 'id'
+}
+
+export type False_Positive_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<False_Positive_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: False_Positive_Bool_Exp;
+};
+
 /** columns and relationships of "file" */
 export type File = {
   __typename?: 'file';
@@ -2439,6 +2671,7 @@ export type Fix = {
   /** An object relationship */
   fixReport?: Maybe<FixReport>;
   fixReportId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   isArchived?: Maybe<Scalars['Boolean']['output']>;
@@ -3084,6 +3317,10 @@ export type FixReport = {
   createdOn: Scalars['timestamptz']['output'];
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
   /** An array relationship */
+  falsePositives: Array<False_Positive>;
+  /** An aggregate relationship */
+  falsePositives_aggregate: False_Positive_Aggregate;
+  /** An array relationship */
   fixes: Array<Fix>;
   /** A computed field, executes function "get_fix_efforts" */
   fixesCountByEffort?: Maybe<Scalars['json']['output']>;
@@ -3127,6 +3364,26 @@ export type FixReportAssignedToArgs = {
 /** columns and relationships of "fix_report" */
 export type FixReportConfidencesArgs = {
   path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "fix_report" */
+export type FixReportFalsePositivesArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_report" */
+export type FixReportFalsePositives_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
 };
 
 
@@ -3237,6 +3494,8 @@ export type FixReport_Bool_Exp = {
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   expirationOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  falsePositives?: InputMaybe<False_Positive_Bool_Exp>;
+  falsePositives_aggregate?: InputMaybe<False_Positive_Aggregate_Bool_Exp>;
   fixes?: InputMaybe<Fix_Bool_Exp>;
   fixesCountByEffort?: InputMaybe<Json_Comparison_Exp>;
   fixesDoneCount?: InputMaybe<Int_Comparison_Exp>;
@@ -3277,6 +3536,7 @@ export type FixReport_Insert_Input = {
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  falsePositives?: InputMaybe<False_Positive_Arr_Rel_Insert_Input>;
   fixes?: InputMaybe<Fix_Arr_Rel_Insert_Input>;
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -3361,6 +3621,7 @@ export type FixReport_Order_By = {
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
   expirationOn?: InputMaybe<Order_By>;
+  falsePositives_aggregate?: InputMaybe<False_Positive_Aggregate_Order_By>;
   fixesCountByEffort?: InputMaybe<Order_By>;
   fixesDoneCount?: InputMaybe<Order_By>;
   fixesInprogressCount?: InputMaybe<Order_By>;
@@ -3693,6 +3954,7 @@ export type Fix_Bool_Exp = {
   fixRawContentHash?: InputMaybe<String_Comparison_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   fixReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  fix_shared_state_id?: InputMaybe<Uuid_Comparison_Exp>;
   gitBlameLogin?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
@@ -3748,6 +4010,7 @@ export type Fix_Insert_Input = {
   fixRawContentHash?: InputMaybe<Scalars['String']['input']>;
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3778,6 +4041,7 @@ export type Fix_Max_Fields = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: Maybe<Scalars['String']['output']>;
   fixReportId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
@@ -3806,6 +4070,7 @@ export type Fix_Max_Order_By = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: InputMaybe<Order_By>;
   fixReportId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   modifiedBy?: InputMaybe<Order_By>;
@@ -3825,6 +4090,7 @@ export type Fix_Min_Fields = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: Maybe<Scalars['String']['output']>;
   fixReportId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
@@ -3853,6 +4119,7 @@ export type Fix_Min_Order_By = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: InputMaybe<Order_By>;
   fixReportId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   modifiedBy?: InputMaybe<Order_By>;
@@ -3899,6 +4166,7 @@ export type Fix_Order_By = {
   fixRawContentHash?: InputMaybe<Order_By>;
   fixReport?: InputMaybe<FixReport_Order_By>;
   fixReportId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
@@ -3934,6 +4202,7 @@ export type Fix_Rating = {
   fix: Fix;
   fixId: Scalars['uuid']['output'];
   fixRatingTag?: Maybe<Fix_Rating_Tag_Enum>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   updatedDate: Scalars['timestamptz']['output'];
   /** An object relationship */
@@ -4025,6 +4294,7 @@ export type Fix_Rating_Bool_Exp = {
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum_Comparison_Exp>;
+  fix_shared_state_id?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   updatedDate?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
@@ -4051,6 +4321,7 @@ export type Fix_Rating_Insert_Input = {
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -4063,6 +4334,7 @@ export type Fix_Rating_Max_Fields = {
   comment?: Maybe<Scalars['String']['output']>;
   excludedByUserId?: Maybe<Scalars['uuid']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   updatedDate?: Maybe<Scalars['timestamptz']['output']>;
   voteScore?: Maybe<Scalars['smallint']['output']>;
@@ -4073,6 +4345,7 @@ export type Fix_Rating_Max_Order_By = {
   comment?: InputMaybe<Order_By>;
   excludedByUserId?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   voteScore?: InputMaybe<Order_By>;
@@ -4084,6 +4357,7 @@ export type Fix_Rating_Min_Fields = {
   comment?: Maybe<Scalars['String']['output']>;
   excludedByUserId?: Maybe<Scalars['uuid']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   updatedDate?: Maybe<Scalars['timestamptz']['output']>;
   voteScore?: Maybe<Scalars['smallint']['output']>;
@@ -4094,6 +4368,7 @@ export type Fix_Rating_Min_Order_By = {
   comment?: InputMaybe<Order_By>;
   excludedByUserId?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   voteScore?: InputMaybe<Order_By>;
@@ -4122,6 +4397,7 @@ export type Fix_Rating_Order_By = {
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
   fixRatingTag?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
@@ -4144,6 +4420,8 @@ export enum Fix_Rating_Select_Column {
   /** column name */
   FixRatingTag = 'fixRatingTag',
   /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
+  /** column name */
   Id = 'id',
   /** column name */
   UpdatedDate = 'updatedDate',
@@ -4157,6 +4435,7 @@ export type Fix_Rating_Set_Input = {
   excludedByUserId?: InputMaybe<Scalars['uuid']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   voteScore?: InputMaybe<Scalars['smallint']['input']>;
@@ -4209,6 +4488,7 @@ export type Fix_Rating_Stream_Cursor_Value_Input = {
   excludedByUserId?: InputMaybe<Scalars['uuid']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   voteScore?: InputMaybe<Scalars['smallint']['input']>;
@@ -4391,6 +4671,8 @@ export enum Fix_Rating_Update_Column {
   FixId = 'fixId',
   /** column name */
   FixRatingTag = 'fixRatingTag',
+  /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
   /** column name */
   Id = 'id',
   /** column name */
@@ -4622,6 +4904,8 @@ export enum Fix_Select_Column {
   /** column name */
   FixReportId = 'fixReportId',
   /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
+  /** column name */
   GitBlameLogin = 'gitBlameLogin',
   /** column name */
   Id = 'id',
@@ -4671,6 +4955,7 @@ export type Fix_Set_Input = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: InputMaybe<Scalars['String']['input']>;
   fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4906,6 +5191,7 @@ export type Fix_Stream_Cursor_Value_Input = {
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: InputMaybe<Scalars['String']['input']>;
   fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4941,6 +5227,7 @@ export type Fix_To_Scm_Submit_Fix_Request = {
   /** An object relationship */
   fix: Fix;
   fixId: Scalars['uuid']['output'];
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   /** An object relationship */
   scmSubmitFixRequest: Scm_Submit_Fix_Request;
@@ -5001,6 +5288,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Bool_Exp = {
   _or?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>>;
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
+  fix_shared_state_id?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
   scmSubmitFixRequestId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -5016,6 +5304,7 @@ export enum Fix_To_Scm_Submit_Fix_Request_Constraint {
 export type Fix_To_Scm_Submit_Fix_Request_Insert_Input = {
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Obj_Rel_Insert_Input>;
   scmSubmitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
@@ -5025,6 +5314,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Insert_Input = {
 export type Fix_To_Scm_Submit_Fix_Request_Max_Fields = {
   __typename?: 'fix_to_scm_submit_fix_request_max_fields';
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   scmSubmitFixRequestId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -5032,6 +5322,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Max_Fields = {
 /** order by max() on columns of table "fix_to_scm_submit_fix_request" */
 export type Fix_To_Scm_Submit_Fix_Request_Max_Order_By = {
   fixId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   scmSubmitFixRequestId?: InputMaybe<Order_By>;
 };
@@ -5040,6 +5331,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Max_Order_By = {
 export type Fix_To_Scm_Submit_Fix_Request_Min_Fields = {
   __typename?: 'fix_to_scm_submit_fix_request_min_fields';
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   scmSubmitFixRequestId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -5047,6 +5339,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Min_Fields = {
 /** order by min() on columns of table "fix_to_scm_submit_fix_request" */
 export type Fix_To_Scm_Submit_Fix_Request_Min_Order_By = {
   fixId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   scmSubmitFixRequestId?: InputMaybe<Order_By>;
 };
@@ -5071,6 +5364,7 @@ export type Fix_To_Scm_Submit_Fix_Request_On_Conflict = {
 export type Fix_To_Scm_Submit_Fix_Request_Order_By = {
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Order_By>;
   scmSubmitFixRequestId?: InputMaybe<Order_By>;
@@ -5086,6 +5380,8 @@ export enum Fix_To_Scm_Submit_Fix_Request_Select_Column {
   /** column name */
   FixId = 'fixId',
   /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
+  /** column name */
   Id = 'id',
   /** column name */
   ScmSubmitFixRequestId = 'scmSubmitFixRequestId'
@@ -5094,6 +5390,7 @@ export enum Fix_To_Scm_Submit_Fix_Request_Select_Column {
 /** input type for updating data in table "fix_to_scm_submit_fix_request" */
 export type Fix_To_Scm_Submit_Fix_Request_Set_Input = {
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   scmSubmitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -5109,6 +5406,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Fix_To_Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   scmSubmitFixRequestId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -5117,6 +5415,8 @@ export type Fix_To_Scm_Submit_Fix_Request_Stream_Cursor_Value_Input = {
 export enum Fix_To_Scm_Submit_Fix_Request_Update_Column {
   /** column name */
   FixId = 'fixId',
+  /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
   /** column name */
   Id = 'id',
   /** column name */
@@ -5343,6 +5643,8 @@ export enum Fix_Update_Column {
   FixRawContentHash = 'fixRawContentHash',
   /** column name */
   FixReportId = 'fixReportId',
+  /** column name */
+  FixSharedStateId = 'fix_shared_state_id',
   /** column name */
   GitBlameLogin = 'gitBlameLogin',
   /** column name */
@@ -7024,6 +7326,10 @@ export type Mutation_Root = {
   delete_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** delete single row from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
+  /** delete data from the table: "false_positive" */
+  delete_false_positive?: Maybe<False_Positive_Mutation_Response>;
+  /** delete single row from the table: "false_positive" */
+  delete_false_positive_by_pk?: Maybe<False_Positive>;
   /** delete data from the table: "file" */
   delete_file?: Maybe<File_Mutation_Response>;
   /** delete single row from the table: "file" */
@@ -7249,6 +7555,10 @@ export type Mutation_Root = {
   insert_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** insert a single row into the table: "effort_to_apply_fix" */
   insert_effort_to_apply_fix_one?: Maybe<Effort_To_Apply_Fix>;
+  /** insert data into the table: "false_positive" */
+  insert_false_positive?: Maybe<False_Positive_Mutation_Response>;
+  /** insert a single row into the table: "false_positive" */
+  insert_false_positive_one?: Maybe<False_Positive>;
   /** insert data into the table: "file" */
   insert_file?: Maybe<File_Mutation_Response>;
   /** insert a single row into the table: "file" */
@@ -7500,6 +7810,12 @@ export type Mutation_Root = {
   update_effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
   /** update multiples rows of table: "effort_to_apply_fix" */
   update_effort_to_apply_fix_many?: Maybe<Array<Maybe<Effort_To_Apply_Fix_Mutation_Response>>>;
+  /** update data of the table: "false_positive" */
+  update_false_positive?: Maybe<False_Positive_Mutation_Response>;
+  /** update single row of the table: "false_positive" */
+  update_false_positive_by_pk?: Maybe<False_Positive>;
+  /** update multiples rows of table: "false_positive" */
+  update_false_positive_many?: Maybe<Array<Maybe<False_Positive_Mutation_Response>>>;
   /** update data of the table: "file" */
   update_file?: Maybe<File_Mutation_Response>;
   /** update single row of the table: "file" */
@@ -7832,6 +8148,7 @@ export type Mutation_RootApplySimilarAnswersArgs = {
 /** mutation root */
 export type Mutation_RootAutoPrAnalysisArgs = {
   analysisId: Scalars['String']['input'];
+  sameBranchCommit?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -7987,6 +8304,18 @@ export type Mutation_RootDelete_Effort_To_Apply_FixArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Effort_To_Apply_Fix_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_False_PositiveArgs = {
+  where: False_Positive_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_False_Positive_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -8687,6 +9016,20 @@ export type Mutation_RootInsert_Effort_To_Apply_FixArgs = {
 export type Mutation_RootInsert_Effort_To_Apply_Fix_OneArgs = {
   object: Effort_To_Apply_Fix_Insert_Input;
   on_conflict?: InputMaybe<Effort_To_Apply_Fix_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_False_PositiveArgs = {
+  objects: Array<False_Positive_Insert_Input>;
+  on_conflict?: InputMaybe<False_Positive_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_False_Positive_OneArgs = {
+  object: False_Positive_Insert_Input;
+  on_conflict?: InputMaybe<False_Positive_On_Conflict>;
 };
 
 
@@ -9634,6 +9977,26 @@ export type Mutation_RootUpdate_Effort_To_Apply_Fix_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Effort_To_Apply_Fix_ManyArgs = {
   updates: Array<Effort_To_Apply_Fix_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_False_PositiveArgs = {
+  _set?: InputMaybe<False_Positive_Set_Input>;
+  where: False_Positive_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_False_Positive_By_PkArgs = {
+  _set?: InputMaybe<False_Positive_Set_Input>;
+  pk_columns: False_Positive_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_False_Positive_ManyArgs = {
+  updates: Array<False_Positive_Updates>;
 };
 
 
@@ -14865,6 +15228,12 @@ export type Query_Root = {
   effort_to_apply_fix_aggregate: Effort_To_Apply_Fix_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" using primary key columns */
   effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
+  /** fetch data from the table: "false_positive" */
+  false_positive: Array<False_Positive>;
+  /** fetch aggregated fields from the table: "false_positive" */
+  false_positive_aggregate: False_Positive_Aggregate;
+  /** fetch data from the table: "false_positive" using primary key columns */
+  false_positive_by_pk?: Maybe<False_Positive>;
   /** fetch data from the table: "file" */
   file: Array<File>;
   /** fetch aggregated fields from the table: "file" */
@@ -14933,6 +15302,7 @@ export type Query_Root = {
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
   getCheckmarxProjects?: Maybe<GetCheckmarxProjectsResponse>;
+  getFalsePositive: GetFalsePositiveResponseUnion;
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
   getGitBlame: GetGitBlameResponse;
@@ -15367,6 +15737,29 @@ export type Query_RootEffort_To_Apply_Fix_By_PkArgs = {
 };
 
 
+export type Query_RootFalse_PositiveArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+
+export type Query_RootFalse_Positive_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+
+export type Query_RootFalse_Positive_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootFileArgs = {
   distinct_on?: InputMaybe<Array<File_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -15627,6 +16020,11 @@ export type Query_RootGetCheckmarxIntegrationDataArgs = {
 
 export type Query_RootGetCheckmarxProjectsArgs = {
   organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetFalsePositiveArgs = {
+  fpId: Scalars['uuid']['input'];
 };
 
 
@@ -18498,6 +18896,14 @@ export type Subscription_Root = {
   effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
   /** fetch data from the table in a streaming manner: "effort_to_apply_fix" */
   effort_to_apply_fix_stream: Array<Effort_To_Apply_Fix>;
+  /** fetch data from the table: "false_positive" */
+  false_positive: Array<False_Positive>;
+  /** fetch aggregated fields from the table: "false_positive" */
+  false_positive_aggregate: False_Positive_Aggregate;
+  /** fetch data from the table: "false_positive" using primary key columns */
+  false_positive_by_pk?: Maybe<False_Positive>;
+  /** fetch data from the table in a streaming manner: "false_positive" */
+  false_positive_stream: Array<False_Positive>;
   /** fetch data from the table: "file" */
   file: Array<File>;
   /** fetch aggregated fields from the table: "file" */
@@ -19122,6 +19528,36 @@ export type Subscription_RootEffort_To_Apply_Fix_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Effort_To_Apply_Fix_Stream_Cursor_Input>>;
   where?: InputMaybe<Effort_To_Apply_Fix_Bool_Exp>;
+};
+
+
+export type Subscription_RootFalse_PositiveArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+
+export type Subscription_RootFalse_Positive_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<False_Positive_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<False_Positive_Order_By>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
+};
+
+
+export type Subscription_RootFalse_Positive_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootFalse_Positive_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<False_Positive_Stream_Cursor_Input>>;
+  where?: InputMaybe<False_Positive_Bool_Exp>;
 };
 
 
@@ -22278,8 +22714,11 @@ export type Vulnerability_Report_Issue = {
   createdAt: Scalars['timestamptz']['output'];
   extraData?: Maybe<Scalars['jsonb']['output']>;
   /** An object relationship */
+  falsePositive?: Maybe<False_Positive>;
+  /** An object relationship */
   fix?: Maybe<Fix>;
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fpId?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   isSuppressed: Scalars['Boolean']['output'];
   issueLanguage: Scalars['String']['output'];
@@ -22440,8 +22879,10 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   extraData?: InputMaybe<Jsonb_Comparison_Exp>;
+  falsePositive?: InputMaybe<False_Positive_Bool_Exp>;
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
+  fpId?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguage?: InputMaybe<String_Comparison_Exp>;
@@ -22989,8 +23430,10 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
+  falsePositive?: InputMaybe<False_Positive_Obj_Rel_Insert_Input>;
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
@@ -23012,6 +23455,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   __typename?: 'vulnerability_report_issue_max_fields';
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
@@ -23027,6 +23471,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
 export type Vulnerability_Report_Issue_Max_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
@@ -23041,6 +23486,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   __typename?: 'vulnerability_report_issue_min_fields';
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
+  fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
@@ -23056,6 +23502,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
 export type Vulnerability_Report_Issue_Min_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
@@ -23093,8 +23540,10 @@ export type Vulnerability_Report_Issue_Order_By = {
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
+  falsePositive?: InputMaybe<False_Positive_Order_By>;
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isSuppressed?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
@@ -23130,6 +23579,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   ExtraData = 'extraData',
   /** column name */
   FixId = 'fixId',
+  /** column name */
+  FpId = 'fpId',
   /** column name */
   Id = 'id',
   /** column name */
@@ -23173,6 +23624,7 @@ export type Vulnerability_Report_Issue_Set_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
@@ -23385,6 +23837,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
@@ -23753,6 +24206,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   ExtraData = 'extraData',
   /** column name */
   FixId = 'fixId',
+  /** column name */
+  FpId = 'fpId',
   /** column name */
   Id = 'id',
   /** column name */
@@ -24750,6 +25205,7 @@ export type GitReferenceQuery = { __typename?: 'query_root', gitReference?: { __
 
 export type AutoPrAnalysisMutationVariables = Exact<{
   analysisId: Scalars['String']['input'];
+  commitDirectly?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -25128,8 +25584,8 @@ export const GitReferenceDocument = `
 }
     `;
 export const AutoPrAnalysisDocument = `
-    mutation autoPrAnalysis($analysisId: String!) {
-  autoPrAnalysis(analysisId: $analysisId) {
+    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean) {
+  autoPrAnalysis(analysisId: $analysisId, sameBranchCommit: $commitDirectly) {
     __typename
     ... on AutoPrSuccess {
       status

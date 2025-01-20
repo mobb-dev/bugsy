@@ -81,6 +81,7 @@ export async function analyze(
     mobbProjectName,
     organizationId,
     autoPr,
+    commitDirectly,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -99,6 +100,7 @@ export async function analyze(
       organizationId,
       command: 'analyze',
       autoPr,
+      commitDirectly,
     },
     { skipPrompts }
   )

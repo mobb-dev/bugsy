@@ -9,9 +9,10 @@ const debug = Debug('mobbdev:handleAutoPr')
 export async function handleAutoPr(params: {
   gqlClient: GQLClient
   analysisId: string
+  commitDirectly?: boolean
   createSpinner: CreateSpinner
 }) {
-  const { gqlClient, analysisId, createSpinner } = params
+  const { gqlClient, analysisId, commitDirectly, createSpinner } = params
   const createAutoPrSpinner = createSpinner(
     '🔄 Waiting for the analysis to finish before initiating automatic pull request creation'
   ).start()
@@ -20,7 +21,10 @@ export async function handleAutoPr(params: {
       analysisId,
     },
     callback: async (analysisId) => {
-      const autoPrAnalysisRes = await gqlClient.autoPrAnalysis(analysisId)
+      const autoPrAnalysisRes = await gqlClient.autoPrAnalysis(
+        analysisId,
+        commitDirectly
+      )
       debug('auto pr analysis res %o', autoPrAnalysisRes)
       if (autoPrAnalysisRes.autoPrAnalysis?.__typename === 'AutoPrError') {
         createAutoPrSpinner.error({

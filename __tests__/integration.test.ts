@@ -135,12 +135,13 @@ describe('Basic Analyze tests', () => {
         ci: false,
         command: 'scan',
         autoPr: true,
+        commitDirectly: true,
       },
       { skipPrompts: true }
     )
 
     expect(runAnalysisSpy).toHaveBeenCalled()
-    expect(autoPrAnalysisSpy).toHaveBeenCalled()
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true)
     expect(mockedOpen).toHaveBeenCalledTimes(2)
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
   }, 30000)
@@ -235,10 +236,11 @@ describe('Basic Analyze tests', () => {
         ci: true,
         command: 'analyze',
         autoPr: true,
+        commitDirectly: true,
       },
       { skipPrompts: true }
     )
-    expect(autoPrAnalysisSpy).toHaveBeenCalled()
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true)
     expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
     consoleMock.mockClear()
   })

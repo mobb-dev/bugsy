@@ -1,4 +1,7 @@
 import { IssueType_Enum } from '../../../../generates/client_generates'
+// Note: we use a guidance from Python on purpose. CSRF is detected in HTML
+// and treated as Python by Semgrep, but as JS by Fortify.
+import { csrf } from '../python/csrf'
 import { commandInjection } from './commandInjection'
 import { graphqlDepthLimit } from './graphqlDepthLimit'
 import { hardcodedDomainInHtml } from './hardcodedDomainInHtml'
@@ -40,6 +43,7 @@ const vulnerabilities = {
   [IssueType_Enum.NoLimitsOrThrottling as string]: noLimitsOrThrottling,
   [IssueType_Enum.MissingCspHeader as string]: cspHeaderValue,
   [IssueType_Enum.HardcodedDomainInHtml as string]: hardcodedDomainInHtml,
+  [IssueType_Enum.Csrf as string]: csrf,
 }
 
 export default vulnerabilities

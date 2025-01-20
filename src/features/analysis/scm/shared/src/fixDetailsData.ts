@@ -330,7 +330,12 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   },
   [IssueType_Enum.StringFormatMisuse]: undefined,
   [IssueType_Enum.NonReadonlyField]: undefined,
-  [IssueType_Enum.Csrf]: undefined,
+  [IssueType_Enum.Csrf]: {
+    issueDescription:
+      'Cross Site Request Forgery is an attack that forces an end user to execute unwanted actions on a web application in which they’re currently authenticated.',
+    fixInstructions:
+      'Configure a CSRF protection mechanism, such as a CSRF token, in your application.',
+  },
   [IssueType_Enum.WeakEncryption]: undefined,
   [IssueType_Enum.CodeInComment]: undefined,
   [IssueType_Enum.RegexMissingTimeout]: undefined,

@@ -69,6 +69,14 @@ export const autoPrOption = {
   default: false,
 } as const
 
+export const commitDirectlyOption = {
+  describe: chalk.bold(
+    'Commit directly to the scanned branch instead of creating a pull request'
+  ),
+  type: 'boolean',
+  default: false,
+} as const
+
 export const scmTypeOption = {
   demandOption: true,
   describe: chalk.bold('SCM type'),

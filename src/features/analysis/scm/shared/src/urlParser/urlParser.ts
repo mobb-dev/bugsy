@@ -1,7 +1,10 @@
 import { z } from 'zod'
 
-import { ADO_PREFIX_PATH, NAME_REGEX } from '..'
 import { ParseScmURLRes, scmCloudUrl, ScmType } from '../types'
+
+export const ADO_PREFIX_PATH = 'tfs'
+
+const NAME_REGEX = /[a-z0-9\-_.+]+/i
 
 type BaseRepo = {
   repoName: string | undefined

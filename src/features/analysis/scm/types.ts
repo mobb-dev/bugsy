@@ -34,6 +34,7 @@ export const scmSubmitRequestStatus = {
   DRAFT: 'draft',
   ERROR: 'error',
   SKIPPED: 'skipped',
+  NO_ACCESS: 'no_access',
 } as const
 
 export type ScmSubmitRequestStatus =

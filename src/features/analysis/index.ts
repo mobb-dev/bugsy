@@ -148,6 +148,7 @@ export type AnalysisParams = {
   command: MobbCliCommand
   organizationId?: string
   autoPr?: boolean
+  commitDirectly?: boolean
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -324,6 +325,7 @@ export async function _scan(
     command,
     organizationId: userOrganizationId,
     autoPr,
+    commitDirectly,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -491,6 +493,7 @@ export async function _scan(
     await handleAutoPr({
       gqlClient,
       analysisId: reportUploadInfo.fixReportId,
+      commitDirectly,
       createSpinner,
     })
   }
@@ -700,6 +703,7 @@ export async function _scan(
       await handleAutoPr({
         gqlClient,
         analysisId: reportUploadInfo.fixReportId,
+        commitDirectly,
         createSpinner,
       })
     }

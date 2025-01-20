@@ -17,7 +17,7 @@ import {
   getBitbucketSdk,
   parseBitbucketOrganizationAndRepo,
   validateBitbucketParams,
-} from './'
+} from './bitbucket'
 
 function getUserAndPassword(token: string) {
   const [username, password] = token.split(':')

@@ -391,8 +391,8 @@ query gitReference($repoUrl: String!, $reference: String!) {
   }
 }
 
-mutation autoPrAnalysis($analysisId: String!) {
-  autoPrAnalysis(analysisId: $analysisId) {
+mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean) {
+  autoPrAnalysis(analysisId: $analysisId, sameBranchCommit: $commitDirectly) {
     __typename
     ... on AutoPrSuccess {
       status

@@ -19,7 +19,7 @@ import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
 import * as openExport from 'open'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import * as commandsExports from '../src/commands'
@@ -92,6 +92,10 @@ vi.mock('../src/features/analysis/scanners/snyk', () => ({
     return true
   }),
 }))
+
+beforeEach(() => {
+  vi.clearAllMocks() // Clear all spy calls
+})
 
 it('test manifest files are included in zip upload', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mobb-cli-test-pack'))

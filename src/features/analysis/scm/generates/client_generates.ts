@@ -373,6 +373,12 @@ export type MeResponse = {
   userOrganizationsAndUserOrganizationRoles: Array<Maybe<OrganizationToRoleType>>;
 };
 
+export type MobbProjectAccessError = BaseError & {
+  __typename?: 'MobbProjectAccessError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
 export type NoGitBlameInfoError = {
   __typename?: 'NoGitBlameInfoError';
   error?: Maybe<Scalars['String']['output']>;
@@ -769,6 +775,12 @@ export type UpdateGithubTokenFromAuth0 = {
   status: Status;
 };
 
+export type UploadReportS3Error = BaseError & {
+  __typename?: 'UploadReportS3Error';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
 export type UploadResponse = {
   __typename?: 'UploadResponse';
   error?: Maybe<Scalars['String']['output']>;
@@ -858,7 +870,13 @@ export type VulnerabilityReport = {
   vulnerabilityReportId: Scalars['String']['output'];
 };
 
-export type VulnerabilityReportResponse = BadShaError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | VulnerabilityReport;
+export type VulnerabilityReportDownloadError = BaseError & {
+  __typename?: 'VulnerabilityReportDownloadError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
 
 export type AggregatedUnexpiredVulnerabilitiesState_Organization_Args = {
   linear_vul_count_limit?: InputMaybe<Scalars['Int']['input']>;
@@ -8263,6 +8281,7 @@ export type Mutation_Root = {
   sendInvitation?: Maybe<SendInvitationResponse>;
   setAnswers: SetAnswersResponse;
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
+  submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
   tryNow: VulnerabilityReportResponse;
   updateAdoToken: ScmAccessToken;
@@ -10361,6 +10380,15 @@ export type Mutation_RootSubmitCheckmarxVulnerabilityReportArgs = {
   checkmarxProjectId: Scalars['String']['input'];
   checkmarxProjectName: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootSubmitExternalVulnerabilityReportArgs = {
+  projectName: Scalars['String']['input'];
+  reference: Scalars['String']['input'];
+  repoUrl: Scalars['String']['input'];
+  vulnerabilityReportUrl: Scalars['String']['input'];
 };
 
 
@@ -17911,6 +17939,8 @@ export enum Scan_Source_Constraint {
 }
 
 export enum Scan_Source_Enum {
+  /** ASPM Integration */
+  Aspm = 'ASPM',
   /** The auto-fixer */
   AutoFixer = 'AUTO_FIXER',
   /** Azure CI */
@@ -25712,7 +25742,7 @@ export type DigestVulnerabilityReportMutationVariables = Exact<{
 }>;
 
 
-export type DigestVulnerabilityReportMutation = { __typename?: 'mutation_root', digestVulnerabilityReport: { __typename: 'BadShaError' } | { __typename: 'RabbitSendError', status: Status, error?: string | null } | { __typename: 'ReferenceNotFoundError', status: Status, error?: string | null } | { __typename: 'RepoValidationError' } | { __typename: 'ReportValidationError', status: Status, error?: string | null } | { __typename: 'VulnerabilityReport', vulnerabilityReportId: string, fixReportId: string } };
+export type DigestVulnerabilityReportMutation = { __typename?: 'mutation_root', digestVulnerabilityReport: { __typename: 'BadShaError' } | { __typename: 'MobbProjectAccessError' } | { __typename: 'RabbitSendError', status: Status, error?: string | null } | { __typename: 'ReferenceNotFoundError', status: Status, error?: string | null } | { __typename: 'RepoValidationError' } | { __typename: 'ReportValidationError', status: Status, error?: string | null } | { __typename: 'UploadReportS3Error' } | { __typename: 'VulnerabilityReport', vulnerabilityReportId: string, fixReportId: string } | { __typename: 'VulnerabilityReportDownloadError' } };
 
 export type SubmitVulnerabilityReportMutationVariables = Exact<{
   fixReportId: Scalars['String']['input'];
@@ -25727,7 +25757,7 @@ export type SubmitVulnerabilityReportMutationVariables = Exact<{
 }>;
 
 
-export type SubmitVulnerabilityReportMutation = { __typename?: 'mutation_root', submitVulnerabilityReport: { __typename: 'BadShaError' } | { __typename: 'RabbitSendError' } | { __typename: 'ReferenceNotFoundError' } | { __typename: 'RepoValidationError' } | { __typename: 'ReportValidationError' } | { __typename: 'VulnerabilityReport', vulnerabilityReportId: string, fixReportId: string } };
+export type SubmitVulnerabilityReportMutation = { __typename?: 'mutation_root', submitVulnerabilityReport: { __typename: 'BadShaError' } | { __typename: 'MobbProjectAccessError' } | { __typename: 'RabbitSendError' } | { __typename: 'ReferenceNotFoundError' } | { __typename: 'RepoValidationError' } | { __typename: 'ReportValidationError' } | { __typename: 'UploadReportS3Error' } | { __typename: 'VulnerabilityReport', vulnerabilityReportId: string, fixReportId: string } | { __typename: 'VulnerabilityReportDownloadError' } };
 
 export type CreateCommunityUserMutationVariables = Exact<{ [key: string]: never; }>;
 

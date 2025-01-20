@@ -18,6 +18,53 @@ import { IssueTypeSettingZ } from './validations'
 
 export type Unpacked<T> = T extends (infer U)[] ? U : T
 
+const ScmSubmitFixRequestsZ = z.array(
+  z.object({
+    scmSubmitFixRequest: z.object({
+      submitFixRequest: z.object({
+        createdByUser: z.object({
+          email: z.string(),
+        }),
+        targetBranchName: z.string().default(''),
+      }),
+      prUrl: z.string().nullable(),
+      prStatus: z.nativeEnum(Pr_Status_Enum).nullable(),
+      commitUrl: z.string().nullable(),
+      scmId: z.string(),
+    }),
+  })
+)
+
+export const FixRatingZ = z.object({
+  voteScore: z.number(),
+  fixRatingTag: z.nativeEnum(Fix_Rating_Tag_Enum).nullable().default(null),
+  comment: z.string().nullable().default(null),
+  updatedDate: z.string().nullable(),
+  user: z.object({
+    email: z.string(),
+    name: z.string(),
+  }),
+})
+
+const FixSharedStateZ = z
+  .object({
+    state: z.nativeEnum(Fix_State_Enum),
+    isArchived: z.boolean(),
+    scmSubmitFixRequests: ScmSubmitFixRequestsZ,
+    fixRatings: z.array(FixRatingZ).default([]),
+  })
+  .nullish()
+  .transform((data) =>
+    data
+      ? data
+      : {
+          state: Fix_State_Enum.Ready,
+          isArchived: false,
+          scmSubmitFixRequests: [],
+          fixRatings: [],
+        }
+  )
+
 export const OrganizationScreenQueryParamsZ = z.object({
   organizationId: z.string().uuid(),
 })
@@ -46,23 +93,6 @@ export const CliLoginPageQueryParamsZ = z.object({
   loginId: z.string().uuid(),
 })
 
-const ScmSubmitFixRequestsZ = z.array(
-  z.object({
-    scmSubmitFixRequest: z.object({
-      submitFixRequest: z.object({
-        createdByUser: z.object({
-          email: z.string(),
-        }),
-        targetBranchName: z.string().default(''),
-      }),
-      prUrl: z.string().nullable(),
-      prStatus: z.nativeEnum(Pr_Status_Enum).nullable(),
-      commitUrl: z.string().nullable(),
-      scmId: z.string(),
-    }),
-  })
-)
-
 export type ScmSubmitFixRequests = z.infer<typeof ScmSubmitFixRequestsZ>
 
 // Note: we're using zod here becasue we need to assue we have all the data ready for rendering the page
@@ -88,17 +118,6 @@ export const AnalysisReportDigestedZ = z.object({
     project: z.object({
       organizationId: z.string().uuid(),
     }),
-  }),
-})
-
-export const FixRatingZ = z.object({
-  voteScore: z.number(),
-  fixRatingTag: z.nativeEnum(Fix_Rating_Tag_Enum).nullable().default(null),
-  comment: z.string().nullable().default(null),
-  updatedDate: z.string().nullable(),
-  user: z.object({
-    email: z.string(),
-    name: z.string(),
   }),
 })
 
@@ -139,7 +158,7 @@ export const ReportQueryResultZ = z.object({
             fileRepoRelativePath: z.string(),
           })
         ),
-        state: z.nativeEnum(Fix_State_Enum),
+        sharedState: FixSharedStateZ,
         numberOfVulnerabilityIssues: z.number(),
         vulnerabilityReportIssues: z.array(
           z.object({
@@ -148,9 +167,7 @@ export const ReportQueryResultZ = z.object({
             parsedSeverity: ParsedSeverityZ,
           })
         ),
-        scmSubmitFixRequests: ScmSubmitFixRequestsZ,
-        isArchived: z.boolean().nullable(),
-        fixRatings: z.array(FixRatingZ).default([]),
+        // scmSubmitFixRequests: ScmSubmitFixRequestsZ,
       })
     ),
     repo: z.object({
@@ -220,8 +237,7 @@ export const ReportQueryResultZ = z.object({
 export const ReportFixesQueryZ = z.array(
   z.object({
     id: z.string().uuid(),
-    state: z.nativeEnum(Fix_State_Enum),
-    isArchived: z.boolean().nullable(),
+    sharedState: FixSharedStateZ,
     confidence: z.number(),
     gitBlameLogin: z.string().nullable(),
     effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
@@ -243,8 +259,6 @@ export const ReportFixesQueryZ = z.array(
         })
       )
       .min(1),
-    scmSubmitFixRequests: ScmSubmitFixRequestsZ,
-    fixRatings: z.array(FixRatingZ).default([]),
   })
 )
 
@@ -306,7 +320,7 @@ export const PatchAndQuestionsZ = z.object({
 export const FixQueryZ = z.object({
   __typename: z.literal('fix').optional(),
   id: z.string().uuid(),
-  state: z.nativeEnum(Fix_State_Enum),
+  sharedState: FixSharedStateZ,
   modifiedBy: z.string().nullable(),
   gitBlameLogin: z.string().nullable(),
   safeIssueLanguage: z.string(),
@@ -314,7 +328,6 @@ export const FixQueryZ = z.object({
   confidence: z.number(),
   fixReportId: z.string().uuid(),
   isExpired: z.boolean().default(false),
-  isArchived: z.boolean().nullable(),
   fixFiles: z.array(
     z.object({
       fileRepoRelativePath: z.string(),
@@ -329,9 +342,8 @@ export const FixQueryZ = z.object({
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,
-  scmSubmitFixRequests: ScmSubmitFixRequestsZ,
+
   effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
-  fixRatings: z.array(FixRatingZ).default([]),
 })
 export type FixQuery = z.infer<typeof FixQueryZ>
 
@@ -412,11 +424,15 @@ export const FixScreenQueryResultZ = z.object({
       ),
     })
   ),
-  fixesWithSameIssueType: z.object({
-    fix: z.array(
-      z.object({ id: z.string().uuid(), state: z.nativeEnum(Fix_State_Enum) })
-    ),
-  }),
+  fixesWithSameIssueType: z.array(
+    z.object({
+      id: z.string().uuid(),
+      sharedState: z
+        .object({ state: z.nativeEnum(Fix_State_Enum) })
+        .nullable()
+        .default({ state: Fix_State_Enum.Ready }),
+    })
+  ),
 })
 
 export const FixReportByProjectZ = z.object({

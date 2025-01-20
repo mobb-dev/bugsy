@@ -870,10 +870,6 @@ export type AggregatedVulnerabilitiesState_Organization_Args = {
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type AggregatedVulnerabilitySeverities_Project_Args = {
-  min_confidence?: InputMaybe<Scalars['Int']['input']>;
-};
-
 /** columns and relationships of "aggregated_fix_state" */
 export type Aggregated_Fix_State = {
   __typename?: 'aggregated_fix_state';
@@ -1047,30 +1043,10 @@ export type Aggregated_Severities_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-/** order by aggregate values of table "aggregated_severities" */
-export type Aggregated_Severities_Aggregate_Order_By = {
-  avg?: InputMaybe<Aggregated_Severities_Avg_Order_By>;
-  count?: InputMaybe<Order_By>;
-  max?: InputMaybe<Aggregated_Severities_Max_Order_By>;
-  min?: InputMaybe<Aggregated_Severities_Min_Order_By>;
-  stddev?: InputMaybe<Aggregated_Severities_Stddev_Order_By>;
-  stddev_pop?: InputMaybe<Aggregated_Severities_Stddev_Pop_Order_By>;
-  stddev_samp?: InputMaybe<Aggregated_Severities_Stddev_Samp_Order_By>;
-  sum?: InputMaybe<Aggregated_Severities_Sum_Order_By>;
-  var_pop?: InputMaybe<Aggregated_Severities_Var_Pop_Order_By>;
-  var_samp?: InputMaybe<Aggregated_Severities_Var_Samp_Order_By>;
-  variance?: InputMaybe<Aggregated_Severities_Variance_Order_By>;
-};
-
 /** aggregate avg on columns */
 export type Aggregated_Severities_Avg_Fields = {
   __typename?: 'aggregated_severities_avg_fields';
   count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** order by avg() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Avg_Order_By = {
-  count?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "aggregated_severities". All fields are combined with a logical 'AND'. */
@@ -1089,23 +1065,11 @@ export type Aggregated_Severities_Max_Fields = {
   vulnerability_severity?: Maybe<Scalars['String']['output']>;
 };
 
-/** order by max() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Max_Order_By = {
-  count?: InputMaybe<Order_By>;
-  vulnerability_severity?: InputMaybe<Order_By>;
-};
-
 /** aggregate min on columns */
 export type Aggregated_Severities_Min_Fields = {
   __typename?: 'aggregated_severities_min_fields';
   count?: Maybe<Scalars['bigint']['output']>;
   vulnerability_severity?: Maybe<Scalars['String']['output']>;
-};
-
-/** order by min() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Min_Order_By = {
-  count?: InputMaybe<Order_By>;
-  vulnerability_severity?: InputMaybe<Order_By>;
 };
 
 /** Ordering options when selecting data from "aggregated_severities". */
@@ -1128,31 +1092,16 @@ export type Aggregated_Severities_Stddev_Fields = {
   count?: Maybe<Scalars['Float']['output']>;
 };
 
-/** order by stddev() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Stddev_Order_By = {
-  count?: InputMaybe<Order_By>;
-};
-
 /** aggregate stddev_pop on columns */
 export type Aggregated_Severities_Stddev_Pop_Fields = {
   __typename?: 'aggregated_severities_stddev_pop_fields';
   count?: Maybe<Scalars['Float']['output']>;
 };
 
-/** order by stddev_pop() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Stddev_Pop_Order_By = {
-  count?: InputMaybe<Order_By>;
-};
-
 /** aggregate stddev_samp on columns */
 export type Aggregated_Severities_Stddev_Samp_Fields = {
   __typename?: 'aggregated_severities_stddev_samp_fields';
   count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** order by stddev_samp() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Stddev_Samp_Order_By = {
-  count?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "aggregated_severities" */
@@ -1175,20 +1124,10 @@ export type Aggregated_Severities_Sum_Fields = {
   count?: Maybe<Scalars['bigint']['output']>;
 };
 
-/** order by sum() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Sum_Order_By = {
-  count?: InputMaybe<Order_By>;
-};
-
 /** aggregate var_pop on columns */
 export type Aggregated_Severities_Var_Pop_Fields = {
   __typename?: 'aggregated_severities_var_pop_fields';
   count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** order by var_pop() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Var_Pop_Order_By = {
-  count?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
@@ -1197,20 +1136,10 @@ export type Aggregated_Severities_Var_Samp_Fields = {
   count?: Maybe<Scalars['Float']['output']>;
 };
 
-/** order by var_samp() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Var_Samp_Order_By = {
-  count?: InputMaybe<Order_By>;
-};
-
 /** aggregate variance on columns */
 export type Aggregated_Severities_Variance_Fields = {
   __typename?: 'aggregated_severities_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** order by variance() on columns of table "aggregated_severities" */
-export type Aggregated_Severities_Variance_Order_By = {
-  count?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "api_token" */
@@ -2645,9 +2574,10 @@ export type Fix = {
   __typename?: 'fix';
   confidence: Scalars['Int']['output'];
   created_on?: Maybe<Scalars['timestamptz']['output']>;
-  /** An object relationship */
-  downloadedBy?: Maybe<User>;
-  downloadedByUserId?: Maybe<Scalars['uuid']['output']>;
+  /** A computed field, executes function "get_downloaded_by" */
+  downloadedBy?: Maybe<Array<User>>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: Maybe<Scalars['uuid']['output']>;
   effortToApplyFix?: Maybe<Effort_To_Apply_Fix_Enum>;
   /** An array relationship */
   fixAnswers: Array<FixAnswer>;
@@ -2662,10 +2592,8 @@ export type Fix = {
   /** An object relationship */
   fixInfoFile?: Maybe<File>;
   fixInfoFileId?: Maybe<Scalars['uuid']['output']>;
-  /** An array relationship */
-  fixRatings: Array<Fix_Rating>;
-  /** An aggregate relationship */
-  fixRatings_aggregate: Fix_Rating_Aggregate;
+  /** A computed field, executes function "fix_ratings" */
+  fixRatings?: Maybe<Array<Fix_Rating>>;
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
@@ -2674,7 +2602,10 @@ export type Fix = {
   fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
+  /** A computed field, executes function "is_archived" */
   isArchived?: Maybe<Scalars['Boolean']['output']>;
+  /** This field is deprecated */
+  isArchivedDeprecated?: Maybe<Scalars['Boolean']['output']>;
   isExpired: Scalars['Boolean']['output'];
   /** This field is deprecated */
   issueLanguageOld?: Maybe<IssueLanguage_Enum>;
@@ -2691,14 +2622,17 @@ export type Fix = {
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
-  /** An array relationship */
-  scmSubmitFixRequests: Array<Fix_To_Scm_Submit_Fix_Request>;
-  /** An aggregate relationship */
-  scmSubmitFixRequests_aggregate: Fix_To_Scm_Submit_Fix_Request_Aggregate;
+  /** A computed field, executes function "fix_scm_submit_fix_requests" */
+  scmSubmitFixRequests?: Maybe<Array<Scm_Submit_Fix_Request>>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  sharedState?: Maybe<Fix_Shared_State>;
   splitPatchAndQuestions: GetSplitFixResponseUnion;
-  state: Fix_State_Enum;
+  /** A computed field, executes function "fix_state" */
+  state?: Maybe<Scalars['String']['output']>;
+  /** This field is deprecated */
+  stateDeprecated: Fix_State_Enum;
   /** An array relationship */
   submitFixRequests: Array<Fix_To_Submit_Fix_Request>;
   /** An aggregate relationship */
@@ -2710,6 +2644,16 @@ export type Fix = {
   /** An aggregate relationship */
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
   vulnerabilitySeverityOld?: Maybe<Vulnerability_Severity_Enum>;
+};
+
+
+/** columns and relationships of "fix" */
+export type FixDownloadedByArgs = {
+  distinct_on?: InputMaybe<Array<User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Order_By>>;
+  where?: InputMaybe<User_Bool_Exp>;
 };
 
 
@@ -2764,16 +2708,6 @@ export type FixFixRatingsArgs = {
 
 
 /** columns and relationships of "fix" */
-export type FixFixRatings_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Fix_Rating_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Fix_Rating_Order_By>>;
-  where?: InputMaybe<Fix_Rating_Bool_Exp>;
-};
-
-
-/** columns and relationships of "fix" */
 export type FixPatchAndQuestionsArgs = {
   userInput?: InputMaybe<Array<QuestionAnswer>>;
 };
@@ -2781,21 +2715,11 @@ export type FixPatchAndQuestionsArgs = {
 
 /** columns and relationships of "fix" */
 export type FixScmSubmitFixRequestsArgs = {
-  distinct_on?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Select_Column>>;
+  distinct_on?: InputMaybe<Array<Scm_Submit_Fix_Request_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Order_By>>;
-  where?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
-};
-
-
-/** columns and relationships of "fix" */
-export type FixScmSubmitFixRequests_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Order_By>>;
-  where?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
+  order_by?: InputMaybe<Array<Scm_Submit_Fix_Request_Order_By>>;
+  where?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
 };
 
 
@@ -3940,7 +3864,7 @@ export type Fix_Bool_Exp = {
   confidence?: InputMaybe<Int_Comparison_Exp>;
   created_on?: InputMaybe<Timestamptz_Comparison_Exp>;
   downloadedBy?: InputMaybe<User_Bool_Exp>;
-  downloadedByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  downloadedByUserIdDeprecated?: InputMaybe<Uuid_Comparison_Exp>;
   effortToApplyFix?: InputMaybe<Effort_To_Apply_Fix_Enum_Comparison_Exp>;
   fixAnswers?: InputMaybe<FixAnswer_Bool_Exp>;
   fixAnswers_aggregate?: InputMaybe<FixAnswer_Aggregate_Bool_Exp>;
@@ -3950,7 +3874,6 @@ export type Fix_Bool_Exp = {
   fixInfoFile?: InputMaybe<File_Bool_Exp>;
   fixInfoFileId?: InputMaybe<Uuid_Comparison_Exp>;
   fixRatings?: InputMaybe<Fix_Rating_Bool_Exp>;
-  fixRatings_aggregate?: InputMaybe<Fix_Rating_Aggregate_Bool_Exp>;
   fixRawContentHash?: InputMaybe<String_Comparison_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   fixReportId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -3958,6 +3881,7 @@ export type Fix_Bool_Exp = {
   gitBlameLogin?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
+  isArchivedDeprecated?: InputMaybe<Boolean_Comparison_Exp>;
   isExpired?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
   issueTypeOld?: InputMaybe<IssueType_Enum_Comparison_Exp>;
@@ -3967,10 +3891,11 @@ export type Fix_Bool_Exp = {
   patchFileId?: InputMaybe<Uuid_Comparison_Exp>;
   safeIssueLanguage?: InputMaybe<String_Comparison_Exp>;
   safeIssueType?: InputMaybe<String_Comparison_Exp>;
-  scmSubmitFixRequests?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
-  scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
+  scmSubmitFixRequests?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
   severityValue?: InputMaybe<Int_Comparison_Exp>;
-  state?: InputMaybe<Fix_State_Enum_Comparison_Exp>;
+  sharedState?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+  state?: InputMaybe<String_Comparison_Exp>;
+  stateDeprecated?: InputMaybe<Fix_State_Enum_Comparison_Exp>;
   submitFixRequests?: InputMaybe<Fix_To_Submit_Fix_Request_Bool_Exp>;
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Bool_Exp>;
   urlPath?: InputMaybe<String_Comparison_Exp>;
@@ -3987,6 +3912,224 @@ export enum Fix_Constraint {
   FixPkey = 'fix_pkey'
 }
 
+/** This table creates many-to-many relationship between the fix and user */
+export type Fix_Download_To_User = {
+  __typename?: 'fix_download_to_user';
+  downloadedAt: Scalars['timestamptz']['output'];
+  fixId: Scalars['uuid']['output'];
+  fixSharedId: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "fix_download_to_user" */
+export type Fix_Download_To_User_Aggregate = {
+  __typename?: 'fix_download_to_user_aggregate';
+  aggregate?: Maybe<Fix_Download_To_User_Aggregate_Fields>;
+  nodes: Array<Fix_Download_To_User>;
+};
+
+export type Fix_Download_To_User_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Fix_Download_To_User_Aggregate_Bool_Exp_Count>;
+};
+
+export type Fix_Download_To_User_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "fix_download_to_user" */
+export type Fix_Download_To_User_Aggregate_Fields = {
+  __typename?: 'fix_download_to_user_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Fix_Download_To_User_Max_Fields>;
+  min?: Maybe<Fix_Download_To_User_Min_Fields>;
+};
+
+
+/** aggregate fields of "fix_download_to_user" */
+export type Fix_Download_To_User_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "fix_download_to_user" */
+export type Fix_Download_To_User_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Fix_Download_To_User_Max_Order_By>;
+  min?: InputMaybe<Fix_Download_To_User_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "fix_download_to_user" */
+export type Fix_Download_To_User_Arr_Rel_Insert_Input = {
+  data: Array<Fix_Download_To_User_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Fix_Download_To_User_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "fix_download_to_user". All fields are combined with a logical 'AND'. */
+export type Fix_Download_To_User_Bool_Exp = {
+  _and?: InputMaybe<Array<Fix_Download_To_User_Bool_Exp>>;
+  _not?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+  _or?: InputMaybe<Array<Fix_Download_To_User_Bool_Exp>>;
+  downloadedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixId?: InputMaybe<Uuid_Comparison_Exp>;
+  fixSharedId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "fix_download_to_user" */
+export enum Fix_Download_To_User_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixDownloadToUserPkey = 'fix_download_to_user_pkey'
+}
+
+/** input type for inserting data into table "fix_download_to_user" */
+export type Fix_Download_To_User_Insert_Input = {
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Fix_Download_To_User_Max_Fields = {
+  __typename?: 'fix_download_to_user_max_fields';
+  downloadedAt?: Maybe<Scalars['timestamptz']['output']>;
+  fixId?: Maybe<Scalars['uuid']['output']>;
+  fixSharedId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "fix_download_to_user" */
+export type Fix_Download_To_User_Max_Order_By = {
+  downloadedAt?: InputMaybe<Order_By>;
+  fixId?: InputMaybe<Order_By>;
+  fixSharedId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Fix_Download_To_User_Min_Fields = {
+  __typename?: 'fix_download_to_user_min_fields';
+  downloadedAt?: Maybe<Scalars['timestamptz']['output']>;
+  fixId?: Maybe<Scalars['uuid']['output']>;
+  fixSharedId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "fix_download_to_user" */
+export type Fix_Download_To_User_Min_Order_By = {
+  downloadedAt?: InputMaybe<Order_By>;
+  fixId?: InputMaybe<Order_By>;
+  fixSharedId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "fix_download_to_user" */
+export type Fix_Download_To_User_Mutation_Response = {
+  __typename?: 'fix_download_to_user_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Fix_Download_To_User>;
+};
+
+/** on_conflict condition type for table "fix_download_to_user" */
+export type Fix_Download_To_User_On_Conflict = {
+  constraint: Fix_Download_To_User_Constraint;
+  update_columns?: Array<Fix_Download_To_User_Update_Column>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "fix_download_to_user". */
+export type Fix_Download_To_User_Order_By = {
+  downloadedAt?: InputMaybe<Order_By>;
+  fixId?: InputMaybe<Order_By>;
+  fixSharedId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: fix_download_to_user */
+export type Fix_Download_To_User_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "fix_download_to_user" */
+export enum Fix_Download_To_User_Select_Column {
+  /** column name */
+  DownloadedAt = 'downloadedAt',
+  /** column name */
+  FixId = 'fixId',
+  /** column name */
+  FixSharedId = 'fixSharedId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UserId = 'userId'
+}
+
+/** input type for updating data in table "fix_download_to_user" */
+export type Fix_Download_To_User_Set_Input = {
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "fix_download_to_user" */
+export type Fix_Download_To_User_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Fix_Download_To_User_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Fix_Download_To_User_Stream_Cursor_Value_Input = {
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "fix_download_to_user" */
+export enum Fix_Download_To_User_Update_Column {
+  /** column name */
+  DownloadedAt = 'downloadedAt',
+  /** column name */
+  FixId = 'fixId',
+  /** column name */
+  FixSharedId = 'fixSharedId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UserId = 'userId'
+}
+
+export type Fix_Download_To_User_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Fix_Download_To_User_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Fix_Download_To_User_Bool_Exp;
+};
+
 /** input type for incrementing numeric columns in table "fix" */
 export type Fix_Inc_Input = {
   confidence?: InputMaybe<Scalars['Int']['input']>;
@@ -3996,8 +4139,8 @@ export type Fix_Inc_Input = {
 export type Fix_Insert_Input = {
   confidence?: InputMaybe<Scalars['Int']['input']>;
   created_on?: InputMaybe<Scalars['timestamptz']['input']>;
-  downloadedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  downloadedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: InputMaybe<Scalars['uuid']['input']>;
   effortToApplyFix?: InputMaybe<Effort_To_Apply_Fix_Enum>;
   fixAnswers?: InputMaybe<FixAnswer_Arr_Rel_Insert_Input>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
@@ -4005,7 +4148,6 @@ export type Fix_Insert_Input = {
   fixFiles?: InputMaybe<FixFile_Arr_Rel_Insert_Input>;
   fixInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   fixInfoFileId?: InputMaybe<Scalars['uuid']['input']>;
-  fixRatings?: InputMaybe<Fix_Rating_Arr_Rel_Insert_Input>;
   /** This hash is derived from the 'patch', 'vendor' ,'issue_type', 'language', and the 'question_keys' */
   fixRawContentHash?: InputMaybe<Scalars['String']['input']>;
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
@@ -4013,7 +4155,8 @@ export type Fix_Insert_Input = {
   fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This field is deprecated */
+  isArchivedDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
@@ -4022,8 +4165,9 @@ export type Fix_Insert_Input = {
   patchFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
-  scmSubmitFixRequests?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Arr_Rel_Insert_Input>;
-  state?: InputMaybe<Fix_State_Enum>;
+  sharedState?: InputMaybe<Fix_Shared_State_Obj_Rel_Insert_Input>;
+  /** This field is deprecated */
+  stateDeprecated?: InputMaybe<Fix_State_Enum>;
   submitFixRequests?: InputMaybe<Fix_To_Submit_Fix_Request_Arr_Rel_Insert_Input>;
   vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Arr_Rel_Insert_Input>;
   vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
@@ -4034,7 +4178,8 @@ export type Fix_Max_Fields = {
   __typename?: 'fix_max_fields';
   confidence?: Maybe<Scalars['Int']['output']>;
   created_on?: Maybe<Scalars['timestamptz']['output']>;
-  downloadedByUserId?: Maybe<Scalars['uuid']['output']>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: Maybe<Scalars['uuid']['output']>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: Maybe<Scalars['String']['output']>;
   fixInfoFileId?: Maybe<Scalars['uuid']['output']>;
@@ -4055,6 +4200,8 @@ export type Fix_Max_Fields = {
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "fix_state" */
+  state?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_fix_url_path" */
   urlPath?: Maybe<Scalars['String']['output']>;
 };
@@ -4063,7 +4210,8 @@ export type Fix_Max_Fields = {
 export type Fix_Max_Order_By = {
   confidence?: InputMaybe<Order_By>;
   created_on?: InputMaybe<Order_By>;
-  downloadedByUserId?: InputMaybe<Order_By>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: InputMaybe<Order_By>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: InputMaybe<Order_By>;
   fixInfoFileId?: InputMaybe<Order_By>;
@@ -4083,7 +4231,8 @@ export type Fix_Min_Fields = {
   __typename?: 'fix_min_fields';
   confidence?: Maybe<Scalars['Int']['output']>;
   created_on?: Maybe<Scalars['timestamptz']['output']>;
-  downloadedByUserId?: Maybe<Scalars['uuid']['output']>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: Maybe<Scalars['uuid']['output']>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: Maybe<Scalars['String']['output']>;
   fixInfoFileId?: Maybe<Scalars['uuid']['output']>;
@@ -4104,6 +4253,8 @@ export type Fix_Min_Fields = {
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "fix_state" */
+  state?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_fix_url_path" */
   urlPath?: Maybe<Scalars['String']['output']>;
 };
@@ -4112,7 +4263,8 @@ export type Fix_Min_Fields = {
 export type Fix_Min_Order_By = {
   confidence?: InputMaybe<Order_By>;
   created_on?: InputMaybe<Order_By>;
-  downloadedByUserId?: InputMaybe<Order_By>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: InputMaybe<Order_By>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: InputMaybe<Order_By>;
   fixInfoFileId?: InputMaybe<Order_By>;
@@ -4154,8 +4306,8 @@ export type Fix_On_Conflict = {
 export type Fix_Order_By = {
   confidence?: InputMaybe<Order_By>;
   created_on?: InputMaybe<Order_By>;
-  downloadedBy?: InputMaybe<User_Order_By>;
-  downloadedByUserId?: InputMaybe<Order_By>;
+  downloadedByUserIdDeprecated?: InputMaybe<Order_By>;
+  downloadedBy_aggregate?: InputMaybe<User_Aggregate_Order_By>;
   effortToApplyFix?: InputMaybe<Order_By>;
   fixAnswers_aggregate?: InputMaybe<FixAnswer_Aggregate_Order_By>;
   fixContentHashId?: InputMaybe<Order_By>;
@@ -4170,6 +4322,7 @@ export type Fix_Order_By = {
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
+  isArchivedDeprecated?: InputMaybe<Order_By>;
   isExpired?: InputMaybe<Order_By>;
   issueLanguageOld?: InputMaybe<Order_By>;
   issueTypeOld?: InputMaybe<Order_By>;
@@ -4179,9 +4332,11 @@ export type Fix_Order_By = {
   patchFileId?: InputMaybe<Order_By>;
   safeIssueLanguage?: InputMaybe<Order_By>;
   safeIssueType?: InputMaybe<Order_By>;
-  scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
+  scmSubmitFixRequests_aggregate?: InputMaybe<Scm_Submit_Fix_Request_Aggregate_Order_By>;
   severityValue?: InputMaybe<Order_By>;
+  sharedState?: InputMaybe<Fix_Shared_State_Order_By>;
   state?: InputMaybe<Order_By>;
+  stateDeprecated?: InputMaybe<Order_By>;
   submitFixRequests_aggregate?: InputMaybe<Fix_To_Submit_Fix_Request_Aggregate_Order_By>;
   urlPath?: InputMaybe<Order_By>;
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Order_By>;
@@ -4200,9 +4355,10 @@ export type Fix_Rating = {
   excludedByUserId: Scalars['uuid']['output'];
   /** An object relationship */
   fix: Fix;
+  /** This field is deprecated */
   fixId: Scalars['uuid']['output'];
   fixRatingTag?: Maybe<Fix_Rating_Tag_Enum>;
-  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
+  fixSharedStateId?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   updatedDate: Scalars['timestamptz']['output'];
   /** An object relationship */
@@ -4294,7 +4450,7 @@ export type Fix_Rating_Bool_Exp = {
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum_Comparison_Exp>;
-  fix_shared_state_id?: InputMaybe<Uuid_Comparison_Exp>;
+  fixSharedStateId?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   updatedDate?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
@@ -4319,9 +4475,10 @@ export type Fix_Rating_Insert_Input = {
   comment?: InputMaybe<Scalars['String']['input']>;
   excludedByUserId?: InputMaybe<Scalars['uuid']['input']>;
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
+  /** This field is deprecated */
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
-  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -4333,8 +4490,9 @@ export type Fix_Rating_Max_Fields = {
   __typename?: 'fix_rating_max_fields';
   comment?: Maybe<Scalars['String']['output']>;
   excludedByUserId?: Maybe<Scalars['uuid']['output']>;
+  /** This field is deprecated */
   fixId?: Maybe<Scalars['uuid']['output']>;
-  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
+  fixSharedStateId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   updatedDate?: Maybe<Scalars['timestamptz']['output']>;
   voteScore?: Maybe<Scalars['smallint']['output']>;
@@ -4344,8 +4502,9 @@ export type Fix_Rating_Max_Fields = {
 export type Fix_Rating_Max_Order_By = {
   comment?: InputMaybe<Order_By>;
   excludedByUserId?: InputMaybe<Order_By>;
+  /** This field is deprecated */
   fixId?: InputMaybe<Order_By>;
-  fix_shared_state_id?: InputMaybe<Order_By>;
+  fixSharedStateId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   voteScore?: InputMaybe<Order_By>;
@@ -4356,8 +4515,9 @@ export type Fix_Rating_Min_Fields = {
   __typename?: 'fix_rating_min_fields';
   comment?: Maybe<Scalars['String']['output']>;
   excludedByUserId?: Maybe<Scalars['uuid']['output']>;
+  /** This field is deprecated */
   fixId?: Maybe<Scalars['uuid']['output']>;
-  fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
+  fixSharedStateId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   updatedDate?: Maybe<Scalars['timestamptz']['output']>;
   voteScore?: Maybe<Scalars['smallint']['output']>;
@@ -4367,8 +4527,9 @@ export type Fix_Rating_Min_Fields = {
 export type Fix_Rating_Min_Order_By = {
   comment?: InputMaybe<Order_By>;
   excludedByUserId?: InputMaybe<Order_By>;
+  /** This field is deprecated */
   fixId?: InputMaybe<Order_By>;
-  fix_shared_state_id?: InputMaybe<Order_By>;
+  fixSharedStateId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   voteScore?: InputMaybe<Order_By>;
@@ -4397,7 +4558,7 @@ export type Fix_Rating_Order_By = {
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
   fixRatingTag?: InputMaybe<Order_By>;
-  fix_shared_state_id?: InputMaybe<Order_By>;
+  fixSharedStateId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   updatedDate?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
@@ -4420,7 +4581,7 @@ export enum Fix_Rating_Select_Column {
   /** column name */
   FixRatingTag = 'fixRatingTag',
   /** column name */
-  FixSharedStateId = 'fix_shared_state_id',
+  FixSharedStateId = 'fixSharedStateId',
   /** column name */
   Id = 'id',
   /** column name */
@@ -4433,9 +4594,10 @@ export enum Fix_Rating_Select_Column {
 export type Fix_Rating_Set_Input = {
   comment?: InputMaybe<Scalars['String']['input']>;
   excludedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  /** This field is deprecated */
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
-  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   voteScore?: InputMaybe<Scalars['smallint']['input']>;
@@ -4486,9 +4648,10 @@ export type Fix_Rating_Stream_Cursor_Input = {
 export type Fix_Rating_Stream_Cursor_Value_Input = {
   comment?: InputMaybe<Scalars['String']['input']>;
   excludedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  /** This field is deprecated */
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixRatingTag?: InputMaybe<Fix_Rating_Tag_Enum>;
-  fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
   voteScore?: InputMaybe<Scalars['smallint']['input']>;
@@ -4672,7 +4835,7 @@ export enum Fix_Rating_Update_Column {
   /** column name */
   FixRatingTag = 'fixRatingTag',
   /** column name */
-  FixSharedStateId = 'fix_shared_state_id',
+  FixSharedStateId = 'fixSharedStateId',
   /** column name */
   Id = 'id',
   /** column name */
@@ -4892,7 +5055,7 @@ export enum Fix_Select_Column {
   /** column name */
   CreatedOn = 'created_on',
   /** column name */
-  DownloadedByUserId = 'downloadedByUserId',
+  DownloadedByUserIdDeprecated = 'downloadedByUserIdDeprecated',
   /** column name */
   EffortToApplyFix = 'effortToApplyFix',
   /** column name */
@@ -4910,7 +5073,7 @@ export enum Fix_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  IsArchived = 'isArchived',
+  IsArchivedDeprecated = 'isArchivedDeprecated',
   /** column name */
   IsExpired = 'isExpired',
   /** column name */
@@ -4922,7 +5085,7 @@ export enum Fix_Select_Column {
   /** column name */
   PatchFileId = 'patchFileId',
   /** column name */
-  State = 'state',
+  StateDeprecated = 'stateDeprecated',
   /** column name */
   VulnerabilitySeverityOld = 'vulnerabilitySeverityOld'
 }
@@ -4930,7 +5093,7 @@ export enum Fix_Select_Column {
 /** select "fix_aggregate_bool_exp_bool_and_arguments_columns" columns of table "fix" */
 export enum Fix_Select_Column_Fix_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
   /** column name */
-  IsArchived = 'isArchived',
+  IsArchivedDeprecated = 'isArchivedDeprecated',
   /** column name */
   IsExpired = 'isExpired'
 }
@@ -4938,7 +5101,7 @@ export enum Fix_Select_Column_Fix_Aggregate_Bool_Exp_Bool_And_Arguments_Columns 
 /** select "fix_aggregate_bool_exp_bool_or_arguments_columns" columns of table "fix" */
 export enum Fix_Select_Column_Fix_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
   /** column name */
-  IsArchived = 'isArchived',
+  IsArchivedDeprecated = 'isArchivedDeprecated',
   /** column name */
   IsExpired = 'isExpired'
 }
@@ -4947,7 +5110,8 @@ export enum Fix_Select_Column_Fix_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
 export type Fix_Set_Input = {
   confidence?: InputMaybe<Scalars['Int']['input']>;
   created_on?: InputMaybe<Scalars['timestamptz']['input']>;
-  downloadedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: InputMaybe<Scalars['uuid']['input']>;
   effortToApplyFix?: InputMaybe<Effort_To_Apply_Fix_Enum>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: InputMaybe<Scalars['String']['input']>;
@@ -4958,7 +5122,8 @@ export type Fix_Set_Input = {
   fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This field is deprecated */
+  isArchivedDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
@@ -4966,8 +5131,313 @@ export type Fix_Set_Input = {
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
-  state?: InputMaybe<Fix_State_Enum>;
+  /** This field is deprecated */
+  stateDeprecated?: InputMaybe<Fix_State_Enum>;
   vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
+};
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_State = {
+  __typename?: 'fix_shared_state';
+  /** An array relationship */
+  downloadedBy: Array<Fix_Download_To_User>;
+  /** An aggregate relationship */
+  downloadedBy_aggregate: Fix_Download_To_User_Aggregate;
+  fixHash: Scalars['String']['output'];
+  /** An array relationship */
+  fixRatings: Array<Fix_Rating>;
+  /** An aggregate relationship */
+  fixRatings_aggregate: Fix_Rating_Aggregate;
+  /** An array relationship */
+  fixes: Array<Fix>;
+  /** An aggregate relationship */
+  fixes_aggregate: Fix_Aggregate;
+  id: Scalars['uuid']['output'];
+  isArchived: Scalars['Boolean']['output'];
+  /** An object relationship */
+  project: Project;
+  projectId: Scalars['uuid']['output'];
+  repoUrl: Scalars['String']['output'];
+  /** An array relationship */
+  scmSubmitFixRequests: Array<Fix_To_Scm_Submit_Fix_Request>;
+  /** An aggregate relationship */
+  scmSubmitFixRequests_aggregate: Fix_To_Scm_Submit_Fix_Request_Aggregate;
+  state: Fix_State_Enum;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateDownloadedByArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateDownloadedBy_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateFixRatingsArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Rating_Order_By>>;
+  where?: InputMaybe<Fix_Rating_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateFixRatings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Rating_Order_By>>;
+  where?: InputMaybe<Fix_Rating_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateFixesArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Order_By>>;
+  where?: InputMaybe<Fix_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateFixes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Order_By>>;
+  where?: InputMaybe<Fix_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateScmSubmitFixRequestsArgs = {
+  distinct_on?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Order_By>>;
+  where?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_shared_state" */
+export type Fix_Shared_StateScmSubmitFixRequests_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Order_By>>;
+  where?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
+};
+
+/** aggregated selection of "fix_shared_state" */
+export type Fix_Shared_State_Aggregate = {
+  __typename?: 'fix_shared_state_aggregate';
+  aggregate?: Maybe<Fix_Shared_State_Aggregate_Fields>;
+  nodes: Array<Fix_Shared_State>;
+};
+
+/** aggregate fields of "fix_shared_state" */
+export type Fix_Shared_State_Aggregate_Fields = {
+  __typename?: 'fix_shared_state_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Fix_Shared_State_Max_Fields>;
+  min?: Maybe<Fix_Shared_State_Min_Fields>;
+};
+
+
+/** aggregate fields of "fix_shared_state" */
+export type Fix_Shared_State_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Fix_Shared_State_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "fix_shared_state". All fields are combined with a logical 'AND'. */
+export type Fix_Shared_State_Bool_Exp = {
+  _and?: InputMaybe<Array<Fix_Shared_State_Bool_Exp>>;
+  _not?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+  _or?: InputMaybe<Array<Fix_Shared_State_Bool_Exp>>;
+  downloadedBy?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+  downloadedBy_aggregate?: InputMaybe<Fix_Download_To_User_Aggregate_Bool_Exp>;
+  fixHash?: InputMaybe<String_Comparison_Exp>;
+  fixRatings?: InputMaybe<Fix_Rating_Bool_Exp>;
+  fixRatings_aggregate?: InputMaybe<Fix_Rating_Aggregate_Bool_Exp>;
+  fixes?: InputMaybe<Fix_Bool_Exp>;
+  fixes_aggregate?: InputMaybe<Fix_Aggregate_Bool_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  isArchived?: InputMaybe<Boolean_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  repoUrl?: InputMaybe<String_Comparison_Exp>;
+  scmSubmitFixRequests?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>;
+  scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Bool_Exp>;
+  state?: InputMaybe<Fix_State_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "fix_shared_state" */
+export enum Fix_Shared_State_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixSharedStatePkey = 'fix_shared_state_pkey',
+  /** unique or primary key constraint on columns "repo_url", "project_id", "fix_hash" */
+  FixSharedStateProjectIdFixHashRepoUrlKey = 'fix_shared_state_project_id_fix_hash_repo_url_key'
+}
+
+/** input type for inserting data into table "fix_shared_state" */
+export type Fix_Shared_State_Insert_Input = {
+  downloadedBy?: InputMaybe<Fix_Download_To_User_Arr_Rel_Insert_Input>;
+  fixHash?: InputMaybe<Scalars['String']['input']>;
+  fixRatings?: InputMaybe<Fix_Rating_Arr_Rel_Insert_Input>;
+  fixes?: InputMaybe<Fix_Arr_Rel_Insert_Input>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  scmSubmitFixRequests?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Arr_Rel_Insert_Input>;
+  state?: InputMaybe<Fix_State_Enum>;
+};
+
+/** aggregate max on columns */
+export type Fix_Shared_State_Max_Fields = {
+  __typename?: 'fix_shared_state_max_fields';
+  fixHash?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Fix_Shared_State_Min_Fields = {
+  __typename?: 'fix_shared_state_min_fields';
+  fixHash?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "fix_shared_state" */
+export type Fix_Shared_State_Mutation_Response = {
+  __typename?: 'fix_shared_state_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Fix_Shared_State>;
+};
+
+/** input type for inserting object relation for remote table "fix_shared_state" */
+export type Fix_Shared_State_Obj_Rel_Insert_Input = {
+  data: Fix_Shared_State_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Fix_Shared_State_On_Conflict>;
+};
+
+/** on_conflict condition type for table "fix_shared_state" */
+export type Fix_Shared_State_On_Conflict = {
+  constraint: Fix_Shared_State_Constraint;
+  update_columns?: Array<Fix_Shared_State_Update_Column>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "fix_shared_state". */
+export type Fix_Shared_State_Order_By = {
+  downloadedBy_aggregate?: InputMaybe<Fix_Download_To_User_Aggregate_Order_By>;
+  fixHash?: InputMaybe<Order_By>;
+  fixRatings_aggregate?: InputMaybe<Fix_Rating_Aggregate_Order_By>;
+  fixes_aggregate?: InputMaybe<Fix_Aggregate_Order_By>;
+  id?: InputMaybe<Order_By>;
+  isArchived?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  repoUrl?: InputMaybe<Order_By>;
+  scmSubmitFixRequests_aggregate?: InputMaybe<Fix_To_Scm_Submit_Fix_Request_Aggregate_Order_By>;
+  state?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: fix_shared_state */
+export type Fix_Shared_State_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "fix_shared_state" */
+export enum Fix_Shared_State_Select_Column {
+  /** column name */
+  FixHash = 'fixHash',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsArchived = 'isArchived',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoUrl = 'repoUrl',
+  /** column name */
+  State = 'state'
+}
+
+/** input type for updating data in table "fix_shared_state" */
+export type Fix_Shared_State_Set_Input = {
+  fixHash?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Fix_State_Enum>;
+};
+
+/** Streaming cursor of the table "fix_shared_state" */
+export type Fix_Shared_State_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Fix_Shared_State_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Fix_Shared_State_Stream_Cursor_Value_Input = {
+  fixHash?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Fix_State_Enum>;
+};
+
+/** update columns of table "fix_shared_state" */
+export enum Fix_Shared_State_Update_Column {
+  /** column name */
+  FixHash = 'fixHash',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsArchived = 'isArchived',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoUrl = 'repoUrl',
+  /** column name */
+  State = 'state'
+}
+
+export type Fix_Shared_State_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Fix_Shared_State_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Fix_Shared_State_Bool_Exp;
 };
 
 /** columns and relationships of "fix_state" */
@@ -5183,7 +5653,8 @@ export type Fix_Stream_Cursor_Input = {
 export type Fix_Stream_Cursor_Value_Input = {
   confidence?: InputMaybe<Scalars['Int']['input']>;
   created_on?: InputMaybe<Scalars['timestamptz']['input']>;
-  downloadedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  /** This field is deprecated */
+  downloadedByUserIdDeprecated?: InputMaybe<Scalars['uuid']['input']>;
   effortToApplyFix?: InputMaybe<Effort_To_Apply_Fix_Enum>;
   /** the hash is derived from 'vulnerability_report_issue_state', 'vendor', 'fix report id', 'is_ai',  'issue_type', 'language', 'patch', and the 'question_keys' */
   fixContentHashId?: InputMaybe<Scalars['String']['input']>;
@@ -5194,7 +5665,8 @@ export type Fix_Stream_Cursor_Value_Input = {
   fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This field is deprecated */
+  isArchivedDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
@@ -5202,7 +5674,8 @@ export type Fix_Stream_Cursor_Value_Input = {
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
-  state?: InputMaybe<Fix_State_Enum>;
+  /** This field is deprecated */
+  stateDeprecated?: InputMaybe<Fix_State_Enum>;
   vulnerabilitySeverityOld?: InputMaybe<Vulnerability_Severity_Enum>;
 };
 
@@ -5227,6 +5700,8 @@ export type Fix_To_Scm_Submit_Fix_Request = {
   /** An object relationship */
   fix: Fix;
   fixId: Scalars['uuid']['output'];
+  /** An object relationship */
+  fixSharedState?: Maybe<Fix_Shared_State>;
   fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   /** An object relationship */
@@ -5288,6 +5763,7 @@ export type Fix_To_Scm_Submit_Fix_Request_Bool_Exp = {
   _or?: InputMaybe<Array<Fix_To_Scm_Submit_Fix_Request_Bool_Exp>>;
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
+  fixSharedState?: InputMaybe<Fix_Shared_State_Bool_Exp>;
   fix_shared_state_id?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
@@ -5304,6 +5780,7 @@ export enum Fix_To_Scm_Submit_Fix_Request_Constraint {
 export type Fix_To_Scm_Submit_Fix_Request_Insert_Input = {
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
+  fixSharedState?: InputMaybe<Fix_Shared_State_Obj_Rel_Insert_Input>;
   fix_shared_state_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Obj_Rel_Insert_Input>;
@@ -5364,6 +5841,7 @@ export type Fix_To_Scm_Submit_Fix_Request_On_Conflict = {
 export type Fix_To_Scm_Submit_Fix_Request_Order_By = {
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
+  fixSharedState?: InputMaybe<Fix_Shared_State_Order_By>;
   fix_shared_state_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   scmSubmitFixRequest?: InputMaybe<Scm_Submit_Fix_Request_Order_By>;
@@ -5632,7 +6110,7 @@ export enum Fix_Update_Column {
   /** column name */
   CreatedOn = 'created_on',
   /** column name */
-  DownloadedByUserId = 'downloadedByUserId',
+  DownloadedByUserIdDeprecated = 'downloadedByUserIdDeprecated',
   /** column name */
   EffortToApplyFix = 'effortToApplyFix',
   /** column name */
@@ -5650,7 +6128,7 @@ export enum Fix_Update_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  IsArchived = 'isArchived',
+  IsArchivedDeprecated = 'isArchivedDeprecated',
   /** column name */
   IsExpired = 'isExpired',
   /** column name */
@@ -5662,7 +6140,7 @@ export enum Fix_Update_Column {
   /** column name */
   PatchFileId = 'patchFileId',
   /** column name */
-  State = 'state',
+  StateDeprecated = 'stateDeprecated',
   /** column name */
   VulnerabilitySeverityOld = 'vulnerabilitySeverityOld'
 }
@@ -7350,6 +7828,10 @@ export type Mutation_Root = {
   delete_fixReport_by_pk?: Maybe<FixReport>;
   /** delete single row from the table: "fix" */
   delete_fix_by_pk?: Maybe<Fix>;
+  /** delete data from the table: "fix_download_to_user" */
+  delete_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
+  /** delete single row from the table: "fix_download_to_user" */
+  delete_fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
   /** delete data from the table: "fix_rating" */
   delete_fix_rating?: Maybe<Fix_Rating_Mutation_Response>;
   /** delete single row from the table: "fix_rating" */
@@ -7362,6 +7844,10 @@ export type Mutation_Root = {
   delete_fix_report_state?: Maybe<Fix_Report_State_Mutation_Response>;
   /** delete single row from the table: "fix_report_state" */
   delete_fix_report_state_by_pk?: Maybe<Fix_Report_State>;
+  /** delete data from the table: "fix_shared_state" */
+  delete_fix_shared_state?: Maybe<Fix_Shared_State_Mutation_Response>;
+  /** delete single row from the table: "fix_shared_state" */
+  delete_fix_shared_state_by_pk?: Maybe<Fix_Shared_State>;
   /** delete data from the table: "fix_state" */
   delete_fix_state?: Maybe<Fix_State_Mutation_Response>;
   /** delete single row from the table: "fix_state" */
@@ -7577,6 +8063,10 @@ export type Mutation_Root = {
   insert_fixReport?: Maybe<FixReport_Mutation_Response>;
   /** insert a single row into the table: "fix_report" */
   insert_fixReport_one?: Maybe<FixReport>;
+  /** insert data into the table: "fix_download_to_user" */
+  insert_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
+  /** insert a single row into the table: "fix_download_to_user" */
+  insert_fix_download_to_user_one?: Maybe<Fix_Download_To_User>;
   /** insert a single row into the table: "fix" */
   insert_fix_one?: Maybe<Fix>;
   /** insert data into the table: "fix_rating" */
@@ -7591,6 +8081,10 @@ export type Mutation_Root = {
   insert_fix_report_state?: Maybe<Fix_Report_State_Mutation_Response>;
   /** insert a single row into the table: "fix_report_state" */
   insert_fix_report_state_one?: Maybe<Fix_Report_State>;
+  /** insert data into the table: "fix_shared_state" */
+  insert_fix_shared_state?: Maybe<Fix_Shared_State_Mutation_Response>;
+  /** insert a single row into the table: "fix_shared_state" */
+  insert_fix_shared_state_one?: Maybe<Fix_Shared_State>;
   /** insert data into the table: "fix_state" */
   insert_fix_state?: Maybe<Fix_State_Mutation_Response>;
   /** insert a single row into the table: "fix_state" */
@@ -7844,6 +8338,12 @@ export type Mutation_Root = {
   update_fixReport_many?: Maybe<Array<Maybe<FixReport_Mutation_Response>>>;
   /** update single row of the table: "fix" */
   update_fix_by_pk?: Maybe<Fix>;
+  /** update data of the table: "fix_download_to_user" */
+  update_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
+  /** update single row of the table: "fix_download_to_user" */
+  update_fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
+  /** update multiples rows of table: "fix_download_to_user" */
+  update_fix_download_to_user_many?: Maybe<Array<Maybe<Fix_Download_To_User_Mutation_Response>>>;
   /** update multiples rows of table: "fix" */
   update_fix_many?: Maybe<Array<Maybe<Fix_Mutation_Response>>>;
   /** update data of the table: "fix_rating" */
@@ -7864,6 +8364,12 @@ export type Mutation_Root = {
   update_fix_report_state_by_pk?: Maybe<Fix_Report_State>;
   /** update multiples rows of table: "fix_report_state" */
   update_fix_report_state_many?: Maybe<Array<Maybe<Fix_Report_State_Mutation_Response>>>;
+  /** update data of the table: "fix_shared_state" */
+  update_fix_shared_state?: Maybe<Fix_Shared_State_Mutation_Response>;
+  /** update single row of the table: "fix_shared_state" */
+  update_fix_shared_state_by_pk?: Maybe<Fix_Shared_State>;
+  /** update multiples rows of table: "fix_shared_state" */
+  update_fix_shared_state_many?: Maybe<Array<Maybe<Fix_Shared_State_Mutation_Response>>>;
   /** update data of the table: "fix_state" */
   update_fix_state?: Maybe<Fix_State_Mutation_Response>;
   /** update single row of the table: "fix_state" */
@@ -8380,6 +8886,18 @@ export type Mutation_RootDelete_Fix_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Fix_Download_To_UserArgs = {
+  where: Fix_Download_To_User_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Download_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Fix_RatingArgs = {
   where: Fix_Rating_Bool_Exp;
 };
@@ -8412,6 +8930,18 @@ export type Mutation_RootDelete_Fix_Report_StateArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Fix_Report_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Shared_StateArgs = {
+  where: Fix_Shared_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Shared_State_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -9097,6 +9627,20 @@ export type Mutation_RootInsert_FixReport_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Fix_Download_To_UserArgs = {
+  objects: Array<Fix_Download_To_User_Insert_Input>;
+  on_conflict?: InputMaybe<Fix_Download_To_User_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Download_To_User_OneArgs = {
+  object: Fix_Download_To_User_Insert_Input;
+  on_conflict?: InputMaybe<Fix_Download_To_User_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Fix_OneArgs = {
   object: Fix_Insert_Input;
   on_conflict?: InputMaybe<Fix_On_Conflict>;
@@ -9142,6 +9686,20 @@ export type Mutation_RootInsert_Fix_Report_StateArgs = {
 export type Mutation_RootInsert_Fix_Report_State_OneArgs = {
   object: Fix_Report_State_Insert_Input;
   on_conflict?: InputMaybe<Fix_Report_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Shared_StateArgs = {
+  objects: Array<Fix_Shared_State_Insert_Input>;
+  on_conflict?: InputMaybe<Fix_Shared_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Shared_State_OneArgs = {
+  object: Fix_Shared_State_Insert_Input;
+  on_conflict?: InputMaybe<Fix_Shared_State_On_Conflict>;
 };
 
 
@@ -10099,6 +10657,26 @@ export type Mutation_RootUpdate_Fix_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Fix_Download_To_UserArgs = {
+  _set?: InputMaybe<Fix_Download_To_User_Set_Input>;
+  where: Fix_Download_To_User_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Download_To_User_By_PkArgs = {
+  _set?: InputMaybe<Fix_Download_To_User_Set_Input>;
+  pk_columns: Fix_Download_To_User_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Download_To_User_ManyArgs = {
+  updates: Array<Fix_Download_To_User_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Fix_ManyArgs = {
   updates: Array<Fix_Updates>;
 };
@@ -10163,6 +10741,26 @@ export type Mutation_RootUpdate_Fix_Report_State_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Fix_Report_State_ManyArgs = {
   updates: Array<Fix_Report_State_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Shared_StateArgs = {
+  _set?: InputMaybe<Fix_Shared_State_Set_Input>;
+  where: Fix_Shared_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Shared_State_By_PkArgs = {
+  _set?: InputMaybe<Fix_Shared_State_Set_Input>;
+  pk_columns: Fix_Shared_State_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Shared_State_ManyArgs = {
+  updates: Array<Fix_Shared_State_Updates>;
 };
 
 
@@ -13465,14 +14063,10 @@ export type Pr_Status_Updates = {
 /** columns and relationships of "project" */
 export type Project = {
   __typename?: 'project';
-  /** A computed field, executes function "project_aggregated_resolved_vulnerability_severities" */
-  aggregatedResolvedVulnerabilities?: Maybe<Array<Aggregated_Severities>>;
   /** An array relationship */
   aggregatedResolvedVulnerabilitiesView: Array<View_Project_Resolved_Vulnerabilities>;
   /** An aggregate relationship */
   aggregatedResolvedVulnerabilitiesView_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
-  /** A computed field, executes function "project_aggregated_vulnerability_severities" */
-  aggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
   /** An array relationship */
   aggregatedVulnerabilitySeveritiesView: Array<View_Project_Vulnerability_Severities>;
   /** An aggregate relationship */
@@ -13499,12 +14093,8 @@ export type Project = {
   projectUsers: Array<Project_To_User>;
   /** An aggregate relationship */
   projectUsers_aggregate: Project_To_User_Aggregate;
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   totalResolvedVulnerabilitiesView?: Maybe<View_Project_Total_Resolved_Vulnerabilities>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   totalUniqueUnresolvedVulnerabilitiesView?: Maybe<View_Total_Unique_Unresolved_Vulnerabilities>;
   updatedAt: Scalars['timestamptz']['output'];
@@ -13512,16 +14102,6 @@ export type Project = {
   vulnerabilityReports: Array<Vulnerability_Report>;
   /** An aggregate relationship */
   vulnerabilityReports_aggregate: Vulnerability_Report_Aggregate;
-};
-
-
-/** columns and relationships of "project" */
-export type ProjectAggregatedResolvedVulnerabilitiesArgs = {
-  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
-  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
 };
 
 
@@ -13542,17 +14122,6 @@ export type ProjectAggregatedResolvedVulnerabilitiesView_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
   where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
-};
-
-
-/** columns and relationships of "project" */
-export type ProjectAggregatedVulnerabilitySeveritiesArgs = {
-  args: AggregatedVulnerabilitySeverities_Project_Args;
-  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
-  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
 };
 
 
@@ -13647,12 +14216,6 @@ export type ProjectProjectUsers_AggregateArgs = {
 
 
 /** columns and relationships of "project" */
-export type ProjectTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
-
-/** columns and relationships of "project" */
 export type ProjectVulnerabilityReportsArgs = {
   distinct_on?: InputMaybe<Array<Vulnerability_Report_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -13708,17 +14271,9 @@ export type Project_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "project" */
 export type Project_Aggregate_Fields = {
   __typename?: 'project_aggregate_fields';
-  avg?: Maybe<Project_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Project_Max_Fields>;
   min?: Maybe<Project_Min_Fields>;
-  stddev?: Maybe<Project_Stddev_Fields>;
-  stddev_pop?: Maybe<Project_Stddev_Pop_Fields>;
-  stddev_samp?: Maybe<Project_Stddev_Samp_Fields>;
-  sum?: Maybe<Project_Sum_Fields>;
-  var_pop?: Maybe<Project_Var_Pop_Fields>;
-  var_samp?: Maybe<Project_Var_Samp_Fields>;
-  variance?: Maybe<Project_Variance_Fields>;
 };
 
 
@@ -13742,27 +14297,11 @@ export type Project_Arr_Rel_Insert_Input = {
   on_conflict?: InputMaybe<Project_On_Conflict>;
 };
 
-/** aggregate avg on columns */
-export type Project_Avg_Fields = {
-  __typename?: 'project_avg_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate avg on columns */
-export type Project_Avg_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
 /** Boolean expression to filter rows from the table "project". All fields are combined with a logical 'AND'. */
 export type Project_Bool_Exp = {
   _and?: InputMaybe<Array<Project_Bool_Exp>>;
   _not?: InputMaybe<Project_Bool_Exp>;
   _or?: InputMaybe<Array<Project_Bool_Exp>>;
-  aggregatedResolvedVulnerabilities?: InputMaybe<Aggregated_Severities_Bool_Exp>;
   aggregatedResolvedVulnerabilitiesView?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
   aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp>;
   aggregatedVulnerabilitySeveritiesView?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
@@ -13781,7 +14320,6 @@ export type Project_Bool_Exp = {
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Bool_Exp>;
   projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
-  totalResolvedVulnerabilities?: InputMaybe<Int_Comparison_Exp>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -14064,17 +14602,7 @@ export type Project_Max_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
-};
-
-
-/** aggregate max on columns */
-export type Project_Max_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
 };
 
 /** order by max() on columns of table "project" */
@@ -14093,17 +14621,7 @@ export type Project_Min_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
-};
-
-
-/** aggregate min on columns */
-export type Project_Min_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
 };
 
 /** order by min() on columns of table "project" */
@@ -14141,7 +14659,6 @@ export type Project_On_Conflict = {
 /** Ordering options when selecting data from "project". */
 export type Project_Order_By = {
   aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Order_By>;
-  aggregatedResolvedVulnerabilities_aggregate?: InputMaybe<Aggregated_Severities_Aggregate_Order_By>;
   aggregatedVulnerabilitySeveritiesView_aggregate?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Order_By>;
   createdOn?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -14154,7 +14671,6 @@ export type Project_Order_By = {
   projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Order_By>;
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Order_By>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
-  totalResolvedVulnerabilities?: InputMaybe<Order_By>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Order_By>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>;
   updatedAt?: InputMaybe<Order_By>;
@@ -14600,51 +15116,6 @@ export type Project_Set_Input = {
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
-/** aggregate stddev on columns */
-export type Project_Stddev_Fields = {
-  __typename?: 'project_stddev_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev on columns */
-export type Project_Stddev_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
-/** aggregate stddev_pop on columns */
-export type Project_Stddev_Pop_Fields = {
-  __typename?: 'project_stddev_pop_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev_pop on columns */
-export type Project_Stddev_Pop_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
-/** aggregate stddev_samp on columns */
-export type Project_Stddev_Samp_Fields = {
-  __typename?: 'project_stddev_samp_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev_samp on columns */
-export type Project_Stddev_Samp_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
 /** Streaming cursor of the table "project" */
 export type Project_Stream_Cursor_Input = {
   /** Stream column input with initial value */
@@ -14662,21 +15133,6 @@ export type Project_Stream_Cursor_Value_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
-};
-
-/** aggregate sum on columns */
-export type Project_Sum_Fields = {
-  __typename?: 'project_sum_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate sum on columns */
-export type Project_Sum_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
 };
 
 /** columns and relationships of "project_to_project_role" */
@@ -15141,51 +15597,6 @@ export type Project_Updates = {
   where: Project_Bool_Exp;
 };
 
-/** aggregate var_pop on columns */
-export type Project_Var_Pop_Fields = {
-  __typename?: 'project_var_pop_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate var_pop on columns */
-export type Project_Var_Pop_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
-/** aggregate var_samp on columns */
-export type Project_Var_Samp_Fields = {
-  __typename?: 'project_var_samp_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate var_samp on columns */
-export type Project_Var_Samp_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
-/** aggregate variance on columns */
-export type Project_Variance_Fields = {
-  __typename?: 'project_variance_fields';
-  /** A computed field, executes function "total_resolved_vulnerabilities" */
-  totalResolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "total_project_unique_unresolved_vulnerabilities" */
-  totalUniqueUnresolvedVulnerabilities?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate variance on columns */
-export type Project_Variance_FieldsTotalUniqueUnresolvedVulnerabilitiesArgs = {
-  args: TotalUniqueUnresolvedVulnerabilities_Project_Args;
-};
-
 export type Query_Root = {
   __typename?: 'query_root';
   /** fetch data from the table: "aggregated_fix_state" */
@@ -15264,6 +15675,12 @@ export type Query_Root = {
   fix_aggregate: Fix_Aggregate;
   /** fetch data from the table: "fix" using primary key columns */
   fix_by_pk?: Maybe<Fix>;
+  /** fetch data from the table: "fix_download_to_user" */
+  fix_download_to_user: Array<Fix_Download_To_User>;
+  /** fetch aggregated fields from the table: "fix_download_to_user" */
+  fix_download_to_user_aggregate: Fix_Download_To_User_Aggregate;
+  /** fetch data from the table: "fix_download_to_user" using primary key columns */
+  fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
   /** fetch data from the table: "fix_rating" */
   fix_rating: Array<Fix_Rating>;
   /** fetch aggregated fields from the table: "fix_rating" */
@@ -15282,6 +15699,12 @@ export type Query_Root = {
   fix_report_state_aggregate: Fix_Report_State_Aggregate;
   /** fetch data from the table: "fix_report_state" using primary key columns */
   fix_report_state_by_pk?: Maybe<Fix_Report_State>;
+  /** fetch data from the table: "fix_shared_state" */
+  fix_shared_state: Array<Fix_Shared_State>;
+  /** fetch aggregated fields from the table: "fix_shared_state" */
+  fix_shared_state_aggregate: Fix_Shared_State_Aggregate;
+  /** fetch data from the table: "fix_shared_state" using primary key columns */
+  fix_shared_state_by_pk?: Maybe<Fix_Shared_State>;
   /** fetch data from the table: "fix_state" */
   fix_state: Array<Fix_State>;
   /** fetch aggregated fields from the table: "fix_state" */
@@ -15875,6 +16298,29 @@ export type Query_RootFix_By_PkArgs = {
 };
 
 
+export type Query_RootFix_Download_To_UserArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Download_To_User_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Download_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootFix_RatingArgs = {
   distinct_on?: InputMaybe<Array<Fix_Rating_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -15941,6 +16387,29 @@ export type Query_RootFix_Report_State_AggregateArgs = {
 
 export type Query_RootFix_Report_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootFix_Shared_StateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Shared_State_Order_By>>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Shared_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Shared_State_Order_By>>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Shared_State_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -18942,6 +19411,14 @@ export type Subscription_Root = {
   fix_aggregate: Fix_Aggregate;
   /** fetch data from the table: "fix" using primary key columns */
   fix_by_pk?: Maybe<Fix>;
+  /** fetch data from the table: "fix_download_to_user" */
+  fix_download_to_user: Array<Fix_Download_To_User>;
+  /** fetch aggregated fields from the table: "fix_download_to_user" */
+  fix_download_to_user_aggregate: Fix_Download_To_User_Aggregate;
+  /** fetch data from the table: "fix_download_to_user" using primary key columns */
+  fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
+  /** fetch data from the table in a streaming manner: "fix_download_to_user" */
+  fix_download_to_user_stream: Array<Fix_Download_To_User>;
   /** fetch data from the table: "fix_rating" */
   fix_rating: Array<Fix_Rating>;
   /** fetch aggregated fields from the table: "fix_rating" */
@@ -18966,6 +19443,14 @@ export type Subscription_Root = {
   fix_report_state_by_pk?: Maybe<Fix_Report_State>;
   /** fetch data from the table in a streaming manner: "fix_report_state" */
   fix_report_state_stream: Array<Fix_Report_State>;
+  /** fetch data from the table: "fix_shared_state" */
+  fix_shared_state: Array<Fix_Shared_State>;
+  /** fetch aggregated fields from the table: "fix_shared_state" */
+  fix_shared_state_aggregate: Fix_Shared_State_Aggregate;
+  /** fetch data from the table: "fix_shared_state" using primary key columns */
+  fix_shared_state_by_pk?: Maybe<Fix_Shared_State>;
+  /** fetch data from the table in a streaming manner: "fix_shared_state" */
+  fix_shared_state_stream: Array<Fix_Shared_State>;
   /** fetch data from the table: "fix_state" */
   fix_state: Array<Fix_State>;
   /** fetch aggregated fields from the table: "fix_state" */
@@ -19704,6 +20189,36 @@ export type Subscription_RootFix_By_PkArgs = {
 };
 
 
+export type Subscription_RootFix_Download_To_UserArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Download_To_User_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_To_User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_To_User_Order_By>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Download_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootFix_Download_To_User_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Fix_Download_To_User_Stream_Cursor_Input>>;
+  where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
 export type Subscription_RootFix_RatingArgs = {
   distinct_on?: InputMaybe<Array<Fix_Rating_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -19791,6 +20306,36 @@ export type Subscription_RootFix_Report_State_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Fix_Report_State_Stream_Cursor_Input>>;
   where?: InputMaybe<Fix_Report_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Shared_StateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Shared_State_Order_By>>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Shared_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Shared_State_Order_By>>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Shared_State_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootFix_Shared_State_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Fix_Shared_State_Stream_Cursor_Input>>;
+  where?: InputMaybe<Fix_Shared_State_Bool_Exp>;
 };
 
 
@@ -21174,10 +21719,6 @@ export type Timestamptz_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['timestamptz']['input']>>;
 };
 
-export type TotalUniqueUnresolvedVulnerabilities_Project_Args = {
-  min_confidence?: InputMaybe<Scalars['Int']['input']>;
-};
-
 export type UnresolvedAggregatedVulnerabilitySeverities_Organization_Args = {
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -21337,6 +21878,13 @@ export type User_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** order by aggregate values of table "user" */
+export type User_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<User_Max_Order_By>;
+  min?: InputMaybe<User_Min_Order_By>;
+};
+
 /** Boolean expression to filter rows from the table "user". All fields are combined with a logical 'AND'. */
 export type User_Bool_Exp = {
   _and?: InputMaybe<Array<User_Bool_Exp>>;
@@ -21400,6 +21948,16 @@ export type User_Max_Fields = {
   picture?: Maybe<Scalars['String']['output']>;
 };
 
+/** order by max() on columns of table "user" */
+export type User_Max_Order_By = {
+  email?: InputMaybe<Order_By>;
+  githubToken?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  impersonatedUserEmail?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  picture?: InputMaybe<Order_By>;
+};
+
 /** aggregate min on columns */
 export type User_Min_Fields = {
   __typename?: 'user_min_fields';
@@ -21409,6 +21967,16 @@ export type User_Min_Fields = {
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "user" */
+export type User_Min_Order_By = {
+  email?: InputMaybe<Order_By>;
+  githubToken?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  impersonatedUserEmail?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  picture?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "user" */

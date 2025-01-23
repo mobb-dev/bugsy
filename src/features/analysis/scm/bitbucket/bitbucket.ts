@@ -73,40 +73,47 @@ export async function getBitbucketToken(
   params: GetBitbucketTokenArgs
 ): Promise<GetBitbucketTokenRes> {
   const { bitbucketClientId, bitbucketClientSecret, authType } = params
-  const res = await fetch(BITBUCKET_ACCESS_TOKEN_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization:
-        'Basic ' + btoa(`${bitbucketClientId}:${bitbucketClientSecret}`),
-    },
-    body: querystring.stringify(
-      authType === 'refresh_token'
-        ? {
-            grant_type: authType,
-            refresh_token: params.refreshToken,
-          }
-        : {
-            grant_type: authType,
-            code: params.code,
-          }
-    ),
-  })
-  const authResult = await res.json()
+  try {
+    const res = await fetch(BITBUCKET_ACCESS_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization:
+          'Basic ' + btoa(`${bitbucketClientId}:${bitbucketClientSecret}`),
+      },
+      body: querystring.stringify(
+        authType === 'refresh_token'
+          ? {
+              grant_type: authType,
+              refresh_token: params.refreshToken,
+            }
+          : {
+              grant_type: authType,
+              code: params.code,
+            }
+      ),
+    })
+    const authResult = await res.json()
 
-  const parseResult = BitbucketAuthResultZ.safeParse(authResult)
-  if (!parseResult.success) {
-    debug(
-      `failed to parse bitbucket auth result for: ${authType}`,
-      parseResult.error
-    )
+    const parseResult = BitbucketAuthResultZ.safeParse(authResult)
+    if (!parseResult.success) {
+      debug(
+        `failed to parse bitbucket auth result for: ${authType}`,
+        parseResult.error
+      )
+      return {
+        success: false,
+      }
+    }
+    return {
+      success: true,
+      authResult: parseResult.data,
+    }
+  } catch (e) {
+    debug(`failed to get bitbucket token:`, e)
     return {
       success: false,
     }
-  }
-  return {
-    success: true,
-    authResult: parseResult.data,
   }
 }
 

@@ -12,6 +12,7 @@ import {
   Gitlab,
   GitlabAPIResponse,
 } from '@gitbeaker/rest'
+import Debug from 'debug'
 import {
   fetch as undiciFetch,
   ProxyAgent,
@@ -36,6 +37,8 @@ import {
   GitlabAuthResultZ,
   GitlabTokenRequestTypeEnum,
 } from './types'
+
+const debug = Debug('scm:gitlab')
 
 function removeTrailingSlash(str: string) {
   return str.trim().replace(/\/+$/, '')
@@ -481,36 +484,43 @@ export async function getGitlabToken({
     })
   }
 
-  const tokenUrl = `${effectiveUrl}/oauth/token`
-  const res = await undiciFetch(tokenUrl, {
-    dispatcher,
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: querystring.stringify({
-      client_id: gitlabClientId,
-      client_secret: gitlabClientSecret,
-      [tokenType]: token,
-      grant_type:
-        tokenType === GitlabTokenRequestTypeEnum.CODE
-          ? 'authorization_code'
-          : 'refresh_token',
-      redirect_uri: callbackUrl,
-    }),
-  })
-  const authResult = await res.json()
-  const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
-  if (!parsedAuthResult.success) {
-    console.debug(`error using: ${tokenType} for gitlab`, authResult)
+  try {
+    const tokenUrl = `${effectiveUrl}/oauth/token`
+    const res = await undiciFetch(tokenUrl, {
+      dispatcher,
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: querystring.stringify({
+        client_id: gitlabClientId,
+        client_secret: gitlabClientSecret,
+        [tokenType]: token,
+        grant_type:
+          tokenType === GitlabTokenRequestTypeEnum.CODE
+            ? 'authorization_code'
+            : 'refresh_token',
+        redirect_uri: callbackUrl,
+      }),
+    })
+    const authResult = await res.json()
+    const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
+    if (!parsedAuthResult.success) {
+      debug(`error using: ${tokenType} for gitlab`, authResult)
+      return {
+        success: false,
+      }
+    }
+    return {
+      success: true,
+      authResult: parsedAuthResult.data,
+    }
+  } catch (e) {
+    debug(`failed to get gitlab token:`, e)
     return {
       success: false,
     }
-  }
-  return {
-    success: true,
-    authResult: parsedAuthResult.data,
   }
 }
 

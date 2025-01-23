@@ -340,39 +340,44 @@ export async function getAdoToken({
   tokenType: AdoOAuthTokenType
   redirectUri: string
 }) {
-  const res = await fetch(ADO_ACCESS_TOKEN_URL, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: querystring.stringify({
-      client_assertion_type:
-        'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      client_assertion: adoClientSecret,
-      redirect_uri: redirectUri,
-      assertion: token,
-      grant_type:
-        tokenType === 'code'
-          ? 'urn:ietf:params:oauth:grant-type:jwt-bearer'
-          : 'refresh_token',
-    }),
-  })
-  const authResult = await res.json()
-  const parsedAuthResult = AdoAuthResultZ.safeParse(authResult)
-  if (!parsedAuthResult.success) {
-    debug('ado refresh token error', { authResult, redirectUri })
-  }
-  const scmOrgs = parsedAuthResult.success
-    ? await getOrgsForOauthToken({
-        oauthToken: parsedAuthResult.data.access_token,
-      })
-    : null
+  try {
+    const res = await fetch(ADO_ACCESS_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: querystring.stringify({
+        client_assertion_type:
+          'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: adoClientSecret,
+        redirect_uri: redirectUri,
+        assertion: token,
+        grant_type:
+          tokenType === 'code'
+            ? 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+            : 'refresh_token',
+      }),
+    })
+    const authResult = await res.json()
+    const parsedAuthResult = AdoAuthResultZ.safeParse(authResult)
+    if (!parsedAuthResult.success) {
+      debug('ado refresh token error', { authResult, redirectUri })
+    }
+    const scmOrgs = parsedAuthResult.success
+      ? await getOrgsForOauthToken({
+          oauthToken: parsedAuthResult.data.access_token,
+        })
+      : null
 
-  return AdoAuthResultWithOrgsZ.safeParse({
-    ...parsedAuthResult.data,
-    scmOrgs,
-  })
+    return AdoAuthResultWithOrgsZ.safeParse({
+      ...parsedAuthResult.data,
+      scmOrgs,
+    })
+  } catch (e) {
+    debug('failed to get ADO token:', e)
+    return { success: false, data: null }
+  }
 }
 
 export async function validateAdoRepo({

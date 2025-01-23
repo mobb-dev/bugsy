@@ -1,7 +1,9 @@
 import { SCMLib } from './scm'
 import {
   CreateSubmitRequestParams,
+  GetGitBlameReponse,
   GetRefererenceResult,
+  ReferenceType,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -16,108 +18,108 @@ export class StubSCMLib extends SCMLib {
     super(url, accessToken, scmOrg)
   }
 
-  public override getUrlWithCredentials(): Promise<string> {
-    console.error('getUrlWithCredentials() not implemented')
-    throw new Error('getUrlWithCredentials() not implemented')
+  public override async getUrlWithCredentials(): Promise<string> {
+    console.warn('getUrlWithCredentials() returning empty string')
+    return ''
   }
 
   async createSubmitRequest(
     _params: CreateSubmitRequestParams
   ): Promise<string> {
-    console.error('createSubmitRequest() not implemented')
-    throw new Error('createSubmitRequest() not implemented')
+    console.warn('createSubmitRequest() returning empty string')
+    return ''
   }
 
   get scmLibType(): ScmLibScmType {
-    console.error('getScmLibType() not implemented')
-    throw new Error('getScmLibType() not implemented')
+    console.warn('scmLibType returning GITHUB as default')
+    return ScmLibScmType.GITHUB
   }
 
   getAuthHeaders(): Record<string, string> {
-    console.error('getAuthHeaders() not implemented')
-    throw new Error('getAuthHeaders() not implemented')
+    console.warn('getAuthHeaders() returning empty object')
+    return {}
   }
 
-  getDownloadUrl(_sha: string): Promise<string> {
-    console.error('getDownloadUrl() not implemented')
-    throw new Error('getDownloadUrl() not implemented')
+  async getDownloadUrl(_sha: string): Promise<string> {
+    console.warn('getDownloadUrl() returning empty string')
+    return ''
   }
 
   async getIsRemoteBranch(_branch: string): Promise<boolean> {
-    console.error('getIsRemoteBranch() not implemented')
-    throw new Error('getIsRemoteBranch() not implemented')
+    console.warn('getIsRemoteBranch() returning false')
+    return false
   }
 
-  async validateParams() {
-    console.error('validateParams() not implemented')
-    throw new Error('validateParams() not implemented')
+  async validateParams(): Promise<void> {
+    console.warn('validateParams() no-op')
   }
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
-    console.error('getRepoList() not implemented')
-    throw new Error('getRepoList() not implemented')
+    console.warn('getRepoList() returning empty array')
+    return []
   }
 
   async getBranchList(): Promise<string[]> {
-    console.error('getBranchList() not implemented')
-    throw new Error('getBranchList() not implemented')
+    console.warn('getBranchList() returning empty array')
+    return []
   }
 
   async getUsername(): Promise<string> {
-    console.error('getUsername() not implemented')
-    throw new Error('getUsername() not implemented')
+    console.warn('getUsername() returning empty string')
+    return ''
   }
 
   async getSubmitRequestStatus(
     _scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus> {
-    console.error('getSubmitRequestStatus() not implemented')
-    throw new Error('getSubmitRequestStatus() not implemented')
+    console.warn('getSubmitRequestStatus() returning ERROR')
+    return 'error'
   }
 
   async getUserHasAccessToRepo(): Promise<boolean> {
-    console.error('getUserHasAccessToRepo() not implemented')
-    throw new Error('getUserHasAccessToRepo() not implemented')
+    console.warn('getUserHasAccessToRepo() returning false')
+    return false
   }
 
   async getRepoBlameRanges(
     _ref: string,
     _path: string
-  ): Promise<
-    {
-      startingLine: number
-      endingLine: number
-      name: string
-      login: string
-      email: string
-    }[]
-  > {
-    console.error('getRepoBlameRanges() not implemented')
-    throw new Error('getRepoBlameRanges() not implemented')
+  ): Promise<GetGitBlameReponse> {
+    console.warn('getRepoBlameRanges() returning empty array')
+    return []
   }
 
   async getReferenceData(_ref: string): Promise<GetRefererenceResult> {
-    console.error('getReferenceData() not implemented')
-    throw new Error('getReferenceData() not implemented')
+    console.warn('getReferenceData() returning null/empty defaults')
+    return {
+      type: ReferenceType.BRANCH,
+      sha: '',
+      date: undefined,
+    }
   }
 
   async getRepoDefaultBranch(): Promise<string> {
-    console.error('getRepoDefaultBranch() not implemented')
-    throw new Error('getRepoDefaultBranch() not implemented')
+    console.warn('getRepoDefaultBranch() returning empty string')
+    return ''
   }
+
   async getPrUrl(_prNumber: number): Promise<string> {
-    console.error('getPr() not implemented')
-    throw new Error('getPr() not implemented')
+    console.warn('getPrUrl() returning empty string')
+    return ''
   }
+
   async getPrId(_prUrl: string): Promise<string> {
-    console.error('getPrId() not implemented')
-    throw new Error('getPrId() not implemented')
+    console.warn('getPrId() returning empty string')
+    return ''
   }
+
   async getCommitUrl(_commitId: string): Promise<string> {
-    console.error('getCommitUrl() not implemented')
-    throw new Error('getCommitUrl() not implemented')
+    console.warn('getCommitUrl() returning empty string')
+    return ''
   }
-  _getUsernameForAuthUrl(): Promise<string> {
-    throw new Error('Method not implemented.')
+
+  async _getUsernameForAuthUrl(): Promise<string> {
+    console.warn('_getUsernameForAuthUrl() returning empty string')
+    return ''
   }
 }

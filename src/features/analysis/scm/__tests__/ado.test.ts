@@ -39,7 +39,7 @@ type TestNames = (typeof testNames)[keyof typeof testNames]
 
 const testInputs: Record<TestNames, TestInput> = {
   accessTokenTest: {
-    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo1',
     NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo2',
@@ -63,7 +63,7 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: '5357a65e054976cd7d79b81ef3906ded050ed921',
   },
   publicRepoWithPat: {
-    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL: 'https://dev.azure.com/yhaggai/_git/hello_public',
     NON_EXISTING_ADO_URL:
@@ -76,7 +76,7 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: '208ca7e6189b8c90bf4a9d3179f27f19a6c98940',
   },
   repoWithSpacesTest: {
-    ADO_PAT: env.ADO_TEST_ACCESS_TOKEN,
+    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
     PAT_ORG: 'mobbtest',
     ADO_URL:
       'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces',

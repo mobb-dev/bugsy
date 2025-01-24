@@ -23,7 +23,6 @@ export const env = z
     PLAYWRIGHT_GH_ON_PREM_REPO_URL: z.string().min(1),
     PLAYWRIGHT_GH_ON_PREM_URL: z.string().min(1),
     PLAYWRIGHT_GH_ON_PREM_PAT: z.string().min(1),
-    ADO_TEST_ACCESS_TOKEN: z.string().min(1),
     PLAYWRIGHT_ADO_ON_PREM_PAT: z.string().min(1),
     PLAYWRIGHT_ADO_ON_PREM_REPO_URL: z.string().min(1),
     PLAYWRIGHT_ADO_ON_PREM_URL: z.string().min(1),

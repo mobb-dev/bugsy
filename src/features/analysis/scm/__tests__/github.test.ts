@@ -158,19 +158,18 @@ const REPO = 'react'
 const GITHUB_URL = `https://github.com/${OWNER}/${REPO}`
 const GITHUB_ON_PREM_URL = `https://my.custom-onprem-domain.com/${OWNER}/${REPO}`
 const INVALID_URL = 'https://invalid.com/facebook'
-const TEST_REPO_URL = 'https://github.com/mobbgeneraldev/WebGoat'
 
 describe('scm instance tests', () => {
   it('should return the correct headers for basic auth type ', async () => {
     const scmLib = await createScmLib({
-      url: TEST_REPO_URL,
+      url: env.PLAYWRIGHT_GH_CLOUD_REPO_URL,
       scmType: ScmLibScmType.GITHUB,
-      accessToken: env.TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
       scmOrg: undefined,
     })
     const authHeaders = scmLib.getAuthHeaders()
     expect(authHeaders).toStrictEqual({
-      authorization: `Bearer ${env.TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN}`,
+      authorization: `Bearer ${env.PLAYWRIGHT_GH_CLOUD_PAT}`,
     })
   })
 })

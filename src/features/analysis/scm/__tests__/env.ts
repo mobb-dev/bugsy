@@ -12,11 +12,12 @@ dotenv.config({
 
 export const env = z
   .object({
-    TEST_MINIMAL_WEBGOAT_BITBUCKET_USERNAME: z.string().min(1),
-    TEST_MINIMAL_WEBGOAT_BITBUCKET_PASSWORD: z.string().min(1),
-    TEST_MINIMAL_WEBGOAT_GITHUB_TOKEN: z.string().min(1),
-    TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN: z.string().min(1),
-    TEST_MINIMAL_WEBGOAT_ADO_TOKEN: z.string().min(1),
+    PLAYWRIGHT_BB_CLOUD_PAT: z.string().min(1),
+    PLAYWRIGHT_GL_CLOUD_PAT: z.string().min(1),
+    PLAYWRIGHT_GL_CLOUD_REPO_URL: z.string().min(1),
+    PLAYWRIGHT_ADO_CLOUD_PAT: z.string().min(1),
+    PLAYWRIGHT_ADO_CLOUD_SCM_ORG: z.string().min(1),
+    PLAYWRIGHT_ADO_CLOUD_REPO_URL: z.string().min(1),
     PLAYWRIGHT_GL_ON_PREM_REPO_URL: z.string().min(1),
     PLAYWRIGHT_GL_ON_PREM_URL: z.string().min(1),
     PLAYWRIGHT_GL_ON_PREM_PAT: z.string().min(1),
@@ -27,6 +28,7 @@ export const env = z
     PLAYWRIGHT_ADO_ON_PREM_REPO_URL: z.string().min(1),
     PLAYWRIGHT_ADO_ON_PREM_URL: z.string().min(1),
     PLAYWRIGHT_GH_CLOUD_PAT: z.string().min(1),
+    PLAYWRIGHT_GH_CLOUD_REPO_URL: z.string().min(1),
   })
   .required()
   .parse(process.env)

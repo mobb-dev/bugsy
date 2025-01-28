@@ -240,26 +240,28 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
           }
         })(),
         (async () => {
-          const res = await git.getRefs(repo, projectName, `tags/${ref}`)
-          if (!res[0] || !res[0].objectId) {
+          const res = await git.getRefs(
+            repo,
+            projectName,
+            `tags/${ref}`,
+            false,
+            false,
+            false,
+            false,
+            true
+          )
+          if (!res[0] || (!res[0].objectId && !res[0].peeledObjectId)) {
             throw new Error('no tag ref')
           }
-          let objectId = res[0].objectId
-          try {
-            //in some cases the call to git.getRefs() returns the sha of the commit in the objectId and in some cases
-            //it returns the tag object ID which we then need to call git.getAnnotatedTag() on it
-            const tag = await git.getAnnotatedTag(projectName, repo, objectId)
-            if (tag.taggedObject?.objectId) {
-              objectId = tag.taggedObject.objectId
-            }
-          } catch (e) {
-            /* empty */
+          const sha = res[0].peeledObjectId || res[0].objectId
+          if (!sha) {
+            throw new Error('no sha')
           }
           const commitRes = await git.getCommits(
             repo,
             {
-              fromCommitId: objectId,
-              toCommitId: objectId,
+              fromCommitId: sha,
+              toCommitId: sha,
               $top: 1,
             },
             projectName
@@ -269,7 +271,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
             throw new Error('no commit')
           }
           return {
-            sha: objectId,
+            sha,
             type: ReferenceType.TAG,
             date: commit.committer?.date || new Date(),
           }

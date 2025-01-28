@@ -13,8 +13,6 @@ import { createScmLib } from '../scmFactory'
 import { ReferenceType, ScmLibScmType } from '../types'
 import { env } from './env'
 
-const TEST_ADO_REPO = 'https://dev.azure.com/mobbtest/test/_git/repo1'
-
 type TestInput = {
   ADO_PAT: string | undefined
   PAT_ORG: string | undefined
@@ -39,55 +37,59 @@ type TestNames = (typeof testNames)[keyof typeof testNames]
 
 const testInputs: Record<TestNames, TestInput> = {
   accessTokenTest: {
-    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
-    PAT_ORG: 'mobbtest',
-    ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo1',
-    NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo2',
-    EXISTING_COMMIT: 'e619caab398d5b75621dc8aab9e480eaee5ce42d',
+    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_URL: 'https://dev.azure.com/citestjob/_git/webgoat',
+    NON_EXISTING_ADO_URL:
+      'https://dev.azure.com/citestjob/_git/webgoat_non_existing',
+    EXISTING_COMMIT: 'ac7a9c7863c72bf0c14474aeb904af2b3a2f1bb4',
     NON_EXISTING_BRANCH: 'non-existing-branch',
     EXISTING_TAG: 'test-tag',
     EXISTING_BRANCH: 'main',
-    EXISTING_BRANCH_SHA: 'b67eb441420675e0f107e2c1a3ba04900fc110fb',
-    EXISTING_TAG_SHA: '9193050cf8c314dd52638d4bc2720b3ab48101a9',
+    EXISTING_BRANCH_SHA: '737a5344cbfaccde78d109329d15c1f3123c992b',
+    EXISTING_TAG_SHA: 'a0b6decf34a282dad1cbd0d4886764ce7bd4c6a0',
   },
   publicRepoTest: {
     ADO_PAT: undefined,
     PAT_ORG: undefined,
-    ADO_URL: 'https://dev.azure.com/mobbtest/test-public/_git/repo-public',
-    NON_EXISTING_ADO_URL: 'https://dev.azure.com/mobbtest/test/_git/repo1',
-    EXISTING_COMMIT: 'b67eb441420675e0f107e2c1a3ba04900fc110fb',
-    EXISTING_BRANCH: 'main',
-    NON_EXISTING_BRANCH: 'non-existing-branch',
-    EXISTING_TAG: 'v2023.8',
-    EXISTING_BRANCH_SHA: 'f7534d521f1abc7a5a5ace657b63763d1a7fce4c',
-    EXISTING_TAG_SHA: '5357a65e054976cd7d79b81ef3906ded050ed921',
-  },
-  publicRepoWithPat: {
-    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
-    PAT_ORG: 'mobbtest',
-    ADO_URL: 'https://dev.azure.com/yhaggai/_git/hello_public',
-    NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces1',
-    EXISTING_COMMIT: '51b861ec104fc5f7cf4bba564d7529d011fa5e7b',
-    EXISTING_BRANCH: 'main',
-    NON_EXISTING_BRANCH: 'non-existing-branch',
-    EXISTING_TAG: undefined,
-    EXISTING_BRANCH_SHA: '208ca7e6189b8c90bf4a9d3179f27f19a6c98940',
-    EXISTING_TAG_SHA: '208ca7e6189b8c90bf4a9d3179f27f19a6c98940',
-  },
-  repoWithSpacesTest: {
-    ADO_PAT: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
-    PAT_ORG: 'mobbtest',
     ADO_URL:
-      'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces',
+      'https://dev.azure.com/citestjob/test-public/_git/webgoat.mobbci.testjob',
     NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces1',
-    EXISTING_COMMIT: 'd14918a74b1dd2c26726f71cb85059e63e033988',
+      'https://dev.azure.com/citestjob/test-public/_git/test-public.non.existing',
+    EXISTING_COMMIT: '83ed4c3d5c420202dd4121bf535dd9c555937a79',
     EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
     EXISTING_TAG: 'test-tag',
-    EXISTING_BRANCH_SHA: 'd14918a74b1dd2c26726f71cb85059e63e033988',
-    EXISTING_TAG_SHA: 'd14918a74b1dd2c26726f71cb85059e63e033988',
+    EXISTING_BRANCH_SHA: '737a5344cbfaccde78d109329d15c1f3123c992b',
+    EXISTING_TAG_SHA: '777cec5a57d6a0163604c230b299a761317cd4bb',
+  },
+  publicRepoWithPat: {
+    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_URL:
+      'https://dev.azure.com/aidainnovazione0090/DeviceManager/_git/app-functions-sdk-go',
+    NON_EXISTING_ADO_URL:
+      'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces1',
+    EXISTING_COMMIT: '7c9b2da4b58b151534a09fd7a0b2c10f18664204',
+    EXISTING_BRANCH: 'main',
+    NON_EXISTING_BRANCH: 'non-existing-branch',
+    EXISTING_TAG: 'v2.3.0',
+    EXISTING_BRANCH_SHA: 'b28f7f7e4352f4c06fb2e306005bbf60a37afcd7',
+    EXISTING_TAG_SHA: 'b28f7f7e4352f4c06fb2e306005bbf60a37afcd7',
+  },
+  repoWithSpacesTest: {
+    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_URL:
+      'https://dev.azure.com/citestjob/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
+    NON_EXISTING_ADO_URL:
+      'https://dev.azure.com/citestjob/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20space.non.existing',
+    EXISTING_COMMIT: 'ac7a9c7863c72bf0c14474aeb904af2b3a2f1bb4',
+    EXISTING_BRANCH: 'main',
+    NON_EXISTING_BRANCH: 'non-existing-branch',
+    EXISTING_TAG: 'test-tag',
+    EXISTING_BRANCH_SHA: '737a5344cbfaccde78d109329d15c1f3123c992b',
+    EXISTING_TAG_SHA: '777cec5a57d6a0163604c230b299a761317cd4bb',
   },
   onPremTestParams: {
     ADO_PAT: env.PLAYWRIGHT_ADO_ON_PREM_PAT,
@@ -263,9 +265,9 @@ describe.each(Object.entries(testInputs))(
 
 const scmTestParams = {
   accessTokenConfig: {
-    url: TEST_ADO_REPO,
-    accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
-    scmOrg: 'mobbtest',
+    url: env.PLAYWRIGHT_ADO_CLOUD_REPO_URL,
+    accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+    scmOrg: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
   },
   // todo: add when we set an environment for on-prem add this test params back
 }
@@ -360,7 +362,7 @@ describe.each(Object.entries(scmTestParams))(
         `${protocol}//${accessToken}@${hostname}${pathname}`
       )
       const prUrl = await scmLib.getPrUrl(1)
-      expect(prUrl).toMatch(`${TEST_ADO_REPO}/pullrequest/1`)
+      expect(prUrl).toMatch(`${url}/pullrequest/1`)
     })
   }
 )
@@ -370,7 +372,7 @@ describe('Ado scm general checks', () => {
     const scmLib = await createScmLib({
       url: undefined,
       scmType: ScmLibScmType.ADO,
-      accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
+      accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
       scmOrg: testInputs.accessTokenTest.PAT_ORG,
     })
 
@@ -382,25 +384,37 @@ describe('Ado scm general checks', () => {
         expect.objectContaining({
           repoIsPublic: true,
           repoLanguages: [],
-          repoName: 'repo with spaces',
-          repoOwner: 'mobbtest',
+          repoName: 'test-public',
+          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoUpdatedAt: 'Mon Jan 27 2025',
           repoUrl:
-            'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces',
+            'https://dev.azure.com/citestjob/test-public/_git/test-public',
         }),
         expect.objectContaining({
           repoIsPublic: false,
           repoLanguages: [],
-          repoName: 'repo1',
-          repoOwner: 'mobbtest',
-          repoUrl: 'https://dev.azure.com/mobbtest/test/_git/repo1',
+          repoName: 'webgoat',
+          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoUpdatedAt: 'Mon Nov 18 2024',
+          repoUrl: 'https://dev.azure.com/citestjob/webgoat/_git/webgoat',
         }),
         expect.objectContaining({
           repoIsPublic: true,
           repoLanguages: [],
-          repoName: 'repo-public',
-          repoOwner: 'mobbtest',
+          repoName: 'webgoat.mobbci.testjob',
+          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoUpdatedAt: 'Mon Nov 18 2024',
           repoUrl:
-            'https://dev.azure.com/mobbtest/test-public/_git/repo-public',
+            'https://dev.azure.com/citestjob/test-public/_git/webgoat.mobbci.testjob',
+        }),
+        expect.objectContaining({
+          repoIsPublic: true,
+          repoLanguages: [],
+          repoName: 'webgoat.mobbci.testjob.mobbci.testjob test with spaces',
+          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoUpdatedAt: 'Mon Nov 18 2024',
+          repoUrl:
+            'https://dev.azure.com/citestjob/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
         }),
       ])
     )
@@ -408,8 +422,8 @@ describe('Ado scm general checks', () => {
   it('should throw RepoNoTokenAccessError when repo is not accessible', async () => {
     await expect(
       createScmLib({
-        url: 'https://dev.azure.com/mobbtest/test/_git/repo11',
-        accessToken: env.TEST_MINIMAL_WEBGOAT_ADO_TOKEN,
+        url: 'https://dev.azure.com/bogusssss/test/_git/bogus.non-existing',
+        accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
         scmType: ScmLibScmType.ADO,
         scmOrg: testInputs.accessTokenTest.PAT_ORG,
       })

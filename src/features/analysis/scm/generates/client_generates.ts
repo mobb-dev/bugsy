@@ -765,8 +765,8 @@ export type UnstructuredFixExtraContext = {
   value: Scalars['JSON']['output'];
 };
 
-export type UpdateFixAcrhiveStateResponse = {
-  __typename?: 'UpdateFixAcrhiveStateResponse';
+export type UpdateFixesAcrhiveStateResponse = {
+  __typename?: 'UpdateFixesAcrhiveStateResponse';
   status: Status;
 };
 
@@ -8288,7 +8288,7 @@ export type Mutation_Root = {
   updateBitbucketToken: ScmAccessToken;
   updateBitbucketTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateDownloadedFixData?: Maybe<StatusQueryResponse>;
-  updateFixAcrhiveState?: Maybe<UpdateFixAcrhiveStateResponse>;
+  updateFixesAcrhiveState?: Maybe<UpdateFixesAcrhiveStateResponse>;
   updateGithubToken: ScmAccessToken;
   updateGithubTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateGitlabToken: ScmAccessToken;
@@ -10435,10 +10435,9 @@ export type Mutation_RootUpdateDownloadedFixDataArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUpdateFixAcrhiveStateArgs = {
-  fixId: Scalars['String']['input'];
+export type Mutation_RootUpdateFixesAcrhiveStateArgs = {
+  fixIds: Array<Scalars['String']['input']>;
   isArchived: Scalars['Boolean']['input'];
-  projectId: Scalars['String']['input'];
 };
 
 

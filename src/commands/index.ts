@@ -204,15 +204,17 @@ export async function handleMobbLogin({
   const { createSpinner } = Spinner({ ci: skipPrompts })
   if (await inGqlClient.verifyToken()) {
     createSpinner().start().success({
-      text: '🔓 Logged in to Mobb successfully',
+      text: '🔓 Login to Mobb succeeded',
     })
 
     return inGqlClient
   } else if (apiKey) {
     createSpinner().start().error({
-      text: '🔓 Logged in to Mobb failed - check your api-key',
+      text: '🔓 Login to Mobb failed: The provided API key does not match any configured API key on the system',
     })
-    throw new CliError()
+    throw new CliError(
+      'Login to Mobb failed: The provided API key does not match any configured API key on the system'
+    )
   }
 
   const loginSpinner = createSpinner().start()

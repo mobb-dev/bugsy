@@ -177,19 +177,18 @@ describe.each(Object.entries(reposConfig))(
 
 const GITLAB_URL = 'https://gitlab.com/zj-gitlab/gitlab-ce'
 const INVALID_URL = 'https://invalid.com/zj-gitlab'
-const TEST_GITLAB_REPO = 'https://gitlab.com/generaldev1/WebGoat'
 
 describe('scm instance tests', () => {
   it('should return the correct headers for basic auth type ', async () => {
     const scmLib = await createScmLib({
-      url: TEST_GITLAB_REPO,
+      url: env.PLAYWRIGHT_GL_CLOUD_REPO_URL,
       scmType: ScmLibScmType.GITLAB,
-      accessToken: env.TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN,
+      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
       scmOrg: undefined,
     })
     const authHeaders = scmLib.getAuthHeaders()
     expect(authHeaders).toStrictEqual({
-      'Private-Token': env.TEST_MINIMAL_WEBGOAT_GITLAB_TOKEN,
+      'Private-Token': env.PLAYWRIGHT_GL_CLOUD_PAT,
     })
   })
 })

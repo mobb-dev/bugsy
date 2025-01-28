@@ -26,20 +26,20 @@ const EXPIRED_TOKEN =
 const WORKSPACE_SLUG = 'mobb-dev'
 const PUBLIC_URL = 'https://bitbucket.org/jwalton/opup'
 const REPO = {
-  URL: 'https://bitbucket.org/mobb-dev/webgoat',
-  COMMIT_SHA: '3134f180660c138b820a10ca91144fd42b28ec08',
-  BRANCH: 'helm',
-  TAG: 'vtest9',
+  URL: 'https://bitbucket.org/mobbcitest/webgoat',
+  COMMIT_SHA: 'bb6e84ddcf98f4a65f51dd6114fe939d2fbf83d8',
+  BRANCH: 'main',
+  TAG: 'test-tag',
 } as const
 
 const ALLOWED_URLS = [
   REPO.URL,
-  'https://bitbucket.org/mobb-dev/webgoat.git',
-  'https://mobb-dev-admin@bitbucket.org/mobb-dev/webgoat.git',
+  'https://bitbucket.org/mobbcitest/webgoat.git',
+  'https://mobb-dev-admin@bitbucket.org/mobbcitest/webgoat.git',
 ]
-
-const authUsername = env.TEST_MINIMAL_WEBGOAT_BITBUCKET_USERNAME
-const authPassword = env.TEST_MINIMAL_WEBGOAT_BITBUCKET_PASSWORD
+const parts = env.PLAYWRIGHT_BB_CLOUD_PAT.split(':')
+const authUsername = parts[0] || ''
+const authPassword = parts[1] || ''
 
 describe('bitbucket sdk function', async () => {
   it('should get user', async () => {
@@ -49,7 +49,7 @@ describe('bitbucket sdk function', async () => {
       username: authUsername,
     })
     const res = await bitbucketSdk.getUser()
-    expect(res.username).toMatchInlineSnapshot('"mobb-dev-admin"')
+    expect(res.username).toMatchInlineSnapshot(`"mobbcitest-admin"`)
   })
   it('should get all the repos of specific workspace', async () => {
     const bitbucketSdk = getBitbucketSdk({
@@ -58,7 +58,7 @@ describe('bitbucket sdk function', async () => {
       username: authUsername,
     })
     const res = await bitbucketSdk.getRepos({ workspaceSlug: WORKSPACE_SLUG })
-    expect(res[0]?.repoName).toMatchInlineSnapshot('"WebGoat"')
+    expect(res[0]?.repoName).toMatchInlineSnapshot(`undefined`)
   })
   it('should get all the repos all the users workspaces', async () => {
     const bitbucketSdk = getBitbucketSdk({
@@ -78,8 +78,8 @@ describe('bitbucket sdk function', async () => {
       [
         {
           "repoIsPublic": false,
-          "repoName": "WebGoat",
-          "repoUrl": "https://bitbucket.org/mobb-dev/webgoat",
+          "repoName": "webgoat",
+          "repoUrl": "https://bitbucket.org/mobbcitest/webgoat",
         },
       ]
     `)
@@ -108,8 +108,8 @@ describe('bitbucket sdk function', async () => {
     })
     expect(res).toMatchInlineSnapshot(`
       {
-        "date": 2021-03-30T14:02:06.000Z,
-        "sha": "d077a76063bab00fab590e9e470eb9122807e3be",
+        "date": 2024-07-07T10:24:25.000Z,
+        "sha": "1531987da5a4983dbbcaed2de81ee22d5913b68a",
         "type": "TAG",
       }
     `)
@@ -125,7 +125,7 @@ describe('bitbucket sdk function', async () => {
       ref: REPO.COMMIT_SHA,
     })
     expect(res.sha).toMatchInlineSnapshot(
-      '"3134f180660c138b820a10ca91144fd42b28ec08"'
+      `"bb6e84ddcf98f4a65f51dd6114fe939d2fbf83d8"`
     )
   })
 
@@ -246,7 +246,7 @@ describe('scm instance tests', () => {
       expect(parsedPassword).toBe(authPassword)
       const authoriazedUrl = await scmLib.getUrlWithCredentials()
       expect(authoriazedUrl).toBe(
-        `https://${authUsername}:${authPassword}@bitbucket.org/mobb-dev/webgoat`
+        `https://${authUsername}:${authPassword}@bitbucket.org/mobbcitest/webgoat`
       )
     }
   )

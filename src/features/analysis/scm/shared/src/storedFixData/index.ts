@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { IssueLanguage_Enum } from '../../../generates/client_generates'
 import csharp from './csharp'
+import go from './go'
 import java from './java'
 import javascript from './javascript'
 import php from './php'
@@ -21,6 +22,7 @@ export const languages = {
   [IssueLanguage_Enum.Xml as string]: xml,
   [IssueLanguage_Enum.Python as string]: python,
   [IssueLanguage_Enum.Php as string]: php,
+  [IssueLanguage_Enum.Go as string]: go,
 }
 
 export type SQLInjection = typeof javascript.SQL_Injection

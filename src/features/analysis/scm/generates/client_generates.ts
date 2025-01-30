@@ -330,6 +330,7 @@ export type InvitationBaseError = {
 export enum Language {
   Cpp = 'CPP',
   Csharp = 'CSHARP',
+  Go = 'GO',
   Java = 'JAVA',
   Js = 'JS',
   Php = 'PHP',
@@ -7291,6 +7292,8 @@ export enum IssueLanguage_Enum {
   CSharp = 'CSharp',
   /** C++ */
   Cpp = 'Cpp',
+  /** Go */
+  Go = 'Go',
   /** Java */
   Java = 'Java',
   /** JavaScript */

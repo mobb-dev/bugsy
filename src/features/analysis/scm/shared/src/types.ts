@@ -7,10 +7,12 @@ import {
   Fix_State_Enum,
   FixQuestionInputType,
   IssueLanguage_Enum,
+  IssueType_Enum,
   Language,
   ManifestAction,
   Pr_Status_Enum,
   Project_Role_Type_Enum,
+  Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
 } from '../../generates/client_generates'
@@ -130,6 +132,8 @@ export const ReportQueryResultZ = z.object({
     fixesDownloaded: z.object({
       aggregate: z.object({ count: z.number() }),
     }),
+    fixesDoneCount: z.number(),
+    fixesInprogressCount: z.number(),
     fixesReadyCount: z.number(),
     issueTypes: z.record(z.string(), z.number()).nullable(),
     issueLanguages: z.record(z.string(), z.number()).nullable(),
@@ -162,6 +166,7 @@ export const ReportQueryResultZ = z.object({
         numberOfVulnerabilityIssues: z.number(),
         vulnerabilityReportIssues: z.array(
           z.object({
+            id: z.string().uuid(),
             issueType: z.string(),
             issueLanguage: z.string(),
             parsedSeverity: ParsedSeverityZ,
@@ -223,6 +228,7 @@ export const ReportQueryResultZ = z.object({
       }),
       vulnerabilityReportIssues: z
         .object({
+          id: z.string().uuid(),
           extraData: z.object({
             missing_files: z.string().array().nullish(),
             large_files: z.string().array().nullish(),
@@ -234,33 +240,31 @@ export const ReportQueryResultZ = z.object({
   }),
 })
 
-export const ReportFixesQueryZ = z.array(
-  z.object({
-    id: z.string().uuid(),
-    sharedState: FixSharedStateZ,
-    confidence: z.number(),
-    gitBlameLogin: z.string().nullable(),
-    effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
-    safeIssueLanguage: z.string(),
-    safeIssueType: z.string(),
-    fixReportId: z.string().uuid(),
-    filePaths: z.array(
+export const ReportFixesQueryFixZ = z.object({
+  id: z.string().uuid(),
+  sharedState: FixSharedStateZ,
+  confidence: z.number(),
+  gitBlameLogin: z.string().nullable(),
+  effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
+  safeIssueLanguage: z.string(),
+  safeIssueType: z.string(),
+  fixReportId: z.string().uuid(),
+  filePaths: z.array(
+    z.object({
+      fileRepoRelativePath: z.string(),
+    })
+  ),
+  numberOfVulnerabilityIssues: z.number(),
+  vulnerabilityReportIssues: z
+    .array(
       z.object({
-        fileRepoRelativePath: z.string(),
+        issueType: z.string(),
+        issueLanguage: z.string(),
+        parsedSeverity: ParsedSeverityZ,
       })
-    ),
-    numberOfVulnerabilityIssues: z.number(),
-    vulnerabilityReportIssues: z
-      .array(
-        z.object({
-          issueType: z.string(),
-          issueLanguage: z.string(),
-          parsedSeverity: ParsedSeverityZ,
-        })
-      )
-      .min(1),
-  })
-)
+    )
+    .min(1),
+})
 
 const ExtraContextInternalZ = z.object({
   key: z.string(),
@@ -346,6 +350,52 @@ export const FixQueryZ = z.object({
   effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
 })
 export type FixQuery = z.infer<typeof FixQueryZ>
+
+export const GetReportIssuesQueryZ = z
+  .object({
+    fixReport: z
+      .object({
+        vulnerabilityReport: z.object({
+          id: z.string().uuid(),
+          lastIssueUpdatedAt: z.string(),
+          vulnerabilityReportIssues_aggregate: z.object({
+            aggregate: z.object({ count: z.number() }),
+          }),
+          vulnerabilityReportIssues: z.array(
+            z.object({
+              id: z.string().uuid(),
+              createdAt: z.string(),
+              issueType: z.string(),
+              issueLanguage: z.string(),
+              state: z.nativeEnum(Vulnerability_Report_Issue_State_Enum),
+              extraData: z.object({
+                missing_files: z.string().array().nullish(),
+                large_files: z.string().array().nullish(),
+                error_files: z.string().array().nullish(),
+              }),
+              fix: ReportFixesQueryFixZ.nullable(),
+              falsePositive: z
+                .object({
+                  id: z.string().uuid(),
+                })
+                .nullable(),
+              parsedIssueType: z.nativeEnum(IssueType_Enum),
+              parsedIssueLanguage: z.nativeEnum(IssueLanguage_Enum),
+              parsedSeverity: z.nativeEnum(Vulnerability_Severity_Enum),
+              severity: z.string(),
+              severityValue: z.number(),
+              vulnerabilityReportIssueTags: z.array(
+                z.object({
+                  vulnerability_report_issue_tag_value: z.string(),
+                })
+              ),
+            })
+          ),
+        }),
+      })
+      .array(),
+  })
+  .nullish()
 
 export const FixScreenQueryResultZ = z.object({
   fixReport_by_pk: z.object({
@@ -451,16 +501,34 @@ export const FixPageQueryZ = z.object({
 
 export const GetReportFixesQueryZ = z
   .object({
-    fixReport: z
-      .object({
-        fixes: ReportFixesQueryZ,
-        vulnerabilityReport: z.object({
+    fixReport: z.array(
+      z.object({
+        fixes: z.array(ReportFixesQueryFixZ),
+        fixes_aggregate: z.object({
+          aggregate: z.object({ count: z.number() }),
+        }),
+        vulnerabilityReportIssuesTotalCount: z.object({
+          vulnerabilityReportIssues_aggregate: z.object({
+            aggregate: z.object({ count: z.number() }),
+          }),
+        }),
+        vulnerabilityReportIssuesFixedCount: z.object({
+          vulnerabilityReportIssues_aggregate: z.object({
+            aggregate: z.object({ count: z.number() }),
+          }),
+        }),
+        vulnerabilityReportIssuesIrrelevantCount: z.object({
+          vulnerabilityReportIssues_aggregate: z.object({
+            aggregate: z.object({ count: z.number() }),
+          }),
+        }),
+        vulnerabilityReportIssuesRemainingCount: z.object({
           vulnerabilityReportIssues_aggregate: z.object({
             aggregate: z.object({ count: z.number() }),
           }),
         }),
       })
-      .array(),
+    ),
   })
   .nullish()
 
@@ -555,7 +623,7 @@ export type FixQuestionsData =
   FixQueryResult['fix_by_pk']['patchAndQuestions']['questions']
 export type FixQuestionData = Unpacked<FixQuestionsData>
 export type ExtraContext = Unpacked<FixQuestionData['extraContext']>['value']
-export type FixOnReport = z.infer<typeof ReportFixesQueryZ>[number]
+export type FixOnReport = z.infer<typeof ReportFixesQueryFixZ>
 export type Fix = FixPageData['fix_by_pk']
 export type ProjectQueryResult = z.infer<typeof ProjectPageQueryResultZ>
 export type ProjectVulnerabilityReport = z.infer<

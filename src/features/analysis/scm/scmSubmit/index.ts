@@ -430,13 +430,26 @@ export async function submitFixesToSameBranch(
     })
 
     const [fix] = fixes
-    const { commit } = await _cherryPickFixToBranch({
+    const { commit, success } = await _cherryPickFixToBranch({
       git,
       fix,
       targetBranch: branchName,
       commitDescription,
       commitMessage,
     })
+    //if the fix has conflicts with the target branch (or internal fix conflicts - bug), return an error
+    if (!success) {
+      console.warn(
+        `Fix ${fix.fixId} has conflicts with the target branch: ${branchName}. patches: ${fix.patchesOriginalEncodingBase64}`
+      )
+      response.error = {
+        type: 'AllFixesConflictWithTargetBranchError',
+        info: {
+          message: `No fixes were applied. Fix ${fix.fixId} has conflicts with the target branch: ${branchName}. patches: ${fix.patchesOriginalEncodingBase64}`,
+        },
+      }
+      return response
+    }
     if (
       !(await _pushBranch(git, branchName, [{ fixId: fix.fixId }], response))
     ) {
@@ -451,7 +464,7 @@ export async function submitFixesToSameBranch(
     return {
       ...response,
       error: {
-        type: 'PushBranchError',
+        type: 'UnknownError',
         info: {
           message: errorMessage,
         },
@@ -523,6 +536,16 @@ export const submitFixesToDifferentBranch = async (
         appliedPatches,
         appliedFixes: fixArray,
       })
+      //fixArray has a length of 0 only if the submitBranch is still identical to the base commit.
+      //success is false if the cherry pick failed.
+      //So this condition is true if the cherry pick failed for the first fix of the branch so it means
+      //there is an internal conflict between the different patches of the same fix. This is an unexpected state.
+      if (!fixRes.success && fixArray.length === 0) {
+        console.error(
+          `Internal conflict in fix ${fix.fixId} for submit fix request: ${msg.submitFixRequestId} patches: ${fix.patches}`
+        )
+        continue
+      }
       if (!fixRes.success) {
         submitBranch = `${submitBranch}-${branchIndex}`
         //create a new branch with the same name as the PR branch but with a "-x" suffix where x is the branch index
@@ -549,6 +572,16 @@ export const submitFixesToDifferentBranch = async (
           appliedFixes: fixArray,
         })
       }
+    }
+    //if all fixes were skipped (because they have internal conflicts) return an error
+    if (fixArray.length === 0) {
+      response.error = {
+        type: 'InternalFixConflictError',
+        info: {
+          message: 'No fixes were applied',
+        },
+      }
+      return response
     }
     //push the branch to the origin and add the branch name and the fixes ids to the response
     if (!(await _pushBranch(git, submitBranch, fixArray, response))) {

@@ -47,7 +47,7 @@ function createWSClient(options: WsOptions) {
 export type ResolveFuncType<T> = (value: T) => void
 export type NextCallbackFunction<T> = (
   resolve: ResolveFuncType<T>,
-  reject: ResolveFuncType<T>,
+  reject: ResolveFuncType<unknown>,
   data: T
 ) => void
 
@@ -77,7 +77,7 @@ export function subscribe<T, TV extends Record<string, unknown>>(
             resolve(data)
           }
 
-          function callbackReject(data: T) {
+          function callbackReject(data: unknown) {
             unsubscribe()
             if (timer) {
               clearTimeout(timer)

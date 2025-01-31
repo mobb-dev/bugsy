@@ -68,6 +68,8 @@ export const SubmitFixesBaseResponseMessageZ = z.object({
       type: z.enum([
         'InitialRepoAccessError',
         'PushBranchError',
+        'AllFixesConflictWithTargetBranchError',
+        'InternalFixConflictError',
         'UnknownError',
       ]),
       info: z.object({

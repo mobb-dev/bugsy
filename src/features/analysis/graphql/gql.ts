@@ -345,8 +345,8 @@ export class GQLClient {
           !data.analysis?.state ||
           data.analysis?.state === Fix_Report_State_Enum.Failed
         ) {
-          reject(data)
-          throw new Error(`Analysis failed with id: ${data.analysis?.id}`)
+          reject(new Error(`Analysis failed with id: ${data.analysis?.id}`))
+          return
         }
         if (callbackStates.includes(data.analysis?.state)) {
           await params.callback(data.analysis.id)

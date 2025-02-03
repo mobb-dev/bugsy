@@ -3250,6 +3250,8 @@ export type FixFile_Updates = {
 /** columns and relationships of "fix_report" */
 export type FixReport = {
   __typename?: 'fixReport';
+  /** A computed field, executes function "analysis_url_path" */
+  analysisUrl?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_git_blame_logins" */
   assignedTo?: Maybe<Scalars['json']['output']>;
   /** A computed field, executes function "get_fix_report_confidence" */
@@ -3431,6 +3433,7 @@ export type FixReport_Bool_Exp = {
   _and?: InputMaybe<Array<FixReport_Bool_Exp>>;
   _not?: InputMaybe<FixReport_Bool_Exp>;
   _or?: InputMaybe<Array<FixReport_Bool_Exp>>;
+  analysisUrl?: InputMaybe<String_Comparison_Exp>;
   assignedTo?: InputMaybe<Json_Comparison_Exp>;
   confidences?: InputMaybe<Json_Comparison_Exp>;
   createdByUser?: InputMaybe<User_Bool_Exp>;
@@ -3496,6 +3499,8 @@ export type FixReport_Insert_Input = {
 /** aggregate max on columns */
 export type FixReport_Max_Fields = {
   __typename?: 'fixReport_max_fields';
+  /** A computed field, executes function "analysis_url_path" */
+  analysisUrl?: Maybe<Scalars['String']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
@@ -3516,6 +3521,8 @@ export type FixReport_Max_Fields = {
 /** aggregate min on columns */
 export type FixReport_Min_Fields = {
   __typename?: 'fixReport_min_fields';
+  /** A computed field, executes function "analysis_url_path" */
+  analysisUrl?: Maybe<Scalars['String']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
@@ -3558,6 +3565,7 @@ export type FixReport_On_Conflict = {
 
 /** Ordering options when selecting data from "fix_report". */
 export type FixReport_Order_By = {
+  analysisUrl?: InputMaybe<Order_By>;
   assignedTo?: InputMaybe<Order_By>;
   confidences?: InputMaybe<Order_By>;
   createdByUser?: InputMaybe<User_Order_By>;

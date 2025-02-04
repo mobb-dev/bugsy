@@ -11,11 +11,7 @@ const params: BuildCommentBodyParams = {
     id: 'fix123',
     safeIssueType: IssueType_Enum.Xss,
     safeIssueLanguage: 'JavaScript',
-    vulnerabilityReportIssues: [
-      {
-        parsedSeverity: Vulnerability_Severity_Enum.High,
-      },
-    ],
+    severityText: Vulnerability_Severity_Enum.High,
     patchAndQuestions: {
       __typename: 'FixData',
       patch: 'test patch',

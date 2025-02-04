@@ -12,7 +12,6 @@ import {
   getFixUrlWithRedirect,
   getGuidances,
   getIssueTypeFriendlyString,
-  ParsedSeverityZ,
   PatchAndQuestionsZ,
   toQuestion,
 } from '../../scm'
@@ -76,14 +75,8 @@ export function buildCommentBody({
   const validFixParseRes = z
     .object({
       patchAndQuestions: PatchAndQuestionsZ,
-      vulnerabilityReportIssues: z
-        .array(
-          z.object({
-            parsedSeverity: ParsedSeverityZ,
-          })
-        )
-        .min(1),
       safeIssueLanguage: z.nativeEnum(IssueLanguage_Enum),
+      severityText: z.nativeEnum(Vulnerability_Severity_Enum),
       safeIssueType: z.nativeEnum(IssueType_Enum),
     })
     .safeParse(fix)
@@ -98,8 +91,7 @@ export function buildCommentBody({
     ? getCommitDescription({
         issueType: validFixParseRes.data.safeIssueType,
         vendor: scannerToVulnerability_Report_Vendor_Enum[scanner],
-        severity: validFixParseRes.data.vulnerabilityReportIssues[0]
-          ?.parsedSeverity as Vulnerability_Severity_Enum,
+        severity: validFixParseRes.data.severityText,
         guidances: getGuidances({
           questions:
             validFixParseRes.data.patchAndQuestions.questions.map(toQuestion),

@@ -168,12 +168,12 @@ export const ReportQueryResultZ = z.object({
         ),
         sharedState: FixSharedStateZ,
         numberOfVulnerabilityIssues: z.number(),
+        severityText: z.nativeEnum(Vulnerability_Severity_Enum),
         vulnerabilityReportIssues: z.array(
           z.object({
             id: z.string().uuid(),
             issueType: z.string(),
             issueLanguage: z.string(),
-            parsedSeverity: ParsedSeverityZ,
           })
         ),
         // scmSubmitFixRequests: ScmSubmitFixRequestsZ,
@@ -259,12 +259,12 @@ export const ReportFixesQueryFixZ = z.object({
     })
   ),
   numberOfVulnerabilityIssues: z.number(),
+  severityText: z.nativeEnum(Vulnerability_Severity_Enum),
   vulnerabilityReportIssues: z
     .array(
       z.object({
         issueType: z.string(),
         issueLanguage: z.string(),
-        parsedSeverity: ParsedSeverityZ,
       })
     )
     .min(1),
@@ -342,11 +342,11 @@ export const FixQueryZ = z.object({
     })
   ),
   numberOfVulnerabilityIssues: z.number(),
+  severityText: z.nativeEnum(Vulnerability_Severity_Enum),
   vulnerabilityReportIssues: z.array(
     z.object({
       vendorIssueId: z.string(),
       issueLanguage: z.string(),
-      parsedSeverity: ParsedSeverityZ,
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,
@@ -471,12 +471,12 @@ export const FixScreenQueryResultZ = z.object({
   fixReport_by_pk: FixPageFixReportZ,
   fix_by_pk: FixQueryZ.merge(
     z.object({
+      severityText: z.nativeEnum(Vulnerability_Severity_Enum),
       vulnerabilityReportIssues: z.array(
         z.object({
           vendorIssueId: z.string(),
           issueType: z.string(),
           issueLanguage: z.string(),
-          parsedSeverity: ParsedSeverityZ,
         })
       ),
     })

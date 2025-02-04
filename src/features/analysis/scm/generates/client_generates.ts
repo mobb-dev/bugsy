@@ -2643,6 +2643,8 @@ export type Fix = {
   safeIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "fix_scm_submit_fix_requests" */
   scmSubmitFixRequests?: Maybe<Array<Scm_Submit_Fix_Request>>;
+  /** A computed field, executes function "get_severity_text" */
+  severityText?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
@@ -3919,6 +3921,7 @@ export type Fix_Bool_Exp = {
   safeIssueLanguage?: InputMaybe<String_Comparison_Exp>;
   safeIssueType?: InputMaybe<String_Comparison_Exp>;
   scmSubmitFixRequests?: InputMaybe<Scm_Submit_Fix_Request_Bool_Exp>;
+  severityText?: InputMaybe<String_Comparison_Exp>;
   severityValue?: InputMaybe<Int_Comparison_Exp>;
   sharedState?: InputMaybe<Fix_Shared_State_Bool_Exp>;
   state?: InputMaybe<String_Comparison_Exp>;
@@ -4225,6 +4228,8 @@ export type Fix_Max_Fields = {
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_severity_text" */
+  severityText?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "fix_state" */
@@ -4278,6 +4283,8 @@ export type Fix_Min_Fields = {
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** Returns the issue type for a given fix. If the issue_type is null in the fix, it fetches the issue_type from the related vulnerability_report_issue. */
   safeIssueType?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_severity_text" */
+  severityText?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "fix_state" */
@@ -4360,6 +4367,7 @@ export type Fix_Order_By = {
   safeIssueLanguage?: InputMaybe<Order_By>;
   safeIssueType?: InputMaybe<Order_By>;
   scmSubmitFixRequests_aggregate?: InputMaybe<Scm_Submit_Fix_Request_Aggregate_Order_By>;
+  severityText?: InputMaybe<Order_By>;
   severityValue?: InputMaybe<Order_By>;
   sharedState?: InputMaybe<Fix_Shared_State_Order_By>;
   state?: InputMaybe<Order_By>;
@@ -25716,7 +25724,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, safeIssueLanguage?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedSeverity?: Vulnerability_Severity_Enum | null }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, severityText?: string | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -25926,9 +25934,7 @@ export const GetFixesDocument = `
   fixes: fix(where: $filters) {
     safeIssueType
     id
-    vulnerabilityReportIssues(limit: 1) {
-      parsedSeverity
-    }
+    severityText
     safeIssueLanguage
     patchAndQuestions {
       __typename

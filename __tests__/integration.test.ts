@@ -306,11 +306,6 @@ describe('Basic Analyze tests', () => {
       vulnerabilityReportId: getAnalysis.vulnerabilityReportId,
     })
 
-    //TODO: JONATHANA delete me after we find the problem
-    console.log(
-      `test debug: pr number: ${pullRequestNumber}\n\n\n${JSON.stringify(comments)}\n\n\n${JSON.stringify(generalPrComments)}\n\n\n${JSON.stringify(prVulenrabilities)}\n\n\n${JSON.stringify(diff)}`
-    )
-
     expect(prVulenrabilities.fixablePrVuls).toBe(1)
     expect(prVulenrabilities.nonFixablePrVuls).toBe(0)
     expect(prVulenrabilities.totalPrVulnerabilities).toBe(1)

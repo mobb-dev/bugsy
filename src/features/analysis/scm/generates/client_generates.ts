@@ -7526,6 +7526,8 @@ export enum IssueType_Enum {
   ErroneousStringCompare = 'ERRONEOUS_STRING_COMPARE',
   /** Error Condition Without Action */
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
+  /** frameable_login_page */
+  FrameableLoginPage = 'FRAMEABLE_LOGIN_PAGE',
   /** GraphQl Depth Limit */
   GraphqlDepthLimit = 'GRAPHQL_DEPTH_LIMIT',
   /** Hardcoded Domain in HTML */
@@ -10404,8 +10406,8 @@ export type Mutation_RootSubmitCheckmarxVulnerabilityReportArgs = {
 
 /** mutation root */
 export type Mutation_RootSubmitExternalVulnerabilityReportArgs = {
+  gitReference?: InputMaybe<Scalars['String']['input']>;
   projectName: Scalars['String']['input'];
-  reference: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
   vulnerabilityReportUrl: Scalars['String']['input'];
 };

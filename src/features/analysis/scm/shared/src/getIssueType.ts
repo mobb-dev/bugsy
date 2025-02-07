@@ -97,6 +97,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.WeakEncryption]: 'Weak Encryption Mechanism',
   [IssueType_Enum.CodeInComment]: 'Code in Comment',
   [IssueType_Enum.RegexMissingTimeout]: 'Regex Missing Timeout',
+  [IssueType_Enum.FrameableLoginPage]: 'Frameable Login Page',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

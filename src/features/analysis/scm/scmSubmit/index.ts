@@ -39,7 +39,8 @@ const _pushBranch = async (
   git: SimpleGit,
   branchName: string,
   fixArray: FixResponseArray,
-  response: SubmitFixesResponseMessage
+  response: SubmitFixesResponseMessage,
+  isSameBranch: boolean
 ) => {
   try {
     await git.push('origin', branchName, ['--set-upstream'])
@@ -47,15 +48,19 @@ const _pushBranch = async (
     response.error = {
       type: 'PushBranchError',
       info: {
-        message: 'Failed to push branch',
+        message:
+          'Failed to push branch. This could happen if the branch was modified while this job was already started, SCM prod or permission problem or a bug',
         pushBranchName: branchName,
       },
     }
-    for (const submitBranch of response.submitBranches) {
-      try {
-        git.push(['origin', '--delete', submitBranch.branchName])
-      } catch (e) {
-        //ignore
+    //if this is an already existing branch, don't delete it on failure
+    if (!isSameBranch) {
+      for (const submitBranch of response.submitBranches) {
+        try {
+          git.push(['origin', '--delete', submitBranch.branchName])
+        } catch (e) {
+          //ignore
+        }
       }
     }
     return false
@@ -385,15 +390,18 @@ async function _initGitAndFiles({
 export async function submitFixesToSameBranch(
   msg: Omit<CommitToSameBranchParams, 'type'>
 ): Promise<SubmitFixesResponseMessage> {
-  const { commitDescription, commitMessage } = msg
+  const { commitDescriptions, commitMessages } = msg
   const response: SubmitFixesResponseMessage = {
     mobbUserEmail: msg.mobbUserEmail,
     githubCommentId: msg.githubCommentId,
     submitBranches: [],
     submitFixRequestId: '',
     type: submitToScmMessageType.commitToSameBranch,
-    commit: null,
+    commits: [],
   }
+
+  const localCommits = []
+  const localFixes = []
 
   const tmpDir = tmp.dirSync({
     unsafeCleanup: true,
@@ -429,34 +437,47 @@ export async function submitFixesToSameBranch(
       fixes: msg.fixes,
     })
 
-    const [fix] = fixes
-    const { commit, success } = await _cherryPickFixToBranch({
-      git,
-      fix,
-      targetBranch: branchName,
-      commitDescription,
-      commitMessage,
-    })
-    //if the fix has conflicts with the target branch (or internal fix conflicts - bug), return an error
-    if (!success) {
-      console.warn(
-        `Fix ${fix.fixId} has conflicts with the target branch: ${branchName}. patches: ${fix.patchesOriginalEncodingBase64}`
-      )
+    for (const [i, fix] of fixes.entries()) {
+      const { commit, success } = await _cherryPickFixToBranch({
+        git,
+        fix,
+        targetBranch: branchName,
+        commitDescription: commitDescriptions?.at(i),
+        commitMessage: commitMessages[i],
+      })
+      if (!success || !commit) {
+        console.warn(
+          `Fix ${fix.fixId} has conflicts with the other fixes or the target branch: ${branchName}. patches: ${fix.patchesOriginalEncodingBase64}`
+        )
+        continue
+      }
+      localCommits.push(commit)
+      localFixes.push(fix)
+    }
+    if (localCommits.length === 0) {
       response.error = {
         type: 'AllFixesConflictWithTargetBranchError',
         info: {
-          message: `No fixes were applied. Fix ${fix.fixId} has conflicts with the target branch: ${branchName}. patches: ${fix.patchesOriginalEncodingBase64}`,
+          message: `No fixes were applied. All fixes have conflicts with the target branch: ${branchName}`,
         },
       }
       return response
     }
     if (
-      !(await _pushBranch(git, branchName, [{ fixId: fix.fixId }], response))
+      !(await _pushBranch(
+        git,
+        branchName,
+        localFixes.map((fix) => ({
+          fixId: fix.fixId,
+        })),
+        response,
+        true
+      ))
     ) {
-      console.log('pushBranch failed')
+      console.warn('pushBranch failed')
       return response
     }
-    response.commit = commit
+    response.commits = localCommits
     return response
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : 'Unknown error'
@@ -552,7 +573,9 @@ export const submitFixesToDifferentBranch = async (
         //as we now know there will be more than a single PR branch
         await git.checkout(['-b', submitBranch, 'HEAD'])
         //push the branch to the origin and add the branch name and the fixes ids to the response
-        if (!(await _pushBranch(git, submitBranch, fixArray, response))) {
+        if (
+          !(await _pushBranch(git, submitBranch, fixArray, response, false))
+        ) {
           return response
         }
         fixArray = []
@@ -584,7 +607,7 @@ export const submitFixesToDifferentBranch = async (
       return response
     }
     //push the branch to the origin and add the branch name and the fixes ids to the response
-    if (!(await _pushBranch(git, submitBranch, fixArray, response))) {
+    if (!(await _pushBranch(git, submitBranch, fixArray, response, false))) {
       return response
     }
     return response

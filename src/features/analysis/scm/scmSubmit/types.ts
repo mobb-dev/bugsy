@@ -24,8 +24,8 @@ export const CommitToSameBranchParamsZ = BaseSubmitToScmMessageZ.merge(
   z.object({
     type: z.literal(submitToScmMessageType.commitToSameBranch),
     branch: z.string(),
-    commitMessage: z.string(),
-    commitDescription: z.string().nullish(),
+    commitMessages: z.array(z.string()),
+    commitDescriptions: z.array(z.string().nullish()),
     githubCommentId: z.number().nullish(),
   })
 )
@@ -93,21 +93,19 @@ const summarySchemaZ = z.object({
   deletions: z.number(),
 })
 
-const GitCommitZ = z
-  .object({
-    author: authorSchemaZ,
-    branch: z.string(),
-    commit: z.string(),
-    root: z.boolean(),
-    summary: summarySchemaZ,
-  })
-  .nullable()
+const GitCommitZ = z.object({
+  author: authorSchemaZ,
+  branch: z.string(),
+  commit: z.string(),
+  root: z.boolean(),
+  summary: summarySchemaZ,
+})
 
 export const SubmitFixesToSameBranchResponseMessageZ = z
   .object({
     type: z.literal(submitToScmMessageType.commitToSameBranch),
     githubCommentId: z.number().nullish(),
-    commit: GitCommitZ,
+    commits: z.array(GitCommitZ),
   })
   .merge(SubmitFixesBaseResponseMessageZ)
 

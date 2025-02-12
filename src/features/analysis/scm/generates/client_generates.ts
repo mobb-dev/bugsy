@@ -23151,6 +23151,18 @@ export type Vulnerability_Report = {
   vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
   /** An aggregate relationship */
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
+  /** A computed field, executes function "get_vulnerability_report_issue_categories" */
+  vulnerability_report_categories?: Maybe<Scalars['json']['output']>;
+  /** A computed field, executes function "get_vulnerability_report_issue_languages" */
+  vulnerability_report_issue_languages?: Maybe<Scalars['json']['output']>;
+  /** A computed field, executes function "get_vulnerability_report_issue_types" */
+  vulnerability_report_issue_types?: Maybe<Scalars['json']['output']>;
+  /** A computed field, executes function "get_vulnerability_report_severities" */
+  vulnerability_report_severities?: Maybe<Scalars['json']['output']>;
+  /** A computed field, executes function "get_vulnerability_report_states" */
+  vulnerability_report_states?: Maybe<Scalars['json']['output']>;
+  /** A computed field, executes function "get_vulnerability_report_issue_tags" */
+  vulnerability_report_tags?: Maybe<Scalars['json']['output']>;
 };
 
 
@@ -23171,6 +23183,48 @@ export type Vulnerability_ReportVulnerabilityReportIssues_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_CategoriesArgs = {
+  args: Vulnerability_Report_Categories_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_Issue_LanguagesArgs = {
+  args: Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_Issue_TypesArgs = {
+  args: Vulnerability_Report_Issue_Types_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_SeveritiesArgs = {
+  args: Vulnerability_Report_Severities_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_StatesArgs = {
+  args: Vulnerability_Report_States_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_TagsArgs = {
+  args: Vulnerability_Report_Tags_Vulnerability_Report_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregated selection of "vulnerability_report" */
@@ -23289,6 +23343,10 @@ export type Vulnerability_Report_Bool_Exp = {
   vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Bool_Exp>;
 };
 
+export type Vulnerability_Report_Categories_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** unique or primary key constraints on table "vulnerability_report" */
 export enum Vulnerability_Report_Constraint {
   /** unique or primary key constraint on columns "id" */
@@ -23325,6 +23383,8 @@ export type Vulnerability_Report_Insert_Input = {
 /** columns and relationships of "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue = {
   __typename?: 'vulnerability_report_issue';
+  /** A computed field, executes function "get_issue_category" */
+  category?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   codeNodes: Array<Vulnerability_Report_Issue_Code_Node>;
   /** An aggregate relationship */
@@ -23344,6 +23404,10 @@ export type Vulnerability_Report_Issue = {
   parsedIssueLanguage?: Maybe<IssueLanguage_Enum>;
   parsedIssueType?: Maybe<IssueType_Enum>;
   parsedSeverity?: Maybe<Vulnerability_Severity_Enum>;
+  /** A computed field, executes function "get_issue_language_from_vul_issue" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_issue_type_from_vul_issue" */
+  safeIssueType?: Maybe<Scalars['String']['output']>;
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
@@ -23493,6 +23557,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   _and?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
   _not?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
+  category?: InputMaybe<String_Comparison_Exp>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -23508,6 +23573,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
   parsedIssueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
+  safeIssueLanguage?: InputMaybe<String_Comparison_Exp>;
+  safeIssueType?: InputMaybe<String_Comparison_Exp>;
   severity?: InputMaybe<String_Comparison_Exp>;
   severityValue?: InputMaybe<Int_Comparison_Exp>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum_Comparison_Exp>;
@@ -24068,15 +24135,25 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Arr_Rel_Insert_Input>;
 };
 
+export type Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** aggregate max on columns */
 export type Vulnerability_Report_Issue_Max_Fields = {
   __typename?: 'vulnerability_report_issue_max_fields';
+  /** A computed field, executes function "get_issue_category" */
+  category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_issue_language_from_vul_issue" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_issue_type_from_vul_issue" */
+  safeIssueType?: Maybe<Scalars['String']['output']>;
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
@@ -24102,12 +24179,18 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
 /** aggregate min on columns */
 export type Vulnerability_Report_Issue_Min_Fields = {
   __typename?: 'vulnerability_report_issue_min_fields';
+  /** A computed field, executes function "get_issue_category" */
+  category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_issue_language_from_vul_issue" */
+  safeIssueLanguage?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_issue_type_from_vul_issue" */
+  safeIssueType?: Maybe<Scalars['String']['output']>;
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
@@ -24155,6 +24238,7 @@ export type Vulnerability_Report_Issue_On_Conflict = {
 
 /** Ordering options when selecting data from "vulnerability_report_issue". */
 export type Vulnerability_Report_Issue_Order_By = {
+  category?: InputMaybe<Order_By>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
@@ -24169,6 +24253,8 @@ export type Vulnerability_Report_Issue_Order_By = {
   parsedIssueLanguage?: InputMaybe<Order_By>;
   parsedIssueType?: InputMaybe<Order_By>;
   parsedSeverity?: InputMaybe<Order_By>;
+  safeIssueLanguage?: InputMaybe<Order_By>;
+  safeIssueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   severityValue?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
@@ -24816,6 +24902,10 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Updates
   where: Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp;
 };
 
+export type Vulnerability_Report_Issue_Types_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** update columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
@@ -25215,6 +25305,14 @@ export type Vulnerability_Report_Set_Input = {
   vendorReportId?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type Vulnerability_Report_Severities_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+export type Vulnerability_Report_States_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** aggregate stddev on columns */
 export type Vulnerability_Report_Stddev_Fields = {
   __typename?: 'vulnerability_report_stddev_fields';
@@ -25283,6 +25381,10 @@ export type Vulnerability_Report_Sum_Fields = {
 /** order by sum() on columns of table "vulnerability_report" */
 export type Vulnerability_Report_Sum_Order_By = {
   issuesWithKnownLanguage?: InputMaybe<Order_By>;
+};
+
+export type Vulnerability_Report_Tags_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** update columns of table "vulnerability_report" */

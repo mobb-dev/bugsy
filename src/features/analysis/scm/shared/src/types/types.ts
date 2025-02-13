@@ -134,6 +134,7 @@ export const ReportQueryResultZ = z.object({
       isKnownBranch: z.boolean().nullish().default(true),
     }),
     vulnerabilityReport: z.object({
+      id: z.string().uuid(),
       reportSummaryUrl: z.string().url().nullish(),
       vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
       issuesWithKnownLanguage: z.number().nullable(),

@@ -2200,6 +2200,86 @@ export type Effort_To_Apply_Fix_Updates = {
   where: Effort_To_Apply_Fix_Bool_Exp;
 };
 
+/** columns and relationships of "expiring_report_paths" */
+export type Expiring_Report_Paths = {
+  __typename?: 'expiring_report_paths';
+  path?: Maybe<Scalars['String']['output']>;
+  report_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregated selection of "expiring_report_paths" */
+export type Expiring_Report_Paths_Aggregate = {
+  __typename?: 'expiring_report_paths_aggregate';
+  aggregate?: Maybe<Expiring_Report_Paths_Aggregate_Fields>;
+  nodes: Array<Expiring_Report_Paths>;
+};
+
+/** aggregate fields of "expiring_report_paths" */
+export type Expiring_Report_Paths_Aggregate_Fields = {
+  __typename?: 'expiring_report_paths_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Expiring_Report_Paths_Max_Fields>;
+  min?: Maybe<Expiring_Report_Paths_Min_Fields>;
+};
+
+
+/** aggregate fields of "expiring_report_paths" */
+export type Expiring_Report_Paths_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Expiring_Report_Paths_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "expiring_report_paths". All fields are combined with a logical 'AND'. */
+export type Expiring_Report_Paths_Bool_Exp = {
+  _and?: InputMaybe<Array<Expiring_Report_Paths_Bool_Exp>>;
+  _not?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
+  _or?: InputMaybe<Array<Expiring_Report_Paths_Bool_Exp>>;
+  path?: InputMaybe<String_Comparison_Exp>;
+  report_id?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Expiring_Report_Paths_Max_Fields = {
+  __typename?: 'expiring_report_paths_max_fields';
+  path?: Maybe<Scalars['String']['output']>;
+  report_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Expiring_Report_Paths_Min_Fields = {
+  __typename?: 'expiring_report_paths_min_fields';
+  path?: Maybe<Scalars['String']['output']>;
+  report_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** Ordering options when selecting data from "expiring_report_paths". */
+export type Expiring_Report_Paths_Order_By = {
+  path?: InputMaybe<Order_By>;
+  report_id?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "expiring_report_paths" */
+export enum Expiring_Report_Paths_Select_Column {
+  /** column name */
+  Path = 'path',
+  /** column name */
+  ReportId = 'report_id'
+}
+
+/** Streaming cursor of the table "expiring_report_paths" */
+export type Expiring_Report_Paths_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Expiring_Report_Paths_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Expiring_Report_Paths_Stream_Cursor_Value_Input = {
+  path?: InputMaybe<Scalars['String']['input']>;
+  report_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
 /** a table which stores the false positives where we have fix info object */
 export type False_Positive = {
   __typename?: 'false_positive';
@@ -7640,6 +7720,8 @@ export enum IssueType_Enum {
   UnvalidatedPublicMethodArgument = 'UNVALIDATED_PUBLIC_METHOD_ARGUMENT',
   /** Useless regular-expression character escape */
   UselessRegexpCharEscape = 'USELESS_REGEXP_CHAR_ESCAPE',
+  /** Use_of_Hard_coded_Cryptographic_Key */
+  UseOfHardCodedCryptographicKey = 'USE_OF_HARD_CODED_CRYPTOGRAPHIC_KEY',
   /** Printing logs in assorted way to the sys out/err */
   UseOfSystemOutputStream = 'USE_OF_SYSTEM_OUTPUT_STREAM',
   /** A variable is assigned a value that is never read */
@@ -15687,6 +15769,10 @@ export type Query_Root = {
   effort_to_apply_fix_aggregate: Effort_To_Apply_Fix_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" using primary key columns */
   effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
+  /** fetch data from the table: "expiring_report_paths" */
+  expiring_report_paths: Array<Expiring_Report_Paths>;
+  /** fetch aggregated fields from the table: "expiring_report_paths" */
+  expiring_report_paths_aggregate: Expiring_Report_Paths_Aggregate;
   /** fetch data from the table: "false_positive" */
   false_positive: Array<False_Positive>;
   /** fetch aggregated fields from the table: "false_positive" */
@@ -16205,6 +16291,24 @@ export type Query_RootEffort_To_Apply_Fix_AggregateArgs = {
 
 export type Query_RootEffort_To_Apply_Fix_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootExpiring_Report_PathsArgs = {
+  distinct_on?: InputMaybe<Array<Expiring_Report_Paths_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Expiring_Report_Paths_Order_By>>;
+  where?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
+};
+
+
+export type Query_RootExpiring_Report_Paths_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Expiring_Report_Paths_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Expiring_Report_Paths_Order_By>>;
+  where?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
 };
 
 
@@ -19415,6 +19519,12 @@ export type Subscription_Root = {
   effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
   /** fetch data from the table in a streaming manner: "effort_to_apply_fix" */
   effort_to_apply_fix_stream: Array<Effort_To_Apply_Fix>;
+  /** fetch data from the table: "expiring_report_paths" */
+  expiring_report_paths: Array<Expiring_Report_Paths>;
+  /** fetch aggregated fields from the table: "expiring_report_paths" */
+  expiring_report_paths_aggregate: Expiring_Report_Paths_Aggregate;
+  /** fetch data from the table in a streaming manner: "expiring_report_paths" */
+  expiring_report_paths_stream: Array<Expiring_Report_Paths>;
   /** fetch data from the table: "false_positive" */
   false_positive: Array<False_Positive>;
   /** fetch aggregated fields from the table: "false_positive" */
@@ -20063,6 +20173,31 @@ export type Subscription_RootEffort_To_Apply_Fix_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Effort_To_Apply_Fix_Stream_Cursor_Input>>;
   where?: InputMaybe<Effort_To_Apply_Fix_Bool_Exp>;
+};
+
+
+export type Subscription_RootExpiring_Report_PathsArgs = {
+  distinct_on?: InputMaybe<Array<Expiring_Report_Paths_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Expiring_Report_Paths_Order_By>>;
+  where?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
+};
+
+
+export type Subscription_RootExpiring_Report_Paths_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Expiring_Report_Paths_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Expiring_Report_Paths_Order_By>>;
+  where?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
+};
+
+
+export type Subscription_RootExpiring_Report_Paths_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Expiring_Report_Paths_Stream_Cursor_Input>>;
+  where?: InputMaybe<Expiring_Report_Paths_Bool_Exp>;
 };
 
 

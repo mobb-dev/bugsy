@@ -340,4 +340,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.CodeInComment]: undefined,
   [IssueType_Enum.RegexMissingTimeout]: undefined,
   [IssueType_Enum.FrameableLoginPage]: undefined,
+  [IssueType_Enum.UseOfHardCodedCryptographicKey]: undefined,
 }

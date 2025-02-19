@@ -1,16 +1,38 @@
 import {
   createSpinner as _createSpinner,
   Options as NanoSpinnerOptions,
+  Spinner,
 } from 'nanospinner'
-import { Spinner } from 'nanospinner'
+
+function printToStdError(opts?: { text?: string }) {
+  if (opts?.text) console.error(opts.text)
+}
 
 const mockSpinner: Spinner = {
-  success: () => mockSpinner,
-  error: () => mockSpinner,
-  warn: () => mockSpinner,
-  stop: () => mockSpinner,
-  start: () => mockSpinner,
-  update: () => mockSpinner,
+  success: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
+  error: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
+  warn: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
+  stop: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
+  start: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
+  update: (opts?: { text?: string }) => {
+    printToStdError(opts)
+    return mockSpinner
+  },
   reset: () => mockSpinner,
   clear: () => mockSpinner,
   spin: () => mockSpinner,

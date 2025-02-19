@@ -91,13 +91,14 @@ export class GQLClient {
   async verifyToken() {
     await this.createCommunityUser()
 
+    let info
     try {
-      await this.getUserInfo()
+      info = await this.getUserInfo()
     } catch (e) {
       debug('verify token failed %o', e)
       return false
     }
-    return true
+    return info?.email || true
   }
 
   async getOrgAndProjectId(

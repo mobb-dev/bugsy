@@ -202,10 +202,13 @@ export async function handleMobbLogin({
   skipPrompts?: boolean
 }) {
   const { createSpinner } = Spinner({ ci: skipPrompts })
-  if (await inGqlClient.verifyToken()) {
-    createSpinner().start().success({
-      text: '🔓 Login to Mobb succeeded',
-    })
+  const userVerify = await inGqlClient.verifyToken()
+  if (userVerify) {
+    createSpinner()
+      .start()
+      .success({
+        text: `🔓 Login to Mobb succeeded. ${typeof userVerify === 'string' ? `Logged in as ${userVerify}` : ''}`,
+      })
 
     return inGqlClient
   } else if (apiKey) {
@@ -271,10 +274,13 @@ export async function handleMobbLogin({
 
   const newGqlClient = new GQLClient({ apiKey: newApiToken, type: 'apiKey' })
 
-  if (await newGqlClient.verifyToken()) {
+  const loginSuccess = await newGqlClient.verifyToken()
+  if (loginSuccess) {
     debug('set api token %s', newApiToken)
     config.set('apiToken', newApiToken)
-    loginSpinner.success({ text: '🔓 Login to Mobb successful!' })
+    loginSpinner.success({
+      text: `🔓 Login to Mobb successful! ${typeof loginSpinner === 'string' ? `Logged in as ${loginSuccess}` : ''}`,
+    })
   } else {
     loginSpinner.error({
       text: 'Something went wrong, API token is invalid.',

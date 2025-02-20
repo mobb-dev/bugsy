@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { env } from 'node:process'
 import { pipeline } from 'node:stream/promises'
 
 import {
@@ -66,6 +67,23 @@ type DownloadRepoParams = {
 function _getScanSource(command: MobbCliCommand): Scan_Source_Enum {
   // `review` comes from the GitHub action https://github.com/mobb-dev/action/blob/b5dfbbe1e005a46b135421c2481a6bff2a3f46fe/review/action.yml#L37
   if (command === 'review') return Scan_Source_Enum.AutoFixer
+
+  // Based on code samples from grep.app. Not tested on every env.
+  const envToCi: [string, Scan_Source_Enum][] = [
+    ['GITLAB_CI', Scan_Source_Enum.CiGitlab],
+    ['GITHUB_ACTIONS', Scan_Source_Enum.CiGithub],
+    ['JENKINS_URL', Scan_Source_Enum.CiJenkins],
+    ['CIRCLECI', Scan_Source_Enum.CiCircleci],
+    ['TF_BUILD', Scan_Source_Enum.CiAzure],
+    ['bamboo_buildKey', Scan_Source_Enum.CiBamboo],
+  ]
+
+  for (const [envKey, source] of envToCi) {
+    if (env[envKey]) {
+      return source
+    }
+  }
+
   return Scan_Source_Enum.Cli
 }
 

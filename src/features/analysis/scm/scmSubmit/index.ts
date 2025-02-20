@@ -6,7 +6,7 @@ import { CommitResult, SimpleGit, simpleGit } from 'simple-git'
 import tmp from 'tmp'
 import { z } from 'zod'
 
-import { GIT_PROXY_HOST } from '../env'
+import { GIT_COMMITTER_EMAIL, GIT_COMMITTER_NAME, GIT_PROXY_HOST } from '../env'
 import { isBrokerUrl } from '../utils'
 import {
   CommitToSameBranchParams,
@@ -182,8 +182,8 @@ async function _initGit(params: InitGitParams) {
     })
   })
   await git.init()
-  await git.addConfig('user.email', 'git@mobb.ai')
-  await git.addConfig('user.name', 'Mobb autofixer')
+  await git.addConfig('user.email', GIT_COMMITTER_EMAIL ?? 'git@mobb.ai')
+  await git.addConfig('user.name', GIT_COMMITTER_NAME ?? 'Mobb autofixer')
   await Promise.all(
     Object.entries(extraHeaders).map(([headerKey, headerValue]) =>
       git.addConfig('http.extraheader', `${headerKey}: ${headerValue}`)

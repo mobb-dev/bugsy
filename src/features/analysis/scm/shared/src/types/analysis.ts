@@ -19,6 +19,7 @@ export const FixPageFixReportZ = z.object({
     originalUrl: z.string(),
     reference: z.string(),
     commitSha: z.string(),
+    isKnownBranch: z.boolean().nullable(),
   }),
   vulnerabilityReport: z.object({
     vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),

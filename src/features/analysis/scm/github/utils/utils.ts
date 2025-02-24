@@ -79,6 +79,9 @@ export function getOctoKit(
     ...options,
     auth: token,
     baseUrl,
+    //GITHUB_API_TOKEN is only defined in the backend and not when running Bugsy as CLI. We want to enable these debug logs in the backend
+    //to debug the performance of these API calls.
+    log: GITHUB_API_TOKEN ? console : undefined,
     request: {
       fetch: getFetch(baseUrl),
     },

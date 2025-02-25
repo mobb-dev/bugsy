@@ -85,6 +85,12 @@ export function getOctoKit(
     request: {
       fetch: getFetch(baseUrl),
     },
+    retry: {
+      enabled: false,
+    },
+    throttle: {
+      enabled: false,
+    },
   })
 }
 

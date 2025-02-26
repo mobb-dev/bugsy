@@ -1,5 +1,4 @@
 import querystring from 'node:querystring'
-import { setTimeout } from 'node:timers/promises'
 
 import {
   createRequesterFn,
@@ -49,8 +48,19 @@ type ApiAuthOptions = {
   gitlabAuthToken?: string | undefined
 }
 
+//we choose a random token to increase the rate limit for anonymous requests to gitlab.com API so that we can exhaust the rate limit
+//of several different pre-generated tokens instead of just one.
+function getRandomGitlabCloudAnonToken() {
+  if (!GITLAB_API_TOKEN || typeof GITLAB_API_TOKEN !== 'string') {
+    return undefined
+  }
+  const tokens = GITLAB_API_TOKEN.split(',')
+  return tokens[Math.floor(Math.random() * tokens.length)]
+}
+
 function getGitBeaker(options: ApiAuthOptions) {
-  const token = options?.gitlabAuthToken ?? GITLAB_API_TOKEN ?? ''
+  const token =
+    options?.gitlabAuthToken ?? getRandomGitlabCloudAnonToken() ?? ''
   const url = options.url
   const host = url ? new URL(url).origin : 'https://gitlab.com'
   if (token?.startsWith('glpat-') || token === '') {
@@ -544,8 +554,6 @@ async function brokerRequestHandler(
   endpoint: string,
   options?: RequestOptions
 ) {
-  const retryCodes = [429, 502]
-  const maxRetries = 10
   const { prefixUrl, searchParams } = options || {}
   let baseUrl: string | undefined
 
@@ -565,39 +573,25 @@ async function brokerRequestHandler(
         })
       : undefined
 
-  /* eslint-disable no-await-in-loop */
-  for (let i = 0; i < maxRetries; i += 1) {
-    const response = await undiciFetch(url, {
-      headers: options?.headers,
-      method: options?.method,
-      body: options?.body ? String(options?.body) : undefined,
-      dispatcher,
-    }).catch((e) => {
-      if (e.name === 'TimeoutError' || e.name === 'AbortError') {
-        throw new Error('Query timeout was reached')
-      }
+  const response = await undiciFetch(url, {
+    headers: options?.headers,
+    method: options?.method,
+    body: options?.body ? String(options?.body) : undefined,
+    dispatcher,
+  }).catch((e) => {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') {
+      throw new Error('Query timeout was reached')
+    }
 
-      throw e
-    })
+    throw e
+  })
 
-    if (response.ok)
-      return {
-        body: await processBody(response),
-        headers: Object.fromEntries(response.headers.entries()),
-        status: response.status,
-      }
-    if (!retryCodes.includes(response.status))
-      throw new Error(`gitbeaker: ${response.statusText}`)
+  if (response.ok)
+    return {
+      body: await processBody(response),
+      headers: Object.fromEntries(response.headers.entries()),
+      status: response.status,
+    }
 
-    // Retry
-    await setTimeout(2 ** i * 0.25)
-
-    // eslint-disable-next-line
-    continue
-  }
-  /* eslint-enable */
-
-  throw new Error(
-    `Could not successfully complete this request due to Error 429. Check the applicable rate limits for this endpoint.`
-  )
+  throw new Error(`gitbeaker: ${response.statusText}`)
 }

@@ -59,6 +59,17 @@ function getFetch(url?: string) {
   }
   return fetch
 }
+
+//we choose a random token to increase the rate limit for anonymous requests to github.com API so that we can exhaust the rate limit
+//of several different pre-generated tokens instead of just one.
+function getRandomGithubCloudAnonToken() {
+  if (!GITHUB_API_TOKEN || typeof GITHUB_API_TOKEN !== 'string') {
+    return undefined
+  }
+  const tokens = GITHUB_API_TOKEN.split(',')
+  return tokens[Math.floor(Math.random() * tokens.length)]
+}
+
 export function getOctoKit(
   options?: OctokitOptions & { url?: string }
 ): Octokit {
@@ -67,7 +78,7 @@ export function getOctoKit(
   // this is only relevant for github.com
   const token =
     !options?.auth && !isGithubOnPrem(options?.url)
-      ? GITHUB_API_TOKEN
+      ? getRandomGithubCloudAnonToken()
       : options?.auth
 
   const baseUrl =

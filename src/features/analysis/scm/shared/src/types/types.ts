@@ -75,6 +75,9 @@ export const AnalysisReportDigestedZ = z.object({
 
 export const ReportQueryResultZ = z.object({
   fixReport_by_pk: z.object({
+    fixableIssuesCount: z.object({
+      aggregate: z.object({ count: z.number() }),
+    }),
     id: z.string().uuid(),
     analysisUrl: z.string(),
     fixesCommitted: z.object({
@@ -308,6 +311,9 @@ export const GetReportFixesQueryZ = z
   .object({
     fixReport: z.array(
       z.object({
+        fixableIssuesCount: z.object({
+          aggregate: z.object({ count: z.number() }),
+        }),
         fixes: z.array(ReportFixesQueryFixZ),
         fixes_aggregate: z.object({
           aggregate: z.object({ count: z.number() }),

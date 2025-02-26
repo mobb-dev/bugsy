@@ -14,6 +14,11 @@ export const FixPageFixReportZ = z.object({
       count: z.number(),
     }),
   }),
+  fixableIssuesCount: z.object({
+    aggregate: z.object({
+      count: z.number(),
+    }),
+  }),
   repo: z.object({
     name: z.string().nullable(),
     originalUrl: z.string(),

@@ -9,16 +9,6 @@ export const FixPageFixReportZ = z.object({
   expirationOn: z.string(),
   createdOn: z.string(),
   state: z.nativeEnum(Fix_Report_State_Enum),
-  fixes_aggregate: z.object({
-    aggregate: z.object({
-      count: z.number(),
-    }),
-  }),
-  fixableIssuesCount: z.object({
-    aggregate: z.object({
-      count: z.number(),
-    }),
-  }),
   repo: z.object({
     name: z.string().nullable(),
     originalUrl: z.string(),

@@ -75,9 +75,6 @@ export const AnalysisReportDigestedZ = z.object({
 
 export const ReportQueryResultZ = z.object({
   fixReport_by_pk: z.object({
-    fixableIssuesCount: z.object({
-      aggregate: z.object({ count: z.number() }),
-    }),
     id: z.string().uuid(),
     analysisUrl: z.string(),
     fixesCommitted: z.object({
@@ -96,11 +93,6 @@ export const ReportQueryResultZ = z.object({
     createdOn: z.string(),
     expirationOn: z.string().nullable(),
     state: z.nativeEnum(Fix_Report_State_Enum),
-    fixes_aggregate: z.object({
-      aggregate: z.object({
-        count: z.number(),
-      }),
-    }),
     fixes: z.array(
       z.object({
         id: z.string().uuid(),
@@ -135,6 +127,11 @@ export const ReportQueryResultZ = z.object({
       reference: z.string(),
       commitSha: z.string(),
       isKnownBranch: z.boolean().nullish().default(true),
+    }),
+    vulnerabilityReportIssuesFixedCount: z.object({
+      vulnerabilityReportIssues_aggregate: z.object({
+        aggregate: z.object({ count: z.number() }),
+      }),
     }),
     vulnerabilityReport: z.object({
       id: z.string().uuid(),
@@ -311,13 +308,7 @@ export const GetReportFixesQueryZ = z
   .object({
     fixReport: z.array(
       z.object({
-        fixableIssuesCount: z.object({
-          aggregate: z.object({ count: z.number() }),
-        }),
         fixes: z.array(ReportFixesQueryFixZ),
-        fixes_aggregate: z.object({
-          aggregate: z.object({ count: z.number() }),
-        }),
         vulnerabilityReportIssuesTotalCount: z.object({
           vulnerabilityReportIssues_aggregate: z.object({
             aggregate: z.object({ count: z.number() }),
@@ -350,9 +341,9 @@ const ProjectVulnerabilityReport = z.object({
   fixReport: z.object({
     id: z.string().uuid(),
     createdOn: z.string(),
-    fixes_aggregate: z.object({
-      aggregate: z.object({
-        count: z.number(),
+    vulnerabilityReportIssuesFixedCount: z.object({
+      vulnerabilityReportIssues_aggregate: z.object({
+        aggregate: z.object({ count: z.number() }),
       }),
     }),
     issueTypes: z.record(z.string(), z.number()).nullable(),
@@ -394,11 +385,6 @@ const ProjectGetProjectZ = z.object({
           .record(z.nativeEnum(IssueLanguage_Enum), z.number())
           .nullable(),
         state: z.nativeEnum(Fix_Report_State_Enum),
-        fixes_aggregate: z.object({
-          aggregate: z.object({
-            count: z.number(),
-          }),
-        }),
         repo: z.object({
           originalUrl: z.string(),
           reference: z.string(),

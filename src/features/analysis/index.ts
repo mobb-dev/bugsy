@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 import { env } from 'node:process'
 import { pipeline } from 'node:stream/promises'
@@ -33,9 +34,9 @@ import { z } from 'zod'
 
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { handleAutoPr } from './auto_pr_handler'
-import { getGitInfo } from './git'
+import { getGitInfo, GetGitInfoResult } from './git'
 import { GQLClient } from './graphql'
-import { pack } from './pack'
+import { pack, repackFpr } from './pack'
 import { mobbAnalysisPrompt, scmIntegrationPrompt } from './prompts'
 import { getCheckmarxReport } from './scanners/checkmarx'
 import { getSnykReport } from './scanners/snyk'
@@ -634,11 +635,22 @@ export async function _scan(
       projectId,
       command,
     })
-    const gitInfo = await getGitInfo(srcPath)
-
+    const srcFileStatus = await fsPromises.lstat(srcPath)
     const zippingSpinner = createSpinner('📦 Zipping repo').start()
 
-    const zipBuffer = await pack(srcPath, vulnFiles)
+    let zipBuffer: Buffer
+    let gitInfo: GetGitInfoResult = { success: false }
+
+    if (
+      srcFileStatus.isFile() &&
+      path.extname(srcPath).toLowerCase() === '.fpr'
+    ) {
+      zipBuffer = await repackFpr(srcPath)
+    } else {
+      gitInfo = await getGitInfo(srcPath)
+      zipBuffer = await pack(srcPath, vulnFiles)
+    }
+
     zippingSpinner.success({ text: '📦 Zipping repo successful!' })
 
     const uploadRepoSpinner = createSpinner('📁 Uploading Repo').start()

@@ -6,10 +6,24 @@ import Debug from 'debug'
 import { globby } from 'globby'
 import { isBinary } from 'istextorbinary'
 import { simpleGit } from 'simple-git'
+import { parseStringPromise } from 'xml2js'
+import { z } from 'zod'
 
 const debug = Debug('mobbdev:pack')
 
 const MAX_FILE_SIZE = 1024 * 1024 * 5
+const FPR_SOURCE_CODE_FILE_MAPPING_SCHEMA = z.object({
+  properties: z.object({
+    entry: z.array(
+      z.object({
+        _: z.string(),
+        $: z.object({
+          key: z.string(),
+        }),
+      })
+    ),
+  }),
+})
 
 function endsWithAny(str: string, suffixes: string[]): boolean {
   return suffixes.some(function (suffix) {
@@ -17,9 +31,9 @@ function endsWithAny(str: string, suffixes: string[]): boolean {
   })
 }
 
-//For now we only support package.json files
+// For now, we only support package.json and pom.xml files.
 function _get_manifest_files_suffixes() {
-  return ['package.json']
+  return ['package.json', 'pom.xml']
 }
 
 export async function pack(srcDirPath: string, vulnFiles: string[]) {
@@ -95,4 +109,28 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
 
   debug('get zip file buffer')
   return zip.toBuffer()
+}
+
+export async function repackFpr(fprPath: string) {
+  debug('repack fpr file %s', fprPath)
+
+  const zipIn = new AdmZip(fprPath)
+  const zipOut = new AdmZip()
+  const mappingXML = zipIn.readAsText('src-archive/index.xml', 'utf-8')
+  const filesMapping = FPR_SOURCE_CODE_FILE_MAPPING_SCHEMA.parse(
+    await parseStringPromise(mappingXML)
+  )
+
+  for (const fileMapping of filesMapping.properties.entry) {
+    const zipPath = fileMapping._
+    const realPath = fileMapping.$.key
+    const buf = zipIn.readFile(zipPath)
+
+    if (buf) {
+      zipOut.addFile(realPath, buf)
+    }
+  }
+
+  debug('get repacked zip file buffer')
+  return zipOut.toBuffer()
 }

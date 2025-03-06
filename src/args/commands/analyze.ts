@@ -40,7 +40,7 @@ export function analyzeBuilder(
     .option('p', {
       alias: 'src-path',
       describe: chalk.bold(
-        'Path to the repository folder with the source code'
+        'Path to the repository folder with the source code; alternatively, you can specify the Fortify FPR file to extract source code out of it'
       ),
       type: 'string',
     })

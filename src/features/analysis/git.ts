@@ -5,7 +5,7 @@ const debug = Debug('mobbdev:git')
 
 const GIT_NOT_INITIALIZED_ERROR_MESSAGE = 'not a git repository'
 
-type GetGitInfoResult =
+export type GetGitInfoResult =
   | {
       success: true
       repoUrl: string

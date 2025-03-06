@@ -227,6 +227,31 @@ describe('Basic Analyze tests', () => {
     }
   )
 
+  it('Direct repo upload from FPR file', async () => {
+    const packSpy = vi.spyOn(ourPackModule, 'repackFpr')
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
+    mockedOpen.mockClear()
+    await analysisExports.runAnalysis(
+      {
+        repo: 'https://bitbucket.com/a/b',
+        ref: 'test',
+        commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+        scanFile: path.join(__dirname, 'assets/scandata.fpr'),
+        srcPath: path.join(__dirname, 'assets/scandata.fpr'),
+        ci: false,
+        command: 'analyze',
+      },
+      { skipPrompts: true }
+    )
+    expect(mockedOpen).toHaveBeenCalledTimes(2)
+    expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+    expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+    // ensure that we filter only relevant files
+    const packedResult = await packSpy.mock.results[0]?.value
+    const uploadedRepoZip = new AdmZip(Buffer.from(packedResult))
+    expect(uploadedRepoZip.getEntryCount()).toBe(12)
+  })
+
   it('Checks ci flag', async () => {
     const consoleMock = vi.spyOn(console, 'log')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')

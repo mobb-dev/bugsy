@@ -163,6 +163,20 @@ export function getGithubSdk(params: OctokitOptions = {}) {
       }
       return res.data.state
     },
+    async createMarkdownCommentOnPullRequest(params: {
+      repoUrl: string
+      prNumber: number
+      markdownComment: string
+    }) {
+      const { repoUrl, prNumber, markdownComment } = params
+      const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
+      return octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: prNumber,
+        body: markdownComment,
+      })
+    },
     async getGithubIsRemoteBranch(params: { repoUrl: string; branch: string }) {
       const { repoUrl, branch } = params
       const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)

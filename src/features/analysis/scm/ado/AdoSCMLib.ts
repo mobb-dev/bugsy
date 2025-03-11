@@ -209,16 +209,16 @@ export class AdoSCMLib extends SCMLib {
       repoUrl: this.url,
     })
   }
-  async getPrUrl(prNumber: number): Promise<string> {
+  async getSubmitRequestUrl(submitRequestIdNumber: number): Promise<string> {
     this._validateUrl()
     const adoSdk = await this.getAdoSdk()
     return adoSdk.getAdoPrUrl({
       url: this.url,
-      prNumber,
+      prNumber: submitRequestIdNumber,
     })
   }
-  async getPrId(prUrl: string): Promise<string> {
-    const match = prUrl.match(/\/pullrequest\/(\d+)/)
+  async getSubmitRequestId(submitRequestUrl: string): Promise<string> {
+    const match = submitRequestUrl.match(/\/pullrequest\/(\d+)/)
     return match?.[1] || ''
   }
   async getCommitUrl(commitId: string): Promise<string> {
@@ -227,6 +227,18 @@ export class AdoSCMLib extends SCMLib {
     return adoSdk.getAdoCommitUrl({
       url: this.url,
       commitId,
+    })
+  }
+  async addCommentToSubmitRequest(
+    scmSubmitRequestId: string,
+    comment: string
+  ): Promise<void> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    await adoSdk.addCommentToAdoPullRequest({
+      repoUrl: this.url,
+      prNumber: Number(scmSubmitRequestId),
+      markdownComment: comment,
     })
   }
 }

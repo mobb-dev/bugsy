@@ -58,6 +58,12 @@ export function analyzeBuilder(
     .option('commit-hash', commitHashOption)
     .option('auto-pr', autoPrOption)
     .option('commit-directly', commitDirectlyOption)
+    .option('pull-request', {
+      alias: ['pr', 'pr-number', 'pr-id'],
+      describe: chalk.bold('Number of the pull request'),
+      type: 'number',
+      demandOption: false,
+    })
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'
@@ -83,6 +89,11 @@ function validateAnalyzeOptions(argv: AnalyzeOptions) {
   if (argv.commitDirectly && !argv['auto-pr']) {
     throw new CliError(
       '--commit-directly flag requires --auto-pr to be provided as well'
+    )
+  }
+  if (argv.pullRequest && !argv['commit-directly']) {
+    throw new CliError(
+      '--pull-request flag requires --commit-directly to be provided as well'
     )
   }
   validateReportFileFormat(argv.f)

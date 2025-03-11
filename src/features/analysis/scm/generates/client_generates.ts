@@ -8776,6 +8776,7 @@ export type Mutation_RootApplySimilarAnswersArgs = {
 /** mutation root */
 export type Mutation_RootAutoPrAnalysisArgs = {
   analysisId: Scalars['String']['input'];
+  prId?: InputMaybe<Scalars['Int']['input']>;
   sameBranchCommit?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -8820,6 +8821,7 @@ export type Mutation_RootCommitToSameBranchArgs = {
   commitMessage: Scalars['String']['input'];
   fixId: Scalars['String']['input'];
   prCommentId?: InputMaybe<Scalars['Int']['input']>;
+  prId?: InputMaybe<Scalars['Int']['input']>;
   submitBranch?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -26061,6 +26063,7 @@ export type GitReferenceQuery = { __typename?: 'query_root', gitReference?: { __
 export type AutoPrAnalysisMutationVariables = Exact<{
   analysisId: Scalars['String']['input'];
   commitDirectly?: InputMaybe<Scalars['Boolean']['input']>;
+  prId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -26437,8 +26440,12 @@ export const GitReferenceDocument = `
 }
     `;
 export const AutoPrAnalysisDocument = `
-    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean) {
-  autoPrAnalysis(analysisId: $analysisId, sameBranchCommit: $commitDirectly) {
+    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean, $prId: Int) {
+  autoPrAnalysis(
+    analysisId: $analysisId
+    sameBranchCommit: $commitDirectly
+    prId: $prId
+  ) {
     __typename
     ... on AutoPrSuccess {
       status

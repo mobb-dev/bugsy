@@ -261,22 +261,34 @@ export class BitbucketSCMLib extends SCMLib {
     const repoRes = await this.bitbucketSdk.getRepo({ repoUrl: this.url })
     return z.string().parse(repoRes.mainbranch?.name)
   }
-  getPrUrl(prNumber: number): Promise<string> {
+  getSubmitRequestUrl(submitRequestId: number): Promise<string> {
     this._validateUrl()
-    const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
+    const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
     return Promise.resolve(
-      `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${prNumber}`
+      `https://bitbucket.org/${workspace}/${repo_slug}/pull-requests/${submitRequestId}`
     )
   }
-  async getPrId(prUrl: string): Promise<string> {
-    const match = prUrl.match(/\/pull-requests\/(\d+)/)
+  async getSubmitRequestId(submitRequestUrl: string): Promise<string> {
+    const match = submitRequestUrl.match(/\/pull-requests\/(\d+)/)
     return match?.[1] || ''
   }
   getCommitUrl(commitId: string): Promise<string> {
     this._validateUrl()
-    const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
+    const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
     return Promise.resolve(
-      `https://bitbucket.org/${workspace}/${repoSlug}/commits/${commitId}`
+      `https://bitbucket.org/${workspace}/${repo_slug}/commits/${commitId}`
     )
+  }
+
+  async addCommentToSubmitRequest(
+    submitRequestId: string,
+    comment: string
+  ): Promise<void> {
+    this._validateUrl()
+    await this.bitbucketSdk.addCommentToPullRequest({
+      prNumber: Number(submitRequestId),
+      url: this.url,
+      markdownComment: comment,
+    })
   }
 }

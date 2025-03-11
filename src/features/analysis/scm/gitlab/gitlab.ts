@@ -201,6 +201,22 @@ export async function getGitlabMergeRequestStatus({
   }
 }
 
+export async function createMarkdownCommentOnPullRequest({
+  markdownComment,
+  accessToken,
+  repoUrl,
+  mrNumber,
+}: {
+  markdownComment: string
+  accessToken: string
+  repoUrl: string
+  mrNumber: number
+}) {
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+  return api.MergeRequestNotes.create(projectPath, mrNumber, markdownComment)
+}
+
 export async function getGitlabIsRemoteBranch({
   accessToken,
   repoUrl,

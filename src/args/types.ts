@@ -24,6 +24,7 @@ export type BaseAnalyzeOptions = {
   'auto-pr': boolean
   'commit-directly'?: boolean
   commitDirectly?: boolean
+  pullRequest?: number
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>

@@ -53,7 +53,7 @@ const BitbucketParseResultZ = z.object({
 })
 export function parseBitbucketOrganizationAndRepo(bitbucketUrl: string): {
   workspace: string
-  repoSlug: string
+  repo_slug: string
 } {
   const parsedGitHubUrl = normalizeUrl(bitbucketUrl)
   const parsingResult = parseScmURL(parsedGitHubUrl, ScmType.Bitbucket)
@@ -61,7 +61,7 @@ export function parseBitbucketOrganizationAndRepo(bitbucketUrl: string): {
 
   return {
     workspace: validatedBitbucketResult.organization,
-    repoSlug: validatedBitbucketResult.repoName,
+    repo_slug: validatedBitbucketResult.repoName,
   }
 }
 const bitbucketRequestType = {
@@ -183,11 +183,11 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       }))
     },
     async getBranchList(params: { repoUrl: string }) {
-      const { workspace, repoSlug } = parseBitbucketOrganizationAndRepo(
+      const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.refs.listBranches({
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
         pagelen: 100, //It seems to not work with very large numbers like 1000 (MAX_BRANCHES_FETCH) and returns a bad request response
         sort: '-target.date',
@@ -201,8 +201,9 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     },
     async getIsUserCollaborator(params: { repoUrl: string }) {
       const { repoUrl } = params
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(repoUrl)
-      const fullRepoName = `${workspace}/${repoSlug}`
+      const { repo_slug, workspace } =
+        parseBitbucketOrganizationAndRepo(repoUrl)
+      const fullRepoName = `${workspace}/${repo_slug}`
       // note: initially I thought about ussing this endpoint - https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-users-get
       // which is more percision but it requires the user to have admin access to the repo
 
@@ -217,11 +218,11 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       )
     },
     async createPullRequest(params: CreatePullRequestParams) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.pullrequests.create({
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
         _body: {
           type: 'pullrequest',
@@ -244,43 +245,43 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return res.data
     },
     async getDownloadlink(params: { repoUrl: string }) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.downloads.list({
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
       })
       return res.data
     },
     async getBranch(params: GetBranchParams) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.refs.getBranch({
         name: params.branchName,
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
       })
       return res.data
     },
     async getRepo(params: { repoUrl: string }) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.repositories.get({
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
       })
       return res.data
     },
     async getCommit(params: GetCommitParams) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
       const res = await bitbucketClient.commits.get({
         commit: params.commitSha,
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
       })
       return res.data
@@ -314,9 +315,10 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     },
     async getTagRef(params: { repoUrl: string; tagName: string }) {
       const { tagName, repoUrl } = params
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(repoUrl)
+      const { repo_slug, workspace } =
+        parseBitbucketOrganizationAndRepo(repoUrl)
       const tagRes = await bitbucketClient.refs.getTag({
-        repo_slug: repoSlug,
+        repo_slug: repo_slug,
         workspace,
         name: tagName,
       })
@@ -350,12 +352,35 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return `${parsedRepoUrl}/get/${sha}.zip`
     },
     async getPullRequest(params: { url: string; prNumber: number }) {
-      const { repoSlug, workspace } = parseBitbucketOrganizationAndRepo(
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.url
       )
       const res = await bitbucketClient.pullrequests.get({
         pull_request_id: params.prNumber,
-        repo_slug: repoSlug,
+        repo_slug,
+        workspace,
+      })
+      return res.data
+    },
+    async addCommentToPullRequest({
+      url,
+      prNumber,
+      markdownComment,
+    }: {
+      url: string
+      prNumber: number
+      markdownComment: string
+    }) {
+      const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(url)
+      const res = await bitbucketClient.pullrequests.createComment({
+        //@ts-expect-error tyep requires _body.type, but it its uses api fails
+        _body: {
+          content: {
+            raw: markdownComment,
+          },
+        },
+        pull_request_id: prNumber,
+        repo_slug,
         workspace,
       })
       return res.data

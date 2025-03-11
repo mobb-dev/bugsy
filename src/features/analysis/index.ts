@@ -345,6 +345,7 @@ export async function _scan(
     organizationId: userOrganizationId,
     autoPr,
     commitDirectly,
+    pullRequest,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -513,6 +514,7 @@ export async function _scan(
       gqlClient,
       analysisId: reportUploadInfo.fixReportId,
       commitDirectly,
+      prId: pullRequest,
       createSpinner,
     })
   }
@@ -734,6 +736,7 @@ export async function _scan(
         gqlClient,
         analysisId: reportUploadInfo.fixReportId,
         commitDirectly,
+        prId: pullRequest,
         createSpinner,
       })
     }

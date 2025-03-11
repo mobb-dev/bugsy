@@ -235,6 +235,18 @@ export class GithubSCMLib extends SCMLib {
     })
   }
 
+  async addCommentToSubmitRequest(
+    submitRequestId: string,
+    comment: string
+  ): Promise<void> {
+    this._validateAccessTokenAndUrl()
+    await this.githubSdk.createMarkdownCommentOnPullRequest({
+      repoUrl: this.url,
+      prNumber: Number(submitRequestId),
+      markdownComment: comment,
+    })
+  }
+
   async getRepoBlameRanges(
     ref: string,
     path: string
@@ -265,18 +277,18 @@ export class GithubSCMLib extends SCMLib {
     this._validateUrl()
     return await this.githubSdk.getGithubRepoDefaultBranch(this.url)
   }
-  async getPrUrl(prNumber: number): Promise<string> {
+  async getSubmitRequestUrl(submitRequestUrl: number): Promise<string> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const getPrRes = await this.githubSdk.getPr({
       owner,
       repo,
-      pull_number: prNumber,
+      pull_number: submitRequestUrl,
     })
     return getPrRes.data.html_url
   }
-  async getPrId(prUrl: string): Promise<string> {
-    const match = prUrl.match(/\/pull\/(\d+)/)
+  async getSubmitRequestId(submitRequestUrl: string): Promise<string> {
+    const match = submitRequestUrl.match(/\/pull\/(\d+)/)
     return match?.[1] || ''
   }
   async getCommitUrl(commitId: string): Promise<string> {

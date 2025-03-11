@@ -50,6 +50,29 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       }
       return parsedPullRequestStatus.data
     },
+    async addCommentToAdoPullRequest({
+      repoUrl,
+      prNumber,
+      markdownComment,
+    }: {
+      repoUrl: string
+      prNumber: number
+      markdownComment: string
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const comment = {
+        comments: [
+          {
+            parentCommentId: 0, // Root comment
+            content: markdownComment,
+            commentType: 1, // Default type
+          },
+        ],
+      }
+
+      await git.createThread(comment, repo, prNumber, projectName)
+    },
     async getAdoIsRemoteBranch({
       repoUrl,
       branch,

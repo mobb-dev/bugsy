@@ -361,7 +361,7 @@ describe.each(Object.entries(scmTestParams))(
       expect(signedRepoUrl).toBe(
         `${protocol}//${accessToken}@${hostname}${pathname}`
       )
-      const prUrl = await scmLib.getPrUrl(1)
+      const prUrl = await scmLib.getSubmitRequestUrl(1)
       expect(prUrl).toMatch(`${url}/pullrequest/1`)
     })
   }

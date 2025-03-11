@@ -376,10 +376,15 @@ export class GQLClient {
     }
     return res.analysis
   }
-  async autoPrAnalysis(analysisId: string, commitDirectly?: boolean) {
+  async autoPrAnalysis(
+    analysisId: string,
+    commitDirectly?: boolean,
+    prId?: number
+  ) {
     return this._clientSdk.autoPrAnalysis({
       analysisId,
       commitDirectly,
+      prId,
     })
   }
   async getFixes(fixIds: string[]) {

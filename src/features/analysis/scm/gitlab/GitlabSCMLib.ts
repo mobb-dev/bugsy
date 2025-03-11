@@ -8,6 +8,7 @@ import {
   ScmSubmitRequestStatus,
 } from '../types'
 import {
+  createMarkdownCommentOnPullRequest,
   createMergeRequest,
   getGitlabBlameRanges,
   getGitlabBranchList,
@@ -162,6 +163,19 @@ export class GitlabSCMLib extends SCMLib {
     }
   }
 
+  async addCommentToSubmitRequest(
+    submitRequestId: string,
+    comment: string
+  ): Promise<void> {
+    this._validateAccessTokenAndUrl()
+    await createMarkdownCommentOnPullRequest({
+      accessToken: this.accessToken,
+      repoUrl: this.url,
+      mrNumber: Number(submitRequestId),
+      markdownComment: comment,
+    })
+  }
+
   async getRepoBlameRanges(
     ref: string,
     path: string
@@ -195,18 +209,18 @@ export class GitlabSCMLib extends SCMLib {
     })
   }
 
-  async getPrUrl(prNumber: number): Promise<string> {
+  async getSubmitRequestUrl(submitRequestUrl: number): Promise<string> {
     this._validateAccessTokenAndUrl()
     const res = await getGitlabMergeRequest({
       url: this.url,
-      prNumber: prNumber,
+      prNumber: submitRequestUrl,
       accessToken: this.accessToken,
     })
     return res.web_url
   }
 
-  async getPrId(prUrl: string): Promise<string> {
-    const match = prUrl.match(/\/merge_requests\/(\d+)/)
+  async getSubmitRequestId(submitRequestUrl: string): Promise<string> {
+    const match = submitRequestUrl.match(/\/merge_requests\/(\d+)/)
     return match?.[1] || ''
   }
 

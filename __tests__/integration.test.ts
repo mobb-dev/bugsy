@@ -140,12 +140,13 @@ describe('Basic Analyze tests', () => {
         command: 'scan',
         autoPr: true,
         commitDirectly: true,
+        pullRequest: 1,
       },
       { skipPrompts: true }
     )
 
     expect(runAnalysisSpy).toHaveBeenCalled()
-    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true)
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true, 1)
     expect(mockedOpen).toHaveBeenCalledTimes(2)
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
   }, 30000)
@@ -255,6 +256,7 @@ describe('Basic Analyze tests', () => {
   it('Checks ci flag', async () => {
     const consoleMock = vi.spyOn(console, 'log')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
+    const prNumber = 1
     await analysisExports.runAnalysis(
       {
         repo: 'https://bitbucket.com/a/b',
@@ -266,10 +268,15 @@ describe('Basic Analyze tests', () => {
         command: 'analyze',
         autoPr: true,
         commitDirectly: true,
+        pullRequest: prNumber,
       },
       { skipPrompts: true }
     )
-    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true)
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      true,
+      prNumber
+    )
     expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
     consoleMock.mockClear()
   })

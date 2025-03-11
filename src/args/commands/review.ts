@@ -47,7 +47,7 @@ export function reviewBuilder(
     })
 
     .option('pull-request', {
-      alias: 'pr',
+      alias: ['pr', 'pr-number', 'pr-id'],
       describe: chalk.bold('Number of the pull request'),
       type: 'number',
       demandOption: true,

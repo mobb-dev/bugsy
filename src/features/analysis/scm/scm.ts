@@ -80,8 +80,13 @@ export abstract class SCMLib {
   abstract _getUsernameForAuthUrl(): Promise<string>
 
   abstract getSubmitRequestStatus(
-    _scmSubmitRequestId: string
+    submitRequestId: string
   ): Promise<ScmSubmitRequestStatus>
+
+  abstract addCommentToSubmitRequest(
+    submitRequestId: string,
+    comment: string
+  ): Promise<void>
 
   abstract createSubmitRequest(args: CreateSubmitRequestParams): Promise<string>
 
@@ -91,8 +96,8 @@ export abstract class SCMLib {
   ): Promise<GetGitBlameReponse>
 
   abstract getReferenceData(ref: string): Promise<GetRefererenceResult>
-  abstract getPrUrl(prNumber: number): Promise<string>
-  abstract getPrId(prUrl: string): Promise<string>
+  abstract getSubmitRequestUrl(submitRequestIdNumber: number): Promise<string>
+  abstract getSubmitRequestId(submitRequestIdUrl: string): Promise<string>
   abstract getCommitUrl(commitId: string): Promise<string>
 
   abstract getRepoDefaultBranch(): Promise<string>

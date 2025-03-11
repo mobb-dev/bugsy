@@ -82,6 +82,7 @@ export async function analyze(
     organizationId,
     autoPr,
     commitDirectly,
+    pullRequest,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -101,6 +102,7 @@ export async function analyze(
       command: 'analyze',
       autoPr,
       commitDirectly,
+      pullRequest,
     },
     { skipPrompts }
   )

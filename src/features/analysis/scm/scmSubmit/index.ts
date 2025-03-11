@@ -398,6 +398,7 @@ export async function submitFixesToSameBranch(
     submitFixRequestId: '',
     type: submitToScmMessageType.commitToSameBranch,
     commits: [],
+    prId: msg.prId,
   }
 
   const localCommits = []

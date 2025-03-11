@@ -10,9 +10,10 @@ export async function handleAutoPr(params: {
   gqlClient: GQLClient
   analysisId: string
   commitDirectly?: boolean
+  prId?: number
   createSpinner: CreateSpinner
 }) {
-  const { gqlClient, analysisId, commitDirectly, createSpinner } = params
+  const { gqlClient, analysisId, commitDirectly, prId, createSpinner } = params
   const createAutoPrSpinner = createSpinner(
     '🔄 Waiting for the analysis to finish before initiating automatic pull request creation'
   ).start()
@@ -23,7 +24,8 @@ export async function handleAutoPr(params: {
     callback: async (analysisId) => {
       const autoPrAnalysisRes = await gqlClient.autoPrAnalysis(
         analysisId,
-        commitDirectly
+        commitDirectly,
+        prId
       )
       debug('auto pr analysis res %o', autoPrAnalysisRes)
       if (autoPrAnalysisRes.autoPrAnalysis?.__typename === 'AutoPrError') {

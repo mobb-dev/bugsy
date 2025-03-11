@@ -27,6 +27,7 @@ export const CommitToSameBranchParamsZ = BaseSubmitToScmMessageZ.merge(
     commitMessages: z.array(z.string()),
     commitDescriptions: z.array(z.string().nullish()),
     githubCommentId: z.number().nullish(),
+    prId: z.number().nullish(),
   })
 )
 
@@ -106,6 +107,7 @@ export const SubmitFixesToSameBranchResponseMessageZ = z
     type: z.literal(submitToScmMessageType.commitToSameBranch),
     githubCommentId: z.number().nullish(),
     commits: z.array(GitCommitZ),
+    prId: z.number().nullish(),
   })
   .merge(SubmitFixesBaseResponseMessageZ)
 

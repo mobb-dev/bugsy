@@ -103,13 +103,13 @@ export class StubSCMLib extends SCMLib {
     return ''
   }
 
-  async getPrUrl(_prNumber: number): Promise<string> {
-    console.warn('getPrUrl() returning empty string')
+  async getSubmitRequestUrl(_submitRequestIdNumber: number): Promise<string> {
+    console.warn('getSubmitRequestUrl() returning empty string')
     return ''
   }
 
-  async getPrId(_prUrl: string): Promise<string> {
-    console.warn('getPrId() returning empty string')
+  async getSubmitRequestId(_submitRequestUrl: string): Promise<string> {
+    console.warn('getSubmitRequestId() returning empty string')
     return ''
   }
 
@@ -121,5 +121,12 @@ export class StubSCMLib extends SCMLib {
   async _getUsernameForAuthUrl(): Promise<string> {
     console.warn('_getUsernameForAuthUrl() returning empty string')
     return ''
+  }
+
+  async addCommentToSubmitRequest(
+    _submitRequestId: string,
+    _comment: string
+  ): Promise<void> {
+    console.warn('addCommentToSubmitRequest() no-op')
   }
 }

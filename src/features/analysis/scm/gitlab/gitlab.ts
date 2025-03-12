@@ -152,7 +152,7 @@ export async function getGitlabIsUserCollaborator({
   accessToken,
   repoUrl,
 }: {
-  username: string
+  username?: string
   accessToken: string
   repoUrl: string
 }) {
@@ -164,6 +164,13 @@ export async function getGitlabIsUserCollaborator({
     const members = await api.ProjectMembers.all(res.id, {
       includeInherited: true,
     })
+    //In case the username is not provided, we just check if the token has access to list the members of the project.
+    //This is useful in case a project token is used and therefore doesn't show in the members list and there is no username to provide.
+    //This is not 100% bulletproof as sometimes the members list can be visible to token that don't have write permissions in a repo
+    //but this is the best we can do besides actually writing something to the repo to test the token.
+    if (!username) {
+      return true
+    }
     return !!members.find((member) => member.username === username)
   } catch (e) {
     return false

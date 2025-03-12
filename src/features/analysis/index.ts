@@ -65,7 +65,10 @@ type DownloadRepoParams = {
   downloadUrl: string
 }
 
-function _getScanSource(command: MobbCliCommand): Scan_Source_Enum {
+function _getScanSource(
+  command: MobbCliCommand,
+  ci: boolean
+): Scan_Source_Enum {
   // `review` comes from the GitHub action https://github.com/mobb-dev/action/blob/b5dfbbe1e005a46b135421c2481a6bff2a3f46fe/review/action.yml#L37
   if (command === 'review') return Scan_Source_Enum.AutoFixer
 
@@ -83,6 +86,10 @@ function _getScanSource(command: MobbCliCommand): Scan_Source_Enum {
     if (env[envKey]) {
       return source
     }
+  }
+
+  if (ci) {
+    return Scan_Source_Enum.CiUnknown
   }
 
   return Scan_Source_Enum.Cli
@@ -479,6 +486,7 @@ export async function _scan(
     fixReportId: reportUploadInfo.fixReportId,
     projectId,
     command,
+    ci,
   })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
@@ -496,7 +504,7 @@ export async function _scan(
       sha,
       experimentalEnabled,
       pullRequest: params.pullRequest,
-      scanSource: _getScanSource(command),
+      scanSource: _getScanSource(command, ci),
     },
   })
   if (
@@ -636,6 +644,7 @@ export async function _scan(
       fixReportId: reportUploadInfo.fixReportId,
       projectId,
       command,
+      ci,
     })
     const srcFileStatus = await fsPromises.lstat(srcPath)
     const zippingSpinner = createSpinner('📦 Zipping repo').start()
@@ -684,7 +693,7 @@ export async function _scan(
           repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
           reference: ref || gitInfo.reference || 'no-branch',
           sha: commitHash || gitInfo.hash || '0123456789abcdef',
-          scanSource: _getScanSource(command),
+          scanSource: _getScanSource(command, ci),
           pullRequest: params.pullRequest,
         },
       })
@@ -751,11 +760,13 @@ export async function _digestReport({
   fixReportId,
   projectId,
   command,
+  ci,
 }: {
   gqlClient: GQLClient
   fixReportId: string
   projectId: string
   command: MobbCliCommand
+  ci: boolean
 }) {
   const digestSpinner = createSpinner(
     progressMassages.processingVulnerabilityReport
@@ -765,7 +776,7 @@ export async function _digestReport({
       {
         fixReportId,
         projectId,
-        scanSource: _getScanSource(command),
+        scanSource: _getScanSource(command, ci),
       }
     )
     try {

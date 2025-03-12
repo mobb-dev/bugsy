@@ -120,15 +120,9 @@ async function _fetchInitialCommit(params: {
   response: SubmitFixesResponseMessage
   depth?: number
 }) {
-  const { git, reference, depth = 1, response } = params
+  const { git, reference, response } = params
   try {
-    await git.fetch([
-      '--depth',
-      `${depth}`,
-      '--filter=blob:none',
-      'origin',
-      reference,
-    ])
+    await git.fetch(['--filter=blob:none', 'origin', reference])
   } catch (e) {
     response.error = {
       type: 'InitialRepoAccessError',
@@ -265,8 +259,6 @@ async function _commitPatch(
   })
   await git.commit(newCommitMessage)
 }
-
-const COMMIT_TO_SAME_BRANCH_FETCH_DEPTH = 10
 
 //This function receives a message and applies all the fix groups (patches) of all the fixes, each to a new commit on a new special brach.
 //All of them are based on the same base commit.
@@ -427,7 +419,6 @@ export async function submitFixesToSameBranch(
         git,
         reference: branchName,
         response,
-        depth: COMMIT_TO_SAME_BRANCH_FETCH_DEPTH,
       }))
     ) {
       return response

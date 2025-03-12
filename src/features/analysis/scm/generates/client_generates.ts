@@ -269,6 +269,11 @@ export type GetGitBlameGoodResponse = {
 
 export type GetGitBlameResponse = GetGitBlameGoodResponse | NoGitBlameInfoError | UrlNotConnectedToScmError;
 
+export type GetInvitationLinkResponse = {
+  __typename?: 'GetInvitationLinkResponse';
+  link: Scalars['String']['output'];
+};
+
 export type GetReposSuccess = {
   __typename?: 'GetReposSuccess';
   repos: Array<ScmRepo>;
@@ -15865,6 +15870,7 @@ export type Query_Root = {
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
   getGitBlame: GetGitBlameResponse;
+  getInvitationLink?: Maybe<GetInvitationLinkResponse>;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
@@ -16666,6 +16672,12 @@ export type Query_RootGetFixArgs = {
 export type Query_RootGetGitBlameArgs = {
   diffString: Scalars['String']['input'];
   fixReportId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetInvitationLinkArgs = {
+  id: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -18081,6 +18093,8 @@ export enum Scan_Source_Enum {
   CiGitlab = 'CI_GITLAB',
   /** Jenkins CI */
   CiJenkins = 'CI_JENKINS',
+  /** Bagsy run with --ci flag */
+  CiUnknown = 'CI_UNKNOWN',
   /** This is Bugsy executed from a command line */
   Cli = 'CLI',
   /** Web App from the Checkmarx integration */
@@ -23554,6 +23568,10 @@ export type Vulnerability_Report_Issue = {
   /** An object relationship */
   vulnerabilityReport: Vulnerability_Report;
   vulnerabilityReportId: Scalars['uuid']['output'];
+  /** An object relationship */
+  vulnerabilityReportIssueNodeDiffFile?: Maybe<File>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: Maybe<Scalars['uuid']['output']>;
   /** An array relationship */
   vulnerabilityReportIssueTags: Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag>;
   /** An aggregate relationship */
@@ -23719,6 +23737,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Bool_Exp>;
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
   vulnerabilityReportIssueTags_aggregate?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp>;
 };
@@ -23732,6 +23752,7 @@ export type Vulnerability_Report_Issue_Code_Node = {
   id: Scalars['uuid']['output'];
   index: Scalars['Int']['output'];
   path: Scalars['String']['output'];
+  sourceCodeFileId?: Maybe<Scalars['uuid']['output']>;
   startCol: Scalars['Int']['output'];
   startLine: Scalars['Int']['output'];
   startOffset: Scalars['Int']['output'];
@@ -23837,6 +23858,7 @@ export type Vulnerability_Report_Issue_Code_Node_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   index?: InputMaybe<Int_Comparison_Exp>;
   path?: InputMaybe<String_Comparison_Exp>;
+  sourceCodeFileId?: InputMaybe<Uuid_Comparison_Exp>;
   startCol?: InputMaybe<Int_Comparison_Exp>;
   startLine?: InputMaybe<Int_Comparison_Exp>;
   startOffset?: InputMaybe<Int_Comparison_Exp>;
@@ -23869,6 +23891,7 @@ export type Vulnerability_Report_Issue_Code_Node_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   index?: InputMaybe<Scalars['Int']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
+  sourceCodeFileId?: InputMaybe<Scalars['uuid']['input']>;
   startCol?: InputMaybe<Scalars['Int']['input']>;
   startLine?: InputMaybe<Scalars['Int']['input']>;
   startOffset?: InputMaybe<Scalars['Int']['input']>;
@@ -23885,6 +23908,7 @@ export type Vulnerability_Report_Issue_Code_Node_Max_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   index?: Maybe<Scalars['Int']['output']>;
   path?: Maybe<Scalars['String']['output']>;
+  sourceCodeFileId?: Maybe<Scalars['uuid']['output']>;
   startCol?: Maybe<Scalars['Int']['output']>;
   startLine?: Maybe<Scalars['Int']['output']>;
   startOffset?: Maybe<Scalars['Int']['output']>;
@@ -23899,6 +23923,7 @@ export type Vulnerability_Report_Issue_Code_Node_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   index?: InputMaybe<Order_By>;
   path?: InputMaybe<Order_By>;
+  sourceCodeFileId?: InputMaybe<Order_By>;
   startCol?: InputMaybe<Order_By>;
   startLine?: InputMaybe<Order_By>;
   startOffset?: InputMaybe<Order_By>;
@@ -23914,6 +23939,7 @@ export type Vulnerability_Report_Issue_Code_Node_Min_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   index?: Maybe<Scalars['Int']['output']>;
   path?: Maybe<Scalars['String']['output']>;
+  sourceCodeFileId?: Maybe<Scalars['uuid']['output']>;
   startCol?: Maybe<Scalars['Int']['output']>;
   startLine?: Maybe<Scalars['Int']['output']>;
   startOffset?: Maybe<Scalars['Int']['output']>;
@@ -23928,6 +23954,7 @@ export type Vulnerability_Report_Issue_Code_Node_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   index?: InputMaybe<Order_By>;
   path?: InputMaybe<Order_By>;
+  sourceCodeFileId?: InputMaybe<Order_By>;
   startCol?: InputMaybe<Order_By>;
   startLine?: InputMaybe<Order_By>;
   startOffset?: InputMaybe<Order_By>;
@@ -23958,6 +23985,7 @@ export type Vulnerability_Report_Issue_Code_Node_Order_By = {
   id?: InputMaybe<Order_By>;
   index?: InputMaybe<Order_By>;
   path?: InputMaybe<Order_By>;
+  sourceCodeFileId?: InputMaybe<Order_By>;
   startCol?: InputMaybe<Order_By>;
   startLine?: InputMaybe<Order_By>;
   startOffset?: InputMaybe<Order_By>;
@@ -23985,6 +24013,8 @@ export enum Vulnerability_Report_Issue_Code_Node_Select_Column {
   /** column name */
   Path = 'path',
   /** column name */
+  SourceCodeFileId = 'sourceCodeFileId',
+  /** column name */
   StartCol = 'startCol',
   /** column name */
   StartLine = 'startLine',
@@ -24002,6 +24032,7 @@ export type Vulnerability_Report_Issue_Code_Node_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   index?: InputMaybe<Scalars['Int']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
+  sourceCodeFileId?: InputMaybe<Scalars['uuid']['input']>;
   startCol?: InputMaybe<Scalars['Int']['input']>;
   startLine?: InputMaybe<Scalars['Int']['input']>;
   startOffset?: InputMaybe<Scalars['Int']['input']>;
@@ -24093,6 +24124,7 @@ export type Vulnerability_Report_Issue_Code_Node_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   index?: InputMaybe<Scalars['Int']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
+  sourceCodeFileId?: InputMaybe<Scalars['uuid']['input']>;
   startCol?: InputMaybe<Scalars['Int']['input']>;
   startLine?: InputMaybe<Scalars['Int']['input']>;
   startOffset?: InputMaybe<Scalars['Int']['input']>;
@@ -24136,6 +24168,8 @@ export enum Vulnerability_Report_Issue_Code_Node_Update_Column {
   Index = 'index',
   /** column name */
   Path = 'path',
+  /** column name */
+  SourceCodeFileId = 'sourceCodeFileId',
   /** column name */
   StartCol = 'startCol',
   /** column name */
@@ -24269,6 +24303,9 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Scalars['uuid']['input']>;
   vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Arr_Rel_Insert_Input>;
 };
 
@@ -24297,6 +24334,8 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by max() on columns of table "vulnerability_report_issue" */
@@ -24311,6 +24350,8 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -24334,6 +24375,8 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by min() on columns of table "vulnerability_report_issue" */
@@ -24348,6 +24391,8 @@ export type Vulnerability_Report_Issue_Min_Order_By = {
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "vulnerability_report_issue" */
@@ -24399,6 +24444,8 @@ export type Vulnerability_Report_Issue_Order_By = {
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Order_By>;
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Order_By>;
   vulnerabilityReportIssueTags_aggregate?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Order_By>;
 };
 
@@ -24445,7 +24492,9 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   VendorIssueId = 'vendorIssueId',
   /** column name */
-  VulnerabilityReportId = 'vulnerabilityReportId'
+  VulnerabilityReportId = 'vulnerabilityReportId',
+  /** column name */
+  VulnerabilityReportIssueNodeDiffFileId = 'vulnerabilityReportIssueNodeDiffFileId'
 }
 
 /** select "vulnerability_report_issue_aggregate_bool_exp_bool_and_arguments_columns" columns of table "vulnerability_report_issue" */
@@ -24478,6 +24527,8 @@ export type Vulnerability_Report_Issue_Set_Input = {
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** columns and relationships of "vulnerability_report_issue_state" */
@@ -24691,6 +24742,8 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
+  /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
+  vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -25076,7 +25129,9 @@ export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
   VendorIssueId = 'vendorIssueId',
   /** column name */
-  VulnerabilityReportId = 'vulnerabilityReportId'
+  VulnerabilityReportId = 'vulnerabilityReportId',
+  /** column name */
+  VulnerabilityReportIssueNodeDiffFileId = 'vulnerabilityReportIssueNodeDiffFileId'
 }
 
 export type Vulnerability_Report_Issue_Updates = {

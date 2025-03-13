@@ -100,6 +100,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.FrameableLoginPage]: 'Frameable Login Page',
   [IssueType_Enum.UseOfHardCodedCryptographicKey]:
     'Use of Hardcoded Cryptographic Key',
+  [IssueType_Enum.MissingSslMinversion]: 'Missing SSL MinVersion',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

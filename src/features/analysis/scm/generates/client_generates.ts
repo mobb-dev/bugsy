@@ -7669,6 +7669,8 @@ export enum IssueType_Enum {
   MissingEqualsOrHashcode = 'MISSING_EQUALS_OR_HASHCODE',
   /** Missing HSTS Header */
   MissingHstsHeader = 'MISSING_HSTS_HEADER',
+  /** Missing TLS MinVersion */
+  MissingSslMinversion = 'MISSING_SSL_MINVERSION',
   /** Non-final public static field */
   NonFinalPublicStaticField = 'NON_FINAL_PUBLIC_STATIC_FIELD',
   /** Fields that are only assigned in the constructor should be readonly */

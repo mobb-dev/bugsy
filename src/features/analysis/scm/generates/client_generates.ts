@@ -2522,6 +2522,54 @@ export type File = {
   signedFile?: Maybe<FilePayload>;
   /** An object relationship */
   vulnerabilityReport?: Maybe<Vulnerability_Report>;
+  /** An array relationship */
+  vulnerabilityReportIssueCodeNodes: Array<Vulnerability_Report_Issue_Code_Node>;
+  /** An aggregate relationship */
+  vulnerabilityReportIssueCodeNodes_aggregate: Vulnerability_Report_Issue_Code_Node_Aggregate;
+  /** An array relationship */
+  vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
+  /** An aggregate relationship */
+  vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
+};
+
+
+/** columns and relationships of "file" */
+export type FileVulnerabilityReportIssueCodeNodesArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
+};
+
+
+/** columns and relationships of "file" */
+export type FileVulnerabilityReportIssueCodeNodes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
+};
+
+
+/** columns and relationships of "file" */
+export type FileVulnerabilityReportIssuesArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+/** columns and relationships of "file" */
+export type FileVulnerabilityReportIssues_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
 };
 
 /** aggregated selection of "file" */
@@ -2558,6 +2606,10 @@ export type File_Bool_Exp = {
   path?: InputMaybe<String_Comparison_Exp>;
   repoByArchiveFile?: InputMaybe<Repo_Bool_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
+  vulnerabilityReportIssueCodeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
+  vulnerabilityReportIssueCodeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
+  vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+  vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "file" */
@@ -2575,6 +2627,8 @@ export type File_Insert_Input = {
   path?: InputMaybe<Scalars['String']['input']>;
   repoByArchiveFile?: InputMaybe<Repo_Obj_Rel_Insert_Input>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
+  vulnerabilityReportIssueCodeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
+  vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -2623,6 +2677,8 @@ export type File_Order_By = {
   path?: InputMaybe<Order_By>;
   repoByArchiveFile?: InputMaybe<Repo_Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
+  vulnerabilityReportIssueCodeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
+  vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: file */
@@ -7743,6 +7799,8 @@ export enum IssueType_Enum {
   WeakEncryption = 'WEAK_ENCRYPTION',
   /** Unbounded occurrences can lead to resources exhaustion and ultimately a denial of service */
   WeakXmlSchemaUnboundedOccurrences = 'WEAK_XML_SCHEMA_UNBOUNDED_OCCURRENCES',
+  /** Missing websocket origin check */
+  WebsocketMissingOriginCheck = 'WEBSOCKET_MISSING_ORIGIN_CHECK',
   /** Cross Site Scripting */
   Xss = 'XSS',
   /** XXE */
@@ -23754,6 +23812,8 @@ export type Vulnerability_Report_Issue_Code_Node = {
   id: Scalars['uuid']['output'];
   index: Scalars['Int']['output'];
   path: Scalars['String']['output'];
+  /** An object relationship */
+  sourceCodeFile?: Maybe<File>;
   sourceCodeFileId?: Maybe<Scalars['uuid']['output']>;
   startCol: Scalars['Int']['output'];
   startLine: Scalars['Int']['output'];
@@ -23860,6 +23920,7 @@ export type Vulnerability_Report_Issue_Code_Node_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   index?: InputMaybe<Int_Comparison_Exp>;
   path?: InputMaybe<String_Comparison_Exp>;
+  sourceCodeFile?: InputMaybe<File_Bool_Exp>;
   sourceCodeFileId?: InputMaybe<Uuid_Comparison_Exp>;
   startCol?: InputMaybe<Int_Comparison_Exp>;
   startLine?: InputMaybe<Int_Comparison_Exp>;
@@ -23893,6 +23954,7 @@ export type Vulnerability_Report_Issue_Code_Node_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   index?: InputMaybe<Scalars['Int']['input']>;
   path?: InputMaybe<Scalars['String']['input']>;
+  sourceCodeFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   sourceCodeFileId?: InputMaybe<Scalars['uuid']['input']>;
   startCol?: InputMaybe<Scalars['Int']['input']>;
   startLine?: InputMaybe<Scalars['Int']['input']>;
@@ -23987,6 +24049,7 @@ export type Vulnerability_Report_Issue_Code_Node_Order_By = {
   id?: InputMaybe<Order_By>;
   index?: InputMaybe<Order_By>;
   path?: InputMaybe<Order_By>;
+  sourceCodeFile?: InputMaybe<File_Order_By>;
   sourceCodeFileId?: InputMaybe<Order_By>;
   startCol?: InputMaybe<Order_By>;
   startLine?: InputMaybe<Order_By>;

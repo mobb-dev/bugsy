@@ -5,6 +5,8 @@ import { FixPageFixReportZ } from './analysis'
 import { FixPartsForFixScreenZ } from './fix'
 import { ParsedSeverityZ } from './shared'
 
+export const MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES = 100_000 // 100kB
+
 export const category = {
   NoFix: 'NoFix',
   Unsupported: 'Unsupported',
@@ -44,7 +46,47 @@ export const BaseIssuePartsZ = z.object({
     // we couldn't sort throught hasura since we used the disctict method there
     // feel free to try to give a try
     .transform((nodes) => nodes.sort((a, b) => b.index - a.index)),
+  sourceCodeNodes: z
+    .array(
+      z
+        .object({
+          sourceCodeFile: z.object({
+            path: z.string(),
+            signedFile: z.object({
+              url: z.string(),
+            }),
+          }),
+        })
+        .transform(async ({ sourceCodeFile }) => {
+          const { url } = sourceCodeFile.signedFile
+          const sourceCodeRes = await fetch(url)
+          if (
+            Number(sourceCodeRes.headers.get('Content-Length')) >
+            MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES
+          ) {
+            return null
+          }
+          return {
+            path: sourceCodeFile.path,
+            fileContent: await sourceCodeRes.text(),
+          }
+        })
+    )
+    .transform((nodes) => nodes.filter((node) => node !== null)),
+
   fix: FixPartsForFixScreenZ.nullish(),
+  vulnerabilityReportIssueNodeDiffFile: z
+    .object({
+      signedFile: z
+        .object({
+          url: z.string(),
+        })
+        .transform(async ({ url }) => {
+          const codeDiff = await fetch(url).then((res) => res.text())
+          return { codeDiff }
+        }),
+    })
+    .nullish(),
 })
 
 const FalsePositivePartsZ = z.object({

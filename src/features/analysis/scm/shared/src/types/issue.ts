@@ -29,6 +29,10 @@ export const BaseIssuePartsZ = z.object({
   createdAt: z.string(),
   parsedSeverity: ParsedSeverityZ,
   category: ValidCategoriesZ,
+  extraData: z.object({
+    missing_files: z.string().array().nullish(),
+    error_files: z.string().array().nullish(),
+  }),
   vulnerabilityReportIssueTags: z.array(
     z.object({
       tag: z.nativeEnum(Vulnerability_Report_Issue_Tag_Enum),

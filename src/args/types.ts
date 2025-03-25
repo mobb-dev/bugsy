@@ -44,7 +44,7 @@ export type BaseReviewOptions = {
   'github-token': string
   githubToken?: string
   pullRequest?: number
-  p: string
+  p?: string
   srcPath?: string
 }
 

@@ -1,6 +1,7 @@
 import { IssueType_Enum } from '../../../../generates/client_generates'
 import { commandInjection } from './commandInjection'
 import { confusingNaming } from './confusingNaming'
+import { duplicatedStrings } from './duplicatedStrings'
 import { erroneousStringCompare } from './erroneousStringCompare'
 import { errorConditionWithoutAction } from './errorConditionWithoutAction'
 import { httpOnlyCookie } from './httpOnlyCookie'
@@ -46,6 +47,7 @@ const vulnerabilities = {
   [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
   [IssueType_Enum.LeftoverDebugCode as string]: leftoverDebugCode,
   [IssueType_Enum.ErroneousStringCompare as string]: erroneousStringCompare,
+  [IssueType_Enum.DuplicatedStrings as string]: duplicatedStrings,
 }
 
 export default vulnerabilities

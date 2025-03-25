@@ -260,15 +260,6 @@ export type GetFixNoFixError = {
   status: FixerStatus;
 };
 
-export type GetGitBlameGoodResponse = {
-  __typename?: 'GetGitBlameGoodResponse';
-  email?: Maybe<Scalars['String']['output']>;
-  login: Scalars['String']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-};
-
-export type GetGitBlameResponse = GetGitBlameGoodResponse | NoGitBlameInfoError | UrlNotConnectedToScmError;
-
 export type GetInvitationLinkResponse = {
   __typename?: 'GetInvitationLinkResponse';
   link: Scalars['String']['output'];
@@ -381,12 +372,6 @@ export type MeResponse = {
 
 export type MobbProjectAccessError = BaseError & {
   __typename?: 'MobbProjectAccessError';
-  error?: Maybe<Scalars['String']['output']>;
-  status: Status;
-};
-
-export type NoGitBlameInfoError = {
-  __typename?: 'NoGitBlameInfoError';
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
 };
@@ -802,12 +787,6 @@ export type UploadResult = {
   uploadFieldsJSON: Scalars['String']['output'];
   uploadKey: Scalars['String']['output'];
   url: Scalars['String']['output'];
-};
-
-export type UrlNotConnectedToScmError = {
-  __typename?: 'UrlNotConnectedToScmError';
-  error?: Maybe<Scalars['String']['output']>;
-  status: Status;
 };
 
 export type UserAlreadyInProjectError = {
@@ -7663,6 +7642,8 @@ export enum IssueType_Enum {
   DeprecatedFunction = 'DEPRECATED_FUNCTION',
   /** A denial of service by exploiting string builder */
   DosStringBuilder = 'DOS_STRING_BUILDER',
+  /** String literals should not be duplicated */
+  DuplicatedStrings = 'DUPLICATED_STRINGS',
   /** Erroneous string compare */
   ErroneousStringCompare = 'ERRONEOUS_STRING_COMPARE',
   /** Error Condition Without Action */
@@ -15929,7 +15910,6 @@ export type Query_Root = {
   getFalsePositive: GetFalsePositiveResponseUnion;
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
-  getGitBlame: GetGitBlameResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
@@ -16726,12 +16706,6 @@ export type Query_RootGetFixArgs = {
   fixId: Scalars['uuid']['input'];
   loadAnswers: Scalars['Boolean']['input'];
   userInput?: InputMaybe<Array<QuestionAnswer>>;
-};
-
-
-export type Query_RootGetGitBlameArgs = {
-  diffString: Scalars['String']['input'];
-  fixReportId: Scalars['String']['input'];
 };
 
 
@@ -23604,6 +23578,7 @@ export type Vulnerability_Report_Issue = {
   extraData?: Maybe<Scalars['jsonb']['output']>;
   /** An object relationship */
   falsePositive?: Maybe<False_Positive>;
+  fingerprintHash?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
   fix?: Maybe<Fix>;
   fixId?: Maybe<Scalars['uuid']['output']>;
@@ -23778,6 +23753,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   extraData?: InputMaybe<Jsonb_Comparison_Exp>;
   falsePositive?: InputMaybe<False_Positive_Bool_Exp>;
+  fingerprintHash?: InputMaybe<String_Comparison_Exp>;
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fpId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -24352,6 +24328,7 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   falsePositive?: InputMaybe<False_Positive_Obj_Rel_Insert_Input>;
+  fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
@@ -24384,6 +24361,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   /** A computed field, executes function "get_issue_category" */
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -24406,6 +24384,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
 /** order by max() on columns of table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Max_Order_By = {
   createdAt?: InputMaybe<Order_By>;
+  fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -24425,6 +24404,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   /** A computed field, executes function "get_issue_category" */
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -24447,6 +24427,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
 /** order by min() on columns of table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Min_Order_By = {
   createdAt?: InputMaybe<Order_By>;
+  fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -24490,6 +24471,7 @@ export type Vulnerability_Report_Issue_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
   falsePositive?: InputMaybe<False_Positive_Order_By>;
+  fingerprintHash?: InputMaybe<Order_By>;
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
@@ -24530,6 +24512,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   CreatedAt = 'createdAt',
   /** column name */
   ExtraData = 'extraData',
+  /** column name */
+  FingerprintHash = 'fingerprintHash',
   /** column name */
   FixId = 'fixId',
   /** column name */
@@ -24578,6 +24562,7 @@ export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_
 export type Vulnerability_Report_Issue_Set_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
+  fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -24793,6 +24778,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Input = {
 export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
+  fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -25168,6 +25154,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
   ExtraData = 'extraData',
   /** column name */
+  FingerprintHash = 'fingerprintHash',
+  /** column name */
   FixId = 'fixId',
   /** column name */
   FpId = 'fpId',
@@ -25390,7 +25378,9 @@ export type Vulnerability_Report_Path_Bool_Exp = {
 /** unique or primary key constraints on table "vulnerability_report_path" */
 export enum Vulnerability_Report_Path_Constraint {
   /** unique or primary key constraint on columns "id" */
-  VulnerabilityReportPathPkey = 'vulnerability_report_path_pkey'
+  VulnerabilityReportPathPkey = 'vulnerability_report_path_pkey',
+  /** unique or primary key constraint on columns "vulnerability_report_id", "path" */
+  VulnerabilityReportPathVulnerabilityReportIdPathKey = 'vulnerability_report_path_vulnerability_report_id_path_key'
 }
 
 /** input type for inserting data into table "vulnerability_report_path" */

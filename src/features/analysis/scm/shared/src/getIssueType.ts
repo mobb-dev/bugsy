@@ -103,6 +103,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.MissingSslMinversion]: 'Missing SSL MinVersion',
   [IssueType_Enum.WebsocketMissingOriginCheck]:
     'Missing Websocket Origin Check',
+  [IssueType_Enum.DuplicatedStrings]:
+    'String Literals Should not Be Duplicated',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

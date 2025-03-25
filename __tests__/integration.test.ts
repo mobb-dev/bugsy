@@ -308,7 +308,6 @@ describe('Basic Analyze tests', () => {
         githubToken: TEST_GITHUB_TOKEN,
         scanFile: reportPath,
         command: mobbCliCommand.review,
-        srcPath: path.join(__dirname, 'assets/github_fixer_demo/repo'),
         ci: true,
       },
       { skipPrompts: true }

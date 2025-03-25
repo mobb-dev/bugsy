@@ -528,6 +528,15 @@ export async function _scan(
   }
 
   await askToOpenAnalysis()
+  if (command === 'review') {
+    await waitForAnaysisAndReviewPr({
+      repo,
+      githubActionToken,
+      analysisId: reportUploadInfo.fixReportId,
+      scanner,
+      gqlClient,
+    })
+  }
   return reportUploadInfo.fixReportId
 
   async function askToOpenAnalysis() {
@@ -699,37 +708,12 @@ export async function _scan(
       })
 
       if (command === 'review') {
-        const params = z
-          .object({
-            repo: z.string().url(),
-            githubActionToken: z.string(),
-          })
-          .parse({ repo, githubActionToken })
-
-        const scm = await createScmLib(
-          {
-            url: params.repo,
-            accessToken: params.githubActionToken,
-            scmOrg: '',
-            scmType: ScmLibScmType.GITHUB,
-          },
-          {
-            propagateExceptions: true,
-          }
-        )
-        await gqlClient.subscribeToAnalysis({
-          subscribeToAnalysisParams: {
-            analysisId: reportUploadInfo.fixReportId,
-          },
-          callback: (analysisId) => {
-            return addFixCommentsForPr({
-              analysisId,
-              gqlClient,
-              scm,
-              scanner: z.nativeEnum(SCANNERS).parse(scanner),
-            })
-          },
-          callbackStates: [Fix_Report_State_Enum.Finished],
+        await waitForAnaysisAndReviewPr({
+          repo,
+          githubActionToken,
+          analysisId: reportUploadInfo.fixReportId,
+          scanner,
+          gqlClient,
         })
       }
     } catch (e) {
@@ -811,4 +795,52 @@ export async function _digestReport({
     })
     throw e
   }
+}
+
+async function waitForAnaysisAndReviewPr({
+  repo,
+  githubActionToken,
+  analysisId,
+  scanner,
+  gqlClient,
+}: {
+  repo?: string
+  githubActionToken?: string
+  analysisId: string
+  scanner?: string
+  gqlClient: GQLClient
+}) {
+  const params = z
+    .object({
+      repo: z.string().url(),
+      githubActionToken: z.string(),
+    })
+    .parse({ repo, githubActionToken })
+
+  const scm = await createScmLib(
+    {
+      url: params.repo,
+      accessToken: params.githubActionToken,
+      scmOrg: '',
+      scmType: ScmLibScmType.GITHUB,
+    },
+    {
+      propagateExceptions: true,
+    }
+  )
+
+  await gqlClient.subscribeToAnalysis({
+    subscribeToAnalysisParams: {
+      analysisId,
+    },
+    callback: (analysisId) => {
+      return addFixCommentsForPr({
+        analysisId,
+        gqlClient,
+        scm,
+        scanner: z.nativeEnum(SCANNERS).parse(scanner),
+      })
+    },
+    callbackStates: [Fix_Report_State_Enum.Finished],
+  })
 }

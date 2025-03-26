@@ -344,4 +344,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.MissingSslMinversion]: undefined,
   [IssueType_Enum.WebsocketMissingOriginCheck]: undefined,
   [IssueType_Enum.DuplicatedStrings]: undefined,
+  [IssueType_Enum.InsecureUuidVersion]: undefined,
 }

@@ -4,9 +4,12 @@ import {
   IssueType_Enum,
   Vulnerability_Severity_Enum,
 } from '../../../scm/generates/client_generates'
-import { buildCommentBody, BuildCommentBodyParams } from '../buildCommentBody'
+import {
+  buildFixCommentBody,
+  BuildFixCommentBodyParams,
+} from '../buildCommentBody'
 
-const params: BuildCommentBodyParams = {
+const params: BuildFixCommentBodyParams = {
   fix: {
     id: 'fix123',
     safeIssueType: IssueType_Enum.Xss,
@@ -25,6 +28,7 @@ const params: BuildCommentBodyParams = {
       },
     },
   },
+  issueId: '123',
   commentId: 123,
   commentUrl: 'https://example.com/comment',
   scanner: 'checkmarx',
@@ -33,11 +37,12 @@ const params: BuildCommentBodyParams = {
   analysisId: 'analysis123',
   organizationId: 'org123',
   patch: '+ Added line\n- Removed line',
+  irrelevantIssueWithTags: [],
 }
 
 describe('buildCommentBody', () => {
   it('should build a comment body with all required elements', () => {
-    const result = buildCommentBody(params)
+    const result = buildFixCommentBody(params)
     expect(result).toMatchInlineSnapshot(`
       "# ![image](https://app.mobb.ai/gh-action/Logo_Rounded_Icon.svg) XSS fix is ready
       This change fixes a **high severity** (🚩) **XSS** issue reported by **Checkmarx**.
@@ -60,7 +65,7 @@ describe('buildCommentBody', () => {
   })
 
   it('should handle custom issue type or language', () => {
-    const result = buildCommentBody({
+    const result = buildFixCommentBody({
       ...params,
       fix: {
         ...params.fix,

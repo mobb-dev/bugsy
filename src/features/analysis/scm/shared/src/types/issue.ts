@@ -7,7 +7,7 @@ import { ParsedSeverityZ } from './shared'
 
 export const MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES = 100_000 // 100kB
 
-export const category = {
+export const CATEGORY = {
   NoFix: 'NoFix',
   Unsupported: 'Unsupported',
   Irrelevant: 'Irrelevant',
@@ -15,11 +15,11 @@ export const category = {
   Fixable: 'Fixable',
 } as const
 export const ValidCategoriesZ = z.union([
-  z.literal(category.NoFix),
-  z.literal(category.Unsupported),
-  z.literal(category.Irrelevant),
-  z.literal(category.FalsePositive),
-  z.literal(category.Fixable),
+  z.literal(CATEGORY.NoFix),
+  z.literal(CATEGORY.Unsupported),
+  z.literal(CATEGORY.Irrelevant),
+  z.literal(CATEGORY.FalsePositive),
+  z.literal(CATEGORY.Fixable),
 ])
 
 export const BaseIssuePartsZ = z.object({
@@ -101,14 +101,14 @@ export type FalsePositiveParts = z.infer<typeof FalsePositivePartsZ>
 
 const IssuePartsWithFixZ = BaseIssuePartsZ.merge(
   z.object({
-    category: z.literal(category.Irrelevant),
+    category: z.literal(CATEGORY.Irrelevant),
     fix: FixPartsForFixScreenZ.nullish(),
   })
 )
 
 export const IssuePartsFpZ = BaseIssuePartsZ.merge(
   z.object({
-    category: z.literal(category.FalsePositive),
+    category: z.literal(CATEGORY.FalsePositive),
     fpId: z.string().uuid(),
     getFalsePositive: FalsePositivePartsZ,
   })
@@ -117,9 +117,9 @@ export const IssuePartsFpZ = BaseIssuePartsZ.merge(
 const GeneralIssueZ = BaseIssuePartsZ.merge(
   z.object({
     category: z.union([
-      z.literal(category.NoFix),
-      z.literal(category.Unsupported),
-      z.literal(category.Fixable),
+      z.literal(CATEGORY.NoFix),
+      z.literal(CATEGORY.Unsupported),
+      z.literal(CATEGORY.Fixable),
     ]),
   })
 )
@@ -154,4 +154,22 @@ export const GetIssueScreenDataZ = z.object({
 })
 
 export const IssueBucketZ = z.enum(['fixable', 'irrelevant', 'remaining'])
+export type IssueBucket = z.infer<typeof IssueBucketZ>
+
 export type GetIssueScreenData = z.infer<typeof GetIssueScreenDataZ>
+export type IssueCategory =
+  GetIssueScreenData['vulnerability_report_issue_by_pk']['category']
+
+export const mapCategoryToBucket: Record<IssueCategory, IssueBucket> = {
+  FalsePositive: 'irrelevant',
+  Irrelevant: 'irrelevant',
+  NoFix: 'remaining',
+  Unsupported: 'remaining',
+  Fixable: 'fixable',
+}
+
+export const mapBucketTypeToCategory: Record<IssueBucket, IssueCategory[]> = {
+  irrelevant: ['FalsePositive', 'Irrelevant'],
+  remaining: ['NoFix', 'Unsupported'],
+  fixable: ['Fixable'],
+}

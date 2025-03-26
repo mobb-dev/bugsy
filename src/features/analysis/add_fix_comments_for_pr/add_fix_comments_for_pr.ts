@@ -3,7 +3,7 @@ import Debug from 'debug'
 
 import { GQLClient } from '../graphql'
 import { SCMLib } from '../scm'
-import { GithubSCMLib } from '../scm/github'
+import { GithubSCMLib } from '../scm/github/GithubSCMLib'
 import {
   deleteAllPreviousComments,
   deleteAllPreviousGeneralPrComments,
@@ -12,6 +12,7 @@ import {
   postAnalysisInsightComment,
   postAnalysisSummary,
   postFixComment,
+  postIssueComment,
 } from './utils'
 
 const debug = Debug('mobbdev:handle-finished-analysis')
@@ -27,9 +28,10 @@ export async function addFixCommentsForPr({
   gqlClient: GQLClient
   scanner: Scanner
 }) {
-  if (_scm instanceof GithubSCMLib === false) {
+  if (!(_scm instanceof GithubSCMLib)) {
     return
   }
+
   const scm = _scm as GithubSCMLib
   const getAnalysisRes = await gqlClient.getAnalysis(analysisId)
   debug('getAnalysis %o', getAnalysisRes)
@@ -54,16 +56,21 @@ export async function addFixCommentsForPr({
     gqlClient,
     vulnerabilityReportId: getAnalysisRes.vulnerabilityReportId,
   })
-  const { vulnerabilityReportIssueCodeNodes } = prVulenrabilities
+
+  const {
+    vulnerabilityReportIssueCodeNodes,
+    irrelevantVulnerabilityReportIssues,
+  } = prVulenrabilities
   const fixesId = vulnerabilityReportIssueCodeNodes.map(
     ({ vulnerabilityReportIssue: { fixId } }) => fixId
   )
+
   const fixesById = await getFixesData({ fixesId, gqlClient })
   const [comments, generalPrComments] = await Promise.all([
     scm.getPrComments({ pull_number: pullRequest }),
     scm.getGeneralPrComments({ prNumber: pullRequest }),
   ])
-  // Delete all previus mobb comments
+  // Delete all previous mobb comments
   await Promise.all([
     ...deleteAllPreviousComments({ comments, scm }),
     ...deleteAllPreviousGeneralPrComments({ generalPrComments, scm }),
@@ -84,6 +91,34 @@ export async function addFixCommentsForPr({
         })
       }
     ),
+    ...irrelevantVulnerabilityReportIssues.map((vulnerabilityReportIssue) => {
+      return vulnerabilityReportIssue.codeNodes.map(
+        (vulnerabilityReportIssueCodeNode) => {
+          return postIssueComment({
+            vulnerabilityReportIssueCodeNode: {
+              path: vulnerabilityReportIssueCodeNode.path,
+              startLine: vulnerabilityReportIssueCodeNode.startLine,
+              vulnerabilityReportIssue: {
+                fixId: '',
+                parsedIssueType: vulnerabilityReportIssue.parsedIssueType,
+                vulnerabilityReportIssueTags:
+                  vulnerabilityReportIssue.vulnerabilityReportIssueTags,
+                category: vulnerabilityReportIssue.category,
+              },
+              vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
+            },
+            projectId,
+            analysisId,
+            organizationId,
+            fixesById,
+            scm,
+            pullRequest,
+            scanner,
+            commitSha,
+          })
+        }
+      )
+    }),
     postAnalysisInsightComment({
       prVulenrabilities,
       pullRequest,

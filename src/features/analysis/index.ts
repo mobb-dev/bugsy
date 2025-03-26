@@ -647,7 +647,6 @@ export async function _scan(
     uploadReportSpinner.success({
       text: '📁 Uploading Report successful!',
     })
-
     const vulnFiles = await _digestReport({
       gqlClient,
       fixReportId: reportUploadInfo.fixReportId,

@@ -21,6 +21,18 @@ export type PostFixCommentParams = {
   commitSha: string
 }
 
+export type PostIssueCommentParams = {
+  vulnerabilityReportIssueCodeNode: PrVulenrabilities['vulnerabilityReportIssueCodeNodes'][0]
+  projectId: string
+  analysisId: string
+  organizationId: string
+  fixesById: FixesById
+  scm: GithubSCMLib
+  pullRequest: number
+  scanner: Scanner
+  commitSha: string
+}
+
 export type PostAnalysisSummaryParams = {
   prVulenrabilities: PrVulenrabilities
   fixesById: FixesById

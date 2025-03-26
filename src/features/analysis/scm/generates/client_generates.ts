@@ -836,6 +836,7 @@ export enum Vendors {
   Checkmarx = 'Checkmarx',
   CodeQl = 'CodeQL',
   Fortify = 'Fortify',
+  Opengrep = 'Opengrep',
   Semgrep = 'Semgrep',
   Snyk = 'Snyk',
   SonarQube = 'SonarQube'
@@ -7686,6 +7687,8 @@ export enum IssueType_Enum {
   InsecureCookie = 'INSECURE_COOKIE',
   /** Insecure Randomness */
   InsecureRandomness = 'INSECURE_RANDOMNESS',
+  /** Insecure UUID version */
+  InsecureUuidVersion = 'INSECURE_UUID_VERSION',
   /** Insufficient Logging of Sensitive Operations */
   InsufficientLogging = 'INSUFFICIENT_LOGGING',
   /** Client jQuery deprecated symbols */
@@ -21975,6 +21978,7 @@ export type User = {
   integrations_aggregate: Integration_Aggregate;
   isImpersonationAllowed: Scalars['Boolean']['output'];
   isSignedUp: Scalars['Boolean']['output'];
+  joined_at: Scalars['timestamptz']['output'];
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
@@ -22135,6 +22139,7 @@ export type User_Bool_Exp = {
   integrations_aggregate?: InputMaybe<Integration_Aggregate_Bool_Exp>;
   isImpersonationAllowed?: InputMaybe<Boolean_Comparison_Exp>;
   isSignedUp?: InputMaybe<Boolean_Comparison_Exp>;
+  joined_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   picture?: InputMaybe<String_Comparison_Exp>;
   scmConfigs?: InputMaybe<Scm_Config_Bool_Exp>;
@@ -22165,6 +22170,7 @@ export type User_Insert_Input = {
   integrations?: InputMaybe<Integration_Arr_Rel_Insert_Input>;
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
@@ -22179,6 +22185,7 @@ export type User_Max_Fields = {
   githubToken?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
+  joined_at?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
 };
@@ -22189,6 +22196,7 @@ export type User_Max_Order_By = {
   githubToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
 };
@@ -22200,6 +22208,7 @@ export type User_Min_Fields = {
   githubToken?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
+  joined_at?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
 };
@@ -22210,6 +22219,7 @@ export type User_Min_Order_By = {
   githubToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
 };
@@ -22247,6 +22257,7 @@ export type User_Order_By = {
   integrations_aggregate?: InputMaybe<Integration_Aggregate_Order_By>;
   isImpersonationAllowed?: InputMaybe<Order_By>;
   isSignedUp?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Order_By>;
@@ -22274,6 +22285,8 @@ export enum User_Select_Column {
   /** column name */
   IsSignedUp = 'isSignedUp',
   /** column name */
+  JoinedAt = 'joined_at',
+  /** column name */
   Name = 'name',
   /** column name */
   Picture = 'picture'
@@ -22287,6 +22300,7 @@ export type User_Set_Input = {
   impersonatedUserEmail?: InputMaybe<Scalars['String']['input']>;
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
 };
@@ -22307,6 +22321,7 @@ export type User_Stream_Cursor_Value_Input = {
   impersonatedUserEmail?: InputMaybe<Scalars['String']['input']>;
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
 };
@@ -22325,6 +22340,8 @@ export enum User_Update_Column {
   IsImpersonationAllowed = 'isImpersonationAllowed',
   /** column name */
   IsSignedUp = 'isSignedUp',
+  /** column name */
+  JoinedAt = 'joined_at',
   /** column name */
   Name = 'name',
   /** column name */
@@ -25761,6 +25778,8 @@ export enum Vulnerability_Report_Vendor_Enum {
   Codeql = 'codeql',
   /** fortify */
   Fortify = 'fortify',
+  /** opengrep */
+  Opengrep = 'opengrep',
   /** semgrep */
   Semgrep = 'semgrep',
   /** snyk */
@@ -26083,7 +26102,7 @@ export type GetVulByNodesMetadataQueryVariables = Exact<{
 }>;
 
 
-export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', issueType: string, fixId?: any | null } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } };
+export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, parsedIssueType?: IssueType_Enum | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
 
 export type UpdateScmTokenMutationVariables = Exact<{
   scmType: Scalars['String']['input'];
@@ -26345,8 +26364,12 @@ export const GetVulByNodesMetadataDocument = `
     path
     startLine
     vulnerabilityReportIssue {
-      issueType
+      parsedIssueType
       fixId
+      category
+      vulnerabilityReportIssueTags {
+        tag: vulnerability_report_issue_tag_value
+      }
     }
   }
   fixablePrVuls: vulnerability_report_issue_aggregate(
@@ -26368,6 +26391,25 @@ export const GetVulByNodesMetadataDocument = `
   ) {
     aggregate {
       count
+    }
+  }
+  irrelevantVulnerabilityReportIssue: vulnerability_report(
+    where: {id: {_eq: $vulnerabilityReportId}}
+  ) {
+    vulnerabilityReportIssues(
+      where: {fixId: {_is_null: true}, _or: [{category: {_eq: "Irrelevant"}}, {category: {_eq: "FalsePositive"}}]}
+    ) {
+      id
+      parsedIssueType
+      fixId
+      category
+      vulnerabilityReportIssueTags {
+        tag: vulnerability_report_issue_tag_value
+      }
+      codeNodes(order_by: {index: desc}, where: {_or: $filters}) {
+        path
+        startLine
+      }
     }
   }
 }

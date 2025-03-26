@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { getFixUrl } from '../shared/src'
+import { getFixUrl, getIssueUrl } from '../shared/src'
 import { ScmType } from '../shared/src'
 import { ScmConfig } from '../types'
 import {
@@ -20,7 +20,15 @@ type GetFixUrlParam = {
   analysisId: string
 }
 
-export function getFixUrlWithRedirect(params: GetCommitUrlParam) {
+type GetIssueUrlParam = {
+  appBaseUrl: string
+  issueId: string
+  projectId: string
+  organizationId: string
+  analysisId: string
+}
+
+export function getFixUrlWithRedirect(params: GetFixCommitUrlParam) {
   const {
     fixId,
     projectId,
@@ -42,13 +50,64 @@ export function getFixUrlWithRedirect(params: GetCommitUrlParam) {
   })}?${searchParams.toString()}`
 }
 
-type GetCommitUrlParam = GetFixUrlParam & {
+export function getIssueUrlWithRedirect(params: GetIssueCommitUrlParam) {
+  const {
+    issueId,
+    projectId,
+    organizationId,
+    analysisId,
+    redirectUrl,
+    appBaseUrl,
+    commentId,
+  } = params
+  const searchParams = new URLSearchParams()
+  searchParams.append('commit_redirect_url', redirectUrl)
+  searchParams.append('comment_id', commentId.toString())
+  return `${getIssueUrl({
+    appBaseUrl,
+    issueId,
+    projectId,
+    organizationId,
+    analysisId,
+  })}?${searchParams.toString()}`
+}
+
+type GetFixCommitUrlParam = GetFixUrlParam & {
   redirectUrl: string
   commentId: number
 }
-export function getCommitUrl(params: GetCommitUrlParam) {
+
+type GetIssueCommitUrlParam = GetIssueUrlParam & {
+  redirectUrl: string
+  commentId: number
+}
+
+export function getCommitUrl(params: GetFixCommitUrlParam) {
   const {
     fixId,
+    projectId,
+    organizationId,
+    analysisId,
+    redirectUrl,
+    appBaseUrl,
+    commentId,
+  } = params
+
+  const searchParams = new URLSearchParams()
+  searchParams.append('redirect_url', redirectUrl)
+  searchParams.append('comment_id', commentId.toString())
+  return `${getFixUrl({
+    appBaseUrl,
+    fixId,
+    projectId,
+    organizationId,
+    analysisId,
+  })}/commit?${searchParams.toString()}`
+}
+
+export function getCommitIssueUrl(params: GetIssueCommitUrlParam) {
+  const {
+    issueId,
     projectId,
     organizationId,
     analysisId,
@@ -59,9 +118,9 @@ export function getCommitUrl(params: GetCommitUrlParam) {
   const searchParams = new URLSearchParams()
   searchParams.append('redirect_url', redirectUrl)
   searchParams.append('comment_id', commentId.toString())
-  return `${getFixUrl({
+  return `${getIssueUrl({
     appBaseUrl,
-    fixId,
+    issueId,
     projectId,
     organizationId,
     analysisId,

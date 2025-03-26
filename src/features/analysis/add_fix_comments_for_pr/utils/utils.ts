@@ -4,7 +4,11 @@ import { z } from 'zod'
 
 import { GQLClient } from '../../graphql'
 import { GetVulByNodeHunk } from '../../graphql/types'
-import { getIssueTypeFriendlyString, MOBB_ICON_IMG } from '../../scm'
+import {
+  getIssueTypeFriendlyString,
+  mapCategoryToBucket,
+  MOBB_ICON_IMG,
+} from '../../scm'
 import { GithubSCMLib } from '../../scm/github'
 import {
   GetGeneralPrCommentResponse,
@@ -22,9 +26,10 @@ import {
   PostAnalysisInsightCommentParams,
   PostAnalysisSummaryParams,
   PostFixCommentParams,
+  PostIssueCommentParams,
   PrVulenrabilities,
 } from '../types'
-import { buildCommentBody } from './buildCommentBody'
+import { buildFixCommentBody, buildIssueCommentBody } from './buildCommentBody'
 
 const debug = Debug('mobbdev:handle-finished-analysis')
 
@@ -103,6 +108,62 @@ export function deleteAllPreviousGeneralPrComments(params: {
     })
 }
 
+export async function postIssueComment(params: PostIssueCommentParams) {
+  const {
+    vulnerabilityReportIssueCodeNode,
+    projectId,
+    analysisId,
+    organizationId,
+    scm,
+    commitSha,
+    pullRequest,
+    scanner,
+  } = params
+
+  const {
+    path,
+    startLine,
+    vulnerabilityReportIssue: {
+      vulnerabilityReportIssueTags,
+      category,
+      parsedIssueType,
+    },
+    vulnerabilityReportIssueId,
+  } = vulnerabilityReportIssueCodeNode
+
+  const irrelevantIssueWithTags =
+    mapCategoryToBucket[category] === 'irrelevant' &&
+    vulnerabilityReportIssueTags?.length > 0
+      ? vulnerabilityReportIssueTags
+      : []
+
+  const commentRes = await scm.postPrComment({
+    body: `# ${MobbIconMarkdown} Your fix is ready!\nRefresh the page in order to see the changes.`,
+    pull_number: pullRequest,
+    commit_id: commitSha,
+    path,
+    line: startLine,
+  })
+  const commentId = commentRes.data.id
+
+  const commentBody = buildIssueCommentBody({
+    issueId: vulnerabilityReportIssueId,
+    issueType: parsedIssueType,
+    irrelevantIssueWithTags,
+    commentId,
+    commentUrl: commentRes.data.html_url,
+    scanner,
+    projectId,
+    analysisId,
+    organizationId,
+  })
+
+  return await scm.updatePrComment({
+    body: commentBody,
+    comment_id: commentId,
+  })
+}
+
 export async function postFixComment(params: PostFixCommentParams) {
   const {
     vulnerabilityReportIssueCodeNode,
@@ -119,8 +180,15 @@ export async function postFixComment(params: PostFixCommentParams) {
   const {
     path,
     startLine,
-    vulnerabilityReportIssue: { fixId },
+    vulnerabilityReportIssue: { fixId, vulnerabilityReportIssueTags, category },
+    vulnerabilityReportIssueId,
   } = vulnerabilityReportIssueCodeNode
+
+  const irrelevantIssueWithTags =
+    mapCategoryToBucket[category] === 'irrelevant' &&
+    vulnerabilityReportIssueTags?.length > 0
+      ? vulnerabilityReportIssueTags
+      : []
 
   const fix = fixesById[fixId]
   if (!fix || fix.patchAndQuestions.__typename !== 'FixData') {
@@ -139,8 +207,10 @@ export async function postFixComment(params: PostFixCommentParams) {
   })
   const commentId = commentRes.data.id
 
-  const commentBody = buildCommentBody({
+  const commentBody = buildFixCommentBody({
     fix,
+    issueId: vulnerabilityReportIssueId,
+    irrelevantIssueWithTags,
     commentId,
     commentUrl: commentRes.data.html_url,
     scanner,

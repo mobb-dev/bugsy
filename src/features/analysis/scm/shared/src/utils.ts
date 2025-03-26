@@ -15,3 +15,21 @@ export function getFixUrl({
 }: GetFixUrlParam) {
   return `${appBaseUrl}/organization/${organizationId}/project/${projectId}/report/${analysisId}/fix/${fixId}`
 }
+
+export type GetIssueUrlParam = {
+  appBaseUrl: string
+  issueId: string
+  projectId: string
+  organizationId: string
+  analysisId: string
+}
+
+export function getIssueUrl({
+  appBaseUrl,
+  issueId,
+  projectId,
+  organizationId,
+  analysisId,
+}: GetIssueUrlParam) {
+  return `${appBaseUrl}/organization/${organizationId}/project/${projectId}/report/${analysisId}/issue/${issueId}`
+}

@@ -166,8 +166,12 @@ query getVulByNodesMetadata(
     path
     startLine
     vulnerabilityReportIssue {
-      issueType
+      parsedIssueType
       fixId
+      category
+      vulnerabilityReportIssueTags {
+        tag: vulnerability_report_issue_tag_value
+      }
     }
   }
   fixablePrVuls: vulnerability_report_issue_aggregate(
@@ -197,6 +201,38 @@ query getVulByNodesMetadata(
   ) {
     aggregate {
       count
+    }
+  }
+  irrelevantVulnerabilityReportIssue: vulnerability_report(
+    where: {
+      id: { _eq: $vulnerabilityReportId }
+    }
+  ) {
+    vulnerabilityReportIssues(
+      where: {
+        fixId: { _is_null: true }
+        _or: [
+          { category: { _eq: "Irrelevant" } }
+          { category: { _eq: "FalsePositive" } }
+        ]
+      }
+    ) {
+        id
+        parsedIssueType
+        fixId
+        category
+        vulnerabilityReportIssueTags {
+          tag: vulnerability_report_issue_tag_value
+        }
+        codeNodes(
+          order_by: { index: desc }
+          where: {
+            _or: $filters
+          }
+        ){
+          path
+          startLine
+        }
     }
   }
 }

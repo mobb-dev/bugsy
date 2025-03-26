@@ -234,6 +234,10 @@ export class GQLClient {
     const vulnerabilitiesOutsidePr =
       totalScanVulnerabilities - nonFixablePrVuls - fixablePrVuls
     const totalPrVulnerabilities = nonFixablePrVuls + fixablePrVuls
+    const irrelevantVulnerabilityReportIssues =
+      parsedGetVulByNodesMetadataRes.irrelevantVulnerabilityReportIssue?.[0]
+        ?.vulnerabilityReportIssues ?? []
+
     return {
       vulnerabilityReportIssueCodeNodes: Object.values(
         uniqueVulByNodesMetadata
@@ -243,6 +247,7 @@ export class GQLClient {
       totalScanVulnerabilities,
       vulnerabilitiesOutsidePr,
       totalPrVulnerabilities,
+      irrelevantVulnerabilityReportIssues,
     }
   }
 

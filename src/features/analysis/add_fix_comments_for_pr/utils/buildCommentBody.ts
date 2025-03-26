@@ -3,15 +3,19 @@ import {
   scannerToVulnerability_Report_Vendor_Enum,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
+import { Vulnerability_Report_Issue_Tag_Enum } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import Debug from 'debug'
 import { z } from 'zod'
 
 import {
   getCommitDescription,
+  getCommitIssueDescription,
+  getCommitIssueUrl,
   getCommitUrl,
   getFixUrlWithRedirect,
   getGuidances,
   getIssueTypeFriendlyString,
+  getIssueUrlWithRedirect,
   PatchAndQuestionsZ,
   toQuestion,
 } from '../../scm'
@@ -28,20 +32,35 @@ const debug = Debug('mobbdev:handle-finished-analysis')
 const getCommitFixButton = (commitUrl: string) =>
   `<a href="${commitUrl}"><img src=${COMMIT_FIX_SVG}></a>`
 
-export type BuildCommentBodyParams = {
+export type BuildFixCommentBodyParams = {
   fix: PostFixCommentParams['fixesById'][string]
   commentId: number
   commentUrl: string
   scanner: Scanner
   fixId: string
+  issueId: string
   projectId: string
   analysisId: string
   organizationId: string
   patch: string
+  irrelevantIssueWithTags: { tag: Vulnerability_Report_Issue_Tag_Enum }[]
 }
 
-export function buildCommentBody({
+export type BuildIssueCommentBodyParams = {
+  commentId: number
+  commentUrl: string
+  scanner: Scanner
+  issueId: string
+  projectId: string
+  analysisId: string
+  organizationId: string
+  issueType: string
+  irrelevantIssueWithTags: { tag: Vulnerability_Report_Issue_Tag_Enum }[]
+}
+
+export function buildFixCommentBody({
   fix,
+  issueId,
   commentId,
   commentUrl,
   scanner,
@@ -50,25 +69,47 @@ export function buildCommentBody({
   analysisId,
   organizationId,
   patch,
-}: BuildCommentBodyParams) {
-  const commitUrl = getCommitUrl({
-    appBaseUrl: WEB_APP_URL,
-    fixId,
-    projectId,
-    analysisId,
-    organizationId,
-    redirectUrl: commentUrl,
-    commentId,
-  })
-  const fixUrl = getFixUrlWithRedirect({
-    appBaseUrl: WEB_APP_URL,
-    fixId,
-    projectId,
-    analysisId,
-    organizationId,
-    redirectUrl: commentUrl,
-    commentId,
-  })
+  irrelevantIssueWithTags,
+}: BuildFixCommentBodyParams) {
+  const isIrrelevantIssueWithTags = irrelevantIssueWithTags?.[0]?.tag
+  const commitUrl = isIrrelevantIssueWithTags
+    ? getCommitIssueUrl({
+        appBaseUrl: WEB_APP_URL,
+        issueId,
+        projectId,
+        analysisId,
+        organizationId,
+        redirectUrl: commentUrl,
+        commentId,
+      })
+    : getCommitUrl({
+        appBaseUrl: WEB_APP_URL,
+        fixId,
+        projectId,
+        analysisId,
+        organizationId,
+        redirectUrl: commentUrl,
+        commentId,
+      })
+  const fixUrl = isIrrelevantIssueWithTags
+    ? getIssueUrlWithRedirect({
+        appBaseUrl: WEB_APP_URL,
+        issueId,
+        projectId,
+        analysisId,
+        organizationId,
+        redirectUrl: commentUrl,
+        commentId,
+      })
+    : getFixUrlWithRedirect({
+        appBaseUrl: WEB_APP_URL,
+        fixId,
+        projectId,
+        analysisId,
+        organizationId,
+        redirectUrl: commentUrl,
+        commentId,
+      })
   const issueType = getIssueTypeFriendlyString(fix.safeIssueType)
   const title = `# ${MobbIconMarkdown} ${issueType} fix is ready`
 
@@ -99,6 +140,7 @@ export function buildCommentBody({
           issueLanguage: validFixParseRes.data.safeIssueLanguage,
           fixExtraContext: validFixParseRes.data.patchAndQuestions.extraContext,
         }),
+        irrelevantIssueWithTags,
       })
     : ''
   const diff = `\`\`\`diff\n${patch} \n\`\`\``
@@ -106,4 +148,35 @@ export function buildCommentBody({
   return `${title}\n${subTitle}\n${diff}\n${getCommitFixButton(
     commitUrl
   )}\n${fixPageLink}`
+}
+
+export function buildIssueCommentBody({
+  issueId,
+  commentId,
+  commentUrl,
+  scanner,
+  issueType,
+  projectId,
+  analysisId,
+  organizationId,
+  irrelevantIssueWithTags,
+}: BuildIssueCommentBodyParams) {
+  const issueUrl = getIssueUrlWithRedirect({
+    appBaseUrl: WEB_APP_URL,
+    issueId,
+    projectId,
+    analysisId,
+    organizationId,
+    redirectUrl: commentUrl,
+    commentId,
+  })
+  const title = `# ${MobbIconMarkdown} Irrelevant issues were spotted - no action required 🧹`
+
+  const subTitle = getCommitIssueDescription({
+    issueType,
+    vendor: scannerToVulnerability_Report_Vendor_Enum[scanner],
+    irrelevantIssueWithTags,
+  })
+  const issuePageLink = `[Learn more and fine tune the issue](${issueUrl})`
+  return `${title}\n${subTitle}\n${issuePageLink}`
 }

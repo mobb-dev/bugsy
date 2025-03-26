@@ -1,3 +1,5 @@
+import { ValidCategoriesZ } from '@mobb/bugsy/features/analysis/scm'
+import { Vulnerability_Report_Issue_Tag_Enum } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { z } from 'zod'
 
 type LineFilter =
@@ -45,7 +47,36 @@ const VulnerabilityReportIssueCodeNodeZ = z.object({
   startLine: z.number(),
   vulnerabilityReportIssue: z.object({
     fixId: z.string(),
+    category: ValidCategoriesZ,
+    parsedIssueType: z.string(),
+    vulnerabilityReportIssueTags: z.array(
+      z.object({
+        tag: z.nativeEnum(Vulnerability_Report_Issue_Tag_Enum),
+      })
+    ),
   }),
+})
+
+const VulnerabilityReportIssueNoFixCodeNodeZ = z.object({
+  vulnerabilityReportIssues: z.array(
+    z.object({
+      id: z.string(),
+      fixId: z.string().nullable(),
+      category: ValidCategoriesZ,
+      parsedIssueType: z.string(),
+      codeNodes: z.array(
+        z.object({
+          path: z.string(),
+          startLine: z.number(),
+        })
+      ),
+      vulnerabilityReportIssueTags: z.array(
+        z.object({
+          tag: z.nativeEnum(Vulnerability_Report_Issue_Tag_Enum),
+        })
+      ),
+    })
+  ),
 })
 
 export const GetVulByNodesMetadataZ = z.object({
@@ -65,6 +96,9 @@ export const GetVulByNodesMetadataZ = z.object({
       count: z.number(),
     }),
   }),
+  irrelevantVulnerabilityReportIssue: z.array(
+    VulnerabilityReportIssueNoFixCodeNodeZ
+  ),
 })
 
 export type VulnerabilityReportIssueCodeNode = z.infer<

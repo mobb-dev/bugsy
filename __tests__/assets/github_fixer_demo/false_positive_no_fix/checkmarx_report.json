@@ -1,0 +1,92 @@
+{
+  "results": [
+    {
+      "type": "sast",
+      "label": "sast",
+      "id": "cifUkHvDmMNzqx9WkKu4loue7tc=",
+      "similarityId": "1777104575",
+      "status": "NEW",
+      "state": "TO_VERIFY",
+      "severity": "LOW",
+      "created": "2025-01-28T12:35:44Z",
+      "firstFoundAt": "2025-01-28T12:35:43Z",
+      "foundAt": "2025-01-28T12:35:44Z",
+      "firstScanId": "245ecba8-7cdb-451d-bc11-120f9f89d00f",
+      "description": "The application uses the hard-coded password &#34;confirmpassword&#34; for authentication purposes, either using it to verify users&#39; identities, or to access another remote system. This password at line 6 of /main.js appears in the code, implying it is accessible to anyone with source code access, and cannot be changed without rebuilding\u00a0the application.\n\n",
+      "descriptionHTML": "<p>The application uses the hard-coded password &ldquo;confirmpassword&rdquo; for authentication purposes, either using it to verify users&lsquo; identities, or to access another remote system. This password at line 6 of /main.js appears in the code, implying it is accessible to anyone with source code access, and cannot be changed without rebuilding\u00a0the application.</p>\n",
+      "data": {
+        "queryId": 2783517675732844652,
+        "queryName": "Use_Of_Hardcoded_Password",
+        "group": "JavaScript_Server_Side_Vulnerabilities",
+        "resultHash": "cifUkHvDmMNzqx9WkKu4loue7tc=",
+        "languageName": "JavaScript",
+        "nodes": [
+          {
+            "id": "r6QCF2U7pi4WkVK3kRZTfxJRnzM=",
+            "line": 6,
+            "name": "&#34;confirmpassword&#34;",
+            "column": 31,
+            "length": 17,
+            "nodeID": 221,
+            "domType": "StringLiteral",
+            "fileName": "/main.js",
+            "fullName": "&#34;confirmpassword&#34;",
+            "typeName": "StringLiteral",
+            "methodLine": 6,
+            "definitions": "-1"
+          },
+          {
+            "id": "GYC6YvwFPJBQegnxwJOYMqNSEn0=",
+            "line": 56,
+            "name": "Lambda",
+            "column": 30,
+            "length": 2,
+            "method": "Lambda",
+            "nodeID": 669,
+            "domType": "LambdaExpr",
+            "fileName": "/main.js",
+            "fullName": "CxJSNS_e46ea72c.Lambda",
+            "methodLine": 56,
+            "definitions": "1"
+          },
+          {
+            "id": "RGbiUJ674HqUjlTTH0Z2LVi/qk8=",
+            "line": 60,
+            "name": "CONFIRM_PASSWORD_NAME",
+            "column": 23,
+            "length": 21,
+            "method": "Lambda",
+            "nodeID": 701,
+            "domType": "UnknownReference",
+            "fileName": "/main.js",
+            "fullName": "CxJSNS_e46ea72c.CONFIRM_PASSWORD_NAME",
+            "typeName": "object",
+            "methodLine": 56,
+            "definitions": "1"
+          }
+        ]
+      },
+      "comments": {},
+      "vulnerabilityDetails": {
+        "cweId": 259,
+        "cvss": {},
+        "compliances": [
+          "PCI DSS v4.0",
+          "ASA Mobile Premium",
+          "OWASP Top 10 API",
+          "ASA Premium",
+          "MOIS(KISA) Secure Coding 2021",
+          "NIST SP 800-53",
+          "OWASP Top 10 2017",
+          "OWASP Top 10 2021",
+          "SANS top 25",
+          "CWE top 25",
+          "FISMA 2014",
+          "OWASP ASVS"
+        ]
+      }
+    }
+  ],
+  "totalCount": 1,
+  "scanID": "245ecba8-7cdb-451d-bc11-120f9f89d00f"
+}

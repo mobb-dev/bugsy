@@ -126,7 +126,7 @@ export async function postIssueComment(params: PostIssueCommentParams) {
     vulnerabilityReportIssue: {
       vulnerabilityReportIssueTags,
       category,
-      parsedIssueType,
+      safeIssueType,
     },
     vulnerabilityReportIssueId,
   } = vulnerabilityReportIssueCodeNode
@@ -148,7 +148,7 @@ export async function postIssueComment(params: PostIssueCommentParams) {
 
   const commentBody = buildIssueCommentBody({
     issueId: vulnerabilityReportIssueId,
-    issueType: parsedIssueType,
+    issueType: safeIssueType,
     irrelevantIssueWithTags,
     commentId,
     commentUrl: commentRes.data.html_url,

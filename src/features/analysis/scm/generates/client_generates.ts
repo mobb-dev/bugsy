@@ -26102,7 +26102,7 @@ export type GetVulByNodesMetadataQueryVariables = Exact<{
 }>;
 
 
-export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, parsedIssueType?: IssueType_Enum | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
+export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
 
 export type UpdateScmTokenMutationVariables = Exact<{
   scmType: Scalars['String']['input'];
@@ -26364,7 +26364,7 @@ export const GetVulByNodesMetadataDocument = `
     path
     startLine
     vulnerabilityReportIssue {
-      parsedIssueType
+      safeIssueType
       fixId
       category
       vulnerabilityReportIssueTags {
@@ -26400,7 +26400,7 @@ export const GetVulByNodesMetadataDocument = `
       where: {fixId: {_is_null: true}, _or: [{category: {_eq: "Irrelevant"}}, {category: {_eq: "FalsePositive"}}]}
     ) {
       id
-      parsedIssueType
+      safeIssueType
       fixId
       category
       vulnerabilityReportIssueTags {

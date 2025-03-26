@@ -166,7 +166,7 @@ query getVulByNodesMetadata(
     path
     startLine
     vulnerabilityReportIssue {
-      parsedIssueType
+      safeIssueType
       fixId
       category
       vulnerabilityReportIssueTags {
@@ -204,9 +204,7 @@ query getVulByNodesMetadata(
     }
   }
   irrelevantVulnerabilityReportIssue: vulnerability_report(
-    where: {
-      id: { _eq: $vulnerabilityReportId }
-    }
+    where: { id: { _eq: $vulnerabilityReportId } }
   ) {
     vulnerabilityReportIssues(
       where: {
@@ -217,22 +215,17 @@ query getVulByNodesMetadata(
         ]
       }
     ) {
-        id
-        parsedIssueType
-        fixId
-        category
-        vulnerabilityReportIssueTags {
-          tag: vulnerability_report_issue_tag_value
-        }
-        codeNodes(
-          order_by: { index: desc }
-          where: {
-            _or: $filters
-          }
-        ){
-          path
-          startLine
-        }
+      id
+      safeIssueType
+      fixId
+      category
+      vulnerabilityReportIssueTags {
+        tag: vulnerability_report_issue_tag_value
+      }
+      codeNodes(order_by: { index: desc }, where: { _or: $filters }) {
+        path
+        startLine
+      }
     }
   }
 }
@@ -425,8 +418,16 @@ query gitReference($repoUrl: String!, $reference: String!) {
   }
 }
 
-mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean ,$prId: Int) {
-  autoPrAnalysis(analysisId: $analysisId, sameBranchCommit: $commitDirectly, prId: $prId) {
+mutation autoPrAnalysis(
+  $analysisId: String!
+  $commitDirectly: Boolean
+  $prId: Int
+) {
+  autoPrAnalysis(
+    analysisId: $analysisId
+    sameBranchCommit: $commitDirectly
+    prId: $prId
+  ) {
     __typename
     ... on AutoPrSuccess {
       status

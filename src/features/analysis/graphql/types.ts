@@ -48,7 +48,7 @@ const VulnerabilityReportIssueCodeNodeZ = z.object({
   vulnerabilityReportIssue: z.object({
     fixId: z.string(),
     category: ValidCategoriesZ,
-    parsedIssueType: z.string(),
+    safeIssueType: z.string(),
     vulnerabilityReportIssueTags: z.array(
       z.object({
         tag: z.nativeEnum(Vulnerability_Report_Issue_Tag_Enum),
@@ -63,7 +63,7 @@ const VulnerabilityReportIssueNoFixCodeNodeZ = z.object({
       id: z.string(),
       fixId: z.string().nullable(),
       category: ValidCategoriesZ,
-      parsedIssueType: z.string(),
+      safeIssueType: z.string(),
       codeNodes: z.array(
         z.object({
           path: z.string(),

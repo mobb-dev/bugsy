@@ -100,7 +100,7 @@ export async function addFixCommentsForPr({
               startLine: vulnerabilityReportIssueCodeNode.startLine,
               vulnerabilityReportIssue: {
                 fixId: '',
-                parsedIssueType: vulnerabilityReportIssue.parsedIssueType,
+                safeIssueType: vulnerabilityReportIssue.safeIssueType,
                 vulnerabilityReportIssueTags:
                   vulnerabilityReportIssue.vulnerabilityReportIssueTags,
                 category: vulnerabilityReportIssue.category,

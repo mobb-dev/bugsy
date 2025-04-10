@@ -6,6 +6,7 @@ import {
   ResourceOptions,
 } from '@gitbeaker/requester-utils'
 import {
+  AccessLevel,
   ExpandedCommitSchema,
   ExpandedMergeRequestSchema,
   Gitlab,
@@ -148,7 +149,6 @@ export async function getGitlabUsername(
 }
 
 export async function getGitlabIsUserCollaborator({
-  username,
   accessToken,
   repoUrl,
 }: {
@@ -161,17 +161,17 @@ export async function getGitlabIsUserCollaborator({
     const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
 
     const res = await api.Projects.show(projectPath)
-    const members = await api.ProjectMembers.all(res.id, {
-      includeInherited: true,
-    })
-    //In case the username is not provided, we just check if the token has access to list the members of the project.
-    //This is useful in case a project token is used and therefore doesn't show in the members list and there is no username to provide.
-    //This is not 100% bulletproof as sometimes the members list can be visible to token that don't have write permissions in a repo
-    //but this is the best we can do besides actually writing something to the repo to test the token.
-    if (!username) {
+
+    const groupAccess = res.permissions?.group_access?.access_level || 0
+    const projectAccess = res.permissions?.project_access?.access_level || 0
+    //If the user has developer access (or more) to the project or group, we consider it a collaborator.
+    if (
+      groupAccess >= AccessLevel.DEVELOPER ||
+      projectAccess >= AccessLevel.DEVELOPER
+    ) {
       return true
     }
-    return !!members.find((member) => member.username === username)
+    return false
   } catch (e) {
     return false
   }

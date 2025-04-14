@@ -152,7 +152,6 @@ export async function getGitlabIsUserCollaborator({
   accessToken,
   repoUrl,
 }: {
-  username?: string
   accessToken: string
   repoUrl: string
 }) {
@@ -160,18 +159,21 @@ export async function getGitlabIsUserCollaborator({
     const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
     const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
 
-    const res = await api.Projects.show(projectPath)
+    const proj = await api.Projects.show(projectPath)
 
-    const groupAccess = res.permissions?.group_access?.access_level || 0
-    const projectAccess = res.permissions?.project_access?.access_level || 0
+    const groupAccess = proj.permissions?.group_access?.access_level || 0
+    const projectAccess = proj.permissions?.project_access?.access_level || 0
+    const accessLevelWithWriteAccess = [
+      AccessLevel.DEVELOPER,
+      AccessLevel.MAINTAINER,
+      AccessLevel.OWNER,
+      AccessLevel.ADMIN,
+    ]
     //If the user has developer access (or more) to the project or group, we consider it a collaborator.
-    if (
-      groupAccess >= AccessLevel.DEVELOPER ||
-      projectAccess >= AccessLevel.DEVELOPER
-    ) {
-      return true
-    }
-    return false
+    return (
+      accessLevelWithWriteAccess.includes(groupAccess) ||
+      accessLevelWithWriteAccess.includes(projectAccess)
+    )
   } catch (e) {
     return false
   }

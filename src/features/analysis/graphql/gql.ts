@@ -1,9 +1,12 @@
 import { sleep } from '@mobb/bugsy/utils'
+import fetchOrig from 'cross-fetch'
 import Debug from 'debug'
 import { GraphQLClient } from 'graphql-request'
+import { HttpProxyAgent } from 'http-proxy-agent'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import { v4 as uuidv4 } from 'uuid'
 
-import { API_URL } from '../../../constants'
+import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
 import {
   CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
@@ -40,6 +43,35 @@ type GQLClientArgs =
       type: 'token'
     }
 
+// Custom fetch with proxy support
+export const fetchWithProxy: typeof fetchOrig = (url, options = {}) => {
+  try {
+    // In case of local testing with proxy, the API_URL should be replaced to http://host.docker.internal:8080/v1/graphql
+    const parsedUrl = new URL(url.toString())
+
+    const isHttp = parsedUrl.protocol === 'http:'
+    const isHttps = parsedUrl.protocol === 'https:'
+
+    const proxy = isHttps ? HTTPS_PROXY : isHttp ? HTTP_PROXY : null
+
+    if (proxy) {
+      const agent = isHttps
+        ? new HttpsProxyAgent(proxy)
+        : new HttpProxyAgent(proxy)
+
+      return fetchOrig(url, {
+        ...options,
+        // @ts-expect-error Node-fetch doesn't type 'agent', but it's valid
+        agent,
+      })
+    }
+  } catch (err) {
+    debug(`Skipping proxy for ${url}. Reason: ${(err as Error).message}`)
+  }
+
+  return fetchOrig(url, options)
+}
+
 export class GQLClient {
   _client: GraphQLClient
   _clientSdk: Sdk
@@ -55,6 +87,7 @@ export class GQLClient {
           : {
               Authorization: `Bearer ${args.token}`,
             },
+      fetch: fetchWithProxy,
       requestMiddleware: (request) => {
         const requestId = uuidv4()
         debug(
@@ -86,6 +119,18 @@ export class GQLClient {
     })
 
     return res.insert_cli_login_one?.id || ''
+  }
+
+  async verifyConnection() {
+    try {
+      await this.getUserInfo()
+    } catch (e) {
+      if (e?.toString().startsWith('FetchError')) {
+        debug('verify connection failed %o', e)
+        return false
+      }
+    }
+    return true
   }
 
   async verifyToken() {
@@ -293,7 +338,7 @@ export class GQLClient {
       projectId,
       pullRequest,
       sha: sha || '',
-      experimentalEnabled,
+      experimentalEnabled: !!experimentalEnabled,
       scanSource: params.scanSource,
     })
   }

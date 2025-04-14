@@ -10,7 +10,6 @@ import {
   getFixesData,
   getRelevantVulenrabilitiesFromDiff,
   postAnalysisInsightComment,
-  postAnalysisSummary,
   postFixComment,
   postIssueComment,
 } from './utils'
@@ -123,12 +122,6 @@ export async function addFixCommentsForPr({
       prVulenrabilities,
       pullRequest,
       scanner,
-      scm,
-    }),
-    postAnalysisSummary({
-      fixesById,
-      prVulenrabilities,
-      pullRequest,
       scm,
     }),
   ])

@@ -1,5 +1,9 @@
+import { Agent } from 'node:http'
+
 import { API_URL } from '@mobb/bugsy/constants'
 import { createClient } from 'graphql-ws'
+import { HttpProxyAgent } from 'http-proxy-agent'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import WebsocketNode from 'isomorphic-ws'
 import WebSocket from 'ws'
 
@@ -25,12 +29,25 @@ type WsOptions = BaseWsOptions & {
 }
 
 function createWSClient(options: WsOptions) {
+  const proxy =
+    options.url.startsWith('https://') && process.env['HTTPS_PROXY']
+      ? new HttpsProxyAgent(process.env['HTTPS_PROXY'])
+      : options.url.startsWith('http://') && process.env['HTTP_PROXY']
+        ? new HttpProxyAgent(process.env['HTTP_PROXY'])
+        : null
+  // Create a custom WebSocket that uses the proxy agent
+  const CustomWebSocket = class extends WebSocket {
+    constructor(address: string, protocols?: string | string[]) {
+      super(address, protocols, proxy ? { agent: proxy as Agent } : undefined)
+    }
+  }
+
   return createClient({
     //this is needed to prevent AWS from killing the connection
     //currently our load balancer has a 29s idle timeout
     keepAlive: 10000,
     url: options.url,
-    webSocketImpl: options.websocket || WebSocket,
+    webSocketImpl: proxy ? CustomWebSocket : options.websocket || WebSocket,
     connectionParams: () => {
       return {
         headers:

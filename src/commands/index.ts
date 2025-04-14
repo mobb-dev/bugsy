@@ -204,6 +204,20 @@ export async function handleMobbLogin({
   skipPrompts?: boolean
 }) {
   const { createSpinner } = Spinner({ ci: skipPrompts })
+
+  const isConnected = await inGqlClient.verifyConnection()
+  if (!isConnected) {
+    createSpinner().start().error({
+      text: '🔓 Connection to Mobb: failed to connect to the Mobb server',
+    })
+    throw new CliError(
+      'Connection to Mobb: failed to connect to the Mobb server'
+    )
+  }
+  createSpinner().start().success({
+    text: `🔓 Connection to Mobb: succeeded`,
+  })
+
   const userVerify = await inGqlClient.verifyToken()
   if (userVerify) {
     createSpinner()

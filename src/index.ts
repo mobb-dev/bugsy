@@ -1,7 +1,10 @@
+import Debug from 'debug'
 import { hideBin } from 'yargs/helpers'
 
 import { parseArgs } from './args/yargs'
-import { CliError } from './utils'
+import { CliError, packageJson } from './utils'
+
+const debug = Debug('mobbdev:index')
 
 async function run() {
   return parseArgs(hideBin(process.argv))
@@ -9,6 +12,7 @@ async function run() {
 
 ;(async () => {
   try {
+    debug('Bugsy CLI v%s running...', packageJson.version)
     await run()
     process.exit(0)
   } catch (err) {

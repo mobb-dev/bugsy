@@ -27,6 +27,7 @@ export const SCANNERS = {
   Snyk: 'snyk',
   Sonarqube: 'sonarqube',
   Semgrep: 'semgrep',
+  Datadog: 'datadog',
 } as const
 
 export const scannerToVulnerability_Report_Vendor_Enum = {
@@ -36,6 +37,7 @@ export const scannerToVulnerability_Report_Vendor_Enum = {
   [SCANNERS.Codeql]: Vulnerability_Report_Vendor_Enum.Codeql,
   [SCANNERS.Fortify]: Vulnerability_Report_Vendor_Enum.Fortify,
   [SCANNERS.Semgrep]: Vulnerability_Report_Vendor_Enum.Semgrep,
+  [SCANNERS.Datadog]: Vulnerability_Report_Vendor_Enum.Datadog,
 } as const
 
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])
@@ -50,6 +52,8 @@ const envVariablesSchema = z
     API_URL: z.string(),
     HASURA_ACCESS_KEY: z.string(),
     LOCAL_GRAPHQL_ENDPOINT: z.string(),
+    HTTP_PROXY: z.string().optional().default(''),
+    HTTPS_PROXY: z.string().optional().default(''),
   })
   .required()
 
@@ -90,6 +94,8 @@ export const WEB_APP_URL = envVariables.WEB_APP_URL
 export const API_URL = envVariables.API_URL
 export const HASURA_ACCESS_KEY = envVariables.HASURA_ACCESS_KEY
 export const LOCAL_GRAPHQL_ENDPOINT = envVariables.LOCAL_GRAPHQL_ENDPOINT
+export const HTTPS_PROXY = envVariables.HTTPS_PROXY
+export const HTTP_PROXY = envVariables.HTTP_PROXY
 
 export const PROJECT_PAGE_REGEX =
   /^http:\/\/(127\.0\.0\.1)|(localhost):5173\/organization\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/project\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/

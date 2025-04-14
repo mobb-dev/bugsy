@@ -128,16 +128,7 @@ export class GitlabSCMLib extends SCMLib {
 
   async getUserHasAccessToRepo(): Promise<boolean> {
     this._validateAccessTokenAndUrl()
-    let username = undefined
-    try {
-      username = await this.getUsername()
-    } catch (e) {
-      console.warn(
-        'could not get username. this is okay if a project token is used'
-      )
-    }
     return getGitlabIsUserCollaborator({
-      username,
       accessToken: this.accessToken,
       repoUrl: this.url,
     })

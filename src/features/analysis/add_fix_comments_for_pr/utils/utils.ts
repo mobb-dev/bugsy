@@ -4,11 +4,7 @@ import { z } from 'zod'
 
 import { GQLClient } from '../../graphql'
 import { GetVulByNodeHunk } from '../../graphql/types'
-import {
-  getIssueTypeFriendlyString,
-  mapCategoryToBucket,
-  MOBB_ICON_IMG,
-} from '../../scm'
+import { mapCategoryToBucket, MOBB_ICON_IMG } from '../../scm'
 import { GithubSCMLib } from '../../scm/github'
 import {
   GetGeneralPrCommentResponse,
@@ -22,12 +18,9 @@ import {
   scannerToFriendlyString,
 } from '../constants'
 import {
-  FixesById,
   PostAnalysisInsightCommentParams,
-  PostAnalysisSummaryParams,
   PostFixCommentParams,
   PostIssueCommentParams,
-  PrVulenrabilities,
 } from '../types'
 import { buildFixCommentBody, buildIssueCommentBody } from './buildCommentBody'
 
@@ -227,38 +220,6 @@ export async function postFixComment(params: PostFixCommentParams) {
   })
 }
 
-export function buildAnalysisSummaryComment(params: {
-  prVulenrabilities: PrVulenrabilities
-  fixesById: FixesById
-}) {
-  const { prVulenrabilities: fixesFromDiff, fixesById } = params
-  const { vulnerabilityReportIssueCodeNodes, fixablePrVuls } = fixesFromDiff
-  const title = `# ${MobbIconMarkdown} ${fixablePrVuls} ${
-    fixablePrVuls === 1 ? 'fix is' : 'fixes are'
-  } ready to be committed`
-  const summary = Object.entries(
-    // count every issue type
-    vulnerabilityReportIssueCodeNodes.reduce<Record<string, number>>(
-      (result, vulnerabilityReportIssueCodeNode) => {
-        const { vulnerabilityReportIssue } = vulnerabilityReportIssueCodeNode
-        const fix = fixesById[vulnerabilityReportIssue.fixId]
-        if (!fix) {
-          throw new Error(`fix ${vulnerabilityReportIssue.fixId} not found`)
-        }
-        const issueType = getIssueTypeFriendlyString(fix.safeIssueType)
-        const vulnerabilityReportIssueCount = (result[issueType] || 0) + 1
-        return {
-          ...result,
-          [issueType]: vulnerabilityReportIssueCount,
-        }
-      },
-      {}
-    )
-  ).map(([issueType, issueTypeCount]) => `**${issueType}** - ${issueTypeCount}`)
-
-  return `${title}\n${summary.join('\n')}`
-}
-
 export async function getRelevantVulenrabilitiesFromDiff(params: {
   gqlClient: GQLClient
   diff: string
@@ -299,22 +260,6 @@ export async function getFixesData(params: {
   const { gqlClient, fixesId } = params
   const { fixes } = await gqlClient.getFixes(fixesId)
   return keyBy(fixes, 'id')
-}
-
-export async function postAnalysisSummary(params: PostAnalysisSummaryParams) {
-  const { prVulenrabilities, fixesById, pullRequest, scm } = params
-  // no need to post a summary if there are no fixes
-  if (Object.values(fixesById).length === 0) {
-    return
-  }
-  const analysisSummaryComment = buildAnalysisSummaryComment({
-    fixesById,
-    prVulenrabilities: prVulenrabilities,
-  })
-  await scm.postGeneralPrComment({
-    body: analysisSummaryComment,
-    prNumber: pullRequest,
-  })
 }
 
 export async function postAnalysisInsightComment(

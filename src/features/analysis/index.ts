@@ -502,7 +502,7 @@ export async function _scan(
       projectId,
       vulnerabilityReportFileName: 'report.json',
       sha,
-      experimentalEnabled,
+      experimentalEnabled: !!experimentalEnabled,
       pullRequest: params.pullRequest,
       scanSource: _getScanSource(command, ci),
     },
@@ -703,6 +703,7 @@ export async function _scan(
           sha: commitHash || gitInfo.hash || '0123456789abcdef',
           scanSource: _getScanSource(command, ci),
           pullRequest: params.pullRequest,
+          experimentalEnabled: !!experimentalEnabled,
         },
       })
 

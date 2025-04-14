@@ -835,6 +835,7 @@ export type ValidationSuccess = {
 export enum Vendors {
   Checkmarx = 'Checkmarx',
   CodeQl = 'CodeQL',
+  Datadog = 'Datadog',
   Fortify = 'Fortify',
   Opengrep = 'Opengrep',
   Semgrep = 'Semgrep',
@@ -25776,6 +25777,8 @@ export enum Vulnerability_Report_Vendor_Enum {
   CheckmarxXml = 'checkmarxXml',
   /** codeql */
   Codeql = 'codeql',
+  /** datadog */
+  Datadog = 'datadog',
   /** fortify */
   Fortify = 'fortify',
   /** opengrep */

@@ -332,7 +332,8 @@ export enum Language {
   Php = 'PHP',
   Python = 'PYTHON',
   Sql = 'SQL',
-  Xml = 'XML'
+  Xml = 'XML',
+  Yaml = 'YAML'
 }
 
 export type ListOfProjectsSuccess = {
@@ -1009,6 +1010,158 @@ export type Aggregated_Fix_State_Var_Samp_Fields = {
 export type Aggregated_Fix_State_Variance_Fields = {
   __typename?: 'aggregated_fix_state_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "aggregated_issue_states_with_normalized" */
+export type Aggregated_Issue_States_With_Normalized = {
+  __typename?: 'aggregated_issue_states_with_normalized';
+  normalizedCount?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  unnormalizedCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "aggregated_issue_states_with_normalized" */
+export type Aggregated_Issue_States_With_Normalized_Aggregate = {
+  __typename?: 'aggregated_issue_states_with_normalized_aggregate';
+  aggregate?: Maybe<Aggregated_Issue_States_With_Normalized_Aggregate_Fields>;
+  nodes: Array<Aggregated_Issue_States_With_Normalized>;
+};
+
+/** aggregate fields of "aggregated_issue_states_with_normalized" */
+export type Aggregated_Issue_States_With_Normalized_Aggregate_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_aggregate_fields';
+  avg?: Maybe<Aggregated_Issue_States_With_Normalized_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Aggregated_Issue_States_With_Normalized_Max_Fields>;
+  min?: Maybe<Aggregated_Issue_States_With_Normalized_Min_Fields>;
+  stddev?: Maybe<Aggregated_Issue_States_With_Normalized_Stddev_Fields>;
+  stddev_pop?: Maybe<Aggregated_Issue_States_With_Normalized_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Aggregated_Issue_States_With_Normalized_Stddev_Samp_Fields>;
+  sum?: Maybe<Aggregated_Issue_States_With_Normalized_Sum_Fields>;
+  var_pop?: Maybe<Aggregated_Issue_States_With_Normalized_Var_Pop_Fields>;
+  var_samp?: Maybe<Aggregated_Issue_States_With_Normalized_Var_Samp_Fields>;
+  variance?: Maybe<Aggregated_Issue_States_With_Normalized_Variance_Fields>;
+};
+
+
+/** aggregate fields of "aggregated_issue_states_with_normalized" */
+export type Aggregated_Issue_States_With_Normalized_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Aggregated_Issue_States_With_Normalized_Avg_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_avg_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "aggregated_issue_states_with_normalized". All fields are combined with a logical 'AND'. */
+export type Aggregated_Issue_States_With_Normalized_Bool_Exp = {
+  _and?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Bool_Exp>>;
+  _not?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
+  _or?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Bool_Exp>>;
+  normalizedCount?: InputMaybe<Bigint_Comparison_Exp>;
+  state?: InputMaybe<String_Comparison_Exp>;
+  unnormalizedCount?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Aggregated_Issue_States_With_Normalized_Max_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_max_fields';
+  normalizedCount?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  unnormalizedCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type Aggregated_Issue_States_With_Normalized_Min_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_min_fields';
+  normalizedCount?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  unnormalizedCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "aggregated_issue_states_with_normalized". */
+export type Aggregated_Issue_States_With_Normalized_Order_By = {
+  normalizedCount?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+  unnormalizedCount?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "aggregated_issue_states_with_normalized" */
+export enum Aggregated_Issue_States_With_Normalized_Select_Column {
+  /** column name */
+  NormalizedCount = 'normalizedCount',
+  /** column name */
+  State = 'state',
+  /** column name */
+  UnnormalizedCount = 'unnormalizedCount'
+}
+
+/** aggregate stddev on columns */
+export type Aggregated_Issue_States_With_Normalized_Stddev_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_stddev_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Aggregated_Issue_States_With_Normalized_Stddev_Pop_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_stddev_pop_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Aggregated_Issue_States_With_Normalized_Stddev_Samp_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_stddev_samp_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "aggregated_issue_states_with_normalized" */
+export type Aggregated_Issue_States_With_Normalized_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Aggregated_Issue_States_With_Normalized_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Aggregated_Issue_States_With_Normalized_Stream_Cursor_Value_Input = {
+  normalizedCount?: InputMaybe<Scalars['bigint']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+  unnormalizedCount?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Aggregated_Issue_States_With_Normalized_Sum_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_sum_fields';
+  normalizedCount?: Maybe<Scalars['bigint']['output']>;
+  unnormalizedCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Aggregated_Issue_States_With_Normalized_Var_Pop_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_var_pop_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Aggregated_Issue_States_With_Normalized_Var_Samp_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_var_samp_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Aggregated_Issue_States_With_Normalized_Variance_Fields = {
+  __typename?: 'aggregated_issue_states_with_normalized_variance_fields';
+  normalizedCount?: Maybe<Scalars['Float']['output']>;
+  unnormalizedCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "aggregated_severities" */
@@ -7443,7 +7596,9 @@ export enum IssueLanguage_Enum {
   /** SQL */
   Sql = 'SQL',
   /** XML */
-  Xml = 'XML'
+  Xml = 'XML',
+  /** YAML */
+  Yaml = 'YAML'
 }
 
 /** Boolean expression to compare columns of type "issueLanguage_enum". All fields are combined with logical 'AND'. */
@@ -7652,6 +7807,8 @@ export enum IssueType_Enum {
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
   /** frameable_login_page */
   FrameableLoginPage = 'FRAMEABLE_LOGIN_PAGE',
+  /** GH_ACTIONS_SHELL_INJECTION */
+  GhActionsShellInjection = 'GH_ACTIONS_SHELL_INJECTION',
   /** GraphQl Depth Limit */
   GraphqlDepthLimit = 'GRAPHQL_DEPTH_LIMIT',
   /** Hardcoded Domain in HTML */
@@ -12087,8 +12244,8 @@ export enum Order_By {
 /** columns and relationships of "organization" */
 export type Organization = {
   __typename?: 'organization';
-  /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v2" */
-  aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Fix_State>>;
+  /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v3" */
+  aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
   aggregatedVulnerabilitiesState?: Maybe<Array<Aggregated_Fix_State>>;
   /** This is a deprecated field it should be deleted */
@@ -12150,11 +12307,11 @@ export type Organization = {
 /** columns and relationships of "organization" */
 export type OrganizationAggregatedUnexpiredVulnerabilitiesStateArgs = {
   args: AggregatedUnexpiredVulnerabilitiesState_Organization_Args;
-  distinct_on?: InputMaybe<Array<Aggregated_Fix_State_Select_Column>>;
+  distinct_on?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
-  where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+  order_by?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Order_By>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
 };
 
 
@@ -15785,6 +15942,10 @@ export type Query_Root = {
   aggregated_fix_state: Array<Aggregated_Fix_State>;
   /** fetch aggregated fields from the table: "aggregated_fix_state" */
   aggregated_fix_state_aggregate: Aggregated_Fix_State_Aggregate;
+  /** fetch data from the table: "aggregated_issue_states_with_normalized" */
+  aggregated_issue_states_with_normalized: Array<Aggregated_Issue_States_With_Normalized>;
+  /** fetch aggregated fields from the table: "aggregated_issue_states_with_normalized" */
+  aggregated_issue_states_with_normalized_aggregate: Aggregated_Issue_States_With_Normalized_Aggregate;
   /** fetch data from the table: "aggregated_severities" */
   aggregated_severities: Array<Aggregated_Severities>;
   /** fetch aggregated fields from the table: "aggregated_severities" */
@@ -16200,6 +16361,24 @@ export type Query_RootAggregated_Fix_State_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
   where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
+export type Query_RootAggregated_Issue_States_With_NormalizedArgs = {
+  distinct_on?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Order_By>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
+};
+
+
+export type Query_RootAggregated_Issue_States_With_Normalized_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Order_By>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
 };
 
 
@@ -19527,6 +19706,12 @@ export type Subscription_Root = {
   aggregated_fix_state_aggregate: Aggregated_Fix_State_Aggregate;
   /** fetch data from the table in a streaming manner: "aggregated_fix_state" */
   aggregated_fix_state_stream: Array<Aggregated_Fix_State>;
+  /** fetch data from the table: "aggregated_issue_states_with_normalized" */
+  aggregated_issue_states_with_normalized: Array<Aggregated_Issue_States_With_Normalized>;
+  /** fetch aggregated fields from the table: "aggregated_issue_states_with_normalized" */
+  aggregated_issue_states_with_normalized_aggregate: Aggregated_Issue_States_With_Normalized_Aggregate;
+  /** fetch data from the table in a streaming manner: "aggregated_issue_states_with_normalized" */
+  aggregated_issue_states_with_normalized_stream: Array<Aggregated_Issue_States_With_Normalized>;
   /** fetch data from the table: "aggregated_severities" */
   aggregated_severities: Array<Aggregated_Severities>;
   /** fetch aggregated fields from the table: "aggregated_severities" */
@@ -20052,6 +20237,31 @@ export type Subscription_RootAggregated_Fix_State_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Aggregated_Fix_State_Stream_Cursor_Input>>;
   where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootAggregated_Issue_States_With_NormalizedArgs = {
+  distinct_on?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Order_By>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
+};
+
+
+export type Subscription_RootAggregated_Issue_States_With_Normalized_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Issue_States_With_Normalized_Order_By>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
+};
+
+
+export type Subscription_RootAggregated_Issue_States_With_Normalized_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Aggregated_Issue_States_With_Normalized_Stream_Cursor_Input>>;
+  where?: InputMaybe<Aggregated_Issue_States_With_Normalized_Bool_Exp>;
 };
 
 

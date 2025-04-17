@@ -43,11 +43,9 @@ type GQLClientArgs =
       type: 'token'
     }
 
-// Custom fetch with proxy support
-export const fetchWithProxy: typeof fetchOrig = (url, options = {}) => {
+export function getProxyAgent(url: string) {
   try {
-    // In case of local testing with proxy, the API_URL should be replaced to http://host.docker.internal:8080/v1/graphql
-    const parsedUrl = new URL(url.toString())
+    const parsedUrl = new URL(url)
 
     const isHttp = parsedUrl.protocol === 'http:'
     const isHttps = parsedUrl.protocol === 'https:'
@@ -55,10 +53,22 @@ export const fetchWithProxy: typeof fetchOrig = (url, options = {}) => {
     const proxy = isHttps ? HTTPS_PROXY : isHttp ? HTTP_PROXY : null
 
     if (proxy) {
-      const agent = isHttps
-        ? new HttpsProxyAgent(proxy)
-        : new HttpProxyAgent(proxy)
+      debug('Using proxy %s', proxy)
+      debug('Proxy agent %o', proxy)
+      return isHttps ? new HttpsProxyAgent(proxy) : new HttpProxyAgent(proxy)
+    }
+  } catch (err) {
+    debug(`Skipping proxy for ${url}. Reason: ${(err as Error).message}`)
+  }
+  return undefined
+}
 
+// Custom fetch with proxy support
+export const fetchWithProxy: typeof fetchOrig = (url, options = {}) => {
+  try {
+    const agent = getProxyAgent(url.toString())
+
+    if (agent) {
       return fetchOrig(url, {
         ...options,
         // @ts-expect-error Node-fetch doesn't type 'agent', but it's valid

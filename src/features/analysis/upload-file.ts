@@ -1,6 +1,8 @@
 import Debug from 'debug'
 import fetch, { File, fileFrom, FormData } from 'node-fetch'
 
+import { getProxyAgent } from './graphql/gql'
+
 const debug = Debug('mobbdev:upload-file')
 
 export async function uploadFile({
@@ -33,9 +35,11 @@ export async function uploadFile({
     debug('upload file from buffer')
     form.append('file', new File([file], 'file'))
   }
+  const agent = getProxyAgent(url)
   const response = await fetch(url, {
     method: 'POST',
     body: form,
+    agent,
   })
 
   if (!response.ok) {

@@ -346,4 +346,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.DuplicatedStrings]: undefined,
   [IssueType_Enum.InsecureUuidVersion]: undefined,
   [IssueType_Enum.GhActionsShellInjection]: undefined,
+  [IssueType_Enum.UnsafeWebThread]: undefined,
 }

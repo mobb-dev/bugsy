@@ -7921,6 +7921,8 @@ export enum IssueType_Enum {
   UnsafeDeserialization = 'UNSAFE_DESERIALIZATION',
   /** Unsafe use of target blank */
   UnsafeTargetBlank = 'UNSAFE_TARGET_BLANK',
+  /** UNSAFE_WEB_THREAD */
+  UnsafeWebThread = 'UNSAFE_WEB_THREAD',
   /** A public method agument is not checked for null */
   UnvalidatedPublicMethodArgument = 'UNVALIDATED_PUBLIC_METHOD_ARGUMENT',
   /** Useless regular-expression character escape */

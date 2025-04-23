@@ -22,6 +22,7 @@ import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import * as openExport from 'open'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
@@ -171,6 +172,10 @@ it('test manifest files are included in zip upload', async () => {
 describe('Basic Analyze tests', () => {
   it('Full analyze flow', async () => {
     mockedOpen.mockClear()
+    const httpsProxyAgentConnectSpy = vi.spyOn(
+      HttpsProxyAgent.prototype,
+      'connect'
+    )
     const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
     await analysisExports.runAnalysis(
@@ -186,6 +191,13 @@ describe('Basic Analyze tests', () => {
       { skipPrompts: true }
     )
 
+    //This test, when executed with a proxy, only calls the https proxy class for websocket connections
+    //This validation here is to make sure that we do use the proxy when needed for websocket connections
+    if (process.env['HTTP_PROXY']) {
+      expect(httpsProxyAgentConnectSpy).toHaveBeenCalled()
+    } else {
+      expect(httpsProxyAgentConnectSpy).not.toHaveBeenCalled()
+    }
     expect(runAnalysisSpy).toHaveBeenCalled()
     expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true, 1)
     expect(mockedOpen).toHaveBeenCalledTimes(2)

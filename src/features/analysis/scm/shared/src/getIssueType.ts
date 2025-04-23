@@ -110,6 +110,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'String Literals Should not Be Duplicated',
   [IssueType_Enum.InsecureUuidVersion]: 'Insecure UUID Version',
   [IssueType_Enum.GhActionsShellInjection]: 'GitHub Actions Shell Injection',
+  [IssueType_Enum.UnsafeWebThread]: 'Unsafe Web Thread',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

@@ -1,13 +1,15 @@
 import { Agent } from 'node:http'
 
 import { API_URL } from '@mobb/bugsy/constants'
+import Debug from 'debug'
 import { createClient } from 'graphql-ws'
-import { HttpProxyAgent } from 'http-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import WebsocketNode from 'isomorphic-ws'
 import WebSocket from 'ws'
 
 import { API_KEY_HEADER_NAME } from './gql'
+
+const debug = Debug('mobbdev:subscribe')
 
 const SUBSCRIPTION_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes in ms
 
@@ -29,12 +31,18 @@ type WsOptions = BaseWsOptions & {
 }
 
 function createWSClient(options: WsOptions) {
+  //We use the HttpsProxyAgent class for both options and not the HttpProxyAgent class as it doesn't work for websocket connections.
+  //The HttpsProxyAgent class makes the connection use the CONNECT HTTP method with the proxy server which is needed for websocket connections,
+  //even non-encrypted ones.
   const proxy =
-    options.url.startsWith('https://') && process.env['HTTPS_PROXY']
+    options.url.startsWith('wss://') && process.env['HTTPS_PROXY']
       ? new HttpsProxyAgent(process.env['HTTPS_PROXY'])
-      : options.url.startsWith('http://') && process.env['HTTP_PROXY']
-        ? new HttpProxyAgent(process.env['HTTP_PROXY'])
+      : options.url.startsWith('ws://') && process.env['HTTP_PROXY']
+        ? new HttpsProxyAgent(process.env['HTTP_PROXY'])
         : null
+  debug(
+    `Using proxy: ${proxy ? 'yes' : 'no'} with url: ${options.url} and with proxy: ${process.env['HTTP_PROXY']} for the websocket connection`
+  )
   // Create a custom WebSocket that uses the proxy agent
   const CustomWebSocket = class extends WebSocket {
     constructor(address: string, protocols?: string | string[]) {

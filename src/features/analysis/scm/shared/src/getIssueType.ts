@@ -4,6 +4,7 @@ import {
   IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
 } from '../../generates/client_generates'
+import { IssuePartsFp } from './types/issue'
 
 export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.NoLimitsOrThrottling]: 'Missing Rate Limiting',
@@ -110,7 +111,14 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'String Literals Should not Be Duplicated',
   [IssueType_Enum.InsecureUuidVersion]: 'Insecure UUID Version',
   [IssueType_Enum.GhActionsShellInjection]: 'GitHub Actions Shell Injection',
+  [IssueType_Enum.ModifiedDefaultParam]: 'Modified Default Param',
   [IssueType_Enum.UnsafeWebThread]: 'Unsafe Web Thread',
+  [IssueType_Enum.NoVar]: 'Prefer "let" or "const"',
+  [IssueType_Enum.InsecureTmpFile]: 'Insecure Temporary File',
+  [IssueType_Enum.SystemExitShouldReraise]: 'SystemExit Should Reraise',
+  [IssueType_Enum.NoReturnInFinally]: 'No Return in Finally Block',
+  [IssueType_Enum.AvoidIdentityComparisonCachedTypes]:
+    'Avoid Identity Comparison of Cached Types',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)
@@ -162,4 +170,38 @@ export const issueDescription: Record<
     'The flagged code resides in a test-specific path or context. This categorization indicates that **it supports testing scenarios and is isolated from production use**.',
   [Vulnerability_Report_Issue_Tag_Enum.VendorCode]:
     'The flagged code originates from a third-party library or dependency maintained externally. This categorization suggests that **the issue lies outside the application’s direct control** and should be addressed by the vendor if necessary.',
+}
+
+type FalsePositiveData = IssuePartsFp['getFalsePositive']
+
+function replaceKeysWithValues(
+  fixDescription: string,
+  extraContext: { key: string; value: string }[]
+): string {
+  let result = fixDescription
+  extraContext.forEach(({ key, value }) => {
+    result = result.replace(`\${${key}}`, value)
+  })
+  return result
+}
+
+export function getParsedFalsePositiveMessage(data: FalsePositiveData): {
+  description: string
+  contextString: string | null
+} {
+  const { fixDescription, extraContext } = data
+
+  const containsTemplate = extraContext.some((context) =>
+    fixDescription.includes(`\${${context.key}}`)
+  )
+
+  const description = containsTemplate
+    ? replaceKeysWithValues(fixDescription, extraContext)
+    : fixDescription
+
+  const contextString = containsTemplate
+    ? null
+    : `\`\`\`${extraContext.map(({ value }) => value).join(' ')} \`\`\``
+
+  return { description, contextString }
 }

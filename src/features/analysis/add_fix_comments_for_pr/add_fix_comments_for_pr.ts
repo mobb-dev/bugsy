@@ -2,7 +2,11 @@ import { Scanner } from '@mobb/bugsy/constants'
 import Debug from 'debug'
 
 import { GQLClient } from '../graphql'
-import { SCMLib } from '../scm'
+import {
+  FalsePositivePartsZ,
+  getParsedFalsePositiveMessage,
+  SCMLib,
+} from '../scm'
 import { GithubSCMLib } from '../scm/github/GithubSCMLib'
 import {
   deleteAllPreviousComments,
@@ -90,34 +94,51 @@ export async function addFixCommentsForPr({
         })
       }
     ),
-    ...irrelevantVulnerabilityReportIssues.map((vulnerabilityReportIssue) => {
-      return vulnerabilityReportIssue.codeNodes.map(
-        (vulnerabilityReportIssueCodeNode) => {
-          return postIssueComment({
-            vulnerabilityReportIssueCodeNode: {
-              path: vulnerabilityReportIssueCodeNode.path,
-              startLine: vulnerabilityReportIssueCodeNode.startLine,
-              vulnerabilityReportIssue: {
-                fixId: '',
-                safeIssueType: vulnerabilityReportIssue.safeIssueType,
-                vulnerabilityReportIssueTags:
-                  vulnerabilityReportIssue.vulnerabilityReportIssueTags,
-                category: vulnerabilityReportIssue.category,
-              },
-              vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
-            },
-            projectId,
-            analysisId,
-            organizationId,
-            fixesById,
-            scm,
-            pullRequest,
-            scanner,
-            commitSha,
+    ...irrelevantVulnerabilityReportIssues.map(
+      async (vulnerabilityReportIssue) => {
+        let fpDescription: string | null = null
+        if (vulnerabilityReportIssue.fpId) {
+          const fpRes = await gqlClient.getFalsePositive({
+            fpId: vulnerabilityReportIssue.fpId,
           })
+          const parsedFpRes = await FalsePositivePartsZ.parseAsync(
+            fpRes?.getFalsePositive
+          )
+          const { description, contextString } =
+            getParsedFalsePositiveMessage(parsedFpRes)
+          fpDescription = contextString
+            ? `${description}\n\n${contextString}`
+            : description
         }
-      )
-    }),
+        return vulnerabilityReportIssue.codeNodes.map(
+          (vulnerabilityReportIssueCodeNode) => {
+            return postIssueComment({
+              vulnerabilityReportIssueCodeNode: {
+                path: vulnerabilityReportIssueCodeNode.path,
+                startLine: vulnerabilityReportIssueCodeNode.startLine,
+                vulnerabilityReportIssue: {
+                  fixId: '',
+                  safeIssueType: vulnerabilityReportIssue.safeIssueType,
+                  vulnerabilityReportIssueTags:
+                    vulnerabilityReportIssue.vulnerabilityReportIssueTags,
+                  category: vulnerabilityReportIssue.category,
+                },
+                vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
+              },
+              projectId,
+              analysisId,
+              organizationId,
+              fixesById,
+              scm,
+              pullRequest,
+              scanner,
+              commitSha,
+              fpDescription,
+            })
+          }
+        )
+      }
+    ),
     postAnalysisInsightComment({
       prVulenrabilities,
       pullRequest,

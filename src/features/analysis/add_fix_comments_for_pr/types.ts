@@ -31,6 +31,7 @@ export type PostIssueCommentParams = {
   pullRequest: number
   scanner: Scanner
   commitSha: string
+  fpDescription: string | null
 }
 
 export type PostAnalysisSummaryParams = {

@@ -64,6 +64,7 @@ const VulnerabilityReportIssueNoFixCodeNodeZ = z.object({
       fixId: z.string().nullable(),
       category: ValidCategoriesZ,
       safeIssueType: z.string(),
+      fpId: z.string().uuid().nullable(),
       codeNodes: z.array(
         z.object({
           path: z.string(),

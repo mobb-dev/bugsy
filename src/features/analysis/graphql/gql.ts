@@ -14,6 +14,7 @@ import {
   GetAnalysisSubscription,
   GetAnalysisSubscriptionVariables,
   GetEncryptedApiTokenQueryVariables,
+  GetFalsePositiveQueryVariables,
   getSdk,
   GitReferenceQueryVariables,
   Sdk,
@@ -458,5 +459,8 @@ export class GQLClient {
   }
   async getReferenceData(args: GitReferenceQueryVariables) {
     return this._clientSdk.gitReference(args)
+  }
+  async getFalsePositive(args: GetFalsePositiveQueryVariables) {
+    return this._clientSdk.getFalsePositive(args)
   }
 }

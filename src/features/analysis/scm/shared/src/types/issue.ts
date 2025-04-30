@@ -93,7 +93,7 @@ export const BaseIssuePartsZ = z.object({
     .nullish(),
 })
 
-const FalsePositivePartsZ = z.object({
+export const FalsePositivePartsZ = z.object({
   extraContext: z.array(z.object({ key: z.string(), value: z.string() })),
   fixDescription: z.string(),
 })

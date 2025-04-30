@@ -98,10 +98,12 @@ export const getCommitIssueDescription = ({
   vendor,
   issueType,
   irrelevantIssueWithTags,
+  fpDescription,
 }: {
   issueType: string
   vendor: Vulnerability_Report_Vendor_Enum
   irrelevantIssueWithTags?: { tag: Vulnerability_Report_Issue_Tag_Enum }[]
+  fpDescription: string | null
 }): string => {
   const issueTypeString = getIssueTypeFriendlyString(issueType)
 
@@ -110,13 +112,14 @@ export const getCommitIssueDescription = ({
   const parseIssueTypeRes = z.nativeEnum(IssueType_Enum).safeParse(issueType)
   if (issueType && parseIssueTypeRes.success) {
     if (irrelevantIssueWithTags?.[0]?.tag) {
-      description += `
+      description = `
 > [!tip]
+> The following issues reported by ${capitalizeFirstLetter(vendor)} on this PR were found to be irrelevant to your project:
 > ${issueTypeString} - ${lowercaseFirstLetter(getTagTooltip(irrelevantIssueWithTags[0].tag))}.
 > Mobb recommends to ignore this issue, however fix is available if you think differently. \n
 
 ## Justification
-${issueDescription[irrelevantIssueWithTags[0].tag]}
+${fpDescription ?? issueDescription[irrelevantIssueWithTags[0].tag]}
 `
     }
 

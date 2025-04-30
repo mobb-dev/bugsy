@@ -56,6 +56,7 @@ export type BuildIssueCommentBodyParams = {
   organizationId: string
   issueType: string
   irrelevantIssueWithTags: { tag: Vulnerability_Report_Issue_Tag_Enum }[]
+  fpDescription: string | null
 }
 
 export function buildFixCommentBody({
@@ -160,6 +161,7 @@ export function buildIssueCommentBody({
   analysisId,
   organizationId,
   irrelevantIssueWithTags,
+  fpDescription,
 }: BuildIssueCommentBodyParams) {
   const issueUrl = getIssueUrlWithRedirect({
     appBaseUrl: WEB_APP_URL,
@@ -176,7 +178,8 @@ export function buildIssueCommentBody({
     issueType,
     vendor: scannerToVulnerability_Report_Vendor_Enum[scanner],
     irrelevantIssueWithTags,
+    fpDescription,
   })
-  const issuePageLink = `[Learn more and fine tune the issue](${issueUrl})`
+  const issuePageLink = `[Learn more about this issue](${issueUrl})`
   return `${title}\n${subTitle}\n${issuePageLink}`
 }

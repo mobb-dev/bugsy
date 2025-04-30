@@ -222,10 +222,23 @@ query getVulByNodesMetadata(
       vulnerabilityReportIssueTags {
         tag: vulnerability_report_issue_tag_value
       }
-      codeNodes(order_by: { index: desc }, where: { _or: $filters }) {
+      codeNodes(order_by: { index: desc }, where: { _or: $filters }, limit: 1) {
         path
         startLine
       }
+      fpId
+    }
+  }
+}
+
+query getFalsePositive($fpId: uuid!) {
+  getFalsePositive(fpId: $fpId) {
+    ... on FalsePositiveData {
+      extraContext {
+        key
+        value
+      }
+      fixDescription
     }
   }
 }

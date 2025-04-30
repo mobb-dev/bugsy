@@ -115,6 +115,12 @@ export type ClaimInvitationSuccess = {
   status: Status;
 };
 
+export type CommitToSameBranchFixInput = {
+  commitDescription?: InputMaybe<Scalars['String']['input']>;
+  commitMessage: Scalars['String']['input'];
+  fixId: Scalars['String']['input'];
+};
+
 export type CreateBrokerApiTokenResponse = {
   __typename?: 'CreateBrokerApiTokenResponse';
   token: Scalars['String']['output'];
@@ -7775,6 +7781,8 @@ export enum IssueType_Constraint {
 export enum IssueType_Enum {
   /** Disabling auto-escaping makes the code more vulnerable to XSS */
   AutoEscapeFalse = 'AUTO_ESCAPE_FALSE',
+  /** AVOID_IDENTITY_COMPARISON_CACHED_TYPES */
+  AvoidIdentityComparisonCachedTypes = 'AVOID_IDENTITY_COMPARISON_CACHED_TYPES',
   /** Client DOM Stored Code Injection */
   ClientDomStoredCodeInjection = 'CLIENT_DOM_STORED_CODE_INJECTION',
   /** Command Injection */
@@ -7845,6 +7853,8 @@ export enum IssueType_Enum {
   InsecureCookie = 'INSECURE_COOKIE',
   /** Insecure Randomness */
   InsecureRandomness = 'INSECURE_RANDOMNESS',
+  /** INSECURE_TMP_FILE */
+  InsecureTmpFile = 'INSECURE_TMP_FILE',
   /** Insecure UUID version */
   InsecureUuidVersion = 'INSECURE_UUID_VERSION',
   /** Insufficient Logging of Sensitive Operations */
@@ -7869,6 +7879,8 @@ export enum IssueType_Enum {
   MissingHstsHeader = 'MISSING_HSTS_HEADER',
   /** Missing TLS MinVersion */
   MissingSslMinversion = 'MISSING_SSL_MINVERSION',
+  /** MODIFIED_DEFAULT_PARAM */
+  ModifiedDefaultParam = 'MODIFIED_DEFAULT_PARAM',
   /** Non-final public static field */
   NonFinalPublicStaticField = 'NON_FINAL_PUBLIC_STATIC_FIELD',
   /** Fields that are only assigned in the constructor should be readonly */
@@ -7877,6 +7889,10 @@ export enum IssueType_Enum {
   NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
   /** Missing rate limiting */
   NoLimitsOrThrottling = 'NO_LIMITS_OR_THROTTLING',
+  /** NO_RETURN_IN_FINALLY */
+  NoReturnInFinally = 'NO_RETURN_IN_FINALLY',
+  /** NO_VAR */
+  NoVar = 'NO_VAR',
   /** Null Dereference */
   NullDereference = 'NULL_DEREFERENCE',
   /** Open Redirect */
@@ -7907,6 +7923,8 @@ export enum IssueType_Enum {
   Ssrf = 'SSRF',
   /** Composite format strings should be used correctly */
   StringFormatMisuse = 'STRING_FORMAT_MISUSE',
+  /** SYSTEM_EXIT_SHOULD_RERAISE */
+  SystemExitShouldReraise = 'SYSTEM_EXIT_SHOULD_RERAISE',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
   SystemInformationLeak = 'SYSTEM_INFORMATION_LEAK',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
@@ -9026,9 +9044,7 @@ export type Mutation_RootCommitToDifferentBranchArgs = {
 
 /** mutation root */
 export type Mutation_RootCommitToSameBranchArgs = {
-  commitDescription?: InputMaybe<Scalars['String']['input']>;
-  commitMessage: Scalars['String']['input'];
-  fixId: Scalars['String']['input'];
+  fixes: Array<CommitToSameBranchFixInput>;
   prCommentId?: InputMaybe<Scalars['Int']['input']>;
   prId?: InputMaybe<Scalars['Int']['input']>;
   submitBranch?: InputMaybe<Scalars['String']['input']>;
@@ -19084,6 +19100,7 @@ export type Smallint_Comparison_Exp = {
 /** Table that represents requests by the user to open PRs on GitHub or MRs on Gitlab or other requests on other SCM types for one or multiple Mobb fixes */
 export type Submit_Fix_Request = {
   __typename?: 'submit_fix_request';
+  commitToSameBranch?: Maybe<Scalars['Boolean']['output']>;
   /** An object relationship */
   createdByUser: User;
   createdByUserId: Scalars['uuid']['output'];
@@ -19107,6 +19124,7 @@ export type Submit_Fix_Request = {
   title: Scalars['String']['output'];
   type: Submit_Fix_Request_Scm_Type_Enum;
   updatedAt: Scalars['timestamptz']['output'];
+  userError?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -19176,6 +19194,7 @@ export type Submit_Fix_Request_Bool_Exp = {
   _and?: InputMaybe<Array<Submit_Fix_Request_Bool_Exp>>;
   _not?: InputMaybe<Submit_Fix_Request_Bool_Exp>;
   _or?: InputMaybe<Array<Submit_Fix_Request_Bool_Exp>>;
+  commitToSameBranch?: InputMaybe<Boolean_Comparison_Exp>;
   createdByUser?: InputMaybe<User_Bool_Exp>;
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -19193,6 +19212,7 @@ export type Submit_Fix_Request_Bool_Exp = {
   title?: InputMaybe<String_Comparison_Exp>;
   type?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum_Comparison_Exp>;
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  userError?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "submit_fix_request" */
@@ -19203,6 +19223,7 @@ export enum Submit_Fix_Request_Constraint {
 
 /** input type for inserting data into table "submit_fix_request" */
 export type Submit_Fix_Request_Insert_Input = {
+  commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -19218,6 +19239,7 @@ export type Submit_Fix_Request_Insert_Input = {
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userError?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
@@ -19232,6 +19254,7 @@ export type Submit_Fix_Request_Max_Fields = {
   targetBranchName?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  userError?: Maybe<Scalars['String']['output']>;
 };
 
 /** aggregate min on columns */
@@ -19246,6 +19269,7 @@ export type Submit_Fix_Request_Min_Fields = {
   targetBranchName?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  userError?: Maybe<Scalars['String']['output']>;
 };
 
 /** response of any mutation on the table "submit_fix_request" */
@@ -19273,6 +19297,7 @@ export type Submit_Fix_Request_On_Conflict = {
 
 /** Ordering options when selecting data from "submit_fix_request". */
 export type Submit_Fix_Request_Order_By = {
+  commitToSameBranch?: InputMaybe<Order_By>;
   createdByUser?: InputMaybe<User_Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
@@ -19288,6 +19313,7 @@ export type Submit_Fix_Request_Order_By = {
   title?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
+  userError?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: submit_fix_request */
@@ -19452,6 +19478,8 @@ export type Submit_Fix_Request_Scm_Type_Updates = {
 /** select columns of table "submit_fix_request" */
 export enum Submit_Fix_Request_Select_Column {
   /** column name */
+  CommitToSameBranch = 'commitToSameBranch',
+  /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
   CreatedOn = 'createdOn',
@@ -19472,11 +19500,14 @@ export enum Submit_Fix_Request_Select_Column {
   /** column name */
   Type = 'type',
   /** column name */
-  UpdatedAt = 'updatedAt'
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  UserError = 'userError'
 }
 
 /** input type for updating data in table "submit_fix_request" */
 export type Submit_Fix_Request_Set_Input = {
+  commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -19488,6 +19519,7 @@ export type Submit_Fix_Request_Set_Input = {
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userError?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "submit_fix_request_state" */
@@ -19654,6 +19686,7 @@ export type Submit_Fix_Request_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Submit_Fix_Request_Stream_Cursor_Value_Input = {
+  commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -19665,10 +19698,13 @@ export type Submit_Fix_Request_Stream_Cursor_Value_Input = {
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userError?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** update columns of table "submit_fix_request" */
 export enum Submit_Fix_Request_Update_Column {
+  /** column name */
+  CommitToSameBranch = 'commitToSameBranch',
   /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
@@ -19690,7 +19726,9 @@ export enum Submit_Fix_Request_Update_Column {
   /** column name */
   Type = 'type',
   /** column name */
-  UpdatedAt = 'updatedAt'
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  UserError = 'userError'
 }
 
 export type Submit_Fix_Request_Updates = {
@@ -26317,7 +26355,14 @@ export type GetVulByNodesMetadataQueryVariables = Exact<{
 }>;
 
 
-export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
+export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, safeIssueType?: string | null, fixId?: any | null, category?: string | null, fpId?: any | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
+
+export type GetFalsePositiveQueryVariables = Exact<{
+  fpId: Scalars['uuid']['input'];
+}>;
+
+
+export type GetFalsePositiveQuery = { __typename?: 'query_root', getFalsePositive: { __typename?: 'FalsePositiveData', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } | { __typename?: 'GetFixNoFixError' } };
 
 export type UpdateScmTokenMutationVariables = Exact<{
   scmType: Scalars['String']['input'];
@@ -26621,10 +26666,24 @@ export const GetVulByNodesMetadataDocument = `
       vulnerabilityReportIssueTags {
         tag: vulnerability_report_issue_tag_value
       }
-      codeNodes(order_by: {index: desc}, where: {_or: $filters}) {
+      codeNodes(order_by: {index: desc}, where: {_or: $filters}, limit: 1) {
         path
         startLine
       }
+      fpId
+    }
+  }
+}
+    `;
+export const GetFalsePositiveDocument = `
+    query getFalsePositive($fpId: uuid!) {
+  getFalsePositive(fpId: $fpId) {
+    ... on FalsePositiveData {
+      extraContext {
+        key
+        value
+      }
+      fixDescription
     }
   }
 }
@@ -26859,6 +26918,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getVulByNodesMetadata(variables: GetVulByNodesMetadataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetVulByNodesMetadataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetVulByNodesMetadataQuery>(GetVulByNodesMetadataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getVulByNodesMetadata', 'query', variables);
+    },
+    getFalsePositive(variables: GetFalsePositiveQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetFalsePositiveQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFalsePositiveQuery>(GetFalsePositiveDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getFalsePositive', 'query', variables);
     },
     updateScmToken(variables: UpdateScmTokenMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateScmTokenMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateScmTokenMutation>(UpdateScmTokenDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateScmToken', 'mutation', variables);

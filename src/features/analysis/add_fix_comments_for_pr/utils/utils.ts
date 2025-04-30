@@ -111,6 +111,7 @@ export async function postIssueComment(params: PostIssueCommentParams) {
     commitSha,
     pullRequest,
     scanner,
+    fpDescription,
   } = params
 
   const {
@@ -149,6 +150,7 @@ export async function postIssueComment(params: PostIssueCommentParams) {
     projectId,
     analysisId,
     organizationId,
+    fpDescription,
   })
 
   return await scm.updatePrComment({

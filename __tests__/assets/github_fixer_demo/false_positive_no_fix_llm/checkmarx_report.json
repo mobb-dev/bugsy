@@ -1,0 +1,160 @@
+{
+  "results": [
+    {
+      "type": "sast",
+      "label": "sast",
+      "id": "rSrPyHSPsTi9EwRdV1njk8zPzOA=",
+      "similarityId": "-670646112",
+      "status": "RECURRENT",
+      "state": "TO_VERIFY",
+      "severity": "LOW",
+      "created": "2025-02-07T13:23:42Z",
+      "firstFoundAt": "2025-01-31T10:55:05Z",
+      "foundAt": "2025-02-07T13:23:42Z",
+      "firstScanId": "86e588d2-70ec-44e0-a439-4a4830f93f35",
+      "description": "Method Lambda at line 13 of /main.go gets user input from element Form. This element\u2019s value flows through the code without being properly sanitized or validated, and is eventually used in writing an audit log in Lambda at line 15 of /main.go.\n\nThis may enable Log Forging.\n\n",
+      "descriptionHTML": "<p>Method Lambda at line 13 of /main.go gets user input from element Form. This element\u2019s value flows through the code without being properly sanitized or validated, and is eventually used in writing an audit log in Lambda at line 15 of /main.go.</p>\n\n<p>This may enable Log Forging.</p>\n",
+      "data": {
+        "queryId": 2463860450102540519,
+        "queryName": "Log_Forging",
+        "group": "Go_Low_Visibility",
+        "resultHash": "rSrPyHSPsTi9EwRdV1njk8zPzOA=",
+        "languageName": "Go",
+        "nodes": [
+          {
+            "id": "Kl7c6Pr0WTA90cLptY69pXs+/CU=",
+            "line": 13,
+            "name": "Form",
+            "column": 13,
+            "length": 4,
+            "method": "Lambda",
+            "nodeID": 74,
+            "domType": "MemberAccess",
+            "fileName": "/main.go",
+            "fullName": "CxGoNS_main_da39a3ee.serve.Lambda.r.Form",
+            "typeName": "Form",
+            "methodLine": 11,
+            "definitions": "0"
+          },
+          {
+            "id": "1H3H6Qvva0The2SnOxwukoav4B4=",
+            "line": 13,
+            "name": "Get",
+            "column": 18,
+            "length": 3,
+            "method": "Lambda",
+            "nodeID": 77,
+            "domType": "MethodInvokeExpr",
+            "fileName": "/main.go",
+            "fullName": "CxGoNS_main_da39a3ee.serve.Lambda.r.Form.Get",
+            "typeName": "Get",
+            "methodLine": 11,
+            "definitions": "0"
+          },
+          {
+            "id": "meXYgr+uRxWH2PnowgulnHJFNsg=",
+            "line": 13,
+            "name": "user",
+            "column": 3,
+            "length": 4,
+            "method": "Lambda",
+            "nodeID": 72,
+            "domType": "Declarator",
+            "fileName": "/main.go",
+            "fullName": "CxGoNS_main_da39a3ee.serve.Lambda.user",
+            "typeName": "object",
+            "methodLine": 11,
+            "definitions": "1"
+          },
+          {
+            "id": "HPWdD/EAMqiaGpG8zdpkApIMaGM=",
+            "line": 15,
+            "name": "user",
+            "column": 93,
+            "length": 4,
+            "method": "Lambda",
+            "nodeID": 119,
+            "domType": "UnknownReference",
+            "fileName": "/main.go",
+            "fullName": "CxGoNS_main_da39a3ee.serve.Lambda.user",
+            "typeName": "object",
+            "methodLine": 11,
+            "definitions": "1"
+          },
+          {
+            "id": "Sfck9Z2KIAYvuhHL+7N6V2NaR4U=",
+            "line": 15,
+            "name": "Sprintf",
+            "column": 79,
+            "length": 7,
+            "method": "Lambda",
+            "nodeID": 113,
+            "domType": "MethodInvokeExpr",
+            "fileName": "/main.go",
+            "fullName": "fmt.Sprintf",
+            "typeName": "Sprintf",
+            "methodLine": 11,
+            "definitions": "0"
+          },
+          {
+            "id": "Em6FTefeo8nvI8bS/EXJC2jXQxw=",
+            "line": 15,
+            "name": "ReplaceAll",
+            "column": 64,
+            "length": 10,
+            "method": "Lambda",
+            "nodeID": 106,
+            "domType": "MethodInvokeExpr",
+            "fileName": "/main.go",
+            "fullName": "strings.ReplaceAll",
+            "typeName": "ReplaceAll",
+            "methodLine": 11,
+            "definitions": "0"
+          },
+          {
+            "id": "3j/swvnyPvJHqsKgIG0WHJmUJq0=",
+            "line": 15,
+            "name": "ReplaceAll",
+            "column": 45,
+            "length": 10,
+            "method": "Lambda",
+            "nodeID": 99,
+            "domType": "MethodInvokeExpr",
+            "fileName": "/main.go",
+            "fullName": "strings.ReplaceAll",
+            "typeName": "ReplaceAll",
+            "methodLine": 11,
+            "definitions": "0"
+          },
+          {
+            "id": "hGu2mnBiIYLg7RZmv7SnJHeDqJ8=",
+            "line": 15,
+            "name": "Printf",
+            "column": 7,
+            "length": 6,
+            "method": "Lambda",
+            "nodeID": 90,
+            "domType": "MethodInvokeExpr",
+            "fileName": "/main.go",
+            "fullName": "log.Printf",
+            "typeName": "Printf",
+            "methodLine": 11,
+            "definitions": "0"
+          }
+        ]
+      },
+      "comments": {},
+      "vulnerabilityDetails": {
+        "cweId": 117,
+        "cvss": {},
+        "compliances": [
+          "OWASP ASVS",
+          "OWASP Top 10 2021",
+          "PCI DSS v4.0"
+        ]
+      }
+    }
+  ],
+  "totalCount": 1,
+  "scanID": "b6fba191-4da1-4341-b2ab-1c19748404fb"
+}

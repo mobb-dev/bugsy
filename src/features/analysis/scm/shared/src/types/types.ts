@@ -85,7 +85,9 @@ export const ReportQueryResultZ = z.object({
     }),
     fixesDoneCount: z.number(),
     fixesInprogressCount: z.number(),
-    fixesReadyCount: z.number(),
+    fixesReadyCount: z.object({
+      aggregate: z.object({ count: z.number() }),
+    }),
     issueTypes: z.record(z.string(), z.number()).nullable(),
     issueLanguages: z.record(z.string(), z.number()).nullable(),
     fixesCountByEffort: z.record(z.string(), z.number()).nullable(),

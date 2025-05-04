@@ -115,6 +115,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.UnsafeWebThread]: 'Unsafe Web Thread',
   [IssueType_Enum.NoVar]: 'Prefer "let" or "const"',
   [IssueType_Enum.InsecureTmpFile]: 'Insecure Temporary File',
+  [IssueType_Enum.ReturnShouldNotBeInvariant]: 'Return Should Not Be Invariant',
   [IssueType_Enum.SystemExitShouldReraise]: 'SystemExit Should Reraise',
   [IssueType_Enum.NoReturnInFinally]: 'No Return in Finally Block',
   [IssueType_Enum.AvoidIdentityComparisonCachedTypes]:

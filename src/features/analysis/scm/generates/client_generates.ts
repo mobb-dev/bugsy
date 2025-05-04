@@ -7917,6 +7917,8 @@ export enum IssueType_Enum {
   RegexInjection = 'REGEX_INJECTION',
   /** REGEX_MISSING_TIMEOUT */
   RegexMissingTimeout = 'REGEX_MISSING_TIMEOUT',
+  /** RETURN_SHOULD_NOT_BE_INVARIANT */
+  ReturnShouldNotBeInvariant = 'RETURN_SHOULD_NOT_BE_INVARIANT',
   /** SQL Injection */
   SqlInjection = 'SQL_Injection',
   /** Server Side Request Forgery */

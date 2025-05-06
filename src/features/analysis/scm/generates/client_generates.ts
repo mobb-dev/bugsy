@@ -8330,6 +8330,10 @@ export type Mutation_Root = {
   delete_user?: Maybe<User_Mutation_Response>;
   /** delete single row from the table: "user" */
   delete_user_by_pk?: Maybe<User>;
+  /** delete data from the table: "user_email_notification_settings" */
+  delete_user_email_notification_settings?: Maybe<User_Email_Notification_Settings_Mutation_Response>;
+  /** delete single row from the table: "user_email_notification_settings" */
+  delete_user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
   /** delete data from the table: "vulnerability_report" */
   delete_vulnerability_report?: Maybe<Vulnerability_Report_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report" */
@@ -8565,6 +8569,10 @@ export type Mutation_Root = {
   insert_submit_fix_request_state_one?: Maybe<Submit_Fix_Request_State>;
   /** insert data into the table: "user" */
   insert_user?: Maybe<User_Mutation_Response>;
+  /** insert data into the table: "user_email_notification_settings" */
+  insert_user_email_notification_settings?: Maybe<User_Email_Notification_Settings_Mutation_Response>;
+  /** insert a single row into the table: "user_email_notification_settings" */
+  insert_user_email_notification_settings_one?: Maybe<User_Email_Notification_Settings>;
   /** insert a single row into the table: "user" */
   insert_user_one?: Maybe<User>;
   /** insert data into the table: "vulnerability_report" */
@@ -8917,6 +8925,12 @@ export type Mutation_Root = {
   update_user?: Maybe<User_Mutation_Response>;
   /** update single row of the table: "user" */
   update_user_by_pk?: Maybe<User>;
+  /** update data of the table: "user_email_notification_settings" */
+  update_user_email_notification_settings?: Maybe<User_Email_Notification_Settings_Mutation_Response>;
+  /** update single row of the table: "user_email_notification_settings" */
+  update_user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
+  /** update multiples rows of table: "user_email_notification_settings" */
+  update_user_email_notification_settings_many?: Maybe<Array<Maybe<User_Email_Notification_Settings_Mutation_Response>>>;
   /** update multiples rows of table: "user" */
   update_user_many?: Maybe<Array<Maybe<User_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report" */
@@ -9689,6 +9703,18 @@ export type Mutation_RootDelete_UserArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_User_Email_Notification_SettingsArgs = {
+  where: User_Email_Notification_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_User_Email_Notification_Settings_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -10506,6 +10532,20 @@ export type Mutation_RootInsert_Submit_Fix_Request_State_OneArgs = {
 export type Mutation_RootInsert_UserArgs = {
   objects: Array<User_Insert_Input>;
   on_conflict?: InputMaybe<User_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_User_Email_Notification_SettingsArgs = {
+  objects: Array<User_Email_Notification_Settings_Insert_Input>;
+  on_conflict?: InputMaybe<User_Email_Notification_Settings_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_User_Email_Notification_Settings_OneArgs = {
+  object: User_Email_Notification_Settings_Insert_Input;
+  on_conflict?: InputMaybe<User_Email_Notification_Settings_On_Conflict>;
 };
 
 
@@ -11798,6 +11838,26 @@ export type Mutation_RootUpdate_UserArgs = {
 export type Mutation_RootUpdate_User_By_PkArgs = {
   _set?: InputMaybe<User_Set_Input>;
   pk_columns: User_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_User_Email_Notification_SettingsArgs = {
+  _set?: InputMaybe<User_Email_Notification_Settings_Set_Input>;
+  where: User_Email_Notification_Settings_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_User_Email_Notification_Settings_By_PkArgs = {
+  _set?: InputMaybe<User_Email_Notification_Settings_Set_Input>;
+  pk_columns: User_Email_Notification_Settings_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_User_Email_Notification_Settings_ManyArgs = {
+  updates: Array<User_Email_Notification_Settings_Updates>;
 };
 
 
@@ -16283,12 +16343,18 @@ export type Query_Root = {
   submit_fix_request_state_aggregate: Submit_Fix_Request_State_Aggregate;
   /** fetch data from the table: "submit_fix_request_state" using primary key columns */
   submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
-  /** fetch data from the table: "user" */
+  /** An array relationship */
   user: Array<User>;
-  /** fetch aggregated fields from the table: "user" */
+  /** An aggregate relationship */
   user_aggregate: User_Aggregate;
   /** fetch data from the table: "user" using primary key columns */
   user_by_pk?: Maybe<User>;
+  /** fetch data from the table: "user_email_notification_settings" */
+  user_email_notification_settings: Array<User_Email_Notification_Settings>;
+  /** fetch aggregated fields from the table: "user_email_notification_settings" */
+  user_email_notification_settings_aggregate: User_Email_Notification_Settings_Aggregate;
+  /** fetch data from the table: "user_email_notification_settings" using primary key columns */
+  user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
   validateCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateExistingCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateRepoUrl?: Maybe<RepoValidationResponse>;
@@ -17661,6 +17727,29 @@ export type Query_RootUser_AggregateArgs = {
 
 
 export type Query_RootUser_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootUser_Email_Notification_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<User_Email_Notification_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Email_Notification_Settings_Order_By>>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootUser_Email_Notification_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<User_Email_Notification_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Email_Notification_Settings_Order_By>>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+
+export type Query_RootUser_Email_Notification_Settings_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -20150,12 +20239,20 @@ export type Subscription_Root = {
   submit_fix_request_state_stream: Array<Submit_Fix_Request_State>;
   /** fetch data from the table in a streaming manner: "submit_fix_request" */
   submit_fix_request_stream: Array<Submit_Fix_Request>;
-  /** fetch data from the table: "user" */
+  /** An array relationship */
   user: Array<User>;
-  /** fetch aggregated fields from the table: "user" */
+  /** An aggregate relationship */
   user_aggregate: User_Aggregate;
   /** fetch data from the table: "user" using primary key columns */
   user_by_pk?: Maybe<User>;
+  /** fetch data from the table: "user_email_notification_settings" */
+  user_email_notification_settings: Array<User_Email_Notification_Settings>;
+  /** fetch aggregated fields from the table: "user_email_notification_settings" */
+  user_email_notification_settings_aggregate: User_Email_Notification_Settings_Aggregate;
+  /** fetch data from the table: "user_email_notification_settings" using primary key columns */
+  user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
+  /** fetch data from the table in a streaming manner: "user_email_notification_settings" */
+  user_email_notification_settings_stream: Array<User_Email_Notification_Settings>;
   /** fetch data from the table in a streaming manner: "user" */
   user_stream: Array<User>;
   /** fetch data from the table: "view_project_resolved_vulnerabilities" */
@@ -21821,6 +21918,36 @@ export type Subscription_RootUser_By_PkArgs = {
 };
 
 
+export type Subscription_RootUser_Email_Notification_SettingsArgs = {
+  distinct_on?: InputMaybe<Array<User_Email_Notification_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Email_Notification_Settings_Order_By>>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootUser_Email_Notification_Settings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<User_Email_Notification_Settings_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Email_Notification_Settings_Order_By>>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+
+export type Subscription_RootUser_Email_Notification_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootUser_Email_Notification_Settings_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<User_Email_Notification_Settings_Stream_Cursor_Input>>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+
 export type Subscription_RootUser_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<User_Stream_Cursor_Input>>;
@@ -22222,6 +22349,9 @@ export type User = {
   /** An aggregate relationship */
   api_tokens_aggregate: Api_Token_Aggregate;
   email: Scalars['String']['output'];
+  /** An object relationship */
+  emailNotificationSettings?: Maybe<User_Email_Notification_Settings>;
+  email_notification_settings_id?: Maybe<Scalars['uuid']['output']>;
   githubToken?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
@@ -22355,6 +22485,33 @@ export type User_Aggregate = {
   nodes: Array<User>;
 };
 
+export type User_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<User_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<User_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<User_Aggregate_Bool_Exp_Count>;
+};
+
+export type User_Aggregate_Bool_Exp_Bool_And = {
+  arguments: User_Select_Column_User_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<User_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type User_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: User_Select_Column_User_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<User_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type User_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<User_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<User_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
 /** aggregate fields of "user" */
 export type User_Aggregate_Fields = {
   __typename?: 'user_aggregate_fields';
@@ -22377,6 +22534,13 @@ export type User_Aggregate_Order_By = {
   min?: InputMaybe<User_Min_Order_By>;
 };
 
+/** input type for inserting array relation for remote table "user" */
+export type User_Arr_Rel_Insert_Input = {
+  data: Array<User_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<User_On_Conflict>;
+};
+
 /** Boolean expression to filter rows from the table "user". All fields are combined with a logical 'AND'. */
 export type User_Bool_Exp = {
   _and?: InputMaybe<Array<User_Bool_Exp>>;
@@ -22385,6 +22549,8 @@ export type User_Bool_Exp = {
   api_tokens?: InputMaybe<Api_Token_Bool_Exp>;
   api_tokens_aggregate?: InputMaybe<Api_Token_Aggregate_Bool_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
+  emailNotificationSettings?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+  email_notification_settings_id?: InputMaybe<Uuid_Comparison_Exp>;
   githubToken?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   impersonatedUserEmail?: InputMaybe<String_Comparison_Exp>;
@@ -22407,16 +22573,207 @@ export type User_Bool_Exp = {
 export enum User_Constraint {
   /** unique or primary key constraint on columns "email" */
   UserEmailKey = 'user_email_key',
+  /** unique or primary key constraint on columns "email_notification_settings_id" */
+  UserEmailNotificationSettingsIdKey = 'user_email_notification_settings_id_key',
   /** unique or primary key constraint on columns "id" */
   UserIdKey = 'user_id_key',
   /** unique or primary key constraint on columns "id" */
   UserPkey = 'user_pkey'
 }
 
+/** columns and relationships of "user_email_notification_settings" */
+export type User_Email_Notification_Settings = {
+  __typename?: 'user_email_notification_settings';
+  analysisCompleted: Scalars['Boolean']['output'];
+  analysisExpirationWarning: Scalars['Boolean']['output'];
+  fixCommitted: Scalars['Boolean']['output'];
+  id: Scalars['uuid']['output'];
+  /** An array relationship */
+  user: Array<User>;
+  /** An aggregate relationship */
+  user_aggregate: User_Aggregate;
+};
+
+
+/** columns and relationships of "user_email_notification_settings" */
+export type User_Email_Notification_SettingsUserArgs = {
+  distinct_on?: InputMaybe<Array<User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Order_By>>;
+  where?: InputMaybe<User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "user_email_notification_settings" */
+export type User_Email_Notification_SettingsUser_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<User_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<User_Order_By>>;
+  where?: InputMaybe<User_Bool_Exp>;
+};
+
+/** aggregated selection of "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Aggregate = {
+  __typename?: 'user_email_notification_settings_aggregate';
+  aggregate?: Maybe<User_Email_Notification_Settings_Aggregate_Fields>;
+  nodes: Array<User_Email_Notification_Settings>;
+};
+
+/** aggregate fields of "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Aggregate_Fields = {
+  __typename?: 'user_email_notification_settings_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<User_Email_Notification_Settings_Max_Fields>;
+  min?: Maybe<User_Email_Notification_Settings_Min_Fields>;
+};
+
+
+/** aggregate fields of "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<User_Email_Notification_Settings_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "user_email_notification_settings". All fields are combined with a logical 'AND'. */
+export type User_Email_Notification_Settings_Bool_Exp = {
+  _and?: InputMaybe<Array<User_Email_Notification_Settings_Bool_Exp>>;
+  _not?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+  _or?: InputMaybe<Array<User_Email_Notification_Settings_Bool_Exp>>;
+  analysisCompleted?: InputMaybe<Boolean_Comparison_Exp>;
+  analysisExpirationWarning?: InputMaybe<Boolean_Comparison_Exp>;
+  fixCommitted?: InputMaybe<Boolean_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  user_aggregate?: InputMaybe<User_Aggregate_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "user_email_notification_settings" */
+export enum User_Email_Notification_Settings_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  UserEmailNotificationSettingsPkey = 'user_email_notification_settings_pkey'
+}
+
+/** input type for inserting data into table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Insert_Input = {
+  analysisCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
+  fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  user?: InputMaybe<User_Arr_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type User_Email_Notification_Settings_Max_Fields = {
+  __typename?: 'user_email_notification_settings_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type User_Email_Notification_Settings_Min_Fields = {
+  __typename?: 'user_email_notification_settings_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Mutation_Response = {
+  __typename?: 'user_email_notification_settings_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<User_Email_Notification_Settings>;
+};
+
+/** input type for inserting object relation for remote table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Obj_Rel_Insert_Input = {
+  data: User_Email_Notification_Settings_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<User_Email_Notification_Settings_On_Conflict>;
+};
+
+/** on_conflict condition type for table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_On_Conflict = {
+  constraint: User_Email_Notification_Settings_Constraint;
+  update_columns?: Array<User_Email_Notification_Settings_Update_Column>;
+  where?: InputMaybe<User_Email_Notification_Settings_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "user_email_notification_settings". */
+export type User_Email_Notification_Settings_Order_By = {
+  analysisCompleted?: InputMaybe<Order_By>;
+  analysisExpirationWarning?: InputMaybe<Order_By>;
+  fixCommitted?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  user_aggregate?: InputMaybe<User_Aggregate_Order_By>;
+};
+
+/** primary key columns input for table: user_email_notification_settings */
+export type User_Email_Notification_Settings_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "user_email_notification_settings" */
+export enum User_Email_Notification_Settings_Select_Column {
+  /** column name */
+  AnalysisCompleted = 'analysisCompleted',
+  /** column name */
+  AnalysisExpirationWarning = 'analysisExpirationWarning',
+  /** column name */
+  FixCommitted = 'fixCommitted',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Set_Input = {
+  analysisCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
+  fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "user_email_notification_settings" */
+export type User_Email_Notification_Settings_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: User_Email_Notification_Settings_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type User_Email_Notification_Settings_Stream_Cursor_Value_Input = {
+  analysisCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
+  fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "user_email_notification_settings" */
+export enum User_Email_Notification_Settings_Update_Column {
+  /** column name */
+  AnalysisCompleted = 'analysisCompleted',
+  /** column name */
+  AnalysisExpirationWarning = 'analysisExpirationWarning',
+  /** column name */
+  FixCommitted = 'fixCommitted',
+  /** column name */
+  Id = 'id'
+}
+
+export type User_Email_Notification_Settings_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<User_Email_Notification_Settings_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: User_Email_Notification_Settings_Bool_Exp;
+};
+
 /** input type for inserting data into table "user" */
 export type User_Insert_Input = {
   api_tokens?: InputMaybe<Api_Token_Arr_Rel_Insert_Input>;
   email?: InputMaybe<Scalars['String']['input']>;
+  emailNotificationSettings?: InputMaybe<User_Email_Notification_Settings_Obj_Rel_Insert_Input>;
+  email_notification_settings_id?: InputMaybe<Scalars['uuid']['input']>;
   githubToken?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   impersonatedUserEmail?: InputMaybe<Scalars['String']['input']>;
@@ -22435,6 +22792,7 @@ export type User_Insert_Input = {
 export type User_Max_Fields = {
   __typename?: 'user_max_fields';
   email?: Maybe<Scalars['String']['output']>;
+  email_notification_settings_id?: Maybe<Scalars['uuid']['output']>;
   githubToken?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
@@ -22446,6 +22804,7 @@ export type User_Max_Fields = {
 /** order by max() on columns of table "user" */
 export type User_Max_Order_By = {
   email?: InputMaybe<Order_By>;
+  email_notification_settings_id?: InputMaybe<Order_By>;
   githubToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
@@ -22458,6 +22817,7 @@ export type User_Max_Order_By = {
 export type User_Min_Fields = {
   __typename?: 'user_min_fields';
   email?: Maybe<Scalars['String']['output']>;
+  email_notification_settings_id?: Maybe<Scalars['uuid']['output']>;
   githubToken?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
@@ -22469,6 +22829,7 @@ export type User_Min_Fields = {
 /** order by min() on columns of table "user" */
 export type User_Min_Order_By = {
   email?: InputMaybe<Order_By>;
+  email_notification_settings_id?: InputMaybe<Order_By>;
   githubToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
@@ -22504,6 +22865,8 @@ export type User_On_Conflict = {
 export type User_Order_By = {
   api_tokens_aggregate?: InputMaybe<Api_Token_Aggregate_Order_By>;
   email?: InputMaybe<Order_By>;
+  emailNotificationSettings?: InputMaybe<User_Email_Notification_Settings_Order_By>;
+  email_notification_settings_id?: InputMaybe<Order_By>;
   githubToken?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
@@ -22528,6 +22891,8 @@ export enum User_Select_Column {
   /** column name */
   Email = 'email',
   /** column name */
+  EmailNotificationSettingsId = 'email_notification_settings_id',
+  /** column name */
   GithubToken = 'githubToken',
   /** column name */
   Id = 'id',
@@ -22545,9 +22910,26 @@ export enum User_Select_Column {
   Picture = 'picture'
 }
 
+/** select "user_aggregate_bool_exp_bool_and_arguments_columns" columns of table "user" */
+export enum User_Select_Column_User_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  IsImpersonationAllowed = 'isImpersonationAllowed',
+  /** column name */
+  IsSignedUp = 'isSignedUp'
+}
+
+/** select "user_aggregate_bool_exp_bool_or_arguments_columns" columns of table "user" */
+export enum User_Select_Column_User_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsImpersonationAllowed = 'isImpersonationAllowed',
+  /** column name */
+  IsSignedUp = 'isSignedUp'
+}
+
 /** input type for updating data in table "user" */
 export type User_Set_Input = {
   email?: InputMaybe<Scalars['String']['input']>;
+  email_notification_settings_id?: InputMaybe<Scalars['uuid']['input']>;
   githubToken?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   impersonatedUserEmail?: InputMaybe<Scalars['String']['input']>;
@@ -22569,6 +22951,7 @@ export type User_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type User_Stream_Cursor_Value_Input = {
   email?: InputMaybe<Scalars['String']['input']>;
+  email_notification_settings_id?: InputMaybe<Scalars['uuid']['input']>;
   githubToken?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   impersonatedUserEmail?: InputMaybe<Scalars['String']['input']>;
@@ -22583,6 +22966,8 @@ export type User_Stream_Cursor_Value_Input = {
 export enum User_Update_Column {
   /** column name */
   Email = 'email',
+  /** column name */
+  EmailNotificationSettingsId = 'email_notification_settings_id',
   /** column name */
   GithubToken = 'githubToken',
   /** column name */

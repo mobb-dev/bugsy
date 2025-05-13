@@ -229,6 +229,15 @@ export class AdoSCMLib extends SCMLib {
       commitId,
     })
   }
+  async getBranchCommitsUrl(branchName: string): Promise<string> {
+    this._validateUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoBranchCommitsUrl({
+      repoUrl: this.url,
+      branch: branchName,
+    })
+  }
+
   async addCommentToSubmitRequest(
     scmSubmitRequestId: string,
     comment: string

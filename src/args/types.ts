@@ -1,7 +1,10 @@
 import type * as Yargs from 'yargs'
 
 import { Scanner } from '../constants'
-import { ScmType } from '../features/analysis/scm'
+import {
+  ConvertToSarifInputFileFormat,
+  ScmType,
+} from '../features/analysis/scm'
 
 export type AnalyzeOptions = Yargs.ArgumentsCamelCase<BaseAnalyzeOptions>
 
@@ -79,4 +82,14 @@ export type BaseAddScmTokenOptions = {
   organization?: string
   refreshToken?: string
   apiKey?: string
+}
+
+export type ConvertToSarifOptions =
+  Yargs.ArgumentsCamelCase<BaseConvertToSarifOptions>
+
+export type BaseConvertToSarifOptions = {
+  ['input-file-path']: string
+  ['output-file-path']: string
+  ['input-file-format']: ConvertToSarifInputFileFormat
+  ['code-path-patterns']?: string[]
 }

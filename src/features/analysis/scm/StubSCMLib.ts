@@ -118,6 +118,11 @@ export class StubSCMLib extends SCMLib {
     return ''
   }
 
+  async getBranchCommitsUrl(_branchName: string): Promise<string> {
+    console.warn('getBranchCommitsUrl() returning empty string')
+    return ''
+  }
+
   async _getUsernameForAuthUrl(): Promise<string> {
     console.warn('_getUsernameForAuthUrl() returning empty string')
     return ''

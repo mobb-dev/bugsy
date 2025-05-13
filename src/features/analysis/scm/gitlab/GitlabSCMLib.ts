@@ -231,4 +231,9 @@ export class GitlabSCMLib extends SCMLib {
     })
     return res.web_url
   }
+
+  async getBranchCommitsUrl(branchName: string): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    return `${this.url}/-/commits/${branchName}`
+  }
 }

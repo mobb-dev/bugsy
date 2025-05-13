@@ -301,6 +301,12 @@ export class GithubSCMLib extends SCMLib {
     })
     return getCommitRes.data.html_url
   }
+
+  async getBranchCommitsUrl(branchName: string): Promise<string> {
+    this._validateAccessTokenAndUrl()
+    return `${this.url}/commits/${branchName}`
+  }
+
   async postGeneralPrComment(
     params: PostPRReviewCommentParams
   ): SCMPostGeneralPrCommentsResponse {

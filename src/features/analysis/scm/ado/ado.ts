@@ -118,6 +118,21 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       )
       return `${getRepositoryRes.webUrl}/commit/${commitId}`
     },
+    async getAdoBranchCommitsUrl({
+      repoUrl,
+      branch,
+    }: {
+      repoUrl: string
+      branch: string
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const getRepositoryRes = await git.getRepository(
+        decodeURI(repo),
+        projectName ? decodeURI(projectName) : undefined
+      )
+      return `${getRepositoryRes.webUrl}/commits?itemVersion=${branch}`
+    },
     getAdoDownloadUrl({
       repoUrl,
       branch,

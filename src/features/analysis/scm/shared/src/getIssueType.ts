@@ -120,6 +120,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.NoReturnInFinally]: 'No Return in Finally Block',
   [IssueType_Enum.AvoidIdentityComparisonCachedTypes]:
     'Avoid Identity Comparison of Cached Types',
+  [IssueType_Enum.AvoidBuiltinShadowing]: 'Avoid Builtin Shadowing',
+  [IssueType_Enum.ImproperStringFormatting]: 'Improper String Formatting',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

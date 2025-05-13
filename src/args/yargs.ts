@@ -1,3 +1,7 @@
+import {
+  convertToSarifBuilder,
+  convertToSarifHandler,
+} from '@mobb/bugsy/args/commands/convert_to_sarif'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import chalk from 'chalk'
 import yargs from 'yargs/yargs'
@@ -57,6 +61,12 @@ export const parseArgs = async (args: readonly string[]) => {
       ),
       addScmTokenBuilder,
       addScmTokenHandler
+    )
+    .command(
+      mobbCliCommand.convertToSarif,
+      chalk.bold('Convert an existing SAST report to SARIF format.'),
+      convertToSarifBuilder,
+      convertToSarifHandler
     )
     .example(
       'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',

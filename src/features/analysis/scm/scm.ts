@@ -99,7 +99,7 @@ export abstract class SCMLib {
   abstract getSubmitRequestUrl(submitRequestIdNumber: number): Promise<string>
   abstract getSubmitRequestId(submitRequestIdUrl: string): Promise<string>
   abstract getCommitUrl(commitId: string): Promise<string>
-
+  abstract getBranchCommitsUrl(branchName: string): Promise<string>
   abstract getRepoDefaultBranch(): Promise<string>
 
   public getAccessToken(): string {

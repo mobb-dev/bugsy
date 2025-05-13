@@ -501,3 +501,7 @@ export type ParseScmURLRes =
       scmType: ScmType.GitHub | ScmType.Bitbucket | ScmType.GitLab
     } & BaseParseScmURLRes)
   | null
+
+export enum ConvertToSarifInputFileFormat {
+  FortifyFPR = 'FortifyFPR',
+}

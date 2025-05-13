@@ -280,6 +280,14 @@ export class BitbucketSCMLib extends SCMLib {
     )
   }
 
+  getBranchCommitsUrl(branchName: string): Promise<string> {
+    this._validateUrl()
+    const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(this.url)
+    return Promise.resolve(
+      `https://bitbucket.org/${workspace}/${repo_slug}/branch/${branchName}`
+    )
+  }
+
   async addCommentToSubmitRequest(
     submitRequestId: string,
     comment: string

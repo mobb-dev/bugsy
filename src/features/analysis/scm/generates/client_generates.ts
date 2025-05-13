@@ -7781,6 +7781,8 @@ export enum IssueType_Constraint {
 export enum IssueType_Enum {
   /** Disabling auto-escaping makes the code more vulnerable to XSS */
   AutoEscapeFalse = 'AUTO_ESCAPE_FALSE',
+  /** AVOID_BUILTIN_SHADOWING */
+  AvoidBuiltinShadowing = 'AVOID_BUILTIN_SHADOWING',
   /** AVOID_IDENTITY_COMPARISON_CACHED_TYPES */
   AvoidIdentityComparisonCachedTypes = 'AVOID_IDENTITY_COMPARISON_CACHED_TYPES',
   /** Client DOM Stored Code Injection */
@@ -7839,6 +7841,8 @@ export enum IssueType_Enum {
   ImproperExceptionHandling = 'IMPROPER_EXCEPTION_HANDLING',
   /** A resource was defined without proper release */
   ImproperResourceShutdownOrRelease = 'IMPROPER_RESOURCE_SHUTDOWN_OR_RELEASE',
+  /** IMPROPER_STRING_FORMATTING */
+  ImproperStringFormatting = 'IMPROPER_STRING_FORMATTING',
   /** Incomplete Hostname Regex */
   IncompleteHostnameRegex = 'INCOMPLETE_HOSTNAME_REGEX',
   /** A case where the validation on the url is partial */
@@ -26418,6 +26422,8 @@ export enum Vulnerability_Report_Vendor_Enum {
   Datadog = 'datadog',
   /** fortify */
   Fortify = 'fortify',
+  /** fortifyMobbSarif */
+  FortifyMobbSarif = 'fortifyMobbSarif',
   /** opengrep */
   Opengrep = 'opengrep',
   /** semgrep */

@@ -1,7 +1,10 @@
 import chalk from 'chalk'
 
 import { PROJECT_DEFAULT_NAME, SCANNERS } from '../constants'
-import { ScmType } from '../features/analysis/scm'
+import {
+  ConvertToSarifInputFileFormat,
+  ScmType,
+} from '../features/analysis/scm'
 
 export const repoOption = {
   alias: 'r',
@@ -105,4 +108,31 @@ export const scmTokenOption = {
   describe: chalk.bold('SCM API token'),
   type: 'string',
   demandOption: true,
+} as const
+
+export const convertToSarifInputFilePathOption = {
+  demandOption: true,
+  describe: chalk.bold('Original SAST report file path'),
+  type: 'string',
+} as const
+
+export const convertToSarifOutputFilePathOption = {
+  demandOption: true,
+  describe: chalk.bold('Output SARIF report file path'),
+  type: 'string',
+} as const
+
+export const convertToSarifInputFileFormatOption = {
+  demandOption: true,
+  choices: Object.values(ConvertToSarifInputFileFormat),
+  describe: chalk.bold('SAST report file type'),
+} as const
+
+export const convertToSarifCodePathPatternsOption = {
+  demandOption: false,
+  describe: chalk.bold(
+    'Glob-like patterns. Any code node with this pattern makes the issue be included.'
+  ),
+  type: 'string',
+  array: true,
 } as const

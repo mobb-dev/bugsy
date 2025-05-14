@@ -118,6 +118,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.ReturnShouldNotBeInvariant]: 'Return Should Not Be Invariant',
   [IssueType_Enum.SystemExitShouldReraise]: 'SystemExit Should Reraise',
   [IssueType_Enum.NoReturnInFinally]: 'No Return in Finally Block',
+  [IssueType_Enum.WildcardImports]: 'Wildcard Imports should not be used',
   [IssueType_Enum.AvoidIdentityComparisonCachedTypes]:
     'Avoid Identity Comparison of Cached Types',
   [IssueType_Enum.AvoidBuiltinShadowing]: 'Avoid Builtin Shadowing',

@@ -7969,6 +7969,8 @@ export enum IssueType_Enum {
   WeakXmlSchemaUnboundedOccurrences = 'WEAK_XML_SCHEMA_UNBOUNDED_OCCURRENCES',
   /** Missing websocket origin check */
   WebsocketMissingOriginCheck = 'WEBSOCKET_MISSING_ORIGIN_CHECK',
+  /** WILDCARD_IMPORTS */
+  WildcardImports = 'WILDCARD_IMPORTS',
   /** Cross Site Scripting */
   Xss = 'XSS',
   /** XXE */
@@ -8350,6 +8352,10 @@ export type Mutation_Root = {
   delete_vulnerability_report_issue_code_node?: Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_code_node" */
   delete_vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
+  /** delete data from the table: "vulnerability_report_issue_shared_state" */
+  delete_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_report_issue_shared_state" */
+  delete_vulnerability_report_issue_shared_state_by_pk?: Maybe<Vulnerability_Report_Issue_Shared_State>;
   /** delete data from the table: "vulnerability_report_issue_state" */
   delete_vulnerability_report_issue_state?: Maybe<Vulnerability_Report_Issue_State_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_state" */
@@ -8589,6 +8595,10 @@ export type Mutation_Root = {
   insert_vulnerability_report_issue_code_node_one?: Maybe<Vulnerability_Report_Issue_Code_Node>;
   /** insert a single row into the table: "vulnerability_report_issue" */
   insert_vulnerability_report_issue_one?: Maybe<Vulnerability_Report_Issue>;
+  /** insert data into the table: "vulnerability_report_issue_shared_state" */
+  insert_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_report_issue_shared_state" */
+  insert_vulnerability_report_issue_shared_state_one?: Maybe<Vulnerability_Report_Issue_Shared_State>;
   /** insert data into the table: "vulnerability_report_issue_state" */
   insert_vulnerability_report_issue_state?: Maybe<Vulnerability_Report_Issue_State_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_report_issue_state" */
@@ -8953,6 +8963,12 @@ export type Mutation_Root = {
   update_vulnerability_report_issue_code_node_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>>>;
   /** update multiples rows of table: "vulnerability_report_issue" */
   update_vulnerability_report_issue_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Mutation_Response>>>;
+  /** update data of the table: "vulnerability_report_issue_shared_state" */
+  update_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
+  /** update single row of the table: "vulnerability_report_issue_shared_state" */
+  update_vulnerability_report_issue_shared_state_by_pk?: Maybe<Vulnerability_Report_Issue_Shared_State>;
+  /** update multiples rows of table: "vulnerability_report_issue_shared_state" */
+  update_vulnerability_report_issue_shared_state_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report_issue_state" */
   update_vulnerability_report_issue_state?: Maybe<Vulnerability_Report_Issue_State_Mutation_Response>;
   /** update single row of the table: "vulnerability_report_issue_state" */
@@ -9755,6 +9771,18 @@ export type Mutation_RootDelete_Vulnerability_Report_Issue_Code_NodeArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Vulnerability_Report_Issue_Code_Node_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_Shared_StateArgs = {
+  where: Vulnerability_Report_Issue_Shared_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_Shared_State_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -10592,6 +10620,20 @@ export type Mutation_RootInsert_Vulnerability_Report_Issue_Code_Node_OneArgs = {
 export type Mutation_RootInsert_Vulnerability_Report_Issue_OneArgs = {
   object: Vulnerability_Report_Issue_Insert_Input;
   on_conflict?: InputMaybe<Vulnerability_Report_Issue_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_Shared_StateArgs = {
+  objects: Array<Vulnerability_Report_Issue_Shared_State_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Shared_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_Shared_State_OneArgs = {
+  object: Vulnerability_Report_Issue_Shared_State_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Shared_State_On_Conflict>;
 };
 
 
@@ -11936,6 +11978,26 @@ export type Mutation_RootUpdate_Vulnerability_Report_Issue_Code_Node_ManyArgs = 
 /** mutation root */
 export type Mutation_RootUpdate_Vulnerability_Report_Issue_ManyArgs = {
   updates: Array<Vulnerability_Report_Issue_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Shared_StateArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Set_Input>;
+  where: Vulnerability_Report_Issue_Shared_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Shared_State_By_PkArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Set_Input>;
+  pk_columns: Vulnerability_Report_Issue_Shared_State_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Shared_State_ManyArgs = {
+  updates: Array<Vulnerability_Report_Issue_Shared_State_Updates>;
 };
 
 
@@ -16397,6 +16459,12 @@ export type Query_Root = {
   vulnerability_report_issue_code_node_aggregate: Vulnerability_Report_Issue_Code_Node_Aggregate;
   /** fetch data from the table: "vulnerability_report_issue_code_node" using primary key columns */
   vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
+  /** fetch data from the table: "vulnerability_report_issue_shared_state" */
+  vulnerability_report_issue_shared_state: Array<Vulnerability_Report_Issue_Shared_State>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_shared_state" */
+  vulnerability_report_issue_shared_state_aggregate: Vulnerability_Report_Issue_Shared_State_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_shared_state" using primary key columns */
+  vulnerability_report_issue_shared_state_by_pk?: Maybe<Vulnerability_Report_Issue_Shared_State>;
   /** fetch data from the table: "vulnerability_report_issue_state" */
   vulnerability_report_issue_state: Array<Vulnerability_Report_Issue_State>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_state" */
@@ -17921,6 +17989,29 @@ export type Query_RootVulnerability_Report_Issue_Code_Node_AggregateArgs = {
 
 
 export type Query_RootVulnerability_Report_Issue_Code_Node_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Shared_StateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Shared_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Shared_State_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -20303,6 +20394,14 @@ export type Subscription_Root = {
   vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
   /** fetch data from the table in a streaming manner: "vulnerability_report_issue_code_node" */
   vulnerability_report_issue_code_node_stream: Array<Vulnerability_Report_Issue_Code_Node>;
+  /** fetch data from the table: "vulnerability_report_issue_shared_state" */
+  vulnerability_report_issue_shared_state: Array<Vulnerability_Report_Issue_Shared_State>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_shared_state" */
+  vulnerability_report_issue_shared_state_aggregate: Vulnerability_Report_Issue_Shared_State_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_shared_state" using primary key columns */
+  vulnerability_report_issue_shared_state_by_pk?: Maybe<Vulnerability_Report_Issue_Shared_State>;
+  /** fetch data from the table in a streaming manner: "vulnerability_report_issue_shared_state" */
+  vulnerability_report_issue_shared_state_stream: Array<Vulnerability_Report_Issue_Shared_State>;
   /** fetch data from the table: "vulnerability_report_issue_state" */
   vulnerability_report_issue_state: Array<Vulnerability_Report_Issue_State>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_state" */
@@ -22132,6 +22231,36 @@ export type Subscription_RootVulnerability_Report_Issue_Code_Node_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Vulnerability_Report_Issue_Code_Node_Stream_Cursor_Input>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Shared_StateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Shared_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Shared_State_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Shared_State_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
 };
 
 
@@ -24256,6 +24385,9 @@ export type Vulnerability_Report_Issue = {
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  sharedState?: Maybe<Vulnerability_Report_Issue_Shared_State>;
+  sharedStateId?: Maybe<Scalars['uuid']['output']>;
   state: Vulnerability_Report_Issue_State_Enum;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId: Scalars['String']['output'];
@@ -24427,6 +24559,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   safeIssueType?: InputMaybe<String_Comparison_Exp>;
   severity?: InputMaybe<String_Comparison_Exp>;
   severityValue?: InputMaybe<Int_Comparison_Exp>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+  sharedStateId?: InputMaybe<Uuid_Comparison_Exp>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum_Comparison_Exp>;
   vendorInstanceId?: InputMaybe<String_Comparison_Exp>;
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
@@ -24999,6 +25133,8 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   parsedIssueType?: InputMaybe<IssueType_Enum>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Obj_Rel_Insert_Input>;
+  sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
@@ -25033,6 +25169,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  sharedStateId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -25050,6 +25187,7 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
+  sharedStateId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
@@ -25076,6 +25214,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   severity?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
+  sharedStateId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -25093,6 +25232,7 @@ export type Vulnerability_Report_Issue_Min_Order_By = {
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
+  sharedStateId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
@@ -25145,6 +25285,8 @@ export type Vulnerability_Report_Issue_Order_By = {
   safeIssueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   severityValue?: InputMaybe<Order_By>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Order_By>;
+  sharedStateId?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
@@ -25194,6 +25336,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   Severity = 'severity',
   /** column name */
+  SharedStateId = 'sharedStateId',
+  /** column name */
   State = 'state',
   /** column name */
   VendorInstanceId = 'vendorInstanceId',
@@ -25232,12 +25376,195 @@ export type Vulnerability_Report_Issue_Set_Input = {
   parsedIssueType?: InputMaybe<IssueType_Enum>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
+  sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
   /** used to store the "diff" of all the nodes in the issue so that the frontend can fetch it easily */
   vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State = {
+  __typename?: 'vulnerability_report_issue_shared_state';
+  id: Scalars['uuid']['output'];
+  isArchived: Scalars['Boolean']['output'];
+  issueFingerprintHash: Scalars['String']['output'];
+  /** An object relationship */
+  project: Project;
+  projectId: Scalars['uuid']['output'];
+  repoUrl: Scalars['String']['output'];
+};
+
+/** aggregated selection of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Aggregate = {
+  __typename?: 'vulnerability_report_issue_shared_state_aggregate';
+  aggregate?: Maybe<Vulnerability_Report_Issue_Shared_State_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Report_Issue_Shared_State>;
+};
+
+/** aggregate fields of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Aggregate_Fields = {
+  __typename?: 'vulnerability_report_issue_shared_state_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Report_Issue_Shared_State_Max_Fields>;
+  min?: Maybe<Vulnerability_Report_Issue_Shared_State_Min_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_report_issue_shared_state". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Bool_Exp>>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  isArchived?: InputMaybe<Boolean_Comparison_Exp>;
+  issueFingerprintHash?: InputMaybe<String_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  repoUrl?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_report_issue_shared_state" */
+export enum Vulnerability_Report_Issue_Shared_State_Constraint {
+  /** unique or primary key constraint on columns "repo_url", "project_id", "issue_fingerprint_hash" */
+  VulnerabilityReportIssueShIssueFingerprintHashRepoUrlP = 'vulnerability_report_issue_sh_issue_fingerprint_hash_repo_url_p',
+  /** unique or primary key constraint on columns "id" */
+  VulnerabilityReportIssueSharedStatePkey = 'vulnerability_report_issue_shared_state_pkey'
+}
+
+/** input type for inserting data into table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
+  __typename?: 'vulnerability_report_issue_shared_state_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  issueFingerprintHash?: Maybe<Scalars['String']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Report_Issue_Shared_State_Min_Fields = {
+  __typename?: 'vulnerability_report_issue_shared_state_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  issueFingerprintHash?: Maybe<Scalars['String']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Mutation_Response = {
+  __typename?: 'vulnerability_report_issue_shared_state_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Report_Issue_Shared_State>;
+};
+
+/** input type for inserting object relation for remote table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Obj_Rel_Insert_Input = {
+  data: Vulnerability_Report_Issue_Shared_State_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Shared_State_On_Conflict>;
+};
+
+/** on_conflict condition type for table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_On_Conflict = {
+  constraint: Vulnerability_Report_Issue_Shared_State_Constraint;
+  update_columns?: Array<Vulnerability_Report_Issue_Shared_State_Update_Column>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_report_issue_shared_state". */
+export type Vulnerability_Report_Issue_Shared_State_Order_By = {
+  id?: InputMaybe<Order_By>;
+  isArchived?: InputMaybe<Order_By>;
+  issueFingerprintHash?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  repoUrl?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_report_issue_shared_state */
+export type Vulnerability_Report_Issue_Shared_State_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "vulnerability_report_issue_shared_state" */
+export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsArchived = 'isArchived',
+  /** column name */
+  IssueFingerprintHash = 'issueFingerprintHash',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoUrl = 'repoUrl'
+}
+
+/** input type for updating data in table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Set_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "vulnerability_report_issue_shared_state" */
+export enum Vulnerability_Report_Issue_Shared_State_Update_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsArchived = 'isArchived',
+  /** column name */
+  IssueFingerprintHash = 'issueFingerprintHash',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoUrl = 'repoUrl'
+}
+
+export type Vulnerability_Report_Issue_Shared_State_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Report_Issue_Shared_State_Bool_Exp;
 };
 
 /** columns and relationships of "vulnerability_report_issue_state" */
@@ -25448,6 +25775,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   parsedIssueType?: InputMaybe<IssueType_Enum>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
+  sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
@@ -25834,6 +26162,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   ParsedSeverity = 'parsedSeverity',
   /** column name */
   Severity = 'severity',
+  /** column name */
+  SharedStateId = 'sharedStateId',
   /** column name */
   State = 'state',
   /** column name */

@@ -356,4 +356,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.AvoidIdentityComparisonCachedTypes]: undefined,
   [IssueType_Enum.AvoidBuiltinShadowing]: undefined,
   [IssueType_Enum.ImproperStringFormatting]: undefined,
+  [IssueType_Enum.WildcardImports]: undefined,
 }

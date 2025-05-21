@@ -435,11 +435,13 @@ mutation autoPrAnalysis(
   $analysisId: String!
   $commitDirectly: Boolean
   $prId: Int
+  $prStrategy: PRStrategy
 ) {
   autoPrAnalysis(
     analysisId: $analysisId
     sameBranchCommit: $commitDirectly
     prId: $prId
+    prStrategy: $prStrategy
   ) {
     __typename
     ... on AutoPrSuccess {

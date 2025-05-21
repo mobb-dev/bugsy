@@ -25,6 +25,8 @@ export type BaseAnalyzeOptions = {
   organizationId?: string
   autoPr?: boolean
   'auto-pr': boolean
+  'create-one-pr'?: boolean
+  createOnePr?: boolean
   'commit-directly'?: boolean
   commitDirectly?: boolean
   pullRequest?: number

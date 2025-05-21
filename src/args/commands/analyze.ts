@@ -11,6 +11,7 @@ import {
   ciOption,
   commitDirectlyOption,
   commitHashOption,
+  createOnePrOption,
   mobbProjectNameOption,
   organizationIdOptions,
   refOption,
@@ -57,6 +58,7 @@ export function analyzeBuilder(
     .option('api-key', apiKeyOption)
     .option('commit-hash', commitHashOption)
     .option('auto-pr', autoPrOption)
+    .option('create-one-pr', createOnePrOption)
     .option('commit-directly', commitDirectlyOption)
     .option('pull-request', {
       alias: ['pr', 'pr-number', 'pr-id'],
@@ -71,7 +73,9 @@ export function analyzeBuilder(
     .help()
 }
 
-function validateAnalyzeOptions(argv: AnalyzeOptions) {
+// Export for testing
+export function validateAnalyzeOptions(argv: AnalyzeOptions) {
+  console.log('argv', argv)
   if (!fs.existsSync(argv.f)) {
     throw new CliError(`\nCan't access ${chalk.bold(argv.f)}`)
   }
@@ -91,7 +95,17 @@ function validateAnalyzeOptions(argv: AnalyzeOptions) {
       '--commit-directly flag requires --auto-pr to be provided as well'
     )
   }
-  if (argv.pullRequest && !argv['commit-directly']) {
+  if (argv['create-one-pr'] && !argv['auto-pr']) {
+    throw new CliError(
+      '--create-one-pr flag requires --auto-pr to be provided as well'
+    )
+  }
+  if (argv['create-one-pr'] && argv.commitDirectly) {
+    throw new CliError(
+      '--create-one-pr and --commit-directly cannot be provided at the same time'
+    )
+  }
+  if (argv.pullRequest && !argv.commitDirectly) {
     throw new CliError(
       '--pull-request flag requires --commit-directly to be provided as well'
     )

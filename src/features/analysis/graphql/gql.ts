@@ -17,6 +17,7 @@ import {
   GetFalsePositiveQueryVariables,
   getSdk,
   GitReferenceQueryVariables,
+  PrStrategy,
   Sdk,
   SubmitVulnerabilityReportMutationVariables,
   ValidateRepoUrlQueryVariables,
@@ -437,15 +438,22 @@ export class GQLClient {
     }
     return res.analysis
   }
-  async autoPrAnalysis(
-    analysisId: string,
-    commitDirectly?: boolean,
+  async autoPrAnalysis({
+    analysisId,
+    commitDirectly,
+    prId,
+    prStrategy,
+  }: {
+    analysisId: string
+    commitDirectly?: boolean
     prId?: number
-  ) {
+    prStrategy?: PrStrategy
+  }) {
     return this._clientSdk.autoPrAnalysis({
       analysisId,
       commitDirectly,
       prId,
+      prStrategy,
     })
   }
   async getFixes(fixIds: string[]) {

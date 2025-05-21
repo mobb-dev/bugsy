@@ -72,6 +72,14 @@ export const autoPrOption = {
   default: false,
 } as const
 
+export const createOnePrOption = {
+  describe: chalk.bold(
+    'Create a single unified PR for all fixes (requires --auto-pr)'
+  ),
+  type: 'boolean',
+  default: false,
+} as const
+
 export const commitDirectlyOption = {
   describe: chalk.bold(
     'Commit directly to the scanned branch instead of creating a pull request'

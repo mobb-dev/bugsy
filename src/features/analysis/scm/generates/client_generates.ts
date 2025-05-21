@@ -9040,6 +9040,7 @@ export type Mutation_RootApplySimilarAnswersArgs = {
 export type Mutation_RootAutoPrAnalysisArgs = {
   analysisId: Scalars['String']['input'];
   prId?: InputMaybe<Scalars['Int']['input']>;
+  prStrategy?: InputMaybe<PrStrategy>;
   sameBranchCommit?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -27176,6 +27177,7 @@ export type AutoPrAnalysisMutationVariables = Exact<{
   analysisId: Scalars['String']['input'];
   commitDirectly?: InputMaybe<Scalars['Boolean']['input']>;
   prId?: InputMaybe<Scalars['Int']['input']>;
+  prStrategy?: InputMaybe<PrStrategy>;
 }>;
 
 
@@ -27589,11 +27591,12 @@ export const GitReferenceDocument = `
 }
     `;
 export const AutoPrAnalysisDocument = `
-    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean, $prId: Int) {
+    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean, $prId: Int, $prStrategy: PRStrategy) {
   autoPrAnalysis(
     analysisId: $analysisId
     sameBranchCommit: $commitDirectly
     prId: $prId
+    prStrategy: $prStrategy
   ) {
     __typename
     ... on AutoPrSuccess {

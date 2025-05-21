@@ -199,7 +199,14 @@ describe('Basic Analyze tests', () => {
       expect(httpsProxyAgentConnectSpy).not.toHaveBeenCalled()
     }
     expect(runAnalysisSpy).toHaveBeenCalled()
-    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(expect.any(String), true, 1)
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        analysisId: expect.any(String),
+        commitDirectly: true,
+        prId: 1,
+        prStrategy: 'SPREAD',
+      })
+    )
     expect(mockedOpen).toHaveBeenCalledTimes(2)
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
   }, 30000)
@@ -326,9 +333,12 @@ describe('Basic Analyze tests', () => {
       { skipPrompts: true }
     )
     expect(autoPrAnalysisSpy).toHaveBeenCalledWith(
-      expect.any(String),
-      true,
-      prNumber
+      expect.objectContaining({
+        analysisId: expect.any(String),
+        commitDirectly: true,
+        prId: prNumber,
+        prStrategy: 'SPREAD',
+      })
     )
     expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
     consoleMock.mockClear()
@@ -918,5 +928,72 @@ For specific requests [contact us](https://content.mobb.ai/contact) and we'll do
     comments.data.forEach((comment) => {
       expect(comment.body.startsWith(irrelevantIssueMessageContent)).toBe(true)
     })
+  })
+})
+
+describe('create-one-pr flag tests', () => {
+  it('should successfully run analysis with create-one-pr and auto-pr', async () => {
+    const consoleMock = vi.spyOn(console, 'log')
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
+    const prNumber = 1
+    await analysisExports.runAnalysis(
+      {
+        repo: 'https://bitbucket.com/a/b',
+        ref: 'test',
+        commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+        scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
+        srcPath: path.join(__dirname, 'assets'),
+        ci: true,
+        command: 'analyze',
+        createOnePr: true,
+        autoPr: true,
+        commitDirectly: false,
+        pullRequest: prNumber,
+      },
+      { skipPrompts: true }
+    )
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        analysisId: expect.any(String),
+        commitDirectly: false,
+        prId: prNumber,
+        prStrategy: 'CONDENSE',
+      })
+    )
+    expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
+    consoleMock.mockClear()
+  })
+
+  it('should successfully run analysis with create-one-pr and auto-pr in non-CI mode', async () => {
+    const consoleMock = vi.spyOn(console, 'log')
+    const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
+    const mockedOpen = vi.spyOn(openExport, 'default')
+    await analysisExports.runAnalysis(
+      {
+        repo: 'https://bitbucket.com/a/b',
+        ref: 'test',
+        commitHash: 'ad00119b0d4a56f44a49d3d20eccb77978a363f8',
+        scanFile: path.join(__dirname, 'assets/simple/codeql_report.json'),
+        srcPath: path.join(__dirname, 'assets'),
+        ci: false,
+        command: 'analyze',
+        createOnePr: true,
+        autoPr: true,
+        commitDirectly: false,
+      },
+      { skipPrompts: true }
+    )
+    expect(autoPrAnalysisSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        analysisId: expect.any(String),
+        commitDirectly: false,
+        prId: undefined,
+        prStrategy: 'CONDENSE',
+      })
+    )
+    expect(mockedOpen).toHaveBeenCalledTimes(2)
+    expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+    consoleMock.mockClear()
+    mockedOpen.mockClear()
   })
 })

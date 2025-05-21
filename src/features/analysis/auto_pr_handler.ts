@@ -2,7 +2,10 @@ import Debug from 'debug'
 
 import { CreateSpinner } from '../../utils/spinner'
 import { GQLClient } from './graphql'
-import { Fix_Report_State_Enum } from './scm/generates/client_generates'
+import {
+  Fix_Report_State_Enum,
+  PrStrategy,
+} from './scm/generates/client_generates'
 
 const debug = Debug('mobbdev:handleAutoPr')
 
@@ -12,8 +15,16 @@ export async function handleAutoPr(params: {
   commitDirectly?: boolean
   prId?: number
   createSpinner: CreateSpinner
+  createOnePr?: boolean
 }) {
-  const { gqlClient, analysisId, commitDirectly, prId, createSpinner } = params
+  const {
+    gqlClient,
+    analysisId,
+    commitDirectly,
+    prId,
+    createSpinner,
+    createOnePr,
+  } = params
   const createAutoPrSpinner = createSpinner(
     '🔄 Waiting for the analysis to finish before initiating automatic pull request creation'
   ).start()
@@ -22,11 +33,12 @@ export async function handleAutoPr(params: {
       analysisId,
     },
     callback: async (analysisId) => {
-      const autoPrAnalysisRes = await gqlClient.autoPrAnalysis(
+      const autoPrAnalysisRes = await gqlClient.autoPrAnalysis({
         analysisId,
         commitDirectly,
-        prId
-      )
+        prId,
+        prStrategy: createOnePr ? PrStrategy.Condense : PrStrategy.Spread,
+      })
       debug('auto pr analysis res %o', autoPrAnalysisRes)
       if (autoPrAnalysisRes.autoPrAnalysis?.__typename === 'AutoPrError') {
         createAutoPrSpinner.error({

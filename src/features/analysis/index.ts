@@ -174,6 +174,7 @@ export type AnalysisParams = {
   command: MobbCliCommand
   organizationId?: string
   autoPr?: boolean
+  createOnePr?: boolean
   commitDirectly?: boolean
 }
 export async function runAnalysis(
@@ -351,6 +352,7 @@ export async function _scan(
     command,
     organizationId: userOrganizationId,
     autoPr,
+    createOnePr,
     commitDirectly,
     pullRequest,
   } = params
@@ -524,6 +526,7 @@ export async function _scan(
       commitDirectly,
       prId: pullRequest,
       createSpinner,
+      createOnePr,
     })
   }
 
@@ -731,6 +734,7 @@ export async function _scan(
         commitDirectly,
         prId: pullRequest,
         createSpinner,
+        createOnePr,
       })
     }
 

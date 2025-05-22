@@ -125,7 +125,7 @@ async function convertFprToSarif(
     "results": [\n`
     )
 
-    vulnerabilityParser
+    const filteredVulns = vulnerabilityParser
       .getVulnerabilities()
       .map((vulnerability) =>
         fortifyVulnerabilityToSarifResult(
@@ -136,13 +136,14 @@ async function convertFprToSarif(
         )
       )
       .filter((sarifResult) => filterSarifResult(sarifResult, codePathPatterns))
-      .forEach((sarifResult, index) => {
-        fs.appendFileSync(outputFilePath, JSON.stringify(sarifResult, null, 2))
 
-        if (index !== vulnerabilityParser.getVulnerabilities().length - 1) {
-          fs.appendFileSync(outputFilePath, ',\n')
-        }
-      })
+    filteredVulns.forEach((sarifResult, index) => {
+      fs.appendFileSync(outputFilePath, JSON.stringify(sarifResult, null, 2))
+
+      if (index !== filteredVulns.length - 1) {
+        fs.appendFileSync(outputFilePath, ',\n')
+      }
+    })
 
     fs.appendFileSync(outputFilePath, '\n]}]}')
   } finally {

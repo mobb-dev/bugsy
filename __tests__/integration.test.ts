@@ -12,6 +12,7 @@ import {
 } from '@mobb/bugsy/features/analysis/graphql'
 import {
   MOBB_ICON_IMG,
+  REPORT_DEFAULT_FILE_NAME,
   scmCloudUrl,
   ScmLibScmType,
   ScmType,
@@ -130,7 +131,7 @@ vi.mock('open', () => ({
 
 vi.mock('../src/features/analysis/scanners/snyk', () => ({
   getSnykReport: vi.fn().mockImplementation(async (reportPath) => {
-    fs.copyFileSync(path.join(__dirname, 'report.json'), reportPath)
+    fs.copyFileSync(path.join(__dirname, REPORT_DEFAULT_FILE_NAME), reportPath)
     return true
   }),
 }))

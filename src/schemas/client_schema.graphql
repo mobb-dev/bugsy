@@ -295,16 +295,22 @@ mutation uploadS3BucketInfo($fileName: String!) {
 }
 
 mutation DigestVulnerabilityReport(
-  $vulnerabilityReportFileName: String!
+  $vulnerabilityReportFileName: String
   $fixReportId: String!
   $projectId: String!
   $scanSource: String!
+  $repoUrl: String
+  $reference: String
+  $sha: String
 ) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     projectId: $projectId
     scanSource: $scanSource
+    repoUrl: $repoUrl
+    reference: $reference
+    sha: $sha
   ) {
     __typename
     ... on VulnerabilityReport {

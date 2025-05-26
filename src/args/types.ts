@@ -9,7 +9,7 @@ import {
 export type AnalyzeOptions = Yargs.ArgumentsCamelCase<BaseAnalyzeOptions>
 
 export type BaseAnalyzeOptions = {
-  f: string
+  f?: string
   'scan-file'?: string
   r?: string
   repo: string

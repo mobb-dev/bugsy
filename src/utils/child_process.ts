@@ -2,9 +2,6 @@ import cp from 'node:child_process'
 
 import Debug from 'debug'
 import * as process from 'process'
-import supportsColor from 'supports-color'
-
-const { stdout } = supportsColor
 
 type ChildProcessArgs = {
   childProcess: cp.ChildProcess
@@ -15,6 +12,7 @@ type BaseChildProcessArgs = {
   args: string[]
   processPath: string
   name: string
+  cwd?: string
 }
 
 type ChildProcessOptions = {
@@ -27,17 +25,18 @@ export function createFork(
 ) {
   const child = cp.fork(processPath, args, {
     stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-    env: { ...process.env, FORCE_COLOR: stdout ? '1' : '0' },
+    env: { ...process.env },
   })
   return createChildProcess({ childProcess: child, name }, options)
 }
-export function createSpwan(
-  { args, processPath, name }: BaseChildProcessArgs,
+export function createSpawn(
+  { args, processPath, name, cwd }: BaseChildProcessArgs,
   options: ChildProcessOptions
 ) {
   const child = cp.spawn(processPath, args, {
     stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-    env: { ...process.env, FORCE_COLOR: stdout ? '1' : '0' },
+    env: { ...process.env },
+    cwd,
   })
   return createChildProcess({ childProcess: child, name }, options)
 }

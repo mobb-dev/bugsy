@@ -9864,8 +9864,11 @@ export type Mutation_RootDelete_Vulnerability_Severity_By_PkArgs = {
 export type Mutation_RootDigestVulnerabilityReportArgs = {
   fixReportId: Scalars['String']['input'];
   projectId: Scalars['String']['input'];
+  reference?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
   scanSource: Scalars['String']['input'];
-  vulnerabilityReportFileName: Scalars['String']['input'];
+  sha?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -27107,10 +27110,13 @@ export type UploadS3BucketInfoMutationVariables = Exact<{
 export type UploadS3BucketInfoMutation = { __typename?: 'mutation_root', uploadS3BucketInfo: { __typename?: 'UploadResponse', status: Status, error?: string | null, reportUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null, repoUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null } };
 
 export type DigestVulnerabilityReportMutationVariables = Exact<{
-  vulnerabilityReportFileName: Scalars['String']['input'];
+  vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
   projectId: Scalars['String']['input'];
   scanSource: Scalars['String']['input'];
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  reference?: InputMaybe<Scalars['String']['input']>;
+  sha?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -27461,12 +27467,15 @@ export const UploadS3BucketInfoDocument = `
 }
     `;
 export const DigestVulnerabilityReportDocument = `
-    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String!, $fixReportId: String!, $projectId: String!, $scanSource: String!) {
+    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     projectId: $projectId
     scanSource: $scanSource
+    repoUrl: $repoUrl
+    reference: $reference
+    sha: $sha
   ) {
     __typename
     ... on VulnerabilityReport {

@@ -17,7 +17,7 @@ import {
   FixSharedStateZ,
   PatchAndQuestionsZ,
 } from './fix'
-import { IssuePartsZ } from './issue'
+import { IssuePartsZ, VulnerabilityReportIssueSharedStateZ } from './issue'
 import { ParsedSeverityZ } from './shared'
 
 export type Unpacked<T> = T extends (infer U)[] ? U : T
@@ -257,6 +257,7 @@ export const VulnerabilityReportIssueZ = z.object({
       vulnerability_report_issue_tag_value: z.string(),
     })
   ),
+  sharedState: VulnerabilityReportIssueSharedStateZ,
 })
 export type VulnerabilityReportIssue = z.infer<typeof VulnerabilityReportIssueZ>
 

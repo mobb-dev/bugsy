@@ -22,6 +22,12 @@ export const ValidCategoriesZ = z.union([
   z.literal(CATEGORY.Fixable),
 ])
 
+export const VulnerabilityReportIssueSharedStateZ = z
+  .object({
+    id: z.string().uuid(),
+    isArchived: z.boolean(),
+  })
+  .nullish()
 export const BaseIssuePartsZ = z.object({
   id: z.string().uuid(),
   safeIssueType: z.string(),
@@ -91,6 +97,7 @@ export const BaseIssuePartsZ = z.object({
         }),
     })
     .nullish(),
+  sharedState: VulnerabilityReportIssueSharedStateZ,
 })
 
 export const FalsePositivePartsZ = z.object({

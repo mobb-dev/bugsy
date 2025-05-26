@@ -43,6 +43,7 @@ import { getSnykReport } from './scanners/snyk'
 import {
   getCloudScmLibTypeFromUrl,
   getScmConfig,
+  REPORT_DEFAULT_FILE_NAME,
   ScmConfig,
   ScmLibScmType,
 } from './scm'
@@ -308,7 +309,7 @@ async function getReport(
     authHeaders: scm.getAuthHeaders(),
     downloadUrl,
   })
-  const reportPath = path.join(dirname, 'report.json')
+  const reportPath = path.join(dirname, REPORT_DEFAULT_FILE_NAME)
   switch (scanner) {
     case 'snyk':
       await getSnykReport(reportPath, repositoryRoot, { skipPrompts })
@@ -464,20 +465,21 @@ export async function _scan(
     )
   }
 
-  if (!reportPath) {
-    throw new Error('reportPath is null')
-  }
+  const shouldScan = !reportPath
+
   const uploadReportSpinner = createSpinner('📁 Uploading Report').start()
   try {
-    await uploadFile({
-      file: reportPath,
-      url: reportUploadInfo.url,
-      uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
-        string,
-        string
-      >,
-      uploadKey: reportUploadInfo.uploadKey,
-    })
+    if (reportPath) {
+      await uploadFile({
+        file: reportPath,
+        url: reportUploadInfo.url,
+        uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
+          string,
+          string
+        >,
+        uploadKey: reportUploadInfo.uploadKey,
+      })
+    }
   } catch (e) {
     uploadReportSpinner.error({ text: '📁 Report upload failed' })
     throw e
@@ -489,6 +491,10 @@ export async function _scan(
     projectId,
     command,
     ci,
+    repoUrl: repo,
+    sha,
+    reference,
+    shouldScan,
   })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
@@ -502,7 +508,9 @@ export async function _scan(
       repoUrl: z.string().parse(repo),
       reference,
       projectId,
-      vulnerabilityReportFileName: 'report.json',
+      vulnerabilityReportFileName: shouldScan
+        ? undefined
+        : REPORT_DEFAULT_FILE_NAME,
       sha,
       experimentalEnabled: !!experimentalEnabled,
       pullRequest: params.pullRequest,
@@ -629,68 +637,69 @@ export async function _scan(
     if (!repoUploadInfo || !reportUploadInfo) {
       throw new Error('uploadS3BucketInfo is null')
     }
-    if (!srcPath || !reportPath) {
-      throw new Error('src path and reportPath is required')
+    if (!srcPath) {
+      throw new Error('src path is required')
     }
-    const uploadReportSpinner = createSpinner('📁 Uploading Report').start()
-    try {
-      await uploadFile({
-        file: reportPath,
-        url: reportUploadInfo.url,
-        uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
-          string,
-          string
-        >,
-        uploadKey: reportUploadInfo.uploadKey,
-      })
-    } catch (e) {
-      uploadReportSpinner.error({ text: '📁 Report upload failed' })
-      throw e
-    }
-    uploadReportSpinner.success({
-      text: '📁 Uploading Report successful!',
-    })
-    const vulnFiles = await _digestReport({
-      gqlClient,
-      fixReportId: reportUploadInfo.fixReportId,
-      projectId,
-      command,
-      ci,
-    })
-    const srcFileStatus = await fsPromises.lstat(srcPath)
-    const zippingSpinner = createSpinner('📦 Zipping repo').start()
+    const shouldScan = !reportPath
 
-    let zipBuffer: Buffer
+    if (reportPath) {
+      const uploadReportSpinner = createSpinner('📁 Uploading Report').start()
+      try {
+        await uploadFile({
+          file: reportPath,
+          url: reportUploadInfo.url,
+          uploadFields: JSON.parse(reportUploadInfo.uploadFieldsJSON) as Record<
+            string,
+            string
+          >,
+          uploadKey: reportUploadInfo.uploadKey,
+        })
+      } catch (e) {
+        uploadReportSpinner.error({ text: '📁 Report upload failed' })
+        throw e
+      }
+      uploadReportSpinner.success({
+        text: '📁 Uploading Report successful!',
+      })
+    }
+
     let gitInfo: GetGitInfoResult = { success: false }
-
-    if (
-      srcFileStatus.isFile() &&
-      path.extname(srcPath).toLowerCase() === '.fpr'
-    ) {
-      zipBuffer = await repackFpr(srcPath)
-    } else {
-      gitInfo = await getGitInfo(srcPath)
-      zipBuffer = await pack(srcPath, vulnFiles)
-    }
-
-    zippingSpinner.success({ text: '📦 Zipping repo successful!' })
-
-    const uploadRepoSpinner = createSpinner('📁 Uploading Repo').start()
-    try {
-      await uploadFile({
-        file: zipBuffer,
-        url: repoUploadInfo.url,
-        uploadFields: JSON.parse(repoUploadInfo.uploadFieldsJSON) as Record<
-          string,
-          string
-        >,
-        uploadKey: repoUploadInfo.uploadKey,
+    //if the user provided a report path, we need to first digest the report, get the list of files and then upload the repo with relevant files filtering
+    if (reportPath) {
+      const vulnFiles = await _digestReport({
+        gqlClient,
+        fixReportId: reportUploadInfo.fixReportId,
+        projectId,
+        command,
+        ci,
+        shouldScan,
       })
-    } catch (e) {
-      uploadRepoSpinner.error({ text: '📁 Repo upload failed' })
-      throw e
+
+      const res = await _zipAndUploadRepo({
+        srcPath,
+        vulnFiles,
+        repoUploadInfo,
+        isIncludeAllFiles: false,
+      })
+      gitInfo = res.gitInfo
+      //if the user did not provide a report path, we need to upload the repo with all files and only then call the digest which will actually run an opengrep scan
+    } else {
+      const res = await _zipAndUploadRepo({
+        srcPath,
+        vulnFiles: [],
+        repoUploadInfo,
+        isIncludeAllFiles: true,
+      })
+      gitInfo = res.gitInfo
+      await _digestReport({
+        gqlClient,
+        fixReportId: reportUploadInfo.fixReportId,
+        projectId,
+        command,
+        ci,
+        shouldScan,
+      })
     }
-    uploadRepoSpinner.success({ text: '📁 Uploading Repo successful!' })
 
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
@@ -743,18 +752,80 @@ export async function _scan(
   }
 }
 
+async function _zipAndUploadRepo({
+  srcPath,
+  vulnFiles,
+  repoUploadInfo,
+  isIncludeAllFiles,
+}: {
+  srcPath: string
+  vulnFiles: string[]
+  repoUploadInfo: {
+    __typename?: 'UploadResult'
+    url: string
+    fixReportId: string
+    uploadFieldsJSON: string
+    uploadKey: string
+  }
+  isIncludeAllFiles: boolean
+}) {
+  const srcFileStatus = await fsPromises.lstat(srcPath)
+  const zippingSpinner = createSpinner('📦 Zipping repo').start()
+
+  let zipBuffer: Buffer
+  let gitInfo: GetGitInfoResult = { success: false }
+
+  if (
+    srcFileStatus.isFile() &&
+    path.extname(srcPath).toLowerCase() === '.fpr'
+  ) {
+    zipBuffer = await repackFpr(srcPath)
+  } else {
+    gitInfo = await getGitInfo(srcPath)
+    zipBuffer = await pack(srcPath, vulnFiles, isIncludeAllFiles)
+  }
+
+  zippingSpinner.success({ text: '📦 Zipping repo successful!' })
+
+  const uploadRepoSpinner = createSpinner('📁 Uploading Repo').start()
+  try {
+    await uploadFile({
+      file: zipBuffer,
+      url: repoUploadInfo.url,
+      uploadFields: JSON.parse(repoUploadInfo.uploadFieldsJSON) as Record<
+        string,
+        string
+      >,
+      uploadKey: repoUploadInfo.uploadKey,
+    })
+  } catch (e) {
+    uploadRepoSpinner.error({ text: '📁 Repo upload failed' })
+    throw e
+  }
+  uploadRepoSpinner.success({ text: '📁 Uploading Repo successful!' })
+  return { gitInfo }
+}
+
 export async function _digestReport({
   gqlClient,
   fixReportId,
   projectId,
   command,
   ci,
+  repoUrl,
+  sha,
+  reference,
+  shouldScan,
 }: {
   gqlClient: GQLClient
   fixReportId: string
   projectId: string
   command: MobbCliCommand
   ci: boolean
+  repoUrl?: string
+  sha?: string
+  reference?: string
+  shouldScan?: boolean
 }) {
   const digestSpinner = createSpinner(
     progressMassages.processingVulnerabilityReport
@@ -765,6 +836,10 @@ export async function _digestReport({
         fixReportId,
         projectId,
         scanSource: _getScanSource(command, ci),
+        repoUrl,
+        sha,
+        reference,
+        shouldScan,
       }
     )
     try {

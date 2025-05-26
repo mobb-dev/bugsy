@@ -6,7 +6,7 @@ import {
 } from '@mobb/bugsy/features/analysis/prompts'
 import { cxOperatingSystemSupportMessage } from '@mobb/bugsy/post_install/constants.mjs'
 import { CliError } from '@mobb/bugsy/utils'
-import { createSpwan } from '@mobb/bugsy/utils/child_process'
+import { createSpawn } from '@mobb/bugsy/utils/child_process'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { existsSync } from 'fs'
@@ -71,7 +71,7 @@ async function forkCheckmarx(
   { display }: { display: boolean }
 ) {
   debug('fork checkmarx with args %o %s', args.join(' '), display)
-  return createSpwan(
+  return createSpawn(
     { args, processPath: getCheckmarxPath(), name: 'checkmarx' },
     { display }
   )

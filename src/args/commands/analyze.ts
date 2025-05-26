@@ -31,7 +31,6 @@ export function analyzeBuilder(
   return yargs
     .option('f', {
       alias: 'scan-file',
-      demandOption: true,
       type: 'string',
       describe: chalk.bold(
         'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL, Sonarqube, Semgrep, Datadog)'
@@ -73,10 +72,8 @@ export function analyzeBuilder(
     .help()
 }
 
-// Export for testing
-export function validateAnalyzeOptions(argv: AnalyzeOptions) {
-  console.log('argv', argv)
-  if (!fs.existsSync(argv.f)) {
+function validateAnalyzeOptions(argv: AnalyzeOptions) {
+  if (argv.f && !fs.existsSync(argv.f)) {
     throw new CliError(`\nCan't access ${chalk.bold(argv.f)}`)
   }
   validateOrganizationId(argv.organizationId)
@@ -110,7 +107,9 @@ export function validateAnalyzeOptions(argv: AnalyzeOptions) {
       '--pull-request flag requires --commit-directly to be provided as well'
     )
   }
-  validateReportFileFormat(argv.f)
+  if (argv.f) {
+    validateReportFileFormat(argv.f)
+  }
 }
 
 export async function analyzeHandler(args: AnalyzeOptions) {

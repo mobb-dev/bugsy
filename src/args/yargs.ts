@@ -41,7 +41,7 @@ export const parseArgs = async (args: readonly string[]) => {
     .command(
       mobbCliCommand.analyze,
       chalk.bold(
-        'Provide a vulnerability report and relevant code repository, get automated fixes right away.'
+        'Provide a code repository, get automated fixes right away. You can also provide a vulnerability report to analyze or have Mobb scan the code for you.'
       ),
       analyzeBuilder,
       analyzeHandler

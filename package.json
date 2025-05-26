@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.83",
+  "version": "1.0.84",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -71,7 +71,6 @@
     "semver": "7.7.1",
     "simple-git": "3.27.0",
     "snyk": "1.1296.2",
-    "supports-color": "10.0.0",
     "tar": "6.2.1",
     "tmp": "0.2.3",
     "undici": "6.21.1",

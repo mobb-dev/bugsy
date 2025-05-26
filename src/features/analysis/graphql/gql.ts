@@ -7,6 +7,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { v4 as uuidv4 } from 'uuid'
 
 import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
+import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
@@ -237,7 +238,7 @@ export class GQLClient {
 
   async uploadS3BucketInfo() {
     const uploadS3BucketInfoResult = await this._clientSdk.uploadS3BucketInfo({
-      fileName: 'report.json',
+      fileName: REPORT_DEFAULT_FILE_NAME,
     })
     return uploadS3BucketInfoResult
   }
@@ -312,16 +313,29 @@ export class GQLClient {
     fixReportId,
     projectId,
     scanSource,
+    repoUrl,
+    reference,
+    sha,
+    shouldScan,
   }: {
     fixReportId: string
     projectId: string
     scanSource: string
+    repoUrl?: string
+    reference?: string
+    sha?: string
+    shouldScan?: boolean
   }) {
     const res = await this._clientSdk.DigestVulnerabilityReport({
       fixReportId,
-      vulnerabilityReportFileName: 'report.json',
+      vulnerabilityReportFileName: shouldScan
+        ? undefined
+        : REPORT_DEFAULT_FILE_NAME,
       projectId,
       scanSource,
+      repoUrl,
+      reference,
+      sha,
     })
     if (res.digestVulnerabilityReport.__typename !== 'VulnerabilityReport') {
       throw new Error('Digesting vulnerability report failed')

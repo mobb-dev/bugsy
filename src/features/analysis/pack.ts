@@ -36,7 +36,11 @@ function _get_manifest_files_suffixes() {
   return ['package.json', 'pom.xml']
 }
 
-export async function pack(srcDirPath: string, vulnFiles: string[]) {
+export async function pack(
+  srcDirPath: string,
+  vulnFiles: string[],
+  isIncludeAllFiles: boolean = false
+) {
   debug('pack folder %s', srcDirPath)
   let git = undefined
   try {
@@ -76,18 +80,20 @@ export async function pack(srcDirPath: string, vulnFiles: string[]) {
   for (const filepath of filepaths) {
     const absFilepath = path.join(srcDirPath, filepath.toString())
 
-    //make sure we send manifest files of the code the Mobb server for analysis
-    vulnFiles = vulnFiles.concat(_get_manifest_files_suffixes())
+    if (!isIncludeAllFiles) {
+      //make sure we send manifest files of the code the Mobb server for analysis
+      vulnFiles = vulnFiles.concat(_get_manifest_files_suffixes())
 
-    // the server returns relative paths in unix style
-    if (
-      !endsWithAny(
-        absFilepath.toString().replaceAll(path.win32.sep, path.posix.sep),
-        vulnFiles
-      )
-    ) {
-      debug('ignoring %s because it is not a vulnerability file', filepath)
-      continue
+      // the server returns relative paths in unix style
+      if (
+        !endsWithAny(
+          absFilepath.toString().replaceAll(path.win32.sep, path.posix.sep),
+          vulnFiles
+        )
+      ) {
+        debug('ignoring %s because it is not a vulnerability file', filepath)
+        continue
+      }
     }
 
     if (fs.lstatSync(absFilepath).size > MAX_FILE_SIZE) {

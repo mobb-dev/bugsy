@@ -181,9 +181,6 @@ export class GQLClient {
     const project = projectName
       ? (org?.projects.find((project) => project.name === projectName) ?? null)
       : org?.projects[0]
-    if (!project?.id) {
-      throw new Error('Project not found')
-    }
     let projectId = project?.id
     if (!projectId) {
       const createdProject = await this._clientSdk.CreateProject({
@@ -191,6 +188,9 @@ export class GQLClient {
         projectName: projectName || 'My project',
       })
       projectId = createdProject.createProject.projectId
+    }
+    if (!project?.id) {
+      throw new Error('Project not found')
     }
 
     return {

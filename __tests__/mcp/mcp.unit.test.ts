@@ -42,7 +42,7 @@ vi.mock('node-fetch', async () => {
 })
 
 // Mock the subscribe function to prevent actual WebSocket connections
-vi.mock('../../src/mcp/tools/fixVulnerabilities/helpers/subscribe', () => ({
+vi.mock('../../src/mcp/services/Subscribe', () => ({
   subscribe: vi.fn().mockResolvedValue({
     analysis: {
       id: 'test-analysis-id',
@@ -268,9 +268,7 @@ describe('MCP Server Direct Tests', () => {
         // Get access to mocked functions for verification
         const { default: fetch } = await import('node-fetch')
         const mockedFetch = vi.mocked(fetch)
-        const { subscribe } = await import(
-          '../../src/mcp/tools/fixVulnerabilities/helpers/subscribe'
-        )
+        const { subscribe } = await import('../../src/mcp/services/Subscribe')
         const mockedSubscribe = vi.mocked(subscribe)
 
         const tool = new FixVulnerabilitiesTool()
@@ -278,7 +276,7 @@ describe('MCP Server Direct Tests', () => {
 
         // === VERIFY COMPLETE FLOW LOGS ===
         expectLogMessage('Executing tool: fix_vulnerabilities')
-        expectLogMessage('FilePackingService: packing files')
+        expectLogMessage('FilePacking: packing files')
         expectLogMessage('Files packed successfully')
         expectLogMessage('Upload info retrieved')
         expectLogMessage('File uploaded successfully')

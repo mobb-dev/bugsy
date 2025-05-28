@@ -158,11 +158,12 @@ function filterSarifResult(
   const paths = sarifResult.locations.map(
     (l) => l.physicalLocation.artifactLocation.uri
   )
-  const matchPaths = multimatch(paths, codePathPatterns, {
+  const uniquePaths: string[] = [...new Set(paths)]
+  const matchPaths = multimatch(uniquePaths, codePathPatterns, {
     dot: true,
   })
 
-  return matchPaths.length > 0
+  return matchPaths.length === uniquePaths.length
 }
 
 function fortifyVulnerabilityToSarifResult(

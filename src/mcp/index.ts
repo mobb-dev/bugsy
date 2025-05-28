@@ -20,8 +20,14 @@ function createMcpServer(): McpServer {
 
   server.registerTool({
     name: fixVulnerabilitiesTool.name,
-    definition: fixVulnerabilitiesTool.getDefinition(),
-    execute: (args: unknown) => fixVulnerabilitiesTool.execute(args),
+    definition: {
+      name: fixVulnerabilitiesTool.name,
+      display_name: fixVulnerabilitiesTool.display_name,
+      description: fixVulnerabilitiesTool.description,
+      inputSchema: fixVulnerabilitiesTool.inputSchema,
+    },
+    execute: (args: unknown) =>
+      fixVulnerabilitiesTool.execute(args as { path: string }),
   })
 
   logInfo('MCP server created and configured')

@@ -15,7 +15,6 @@ const config: CodegenConfig = {
         'typescript',
         'typescript-operations',
         'typescript-graphql-request',
-        'typescript-msw',
       ],
       config: {
         documentMode: 'string',

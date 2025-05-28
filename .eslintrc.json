@@ -4,7 +4,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["@typescript-eslint", "simple-import-sort", "import", "unicorn"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "import"],
   "parser": "@typescript-eslint/parser",
   "ignorePatterns": [
     "**/dist",

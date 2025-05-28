@@ -1,0 +1,205 @@
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import {
+  CallToolRequest,
+  CallToolRequestSchema,
+  ListToolsRequest,
+  ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js'
+
+import { logDebug, logError, logInfo, logWarn } from '../Logger'
+import { type ToolDefinition, ToolRegistry } from './ToolRegistry'
+
+export type McpServerConfig = {
+  name: string
+  version: string
+}
+
+export class McpServer {
+  private server: Server
+  private toolRegistry: ToolRegistry
+  private isEventHandlersSetup = false
+
+  constructor(config: McpServerConfig) {
+    this.server = new Server(
+      {
+        name: config.name,
+        version: config.version,
+      },
+      {
+        capabilities: {
+          tools: {},
+        },
+      }
+    )
+
+    this.toolRegistry = new ToolRegistry()
+    this.setupHandlers()
+    this.setupProcessEventHandlers()
+    logInfo('MCP server instance created', config)
+  }
+
+  private setupProcessEventHandlers(): void {
+    if (this.isEventHandlersSetup) {
+      logDebug('Process event handlers already setup, skipping')
+      return
+    }
+
+    // Define signals with their corresponding messages
+    const signals: Record<string, string> = {
+      SIGINT: 'MCP server interrupted',
+      SIGTERM: 'MCP server terminated',
+      exit: 'MCP server exiting',
+      uncaughtException: 'Uncaught exception in MCP server',
+      unhandledRejection: 'Unhandled promise rejection in MCP server',
+      warning: 'Warning in MCP server',
+    }
+
+    // Set up handlers for each signal or event
+    Object.entries(signals).forEach(([signal, message]) => {
+      process.on(
+        signal as
+          | NodeJS.Signals
+          | 'exit'
+          | 'uncaughtException'
+          | 'unhandledRejection'
+          | 'warning',
+        (error?: Error | number) => {
+          if (error && signal !== 'exit') {
+            logError(`${message}`, { error, signal })
+          } else {
+            logInfo(message, { signal })
+          }
+
+          // Exit on termination signals
+          if (signal === 'SIGINT' || signal === 'SIGTERM') {
+            process.exit(0)
+          }
+
+          // For uncaughtException, exit with error code
+          if (signal === 'uncaughtException') {
+            process.exit(1)
+          }
+        }
+      )
+    })
+
+    this.isEventHandlersSetup = true
+    logDebug('Process event handlers registered')
+  }
+
+  private createShutdownPromise(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const cleanup = () => {
+        logInfo('Process shutdown initiated')
+        resolve()
+      }
+
+      process.once('SIGINT', cleanup)
+      process.once('SIGTERM', cleanup)
+    })
+  }
+
+  private setupHandlers(): void {
+    // List tools handler
+    this.server.setRequestHandler(
+      ListToolsRequestSchema,
+      async (request: ListToolsRequest) => {
+        logInfo('Received list_tools request', { params: request.params })
+
+        const tools = this.toolRegistry.getAllTools()
+        const response = { tools }
+
+        logInfo('Returning list_tools response', {
+          toolCount: tools.length,
+          toolNames: tools.map((t: ToolDefinition) => t.name),
+          response,
+        })
+        return response
+      }
+    )
+
+    // Call tool handler
+    this.server.setRequestHandler(
+      CallToolRequestSchema,
+      async (request: CallToolRequest) => {
+        const { name, arguments: args } = request.params
+        logInfo(`Received call tool request for ${name}`, { name, args })
+
+        try {
+          const tool = this.toolRegistry.getTool(name)
+          if (!tool) {
+            const errorMsg = `Unknown tool: ${name}`
+            logWarn(errorMsg, {
+              name,
+              availableTools: this.toolRegistry.getToolNames(),
+            })
+            throw new Error(errorMsg)
+          }
+
+          logDebug(`Executing tool: ${name}`, { args })
+          const response = await tool.execute(args)
+
+          // Ensure response is properly serializable
+          const serializedResponse = JSON.parse(JSON.stringify(response))
+          logInfo(`Tool ${name} executed successfully`, {
+            responseType: typeof response,
+            hasContent: !!serializedResponse.content,
+          })
+
+          return serializedResponse
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error)
+          logError(`Error executing tool ${name}: ${errorMessage}`, {
+            error,
+            toolName: name,
+            args,
+          })
+          throw error
+        }
+      }
+    )
+
+    logDebug('MCP server handlers registered')
+  }
+
+  public registerTool(tool: {
+    name: string
+    definition: ToolDefinition
+    execute: (args: unknown) => Promise<unknown>
+  }): void {
+    this.toolRegistry.registerTool({
+      name: tool.name,
+      definition: tool.definition,
+      execute: tool.execute,
+    })
+    logDebug(`Tool registered: ${tool.name}`)
+  }
+
+  public async start(): Promise<void> {
+    try {
+      logDebug('Starting MCP server')
+      const transport = new StdioServerTransport()
+      await this.server.connect(transport)
+      logInfo('MCP server is running on stdin/stdout')
+
+      // Keep process running until interrupted
+      process.stdin.resume()
+
+      // Wait for shutdown signal
+      await this.createShutdownPromise()
+
+      // Clean shutdown
+      await this.stop()
+    } catch (error) {
+      logError('Failed to start MCP server', { error })
+      throw error
+    }
+  }
+
+  public async stop(): Promise<void> {
+    logInfo('MCP server shutting down')
+    // Add any cleanup logic here if needed
+  }
+}

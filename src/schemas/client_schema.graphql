@@ -65,14 +65,14 @@ query GetVulnerabilityReportPaths($vulnerabilityReportId: uuid!) {
   }
 }
 
-subscription getAnalysis($analysisId: uuid!) {
+subscription getAnalysisSubscription($analysisId: uuid!) {
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
   }
 }
 
-query getAnalsyis($analysisId: uuid!) {
+query getAnalysis($analysisId: uuid!) {
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
@@ -457,6 +457,36 @@ mutation autoPrAnalysis(
     ... on AutoPrError {
       status
       error
+    }
+  }
+}
+
+query GetMCPFixes($fixReportId: uuid!) {
+  fix(where: { fixReportId: { _eq: $fixReportId } }) {
+    id
+    confidence
+    safeIssueType
+    severityText
+    vulnerabilityReportIssues {
+      parsedIssueType
+      parsedSeverity
+      vulnerabilityReportIssueTags {
+        vulnerability_report_issue_tag_value
+      }
+    }
+    patchAndQuestions {
+      __typename
+      ... on FixData {
+        patch
+        patchOriginalEncodingBase64
+        extraContext {
+          extraContext {
+            key
+            value
+          }
+          fixDescription
+        }
+      }
     }
   }
 }

@@ -11,9 +11,9 @@ import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
-  GetAnalysisDocument,
-  GetAnalysisSubscription,
-  GetAnalysisSubscriptionVariables,
+  GetAnalysisSubscriptionDocument,
+  GetAnalysisSubscriptionSubscription,
+  GetAnalysisSubscriptionSubscriptionVariables,
   GetEncryptedApiTokenQueryVariables,
   GetFalsePositiveQueryVariables,
   getSdk,
@@ -408,14 +408,17 @@ export class GQLClient {
   }
 
   async subscribeToAnalysis(params: {
-    subscribeToAnalysisParams: GetAnalysisSubscriptionVariables
+    subscribeToAnalysisParams: GetAnalysisSubscriptionSubscriptionVariables
     callback: (analysisId: string) => void
     callbackStates: Fix_Report_State_Enum[]
     timeoutInMs?: number
   }) {
     const { callbackStates } = params
-    return subscribe<GetAnalysisSubscription, GetAnalysisSubscriptionVariables>(
-      GetAnalysisDocument,
+    return subscribe<
+      GetAnalysisSubscriptionSubscription,
+      GetAnalysisSubscriptionSubscriptionVariables
+    >(
+      GetAnalysisSubscriptionDocument,
       params.subscribeToAnalysisParams,
       async (resolve, reject, data) => {
         if (
@@ -444,7 +447,7 @@ export class GQLClient {
     )
   }
   async getAnalysis(analysisId: string) {
-    const res = await this._clientSdk.getAnalsyis({
+    const res = await this._clientSdk.getAnalysis({
       analysisId,
     })
     if (!res.analysis) {

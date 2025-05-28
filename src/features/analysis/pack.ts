@@ -32,7 +32,7 @@ function endsWithAny(str: string, suffixes: string[]): boolean {
 }
 
 // For now, we only support package.json and pom.xml files.
-function _get_manifest_files_suffixes() {
+function getManifestFilesSuffixes() {
   return ['package.json', 'pom.xml']
 }
 
@@ -82,7 +82,7 @@ export async function pack(
 
     if (!isIncludeAllFiles) {
       //make sure we send manifest files of the code the Mobb server for analysis
-      vulnFiles = vulnFiles.concat(_get_manifest_files_suffixes())
+      vulnFiles = vulnFiles.concat(getManifestFilesSuffixes())
 
       // the server returns relative paths in unix style
       if (

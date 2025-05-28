@@ -4,12 +4,18 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["@typescript-eslint", "simple-import-sort", "import"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "import", "unicorn"],
   "parser": "@typescript-eslint/parser",
-  "ignorePatterns": ["**/dist"],
+  "ignorePatterns": [
+    "**/dist",
+    "client_codegen.ts",
+    "vitest.config.ts",
+    "tsup.config.js"
+  ],
   "parserOptions": {
     "ecmaVersion": "latest",
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "root": true,
   "rules": {
@@ -22,13 +28,71 @@
     ],
     // to enforce using type for objec type definitions, can be type or interface
     "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    // enforce camelCase for variables and function names with exceptions
+    "@typescript-eslint/naming-convention": [
+     "error",
+     {
+       "selector": "variable",
+       "format": ["camelCase", "UPPER_CASE", "PascalCase"],
+       "leadingUnderscore": "allow",
+       "trailingUnderscore": "allow",
+       "filter": {
+         "regex": "^(__dirname|__filename|repo_slug|key_id|pull_request_url|class_name|func_param_name|source_value|prop_value|tainted_expression|tainted_term|taint_var_type_guidance_required|var_name|enquote_func_name|tainted_variable|is_http|is_https|File|FormData)$",
+         "match": false
+       }
+     },
+     {
+       "selector": "function",
+       "format": ["camelCase", "PascalCase"],
+       "leadingUnderscore": "allow"
+     },
+     {
+       "selector": "parameter",
+       "format": ["camelCase"],
+       "leadingUnderscore": "allow",
+       "filter": {
+         "regex": "^(ADO_PAT|ADO_MOBB_ORG|ADO_URL|NON_EXISTING_ADO_URL|EXISTING_COMMIT|EXISTING_BRANCH|NON_EXISTING_BRANCH|EXISTING_TAG|EXISTING_BRANCH_SHA|EXISTING_TAG_SHA|INVALID_URL|EXPECTED|class_name|func_param_name|source_value|prop_value|tainted_expression|tainted_term|taint_var_type_guidance_required|var_name|enquote_func_name|tainted_variable)$",
+         "match": false
+       }
+     },
+     {
+       "selector": "objectLiteralProperty",
+       "format": ["camelCase", "PascalCase", "UPPER_CASE"],
+       "leadingUnderscore": "allow",
+       "filter": {
+         "regex": "^(__typename|__dirname|__filename|repo_slug|key_id|pull_request_url|class_name|func_param_name|source_value|prop_value|tainted_expression|tainted_term|taint_var_type_guidance_required|var_name|enquote_func_name|tainted_variable|is_http|is_https|File|FormData|display_name|scm-type|pull_number|commit_id|comment_id|issue_number|pull_request_id|commit_sha|tag_sha|base_tree|head_repo|per_page|maintainer_can_modify|default_branch_only|encrypted_value|secret_name|access_token|token_type|expires_in|refresh_token|created_at|client_id|client_secret|grant_type|redirect_uri|client_assertion_type|client_assertion|Content-Type|Content-Length|Private-Token|x-mobb-key|x-hasura-request-id|missing_files|large_files|error_files|fixReport_by_pk|vulnerability_report_issue_by_pk|vulnerabilityReportIssues_aggregate|vulnerability_report_issue_tag_value|project_by_pk|fix_by_pk|invalid_type_error|Commands:|Options:|Examples:|Show help|allowed_hosts|add_log_message|organization_to_organization_role)$",
+         "match": false
+       }
+     },
+     {
+       "selector": ["variable", "parameter", "property"],
+       "types": ["boolean"],
+       "format": ["PascalCase"],
+       "prefix": ["is", "has"],
+       "filter": {
+         "regex": "^(debug|force|append|research|skipInstall|yes|addAliases|withSubtasks|complexityReport|skipGenerate|convert|confirm|all|ci|autoPr|createOnePr|commitDirectly|listAvailableModels|ollama|openrouter|auto-pr|create-one-pr|commit-directly|y|success|skipPrompts|shouldScan|experimentalEnabled|includeDigested|display|res|propagateExceptions|containsTemplate|clientMightBeAffected|error|repoIsPublic|includeOrgTokens|maintainer_can_modify|default_branch_only|is_http|is_https)$",
+         "match": false
+       }
+     }
+    ],
+    // Prefer T[] over Array<T> for array type definitions
+    "@typescript-eslint/array-type": ["error", { "default": "array" }],
+    //// Prefer optional chaining over explicit null/undefined checks
+    "@typescript-eslint/prefer-optional-chain": "error",
+    // Require comments in empty functions to document intent
+    "@typescript-eslint/no-empty-function": [
+      "error",
+      {
+        "allow": []
+      }
+    ],
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "import/first": "error",
     "import/newline-after-import": "error",
     "@typescript-eslint/ban-ts-comment": "warn"
   },
-   "env": {
+  "env": {
     "node": true
   }
 }

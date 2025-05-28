@@ -84,7 +84,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       const git = await api.getGitApi()
       try {
         const branchStatus = await git.getBranch(repo, branch, projectName)
-        if (!branchStatus || !branchStatus.commit) {
+        if (!branchStatus?.commit) {
           console.log(`no branch status: ${JSON.stringify(branchStatus)}`)
           throw new InvalidRepoUrlError('no branch status')
         }
@@ -248,7 +248,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       const results = await Promise.allSettled([
         (async () => {
           const res = await git.getBranch(repo, ref, projectName)
-          if (!res.commit || !res.commit.commitId) {
+          if (!res.commit?.commitId) {
             throw new InvalidRepoUrlError('no commit on branch')
           }
           return {
@@ -268,7 +268,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
             projectName
           )
           const commit = res[0]
-          if (!commit || !commit.commitId) {
+          if (!commit?.commitId) {
             throw new Error('no commit')
           }
           return {

@@ -4,6 +4,7 @@ export const mobbCliCommand = {
   analyze: 'analyze',
   review: 'review',
   convertToSarif: 'convert-to-sarif',
+  mcp: 'mcp',
 } as const
 
 type MobbCliCommandType = typeof mobbCliCommand

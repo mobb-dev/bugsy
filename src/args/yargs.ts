@@ -7,6 +7,7 @@ import chalk from 'chalk'
 import yargs from 'yargs/yargs'
 
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
+import { mcpBuilder, mcpHandler } from './commands/mcp'
 import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
 import { addScmTokenBuilder, addScmTokenHandler } from './commands/token'
@@ -67,6 +68,12 @@ export const parseArgs = async (args: readonly string[]) => {
       chalk.bold('Convert an existing SAST report to SARIF format.'),
       convertToSarifBuilder,
       convertToSarifHandler
+    )
+    .command(
+      mobbCliCommand.mcp,
+      chalk.bold('Launch the MCP (Model Context Protocol) server.'),
+      mcpBuilder,
+      mcpHandler
     )
     .example(
       'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',

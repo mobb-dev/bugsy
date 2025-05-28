@@ -94,7 +94,7 @@ export type GithubBlameResponse = {
   repository: {
     object: {
       blame: {
-        ranges: Array<{
+        ranges: {
           age: number
           endingLine: number
           startingLine: number
@@ -107,7 +107,7 @@ export type GithubBlameResponse = {
               }
             }
           }
-        }>
+        }[]
       }
     }
   }

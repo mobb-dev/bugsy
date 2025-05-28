@@ -1,4 +1,5 @@
 import { GraphQLClient, RequestOptions } from 'graphql-request';
+import { graphql, type GraphQLResponseResolver, type RequestHandlerOptions } from 'msw'
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -27055,19 +27056,19 @@ export type GetVulnerabilityReportPathsQueryVariables = Exact<{
 
 export type GetVulnerabilityReportPathsQuery = { __typename?: 'query_root', vulnerability_report_path: Array<{ __typename?: 'vulnerability_report_path', path: string }> };
 
-export type GetAnalysisSubscriptionVariables = Exact<{
+export type GetAnalysisSubscriptionSubscriptionVariables = Exact<{
   analysisId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetAnalysisSubscription = { __typename?: 'subscription_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum } | null };
+export type GetAnalysisSubscriptionSubscription = { __typename?: 'subscription_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum } | null };
 
-export type GetAnalsyisQueryVariables = Exact<{
+export type GetAnalysisQueryVariables = Exact<{
   analysisId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetAnalsyisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
+export type GetAnalysisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
 
 export type GetFixesQueryVariables = Exact<{
   filters: Fix_Bool_Exp;
@@ -27189,6 +27190,13 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
+export type GetMcpFixesQueryVariables = Exact<{
+  fixReportId: Scalars['uuid']['input'];
+}>;
+
+
+export type GetMcpFixesQuery = { __typename?: 'query_root', fix: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }> };
+
 
 export const MeDocument = `
     query Me {
@@ -27259,16 +27267,16 @@ export const GetVulnerabilityReportPathsDocument = `
   }
 }
     `;
-export const GetAnalysisDocument = `
-    subscription getAnalysis($analysisId: uuid!) {
+export const GetAnalysisSubscriptionDocument = `
+    subscription getAnalysisSubscription($analysisId: uuid!) {
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
   }
 }
     `;
-export const GetAnalsyisDocument = `
-    query getAnalsyis($analysisId: uuid!) {
+export const GetAnalysisDocument = `
+    query getAnalysis($analysisId: uuid!) {
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
@@ -27619,6 +27627,37 @@ export const AutoPrAnalysisDocument = `
   }
 }
     `;
+export const GetMcpFixesDocument = `
+    query GetMCPFixes($fixReportId: uuid!) {
+  fix(where: {fixReportId: {_eq: $fixReportId}}) {
+    id
+    confidence
+    safeIssueType
+    severityText
+    vulnerabilityReportIssues {
+      parsedIssueType
+      parsedSeverity
+      vulnerabilityReportIssueTags {
+        vulnerability_report_issue_tag_value
+      }
+    }
+    patchAndQuestions {
+      __typename
+      ... on FixData {
+        patch
+        patchOriginalEncodingBase64
+        extraContext {
+          extraContext {
+            key
+            value
+          }
+          fixDescription
+        }
+      }
+    }
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -27642,11 +27681,11 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     GetVulnerabilityReportPaths(variables: GetVulnerabilityReportPathsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetVulnerabilityReportPathsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetVulnerabilityReportPathsQuery>(GetVulnerabilityReportPathsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVulnerabilityReportPaths', 'query', variables);
     },
-    getAnalysis(variables: GetAnalysisSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalysisSubscription> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisSubscription>(GetAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalysis', 'subscription', variables);
+    getAnalysisSubscription(variables: GetAnalysisSubscriptionSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalysisSubscriptionSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisSubscriptionSubscription>(GetAnalysisSubscriptionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalysisSubscription', 'subscription', variables);
     },
-    getAnalsyis(variables: GetAnalsyisQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalsyisQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalsyisQuery>(GetAnalsyisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalsyis', 'query', variables);
+    getAnalysis(variables: GetAnalysisQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalysisQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisQuery>(GetAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalysis', 'query', variables);
     },
     getFixes(variables: GetFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetFixesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetFixesQuery>(GetFixesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getFixes', 'query', variables);
@@ -27689,7 +27728,471 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AutoPrAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>(AutoPrAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'autoPrAnalysis', 'mutation', variables);
+    },
+    GetMCPFixes(variables: GetMcpFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetMcpFixesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetMcpFixesQuery>(GetMcpFixesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetMCPFixes', 'query', variables);
     }
   };
 }
 export type Sdk = ReturnType<typeof getSdk>;
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockMeQuery(
+ *   ({ query, variables }) => {
+ *     return HttpResponse.json({
+ *       data: { me }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockMeQuery = (resolver: GraphQLResponseResolver<MeQuery, MeQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<MeQuery, MeQueryVariables>(
+    'Me',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetOrgAndProjectIdQuery(
+ *   ({ query, variables }) => {
+ *     const { filters, limit } = variables;
+ *     return HttpResponse.json({
+ *       data: { organization_to_organization_role }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetOrgAndProjectIdQuery = (resolver: GraphQLResponseResolver<GetOrgAndProjectIdQuery, GetOrgAndProjectIdQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetOrgAndProjectIdQuery, GetOrgAndProjectIdQueryVariables>(
+    'getOrgAndProjectId',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetEncryptedApiTokenQuery(
+ *   ({ query, variables }) => {
+ *     const { loginId } = variables;
+ *     return HttpResponse.json({
+ *       data: { cli_login_by_pk }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetEncryptedApiTokenQuery = (resolver: GraphQLResponseResolver<GetEncryptedApiTokenQuery, GetEncryptedApiTokenQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetEncryptedApiTokenQuery, GetEncryptedApiTokenQueryVariables>(
+    'GetEncryptedApiToken',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockFixReportStateQuery(
+ *   ({ query, variables }) => {
+ *     const { id } = variables;
+ *     return HttpResponse.json({
+ *       data: { fixReport_by_pk }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockFixReportStateQuery = (resolver: GraphQLResponseResolver<FixReportStateQuery, FixReportStateQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<FixReportStateQuery, FixReportStateQueryVariables>(
+    'FixReportState',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetVulnerabilityReportPathsQuery(
+ *   ({ query, variables }) => {
+ *     const { vulnerabilityReportId } = variables;
+ *     return HttpResponse.json({
+ *       data: { vulnerability_report_path }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetVulnerabilityReportPathsQuery = (resolver: GraphQLResponseResolver<GetVulnerabilityReportPathsQuery, GetVulnerabilityReportPathsQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetVulnerabilityReportPathsQuery, GetVulnerabilityReportPathsQueryVariables>(
+    'GetVulnerabilityReportPaths',
+    resolver,
+    options
+  )
+
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetAnalysisQuery(
+ *   ({ query, variables }) => {
+ *     const { analysisId } = variables;
+ *     return HttpResponse.json({
+ *       data: { fixReport_by_pk }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetAnalysisQuery = (resolver: GraphQLResponseResolver<GetAnalysisQuery, GetAnalysisQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetAnalysisQuery, GetAnalysisQueryVariables>(
+    'getAnalysis',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetFixesQuery(
+ *   ({ query, variables }) => {
+ *     const { filters } = variables;
+ *     return HttpResponse.json({
+ *       data: { fix }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetFixesQuery = (resolver: GraphQLResponseResolver<GetFixesQuery, GetFixesQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetFixesQuery, GetFixesQueryVariables>(
+    'getFixes',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetVulByNodesMetadataQuery(
+ *   ({ query, variables }) => {
+ *     const { filters, vulnerabilityReportId } = variables;
+ *     return HttpResponse.json({
+ *       data: { vulnerability_report_issue_code_node, vulnerability_report_issue_aggregate, vulnerability_report_issue_aggregate, vulnerability_report_issue_aggregate, vulnerability_report }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetVulByNodesMetadataQuery = (resolver: GraphQLResponseResolver<GetVulByNodesMetadataQuery, GetVulByNodesMetadataQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetVulByNodesMetadataQuery, GetVulByNodesMetadataQueryVariables>(
+    'getVulByNodesMetadata',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetFalsePositiveQuery(
+ *   ({ query, variables }) => {
+ *     const { fpId } = variables;
+ *     return HttpResponse.json({
+ *       data: { getFalsePositive }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetFalsePositiveQuery = (resolver: GraphQLResponseResolver<GetFalsePositiveQuery, GetFalsePositiveQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetFalsePositiveQuery, GetFalsePositiveQueryVariables>(
+    'getFalsePositive',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockUpdateScmTokenMutation(
+ *   ({ query, variables }) => {
+ *     const { scmType, url, token, org, refreshToken } = variables;
+ *     return HttpResponse.json({
+ *       data: { updateScmToken }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockUpdateScmTokenMutation = (resolver: GraphQLResponseResolver<UpdateScmTokenMutation, UpdateScmTokenMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<UpdateScmTokenMutation, UpdateScmTokenMutationVariables>(
+    'updateScmToken',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockUploadS3BucketInfoMutation(
+ *   ({ query, variables }) => {
+ *     const { fileName } = variables;
+ *     return HttpResponse.json({
+ *       data: { uploadS3BucketInfo }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockUploadS3BucketInfoMutation = (resolver: GraphQLResponseResolver<UploadS3BucketInfoMutation, UploadS3BucketInfoMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<UploadS3BucketInfoMutation, UploadS3BucketInfoMutationVariables>(
+    'uploadS3BucketInfo',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockDigestVulnerabilityReportMutation(
+ *   ({ query, variables }) => {
+ *     const { vulnerabilityReportFileName, fixReportId, projectId, scanSource, repoUrl, reference, sha } = variables;
+ *     return HttpResponse.json({
+ *       data: { digestVulnerabilityReport }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockDigestVulnerabilityReportMutation = (resolver: GraphQLResponseResolver<DigestVulnerabilityReportMutation, DigestVulnerabilityReportMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<DigestVulnerabilityReportMutation, DigestVulnerabilityReportMutationVariables>(
+    'DigestVulnerabilityReport',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockSubmitVulnerabilityReportMutation(
+ *   ({ query, variables }) => {
+ *     const { fixReportId, repoUrl, reference, projectId, scanSource, sha, experimentalEnabled, vulnerabilityReportFileName, pullRequest } = variables;
+ *     return HttpResponse.json({
+ *       data: { submitVulnerabilityReport }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockSubmitVulnerabilityReportMutation = (resolver: GraphQLResponseResolver<SubmitVulnerabilityReportMutation, SubmitVulnerabilityReportMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<SubmitVulnerabilityReportMutation, SubmitVulnerabilityReportMutationVariables>(
+    'SubmitVulnerabilityReport',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockCreateCommunityUserMutation(
+ *   ({ query, variables }) => {
+ *     return HttpResponse.json({
+ *       data: { initOrganizationAndProject }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockCreateCommunityUserMutation = (resolver: GraphQLResponseResolver<CreateCommunityUserMutation, CreateCommunityUserMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<CreateCommunityUserMutation, CreateCommunityUserMutationVariables>(
+    'CreateCommunityUser',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockCreateCliLoginMutation(
+ *   ({ query, variables }) => {
+ *     const { publicKey } = variables;
+ *     return HttpResponse.json({
+ *       data: { insert_cli_login_one }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockCreateCliLoginMutation = (resolver: GraphQLResponseResolver<CreateCliLoginMutation, CreateCliLoginMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<CreateCliLoginMutation, CreateCliLoginMutationVariables>(
+    'CreateCliLogin',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockPerformCliLoginMutation(
+ *   ({ query, variables }) => {
+ *     const { loginId } = variables;
+ *     return HttpResponse.json({
+ *       data: { performCliLogin }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockPerformCliLoginMutation = (resolver: GraphQLResponseResolver<PerformCliLoginMutation, PerformCliLoginMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<PerformCliLoginMutation, PerformCliLoginMutationVariables>(
+    'performCliLogin',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockCreateProjectMutation(
+ *   ({ query, variables }) => {
+ *     const { organizationId, projectName } = variables;
+ *     return HttpResponse.json({
+ *       data: { createProject }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockCreateProjectMutation = (resolver: GraphQLResponseResolver<CreateProjectMutation, CreateProjectMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<CreateProjectMutation, CreateProjectMutationVariables>(
+    'CreateProject',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockValidateRepoUrlQuery(
+ *   ({ query, variables }) => {
+ *     const { repoUrl } = variables;
+ *     return HttpResponse.json({
+ *       data: { validateRepoUrl }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockValidateRepoUrlQuery = (resolver: GraphQLResponseResolver<ValidateRepoUrlQuery, ValidateRepoUrlQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<ValidateRepoUrlQuery, ValidateRepoUrlQueryVariables>(
+    'validateRepoUrl',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGitReferenceQuery(
+ *   ({ query, variables }) => {
+ *     const { repoUrl, reference } = variables;
+ *     return HttpResponse.json({
+ *       data: { gitReference }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGitReferenceQuery = (resolver: GraphQLResponseResolver<GitReferenceQuery, GitReferenceQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GitReferenceQuery, GitReferenceQueryVariables>(
+    'gitReference',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockAutoPrAnalysisMutation(
+ *   ({ query, variables }) => {
+ *     const { analysisId, commitDirectly, prId, prStrategy } = variables;
+ *     return HttpResponse.json({
+ *       data: { autoPrAnalysis }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockAutoPrAnalysisMutation = (resolver: GraphQLResponseResolver<AutoPrAnalysisMutation, AutoPrAnalysisMutationVariables>, options?: RequestHandlerOptions) =>
+  graphql.mutation<AutoPrAnalysisMutation, AutoPrAnalysisMutationVariables>(
+    'autoPrAnalysis',
+    resolver,
+    options
+  )
+
+/**
+ * @param resolver A function that accepts [resolver arguments](https://mswjs.io/docs/api/graphql#resolver-argument) and must always return the instruction on what to do with the intercepted request. ([see more](https://mswjs.io/docs/concepts/response-resolver#resolver-instructions))
+ * @param options Options object to customize the behavior of the mock. ([see more](https://mswjs.io/docs/api/graphql#handler-options))
+ * @see https://mswjs.io/docs/basics/response-resolver
+ * @example
+ * mockGetMcpFixesQuery(
+ *   ({ query, variables }) => {
+ *     const { fixReportId } = variables;
+ *     return HttpResponse.json({
+ *       data: { fix }
+ *     })
+ *   },
+ *   requestOptions
+ * )
+ */
+export const mockGetMcpFixesQuery = (resolver: GraphQLResponseResolver<GetMcpFixesQuery, GetMcpFixesQueryVariables>, options?: RequestHandlerOptions) =>
+  graphql.query<GetMcpFixesQuery, GetMcpFixesQueryVariables>(
+    'GetMCPFixes',
+    resolver,
+    options
+  )

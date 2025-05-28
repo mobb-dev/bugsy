@@ -53,7 +53,7 @@ function createChildProcess(
       debug(`chunk received from ${name} std ${chunk}`)
       out += chunk
     }
-    if (!childProcess || !childProcess?.stdout || !childProcess?.stderr) {
+    if (!childProcess?.stdout || !childProcess?.stderr) {
       debug(`unable to fork ${name}`)
       reject(new Error(`unable to fork ${name}`))
     }

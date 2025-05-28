@@ -30,7 +30,7 @@ export const SCANNERS = {
   Datadog: 'datadog',
 } as const
 
-export const scannerToVulnerability_Report_Vendor_Enum = {
+export const scannerToVulnerabilityReportVendorEnum = {
   [SCANNERS.Checkmarx]: Vulnerability_Report_Vendor_Enum.Checkmarx,
   [SCANNERS.Snyk]: Vulnerability_Report_Vendor_Enum.Snyk,
   [SCANNERS.Sonarqube]: Vulnerability_Report_Vendor_Enum.Sonarqube,

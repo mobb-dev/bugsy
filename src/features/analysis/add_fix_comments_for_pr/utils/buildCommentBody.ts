@@ -1,6 +1,6 @@
 import {
   Scanner,
-  scannerToVulnerability_Report_Vendor_Enum,
+  scannerToVulnerabilityReportVendorEnum,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
 import { Vulnerability_Report_Issue_Tag_Enum } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
@@ -132,7 +132,7 @@ export function buildFixCommentBody({
   const subTitle = validFixParseRes.success
     ? getCommitDescription({
         issueType: validFixParseRes.data.safeIssueType,
-        vendor: scannerToVulnerability_Report_Vendor_Enum[scanner],
+        vendor: scannerToVulnerabilityReportVendorEnum[scanner],
         severity: validFixParseRes.data.severityText,
         guidances: getGuidances({
           questions:
@@ -176,7 +176,7 @@ export function buildIssueCommentBody({
 
   const subTitle = getCommitIssueDescription({
     issueType,
-    vendor: scannerToVulnerability_Report_Vendor_Enum[scanner],
+    vendor: scannerToVulnerabilityReportVendorEnum[scanner],
     irrelevantIssueWithTags,
     fpDescription,
   })

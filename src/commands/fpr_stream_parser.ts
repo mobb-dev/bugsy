@@ -53,7 +53,9 @@ class BaseStreamParser {
     this.currentPath.pop()
   }
 
-  protected onText(_text: string) {}
+  protected onText(_text: string) {
+    /* empty */
+  }
 }
 
 export class AuditMetadataParser extends BaseStreamParser {

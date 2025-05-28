@@ -135,7 +135,7 @@ describe('bitbucket sdk function', async () => {
       password: authPassword,
       username: authUsername,
     })
-    expect(
+    await expect(
       bitbucketSdk.getReferenceData({
         url: REPO.URL,
         ref: '111111',

@@ -44,11 +44,7 @@ export async function addFixCommentsForPr({
       project: { organizationId },
     },
   } = getAnalysisRes
-  if (
-    !getAnalysisRes.repo ||
-    !getAnalysisRes.repo.commitSha ||
-    !getAnalysisRes.repo.pullRequest
-  ) {
+  if (!getAnalysisRes.repo?.commitSha || !getAnalysisRes.repo.pullRequest) {
     throw new Error('repo not found')
   }
   const { commitSha, pullRequest } = getAnalysisRes.repo

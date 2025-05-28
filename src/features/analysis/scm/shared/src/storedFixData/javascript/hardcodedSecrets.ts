@@ -1,7 +1,7 @@
 import { Question } from '../../types'
 
 export const hardcodedSecrets = {
-  guidance: ({ questions }: { questions: Array<Question> }) => {
+  guidance: ({ questions }: { questions: Question[] }) => {
     const envVarName =
       questions.find((q) => q.key === 'env_var_name')?.value || 'the'
     const keepAsDefault = questions.find(

@@ -51,7 +51,7 @@ export default class TerminalEmulator {
 
     this.kill()
     throw new Error(
-      `Waiting for ${match} for too long. Output: ${this.getOutput().slice(-500)}`
+      `Waiting for ${match} for too long. Output: ${this.getOutput().slice(-2048)}`
     )
   }
 

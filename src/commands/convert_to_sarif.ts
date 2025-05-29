@@ -14,8 +14,8 @@ import {
 } from '@mobb/bugsy/commands/fpr_stream_parser'
 import { ConvertToSarifInputFileFormat } from '@mobb/bugsy/features/analysis/scm'
 import { CliError } from '@mobb/bugsy/utils'
-import AdmZip from 'adm-zip'
 import multimatch from 'multimatch'
+import StreamZip from 'node-stream-zip'
 import tmp from 'tmp'
 
 type Message = {
@@ -66,9 +66,10 @@ async function convertFprToSarif(
   outputFilePath: string,
   codePathPatterns: string[]
 ) {
-  const zipIn = new AdmZip(inputFilePath)
+  const zipIn = new StreamZip.async({ file: inputFilePath })
+  const zipInEntries = await zipIn.entries()
 
-  if (!zipIn.getEntry('audit.fvdl')) {
+  if (!('audit.fvdl' in zipInEntries)) {
     throw new CliError(
       '\nError: the input file should be in a valid Fortify FPR format.'
     )
@@ -79,11 +80,11 @@ async function convertFprToSarif(
   })
 
   try {
-    zipIn.extractEntryTo('audit.fvdl', tmpObj.name)
+    const auditFvdlPath = path.join(tmpObj.name, 'audit.fvdl')
 
-    const auditFvdlSaxParser = initSaxParser(
-      path.join(tmpObj.name, 'audit.fvdl')
-    )
+    await zipIn.extract('audit.fvdl', auditFvdlPath)
+
+    const auditFvdlSaxParser = initSaxParser(auditFvdlPath)
     const vulnerabilityParser = new VulnerabilityParser(
       auditFvdlSaxParser.parser
     )
@@ -97,17 +98,19 @@ async function convertFprToSarif(
 
     await auditFvdlSaxParser.parse()
 
-    if (zipIn.getEntry('audit.xml')) {
-      zipIn.extractEntryTo('audit.xml', tmpObj.name)
+    if ('audit.xml' in zipInEntries) {
+      const auditXmlPath = path.join(tmpObj.name, 'audit.xml')
 
-      const auditXmlSaxParser = initSaxParser(
-        path.join(tmpObj.name, 'audit.xml')
-      )
+      await zipIn.extract('audit.xml', auditXmlPath)
+
+      const auditXmlSaxParser = initSaxParser(auditXmlPath)
 
       auditMetadataParser = new AuditMetadataParser(auditXmlSaxParser.parser)
 
       await auditXmlSaxParser.parse()
     }
+
+    await zipIn.close()
 
     // We have to write JSON in manually as JSON.serialize fails for large data.
     fs.writeFileSync(

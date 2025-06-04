@@ -86,7 +86,8 @@ async function convertFprToSarif(
 
     const auditFvdlSaxParser = initSaxParser(auditFvdlPath)
     const vulnerabilityParser = new VulnerabilityParser(
-      auditFvdlSaxParser.parser
+      auditFvdlSaxParser.parser,
+      path.join(tmpObj.name, 'vulns.json')
     )
     const unifiedNodePoolParser = new UnifiedNodePoolParser(
       auditFvdlSaxParser.parser
@@ -112,10 +113,10 @@ async function convertFprToSarif(
 
     await zipIn.close()
 
-    // We have to write JSON in manually as JSON.serialize fails for large data.
-    fs.writeFileSync(
-      outputFilePath,
-      `{
+    // We must write JSON manually as JSON.serialize fails for large data.
+    const writer = fs.createWriteStream(outputFilePath)
+
+    writer.write(`{
   "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
   "version": "2.1.0",
   "runs": [
@@ -125,30 +126,32 @@ async function convertFprToSarif(
         "name": "Fortify Mobb Converter"
       }
     },
-    "results": [\n`
-    )
+    "results": [\n`)
 
-    const filteredVulns = vulnerabilityParser
-      .getVulnerabilities()
-      .map((vulnerability) =>
-        fortifyVulnerabilityToSarifResult(
-          vulnerability,
-          auditMetadataParser,
-          reportMetadataParser,
-          unifiedNodePoolParser
-        )
+    let isFirstVuln = true
+
+    for await (const vulnerability of vulnerabilityParser.getVulnerabilities()) {
+      const sarifResult = fortifyVulnerabilityToSarifResult(
+        vulnerability,
+        auditMetadataParser,
+        reportMetadataParser,
+        unifiedNodePoolParser
       )
-      .filter((sarifResult) => filterSarifResult(sarifResult, codePathPatterns))
 
-    filteredVulns.forEach((sarifResult, index) => {
-      fs.appendFileSync(outputFilePath, JSON.stringify(sarifResult, null, 2))
+      if (filterSarifResult(sarifResult, codePathPatterns)) {
+        if (isFirstVuln) {
+          isFirstVuln = false
+        } else {
+          writer.write(',\n')
+        }
 
-      if (index !== filteredVulns.length - 1) {
-        fs.appendFileSync(outputFilePath, ',\n')
+        writer.write(JSON.stringify(sarifResult, null, 2))
       }
-    })
+    }
 
-    fs.appendFileSync(outputFilePath, '\n]}]}')
+    writer.write('\n]}]}')
+
+    await new Promise((r) => writer.end(r))
   } finally {
     tmpObj.removeCallback()
   }

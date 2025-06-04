@@ -123,6 +123,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'Avoid Identity Comparison of Cached Types',
   [IssueType_Enum.AvoidBuiltinShadowing]: 'Avoid Builtin Shadowing',
   [IssueType_Enum.ImproperStringFormatting]: 'Improper String Formatting',
+  [IssueType_Enum.TarSlip]: 'Tar Slip',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

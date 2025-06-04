@@ -7935,6 +7935,8 @@ export enum IssueType_Enum {
   SystemInformationLeak = 'SYSTEM_INFORMATION_LEAK',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
   SystemInformationLeakExternal = 'SYSTEM_INFORMATION_LEAK_EXTERNAL',
+  /** TAR_SLIP */
+  TarSlip = 'TAR_SLIP',
   /** Trust Boundary Violation */
   TrustBoundaryViolation = 'TRUST_BOUNDARY_VIOLATION',
   /** HTTP request parameter may be either an array or a string */
@@ -22725,6 +22727,7 @@ export type User_Email_Notification_Settings = {
   analysisExpirationWarning: Scalars['Boolean']['output'];
   fixCommitted: Scalars['Boolean']['output'];
   id: Scalars['uuid']['output'];
+  sendInviteEmail: Scalars['Boolean']['output'];
   /** An array relationship */
   user: Array<User>;
   /** An aggregate relationship */
@@ -22782,6 +22785,7 @@ export type User_Email_Notification_Settings_Bool_Exp = {
   analysisExpirationWarning?: InputMaybe<Boolean_Comparison_Exp>;
   fixCommitted?: InputMaybe<Boolean_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  sendInviteEmail?: InputMaybe<Boolean_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
   user_aggregate?: InputMaybe<User_Aggregate_Bool_Exp>;
 };
@@ -22798,6 +22802,7 @@ export type User_Email_Notification_Settings_Insert_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
   user?: InputMaybe<User_Arr_Rel_Insert_Input>;
 };
 
@@ -22842,6 +22847,7 @@ export type User_Email_Notification_Settings_Order_By = {
   analysisExpirationWarning?: InputMaybe<Order_By>;
   fixCommitted?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  sendInviteEmail?: InputMaybe<Order_By>;
   user_aggregate?: InputMaybe<User_Aggregate_Order_By>;
 };
 
@@ -22859,7 +22865,9 @@ export enum User_Email_Notification_Settings_Select_Column {
   /** column name */
   FixCommitted = 'fixCommitted',
   /** column name */
-  Id = 'id'
+  Id = 'id',
+  /** column name */
+  SendInviteEmail = 'sendInviteEmail'
 }
 
 /** input type for updating data in table "user_email_notification_settings" */
@@ -22868,6 +22876,7 @@ export type User_Email_Notification_Settings_Set_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Streaming cursor of the table "user_email_notification_settings" */
@@ -22884,6 +22893,7 @@ export type User_Email_Notification_Settings_Stream_Cursor_Value_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** update columns of table "user_email_notification_settings" */
@@ -22895,7 +22905,9 @@ export enum User_Email_Notification_Settings_Update_Column {
   /** column name */
   FixCommitted = 'fixCommitted',
   /** column name */
-  Id = 'id'
+  Id = 'id',
+  /** column name */
+  SendInviteEmail = 'sendInviteEmail'
 }
 
 export type User_Email_Notification_Settings_Updates = {
@@ -27665,71 +27677,71 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    Me(variables?: MeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<MeQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<MeQuery>(MeDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Me', 'query', variables);
+    Me(variables?: MeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<MeQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<MeQuery>({ document: MeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Me', 'query', variables);
     },
-    getOrgAndProjectId(variables?: GetOrgAndProjectIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetOrgAndProjectIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetOrgAndProjectIdQuery>(GetOrgAndProjectIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getOrgAndProjectId', 'query', variables);
+    getOrgAndProjectId(variables?: GetOrgAndProjectIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetOrgAndProjectIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetOrgAndProjectIdQuery>({ document: GetOrgAndProjectIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getOrgAndProjectId', 'query', variables);
     },
-    GetEncryptedApiToken(variables: GetEncryptedApiTokenQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetEncryptedApiTokenQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetEncryptedApiTokenQuery>(GetEncryptedApiTokenDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetEncryptedApiToken', 'query', variables);
+    GetEncryptedApiToken(variables: GetEncryptedApiTokenQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetEncryptedApiTokenQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetEncryptedApiTokenQuery>({ document: GetEncryptedApiTokenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetEncryptedApiToken', 'query', variables);
     },
-    FixReportState(variables: FixReportStateQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<FixReportStateQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<FixReportStateQuery>(FixReportStateDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'FixReportState', 'query', variables);
+    FixReportState(variables: FixReportStateQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<FixReportStateQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FixReportStateQuery>({ document: FixReportStateDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'FixReportState', 'query', variables);
     },
-    GetVulnerabilityReportPaths(variables: GetVulnerabilityReportPathsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetVulnerabilityReportPathsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetVulnerabilityReportPathsQuery>(GetVulnerabilityReportPathsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetVulnerabilityReportPaths', 'query', variables);
+    GetVulnerabilityReportPaths(variables: GetVulnerabilityReportPathsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetVulnerabilityReportPathsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetVulnerabilityReportPathsQuery>({ document: GetVulnerabilityReportPathsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetVulnerabilityReportPaths', 'query', variables);
     },
-    getAnalysisSubscription(variables: GetAnalysisSubscriptionSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalysisSubscriptionSubscription> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisSubscriptionSubscription>(GetAnalysisSubscriptionDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalysisSubscription', 'subscription', variables);
+    getAnalysisSubscription(variables: GetAnalysisSubscriptionSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAnalysisSubscriptionSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisSubscriptionSubscription>({ document: GetAnalysisSubscriptionDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getAnalysisSubscription', 'subscription', variables);
     },
-    getAnalysis(variables: GetAnalysisQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetAnalysisQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisQuery>(GetAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getAnalysis', 'query', variables);
+    getAnalysis(variables: GetAnalysisQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAnalysisQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAnalysisQuery>({ document: GetAnalysisDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getAnalysis', 'query', variables);
     },
-    getFixes(variables: GetFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetFixesQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetFixesQuery>(GetFixesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getFixes', 'query', variables);
+    getFixes(variables: GetFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFixesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFixesQuery>({ document: GetFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getFixes', 'query', variables);
     },
-    getVulByNodesMetadata(variables: GetVulByNodesMetadataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetVulByNodesMetadataQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetVulByNodesMetadataQuery>(GetVulByNodesMetadataDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getVulByNodesMetadata', 'query', variables);
+    getVulByNodesMetadata(variables: GetVulByNodesMetadataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetVulByNodesMetadataQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetVulByNodesMetadataQuery>({ document: GetVulByNodesMetadataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getVulByNodesMetadata', 'query', variables);
     },
-    getFalsePositive(variables: GetFalsePositiveQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetFalsePositiveQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetFalsePositiveQuery>(GetFalsePositiveDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'getFalsePositive', 'query', variables);
+    getFalsePositive(variables: GetFalsePositiveQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFalsePositiveQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFalsePositiveQuery>({ document: GetFalsePositiveDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getFalsePositive', 'query', variables);
     },
-    updateScmToken(variables: UpdateScmTokenMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UpdateScmTokenMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UpdateScmTokenMutation>(UpdateScmTokenDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'updateScmToken', 'mutation', variables);
+    updateScmToken(variables: UpdateScmTokenMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateScmTokenMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateScmTokenMutation>({ document: UpdateScmTokenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updateScmToken', 'mutation', variables);
     },
-    uploadS3BucketInfo(variables: UploadS3BucketInfoMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<UploadS3BucketInfoMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<UploadS3BucketInfoMutation>(UploadS3BucketInfoDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'uploadS3BucketInfo', 'mutation', variables);
+    uploadS3BucketInfo(variables: UploadS3BucketInfoMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadS3BucketInfoMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UploadS3BucketInfoMutation>({ document: UploadS3BucketInfoDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'uploadS3BucketInfo', 'mutation', variables);
     },
-    DigestVulnerabilityReport(variables: DigestVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<DigestVulnerabilityReportMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<DigestVulnerabilityReportMutation>(DigestVulnerabilityReportDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DigestVulnerabilityReport', 'mutation', variables);
+    DigestVulnerabilityReport(variables: DigestVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DigestVulnerabilityReportMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DigestVulnerabilityReportMutation>({ document: DigestVulnerabilityReportDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DigestVulnerabilityReport', 'mutation', variables);
     },
-    SubmitVulnerabilityReport(variables: SubmitVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<SubmitVulnerabilityReportMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<SubmitVulnerabilityReportMutation>(SubmitVulnerabilityReportDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'SubmitVulnerabilityReport', 'mutation', variables);
+    SubmitVulnerabilityReport(variables: SubmitVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SubmitVulnerabilityReportMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SubmitVulnerabilityReportMutation>({ document: SubmitVulnerabilityReportDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SubmitVulnerabilityReport', 'mutation', variables);
     },
-    CreateCommunityUser(variables?: CreateCommunityUserMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CreateCommunityUserMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateCommunityUserMutation>(CreateCommunityUserDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateCommunityUser', 'mutation', variables);
+    CreateCommunityUser(variables?: CreateCommunityUserMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateCommunityUserMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateCommunityUserMutation>({ document: CreateCommunityUserDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateCommunityUser', 'mutation', variables);
     },
-    CreateCliLogin(variables: CreateCliLoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CreateCliLoginMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateCliLoginMutation>(CreateCliLoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateCliLogin', 'mutation', variables);
+    CreateCliLogin(variables: CreateCliLoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateCliLoginMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateCliLoginMutation>({ document: CreateCliLoginDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateCliLogin', 'mutation', variables);
     },
-    performCliLogin(variables: PerformCliLoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<PerformCliLoginMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<PerformCliLoginMutation>(PerformCliLoginDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'performCliLogin', 'mutation', variables);
+    performCliLogin(variables: PerformCliLoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<PerformCliLoginMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<PerformCliLoginMutation>({ document: PerformCliLoginDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'performCliLogin', 'mutation', variables);
     },
-    CreateProject(variables: CreateProjectMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<CreateProjectMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<CreateProjectMutation>(CreateProjectDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CreateProject', 'mutation', variables);
+    CreateProject(variables: CreateProjectMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateProjectMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CreateProjectMutation>({ document: CreateProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateProject', 'mutation', variables);
     },
-    validateRepoUrl(variables: ValidateRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ValidateRepoUrlQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<ValidateRepoUrlQuery>(ValidateRepoUrlDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'validateRepoUrl', 'query', variables);
+    validateRepoUrl(variables: ValidateRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ValidateRepoUrlQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ValidateRepoUrlQuery>({ document: ValidateRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'validateRepoUrl', 'query', variables);
     },
-    gitReference(variables: GitReferenceQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GitReferenceQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GitReferenceQuery>(GitReferenceDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'gitReference', 'query', variables);
+    gitReference(variables: GitReferenceQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GitReferenceQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GitReferenceQuery>({ document: GitReferenceDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'gitReference', 'query', variables);
     },
-    autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AutoPrAnalysisMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>(AutoPrAnalysisDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'autoPrAnalysis', 'mutation', variables);
+    autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AutoPrAnalysisMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>({ document: AutoPrAnalysisDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'autoPrAnalysis', 'mutation', variables);
     },
-    GetMCPFixes(variables: GetMcpFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<GetMcpFixesQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetMcpFixesQuery>(GetMcpFixesDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetMCPFixes', 'query', variables);
+    GetMCPFixes(variables: GetMcpFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetMcpFixesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetMcpFixesQuery>({ document: GetMcpFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetMCPFixes', 'query', variables);
     }
   };
 }

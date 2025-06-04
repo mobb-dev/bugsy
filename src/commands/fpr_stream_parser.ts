@@ -1,4 +1,5 @@
-import fs from 'node:fs'
+import fs, { WriteStream } from 'node:fs'
+import readline from 'node:readline'
 
 import sax, { QualifiedTag, SAXStream, Tag } from 'sax'
 
@@ -160,12 +161,22 @@ export class UnifiedNodePoolParser extends BaseStreamParser {
 }
 
 export class VulnerabilityParser extends BaseStreamParser {
-  private vulnerabilities: Vulnerability[] = []
   private isInVulnerability: boolean = false
   private codePoints: (NodeRef | SourceLocation)[] = []
   private metadata: Record<string, string> = {}
   private metaInfo: Record<string, string> = {}
   private groupName: string = ''
+  private readonly tmpStorageFileWriter: WriteStream
+  private readonly tmpStorageFilePath: string
+
+  constructor(parser: SAXStream, tmpStorageFilePath: string) {
+    super(parser)
+
+    // We don't keep vulnerability objects in memory as they take up too much space.
+    // Instead, we store them in a new temporary line-delimited JSON (NDJSON).
+    this.tmpStorageFilePath = tmpStorageFilePath
+    this.tmpStorageFileWriter = fs.createWriteStream(tmpStorageFilePath)
+  }
 
   protected override onOpenTag(tag: Tag | QualifiedTag) {
     super.onOpenTag(tag)
@@ -226,28 +237,48 @@ export class VulnerabilityParser extends BaseStreamParser {
     if (this.getPathString() === 'FVDL > Vulnerabilities > Vulnerability') {
       this.isInVulnerability = false
 
-      this.vulnerabilities.push({
-        nodes: this.codePoints,
-        instanceID: this.metadata['InstanceID'] ?? '',
-        instanceSeverity: this.metadata['InstanceSeverity'] ?? '',
-        confidence: this.metadata['Confidence'] ?? '',
-        classID: this.metadata['ClassID'] ?? '',
-        type: this.metadata['Type'] ?? '',
-        subtype: this.metadata['Subtype'] ?? '',
-        metaInfo: this.metaInfo,
-      })
+      this.tmpStorageFileWriter.write(
+        JSON.stringify({
+          nodes: this.codePoints,
+          instanceID: this.metadata['InstanceID'] ?? '',
+          instanceSeverity: this.metadata['InstanceSeverity'] ?? '',
+          confidence: this.metadata['Confidence'] ?? '',
+          classID: this.metadata['ClassID'] ?? '',
+          type: this.metadata['Type'] ?? '',
+          subtype: this.metadata['Subtype'] ?? '',
+          metaInfo: this.metaInfo,
+        }) + '\n'
+      )
     }
 
     super.onCloseTag()
   }
 
-  public getVulnerabilities() {
-    return this.vulnerabilities
+  public async *getVulnerabilities() {
+    await new Promise((r) => this.tmpStorageFileWriter.end(r))
+
+    const rl = readline.createInterface({
+      input: fs.createReadStream(this.tmpStorageFilePath),
+      crlfDelay: Infinity,
+    })
+
+    for await (const line of rl) {
+      if (line) {
+        yield JSON.parse(line) as Vulnerability
+      }
+    }
   }
 }
 
 export function initSaxParser(filepath: string) {
-  const parser = sax.createStream(true)
+  const parser = sax.createStream(true, {
+    // All these flags help to improve parsing speed a lot.
+    trim: false,
+    normalize: false,
+    lowercase: false,
+    xmlns: false,
+    position: false,
+  })
   const awaiter = new Promise((resolve, reject) => {
     parser.on('end', () => resolve(true))
     parser.on('error', (e) => reject(e))
@@ -256,7 +287,10 @@ export function initSaxParser(filepath: string) {
   return {
     parser,
     parse: async () => {
-      fs.createReadStream(filepath).pipe(parser)
+      fs.createReadStream(filepath, {
+        // Set chunk size to 100 MB. The default is 16 KB, which makes the process too slow.
+        highWaterMark: 100 * 1024 * 1024,
+      }).pipe(parser)
       await awaiter
     },
   }

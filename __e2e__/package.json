@@ -11,6 +11,7 @@
     "dotenv": "16.5.0",
     "node-pty": "1.0.0",
     "npm": "10.9.0",
+    "pino-pretty": "13.0.0",
     "verdaccio": "6.0.5"
   },
   "author": "",

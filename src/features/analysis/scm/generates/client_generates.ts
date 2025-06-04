@@ -329,6 +329,18 @@ export type InvitationBaseError = {
   status: Status;
 };
 
+export type IssueTypeStats = {
+  __typename?: 'IssueTypeStats';
+  count_fixable: Scalars['Int']['output'];
+  count_irrelevant: Scalars['Int']['output'];
+  count_remaining: Scalars['Int']['output'];
+  count_scm_committed: Scalars['Int']['output'];
+  count_scm_merged: Scalars['Int']['output'];
+  count_total_issues: Scalars['Int']['output'];
+  issue_severity: Scalars['String']['output'];
+  issue_type_name: Scalars['String']['output'];
+};
+
 export enum Language {
   Cpp = 'CPP',
   Csharp = 'CSHARP',
@@ -403,6 +415,12 @@ export type PackageInfoResponse = {
   envName?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   version: Scalars['String']['output'];
+};
+
+export type ProjectIssueStats = {
+  __typename?: 'ProjectIssueStats';
+  issue_types: Array<IssueTypeStats>;
+  project_name: Scalars['String']['output'];
 };
 
 export enum Projects {
@@ -16334,6 +16352,7 @@ export type Query_Root = {
   pr_status_by_pk?: Maybe<Pr_Status>;
   /** fetch data from the table: "project" */
   project: Array<Project>;
+  projectIssueStats: ProjectIssueStats;
   /** fetch aggregated fields from the table: "project" */
   project_aggregate: Project_Aggregate;
   /** fetch data from the table: "project" using primary key columns */
@@ -17465,6 +17484,11 @@ export type Query_RootProjectArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Project_Order_By>>;
   where?: InputMaybe<Project_Bool_Exp>;
+};
+
+
+export type Query_RootProjectIssueStatsArgs = {
+  projectId: Scalars['String']['input'];
 };
 
 

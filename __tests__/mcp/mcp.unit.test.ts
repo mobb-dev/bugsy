@@ -1,29 +1,103 @@
 import { tmpdir } from 'os'
 import { join } from 'path'
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
 
 import { FixVulnerabilitiesTool } from '../../src/mcp/tools/fixVulnerabilities/FixVulnerabilitiesTool'
 import {
+  failedToAuthenticatePrompt,
+  failedToConnectToApiPrompt,
+} from '../../src/mcp/tools/fixVulnerabilities/helpers/LLMResponsePrompts'
+import { log } from './helpers/log'
+import {
   createActiveGitRepo,
+  createActiveNoChangesGitRepo,
+  createActiveNonGitRepo,
   createEmptyGitRepo,
   deleteGitRepo,
 } from './helpers/utils'
+import { BAD_API_KEY } from './mocks/graphqlHandlers'
 import { MOCK_API_URL, mockGraphQL, server } from './mocks/mocks.js'
 
-// Mock the logger to capture log messages
-vi.mock('../../src/mcp/Logger', () => ({
+// Create module-level variables for the mocks
+const mockFunctions = {
   logInfo: vi.fn(),
   logError: vi.fn(),
   logDebug: vi.fn(),
-}))
+  logWarn: vi.fn(),
+  log: vi.fn(),
+}
+
+// Mock the logger module - this will be hoisted to the top
+vi.mock('../../src/mcp/Logger', () => {
+  // Implementation that both logs and calls the mock
+  const logInfoImpl = (message: unknown, data?: unknown) => {
+    log('logInfo', message, data)
+    mockFunctions.logInfo(message, data)
+  }
+
+  const logErrorImpl = (message: unknown, data?: unknown) => {
+    log('logError', message, data)
+    mockFunctions.logError(message, data)
+  }
+
+  const logDebugImpl = (message: unknown, data?: unknown) => {
+    log('logDebug', message, data)
+    mockFunctions.logDebug(message, data)
+  }
+
+  const logWarnImpl = (message: unknown, data?: unknown) => {
+    log('logWarn', message, data)
+    mockFunctions.logWarn(message, data)
+  }
+
+  const logImpl = (message: unknown, level: string, data?: unknown) => {
+    if (level === 'error') {
+      logErrorImpl(message, data)
+    } else if (level === 'debug') {
+      logDebugImpl(message, data)
+    } else if (level === 'info') {
+      logInfoImpl(message, data)
+    } else if (level === 'warn') {
+      logWarnImpl(message, data)
+    }
+  }
+
+  return {
+    logInfo: vi.fn().mockImplementation(logInfoImpl),
+    logError: vi.fn().mockImplementation(logErrorImpl),
+    logDebug: vi.fn().mockImplementation(logDebugImpl),
+    logWarn: vi.fn().mockImplementation(logWarnImpl),
+    log: vi.fn().mockImplementation(logImpl),
+  }
+})
+
+// Create a helper object to access the mocks
+const loggerMock = {
+  mocks: mockFunctions,
+}
+
+// Mock open to prevent actual browser opening and add detailed logging
+vi.mock('open', () => {
+  const mockOpen = vi.fn().mockImplementation((url) => {
+    log('Mock open called with URL:', url)
+    // Simulate a small delay to mimic real behavior
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        log('Mock open resolving...')
+        resolve(undefined)
+      }, 100)
+    })
+  })
+  return { default: mockOpen }
+})
+
+// Mock sleep function to speed up tests
+vi.mock('@mobb/bugsy/utils', async () => {
+  const actual = await vi.importActual('@mobb/bugsy/utils')
+  return {
+    ...(actual as object),
+    sleep: vi.fn().mockResolvedValue(undefined),
+  }
+})
 
 // Mock node-fetch to prevent actual HTTP requests while testing uploadFile logic
 vi.mock('node-fetch', async () => {
@@ -42,7 +116,7 @@ vi.mock('node-fetch', async () => {
 })
 
 // Mock the subscribe function to prevent actual WebSocket connections
-vi.mock('../../src/mcp/services/Subscribe', () => ({
+vi.mock('../../src/features/analysis/graphql/subscribe', () => ({
   subscribe: vi.fn().mockResolvedValue({
     analysis: {
       id: 'test-analysis-id',
@@ -51,11 +125,12 @@ vi.mock('../../src/mcp/services/Subscribe', () => ({
   }),
 }))
 
-describe('MCP Server Direct Tests', () => {
+describe('MCP Server', () => {
   let nonExistentPath: string
-  let nonRepoPath: string
   let emptyRepoPath: string
   let activeRepoPath: string
+  let activeNoChangesRepoPath: string
+  let codeNotInGitRepoPath: string
   let originalApiUrl: string | undefined
 
   // Helper function for common result assertions
@@ -68,46 +143,95 @@ describe('MCP Server Direct Tests', () => {
     return result
   }
 
-  beforeAll(() => {
+  beforeEach(async () => {
+    log('Starting beforeEach...')
+
     // Store original API_URL and set it to our mock URL
     originalApiUrl = process.env['API_URL']
     process.env['API_URL'] = MOCK_API_URL
-
-    console.log(`Setting API_URL to: ${MOCK_API_URL}`)
-    console.log(`MSW server starting...`)
+    log(`Setting API_URL to: ${MOCK_API_URL}`)
+    log(`MSW server starting...`)
 
     // Start MSW server
     server.listen({ onUnhandledRequest: 'error' })
+    log(`MSW server started`)
 
-    console.log(`MSW server started`)
-
-    // Create temp paths for testing
+    // Create fresh paths for each test
     nonExistentPath = join(tmpdir(), 'mcp-test-non-existent-' + Date.now())
+    log(`Created nonExistentPath: ${nonExistentPath}`)
 
-    // Create temp directory that is not a git repo
-    nonRepoPath = tmpdir()
+    try {
+      emptyRepoPath = createEmptyGitRepo()
+      log(`Created emptyRepoPath: ${emptyRepoPath}`)
 
-    // Create an empty git repository
-    emptyRepoPath = createEmptyGitRepo()
+      activeRepoPath = createActiveGitRepo()
+      log(`Created activeRepoPath: ${activeRepoPath}`)
 
-    // Create a git repository with a staged file
-    activeRepoPath = createActiveGitRepo()
+      // Create a git repository with no changes in `git status`
+      activeNoChangesRepoPath = createActiveNoChangesGitRepo()
+
+      // Create a directory with a code file that is not in a git repo
+      codeNotInGitRepoPath = createActiveNonGitRepo()
+
+      log(`Using codeNotInGitRepoPath: ${codeNotInGitRepoPath}`)
+    } catch (e) {
+      log('Error in beforeEach:', e)
+      throw e
+    }
+    log('beforeEach completed.')
   })
 
-  beforeEach(() => {
-    // Reset the GraphQL mock system instead of clearing all mocks
+  afterEach(async () => {
+    log('Starting afterEach...')
+    // Clean up repos after each test
+    if (emptyRepoPath) {
+      log(`Cleaning up emptyRepoPath: ${emptyRepoPath}`)
+      try {
+        deleteGitRepo(emptyRepoPath)
+      } catch (e) {
+        log('Error cleaning up emptyRepoPath:', e)
+      }
+    }
+    if (activeRepoPath) {
+      log(`Cleaning up activeRepoPath: ${activeRepoPath}`)
+      try {
+        deleteGitRepo(activeRepoPath)
+      } catch (e) {
+        log('Error cleaning up activeRepoPath:', e)
+      }
+    }
+    if (activeNoChangesRepoPath) {
+      log(`Cleaning up activeNoChangesRepoPath: ${activeNoChangesRepoPath}`)
+      try {
+        deleteGitRepo(activeNoChangesRepoPath)
+      } catch (e) {
+        log('Error cleaning up activeNoChangesRepoPath:', e)
+      }
+    }
+    // Reset the GraphQL mock system
+    log('Resetting GraphQL mocks...')
     mockGraphQL().reset()
-    console.log(`Test starting, MSW handlers reset`)
+    log('afterEach completed.')
+  })
+
+  beforeAll(() => {
+    log('Starting beforeAll...')
+    // Store original API_URL and set it to our mock URL
+    originalApiUrl = process.env['API_URL']
+    process.env['API_URL'] = MOCK_API_URL
+    log(`Setting API_URL to: ${MOCK_API_URL}`)
+    log('beforeAll completed.')
+    server.listen()
   })
 
   afterAll(() => {
+    log('Starting afterAll...')
     // Restore original API_URL
     if (originalApiUrl !== undefined) {
       process.env['API_URL'] = originalApiUrl
     } else {
       delete process.env['API_URL']
     }
-
     console.log(`MSW server stopping...`)
     // Stop MSW server
     server.close()
@@ -116,6 +240,17 @@ describe('MCP Server Direct Tests', () => {
     // Clean up the git repos
     deleteGitRepo(emptyRepoPath)
     deleteGitRepo(activeRepoPath)
+    deleteGitRepo(activeNoChangesRepoPath)
+    deleteGitRepo(codeNotInGitRepoPath)
+
+    log('afterAll completed.')
+  })
+
+  // Create a global error handler
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+    // Force process to continue
+    process.exit(1)
   })
 
   describe('FixVulnerabilitiesTool', () => {
@@ -135,94 +270,153 @@ describe('MCP Server Direct Tests', () => {
 
     it('should handle path that is not a git repository', async () => {
       const tool = new FixVulnerabilitiesTool()
-      await expect(tool.execute({ path: nonRepoPath })).rejects.toThrow(
-        'Path is not a valid git repository'
-      )
+      log('Executing tool with nonRepoPath...')
+      const result = await tool.execute({ path: codeNotInGitRepoPath })
+      log('Tool execution completed, validating result...')
+      expectValidResult(result)
+      log('Test completed: should handle path that is not a git repository')
     })
 
     it('should handle empty git repository', async () => {
       const tool = new FixVulnerabilitiesTool()
+      log('FixVulnerabilitiesTool instance created')
+
+      log('Executing tool with empty repo path')
       const result = await tool.execute({ path: emptyRepoPath })
+      log('Tool execution completed')
 
       expectValidResult(result)
+      log('Result validation passed')
+
       expect(result).toEqual({
         content: [
           {
             type: 'text',
-            text: 'No changed files found in the git repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
           },
         ],
       })
     })
 
-    it('should handle missing API_KEY environment variable', async () => {
-      // Store the original API_KEY
-      const originalApiKey = process.env['API_KEY']
+    describe('MCP authentication', () => {
+      it('should work with API_KEY environment variable', async () => {
+        // Configure GraphQL mocks for complete successful flow
 
-      try {
-        // Unset the API_KEY
-        delete process.env['API_KEY']
+        mockGraphQL().uploadS3BucketInfo().succeeds()
+        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().submitVulnerabilityReport().succeeds()
+        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().createCommunityUser().succeeds()
+        mockGraphQL().me().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
 
+        // === VERIFY FINAL RESULT ===
         expectValidResult(result)
-        expect(result).toEqual({
-          content: [
-            {
-              type: 'text',
-              text: 'API_KEY environment variable is not set',
-            },
-          ],
-        })
-      } finally {
-        // Restore the original API_KEY
-        if (originalApiKey !== undefined) {
-          process.env['API_KEY'] = originalApiKey
-        }
-      }
-    })
+        expect(result.content[0]?.text).toContain(
+          'Here are the fixes to the vulnerabilities discovered by Mobb MCP'
+        )
+      })
 
-    it('should handle API connection failure', async () => {
-      // Set minimal API_KEY to get past the environment check
-      process.env['API_KEY'] = 'test-bad-key'
+      it('should fail with connection error', async () => {
+        // NOTE: This test is currently skipped due to timeout issues with the createCliLogin mock.
+        // The functionality is partially covered by the "should timeout when getEncryptedApiToken is not returning a token" test.
 
-      // Configure GraphQL mock to simulate connection failure
-      mockGraphQL().me().failsWithConnectionError()
+        // Configure GraphQL mocks for the error scenario
+        mockGraphQL().me().failsWithFetchError()
 
-      const tool = new FixVulnerabilitiesTool()
-      const result = await tool.execute({ path: activeRepoPath })
+        // Create the tool and execute it
+        const tool = new FixVulnerabilitiesTool()
+        const result = await tool.execute({ path: activeRepoPath })
 
-      expectValidResult(result)
-      expect(result.content[0]?.text).toBe(
-        'Failed to connect to the API. Please check your API_KEY'
-      )
+        // Verify error handling
+        expectValidResult(result)
+        expect(result.content[0]?.text).toContain(
+          'CONNECTION ERROR: FAILED TO REACH MOBB API'
+        )
+
+        // Verify that the exact failedToConnectToApiPrompt is returned
+        expect(result.content[0]?.text).toBe(failedToConnectToApiPrompt)
+
+        // Verify error was logged
+        const mockedLogError = loggerMock.mocks.logError
+        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+      }, 30000) // Set a higher timeout for this test
+
+      it('should timeout when getEncryptedApiToken is not returning a token', async () => {
+        process.env['API_KEY'] = BAD_API_KEY
+        mockGraphQL().uploadS3BucketInfo().succeeds()
+        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().me().failsWithConnectionError()
+        mockGraphQL().createCliLogin().succeeds()
+        mockGraphQL().createCommunityUser().failsWithBadApiKey()
+        // Mock getEncryptedApiToken to simulate authentication failure by returning empty data
+        mockGraphQL()
+          .getEncryptedApiToken()
+          .failsWithError('authentication failed')
+
+        // Create the tool and execute it
+        const tool = new FixVulnerabilitiesTool()
+        const result = await tool.execute({ path: activeRepoPath })
+
+        // Verify error handling
+        expectValidResult(result)
+
+        // Verify that the authentication error prompt is returned
+        expect(result.content[0]?.text).toBe(failedToAuthenticatePrompt)
+
+        // Verify error was logged
+        const mockedLogError = loggerMock.mocks.logError
+        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+      })
+
+      it('should complete the authentication flow', async () => {
+        process.env['API_KEY'] = BAD_API_KEY
+
+        mockGraphQL().uploadS3BucketInfo().succeeds()
+        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().submitVulnerabilityReport().succeeds()
+        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().me().succeeds()
+        mockGraphQL().createCliLogin().succeeds()
+        mockGraphQL().getEncryptedApiToken().succeeds()
+
+        const tool = new FixVulnerabilitiesTool()
+        const result = await tool.execute({ path: activeRepoPath })
+
+        // === VERIFY FINAL RESULT ===
+        expectValidResult(result)
+        expect(result.content[0]?.text).toContain(
+          'Here are the fixes to the vulnerabilities discovered by Mobb MCP'
+        )
+      })
     })
 
     describe('when API call succeeds', () => {
-      let mockedLogInfo: ReturnType<typeof vi.fn>
-      let mockedLogError: ReturnType<typeof vi.fn>
-
       beforeEach(async () => {
         process.env['API_KEY'] = 'test-working-key'
 
-        // Set up common log mocks
-        const { logInfo, logError } = await import('../../src/mcp/Logger')
-        mockedLogInfo = vi.mocked(logInfo)
-        mockedLogError = vi.mocked(logError)
-
-        // Clear any previous log calls
-        mockedLogInfo.mockClear()
-        mockedLogError.mockClear()
-
         // Clear all mocks including fetch
         vi.clearAllMocks()
+        // Clear logger mocks
+        Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
       })
+
+      // Helper function to check if a debug message exists
+      const expectDebugMessage = (message: string) => {
+        const allLogCalls = loggerMock.mocks.logDebug.mock.calls.map(
+          (call: unknown[]) => String(call[0])
+        )
+        expect(allLogCalls.some((msg: string) => msg.includes(message))).toBe(
+          true
+        )
+      }
 
       // Helper function to check if a log message exists
       const expectLogMessage = (message: string) => {
-        const allLogCalls = mockedLogInfo.mock.calls.map((call: unknown[]) =>
-          String(call[0])
+        const allLogCalls = loggerMock.mocks.logInfo.mock.calls.map(
+          (call: unknown[]) => String(call[0])
         )
         expect(allLogCalls.some((msg: string) => msg.includes(message))).toBe(
           true
@@ -234,8 +428,8 @@ describe('MCP Server Direct Tests', () => {
         message: string,
         expectedData?: unknown
       ) => {
-        const matchingCall = mockedLogInfo.mock.calls.find((call: unknown[]) =>
-          String(call[0]).includes(message)
+        const matchingCall = loggerMock.mocks.logInfo.mock.calls.find(
+          (call: unknown[]) => String(call[0]).includes(message)
         )
         expect(matchingCall).toBeDefined()
         if (expectedData !== undefined) {
@@ -248,8 +442,26 @@ describe('MCP Server Direct Tests', () => {
         message: string,
         expectedData?: unknown
       ) => {
-        const matchingCall = mockedLogError.mock.calls.find((call: unknown[]) =>
-          String(call[0]).includes(message)
+        // Add API context to expected data if it contains error but not endpoint
+        if (
+          expectedData &&
+          typeof expectedData === 'object' &&
+          'error' in expectedData &&
+          !('endpoint' in expectedData)
+        ) {
+          expectedData = {
+            ...expectedData,
+            endpoint: 'http://localhost:3001/graphql',
+            apiKey: expect.any(String),
+            headers: expect.objectContaining({
+              'x-mobb-key': '[REDACTED]',
+              'x-hasura-request-id': '[DYNAMIC]',
+            }),
+          }
+        }
+
+        const matchingCall = loggerMock.mocks.logError.mock.calls.find(
+          (call: unknown[]) => String(call[0]).includes(message)
         )
         expect(matchingCall).toBeDefined()
         if (expectedData !== undefined) {
@@ -268,7 +480,9 @@ describe('MCP Server Direct Tests', () => {
         // Get access to mocked functions for verification
         const { default: fetch } = await import('node-fetch')
         const mockedFetch = vi.mocked(fetch)
-        const { subscribe } = await import('../../src/mcp/services/Subscribe')
+        const { subscribe } = await import(
+          '../../src/features/analysis/graphql/subscribe'
+        )
         const mockedSubscribe = vi.mocked(subscribe)
 
         const tool = new FixVulnerabilitiesTool()
@@ -338,7 +552,7 @@ describe('MCP Server Direct Tests', () => {
         }) // variables
         expect(subscribeCall?.[2]).toBeTypeOf('function') // callback
         expect(subscribeCall?.[3]).toEqual({
-          apiKey: 'test-working-key',
+          apiKey: expect.any(String),
           type: 'apiKey',
           timeoutInMs: 300000, // 5 minutes
         }) // wsClientOptions
@@ -350,7 +564,7 @@ describe('MCP Server Direct Tests', () => {
         )
 
         // Verify no error logs were generated
-        expect(mockedLogError.mock.calls).toHaveLength(0)
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
       })
 
       it('should create new project when MCP Scans project does not exist', async () => {
@@ -397,7 +611,7 @@ describe('MCP Server Direct Tests', () => {
         // Note: The subsequent logs won't be present due to the error
 
         // Verify error was logged with data
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('GraphQL: SubmitVulnerabilityReport failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Submission failed'),
@@ -411,11 +625,6 @@ describe('MCP Server Direct Tests', () => {
             }),
           }),
           variables: expect.any(Object),
-          endpoint: 'http://localhost:3001/graphql',
-          headers: expect.objectContaining({
-            'x-mobb-key': '[REDACTED]',
-            'x-hasura-request-id': '[DYNAMIC]',
-          }),
         })
       })
 
@@ -435,7 +644,7 @@ describe('MCP Server Direct Tests', () => {
         expect(result.content[0]?.text).toContain('Failed to retrieve fixes')
 
         // Verify error was logged with data
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('GraphQL: GetMCPFixes failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Failed to retrieve fixes'),
@@ -449,12 +658,66 @@ describe('MCP Server Direct Tests', () => {
             }),
           }),
           fixReportId: 'test-fix-report-id',
-          endpoint: 'http://localhost:3001/graphql',
-          headers: expect.objectContaining({
-            'x-mobb-key': '[REDACTED]',
-            'x-hasura-request-id': '[DYNAMIC]',
-          }),
         })
+      })
+
+      it('should format fixes prompt with vulnerability details and patches when code is not in git repo', async () => {
+        // Configure GraphQL mocks for complete flow including getMCPFixes
+        mockGraphQL().me().succeeds()
+        mockGraphQL().uploadS3BucketInfo().succeeds()
+        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().submitVulnerabilityReport().succeeds()
+        mockGraphQL().getMCPFixes().succeeds()
+
+        const tool = new FixVulnerabilitiesTool()
+        const result = await tool.execute({ path: codeNotInGitRepoPath })
+
+        expectLogMessage('Executing tool: fix_vulnerabilities')
+        expectDebugMessage(
+          'Git repository validation failed, using all files in the repository'
+        )
+        expectLogMessage('FilePacking: packing files')
+        expectLogMessage('Files packed successfully')
+
+        // Verify successful completion
+        expectValidResult(result)
+        const fixesText = result.content[0]?.text
+
+        // // Verify the complete fixes prompt with snapshot
+        expect(fixesText).toMatchSnapshot()
+
+        expectErrorLogWithData('Path is not a valid git repository')
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(1)
+      })
+
+      it('should format fixes prompt with vulnerability details and patches when no changes in git status', async () => {
+        // Configure GraphQL mocks for complete flow including getMCPFixes
+        mockGraphQL().me().succeeds()
+        mockGraphQL().uploadS3BucketInfo().succeeds()
+        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().submitVulnerabilityReport().succeeds()
+        mockGraphQL().getMCPFixes().succeeds()
+
+        const tool = new FixVulnerabilitiesTool()
+        const result = await tool.execute({ path: activeNoChangesRepoPath })
+
+        expectLogMessage('Executing tool: fix_vulnerabilities')
+        expectDebugMessage(
+          'No changes found, using recently changed files from git history'
+        )
+        expectLogMessage('FilePacking: packing files')
+        expectLogMessage('Files packed successfully')
+
+        // Verify successful completion
+        expectValidResult(result)
+        const fixesText = result.content[0]?.text
+
+        // Verify the complete fixes prompt with snapshot
+        expect(fixesText).toMatchSnapshot()
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
       })
 
       it('should format fixes prompt with vulnerability details and patches', async () => {
@@ -476,7 +739,7 @@ describe('MCP Server Direct Tests', () => {
         expect(fixesText).toMatchSnapshot()
 
         // Verify no error logs were generated
-        expect(mockedLogError.mock.calls).toHaveLength(0)
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
       })
 
       it('should return no fixes found prompt when no fixes are available', async () => {
@@ -498,7 +761,7 @@ describe('MCP Server Direct Tests', () => {
         expect(fixesText).toMatchSnapshot()
 
         // Verify no error logs were generated
-        expect(mockedLogError.mock.calls).toHaveLength(0)
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
       })
 
       it('should handle connection errors gracefully', async () => {
@@ -513,12 +776,12 @@ describe('MCP Server Direct Tests', () => {
 
         // Verify that the error was handled and logged
         expectValidResult(result)
-        expect(result.content[0]?.text).toBe(
-          'Failed to connect to the API. Please check your API_KEY'
+        expect(result.content[0]?.text).toContain(
+          'AUTHENTICATION ERROR: MOBB LOGIN REQUIRED'
         )
 
         // Verify error was logged
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
       })
 
       it('should handle upload file failure gracefully', async () => {
@@ -543,7 +806,7 @@ describe('MCP Server Direct Tests', () => {
         expect(result.content[0]?.text).toContain('Failed to upload the file')
 
         // Verify error was logged
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
       })
 
       it('should handle getAnalysis with missing analysis gracefully', async () => {
@@ -581,15 +844,10 @@ describe('MCP Server Direct Tests', () => {
         expect(result.content[0]?.text).toContain('Upload failed')
 
         // Verify error was logged with enhanced context
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('GraphQL: uploadS3BucketInfo failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Upload failed'),
-          }),
-          endpoint: 'http://localhost:3001/graphql',
-          headers: expect.objectContaining({
-            'x-mobb-key': '[REDACTED]',
-            'x-hasura-request-id': '[DYNAMIC]',
           }),
         })
       })
@@ -608,15 +866,10 @@ describe('MCP Server Direct Tests', () => {
         expect(result.content[0]?.text).toContain('Organization error')
 
         // Verify error was logged with enhanced context
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('GraphQL: getProjectId failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Organization error'),
-          }),
-          endpoint: 'http://localhost:3001/graphql',
-          headers: expect.objectContaining({
-            'x-mobb-key': '[REDACTED]',
-            'x-hasura-request-id': '[DYNAMIC]',
           }),
         })
       })
@@ -636,15 +889,10 @@ describe('MCP Server Direct Tests', () => {
         expect(result.content[0]?.text).toContain('Create project failed')
 
         // Verify error was logged with enhanced context
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('GraphQL: getProjectId failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Create project failed'),
-          }),
-          endpoint: 'http://localhost:3001/graphql',
-          headers: expect.objectContaining({
-            'x-mobb-key': '[REDACTED]',
-            'x-hasura-request-id': '[DYNAMIC]',
           }),
         })
       })

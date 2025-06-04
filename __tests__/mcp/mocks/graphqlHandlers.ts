@@ -1,6 +1,8 @@
 import { graphql, HttpResponse } from 'msw'
 
 import type {
+  CreateCommunityUserMutation,
+  CreateCommunityUserMutationVariables,
   CreateProjectMutation,
   CreateProjectMutationVariables,
   GetMcpFixesQuery,
@@ -15,6 +17,8 @@ import type {
   UploadS3BucketInfoMutationVariables,
 } from '../../../src/features/analysis/scm/generates/client_generates'
 import {
+  mockCreateCommunityUser,
+  mockCreateCommunityUserError,
   mockCreateProject,
   mockCreateProjectError,
   mockGetMCPFixes,
@@ -32,6 +36,13 @@ import {
   mockUploadS3BucketInfo,
   mockUploadS3BucketInfoError,
 } from './fakeResponses'
+import {
+  createCliLoginHandler,
+  getEncryptedApiTokenHandler,
+  setupAuthHandlers,
+} from './handlers/authHandlers'
+
+export const BAD_API_KEY = 'bad-api-key'
 
 // Mock control state
 type MockState = {
@@ -41,9 +52,13 @@ type MockState = {
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
   getMCPFixes: 'success' | 'error' | 'empty'
+  createCliLogin: 'success' | 'error'
+  getEncryptedApiToken: 'success' | 'error'
+  createCommunityUser: 'success' | 'error' | 'badApiKey'
   errorMessages: Record<string, string>
 }
 
+// Initialize the mock state
 const mockState: MockState = {
   me: 'success',
   uploadS3BucketInfo: 'success',
@@ -51,23 +66,28 @@ const mockState: MockState = {
   createProject: 'success',
   submitVulnerabilityReport: 'success',
   getMCPFixes: 'success',
+  createCliLogin: 'success',
+  getEncryptedApiToken: 'success',
+  createCommunityUser: 'success',
   errorMessages: {},
 }
+
+// Share the mock state with auth handlers
+setupAuthHandlers(mockState, mockState.errorMessages)
 
 // GraphQL handlers with proper typing
 export const graphqlHandlers = [
   graphql.query<MeQuery, MeQueryVariables>('Me', () => {
     if (mockState.me === 'connectionError') {
-      return HttpResponse.json(mockMeConnectionError, { status: 500 })
-    }
-    if (mockState.me === 'error') {
-      return HttpResponse.json(
-        mockMeError(mockState.errorMessages['me'] || 'API Error'),
-        { status: 500 }
-      )
+      return HttpResponse.json(mockMeConnectionError)
     }
     if (mockState.me === 'fetchError') {
       throw mockMeFetchError()
+    }
+    if (mockState.me === 'error') {
+      return HttpResponse.json(
+        mockMeError(mockState.errorMessages['me'] || 'Me Error')
+      )
     }
     return HttpResponse.json(mockMe)
   }),
@@ -153,6 +173,31 @@ export const graphqlHandlers = [
     }
     return HttpResponse.json(mockSubmitVulnerabilityReport)
   }),
+
+  // Use the updated auth handlers directly
+  createCliLoginHandler,
+  getEncryptedApiTokenHandler,
+
+  graphql.mutation<
+    CreateCommunityUserMutation,
+    CreateCommunityUserMutationVariables
+  >('CreateCommunityUser', ({ request }) => {
+    if (request.headers.get('x-mobb-key') === BAD_API_KEY) {
+      return HttpResponse.json(
+        mockCreateCommunityUserError('Invalid API key'),
+        { status: 401 }
+      )
+    }
+    if (mockState.createCommunityUser === 'error') {
+      return HttpResponse.json(
+        mockCreateCommunityUserError(
+          mockState.errorMessages['createCommunityUser'] || 'Create User Error'
+        ),
+        { status: 500 }
+      )
+    }
+    return HttpResponse.json(mockCreateCommunityUser)
+  }),
 ]
 
 // Mock GraphQL control system
@@ -160,15 +205,35 @@ export const mockGraphQL = (
   requestSpy: ReturnType<typeof import('vitest').vi.fn>
 ) => ({
   reset: () => {
-    requestSpy.mockClear()
-    // Reset all mock states to success
-    mockState.me = 'success'
-    mockState.uploadS3BucketInfo = 'success'
-    mockState.getOrgAndProjectId = 'success'
-    mockState.createProject = 'success'
-    mockState.submitVulnerabilityReport = 'success'
-    mockState.getMCPFixes = 'success'
-    mockState.errorMessages = {}
+    try {
+      // Clear request spy
+      try {
+        requestSpy.mockClear()
+      } catch (e) {
+        console.error('Error clearing requestSpy:', e)
+      }
+
+      // Reset all mock states to success
+      try {
+        mockState.me = 'success'
+        mockState.uploadS3BucketInfo = 'success'
+        mockState.getOrgAndProjectId = 'success'
+        mockState.createProject = 'success'
+        mockState.submitVulnerabilityReport = 'success'
+        mockState.getMCPFixes = 'success'
+        mockState.createCliLogin = 'success'
+        mockState.getEncryptedApiToken = 'success'
+        mockState.createCommunityUser = 'success'
+        mockState.errorMessages = {}
+      } catch (e) {
+        console.error('Error resetting mock states:', e)
+      }
+    } catch (e) {
+      console.error('Error in mockGraphQL reset:', e)
+    }
+
+    // Always return this to ensure method chaining works
+    return this
   },
   me: () => {
     return {
@@ -255,6 +320,49 @@ export const mockGraphQL = (
       },
       returnsEmptyFixes() {
         mockState.getMCPFixes = 'empty'
+        return this
+      },
+    }
+  },
+  createCliLogin: () => {
+    return {
+      succeeds() {
+        mockState.createCliLogin = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.createCliLogin = 'error'
+        mockState.errorMessages['createCliLogin'] = message
+        return this
+      },
+    }
+  },
+  getEncryptedApiToken: () => {
+    return {
+      succeeds() {
+        mockState.getEncryptedApiToken = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getEncryptedApiToken = 'error'
+        mockState.errorMessages['getEncryptedApiToken'] = message
+        return this
+      },
+    }
+  },
+  createCommunityUser: () => {
+    return {
+      succeeds() {
+        mockState.createCommunityUser = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.createCommunityUser = 'error'
+        mockState.errorMessages['createCommunityUser'] = message
+        return this
+      },
+      failsWithBadApiKey() {
+        mockState.createCommunityUser = 'badApiKey'
         return this
       },
     }

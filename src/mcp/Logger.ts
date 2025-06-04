@@ -1,11 +1,14 @@
+// Disable external logging during tests to prevent ECONNREFUSED errors
 const logglerUrl = 'http://localhost:4444/log'
-
-type LogLevel = 'info' | 'error' | 'warn' | 'debug' | 'trace'
+const isTestEnvironment =
+  process.env['NODE_ENV'] === 'test' ||
+  process.env['VITEST'] ||
+  process.env['TEST']
 
 type LogData = unknown
 
 class Logger {
-  log(message: string, level: LogLevel = 'info', data?: LogData) {
+  log(message: string, level: string = 'info', data?: LogData) {
     const logMessage = {
       timestamp: new Date().toISOString(),
       level,
@@ -13,15 +16,17 @@ class Logger {
       data,
     }
 
-    //post log message to loggler
-    try {
-      fetch(logglerUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(logMessage),
-      })
-    } catch (error) {
-      //do nothing
+    // Skip external logging in test environment
+    if (!isTestEnvironment) {
+      try {
+        fetch(logglerUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(logMessage),
+        })
+      } catch (error) {
+        // do nothing
+      }
     }
   }
 }
@@ -37,5 +42,5 @@ const logWarn = (message: string, data?: LogData) =>
 const logDebug = (message: string, data?: LogData) =>
   logger.log(message, 'debug', data)
 
-export default logger.log
-export { logDebug, logError, logInfo, logWarn }
+const log = logger.log
+export { log, logDebug, logError, logInfo, logWarn }

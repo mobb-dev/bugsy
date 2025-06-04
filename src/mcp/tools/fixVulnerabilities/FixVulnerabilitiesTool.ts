@@ -1,5 +1,6 @@
-import { logInfo } from '../../Logger'
-import { GitService } from '../../services/GitService'
+import { FileUtils } from '../../../features/analysis/scm/FileUtils'
+import { GitService } from '../../../features/analysis/scm/git/GitService'
+import { log, logDebug, logInfo } from '../../Logger'
 import { PathValidation } from '../../services/PathValidation'
 import { VulnerabilityFixService } from './VulnerabilityFixService'
 
@@ -38,22 +39,52 @@ export class FixVulnerabilitiesTool {
     }
 
     // Validate git repository - let validation errors bubble up as MCP errors
-    const gitService = new GitService(args.path)
+    const gitService = new GitService(args.path, log)
     const gitValidation = await gitService.validateRepository()
+    let files: string[] = []
     if (!gitValidation.isValid) {
-      throw new Error(gitValidation.error || 'Git repository validation failed')
+      logDebug(
+        'Git repository validation failed, using all files in the repository',
+        {
+          path: args.path,
+        }
+      )
+      files = FileUtils.getLastChangedFiles(args.path)
+      logDebug('Found files in the repository', {
+        files,
+        fileCount: files.length,
+      })
+    } else {
+      const gitResult = await gitService.getChangedFiles()
+      files = gitResult.files
+      if (files.length === 0) {
+        const recentResult = await gitService.getRecentlyChangedFiles()
+        files = recentResult.files
+        logDebug(
+          'No changes found, using recently changed files from git history',
+          {
+            files,
+            fileCount: files.length,
+            commitsChecked: recentResult.commitCount,
+          }
+        )
+      } else {
+        logDebug('Found changed files in the git repository', {
+          files,
+          fileCount: files.length,
+        })
+      }
     }
 
     // Get changed files (validation already done)
-    const gitResult = await gitService.getChangedFiles()
 
     // Check if there are files to process
-    if (gitResult.files.length === 0) {
+    if (files.length === 0) {
       return {
         content: [
           {
             type: 'text',
-            text: 'No changed files found in the git repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
           },
         ],
       }
@@ -63,7 +94,7 @@ export class FixVulnerabilitiesTool {
       // Process vulnerabilities
       const vulnerabilityFixService = new VulnerabilityFixService()
       const fixResult = await vulnerabilityFixService.processVulnerabilities(
-        gitResult.files,
+        files,
         args.path
       )
 
@@ -78,7 +109,7 @@ export class FixVulnerabilitiesTool {
 
       logInfo('Tool execution completed successfully', {
         resultLength: fixResult.length,
-        fileCount: gitResult.files.length,
+        fileCount: files.length,
         result: result,
       })
 

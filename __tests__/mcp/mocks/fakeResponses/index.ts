@@ -1,3 +1,7 @@
+export {
+  mockCreateCommunityUser,
+  mockCreateCommunityUserError,
+} from './createCommunityUser'
 export { mockCreateProject, mockCreateProjectError } from './createProject'
 export { mockGetAnalysis } from './getAnalysis'
 export { mockGetFixDiff } from './getFixDiff'

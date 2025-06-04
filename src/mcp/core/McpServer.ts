@@ -5,9 +5,11 @@ import {
   CallToolRequestSchema,
   ListToolsRequest,
   ListToolsRequestSchema,
+  ListToolsResult,
 } from '@modelcontextprotocol/sdk/types.js'
 
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
+import { getMcpGQLClient } from '../services/McpGQLClient'
 import { type ToolDefinition, ToolRegistry } from './ToolRegistry'
 
 export type McpServerConfig = {
@@ -100,65 +102,88 @@ export class McpServer {
     })
   }
 
+  public async handleListToolsRequest(
+    request: ListToolsRequest
+  ): Promise<ListToolsResult> {
+    logInfo('Received list_tools request', { params: request.params })
+    try {
+      await getMcpGQLClient()
+    } catch (error) {
+      logError('Failed to get MCPGQLClient', { error })
+      const authError = new Error(
+        'Please authorize this client by visiting: https://mobb.ai'
+      )
+      authError.name = 'AuthorizationRequired'
+      throw authError
+    }
+
+    const tools = this.toolRegistry.getAllTools()
+    return {
+      tools: tools.map((tool: ToolDefinition) => ({
+        name: tool.name,
+        display_name: tool.name,
+        description: tool.description || '',
+        inputSchema: {
+          type: 'object',
+          properties:
+            (tool.inputSchema as { properties?: Record<string, unknown> })
+              .properties || {},
+          required:
+            (tool.inputSchema as { required?: string[] }).required || [],
+        },
+      })),
+    }
+  }
+
+  public async handleCallToolRequest(request: CallToolRequest) {
+    const { name, arguments: args } = request.params
+    logInfo(`Received call tool request for ${name}`, { name, args })
+
+    try {
+      const tool = this.toolRegistry.getTool(name)
+      if (!tool) {
+        const errorMsg = `Unknown tool: ${name}`
+        logWarn(errorMsg, {
+          name,
+          availableTools: this.toolRegistry.getToolNames(),
+        })
+        throw new Error(errorMsg)
+      }
+
+      logDebug(`Executing tool: ${name}`, { args })
+      const response = await tool.execute(args)
+
+      // Ensure response is properly serializable
+      const serializedResponse = JSON.parse(JSON.stringify(response))
+      logInfo(`Tool ${name} executed successfully`, {
+        responseType: typeof response,
+        hasContent: !!serializedResponse.content,
+      })
+
+      return serializedResponse
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      logError(`Error executing tool ${name}: ${errorMessage}`, {
+        error,
+        toolName: name,
+        args,
+      })
+      throw error
+    }
+  }
+
   private setupHandlers(): void {
     // List tools handler
     this.server.setRequestHandler(
       ListToolsRequestSchema,
-      async (request: ListToolsRequest) => {
-        logInfo('Received list_tools request', { params: request.params })
-
-        const tools = this.toolRegistry.getAllTools()
-        const response = { tools }
-
-        logInfo('Returning list_tools response', {
-          toolCount: tools.length,
-          toolNames: tools.map((t: ToolDefinition) => t.name),
-          response,
-        })
-        return response
-      }
+      (request: ListToolsRequest) => this.handleListToolsRequest(request)
     )
 
     // Call tool handler
     this.server.setRequestHandler(
       CallToolRequestSchema,
-      async (request: CallToolRequest) => {
-        const { name, arguments: args } = request.params
-        logInfo(`Received call tool request for ${name}`, { name, args })
-
-        try {
-          const tool = this.toolRegistry.getTool(name)
-          if (!tool) {
-            const errorMsg = `Unknown tool: ${name}`
-            logWarn(errorMsg, {
-              name,
-              availableTools: this.toolRegistry.getToolNames(),
-            })
-            throw new Error(errorMsg)
-          }
-
-          logDebug(`Executing tool: ${name}`, { args })
-          const response = await tool.execute(args)
-
-          // Ensure response is properly serializable
-          const serializedResponse = JSON.parse(JSON.stringify(response))
-          logInfo(`Tool ${name} executed successfully`, {
-            responseType: typeof response,
-            hasContent: !!serializedResponse.content,
-          })
-
-          return serializedResponse
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error)
-          logError(`Error executing tool ${name}: ${errorMessage}`, {
-            error,
-            toolName: name,
-            args,
-          })
-          throw error
-        }
-      }
+      (request: CallToolRequest) => this.handleCallToolRequest(request)
     )
 
     logDebug('MCP server handlers registered')

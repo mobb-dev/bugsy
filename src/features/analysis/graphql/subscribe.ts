@@ -1,6 +1,5 @@
 import { Agent } from 'node:http'
 
-import { API_URL } from '@mobb/bugsy/constants'
 import Debug from 'debug'
 import { createClient } from 'graphql-ws'
 import { HttpsProxyAgent } from 'https-proxy-agent'
@@ -8,6 +7,8 @@ import WebsocketNode from 'isomorphic-ws'
 import WebSocket from 'ws'
 
 import { API_KEY_HEADER_NAME } from './gql'
+
+const DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
 
 const debug = Debug('mobbdev:subscribe')
 
@@ -85,6 +86,7 @@ export function subscribe<T, TV extends Record<string, unknown>>(
   return new Promise<T>((resolve, reject) => {
     let timer: null | ReturnType<typeof setTimeout> = null
     const { timeoutInMs = SUBSCRIPTION_TIMEOUT_MS } = wsClientOptions
+    const API_URL = process.env['API_URL'] || DEFAULT_API_URL
     const client = createWSClient({
       ...wsClientOptions,
       websocket: WebSocket,

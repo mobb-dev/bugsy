@@ -32,7 +32,7 @@ export const mockMe = {
 export const mockMeConnectionError = {
   errors: [
     {
-      message: 'Network error',
+      message: 'Failed to connect to the API. Please check your API_KEY',
       extensions: {
         code: 'NETWORK_ERROR',
       },
@@ -42,7 +42,7 @@ export const mockMeConnectionError = {
 
 export const mockMeFetchError = () => {
   const error = new Error(
-    'FetchError: request to http://localhost:3001/graphql failed'
+    'FetchError: Failed to connect to the API. Please check your API_KEY'
   )
   error.name = 'FetchError'
   return error

@@ -20,11 +20,19 @@ import {
 import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { GithubSCMLib } from '@mobb/bugsy/features/analysis/scm/github/GithubSCMLib'
 import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
+import { createMcpServer } from '@mobb/bugsy/mcp'
 import { mobbCliCommand } from '@mobb/bugsy/types'
+import {
+  CallToolResult,
+  ListToolsResult,
+} from '@modelcontextprotocol/sdk/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
+import { existsSync, mkdtempSync, rmSync } from 'fs'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import * as openExport from 'open'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
@@ -33,6 +41,14 @@ import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
+import { MCPClient } from './mcp/helpers/MCPClient'
+import {
+  createActiveGitRepo,
+  createActiveNoChangesGitRepo,
+  createActiveNonGitRepo,
+  createEmptyGitRepo,
+  deleteGitRepo,
+} from './mcp/helpers/utils'
 
 dotenv.config({
   path: path.join(__dirname, '../../../__tests__/.env'),
@@ -996,5 +1012,206 @@ describe('create-one-pr flag tests', () => {
     expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
     consoleMock.mockClear()
     mockedOpen.mockClear()
+  })
+})
+
+describe('mcp tests', () => {
+  let mcpClient: MCPClient
+
+  let nonExistentPath: string
+  let emptyRepoPath: string
+  let activeRepoPath: string
+  let activeNoChangesRepoPath: string
+  let activeNonGitRepoPath: string
+  let nonRepoEmptyPath: string
+
+  beforeAll(async () => {
+    const server = createMcpServer()
+
+    nonExistentPath = join(tmpdir(), 'mcp-test-non-existent-' + Date.now())
+
+    // Create temp directory that is not a git repo
+    nonRepoEmptyPath = mkdtempSync(join(tmpdir(), 'mcp-test-non-repo-'))
+
+    // Create an empty git repository
+    emptyRepoPath = createEmptyGitRepo()
+
+    // Create a git repository with a staged file
+    activeRepoPath = createActiveGitRepo()
+
+    // Create a git repository with no changes in `git status`
+    activeNoChangesRepoPath = createActiveNoChangesGitRepo()
+
+    activeNonGitRepoPath = createActiveNonGitRepo()
+
+    // Create a client connected to this process
+    mcpClient = new MCPClient(server)
+  })
+
+  afterAll(async () => {
+    // Clean up the process
+    deleteGitRepo(emptyRepoPath)
+    deleteGitRepo(activeRepoPath)
+    deleteGitRepo(activeNoChangesRepoPath)
+
+    // Clean up temp directories
+    if (existsSync(nonRepoEmptyPath)) {
+      rmSync(nonRepoEmptyPath, { recursive: true, force: true })
+    }
+    if (existsSync(activeNonGitRepoPath)) {
+      rmSync(activeNonGitRepoPath, { recursive: true, force: true })
+    }
+  })
+
+  it('should respond to mcp list_tools call', async () => {
+    const response = await mcpClient.listTools()
+
+    const listToolsResponse = response as ListToolsResult
+    expect(Array.isArray(listToolsResponse.tools)).toBe(true)
+
+    // Assert the exact response structure
+    expect(listToolsResponse).toEqual({
+      tools: [
+        {
+          name: 'fix_vulnerabilities',
+          display_name: 'fix_vulnerabilities',
+          description:
+            'Scans the current code changes and returns fixes for potential vulnerabilities',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: {
+                type: 'string',
+                description: 'The path to the local git repository',
+              },
+            },
+            required: ['path'],
+          },
+        },
+      ],
+    })
+  })
+
+  it('should handle missing path parameter in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {})
+    ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
+  })
+
+  it('should handle non-existent path in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: nonExistentPath,
+      })
+    ).rejects.toThrow('Invalid path: potential security risk detected in path')
+  })
+
+  it('should handle empty git repository in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: emptyRepoPath,
+      })
+    ).resolves.toStrictEqual({
+      content: [
+        {
+          text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+          type: 'text',
+        },
+      ],
+    })
+  })
+
+  describe('Path Validation Security Tests', () => {
+    it('should reject path traversal attempts with actual malicious paths', async () => {
+      // Test actual malicious paths that should be blocked by validateMCPPath
+      const maliciousPaths = [
+        '../../../etc/passwd',
+        '..\\..\\..\\windows\\system32\\config\\sam',
+        '../.env',
+        '../../package.json',
+        '../../../home/user/.ssh/id_rsa',
+        'subdir/../../../etc/hosts',
+        './../../sensitive-file.txt',
+        'normal-file/../../../etc/passwd',
+      ]
+
+      for (const maliciousPath of maliciousPaths) {
+        await expect(
+          mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+            path: maliciousPath,
+          })
+        ).rejects.toThrow(
+          'Invalid path: potential security risk detected in path'
+        )
+      }
+    })
+  })
+
+  it('should handle path that is not a git repository in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: nonRepoEmptyPath,
+      })
+    ).resolves.toStrictEqual({
+      content: [
+        {
+          text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+          type: 'text',
+        },
+      ],
+    })
+  })
+
+  it('should handle active non-git repository path in fix_vulnerabilities tool', async () => {
+    // Verify the directory still exists before running the test
+    expect(existsSync(activeNonGitRepoPath)).toBe(true)
+    expect(existsSync(join(activeNonGitRepoPath, 'sample.js'))).toBe(true)
+
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: activeNonGitRepoPath,
+      })
+    ).resolves.toStrictEqual({
+      content: [
+        {
+          text: expect.stringContaining(
+            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+          ),
+          type: 'text',
+        },
+      ],
+    })
+  })
+  it('should handle active git repository path in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: activeRepoPath,
+      })
+    ).resolves.toStrictEqual({
+      content: [
+        {
+          text: expect.stringContaining(
+            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+          ),
+          type: 'text',
+        },
+      ],
+    })
+  })
+  it('should handle active (no changes) git repository path in fix_vulnerabilities tool', async () => {
+    await expect(
+      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+        path: activeNoChangesRepoPath,
+      })
+    ).resolves.toStrictEqual({
+      content: [
+        {
+          text: expect.stringContaining(
+            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+          ),
+          type: 'text',
+        },
+      ],
+    })
   })
 })

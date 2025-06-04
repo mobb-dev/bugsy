@@ -6,7 +6,7 @@ import { FixVulnerabilitiesTool } from './tools/fixVulnerabilities/FixVulnerabil
 /**
  * Creates and configures the MCP server with all tools and services
  */
-function createMcpServer(): McpServer {
+export function createMcpServer(): McpServer {
   logDebug('Creating MCP server')
 
   // Create the server

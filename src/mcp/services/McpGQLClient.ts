@@ -1,12 +1,22 @@
+import crypto from 'node:crypto'
+import os from 'node:os' // 5 sec
+
+import { WEB_APP_URL } from '@mobb/bugsy/constants'
+import { packageJson, sleep } from '@mobb/bugsy/utils'
+import Configstore from 'configstore'
 import { GraphQLClient } from 'graphql-request'
+import open from 'open'
 import { v4 as uuidv4 } from 'uuid'
 
+import { subscribe } from '../../features/analysis/graphql/subscribe'
 import {
+  CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
   GetAnalysisQuery,
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
   GetAnalysisSubscriptionSubscriptionVariables,
+  GetEncryptedApiTokenQueryVariables,
   getSdk,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
@@ -14,22 +24,48 @@ import {
 } from '../../features/analysis/scm/generates/client_generates'
 import { API_KEY_HEADER_NAME, DEFAULT_API_URL } from '../constants'
 import { logDebug, logError, logInfo } from '../Logger'
-import { subscribe } from './Subscribe'
+import {
+  ApiConnectionError,
+  AuthenticationError,
+  CliLoginError,
+  FailedToGetApiTokenError,
+} from '../tools/fixVulnerabilities/errors/VulnerabilityFixErrors'
+
+export const LOGIN_MAX_WAIT = 10 * 1000 // 10 minutes
+export const LOGIN_CHECK_DELAY = 1 * 1000
+
+type GQLClientArgs =
+  | {
+      apiKey: string
+      type: 'apiKey'
+    }
+  | {
+      token: string
+      type: 'token'
+    }
+
+const config = new Configstore(packageJson.name, { apiToken: '' })
+const BROWSER_COOLDOWN_MS = 5000 // 5 seconds cooldown
+let lastBrowserOpenTime = 0
 
 // Simple GQLClient for the fixVulnerabilities tool
 export class McpGQLClient {
   private client: GraphQLClient
   private clientSdk: ReturnType<typeof getSdk>
-  private apiKey: string
-  private apiUrl: string
+  _auth: GQLClientArgs
 
-  constructor(args: { apiKey: string; type: 'apiKey' }) {
+  constructor(args: GQLClientArgs) {
+    this._auth = args
     const API_URL = process.env['API_URL'] || DEFAULT_API_URL
 
-    this.apiKey = args.apiKey
-    this.apiUrl = API_URL
     this.client = new GraphQLClient(API_URL, {
-      headers: { [API_KEY_HEADER_NAME]: args.apiKey || '' },
+      headers:
+        args.type === 'apiKey'
+          ? { [API_KEY_HEADER_NAME]: args.apiKey || '' }
+          : {
+              Authorization: `Bearer ${args.token}`,
+            },
+
       requestMiddleware: (request) => {
         const requestId = uuidv4()
         return {
@@ -47,9 +83,11 @@ export class McpGQLClient {
 
   private getErrorContext() {
     return {
-      endpoint: this.apiUrl,
+      endpoint: process.env['API_URL'] || DEFAULT_API_URL,
+      apiKey: this._auth.type === 'apiKey' ? this._auth.apiKey : '',
       headers: {
-        [API_KEY_HEADER_NAME]: this.apiKey ? '[REDACTED]' : 'undefined',
+        [API_KEY_HEADER_NAME]:
+          this._auth.type === 'apiKey' ? '[REDACTED]' : 'undefined',
         'x-hasura-request-id': '[DYNAMIC]',
       },
     }
@@ -63,15 +101,12 @@ export class McpGQLClient {
       logInfo('GraphQL: Me query successful', { result })
       return true
     } catch (e) {
-      logError('GraphQL: Me query failed', {
-        error: e,
-        ...this.getErrorContext(),
-      })
-      if (e?.toString().startsWith('FetchError')) {
-        console.error('Connection verification failed:', e)
+      if (e?.toString().includes('FetchError')) {
+        logError('verify connection failed %o', e)
+        return false
       }
-      return false
     }
+    return true
   }
 
   async uploadS3BucketInfo(): Promise<UploadS3BucketInfoMutation> {
@@ -174,11 +209,18 @@ export class McpGQLClient {
             resolve(data)
           }
         },
-        {
-          apiKey: this.apiKey,
-          type: 'apiKey',
-          timeoutInMs: params.timeoutInMs,
-        }
+
+        this._auth.type === 'apiKey'
+          ? {
+              apiKey: this._auth.apiKey,
+              type: 'apiKey',
+              timeoutInMs: params.timeoutInMs,
+            }
+          : {
+              token: this._auth.token,
+              type: 'token',
+              timeoutInMs: params.timeoutInMs,
+            }
       )
       logInfo('GraphQL: GetAnalysis subscription completed', { result })
       return result
@@ -261,4 +303,137 @@ export class McpGQLClient {
       throw e
     }
   }
+
+  async getUserInfo() {
+    const { me } = await this.clientSdk.Me()
+    return me
+  }
+
+  async verifyToken() {
+    logDebug('verifying token')
+
+    try {
+      await this.clientSdk.CreateCommunityUser()
+      const info = await this.getUserInfo()
+      logDebug('token verified')
+      return info?.email || true
+    } catch (e) {
+      logError('verify token failed')
+      return false
+    }
+  }
+
+  async createCliLogin(
+    variables: CreateCliLoginMutationVariables
+  ): Promise<string> {
+    try {
+      const res = await this.clientSdk.CreateCliLogin(variables, {
+        // We may have outdated API key in the config storage. Avoid using it for the login request.
+        [API_KEY_HEADER_NAME]: '',
+      })
+
+      const loginId = res.insert_cli_login_one?.id || ''
+      if (!loginId) {
+        logError('create cli login failed - no login ID returned')
+        return ''
+      }
+      return loginId
+    } catch (e) {
+      logError('create cli login failed', { error: e })
+      return ''
+    }
+  }
+
+  async getEncryptedApiToken(
+    variables: GetEncryptedApiTokenQueryVariables
+  ): Promise<string | null> {
+    try {
+      const res = await this.clientSdk.GetEncryptedApiToken(variables, {
+        // We may have outdated API key in the config storage. Avoid using it for the login request.
+        [API_KEY_HEADER_NAME]: '',
+      })
+      return res?.cli_login_by_pk?.encryptedApiToken || null
+    } catch (e) {
+      logError('get encrypted api token failed', { error: e })
+      return null
+    }
+  }
+}
+
+async function openBrowser(url: string) {
+  const now = Date.now()
+  if (!process.env['TEST'] && now - lastBrowserOpenTime < BROWSER_COOLDOWN_MS) {
+    logDebug(`browser cooldown active, skipping open for ${url}`)
+    return
+  }
+  logDebug(`opening browser url ${url}`)
+  await open(url)
+  lastBrowserOpenTime = now
+}
+
+export async function getMcpGQLClient(): Promise<McpGQLClient> {
+  logDebug('getting config', { apiToken: config.get('apiToken') })
+  const inGqlClient = new McpGQLClient({
+    apiKey: config.get('apiToken') || process.env['API_KEY'] || '',
+    type: 'apiKey',
+  })
+
+  const isConnected = await inGqlClient.verifyConnection()
+  if (!isConnected) {
+    throw new ApiConnectionError('Error: failed to connect to the API')
+  }
+
+  const userVerify = await inGqlClient.verifyToken()
+  if (userVerify) {
+    return inGqlClient
+  }
+
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+  })
+  logDebug('creating cli login')
+  const loginId = await inGqlClient.createCliLogin({
+    publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
+  })
+  if (!loginId) {
+    throw new CliLoginError('Error: createCliLogin failed')
+  }
+
+  logDebug(`cli login created ${loginId}`)
+  const webLoginUrl = `${WEB_APP_URL}/cli-login`
+  const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
+  logDebug(`opening browser url ${browserUrl}`)
+  await openBrowser(browserUrl)
+  logDebug(`waiting for login to complete`)
+  let newApiToken = null
+  for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
+    const encryptedApiToken = await inGqlClient.getEncryptedApiToken({
+      loginId,
+    })
+    if (encryptedApiToken) {
+      logDebug('encrypted API token received')
+      newApiToken = crypto
+        .privateDecrypt(privateKey, Buffer.from(encryptedApiToken, 'base64'))
+        .toString('utf-8')
+      logDebug('API token decrypted')
+      break
+    }
+    await sleep(LOGIN_CHECK_DELAY)
+  }
+
+  if (!newApiToken) {
+    throw new FailedToGetApiTokenError(
+      'Error: failed to get encrypted api token'
+    )
+  }
+
+  const newGqlClient = new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })
+  const loginSuccess = await newGqlClient.verifyToken()
+  if (loginSuccess) {
+    logDebug('set api token %s', newApiToken)
+    config.set('apiToken', newApiToken)
+  } else {
+    throw new AuthenticationError('Something went wrong, API token is invalid.')
+  }
+  return newGqlClient
 }

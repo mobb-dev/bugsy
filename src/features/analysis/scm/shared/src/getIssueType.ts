@@ -124,6 +124,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.AvoidBuiltinShadowing]: 'Avoid Builtin Shadowing',
   [IssueType_Enum.ImproperStringFormatting]: 'Improper String Formatting',
   [IssueType_Enum.TarSlip]: 'Tar Slip',
+  [IssueType_Enum.MissingWhitespace]: 'Missing Whitespace',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

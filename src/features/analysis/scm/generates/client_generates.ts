@@ -7901,6 +7901,8 @@ export enum IssueType_Enum {
   MissingHstsHeader = 'MISSING_HSTS_HEADER',
   /** Missing TLS MinVersion */
   MissingSslMinversion = 'MISSING_SSL_MINVERSION',
+  /** MISSING_WHITESPACE */
+  MissingWhitespace = 'MISSING_WHITESPACE',
   /** MODIFIED_DEFAULT_PARAM */
   ModifiedDefaultParam = 'MODIFIED_DEFAULT_PARAM',
   /** Non-final public static field */

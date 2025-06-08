@@ -359,4 +359,6 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.WildcardImports]: undefined,
   [IssueType_Enum.TarSlip]: undefined,
   [IssueType_Enum.MissingWhitespace]: undefined,
+  [IssueType_Enum.NoPrintStatement]: undefined,
+  [IssueType_Enum.NoOpOverhead]: undefined,
 }

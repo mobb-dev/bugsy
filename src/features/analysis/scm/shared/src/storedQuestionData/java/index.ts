@@ -10,6 +10,7 @@ import { leftoverDebugCode } from './leftoverDebugCode'
 import { localeDependentComparison } from './localeDependentComparison'
 import { logForging } from './logForging'
 import { missingCheckAgainstNull } from './missingCheckAgainstNull'
+import { openRedirect } from './openRedirect'
 import { overlyBroadCatch } from './overlyBroadCatch'
 import { privacyViolation } from './privacyViolation'
 import { pt } from './pt'
@@ -38,6 +39,7 @@ const vulnerabilities = {
   [IssueType_Enum.LocaleDependentComparison as string]:
     localeDependentComparison,
   [IssueType_Enum.MissingCheckAgainstNull as string]: missingCheckAgainstNull,
+  [IssueType_Enum.OpenRedirect as string]: openRedirect,
   [IssueType_Enum.OverlyBroadCatch as string]: overlyBroadCatch,
   [IssueType_Enum.SystemInformationLeak as string]: sysLeak,
   [IssueType_Enum.UseOfSystemOutputStream as string]: useOfSystemOutputStream,

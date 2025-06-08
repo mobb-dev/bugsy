@@ -125,6 +125,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.ImproperStringFormatting]: 'Improper String Formatting',
   [IssueType_Enum.TarSlip]: 'Tar Slip',
   [IssueType_Enum.MissingWhitespace]: 'Missing Whitespace',
+  [IssueType_Enum.NoPrintStatement]: 'Python 2 "print" Statement Is Obsolete',
+  [IssueType_Enum.NoOpOverhead]: 'Expensive Arguments in Conditional Methods',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

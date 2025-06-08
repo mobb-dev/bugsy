@@ -344,6 +344,7 @@ export type IssueTypeStats = {
 export enum Language {
   Cpp = 'CPP',
   Csharp = 'CSHARP',
+  Default = 'DEFAULT',
   Go = 'GO',
   Java = 'JAVA',
   Js = 'JS',
@@ -7607,6 +7608,8 @@ export enum IssueLanguage_Enum {
   CSharp = 'CSharp',
   /** C++ */
   Cpp = 'Cpp',
+  /** Default */
+  Default = 'Default',
   /** Go */
   Go = 'Go',
   /** Java */
@@ -7913,6 +7916,10 @@ export enum IssueType_Enum {
   NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
   /** Missing rate limiting */
   NoLimitsOrThrottling = 'NO_LIMITS_OR_THROTTLING',
+  /** NO_OP_OVERHEAD */
+  NoOpOverhead = 'NO_OP_OVERHEAD',
+  /** NO_PRINT_STATEMENT */
+  NoPrintStatement = 'NO_PRINT_STATEMENT',
   /** NO_RETURN_IN_FINALLY */
   NoReturnInFinally = 'NO_RETURN_IN_FINALLY',
   /** NO_VAR */
@@ -12436,6 +12443,7 @@ export type Organization = {
   includeSuppressed: Scalars['Boolean']['output'];
   isAiEnabled: Scalars['Boolean']['output'];
   isPrivateRepoEnabled: Scalars['Boolean']['output'];
+  isSendInvitationEnabled: Scalars['Boolean']['output'];
   /** An array relationship */
   issueTypeSettings: Array<Organization_Issue_Type_Settings>;
   /** An aggregate relationship */
@@ -12757,6 +12765,7 @@ export type Organization_Bool_Exp = {
   includeSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isPrivateRepoEnabled?: InputMaybe<Boolean_Comparison_Exp>;
+  isSendInvitationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
@@ -13053,6 +13062,7 @@ export type Organization_Insert_Input = {
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
@@ -13368,6 +13378,7 @@ export type Organization_Order_By = {
   includeSuppressed?: InputMaybe<Order_By>;
   isAiEnabled?: InputMaybe<Order_By>;
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
+  isSendInvitationEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
@@ -13781,6 +13792,8 @@ export enum Organization_Select_Column {
   /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */
+  IsSendInvitationEnabled = 'isSendInvitationEnabled',
+  /** column name */
   Name = 'name',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
@@ -13804,6 +13817,7 @@ export type Organization_Set_Input = {
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
@@ -13861,6 +13875,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
@@ -14358,6 +14373,8 @@ export enum Organization_Update_Column {
   IsAiEnabled = 'isAiEnabled',
   /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
+  /** column name */
+  IsSendInvitationEnabled = 'isSendInvitationEnabled',
   /** column name */
   Name = 'name',
   /** column name */
@@ -22753,7 +22770,6 @@ export type User_Email_Notification_Settings = {
   analysisExpirationWarning: Scalars['Boolean']['output'];
   fixCommitted: Scalars['Boolean']['output'];
   id: Scalars['uuid']['output'];
-  sendInviteEmail: Scalars['Boolean']['output'];
   /** An array relationship */
   user: Array<User>;
   /** An aggregate relationship */
@@ -22811,7 +22827,6 @@ export type User_Email_Notification_Settings_Bool_Exp = {
   analysisExpirationWarning?: InputMaybe<Boolean_Comparison_Exp>;
   fixCommitted?: InputMaybe<Boolean_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
-  sendInviteEmail?: InputMaybe<Boolean_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
   user_aggregate?: InputMaybe<User_Aggregate_Bool_Exp>;
 };
@@ -22828,7 +22843,6 @@ export type User_Email_Notification_Settings_Insert_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
   user?: InputMaybe<User_Arr_Rel_Insert_Input>;
 };
 
@@ -22873,7 +22887,6 @@ export type User_Email_Notification_Settings_Order_By = {
   analysisExpirationWarning?: InputMaybe<Order_By>;
   fixCommitted?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  sendInviteEmail?: InputMaybe<Order_By>;
   user_aggregate?: InputMaybe<User_Aggregate_Order_By>;
 };
 
@@ -22891,9 +22904,7 @@ export enum User_Email_Notification_Settings_Select_Column {
   /** column name */
   FixCommitted = 'fixCommitted',
   /** column name */
-  Id = 'id',
-  /** column name */
-  SendInviteEmail = 'sendInviteEmail'
+  Id = 'id'
 }
 
 /** input type for updating data in table "user_email_notification_settings" */
@@ -22902,7 +22913,6 @@ export type User_Email_Notification_Settings_Set_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Streaming cursor of the table "user_email_notification_settings" */
@@ -22919,7 +22929,6 @@ export type User_Email_Notification_Settings_Stream_Cursor_Value_Input = {
   analysisExpirationWarning?: InputMaybe<Scalars['Boolean']['input']>;
   fixCommitted?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  sendInviteEmail?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** update columns of table "user_email_notification_settings" */
@@ -22931,9 +22940,7 @@ export enum User_Email_Notification_Settings_Update_Column {
   /** column name */
   FixCommitted = 'fixCommitted',
   /** column name */
-  Id = 'id',
-  /** column name */
-  SendInviteEmail = 'sendInviteEmail'
+  Id = 'id'
 }
 
 export type User_Email_Notification_Settings_Updates = {

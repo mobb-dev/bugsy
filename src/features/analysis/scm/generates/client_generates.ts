@@ -7830,6 +7830,8 @@ export enum IssueType_Enum {
   DeprecatedFunction = 'DEPRECATED_FUNCTION',
   /** A denial of service by exploiting string builder */
   DosStringBuilder = 'DOS_STRING_BUILDER',
+  /** DO_NOT_RAISE_EXCEPTION */
+  DoNotRaiseException = 'DO_NOT_RAISE_EXCEPTION',
   /** String literals should not be duplicated */
   DuplicatedStrings = 'DUPLICATED_STRINGS',
   /** Erroneous string compare */

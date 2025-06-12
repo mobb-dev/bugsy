@@ -7950,6 +7950,8 @@ export enum IssueType_Enum {
   Pt = 'PT',
   /** Race Condition: Format Flaw */
   RaceConditionFormatFlaw = 'RACE_CONDITION_FORMAT_FLAW',
+  /** REDOS */
+  Redos = 'REDOS',
   /** Regular Expression Injection */
   RegexInjection = 'REGEX_INJECTION',
   /** REGEX_MISSING_TIMEOUT */

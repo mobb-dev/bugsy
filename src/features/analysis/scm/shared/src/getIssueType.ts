@@ -131,6 +131,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.DeclareVariableExplicitly]: 'Declare Variable Explicitly',
   [IssueType_Enum.NoNestedTry]: 'No Nested Try',
   [IssueType_Enum.UnnecessaryImports]: 'Unnecessary Imports',
+  [IssueType_Enum.Redos]: 'Regular Expression Denial of Service',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

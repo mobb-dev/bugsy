@@ -212,6 +212,7 @@ query getVulByNodesMetadata(
         _or: [
           { category: { _eq: "Irrelevant" } }
           { category: { _eq: "FalsePositive" } }
+          { category: { _eq: "Filtered" } }
         ]
       }
     ) {
@@ -461,30 +462,120 @@ mutation autoPrAnalysis(
   }
 }
 
-query GetMCPFixes($fixReportId: uuid!) {
-  fix(where: { fixReportId: { _eq: $fixReportId } }) {
-    id
-    confidence
-    safeIssueType
-    severityText
-    vulnerabilityReportIssues {
-      parsedIssueType
-      parsedSeverity
-      vulnerabilityReportIssueTags {
-        vulnerability_report_issue_tag_value
+fragment FixDetails on fix {
+  id
+  confidence
+  safeIssueType
+  severityText
+  vulnerabilityReportIssues {
+    parsedIssueType
+    parsedSeverity
+    vulnerabilityReportIssueTags {
+      vulnerability_report_issue_tag_value
+    }
+  }
+  patchAndQuestions {
+    __typename
+    ... on FixData {
+      patch
+      patchOriginalEncodingBase64
+      extraContext {
+        extraContext {
+          key
+          value
+        }
+        fixDescription
       }
     }
-    patchAndQuestions {
-      __typename
-      ... on FixData {
-        patch
-        patchOriginalEncodingBase64
-        extraContext {
-          extraContext {
-            key
-            value
-          }
-          fixDescription
+  }
+}
+
+query GetMCPFixes($fixReportId: uuid!) {
+  fix(where: { fixReportId: { _eq: $fixReportId } }) {
+    ...FixDetails
+  }
+}
+
+query GetLatestReportByRepoUrl($repoUrl: String!, $limit: Int = 3) {
+  fixReport(
+    where: { repo: { originalUrl: { _eq: $repoUrl } } }
+    order_by: { createdOn: desc }
+    limit: 1
+  ) {
+    id
+    createdOn
+    repo {
+      originalUrl
+    }
+    issueTypes
+    fixes_aggregate(
+      where: { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    CRITICAL: fixes_aggregate(
+      where: {
+        _and: [
+          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+          { severityText: { _eq: "critical" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    HIGH: fixes_aggregate(
+      where: {
+        _and: [
+          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+          { severityText: { _eq: "high" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    MEDIUM: fixes_aggregate(
+      where: {
+        _and: [
+          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+          { severityText: { _eq: "medium" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    LOW: fixes_aggregate(
+      where: {
+        _and: [
+          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+          { severityText: { _eq: "low" } }
+        ]
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    fixes(
+      where: { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+      order_by: { severityValue: desc }
+      limit: $limit
+    ) {
+      ...FixDetails
+    }
+    vulnerabilityReport {
+      scanDate
+      vendor
+      vulnerabilityReportIssues_aggregate(where: { category: { _eq: "Fixable" } }) {
+        aggregate {
+          count
         }
       }
     }

@@ -97,6 +97,16 @@ export function createActiveGitRepo(
       })
       log(`Committed ${filename} to HEAD`)
 
+      // Add a remote origin URL for testing
+      execSync(
+        'git remote add origin https://github.com/test-org/test-repo.git',
+        {
+          cwd: repoPath,
+          stdio: 'pipe',
+        }
+      )
+      log('Added remote origin URL')
+
       // Now modify the file so it shows up in git status as changed
       writeFileSync(filePath, content + '\n// Modified for testing')
       log(`Modified ${filename} to create changes`)

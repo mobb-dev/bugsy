@@ -106,32 +106,34 @@ export async function addFixCommentsForPr({
             ? `${description}\n\n${contextString}`
             : description
         }
-        return vulnerabilityReportIssue.codeNodes.map(
-          (vulnerabilityReportIssueCodeNode) => {
-            return postIssueComment({
-              vulnerabilityReportIssueCodeNode: {
-                path: vulnerabilityReportIssueCodeNode.path,
-                startLine: vulnerabilityReportIssueCodeNode.startLine,
-                vulnerabilityReportIssue: {
-                  fixId: '',
-                  safeIssueType: vulnerabilityReportIssue.safeIssueType,
-                  vulnerabilityReportIssueTags:
-                    vulnerabilityReportIssue.vulnerabilityReportIssueTags,
-                  category: vulnerabilityReportIssue.category,
+        return await Promise.all(
+          vulnerabilityReportIssue.codeNodes.map(
+            async (vulnerabilityReportIssueCodeNode) => {
+              return await postIssueComment({
+                vulnerabilityReportIssueCodeNode: {
+                  path: vulnerabilityReportIssueCodeNode.path,
+                  startLine: vulnerabilityReportIssueCodeNode.startLine,
+                  vulnerabilityReportIssue: {
+                    fixId: '',
+                    safeIssueType: vulnerabilityReportIssue.safeIssueType,
+                    vulnerabilityReportIssueTags:
+                      vulnerabilityReportIssue.vulnerabilityReportIssueTags,
+                    category: vulnerabilityReportIssue.category,
+                  },
+                  vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
                 },
-                vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
-              },
-              projectId,
-              analysisId,
-              organizationId,
-              fixesById,
-              scm,
-              pullRequest,
-              scanner,
-              commitSha,
-              fpDescription,
-            })
-          }
+                projectId,
+                analysisId,
+                organizationId,
+                fixesById,
+                scm,
+                pullRequest,
+                scanner,
+                commitSha,
+                fpDescription,
+              })
+            }
+          )
         )
       }
     ),

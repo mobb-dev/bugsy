@@ -358,6 +358,31 @@ export class McpGQLClient {
       return null
     }
   }
+
+  async getLatestReportByRepoUrl(repoUrl: string, limit?: number) {
+    try {
+      logDebug('GraphQL: Calling GetLatestReportByRepoUrl query', {
+        repoUrl,
+        limit,
+      })
+      const res = await this.clientSdk.GetLatestReportByRepoUrl({
+        repoUrl,
+        limit,
+      })
+      logInfo('GraphQL: GetLatestReportByRepoUrl successful', {
+        result: res,
+        reportCount: res.fixReport?.length || 0,
+      })
+      return res.fixReport?.[0] || null
+    } catch (e) {
+      logError('GraphQL: GetLatestReportByRepoUrl failed', {
+        error: e,
+        repoUrl,
+        ...this.getErrorContext(),
+      })
+      throw e
+    }
+  }
 }
 
 async function openBrowser(url: string) {

@@ -5,6 +5,8 @@ import type {
   CreateCommunityUserMutationVariables,
   CreateProjectMutation,
   CreateProjectMutationVariables,
+  GetLatestReportByRepoUrlQuery,
+  GetLatestReportByRepoUrlQueryVariables,
   GetMcpFixesQuery,
   GetMcpFixesQueryVariables,
   GetOrgAndProjectIdQuery,
@@ -37,6 +39,11 @@ import {
   mockUploadS3BucketInfoError,
 } from './fakeResponses'
 import {
+  mockGetLatestReportByRepoUrl,
+  mockGetLatestReportByRepoUrlEmpty,
+  mockGetLatestReportByRepoUrlError,
+} from './fakeResponses/getLatestReportByRepoUrl'
+import {
   createCliLoginHandler,
   getEncryptedApiTokenHandler,
   setupAuthHandlers,
@@ -52,6 +59,7 @@ type MockState = {
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
   getMCPFixes: 'success' | 'error' | 'empty'
+  getLatestReportByRepoUrl: 'success' | 'error' | 'empty'
   createCliLogin: 'success' | 'error'
   getEncryptedApiToken: 'success' | 'error'
   createCommunityUser: 'success' | 'error' | 'badApiKey'
@@ -66,6 +74,7 @@ const mockState: MockState = {
   createProject: 'success',
   submitVulnerabilityReport: 'success',
   getMCPFixes: 'success',
+  getLatestReportByRepoUrl: 'success',
   createCliLogin: 'success',
   getEncryptedApiToken: 'success',
   createCommunityUser: 'success',
@@ -198,6 +207,25 @@ export const graphqlHandlers = [
     }
     return HttpResponse.json(mockCreateCommunityUser)
   }),
+
+  graphql.query<
+    GetLatestReportByRepoUrlQuery,
+    GetLatestReportByRepoUrlQueryVariables
+  >('GetLatestReportByRepoUrl', () => {
+    if (mockState.getLatestReportByRepoUrl === 'error') {
+      return HttpResponse.json(
+        mockGetLatestReportByRepoUrlError(
+          mockState.errorMessages['getLatestReportByRepoUrl'] ||
+            'Get Latest Report Error'
+        ),
+        { status: 500 }
+      )
+    }
+    if (mockState.getLatestReportByRepoUrl === 'empty') {
+      return HttpResponse.json({ data: mockGetLatestReportByRepoUrlEmpty.data })
+    }
+    return HttpResponse.json({ data: mockGetLatestReportByRepoUrl.data })
+  }),
 ]
 
 // Mock GraphQL control system
@@ -221,6 +249,7 @@ export const mockGraphQL = (
         mockState.createProject = 'success'
         mockState.submitVulnerabilityReport = 'success'
         mockState.getMCPFixes = 'success'
+        mockState.getLatestReportByRepoUrl = 'success'
         mockState.createCliLogin = 'success'
         mockState.getEncryptedApiToken = 'success'
         mockState.createCommunityUser = 'success'
@@ -363,6 +392,23 @@ export const mockGraphQL = (
       },
       failsWithBadApiKey() {
         mockState.createCommunityUser = 'badApiKey'
+        return this
+      },
+    }
+  },
+  getLatestReportByRepoUrl: () => {
+    return {
+      succeeds() {
+        mockState.getLatestReportByRepoUrl = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getLatestReportByRepoUrl = 'error'
+        mockState.errorMessages['getLatestReportByRepoUrl'] = message
+        return this
+      },
+      returnsEmptyReport() {
+        mockState.getLatestReportByRepoUrl = 'empty'
         return this
       },
     }

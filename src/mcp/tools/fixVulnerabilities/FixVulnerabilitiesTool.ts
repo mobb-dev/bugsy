@@ -2,7 +2,7 @@ import { FileUtils } from '../../../features/analysis/scm/FileUtils'
 import { GitService } from '../../../features/analysis/scm/git/GitService'
 import { log, logDebug, logInfo } from '../../Logger'
 import { PathValidation } from '../../services/PathValidation'
-import { VulnerabilityFixService } from './VulnerabilityFixService'
+import { VulnerabilityFixService } from './FixVulnerabilitiesService'
 
 export class FixVulnerabilitiesTool {
   name = 'fix_vulnerabilities'

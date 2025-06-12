@@ -1,11 +1,13 @@
+import { CheckForAvailableFixesTool } from '@mobb/bugsy/mcp/tools/checkForAvailableFixes/AvailableFixesTool'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
+import { noReportFoundPrompt } from '../../src/mcp/tools/checkForAvailableFixes/helpers/AvailableFixesResponsePrompts'
 import { FixVulnerabilitiesTool } from '../../src/mcp/tools/fixVulnerabilities/FixVulnerabilitiesTool'
 import {
   failedToAuthenticatePrompt,
   failedToConnectToApiPrompt,
-} from '../../src/mcp/tools/fixVulnerabilities/helpers/LLMResponsePrompts'
+} from '../../src/mcp/tools/fixVulnerabilities/helpers/FixVulnerabilitiesResponsePrompts'
 import { log } from './helpers/log'
 import {
   createActiveGitRepo,
@@ -896,6 +898,107 @@ describe('MCP Server', () => {
           }),
         })
       })
+    })
+  })
+
+  describe('CheckForAvailableFixesTool', () => {
+    beforeEach(() => {
+      // Reset all logger mocks before each test
+      Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
+    })
+
+    it('should handle missing path parameter', async () => {
+      const tool = new CheckForAvailableFixesTool()
+      await expect(tool.execute({} as { path: string })).rejects.toThrow(
+        "Invalid arguments: Missing required parameter 'path'"
+      )
+    })
+
+    it('should handle non-existent path', async () => {
+      const tool = new CheckForAvailableFixesTool()
+      const result = await tool.execute({ path: nonExistentPath })
+      expectValidResult(result)
+      expect(result.content[0]?.text).toContain(
+        'Invalid path: potential security risk detected in path'
+      )
+    })
+
+    it('should handle path that is not a git repository', async () => {
+      const tool = new CheckForAvailableFixesTool()
+      const result = await tool.execute({ path: codeNotInGitRepoPath })
+      expectValidResult(result)
+      expect(result.content[0]?.text).toContain('Invalid git repository')
+    })
+
+    it('should handle No origin URL git repository', async () => {
+      const tool = new CheckForAvailableFixesTool()
+      const result = await tool.execute({ path: emptyRepoPath })
+
+      expectValidResult(result)
+
+      expect(result.content[0]?.text).toContain(
+        'No origin URL found for the repository'
+      )
+    })
+
+    it('should handle empty report array', async () => {
+      // Configure GraphQL mock to return empty report
+      mockGraphQL().getLatestReportByRepoUrl().returnsEmptyReport()
+
+      const tool = new CheckForAvailableFixesTool()
+      const result = await tool.execute({ path: activeRepoPath })
+
+      expectValidResult(result)
+      const responseText = result.content[0]?.text
+      if (!responseText) {
+        throw new Error('Response text is undefined')
+      }
+
+      // In non-test environment, we expect the noReportFoundPrompt
+      expect(responseText).toBe(noReportFoundPrompt)
+      // Verify the complete prompt with snapshot
+      expect(responseText).toMatchSnapshot()
+
+      // Verify info log was generated (only in non-test environment)
+      expect(loggerMock.mocks.logInfo.mock.calls.length).toBeGreaterThan(0)
+      expect(
+        loggerMock.mocks.logInfo.mock.calls.some(
+          (call) => call[0] === 'No report found for repository'
+        )
+      ).toBe(true)
+
+      // Verify no error logs were generated
+      expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+    })
+
+    it('should handle report with fixes', async () => {
+      // Configure GraphQL mock to return report with fixes
+      mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+      const tool = new CheckForAvailableFixesTool()
+      const result = await tool.execute({ path: activeRepoPath })
+
+      expectValidResult(result)
+      const responseText = result.content[0]?.text ?? ''
+      // remove the timestamp from the response formant i 1/1/2024, 2:00:00 AM
+      const responseTextWithoutTimestamp = responseText.replace(
+        /(\d{1,2}\/\d{1,2}\/\d{4},\s\d{1,2}:\d{2}:\d{2}\s[AP]M)/,
+        '1/1/2000, 12:00:00 AM'
+      )
+      expect(responseTextWithoutTimestamp).toMatchSnapshot()
+
+      // Verify info log was generated (only in non-test environment)
+      expect(loggerMock.mocks.logInfo.mock.calls.length).toBeGreaterThan(0)
+      expect(
+        loggerMock.mocks.logInfo.mock.calls.some(
+          (call) =>
+            call[0] ===
+            'CheckForAvailableFixesTool execution completed successfully'
+        )
+      ).toBe(true)
+
+      // Verify no error logs were generated
+      expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
     })
   })
 })

@@ -118,6 +118,7 @@ export const ReportQueryResultZ = z.object({
             id: z.string().uuid(),
             issueType: z.string(),
             issueLanguage: z.string(),
+            category: z.string(),
           })
         ),
         // scmSubmitFixRequests: ScmSubmitFixRequestsZ,
@@ -251,6 +252,7 @@ export const VulnerabilityReportIssueZ = z.object({
   parsedSeverity: ParsedSeverityZ,
   severity: z.string(),
   severityValue: z.number(),
+  category: z.string(),
   codeNodes: z.array(z.object({ path: z.string() })),
   vulnerabilityReportIssueTags: z.array(
     z.object({

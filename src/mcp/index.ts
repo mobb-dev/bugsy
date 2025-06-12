@@ -1,6 +1,7 @@
 // 0. Import dependencies
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
+import { CheckForAvailableFixesTool } from './tools/checkForAvailableFixes/AvailableFixesTool'
 import { FixVulnerabilitiesTool } from './tools/fixVulnerabilities/FixVulnerabilitiesTool'
 
 /**
@@ -17,7 +18,9 @@ export function createMcpServer(): McpServer {
 
   // Create and register tools
   const fixVulnerabilitiesTool = new FixVulnerabilitiesTool()
+  const checkForAvailableFixesTool = new CheckForAvailableFixesTool()
 
+  // Register fix vulnerabilities tool
   server.registerTool({
     name: fixVulnerabilitiesTool.name,
     definition: {
@@ -28,6 +31,19 @@ export function createMcpServer(): McpServer {
     },
     execute: (args: unknown) =>
       fixVulnerabilitiesTool.execute(args as { path: string }),
+  })
+
+  // Register check for available fixes tool
+  server.registerTool({
+    name: checkForAvailableFixesTool.name,
+    definition: {
+      name: checkForAvailableFixesTool.name,
+      display_name: checkForAvailableFixesTool.displayName,
+      description: checkForAvailableFixesTool.description,
+      inputSchema: checkForAvailableFixesTool.getJsonSchema(),
+    },
+    execute: (args: unknown) =>
+      checkForAvailableFixesTool.execute(args as { path: string }),
   })
 
   logInfo('MCP server created and configured')

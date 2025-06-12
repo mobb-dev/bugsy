@@ -362,4 +362,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.NoPrintStatement]: undefined,
   [IssueType_Enum.NoOpOverhead]: undefined,
   [IssueType_Enum.DoNotRaiseException]: undefined,
+  [IssueType_Enum.DeclareVariableExplicitly]: undefined,
 }

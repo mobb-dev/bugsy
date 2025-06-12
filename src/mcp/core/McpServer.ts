@@ -106,25 +106,16 @@ export class McpServer {
     request: ListToolsRequest
   ): Promise<ListToolsResult> {
     logInfo('Received list_tools request', { params: request.params })
-    try {
-      await getMcpGQLClient()
-    } catch (error) {
-      logError('Failed to get MCPGQLClient', { error })
-      const authError = new Error(
-        'Please authorize this client by visiting: https://mobb.ai'
-      )
-      authError.name = 'AuthorizationRequired'
-      throw authError
-    }
+    void getMcpGQLClient()
 
     const tools = this.toolRegistry.getAllTools()
-    return {
+    const response = {
       tools: tools.map((tool: ToolDefinition) => ({
         name: tool.name,
-        display_name: tool.name,
+        display_name: tool.display_name || tool.name,
         description: tool.description || '',
         inputSchema: {
-          type: 'object',
+          type: 'object' as const,
           properties:
             (tool.inputSchema as { properties?: Record<string, unknown> })
               .properties || {},
@@ -133,6 +124,8 @@ export class McpServer {
         },
       })),
     }
+    logInfo('Returning list_tools response', { response })
+    return response
   }
 
   public async handleCallToolRequest(request: CallToolRequest) {

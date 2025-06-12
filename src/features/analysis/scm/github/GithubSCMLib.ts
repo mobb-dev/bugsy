@@ -65,7 +65,7 @@ export class GithubSCMLib extends SCMLib {
 
   async forkRepo(repoUrl: string): Promise<{ url: string | null }> {
     this._validateAccessToken()
-    return this.githubSdk.forkRepo({
+    return await this.githubSdk.forkRepo({
       repoUrl: repoUrl,
     })
   }
@@ -81,7 +81,7 @@ export class GithubSCMLib extends SCMLib {
     const { key_id, key } = repositoryPublicKeyResponse
 
     const encryptedValue = await encryptSecret(params.value, key)
-    return this.githubSdk.createOrUpdateRepositorySecret({
+    return await this.githubSdk.createOrUpdateRepositorySecret({
       encrypted_value: encryptedValue,
       secret_name: params.name,
       key_id,
@@ -108,7 +108,7 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async validateParams() {
-    return githubValidateParams(this.url, this.accessToken)
+    return await githubValidateParams(this.url, this.accessToken)
   }
   async postPrComment(
     params: Pick<
@@ -118,7 +118,7 @@ export class GithubSCMLib extends SCMLib {
   ) {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return this.githubSdk.postPrComment({
+    return await this.githubSdk.postPrComment({
       ...params,
       owner,
       repo,
@@ -129,7 +129,7 @@ export class GithubSCMLib extends SCMLib {
   ): Promise<UpdateCommentResponse> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return this.githubSdk.updatePrComment({
+    return await this.githubSdk.updatePrComment({
       ...params,
       owner,
       repo,
@@ -138,7 +138,7 @@ export class GithubSCMLib extends SCMLib {
   async deleteComment(params: Pick<DeleteCommentParams, 'comment_id'>) {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return this.githubSdk.deleteComment({
+    return await this.githubSdk.deleteComment({
       ...params,
       owner,
       repo,
@@ -147,7 +147,7 @@ export class GithubSCMLib extends SCMLib {
   async getPrComments(params: Omit<GetPrCommentsParams, 'owner' | 'repo'>) {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return this.githubSdk.getPrComments({
+    return await this.githubSdk.getPrComments({
       per_page: 100,
       ...params,
       owner,
@@ -169,7 +169,7 @@ export class GithubSCMLib extends SCMLib {
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     this._validateAccessToken()
-    return this.githubSdk.getGithubRepoList()
+    return await this.githubSdk.getGithubRepoList()
   }
 
   async getBranchList(): Promise<string[]> {
@@ -203,18 +203,21 @@ export class GithubSCMLib extends SCMLib {
   }
 
   async _getUsernameForAuthUrl(): Promise<string> {
-    return this.getUsername()
+    return await this.getUsername()
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
     this._validateUrl()
-    return this.githubSdk.getGithubIsRemoteBranch({ branch, repoUrl: this.url })
+    return await this.githubSdk.getGithubIsRemoteBranch({
+      branch,
+      repoUrl: this.url,
+    })
   }
 
   async getUserHasAccessToRepo(): Promise<boolean> {
     this._validateAccessTokenAndUrl()
     const username = await this.getUsername()
-    return this.githubSdk.getGithubIsUserCollaborator({
+    return await this.githubSdk.getGithubIsUserCollaborator({
       repoUrl: this.url,
       username,
     })
@@ -222,14 +225,14 @@ export class GithubSCMLib extends SCMLib {
 
   async getUsername(): Promise<string> {
     this._validateAccessToken()
-    return this.githubSdk.getGithubUsername()
+    return await this.githubSdk.getGithubUsername()
   }
 
   async getSubmitRequestStatus(
     scmSubmitRequestId: string
   ): Promise<ScmSubmitRequestStatus> {
     this._validateAccessTokenAndUrl()
-    return this.githubSdk.getGithubPullRequestStatus({
+    return await this.githubSdk.getGithubPullRequestStatus({
       repoUrl: this.url,
       prNumber: Number(scmSubmitRequestId),
     })
@@ -261,7 +264,10 @@ export class GithubSCMLib extends SCMLib {
 
   async getReferenceData(ref: string): Promise<GetRefererenceResult> {
     this._validateUrl()
-    return this.githubSdk.getGithubReferenceData({ ref, gitHubUrl: this.url })
+    return await this.githubSdk.getGithubReferenceData({
+      ref,
+      gitHubUrl: this.url,
+    })
   }
 
   async getPrComment(commentId: number): Promise<GetPrCommentResponse> {
@@ -339,7 +345,7 @@ export class GithubSCMLib extends SCMLib {
   }: SCMDeleteGeneralPrCommentParams): SCMDeleteGeneralPrReviewResponse {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-    return this.githubSdk.deleteGeneralPrComment({
+    return await this.githubSdk.deleteGeneralPrComment({
       owner,
       repo,
       comment_id: commentId,

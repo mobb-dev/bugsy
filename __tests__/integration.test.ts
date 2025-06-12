@@ -1088,130 +1088,224 @@ describe('mcp tests', () => {
             required: ['path'],
           },
         },
-      ],
-    })
-  })
-
-  it('should handle missing path parameter in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {})
-    ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
-  })
-
-  it('should handle non-existent path in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: nonExistentPath,
-      })
-    ).rejects.toThrow('Invalid path: potential security risk detected in path')
-  })
-
-  it('should handle empty git repository in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: emptyRepoPath,
-      })
-    ).resolves.toStrictEqual({
-      content: [
         {
-          text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
-          type: 'text',
+          name: 'check_for_available_fixes',
+          display_name: 'Check for Available Fixes',
+          description:
+            'Checks if there are any available fixes for vulnerabilities in the project',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              path: {
+                type: 'string',
+                description:
+                  'Path to the project directory to check for available fixes',
+              },
+              limit: {
+                type: 'number',
+                description: 'Optional maximum number of results to return',
+              },
+            },
+            required: ['path'],
+          },
         },
       ],
     })
   })
 
-  describe('Path Validation Security Tests', () => {
-    it('should reject path traversal attempts with actual malicious paths', async () => {
-      // Test actual malicious paths that should be blocked by validateMCPPath
-      const maliciousPaths = [
-        '../../../etc/passwd',
-        '..\\..\\..\\windows\\system32\\config\\sam',
-        '../.env',
-        '../../package.json',
-        '../../../home/user/.ssh/id_rsa',
-        'subdir/../../../etc/hosts',
-        './../../sensitive-file.txt',
-        'normal-file/../../../etc/passwd',
-      ]
+  describe('fix_vulnerabilities tool', () => {
+    it('should handle missing path parameter in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {})
+      ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
+    })
 
-      for (const maliciousPath of maliciousPaths) {
-        await expect(
-          mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-            path: maliciousPath,
-          })
-        ).rejects.toThrow(
-          'Invalid path: potential security risk detected in path'
-        )
-      }
+    it('should handle non-existent path in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: nonExistentPath,
+        })
+      ).rejects.toThrow(
+        'Invalid path: potential security risk detected in path'
+      )
+    })
+
+    it('should handle empty git repository in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: emptyRepoPath,
+        })
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            type: 'text',
+          },
+        ],
+      })
+    })
+
+    describe('Path Validation Security Tests', () => {
+      it('should reject path traversal attempts with actual malicious paths', async () => {
+        // Test actual malicious paths that should be blocked by validateMCPPath
+        const maliciousPaths = [
+          '../../../etc/passwd',
+          '..\\..\\..\\windows\\system32\\config\\sam',
+          '../.env',
+          '../../package.json',
+          '../../../home/user/.ssh/id_rsa',
+          'subdir/../../../etc/hosts',
+          './../../sensitive-file.txt',
+          'normal-file/../../../etc/passwd',
+        ]
+
+        for (const maliciousPath of maliciousPaths) {
+          await expect(
+            mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+              path: maliciousPath,
+            })
+          ).rejects.toThrow(
+            'Invalid path: potential security risk detected in path'
+          )
+        }
+      })
+    })
+
+    it('should handle path that is not a git repository in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: nonRepoEmptyPath,
+        })
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            type: 'text',
+          },
+        ],
+      })
+    })
+
+    it('should handle active non-git repository path in fix_vulnerabilities tool', async () => {
+      // Verify the directory still exists before running the test
+      expect(existsSync(activeNonGitRepoPath)).toBe(true)
+      expect(existsSync(join(activeNonGitRepoPath, 'sample.js'))).toBe(true)
+
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: activeNonGitRepoPath,
+        })
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: expect.stringContaining(
+              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+            ),
+            type: 'text',
+          },
+        ],
+      })
+    })
+    it('should handle active git repository path in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: activeRepoPath,
+        })
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: expect.stringContaining(
+              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+            ),
+            type: 'text',
+          },
+        ],
+      })
+    })
+    it('should handle active (no changes) git repository path in fix_vulnerabilities tool', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
+          path: activeNoChangesRepoPath,
+        })
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: expect.stringContaining(
+              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
+            ),
+            type: 'text',
+          },
+        ],
+      })
     })
   })
-
-  it('should handle path that is not a git repository in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: nonRepoEmptyPath,
-      })
-    ).resolves.toStrictEqual({
-      content: [
-        {
-          text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
-          type: 'text',
-        },
-      ],
+  describe('check_for_available_fixes tool', () => {
+    it('should handle missing path parameter', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_available_fixes', {})
+      ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
     })
-  })
 
-  it('should handle active non-git repository path in fix_vulnerabilities tool', async () => {
-    // Verify the directory still exists before running the test
-    expect(existsSync(activeNonGitRepoPath)).toBe(true)
-    expect(existsSync(join(activeNonGitRepoPath, 'sample.js'))).toBe(true)
+    it('should handle non-existent path', async () => {
+      const result = await mcpClient.callTool<CallToolResult>(
+        'check_for_available_fixes',
+        {
+          path: nonExistentPath,
+        }
+      )
+      expect(result.content[0]?.text).toContain(
+        'Invalid path: potential security risk detected in path'
+      )
+    })
 
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: activeNonGitRepoPath,
-      })
-    ).resolves.toStrictEqual({
-      content: [
+    it('should handle path that is not a git repository', async () => {
+      const result = await mcpClient.callTool<CallToolResult>(
+        'check_for_available_fixes',
         {
-          text: expect.stringContaining(
-            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-          ),
-          type: 'text',
-        },
-      ],
+          path: nonRepoEmptyPath,
+        }
+      )
+      expect(result.content[0]?.text).toContain('Invalid git repository')
     })
-  })
-  it('should handle active git repository path in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: activeRepoPath,
-      })
-    ).resolves.toStrictEqual({
-      content: [
+
+    it('should handle empty git repository with no origin', async () => {
+      const result = await mcpClient.callTool<CallToolResult>(
+        'check_for_available_fixes',
         {
-          text: expect.stringContaining(
-            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-          ),
-          type: 'text',
-        },
-      ],
+          path: emptyRepoPath,
+        }
+      )
+      expect(result.content[0]?.text).toContain(
+        'No origin URL found for the repository'
+      )
     })
-  })
-  it('should handle active (no changes) git repository path in fix_vulnerabilities tool', async () => {
-    await expect(
-      mcpClient.callTool<CallToolResult>('fix_vulnerabilities', {
-        path: activeNoChangesRepoPath,
+
+    describe('Path Validation Security Tests', () => {
+      it('should reject path traversal attempts with malicious paths', async () => {
+        // Test actual malicious paths that should be blocked by validateMCPPath
+        const maliciousPaths = [
+          '../../../etc/passwd',
+          '..\\..\\..\\windows\\system32\\config\\sam',
+          '../.env',
+          '../../package.json',
+          '../../../home/user/.ssh/id_rsa',
+          'subdir/../../../etc/hosts',
+          './../../sensitive-file.txt',
+          'normal-file/../../../etc/passwd',
+        ]
+
+        for (const maliciousPath of maliciousPaths) {
+          const result = await mcpClient.callTool<CallToolResult>(
+            'check_for_available_fixes',
+            {
+              path: maliciousPath,
+            }
+          )
+          expect(result.content[0]?.text).toContain(
+            'Invalid path: potential security risk detected in path'
+          )
+        }
       })
-    ).resolves.toStrictEqual({
-      content: [
-        {
-          text: expect.stringContaining(
-            'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-          ),
-          type: 'text',
-        },
-      ],
     })
   })
 })

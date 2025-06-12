@@ -383,4 +383,114 @@ export class GitService {
       throw new Error(errorMessage)
     }
   }
+
+  /**
+   * Normalizes a Git URL to HTTPS format for various Git hosting platforms
+   * @param url The Git URL to normalize
+   * @returns The normalized HTTPS URL
+   */
+  private normalizeGitUrl(url: string): string {
+    let normalizedUrl = url
+
+    // Remove .git suffix if present
+    if (normalizedUrl.endsWith('.git')) {
+      normalizedUrl = normalizedUrl.slice(0, -'.git'.length)
+    }
+
+    // Convert SSH URLs to HTTPS for various platforms
+    const sshToHttpsMappings = [
+      // GitHub
+      { pattern: 'git@github.com:', replacement: 'https://github.com/' },
+      // GitLab
+      { pattern: 'git@gitlab.com:', replacement: 'https://gitlab.com/' },
+      // Bitbucket
+      { pattern: 'git@bitbucket.org:', replacement: 'https://bitbucket.org/' },
+      // Azure DevOps (SSH format)
+      {
+        pattern: 'git@ssh.dev.azure.com:',
+        replacement: 'https://dev.azure.com/',
+      },
+      // Azure DevOps (alternative SSH format)
+      {
+        pattern: /git@([^:]+):v3\/([^/]+)\/([^/]+)\/([^/]+)/,
+        replacement: 'https://$1/$2/_git/$4',
+      },
+    ]
+
+    for (const mapping of sshToHttpsMappings) {
+      if (typeof mapping.pattern === 'string') {
+        if (normalizedUrl.startsWith(mapping.pattern)) {
+          normalizedUrl = normalizedUrl.replace(
+            mapping.pattern,
+            mapping.replacement
+          )
+          break
+        }
+      } else {
+        // Handle regex patterns
+        const match = normalizedUrl.match(mapping.pattern)
+        if (match) {
+          normalizedUrl = normalizedUrl.replace(
+            mapping.pattern,
+            mapping.replacement
+          )
+          break
+        }
+      }
+    }
+
+    return normalizedUrl
+  }
+
+  /**
+   * Gets all remote repository URLs (equivalent to 'git remote -v')
+   */
+  public async getRepoUrls(): Promise<
+    Record<string, { fetch: string; push: string }>
+  > {
+    this.log('Getting all remote repository URLs', 'debug')
+
+    try {
+      const remotes = await this.git.remote(['-v'])
+      if (!remotes) {
+        return {}
+      }
+
+      const remoteMap: Record<string, { fetch: string; push: string }> = {}
+
+      // Parse the output of 'git remote -v'
+      // Format is: "remote_name\turl (fetch)\nremote_name\turl (push)"
+      remotes.split('\n').forEach((line: string) => {
+        if (!line.trim()) return
+
+        const [remoteName, url, type] = line.split(/\s+/)
+        if (!remoteName || !url || !type) return
+
+        // Initialize the remote entry if it doesn't exist
+        if (!remoteMap[remoteName]) {
+          remoteMap[remoteName] = { fetch: '', push: '' }
+        }
+
+        // Normalize URL using the helper method
+        const normalizedUrl = this.normalizeGitUrl(url)
+
+        // At this point we know remoteMap[remoteName] exists because we initialized it above
+        const remote = remoteMap[remoteName]!
+        if (type === '(fetch)') {
+          remote.fetch = normalizedUrl
+        } else if (type === '(push)') {
+          remote.push = normalizedUrl
+        }
+      })
+
+      this.log('Remote repository URLs retrieved', 'debug', {
+        remotes: remoteMap,
+      })
+      return remoteMap
+    } catch (error) {
+      const errorMessage = `Failed to get remote repository URLs: ${(error as Error).message}`
+      this.log(errorMessage, 'error', { error })
+      throw new Error(errorMessage)
+    }
+  }
 }

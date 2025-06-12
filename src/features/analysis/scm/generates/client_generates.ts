@@ -7824,6 +7824,8 @@ export enum IssueType_Enum {
   DeadCodeUnusedField = 'DEAD_CODE_UNUSED_FIELD',
   /** Running the application in debug mode */
   DebugEnabled = 'DEBUG_ENABLED',
+  /** DECLARE_VARIABLE_EXPLICITLY */
+  DeclareVariableExplicitly = 'DECLARE_VARIABLE_EXPLICITLY',
   /** Default definer rights in package or object definition */
   DefaultRightsInObjDefinition = 'DEFAULT_RIGHTS_IN_OBJ_DEFINITION',
   /** Deprecated Function */
@@ -8363,6 +8365,10 @@ export type Mutation_Root = {
   delete_submit_fix_request_state?: Maybe<Submit_Fix_Request_State_Mutation_Response>;
   /** delete single row from the table: "submit_fix_request_state" */
   delete_submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
+  /** delete data from the table: "unfixable" */
+  delete_unfixable?: Maybe<Unfixable_Mutation_Response>;
+  /** delete single row from the table: "unfixable" */
+  delete_unfixable_by_pk?: Maybe<Unfixable>;
   /** delete data from the table: "user" */
   delete_user?: Maybe<User_Mutation_Response>;
   /** delete single row from the table: "user" */
@@ -8608,6 +8614,10 @@ export type Mutation_Root = {
   insert_submit_fix_request_state?: Maybe<Submit_Fix_Request_State_Mutation_Response>;
   /** insert a single row into the table: "submit_fix_request_state" */
   insert_submit_fix_request_state_one?: Maybe<Submit_Fix_Request_State>;
+  /** insert data into the table: "unfixable" */
+  insert_unfixable?: Maybe<Unfixable_Mutation_Response>;
+  /** insert a single row into the table: "unfixable" */
+  insert_unfixable_one?: Maybe<Unfixable>;
   /** insert data into the table: "user" */
   insert_user?: Maybe<User_Mutation_Response>;
   /** insert data into the table: "user_email_notification_settings" */
@@ -8966,6 +8976,12 @@ export type Mutation_Root = {
   update_submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
   /** update multiples rows of table: "submit_fix_request_state" */
   update_submit_fix_request_state_many?: Maybe<Array<Maybe<Submit_Fix_Request_State_Mutation_Response>>>;
+  /** update data of the table: "unfixable" */
+  update_unfixable?: Maybe<Unfixable_Mutation_Response>;
+  /** update single row of the table: "unfixable" */
+  update_unfixable_by_pk?: Maybe<Unfixable>;
+  /** update multiples rows of table: "unfixable" */
+  update_unfixable_many?: Maybe<Array<Maybe<Unfixable_Mutation_Response>>>;
   /** update data of the table: "user" */
   update_user?: Maybe<User_Mutation_Response>;
   /** update single row of the table: "user" */
@@ -9744,6 +9760,18 @@ export type Mutation_RootDelete_Submit_Fix_Request_StateArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Submit_Fix_Request_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_UnfixableArgs = {
+  where: Unfixable_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Unfixable_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -10592,6 +10620,20 @@ export type Mutation_RootInsert_Submit_Fix_Request_StateArgs = {
 export type Mutation_RootInsert_Submit_Fix_Request_State_OneArgs = {
   object: Submit_Fix_Request_State_Insert_Input;
   on_conflict?: InputMaybe<Submit_Fix_Request_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_UnfixableArgs = {
+  objects: Array<Unfixable_Insert_Input>;
+  on_conflict?: InputMaybe<Unfixable_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Unfixable_OneArgs = {
+  object: Unfixable_Insert_Input;
+  on_conflict?: InputMaybe<Unfixable_On_Conflict>;
 };
 
 
@@ -11905,6 +11947,26 @@ export type Mutation_RootUpdate_Submit_Fix_Request_State_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Submit_Fix_Request_State_ManyArgs = {
   updates: Array<Submit_Fix_Request_State_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_UnfixableArgs = {
+  _set?: InputMaybe<Unfixable_Set_Input>;
+  where: Unfixable_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Unfixable_By_PkArgs = {
+  _set?: InputMaybe<Unfixable_Set_Input>;
+  pk_columns: Unfixable_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Unfixable_ManyArgs = {
+  updates: Array<Unfixable_Updates>;
 };
 
 
@@ -16455,6 +16517,12 @@ export type Query_Root = {
   submit_fix_request_state_aggregate: Submit_Fix_Request_State_Aggregate;
   /** fetch data from the table: "submit_fix_request_state" using primary key columns */
   submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
+  /** fetch data from the table: "unfixable" */
+  unfixable: Array<Unfixable>;
+  /** fetch aggregated fields from the table: "unfixable" */
+  unfixable_aggregate: Unfixable_Aggregate;
+  /** fetch data from the table: "unfixable" using primary key columns */
+  unfixable_by_pk?: Maybe<Unfixable>;
   /** An array relationship */
   user: Array<User>;
   /** An aggregate relationship */
@@ -17828,6 +17896,29 @@ export type Query_RootSubmit_Fix_Request_State_AggregateArgs = {
 
 export type Query_RootSubmit_Fix_Request_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootUnfixableArgs = {
+  distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Unfixable_Order_By>>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+
+export type Query_RootUnfixable_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Unfixable_Order_By>>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+
+export type Query_RootUnfixable_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -20385,6 +20476,14 @@ export type Subscription_Root = {
   submit_fix_request_state_stream: Array<Submit_Fix_Request_State>;
   /** fetch data from the table in a streaming manner: "submit_fix_request" */
   submit_fix_request_stream: Array<Submit_Fix_Request>;
+  /** fetch data from the table: "unfixable" */
+  unfixable: Array<Unfixable>;
+  /** fetch aggregated fields from the table: "unfixable" */
+  unfixable_aggregate: Unfixable_Aggregate;
+  /** fetch data from the table: "unfixable" using primary key columns */
+  unfixable_by_pk?: Maybe<Unfixable>;
+  /** fetch data from the table in a streaming manner: "unfixable" */
+  unfixable_stream: Array<Unfixable>;
   /** An array relationship */
   user: Array<User>;
   /** An aggregate relationship */
@@ -22049,6 +22148,36 @@ export type Subscription_RootSubmit_Fix_Request_StreamArgs = {
 };
 
 
+export type Subscription_RootUnfixableArgs = {
+  distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Unfixable_Order_By>>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+
+export type Subscription_RootUnfixable_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Unfixable_Order_By>>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+
+export type Subscription_RootUnfixable_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootUnfixable_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Unfixable_Stream_Cursor_Input>>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+
 export type Subscription_RootUserArgs = {
   distinct_on?: InputMaybe<Array<User_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -22519,6 +22648,186 @@ export type Timestamptz_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['timestamptz']['input']>;
   _neq?: InputMaybe<Scalars['timestamptz']['input']>;
   _nin?: InputMaybe<Array<Scalars['timestamptz']['input']>>;
+};
+
+/** a table which stores the un-fixable info where we have fix info object */
+export type Unfixable = {
+  __typename?: 'unfixable';
+  created_on: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  fixInfoFile: File;
+  /** An object relationship */
+  fixReport: FixReport;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  infoFile?: Maybe<File>;
+  infoFileId: Scalars['uuid']['output'];
+  reportId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "unfixable" */
+export type Unfixable_Aggregate = {
+  __typename?: 'unfixable_aggregate';
+  aggregate?: Maybe<Unfixable_Aggregate_Fields>;
+  nodes: Array<Unfixable>;
+};
+
+/** aggregate fields of "unfixable" */
+export type Unfixable_Aggregate_Fields = {
+  __typename?: 'unfixable_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Unfixable_Max_Fields>;
+  min?: Maybe<Unfixable_Min_Fields>;
+};
+
+
+/** aggregate fields of "unfixable" */
+export type Unfixable_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Unfixable_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "unfixable". All fields are combined with a logical 'AND'. */
+export type Unfixable_Bool_Exp = {
+  _and?: InputMaybe<Array<Unfixable_Bool_Exp>>;
+  _not?: InputMaybe<Unfixable_Bool_Exp>;
+  _or?: InputMaybe<Array<Unfixable_Bool_Exp>>;
+  created_on?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixInfoFile?: InputMaybe<File_Bool_Exp>;
+  fixReport?: InputMaybe<FixReport_Bool_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  infoFile?: InputMaybe<File_Bool_Exp>;
+  infoFileId?: InputMaybe<Uuid_Comparison_Exp>;
+  reportId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "unfixable" */
+export enum Unfixable_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  UnfixablePkey = 'unfixable_pkey'
+}
+
+/** input type for inserting data into table "unfixable" */
+export type Unfixable_Insert_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
+  fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  infoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
+  infoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  reportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Unfixable_Max_Fields = {
+  __typename?: 'unfixable_max_fields';
+  created_on?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  infoFileId?: Maybe<Scalars['uuid']['output']>;
+  reportId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Unfixable_Min_Fields = {
+  __typename?: 'unfixable_min_fields';
+  created_on?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  infoFileId?: Maybe<Scalars['uuid']['output']>;
+  reportId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "unfixable" */
+export type Unfixable_Mutation_Response = {
+  __typename?: 'unfixable_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Unfixable>;
+};
+
+/** input type for inserting object relation for remote table "unfixable" */
+export type Unfixable_Obj_Rel_Insert_Input = {
+  data: Unfixable_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Unfixable_On_Conflict>;
+};
+
+/** on_conflict condition type for table "unfixable" */
+export type Unfixable_On_Conflict = {
+  constraint: Unfixable_Constraint;
+  update_columns?: Array<Unfixable_Update_Column>;
+  where?: InputMaybe<Unfixable_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "unfixable". */
+export type Unfixable_Order_By = {
+  created_on?: InputMaybe<Order_By>;
+  fixInfoFile?: InputMaybe<File_Order_By>;
+  fixReport?: InputMaybe<FixReport_Order_By>;
+  id?: InputMaybe<Order_By>;
+  infoFile?: InputMaybe<File_Order_By>;
+  infoFileId?: InputMaybe<Order_By>;
+  reportId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: unfixable */
+export type Unfixable_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "unfixable" */
+export enum Unfixable_Select_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InfoFileId = 'infoFileId',
+  /** column name */
+  ReportId = 'reportId'
+}
+
+/** input type for updating data in table "unfixable" */
+export type Unfixable_Set_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  infoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  reportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "unfixable" */
+export type Unfixable_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Unfixable_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Unfixable_Stream_Cursor_Value_Input = {
+  created_on?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  infoFileId?: InputMaybe<Scalars['uuid']['input']>;
+  reportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "unfixable" */
+export enum Unfixable_Update_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InfoFileId = 'infoFileId',
+  /** column name */
+  ReportId = 'reportId'
+}
+
+export type Unfixable_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Unfixable_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Unfixable_Bool_Exp;
 };
 
 export type UnresolvedAggregatedVulnerabilitySeverities_Organization_Args = {
@@ -24440,6 +24749,9 @@ export type Vulnerability_Report_Issue = {
   sharedState?: Maybe<Vulnerability_Report_Issue_Shared_State>;
   sharedStateId?: Maybe<Scalars['uuid']['output']>;
   state: Vulnerability_Report_Issue_State_Enum;
+  /** An object relationship */
+  unfixable?: Maybe<Unfixable>;
+  unfixableId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId: Scalars['String']['output'];
   /** An object relationship */
@@ -24613,6 +24925,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
   sharedStateId?: InputMaybe<Uuid_Comparison_Exp>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum_Comparison_Exp>;
+  unfixable?: InputMaybe<Unfixable_Bool_Exp>;
+  unfixableId?: InputMaybe<Uuid_Comparison_Exp>;
   vendorInstanceId?: InputMaybe<String_Comparison_Exp>;
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
@@ -25187,6 +25501,8 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Obj_Rel_Insert_Input>;
   sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
+  unfixable?: InputMaybe<Unfixable_Obj_Rel_Insert_Input>;
+  unfixableId?: InputMaybe<Scalars['uuid']['input']>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
@@ -25221,6 +25537,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
   sharedStateId?: Maybe<Scalars['uuid']['output']>;
+  unfixableId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -25239,6 +25556,7 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
   issueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   sharedStateId?: InputMaybe<Order_By>;
+  unfixableId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
@@ -25266,6 +25584,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   /** A computed field, executes function "vulnerability_report_issue_get_severity_value" */
   severityValue?: Maybe<Scalars['Int']['output']>;
   sharedStateId?: Maybe<Scalars['uuid']['output']>;
+  unfixableId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId?: Maybe<Scalars['uuid']['output']>;
@@ -25284,6 +25603,7 @@ export type Vulnerability_Report_Issue_Min_Order_By = {
   issueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   sharedStateId?: InputMaybe<Order_By>;
+  unfixableId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
@@ -25339,6 +25659,8 @@ export type Vulnerability_Report_Issue_Order_By = {
   sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Order_By>;
   sharedStateId?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
+  unfixable?: InputMaybe<Unfixable_Order_By>;
+  unfixableId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
@@ -25391,6 +25713,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   State = 'state',
   /** column name */
+  UnfixableId = 'unfixableId',
+  /** column name */
   VendorInstanceId = 'vendorInstanceId',
   /** column name */
   VendorIssueId = 'vendorIssueId',
@@ -25429,6 +25753,7 @@ export type Vulnerability_Report_Issue_Set_Input = {
   severity?: InputMaybe<Scalars['String']['input']>;
   sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
+  unfixableId?: InputMaybe<Scalars['uuid']['input']>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
@@ -25679,6 +26004,8 @@ export enum Vulnerability_Report_Issue_State_Enum {
   NoFix = 'NoFix',
   /** This vulnerability is about to be analyzed */
   Pending = 'Pending',
+  /** This vulnerability is un-fixable */
+  Unfixable = 'Unfixable',
   /** We don't support this vulnerability type/language */
   Unsupported = 'Unsupported'
 }
@@ -25828,6 +26155,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   severity?: InputMaybe<Scalars['String']['input']>;
   sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
   state?: InputMaybe<Vulnerability_Report_Issue_State_Enum>;
+  unfixableId?: InputMaybe<Scalars['uuid']['input']>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
@@ -25895,6 +26223,8 @@ export enum Vulnerability_Report_Issue_Tag_Enum {
   FalsePositive = 'FALSE_POSITIVE',
   /** Test code */
   TestCode = 'TEST_CODE',
+  /** Un-fixable */
+  Unfixable = 'UNFIXABLE',
   /** Vendor code */
   VendorCode = 'VENDOR_CODE'
 }
@@ -26217,6 +26547,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   SharedStateId = 'sharedStateId',
   /** column name */
   State = 'state',
+  /** column name */
+  UnfixableId = 'unfixableId',
   /** column name */
   VendorInstanceId = 'vendorInstanceId',
   /** column name */
@@ -27236,6 +27568,8 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+
 export type GetMcpFixesQueryVariables = Exact<{
   fixReportId: Scalars['uuid']['input'];
 }>;
@@ -27243,7 +27577,43 @@ export type GetMcpFixesQueryVariables = Exact<{
 
 export type GetMcpFixesQuery = { __typename?: 'query_root', fix: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }> };
 
+export type GetLatestReportByRepoUrlQueryVariables = Exact<{
+  repoUrl: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
 
+
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, fixes_aggregate: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, vulnerabilityReportIssues_aggregate: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }> };
+
+export const FixDetailsFragmentDoc = `
+    fragment FixDetails on fix {
+  id
+  confidence
+  safeIssueType
+  severityText
+  vulnerabilityReportIssues {
+    parsedIssueType
+    parsedSeverity
+    vulnerabilityReportIssueTags {
+      vulnerability_report_issue_tag_value
+    }
+  }
+  patchAndQuestions {
+    __typename
+    ... on FixData {
+      patch
+      patchOriginalEncodingBase64
+      extraContext {
+        extraContext {
+          key
+          value
+        }
+        fixDescription
+      }
+    }
+  }
+}
+    `;
 export const MeDocument = `
     query Me {
   me {
@@ -27442,7 +27812,7 @@ export const GetVulByNodesMetadataDocument = `
     where: {id: {_eq: $vulnerabilityReportId}}
   ) {
     vulnerabilityReportIssues(
-      where: {fixId: {_is_null: true}, _or: [{category: {_eq: "Irrelevant"}}, {category: {_eq: "FalsePositive"}}]}
+      where: {fixId: {_is_null: true}, _or: [{category: {_eq: "Irrelevant"}}, {category: {_eq: "FalsePositive"}}, {category: {_eq: "Filtered"}}]}
     ) {
       id
       safeIssueType
@@ -27676,34 +28046,77 @@ export const AutoPrAnalysisDocument = `
 export const GetMcpFixesDocument = `
     query GetMCPFixes($fixReportId: uuid!) {
   fix(where: {fixReportId: {_eq: $fixReportId}}) {
+    ...FixDetails
+  }
+}
+    ${FixDetailsFragmentDoc}`;
+export const GetLatestReportByRepoUrlDocument = `
+    query GetLatestReportByRepoUrl($repoUrl: String!, $limit: Int = 3) {
+  fixReport(
+    where: {repo: {originalUrl: {_eq: $repoUrl}}}
+    order_by: {createdOn: desc}
+    limit: 1
+  ) {
     id
-    confidence
-    safeIssueType
-    severityText
-    vulnerabilityReportIssues {
-      parsedIssueType
-      parsedSeverity
-      vulnerabilityReportIssueTags {
-        vulnerability_report_issue_tag_value
+    createdOn
+    repo {
+      originalUrl
+    }
+    issueTypes
+    fixes_aggregate(
+      where: {vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}
+    ) {
+      aggregate {
+        count
       }
     }
-    patchAndQuestions {
-      __typename
-      ... on FixData {
-        patch
-        patchOriginalEncodingBase64
-        extraContext {
-          extraContext {
-            key
-            value
-          }
-          fixDescription
+    CRITICAL: fixes_aggregate(
+      where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "critical"}}]}
+    ) {
+      aggregate {
+        count
+      }
+    }
+    HIGH: fixes_aggregate(
+      where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "high"}}]}
+    ) {
+      aggregate {
+        count
+      }
+    }
+    MEDIUM: fixes_aggregate(
+      where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "medium"}}]}
+    ) {
+      aggregate {
+        count
+      }
+    }
+    LOW: fixes_aggregate(
+      where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "low"}}]}
+    ) {
+      aggregate {
+        count
+      }
+    }
+    fixes(
+      where: {vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}
+      order_by: {severityValue: desc}
+      limit: $limit
+    ) {
+      ...FixDetails
+    }
+    vulnerabilityReport {
+      scanDate
+      vendor
+      vulnerabilityReportIssues_aggregate(where: {category: {_eq: "Fixable"}}) {
+        aggregate {
+          count
         }
       }
     }
   }
 }
-    `;
+    ${FixDetailsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -27777,6 +28190,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetMCPFixes(variables: GetMcpFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetMcpFixesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetMcpFixesQuery>({ document: GetMcpFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetMCPFixes', 'query', variables);
+    },
+    GetLatestReportByRepoUrl(variables: GetLatestReportByRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLatestReportByRepoUrlQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLatestReportByRepoUrlQuery>({ document: GetLatestReportByRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetLatestReportByRepoUrl', 'query', variables);
     }
   };
 }

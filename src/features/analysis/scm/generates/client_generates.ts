@@ -7920,6 +7920,8 @@ export enum IssueType_Enum {
   NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
   /** Missing rate limiting */
   NoLimitsOrThrottling = 'NO_LIMITS_OR_THROTTLING',
+  /** NO_NESTED_TRY */
+  NoNestedTry = 'NO_NESTED_TRY',
   /** NO_OP_OVERHEAD */
   NoOpOverhead = 'NO_OP_OVERHEAD',
   /** NO_PRINT_STATEMENT */
@@ -7974,6 +7976,8 @@ export enum IssueType_Enum {
   TypeConfusion = 'TYPE_CONFUSION',
   /** Unchecked loop condition */
   UncheckedLoopCondition = 'UNCHECKED_LOOP_CONDITION',
+  /** UNNECESSARY_IMPORTS */
+  UnnecessaryImports = 'UNNECESSARY_IMPORTS',
   /** Unsafe deserialization of untrusted data */
   UnsafeDeserialization = 'UNSAFE_DESERIALIZATION',
   /** Unsafe use of target blank */

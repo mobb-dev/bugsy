@@ -129,6 +129,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.NoOpOverhead]: 'Expensive Arguments in Conditional Methods',
   [IssueType_Enum.DoNotRaiseException]: 'Do Not Raise Exception',
   [IssueType_Enum.DeclareVariableExplicitly]: 'Declare Variable Explicitly',
+  [IssueType_Enum.NoNestedTry]: 'No Nested Try',
+  [IssueType_Enum.UnnecessaryImports]: 'Unnecessary Imports',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

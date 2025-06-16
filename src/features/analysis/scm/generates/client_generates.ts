@@ -7834,6 +7834,8 @@ export enum IssueType_Enum {
   DosStringBuilder = 'DOS_STRING_BUILDER',
   /** DO_NOT_RAISE_EXCEPTION */
   DoNotRaiseException = 'DO_NOT_RAISE_EXCEPTION',
+  /** DO_NOT_THROW_GENERIC_EXCEPTION */
+  DoNotThrowGenericException = 'DO_NOT_THROW_GENERIC_EXCEPTION',
   /** String literals should not be duplicated */
   DuplicatedStrings = 'DUPLICATED_STRINGS',
   /** Erroneous string compare */
@@ -9135,8 +9137,8 @@ export type Mutation_RootCommitToDifferentBranchArgs = {
 /** mutation root */
 export type Mutation_RootCommitToSameBranchArgs = {
   fixes: Array<CommitToSameBranchFixInput>;
-  prCommentId?: InputMaybe<Scalars['Int']['input']>;
-  prId?: InputMaybe<Scalars['Int']['input']>;
+  prCommentId?: InputMaybe<Scalars['String']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
   submitBranch?: InputMaybe<Scalars['String']['input']>;
 };
 

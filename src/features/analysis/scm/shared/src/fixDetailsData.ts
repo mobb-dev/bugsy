@@ -366,4 +366,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.UnnecessaryImports]: undefined,
   [IssueType_Enum.NoNestedTry]: undefined,
   [IssueType_Enum.Redos]: undefined,
+  [IssueType_Enum.DoNotThrowGenericException]: undefined,
 }

@@ -132,6 +132,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.NoNestedTry]: 'No Nested Try',
   [IssueType_Enum.UnnecessaryImports]: 'Unnecessary Imports',
   [IssueType_Enum.Redos]: 'Regular Expression Denial of Service',
+  [IssueType_Enum.DoNotThrowGenericException]: 'Do Not Throw Generic Exception',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

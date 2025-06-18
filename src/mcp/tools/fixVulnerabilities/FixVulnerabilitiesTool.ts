@@ -1,27 +1,60 @@
+import z from 'zod'
+
 import { FileUtils } from '../../../features/analysis/scm/FileUtils'
 import { GitService } from '../../../features/analysis/scm/git/GitService'
 import { log, logDebug, logInfo } from '../../Logger'
 import { PathValidation } from '../../services/PathValidation'
+import { BaseTool } from '../base/BaseTool'
 import { VulnerabilityFixService } from './FixVulnerabilitiesService'
 
-export class FixVulnerabilitiesTool {
+export class FixVulnerabilitiesTool extends BaseTool {
   name = 'fix_vulnerabilities'
-  display_name = 'fix_vulnerabilities'
+  displayName = 'Fix Vulnerabilities'
   description =
     'Scans the current code changes and returns fixes for potential vulnerabilities'
 
+  inputValidationSchema = z.object({
+    path: z
+      .string()
+      .describe(
+        'Path to the local git repository to check for available fixes'
+      ),
+    offset: z.number().optional().describe('Optional offset for pagination'),
+    limit: z
+      .number()
+      .optional()
+      .describe('Optional maximum number of results to return'),
+    rescan: z
+      .boolean()
+      .optional()
+      .describe('Optional whether to rescan the repository'),
+  })
+
   inputSchema = {
-    type: 'object',
+    type: 'object' as const,
     properties: {
       path: {
         type: 'string',
-        description: 'The path to the local git repository',
+        description:
+          'Path to the project directory to check for available fixes',
+      },
+      offset: {
+        type: 'number',
+        description: '[Optional] offset for pagination',
+      },
+      limit: {
+        type: 'number',
+        description: '[Optional] maximum number of results to return',
+      },
+      rescan: {
+        type: 'boolean',
+        description: '[Optional] whether to rescan the repository',
       },
     },
     required: ['path'],
-  } as const
+  }
 
-  async execute(args: { path: string }) {
+  async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
     logInfo('Executing tool: fix_vulnerabilities', { path: args.path })
 
     if (!args.path) {
@@ -93,10 +126,13 @@ export class FixVulnerabilitiesTool {
     try {
       // Process vulnerabilities
       const vulnerabilityFixService = new VulnerabilityFixService()
-      const fixResult = await vulnerabilityFixService.processVulnerabilities(
-        files,
-        args.path
-      )
+      const fixResult = await vulnerabilityFixService.processVulnerabilities({
+        fileList: files,
+        repositoryPath: args.path,
+        offset: args.offset,
+        limit: args.limit,
+        isRescan: args.rescan,
+      })
 
       const result = {
         content: [

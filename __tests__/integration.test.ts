@@ -1074,15 +1074,28 @@ describe('mcp tests', () => {
       tools: [
         {
           name: 'fix_vulnerabilities',
-          display_name: 'fix_vulnerabilities',
+          display_name: 'Fix Vulnerabilities',
           description:
             'Scans the current code changes and returns fixes for potential vulnerabilities',
           inputSchema: {
             type: 'object',
             properties: {
+              limit: {
+                description: '[Optional] maximum number of results to return',
+                type: 'number',
+              },
+              offset: {
+                description: '[Optional] offset for pagination',
+                type: 'number',
+              },
               path: {
+                description:
+                  'Path to the project directory to check for available fixes',
                 type: 'string',
-                description: 'The path to the local git repository',
+              },
+              rescan: {
+                description: '[Optional] whether to rescan the repository',
+                type: 'boolean',
               },
             },
             required: ['path'],
@@ -1097,13 +1110,17 @@ describe('mcp tests', () => {
             type: 'object',
             properties: {
               path: {
-                type: 'string',
                 description:
-                  'Path to the project directory to check for available fixes',
+                  'Path to the local git repository to check for available fixes',
+                type: 'string',
+              },
+              offset: {
+                type: 'number',
+                description: '[Optional] offset for pagination',
               },
               limit: {
                 type: 'number',
-                description: 'Optional maximum number of results to return',
+                description: '[Optional] maximum number of results to return',
               },
             },
             required: ['path'],
@@ -1198,9 +1215,7 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: expect.stringContaining(
-              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-            ),
+            text: expect.stringContaining('MOBB SECURITY SCAN COMPLETED'),
             type: 'text',
           },
         ],
@@ -1214,9 +1229,7 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: expect.stringContaining(
-              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-            ),
+            text: expect.stringContaining('MOBB SECURITY SCAN COMPLETED'),
             type: 'text',
           },
         ],
@@ -1230,9 +1243,7 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: expect.stringContaining(
-              'MOBB SECURITY SCAN COMPLETED SUCCESSFULLY'
-            ),
+            text: expect.stringContaining('MOBB SECURITY SCAN COMPLETED'),
             type: 'text',
           },
         ],
@@ -1247,37 +1258,29 @@ describe('mcp tests', () => {
     })
 
     it('should handle non-existent path', async () => {
-      const result = await mcpClient.callTool<CallToolResult>(
-        'check_for_available_fixes',
-        {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_available_fixes', {
           path: nonExistentPath,
-        }
-      )
-      expect(result.content[0]?.text).toContain(
+        })
+      ).rejects.toThrow(
         'Invalid path: potential security risk detected in path'
       )
     })
 
     it('should handle path that is not a git repository', async () => {
-      const result = await mcpClient.callTool<CallToolResult>(
-        'check_for_available_fixes',
-        {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_available_fixes', {
           path: nonRepoEmptyPath,
-        }
-      )
-      expect(result.content[0]?.text).toContain('Invalid git repository')
+        })
+      ).rejects.toThrow('Invalid git repository')
     })
 
     it('should handle empty git repository with no origin', async () => {
-      const result = await mcpClient.callTool<CallToolResult>(
-        'check_for_available_fixes',
-        {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_available_fixes', {
           path: emptyRepoPath,
-        }
-      )
-      expect(result.content[0]?.text).toContain(
-        'No origin URL found for the repository'
-      )
+        })
+      ).rejects.toThrow('No origin URL found for the repository')
     })
 
     describe('Path Validation Security Tests', () => {
@@ -1295,13 +1298,11 @@ describe('mcp tests', () => {
         ]
 
         for (const maliciousPath of maliciousPaths) {
-          const result = await mcpClient.callTool<CallToolResult>(
-            'check_for_available_fixes',
-            {
+          await expect(
+            mcpClient.callTool<CallToolResult>('check_for_available_fixes', {
               path: maliciousPath,
-            }
-          )
-          expect(result.content[0]?.text).toContain(
+            })
+          ).rejects.toThrow(
             'Invalid path: potential security risk detected in path'
           )
         }

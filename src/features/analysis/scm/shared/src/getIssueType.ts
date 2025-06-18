@@ -167,6 +167,8 @@ export function getTagTooltip(tag: string) {
       return "Issue found in supporting files that don't impact core functionality"
     case 'Filtered':
       return 'Issue was filtered by user in the Fix Policy'
+    case 'SUPPRESSED':
+      return 'Suppressed in the scan report'
     default:
       return tag
   }
@@ -188,6 +190,8 @@ export const issueDescription: Record<
     'The flagged code cannot be fixed',
   [Vulnerability_Report_Issue_Tag_Enum.VendorCode]:
     "The flagged code originates from a third-party library or dependency maintained externally. This categorization suggests that **the issue lies outside the application's direct control** and should be addressed by the vendor if necessary.",
+  [Vulnerability_Report_Issue_Tag_Enum.Suppressed]:
+    'Suppressed in the scan report.',
 }
 
 type FalsePositiveData = IssuePartsFp['getFalsePositive']

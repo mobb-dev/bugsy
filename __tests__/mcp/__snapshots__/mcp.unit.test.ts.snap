@@ -26,20 +26,6 @@ We were unable to find a previous vulnerability report for this repository. This
    - Confirm the repository URL matches your remote origin
    - Verify the URL format is correct (e.g., https://github.com/org/repo)
 
-### 🚀 Next Steps
-To get started with security scanning:
-1. Run \`fix_vulnerabilities\` to perform a new scan
-2. Review the results and apply any suggested fixes
-3. Set up regular scanning to maintain security
-
-### 💡 Additional Information
-- New scans typically take a few minutes to complete
-- You'll receive detailed results including:
-  - Vulnerability types and severities
-  - Specific code locations
-  - Recommended fixes
-  - Security best practices
-
 For assistance, please:
 - Visit our documentation at https://docs.mobb.ai
 - Contact support at support@mobb.ai"
@@ -63,7 +49,7 @@ Total number of fixes available: **5**
 - 🔴 Critical: 1
 - 🟠 High: 2
 - 🟡 Medium: 1
-- �� Low: 1
+- 🟢 Low: 1
 
 ## CRITICAL INSTRUCTIONS - READ CAREFULLY
 
@@ -129,6 +115,20 @@ test patch
 - Do NOT ask for permission
 - Explain what you did AFTER applying the patches
 - If any patch fails, continue with the others and report issues at the end
+
+---
+
+## More Fixes Available (5 remaining)
+
+You have viewed 1 out of 5 available fixes.
+
+To fetch additional fixes, run the \`check_for_available_fixes\` tool again with the following parameters:
+
+- **offset**: 0  _(start index for the next batch)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+
+If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+
 "
 `;
 
@@ -188,18 +188,18 @@ If you cannot apply a patch:
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/database/queries.js b/src/database/queries.js
-index 1234567..abcdefg 100644
---- a/src/database/queries.js
-+++ b/src/database/queries.js
-@@ -39,7 +39,8 @@ function getUserById(userId) {
-   if (!userId) {
-     throw new Error('User ID is required');
+  index 1234567..abcdefg 100644
+  --- a/src/database/queries.js
+  +++ b/src/database/queries.js
+  @@ -39,7 +39,8 @@ function getUserById(userId) {
+     if (!userId) {
+       throw new Error('User ID is required');
+     }
+  -  const query = "SELECT * FROM users WHERE id = " + userId;
+  -  return db.query(query);
+  +  const query = "SELECT * FROM users WHERE id = ?";
+  +  return db.query(query, [userId]);
    }
--  const query = "SELECT * FROM users WHERE id = " + userId;
--  return db.query(query);
-+  const query = "SELECT * FROM users WHERE id = ?";
-+  return db.query(query, [userId]);
- }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -217,18 +217,18 @@ index 1234567..abcdefg 100644
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
-index 9876543..fedcba9 100644
---- a/src/components/UserProfile.jsx
-+++ b/src/components/UserProfile.jsx
-@@ -12,7 +12,8 @@ function UserProfile({ user }) {
-   return (
-     <div className="user-profile">
-       <h1>Welcome, {user.name}!</h1>
--      <p dangerouslySetInnerHTML={{__html: user.bio}} />
-+      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
-     </div>
-   );
- }
+  index 9876543..fedcba9 100644
+  --- a/src/components/UserProfile.jsx
+  +++ b/src/components/UserProfile.jsx
+  @@ -12,7 +12,8 @@ function UserProfile({ user }) {
+     return (
+       <div className="user-profile">
+         <h1>Welcome, {user.name}!</h1>
+  -      <p dangerouslySetInnerHTML={{__html: user.bio}} />
+  +      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
+       </div>
+     );
+   }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -240,7 +240,21 @@ index 9876543..fedcba9 100644
 - Do NOT ask for permission
 - Explain what you did AFTER applying the patches
 - If any patch fails, continue with the others and report issues at the end
-  "
+
+
+
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
 `;
 
 exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should format fixes prompt with vulnerability details and patches when code is not in git repo 1`] = `
@@ -299,18 +313,18 @@ If you cannot apply a patch:
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/database/queries.js b/src/database/queries.js
-index 1234567..abcdefg 100644
---- a/src/database/queries.js
-+++ b/src/database/queries.js
-@@ -39,7 +39,8 @@ function getUserById(userId) {
-   if (!userId) {
-     throw new Error('User ID is required');
+  index 1234567..abcdefg 100644
+  --- a/src/database/queries.js
+  +++ b/src/database/queries.js
+  @@ -39,7 +39,8 @@ function getUserById(userId) {
+     if (!userId) {
+       throw new Error('User ID is required');
+     }
+  -  const query = "SELECT * FROM users WHERE id = " + userId;
+  -  return db.query(query);
+  +  const query = "SELECT * FROM users WHERE id = ?";
+  +  return db.query(query, [userId]);
    }
--  const query = "SELECT * FROM users WHERE id = " + userId;
--  return db.query(query);
-+  const query = "SELECT * FROM users WHERE id = ?";
-+  return db.query(query, [userId]);
- }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -328,18 +342,18 @@ index 1234567..abcdefg 100644
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
-index 9876543..fedcba9 100644
---- a/src/components/UserProfile.jsx
-+++ b/src/components/UserProfile.jsx
-@@ -12,7 +12,8 @@ function UserProfile({ user }) {
-   return (
-     <div className="user-profile">
-       <h1>Welcome, {user.name}!</h1>
--      <p dangerouslySetInnerHTML={{__html: user.bio}} />
-+      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
-     </div>
-   );
- }
+  index 9876543..fedcba9 100644
+  --- a/src/components/UserProfile.jsx
+  +++ b/src/components/UserProfile.jsx
+  @@ -12,7 +12,8 @@ function UserProfile({ user }) {
+     return (
+       <div className="user-profile">
+         <h1>Welcome, {user.name}!</h1>
+  -      <p dangerouslySetInnerHTML={{__html: user.bio}} />
+  +      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
+       </div>
+     );
+   }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -351,7 +365,21 @@ index 9876543..fedcba9 100644
 - Do NOT ask for permission
 - Explain what you did AFTER applying the patches
 - If any patch fails, continue with the others and report issues at the end
-  "
+
+
+
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
 `;
 
 exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should format fixes prompt with vulnerability details and patches when no changes in git status 1`] = `
@@ -410,18 +438,18 @@ If you cannot apply a patch:
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/database/queries.js b/src/database/queries.js
-index 1234567..abcdefg 100644
---- a/src/database/queries.js
-+++ b/src/database/queries.js
-@@ -39,7 +39,8 @@ function getUserById(userId) {
-   if (!userId) {
-     throw new Error('User ID is required');
+  index 1234567..abcdefg 100644
+  --- a/src/database/queries.js
+  +++ b/src/database/queries.js
+  @@ -39,7 +39,8 @@ function getUserById(userId) {
+     if (!userId) {
+       throw new Error('User ID is required');
+     }
+  -  const query = "SELECT * FROM users WHERE id = " + userId;
+  -  return db.query(query);
+  +  const query = "SELECT * FROM users WHERE id = ?";
+  +  return db.query(query, [userId]);
    }
--  const query = "SELECT * FROM users WHERE id = " + userId;
--  return db.query(query);
-+  const query = "SELECT * FROM users WHERE id = ?";
-+  return db.query(query, [userId]);
- }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -439,18 +467,18 @@ index 1234567..abcdefg 100644
 **📁 Patch to Apply:**
 \`\`\`diff
 diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
-index 9876543..fedcba9 100644
---- a/src/components/UserProfile.jsx
-+++ b/src/components/UserProfile.jsx
-@@ -12,7 +12,8 @@ function UserProfile({ user }) {
-   return (
-     <div className="user-profile">
-       <h1>Welcome, {user.name}!</h1>
--      <p dangerouslySetInnerHTML={{__html: user.bio}} />
-+      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
-     </div>
-   );
- }
+  index 9876543..fedcba9 100644
+  --- a/src/components/UserProfile.jsx
+  +++ b/src/components/UserProfile.jsx
+  @@ -12,7 +12,8 @@ function UserProfile({ user }) {
+     return (
+       <div className="user-profile">
+         <h1>Welcome, {user.name}!</h1>
+  -      <p dangerouslySetInnerHTML={{__html: user.bio}} />
+  +      <p dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(user.bio)}} />
+       </div>
+     );
+   }
 \`\`\`
 
 **✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
@@ -462,41 +490,26 @@ index 9876543..fedcba9 100644
 - Do NOT ask for permission
 - Explain what you did AFTER applying the patches
 - If any patch fails, continue with the others and report issues at the end
-  "
+
+
+
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
 `;
 
 exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should return no fixes found prompt when no fixes are available 1`] = `
-"🎉 **MOBB SECURITY SCAN COMPLETED SUCCESSFULLY** 🎉
+"🔍 **MOBB SECURITY SCAN COMPLETED** 
 
-## Congratulations! No Vulnerabilities Found
-
-Your code has been thoroughly analyzed by Mobb's advanced security scanning engine, and we're pleased to report that **no security vulnerabilities were detected** in your codebase.
-
-### 🛡️ What This Means
-- Your code follows secure coding practices
-- No immediate security risks were identified
-- Your application appears to be well-protected against common vulnerabilities
-
-### ✅ Scan Summary
-- **Status:** Complete
-- **Vulnerabilities Found:** 0
-- **Security Rating:** Excellent
-- **Action Required:** None
-
-### 🚀 Next Steps
-While no vulnerabilities were found in this scan:
-1. **Keep up the great work** with secure coding practices
-2. **Run regular scans** as your codebase evolves
-3. **Stay updated** with the latest security best practices
-4. **Consider periodic security reviews** for ongoing protection
-
-### 📊 Scan Details
-This scan analyzed your code for common security issues including:
-- SQL Injection vulnerabilities
-- Cross-Site Scripting (XSS) flaws
-- Authentication and authorization issues
-- Input validation problems
-- And many other security concerns
-
-**Well done on maintaining a secure codebase!** 🏆"
+Mobb security scan completed successfully but found no automated fixes available at this time.
+"
 `;

@@ -490,94 +490,131 @@ fragment FixDetails on fix {
   }
 }
 
-query GetMCPFixes($fixReportId: uuid!) {
-  fix(where: { fixReportId: { _eq: $fixReportId } }) {
+fragment FixReportSummaryFields on fixReport {
+  id
+  createdOn
+  repo {
+    originalUrl
+  }
+  issueTypes
+  CRITICAL: fixes_aggregate(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { severityText: { _eq: "critical" } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  HIGH: fixes_aggregate(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { severityText: { _eq: "high" } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  MEDIUM: fixes_aggregate(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { severityText: { _eq: "medium" } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  LOW: fixes_aggregate(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { severityText: { _eq: "low" } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  fixes(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        $filters
+      ]
+    }
+    order_by: { severityValue: desc }
+    limit: $limit
+    offset: $offset
+  ) {
     ...FixDetails
+  }
+  filteredFixesCount: fixes_aggregate(
+    where: {
+      _and: [
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        $filters
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+  totalFixesCount: fixes_aggregate {
+    aggregate {
+      count
+    }
+  }
+  vulnerabilityReport {
+    scanDate
+    vendor
+    totalVulnerabilityReportIssuesCount: vulnerabilityReportIssues_aggregate {
+      aggregate {
+        count
+      }
+    }
+    notFixableVulnerabilityReportIssuesCount: vulnerabilityReportIssues_aggregate(
+      where: { category: { _neq: "Fixable" } }
+    ) {
+      aggregate {
+        count
+      }
+    }
   }
 }
 
-query GetLatestReportByRepoUrl($repoUrl: String!, $limit: Int = 3) {
+query GetLatestReportByRepoUrl(
+  $repoUrl: String!
+  $filters: fix_bool_exp = {}
+  $limit: Int!
+  $offset: Int!
+) {
   fixReport(
     where: { repo: { originalUrl: { _eq: $repoUrl } } }
     order_by: { createdOn: desc }
     limit: 1
   ) {
-    id
-    createdOn
-    repo {
-      originalUrl
-    }
-    issueTypes
-    fixes_aggregate(
-      where: { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-    ) {
-      aggregate {
-        count
-      }
-    }
-    CRITICAL: fixes_aggregate(
-      where: {
-        _and: [
-          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-          { severityText: { _eq: "critical" } }
-        ]
-      }
-    ) {
-      aggregate {
-        count
-      }
-    }
-    HIGH: fixes_aggregate(
-      where: {
-        _and: [
-          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-          { severityText: { _eq: "high" } }
-        ]
-      }
-    ) {
-      aggregate {
-        count
-      }
-    }
-    MEDIUM: fixes_aggregate(
-      where: {
-        _and: [
-          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-          { severityText: { _eq: "medium" } }
-        ]
-      }
-    ) {
-      aggregate {
-        count
-      }
-    }
-    LOW: fixes_aggregate(
-      where: {
-        _and: [
-          { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-          { severityText: { _eq: "low" } }
-        ]
-      }
-    ) {
-      aggregate {
-        count
-      }
-    }
-    fixes(
-      where: { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
-      order_by: { severityValue: desc }
-      limit: $limit
-    ) {
-      ...FixDetails
-    }
-    vulnerabilityReport {
-      scanDate
-      vendor
-      vulnerabilityReportIssues_aggregate(where: { category: { _eq: "Fixable" } }) {
-        aggregate {
-          count
-        }
-      }
-    }
+    ...FixReportSummaryFields
+  }
+}
+
+query GetReportFixes(
+  $reportId: uuid!
+  $filters: fix_bool_exp = {}
+  $limit: Int!
+  $offset: Int!
+) {
+  fixReport(where: { id: { _eq: $reportId } }) {
+    ...FixReportSummaryFields
   }
 }

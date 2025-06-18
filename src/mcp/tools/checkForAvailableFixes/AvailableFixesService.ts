@@ -1,12 +1,11 @@
+import { fixesFoundPrompt, noReportFoundPrompt } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
 import { getMcpGQLClient } from '../../services/McpGQLClient'
-import {
-  fixesFoundPrompt,
-  noReportFoundPrompt,
-} from './helpers/AvailableFixesResponsePrompts'
 
 export class AvailableFixesService {
   private gqlClient: Awaited<ReturnType<typeof getMcpGQLClient>> | null = null
+
+  private currentOffset: number = 0
 
   private async initializeGqlClient() {
     if (!this.gqlClient) {
@@ -15,16 +14,36 @@ export class AvailableFixesService {
     return this.gqlClient
   }
 
-  public async checkForAvailableFixes(
-    repoUrl: string,
+  public async checkForAvailableFixes({
+    repoUrl,
+    limit = 3,
+    offset = 0,
+  }: {
+    repoUrl: string
     limit?: number
-  ): Promise<string> {
+    offset?: number
+  }): Promise<string> {
     try {
       logDebug('Checking for available fixes', { repoUrl, limit })
       const gqlClient = await this.initializeGqlClient()
       logDebug('GQL client initialized')
       logDebug('querying for latest report', { repoUrl, limit })
-      const result = await gqlClient.getLatestReportByRepoUrl(repoUrl, limit)
+
+      let effectiveOffset: number
+      if (offset !== undefined) {
+        effectiveOffset = offset
+      } else if (this.currentOffset) {
+        effectiveOffset = this.currentOffset ?? 0
+      } else {
+        effectiveOffset = 0
+      }
+      logDebug('effectiveOffset', { test: 'j', effectiveOffset })
+
+      const result = await gqlClient.getLatestReportByRepoUrl({
+        repoUrl,
+        limit,
+        offset: effectiveOffset,
+      })
       logDebug('received latest report result', { result })
 
       if (!result) {
@@ -36,7 +55,12 @@ export class AvailableFixesService {
         reportFound: true,
       })
 
-      return fixesFoundPrompt(result)
+      this.currentOffset = effectiveOffset + (result.fixes?.length || 0)
+
+      return fixesFoundPrompt({
+        fixReport: result,
+        offset: this.currentOffset,
+      })
     } catch (error) {
       logError('Failed to check for available fixes', {
         error,

@@ -1,13 +1,9 @@
+import { noReportFoundPrompt } from '@mobb/bugsy/mcp/core/prompts'
 import { CheckForAvailableFixesTool } from '@mobb/bugsy/mcp/tools/checkForAvailableFixes/AvailableFixesTool'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-import { noReportFoundPrompt } from '../../src/mcp/tools/checkForAvailableFixes/helpers/AvailableFixesResponsePrompts'
 import { FixVulnerabilitiesTool } from '../../src/mcp/tools/fixVulnerabilities/FixVulnerabilitiesTool'
-import {
-  failedToAuthenticatePrompt,
-  failedToConnectToApiPrompt,
-} from '../../src/mcp/tools/fixVulnerabilities/helpers/FixVulnerabilitiesResponsePrompts'
 import { log } from './helpers/log'
 import {
   createActiveGitRepo,
@@ -307,7 +303,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
         mockGraphQL().createCommunityUser().succeeds()
         mockGraphQL().me().succeeds()
 
@@ -322,29 +318,15 @@ describe('MCP Server', () => {
       })
 
       it('should fail with connection error', async () => {
-        // NOTE: This test is currently skipped due to timeout issues with the createCliLogin mock.
-        // The functionality is partially covered by the "should timeout when getEncryptedApiToken is not returning a token" test.
-
         // Configure GraphQL mocks for the error scenario
         mockGraphQL().me().failsWithFetchError()
 
         // Create the tool and execute it
         const tool = new FixVulnerabilitiesTool()
-        const result = await tool.execute({ path: activeRepoPath })
-
-        // Verify error handling
-        expectValidResult(result)
-        expect(result.content[0]?.text).toContain(
-          'CONNECTION ERROR: FAILED TO REACH MOBB API'
+        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
+          'Error: failed to connect to Mobb API'
         )
-
-        // Verify that the exact failedToConnectToApiPrompt is returned
-        expect(result.content[0]?.text).toBe(failedToConnectToApiPrompt)
-
-        // Verify error was logged
-        const mockedLogError = loggerMock.mocks.logError
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
-      }, 30000) // Set a higher timeout for this test
+      }) // Set a higher timeout for this test
 
       it('should timeout when getEncryptedApiToken is not returning a token', async () => {
         process.env['API_KEY'] = BAD_API_KEY
@@ -360,17 +342,9 @@ describe('MCP Server', () => {
 
         // Create the tool and execute it
         const tool = new FixVulnerabilitiesTool()
-        const result = await tool.execute({ path: activeRepoPath })
-
-        // Verify error handling
-        expectValidResult(result)
-
-        // Verify that the authentication error prompt is returned
-        expect(result.content[0]?.text).toBe(failedToAuthenticatePrompt)
-
-        // Verify error was logged
-        const mockedLogError = loggerMock.mocks.logError
-        expect(mockedLogError.mock.calls.length).toBeGreaterThan(0)
+        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
+          'Error: failed to get encrypted api token'
+        )
       })
 
       it('should complete the authentication flow', async () => {
@@ -379,7 +353,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
         mockGraphQL().me().succeeds()
         mockGraphQL().createCliLogin().succeeds()
         mockGraphQL().getEncryptedApiToken().succeeds()
@@ -461,7 +435,6 @@ describe('MCP Server', () => {
             }),
           }
         }
-
         const matchingCall = loggerMock.mocks.logError.mock.calls.find(
           (call: unknown[]) => String(call[0]).includes(message)
         )
@@ -477,7 +450,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         // Get access to mocked functions for verification
         const { default: fetch } = await import('node-fetch')
@@ -507,22 +480,27 @@ describe('MCP Server', () => {
 
         // Verify getMCPFixes logs with data
         expectLogMessage('Fixes retrieved')
-        expectLogMessageWithData('GraphQL: GetMCPFixes successful', {
+        expectLogMessageWithData('GraphQL: GetReportFixes successful', {
           result: expect.objectContaining({
-            fix: expect.arrayContaining([
+            fixReport: expect.arrayContaining([
               expect.objectContaining({
-                id: 'test-fix-1',
-                confidence: 85,
-                safeIssueType: 'SQL_INJECTION',
-              }),
-              expect.objectContaining({
-                id: 'test-fix-2',
-                confidence: 75,
-                safeIssueType: 'XSS',
+                fixes: expect.arrayContaining([
+                  expect.objectContaining({
+                    id: 'test-fix-1',
+                    confidence: 85,
+                    safeIssueType: 'SQL_INJECTION',
+                  }),
+                  expect.objectContaining({
+                    id: 'test-fix-2',
+                    confidence: 75,
+                    safeIssueType: 'XSS',
+                  }),
+                ]),
               }),
             ]),
           }),
           fixCount: 2,
+          totalCount: 2,
         })
 
         // === VERIFY S3 UPLOAD ===
@@ -576,7 +554,7 @@ describe('MCP Server', () => {
         mockGraphQL().getOrgAndProjectId().projectNotFound()
         mockGraphQL().createProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -636,30 +614,23 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().failsWithError('Failed to retrieve fixes')
+        mockGraphQL()
+          .getReportFixes()
+          .failsWithError('Failed to retrieve fixes')
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
-
         // Verify that the error was handled and logged
         expectValidResult(result)
         expect(result.content[0]?.text).toContain('Failed to retrieve fixes')
 
         // Verify error was logged with data
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: GetMCPFixes failed', {
+        expectErrorLogWithData('GraphQL: GetReportFixes failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Failed to retrieve fixes'),
-            response: expect.objectContaining({
-              errors: expect.arrayContaining([
-                expect.objectContaining({
-                  message: 'Failed to retrieve fixes',
-                }),
-              ]),
-              status: 500,
-            }),
           }),
-          fixReportId: 'test-fix-report-id',
+          reportId: 'test-fix-report-id',
         })
       })
 
@@ -669,7 +640,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: codeNotInGitRepoPath })
@@ -699,7 +670,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeNoChangesRepoPath })
@@ -728,7 +699,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -750,7 +721,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().returnsEmptyFixes()
+        mockGraphQL().getReportFixes().returnsEmptyFixes()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -774,16 +745,9 @@ describe('MCP Server', () => {
         mockGraphQL().me().failsWithConnectionError()
 
         const tool = new FixVulnerabilitiesTool()
-        const result = await tool.execute({ path: activeRepoPath })
-
-        // Verify that the error was handled and logged
-        expectValidResult(result)
-        expect(result.content[0]?.text).toContain(
-          'AUTHENTICATION ERROR: MOBB LOGIN REQUIRED'
+        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
+          'Invalid API token'
         )
-
-        // Verify error was logged
-        expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
       })
 
       it('should handle upload file failure gracefully', async () => {
@@ -821,7 +785,7 @@ describe('MCP Server', () => {
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
-        mockGraphQL().getMCPFixes().succeeds()
+        mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -916,27 +880,21 @@ describe('MCP Server', () => {
 
     it('should handle non-existent path', async () => {
       const tool = new CheckForAvailableFixesTool()
-      const result = await tool.execute({ path: nonExistentPath })
-      expectValidResult(result)
-      expect(result.content[0]?.text).toContain(
+      await expect(tool.execute({ path: nonExistentPath })).rejects.toThrow(
         'Invalid path: potential security risk detected in path'
       )
     })
 
     it('should handle path that is not a git repository', async () => {
       const tool = new CheckForAvailableFixesTool()
-      const result = await tool.execute({ path: codeNotInGitRepoPath })
-      expectValidResult(result)
-      expect(result.content[0]?.text).toContain('Invalid git repository')
+      await expect(
+        tool.execute({ path: codeNotInGitRepoPath })
+      ).rejects.toThrow('Invalid git repository')
     })
 
     it('should handle No origin URL git repository', async () => {
       const tool = new CheckForAvailableFixesTool()
-      const result = await tool.execute({ path: emptyRepoPath })
-
-      expectValidResult(result)
-
-      expect(result.content[0]?.text).toContain(
+      await expect(tool.execute({ path: emptyRepoPath })).rejects.toThrow(
         'No origin URL found for the repository'
       )
     })

@@ -292,7 +292,7 @@ export async function handleMobbLogin({
 
   const loginSuccess = await newGqlClient.verifyToken()
   if (loginSuccess) {
-    debug('set api token %s', newApiToken)
+    debug(`set api token ${newApiToken}`)
     config.set('apiToken', newApiToken)
     loginSpinner.success({
       text: `🔓 Login to Mobb successful! ${typeof loginSpinner === 'string' ? `Logged in as ${loginSuccess}` : ''}`,

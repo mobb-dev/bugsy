@@ -1,19 +1,17 @@
 import {
   Fix_Report_State_Enum,
-  GetMcpFixesQuery,
   Scan_Source_Enum,
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../../features/analysis/upload-file'
-import { logError, logInfo } from '../../Logger'
+import { fixesPrompt } from '../../core/prompts'
+import { logDebug, logError, logInfo } from '../../Logger'
 import { FilePacking } from '../../services/FilePacking'
 import { getMcpGQLClient, McpGQLClient } from '../../services/McpGQLClient'
+import { McpFix } from '../../types'
 import {
   ApiConnectionError,
-  AuthenticationError,
-  CliLoginError,
-  FailedToGetApiTokenError,
   FileProcessingError,
   FileUploadError,
   GqlClientError,
@@ -21,56 +19,95 @@ import {
   ReportInitializationError,
   ScanError,
 } from './errors/VulnerabilityFixErrors'
-import {
-  failedToAuthenticatePrompt,
-  failedToConnectToApiPrompt,
-  fixesPrompt,
-} from './helpers/FixVulnerabilitiesResponsePrompts'
 
 export const VUL_REPORT_DIGEST_TIMEOUT_MS = 1000 * 60 * 5 // 5 minutes in msec
 
 export class VulnerabilityFixService {
   private gqlClient?: McpGQLClient
   private filePacking: FilePacking
+  /**
+   * Stores the fix report id that is created on the first run so that subsequent
+   * calls can skip the expensive packing/uploading/scan flow and directly fetch
+   * the analysis results.
+   */
+  private storedFixReportId?: string
+  private currentOffset?: number = 0
 
   constructor() {
     this.filePacking = new FilePacking()
   }
 
-  public async processVulnerabilities(
-    fileList: string[],
+  public async processVulnerabilities({
+    fileList,
+    repositoryPath,
+    offset,
+    limit,
+    isRescan = false,
+  }: {
+    fileList: string[]
     repositoryPath: string
-  ): Promise<string> {
+    offset?: number
+    limit?: number
+    isRescan?: boolean
+  }): Promise<string> {
     try {
-      this.validateFiles(fileList)
       this.gqlClient = await this.initializeGqlClient()
 
-      const repoUploadInfo = await this.initializeReport()
-      const zipBuffer = await this.packFiles(fileList, repositoryPath)
-      await this.uploadFiles(zipBuffer, repoUploadInfo)
+      let fixReportId: string | undefined = this.storedFixReportId
 
-      const projectId = await this.getProjectId()
-      await this.runScan({
-        fixReportId: repoUploadInfo!.fixReportId,
-        projectId,
+      if (!fixReportId || isRescan) {
+        this.validateFiles(fileList)
+
+        const repoUploadInfo = await this.initializeReport()
+        fixReportId = repoUploadInfo!.fixReportId
+        this.storedFixReportId = fixReportId // cache for future calls
+
+        const zipBuffer = await this.packFiles(fileList, repositoryPath)
+        await this.uploadFiles(zipBuffer, repoUploadInfo)
+
+        const projectId = await this.getProjectId()
+        await this.runScan({ fixReportId, projectId })
+      }
+
+      // Determine the offset to use when fetching fixes.
+      let effectiveOffset: number
+      if (offset !== undefined) {
+        effectiveOffset = offset
+      } else if (fixReportId) {
+        effectiveOffset = this.currentOffset ?? 0
+      } else {
+        effectiveOffset = 0
+      }
+      logDebug('effectiveOffset', { effectiveOffset })
+
+      const fixes = await this.getReportFixes(
+        fixReportId,
+        effectiveOffset,
+        limit
+      )
+
+      // Update the current offset for subsequent pagination calls
+      this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
+
+      return fixesPrompt({
+        fixes: fixes.fixes,
+        totalCount: fixes.totalCount,
+        offset: effectiveOffset,
       })
-
-      const fixes = await this.getReportFixes(repoUploadInfo!.fixReportId)
-      return fixesPrompt(fixes)
     } catch (error) {
-      if (
-        error instanceof ApiConnectionError ||
-        error instanceof CliLoginError
-      ) {
-        return failedToConnectToApiPrompt
-      }
+      // if (
+      //   error instanceof ApiConnectionError ||
+      //   error instanceof CliLoginError
+      // ) {
+      //   return failedToConnectToApiPrompt
+      // }
 
-      if (
-        error instanceof AuthenticationError ||
-        error instanceof FailedToGetApiTokenError
-      ) {
-        return failedToAuthenticatePrompt
-      }
+      // if (
+      //   error instanceof AuthenticationError ||
+      //   error instanceof FailedToGetApiTokenError
+      // ) {
+      //   return failedToAuthenticatePrompt
+      // }
 
       const message = (error as Error).message
       logError('Vulnerability processing failed', { error: message })
@@ -189,7 +226,7 @@ export class VulnerabilityFixService {
         projectId,
         repoUrl: '',
         reference: 'no-branch',
-        scanSource: Scan_Source_Enum.Cli,
+        scanSource: Scan_Source_Enum.Mcp,
       }
 
     logInfo('Submitting vulnerability report')
@@ -226,14 +263,27 @@ export class VulnerabilityFixService {
   }
 
   private async getReportFixes(
-    fixReportId: string
-  ): Promise<GetMcpFixesQuery['fix']> {
+    fixReportId: string,
+    offset?: number,
+    limit?: number
+  ): Promise<{
+    fixes: McpFix[]
+    totalCount: number
+  }> {
+    logDebug('getReportFixes', { fixReportId, offset, limit })
     if (!this.gqlClient) {
       throw new GqlClientError()
     }
 
-    const fixes = await this.gqlClient.getReportFixes(fixReportId)
-    logInfo('Fixes retrieved', { fixCount: fixes.length })
-    return fixes
+    const fixes = await this.gqlClient.getReportFixesPaginated({
+      reportId: fixReportId,
+      offset,
+      limit,
+    })
+    logInfo('Fixes retrieved', { fixCount: fixes?.fixes?.length })
+    return {
+      fixes: fixes?.fixes || [],
+      totalCount: fixes?.totalCount || 0,
+    }
   }
 }

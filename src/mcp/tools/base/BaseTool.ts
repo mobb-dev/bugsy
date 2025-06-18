@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-import { logDebug, logError, logInfo } from '../../Logger'
+import { logDebug, logInfo } from '../../Logger'
+import { getMcpGQLClient } from '../../services/McpGQLClient'
 
 export type ToolResponse = {
   content: {
@@ -15,33 +16,33 @@ export type ToolDefinition = {
   description: string
   inputSchema: unknown
 }
-
 export abstract class BaseTool {
   public abstract readonly name: string
   public abstract readonly displayName?: string
   public abstract readonly description: string
-  protected abstract readonly inputSchema: z.ZodSchema
+  protected abstract readonly inputValidationSchema: z.ZodSchema
+  protected abstract readonly inputSchema: {
+    type: 'object'
+    properties: Record<string, unknown>
+    required: string[]
+  }
 
   public getDefinition(): ToolDefinition {
     return {
       name: this.name,
       display_name: this.displayName,
       description: this.description,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          path: {
-            type: 'string',
-            description: 'The path to the local git repository',
-          },
-        },
-        required: ['path'],
-      },
+      inputSchema: this.inputSchema,
     }
   }
 
   public async execute(args: unknown): Promise<ToolResponse> {
     logInfo(`Executing tool: ${this.name}`, { args })
+
+    logInfo(`Authenticating tool: ${this.name}`, { args })
+    const mcpGqlClient = await getMcpGQLClient()
+    const userInfo = await mcpGqlClient.getUserInfo()
+    logDebug('Authenticated', { userInfo })
 
     // Validate input arguments - let validation errors bubble up as MCP errors
     const validatedArgs = this.validateInput(args)
@@ -49,31 +50,16 @@ export abstract class BaseTool {
       validatedArgs,
     })
 
-    // Allow tools to perform additional validation that should bubble up as MCP errors
-    await this.validateAdditional(validatedArgs)
+    // Execute the tool logic
+    const result = await this.executeInternal(validatedArgs)
+    logInfo(`Tool ${this.name} executed successfully`)
 
-    try {
-      // Execute the tool logic
-      const result = await this.executeInternal(validatedArgs)
-      logInfo(`Tool ${this.name} executed successfully`)
-
-      return result
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
-      logError(`Tool ${this.name} execution failed: ${errorMessage}`, {
-        error,
-        args,
-      })
-
-      // Return error as tool response content
-      return this.createErrorResponse(errorMessage)
-    }
+    return result
   }
 
   protected validateInput(args: unknown): unknown {
     try {
-      return this.inputSchema.parse(args)
+      return this.inputValidationSchema.parse(args)
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errorDetails = error.errors.map((e) => {
@@ -92,14 +78,6 @@ export abstract class BaseTool {
     }
   }
 
-  /**
-   * Additional validation that should bubble up as MCP errors
-   * Override this method in subclasses to add custom validation
-   */
-  protected async validateAdditional(_validatedArgs: unknown): Promise<void> {
-    // Default implementation does nothing
-  }
-
   protected abstract executeInternal(
     validatedArgs: unknown
   ): Promise<ToolResponse>
@@ -110,17 +88,6 @@ export abstract class BaseTool {
         {
           type: 'text',
           text,
-        },
-      ],
-    }
-  }
-
-  protected createErrorResponse(error: string): ToolResponse {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: error,
         },
       ],
     }

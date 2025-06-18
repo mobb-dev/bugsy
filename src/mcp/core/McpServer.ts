@@ -10,7 +10,8 @@ import {
 
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { getMcpGQLClient } from '../services/McpGQLClient'
-import { type ToolDefinition, ToolRegistry } from './ToolRegistry'
+import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
+import { ToolRegistry } from './ToolRegistry'
 
 export type McpServerConfig = {
   name: string
@@ -106,11 +107,24 @@ export class McpServer {
     request: ListToolsRequest
   ): Promise<ListToolsResult> {
     logInfo('Received list_tools request', { params: request.params })
+
+    logInfo('Environment', {
+      env: process.env,
+    })
+
+    logInfo('Request', {
+      request: JSON.parse(JSON.stringify(request)),
+    })
+
+    logInfo('Server', {
+      server: this.server,
+    })
+
     void getMcpGQLClient()
 
-    const tools = this.toolRegistry.getAllTools()
+    const toolsDefinitions = this.toolRegistry.getAllTools()
     const response = {
-      tools: tools.map((tool: ToolDefinition) => ({
+      tools: toolsDefinitions.map((tool: ToolDefinition) => ({
         name: tool.name,
         display_name: tool.display_name || tool.name,
         description: tool.description || '',
@@ -131,6 +145,18 @@ export class McpServer {
   public async handleCallToolRequest(request: CallToolRequest) {
     const { name, arguments: args } = request.params
     logInfo(`Received call tool request for ${name}`, { name, args })
+
+    logInfo('Environment', {
+      env: process.env,
+    })
+
+    logInfo('Request', {
+      request: JSON.parse(JSON.stringify(request)),
+    })
+
+    logInfo('Server', {
+      server: this.server,
+    })
 
     try {
       const tool = this.toolRegistry.getTool(name)
@@ -182,16 +208,8 @@ export class McpServer {
     logDebug('MCP server handlers registered')
   }
 
-  public registerTool(tool: {
-    name: string
-    definition: ToolDefinition
-    execute: (args: unknown) => Promise<unknown>
-  }): void {
-    this.toolRegistry.registerTool({
-      name: tool.name,
-      definition: tool.definition,
-      execute: tool.execute,
-    })
+  public registerTool(tool: BaseTool): void {
+    this.toolRegistry.registerTool(tool)
     logDebug(`Tool registered: ${tool.name}`)
   }
 

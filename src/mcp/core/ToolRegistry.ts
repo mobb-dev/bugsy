@@ -1,22 +1,10 @@
 import { logDebug, logWarn } from '../Logger'
-
-export type ToolDefinition = {
-  name: string
-  display_name?: string
-  description: string
-  inputSchema: unknown
-}
-
-export type Tool = {
-  name: string
-  definition: ToolDefinition
-  execute: (args: unknown) => Promise<unknown>
-}
+import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 
 export class ToolRegistry {
-  private tools = new Map<string, Tool>()
+  private tools = new Map<string, BaseTool>()
 
-  public registerTool(tool: Tool): void {
+  public registerTool(tool: BaseTool): void {
     if (this.tools.has(tool.name)) {
       logWarn(`Tool ${tool.name} is already registered, overwriting`, {
         toolName: tool.name,
@@ -26,16 +14,16 @@ export class ToolRegistry {
     this.tools.set(tool.name, tool)
     logDebug(`Tool registered: ${tool.name}`, {
       toolName: tool.name,
-      description: tool.definition.description,
+      description: tool.description,
     })
   }
 
-  public getTool(name: string): Tool | undefined {
+  public getTool(name: string): BaseTool | undefined {
     return this.tools.get(name)
   }
 
   public getAllTools(): ToolDefinition[] {
-    return Array.from(this.tools.values()).map((tool) => tool.definition)
+    return Array.from(this.tools.values()).map((tool) => tool.getDefinition())
   }
 
   public getToolNames(): string[] {

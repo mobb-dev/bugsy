@@ -6,15 +6,15 @@ export { mockCreateProject, mockCreateProjectError } from './createProject'
 export { mockGetAnalysis } from './getAnalysis'
 export { mockGetFixDiff } from './getFixDiff'
 export {
-  mockGetMCPFixes,
-  mockGetMCPFixesEmpty,
-  mockGetMCPFixesError,
-} from './getMCPFixes'
-export {
   mockGetOrgAndProjectId,
   mockGetOrgAndProjectIdError,
   mockGetOrgAndProjectIdProjectNotFound,
 } from './getOrgAndProjectId'
+export {
+  mockGetReportFixes,
+  mockGetReportFixesEmpty,
+  mockGetReportFixesError,
+} from './getReportFixes'
 export {
   mockMe,
   mockMeConnectionError,

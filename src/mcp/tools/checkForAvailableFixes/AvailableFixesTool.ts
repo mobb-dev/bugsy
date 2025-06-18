@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { GitService } from '../../../features/analysis/scm/git/GitService'
 import { log, logInfo } from '../../Logger'
 import { PathValidation } from '../../services/PathValidation'
-import { BaseTool, type ToolResponse } from '../base/BaseTool'
+import { BaseTool } from '../base/BaseTool'
 import { AvailableFixesService } from './AvailableFixesService'
 
 export class CheckForAvailableFixesTool extends BaseTool {
@@ -12,49 +12,43 @@ export class CheckForAvailableFixesTool extends BaseTool {
   description =
     'Checks if there are any available fixes for vulnerabilities in the project'
 
-  inputSchema = z.object({
+  inputSchema = {
+    type: 'object' as const,
+    properties: {
+      path: {
+        type: 'string',
+        description:
+          'Path to the local git repository to check for available fixes',
+      },
+      offset: {
+        type: 'number',
+        description: '[Optional] offset for pagination',
+      },
+      limit: {
+        type: 'number',
+        description: '[Optional] maximum number of results to return',
+      },
+    },
+    required: ['path'],
+  }
+
+  inputValidationSchema = z.object({
     path: z
       .string()
-      .describe('Path to the project directory to check for available fixes'),
-    files: z
-      .array(z.string())
-      .optional()
-      .describe('Optional list of specific files to check'),
-    severity: z
-      .array(z.string())
-      .optional()
-      .describe('Optional list of severity levels to filter by'),
-    issueTypes: z
-      .array(z.string())
-      .optional()
-      .describe('Optional list of issue types to filter by'),
+      .describe(
+        'Path to the local git repository to check for available fixes'
+      ),
+    offset: z.number().optional().describe('Optional offset for pagination'),
     limit: z
       .number()
       .optional()
-      .describe('Optional maximum number of results to return'),
+      .describe('Optional maximum number of fixes to return'),
   })
 
-  getJsonSchema() {
-    return {
-      type: 'object' as const,
-      properties: {
-        path: {
-          type: 'string',
-          description:
-            'Path to the project directory to check for available fixes',
-        },
-        limit: {
-          type: 'number',
-          description: 'Optional maximum number of results to return',
-        },
-      },
-      required: ['path'],
-    }
-  }
-
-  override async executeInternal(
-    args: z.infer<typeof this.inputSchema>
-  ): Promise<ToolResponse> {
+  async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
+    // override async executeInternal(
+    //   args: z.infer<typeof this.inputSchema>
+    // ): Promise<ToolResponse> {
     // Validate the path for security and existence
     const pathValidation = new PathValidation()
     const pathValidationResult = await pathValidation.validatePath(args.path)
@@ -87,10 +81,11 @@ export class CheckForAvailableFixesTool extends BaseTool {
 
     // Check for available fixes using the origin URL
     const availableFixesService = new AvailableFixesService()
-    const fixResult = await availableFixesService.checkForAvailableFixes(
-      originUrl,
-      args.limit
-    )
+    const fixResult = await availableFixesService.checkForAvailableFixes({
+      repoUrl: originUrl,
+      limit: args.limit,
+      offset: args.offset,
+    })
     logInfo('CheckForAvailableFixesTool execution completed successfully', {
       fixResult,
     })

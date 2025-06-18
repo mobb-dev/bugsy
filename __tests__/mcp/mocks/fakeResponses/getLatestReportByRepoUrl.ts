@@ -22,7 +22,7 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
           originalUrl: 'https://github.com/mock/repo',
         },
         issueTypes: ['SECURITY'],
-        fixes_aggregate: {
+        filteredFixesCount: {
           __typename: 'fix_aggregate' as const,
           aggregate: {
             count: 5,
@@ -79,14 +79,26 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             },
           },
         ],
+        totalFixesCount: {
+          __typename: 'fix_aggregate' as const,
+          aggregate: {
+            count: 5,
+          },
+        },
         vulnerabilityReport: {
           __typename: 'vulnerability_report' as const,
           scanDate: '2024-01-01T01:00:00Z',
           vendor: Vulnerability_Report_Vendor_Enum.Snyk,
-          vulnerabilityReportIssues_aggregate: {
+          totalVulnerabilityReportIssuesCount: {
             __typename: 'vulnerability_report_issue_aggregate' as const,
             aggregate: {
               count: 5,
+            },
+          },
+          notFixableVulnerabilityReportIssuesCount: {
+            __typename: 'vulnerability_report_issue_aggregate' as const,
+            aggregate: {
+              count: 0,
             },
           },
         },

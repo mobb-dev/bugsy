@@ -7,10 +7,10 @@ import type {
   CreateProjectMutationVariables,
   GetLatestReportByRepoUrlQuery,
   GetLatestReportByRepoUrlQueryVariables,
-  GetMcpFixesQuery,
-  GetMcpFixesQueryVariables,
   GetOrgAndProjectIdQuery,
   GetOrgAndProjectIdQueryVariables,
+  GetReportFixesQuery,
+  GetReportFixesQueryVariables,
   MeQuery,
   MeQueryVariables,
   SubmitVulnerabilityReportMutation,
@@ -23,12 +23,12 @@ import {
   mockCreateCommunityUserError,
   mockCreateProject,
   mockCreateProjectError,
-  mockGetMCPFixes,
-  mockGetMCPFixesEmpty,
-  mockGetMCPFixesError,
   mockGetOrgAndProjectId,
   mockGetOrgAndProjectIdError,
   mockGetOrgAndProjectIdProjectNotFound,
+  mockGetReportFixes,
+  mockGetReportFixesEmpty,
+  mockGetReportFixesError,
   mockMe,
   mockMeConnectionError,
   mockMeError,
@@ -58,12 +58,12 @@ type MockState = {
   getOrgAndProjectId: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
-  getMCPFixes: 'success' | 'error' | 'empty'
   getLatestReportByRepoUrl: 'success' | 'error' | 'empty'
   createCliLogin: 'success' | 'error'
   getEncryptedApiToken: 'success' | 'error'
   createCommunityUser: 'success' | 'error' | 'badApiKey'
   errorMessages: Record<string, string>
+  getReportFixes: 'success' | 'empty' | 'error'
 }
 
 // Initialize the mock state
@@ -73,12 +73,12 @@ const mockState: MockState = {
   getOrgAndProjectId: 'success',
   createProject: 'success',
   submitVulnerabilityReport: 'success',
-  getMCPFixes: 'success',
   getLatestReportByRepoUrl: 'success',
   createCliLogin: 'success',
   getEncryptedApiToken: 'success',
   createCommunityUser: 'success',
   errorMessages: {},
+  getReportFixes: 'success',
 }
 
 // Share the mock state with auth handlers
@@ -149,24 +149,6 @@ export const graphqlHandlers = [
     }
   ),
 
-  graphql.query<GetMcpFixesQuery, GetMcpFixesQueryVariables>(
-    'GetMCPFixes',
-    () => {
-      if (mockState.getMCPFixes === 'error') {
-        return HttpResponse.json(
-          mockGetMCPFixesError(
-            mockState.errorMessages['getMCPFixes'] || 'Get Fixes Error'
-          ),
-          { status: 500 }
-        )
-      }
-      if (mockState.getMCPFixes === 'empty') {
-        return HttpResponse.json(mockGetMCPFixesEmpty)
-      }
-      return HttpResponse.json(mockGetMCPFixes)
-    }
-  ),
-
   graphql.mutation<
     SubmitVulnerabilityReportMutation,
     SubmitVulnerabilityReportMutationVariables
@@ -226,6 +208,19 @@ export const graphqlHandlers = [
     }
     return HttpResponse.json({ data: mockGetLatestReportByRepoUrl.data })
   }),
+
+  graphql.query<GetReportFixesQuery, GetReportFixesQueryVariables>(
+    'GetReportFixes',
+    () => {
+      if (mockState.getReportFixes === 'error') {
+        return HttpResponse.json(mockGetReportFixesError)
+      }
+      if (mockState.getReportFixes === 'empty') {
+        return HttpResponse.json(mockGetReportFixesEmpty)
+      }
+      return HttpResponse.json(mockGetReportFixes)
+    }
+  ),
 ]
 
 // Mock GraphQL control system
@@ -248,12 +243,12 @@ export const mockGraphQL = (
         mockState.getOrgAndProjectId = 'success'
         mockState.createProject = 'success'
         mockState.submitVulnerabilityReport = 'success'
-        mockState.getMCPFixes = 'success'
         mockState.getLatestReportByRepoUrl = 'success'
         mockState.createCliLogin = 'success'
         mockState.getEncryptedApiToken = 'success'
         mockState.createCommunityUser = 'success'
         mockState.errorMessages = {}
+        mockState.getReportFixes = 'success'
       } catch (e) {
         console.error('Error resetting mock states:', e)
       }
@@ -336,23 +331,6 @@ export const mockGraphQL = (
       },
     }
   },
-  getMCPFixes: () => {
-    return {
-      succeeds() {
-        mockState.getMCPFixes = 'success'
-        return this
-      },
-      failsWithError(message: string) {
-        mockState.getMCPFixes = 'error'
-        mockState.errorMessages['getMCPFixes'] = message
-        return this
-      },
-      returnsEmptyFixes() {
-        mockState.getMCPFixes = 'empty'
-        return this
-      },
-    }
-  },
   createCliLogin: () => {
     return {
       succeeds() {
@@ -409,6 +387,23 @@ export const mockGraphQL = (
       },
       returnsEmptyReport() {
         mockState.getLatestReportByRepoUrl = 'empty'
+        return this
+      },
+    }
+  },
+  getReportFixes: () => {
+    return {
+      succeeds() {
+        mockState.getReportFixes = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getReportFixes = 'error'
+        mockState.errorMessages['getReportFixes'] = message
+        return this
+      },
+      returnsEmptyFixes() {
+        mockState.getReportFixes = 'empty'
         return this
       },
     }

@@ -285,25 +285,6 @@ export class McpGQLClient {
     }
   }
 
-  async getReportFixes(fixReportId: string) {
-    try {
-      logDebug('GraphQL: Calling GetMCPFixes query', { fixReportId })
-      const res = await this.clientSdk.GetMCPFixes({ fixReportId })
-      logInfo('GraphQL: GetMCPFixes successful', {
-        result: res,
-        fixCount: res.fix?.length || 0,
-      })
-      return res.fix
-    } catch (e) {
-      logError('GraphQL: GetMCPFixes failed', {
-        error: e,
-        fixReportId,
-        ...this.getErrorContext(),
-      })
-      throw e
-    }
-  }
-
   async getUserInfo() {
     const { me } = await this.clientSdk.Me()
     return me
@@ -359,15 +340,25 @@ export class McpGQLClient {
     }
   }
 
-  async getLatestReportByRepoUrl(repoUrl: string, limit?: number) {
+  async getLatestReportByRepoUrl({
+    repoUrl,
+    limit = 3,
+    offset = 0,
+  }: {
+    repoUrl: string
+    limit?: number
+    offset?: number
+  }) {
     try {
       logDebug('GraphQL: Calling GetLatestReportByRepoUrl query', {
         repoUrl,
         limit,
+        offset,
       })
       const res = await this.clientSdk.GetLatestReportByRepoUrl({
         repoUrl,
         limit,
+        offset,
       })
       logInfo('GraphQL: GetLatestReportByRepoUrl successful', {
         result: res,
@@ -378,6 +369,73 @@ export class McpGQLClient {
       logError('GraphQL: GetLatestReportByRepoUrl failed', {
         error: e,
         repoUrl,
+        ...this.getErrorContext(),
+      })
+      throw e
+    }
+  }
+
+  async getReportFixesPaginated({
+    reportId,
+    limit = 3,
+    offset = 0,
+    issueType,
+    severity,
+  }: {
+    reportId: string
+    limit?: number
+    offset?: number
+    issueType?: string[]
+    severity?: string[]
+  }) {
+    try {
+      // Build filters object based on issueType and severity
+      const filters: Record<string, unknown> = {}
+
+      if (issueType && issueType.length > 0) {
+        filters['safeIssueType'] = { _in: issueType }
+      }
+
+      if (severity && severity.length > 0) {
+        filters['severityText'] = { _in: severity }
+      }
+
+      logDebug('GraphQL: Calling GetReportFixes query', {
+        reportId,
+        limit,
+        offset,
+        filters,
+        issueType,
+        severity,
+      })
+
+      const res = await this.clientSdk.GetReportFixes({
+        reportId,
+        limit,
+        offset,
+        filters,
+      })
+
+      logInfo('GraphQL: GetReportFixes successful', {
+        result: res,
+        fixCount: res.fixReport?.[0]?.fixes?.length || 0,
+        totalCount:
+          res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
+      })
+
+      if (res.fixReport.length === 0) {
+        return null
+      }
+
+      return {
+        fixes: res.fixReport?.[0]?.fixes || [],
+        totalCount:
+          res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
+      }
+    } catch (e) {
+      logError('GraphQL: GetReportFixes failed', {
+        error: e,
+        reportId,
         ...this.getErrorContext(),
       })
       throw e
@@ -405,7 +463,7 @@ export async function getMcpGQLClient(): Promise<McpGQLClient> {
 
   const isConnected = await inGqlClient.verifyConnection()
   if (!isConnected) {
-    throw new ApiConnectionError('Error: failed to connect to the API')
+    throw new ApiConnectionError('Error: failed to connect to Mobb API')
   }
 
   const userVerify = await inGqlClient.verifyToken()
@@ -455,10 +513,10 @@ export async function getMcpGQLClient(): Promise<McpGQLClient> {
   const newGqlClient = new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })
   const loginSuccess = await newGqlClient.verifyToken()
   if (loginSuccess) {
-    logDebug('set api token %s', newApiToken)
+    logDebug(`set api token ${newApiToken}`)
     config.set('apiToken', newApiToken)
   } else {
-    throw new AuthenticationError('Something went wrong, API token is invalid.')
+    throw new AuthenticationError('Invalid API token')
   }
   return newGqlClient
 }

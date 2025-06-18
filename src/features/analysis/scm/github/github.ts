@@ -4,6 +4,7 @@ import { RequestError } from '@octokit/request-error'
 import { MAX_BRANCHES_FETCH } from '../constants'
 import { RefNotFoundError } from '../errors'
 import { ReferenceType, ScmRepoInfo } from '../types'
+import { safeBody } from '../utils'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,
   DELETE_COMMENT_PATH,
@@ -50,6 +51,8 @@ import {
   UpdateCommentResponse,
 } from './types'
 import { getOctoKit, parseGithubOwnerAndRepo } from './utils'
+
+const MAX_GH_PR_BODY_LENGTH = 65536
 
 export function getGithubSdk(params: OctokitOptions = {}) {
   const octokit = getOctoKit(params)
@@ -461,7 +464,7 @@ export function getGithubSdk(params: OctokitOptions = {}) {
         title,
         head: newBranchName,
         head_repo: sourceRepo,
-        body,
+        body: safeBody(body, MAX_GH_PR_BODY_LENGTH),
         base: defaultBranch,
       })
 
@@ -490,7 +493,7 @@ export function getGithubSdk(params: OctokitOptions = {}) {
         owner,
         repo,
         title: options.title,
-        body: options.body,
+        body: safeBody(options.body, MAX_GH_PR_BODY_LENGTH),
         head: options.sourceBranchName,
         base: options.targetBranchName,
         draft: false,

@@ -18,6 +18,7 @@ import {
   ScmRepoInfo,
 } from '../types'
 import { normalizeUrl, shouldValidateUrl } from '../utils'
+import { safeBody } from '../utils'
 import {
   CreatePullRequestParams,
   GetBitbucketTokenArgs,
@@ -41,6 +42,8 @@ const TokenExpiredErrorZ = z.object({
 })
 
 const BITBUCKET_ACCESS_TOKEN_URL = `https://${BITBUCKET_HOSTNAME}/site/oauth2/access_token`
+
+const MAX_BITBUCKET_PR_BODY_LENGTH = 32768
 
 type BitbucketRequestTypeKeys = keyof typeof bitbucketRequestType
 export type BitbucketRequestType =
@@ -228,7 +231,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
           type: 'pullrequest',
           title: params.title,
           summary: {
-            raw: params.body,
+            raw: safeBody(params.body, MAX_BITBUCKET_PR_BODY_LENGTH),
           },
           source: {
             branch: {

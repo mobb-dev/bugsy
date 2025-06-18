@@ -4,6 +4,7 @@ import {
   InvalidUrlPatternError,
   RefNotFoundError,
 } from '../errors'
+import { safeBody } from '../utils'
 import { AdoTokenTypeEnum, DEFUALT_ADO_ORIGIN } from './constants'
 import {
   GetAdoApiClientParams,
@@ -19,6 +20,8 @@ import {
   validateAdoRepo,
 } from './utils'
 import { ValidPullRequestStatusZ } from './validation'
+
+const MAX_ADO_PR_BODY_LENGTH = 150000
 
 export async function getAdoSdk(params: GetAdoApiClientParams) {
   const api = await getAdoApiClient(params)
@@ -207,7 +210,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
           sourceRefName: `refs/heads/${sourceBranchName}`,
           targetRefName: `refs/heads/${targetBranchName}`,
           title,
-          description: body,
+          description: safeBody(body, MAX_ADO_PR_BODY_LENGTH),
         },
         repo,
         projectName

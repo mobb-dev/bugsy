@@ -30,6 +30,7 @@ import {
 import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { ReferenceType } from '../types'
 import { isBrokerUrl, shouldValidateUrl } from '../utils'
+import { safeBody } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
 import {
   GetGitlabTokenParams,
@@ -48,6 +49,8 @@ type ApiAuthOptions = {
   url: string | undefined
   gitlabAuthToken?: string | undefined
 }
+
+const MAX_GITLAB_PR_BODY_LENGTH = 1048576
 
 //we choose a random token to increase the rate limit for anonymous requests to gitlab.com API so that we can exhaust the rate limit
 //of several different pre-generated tokens instead of just one.
@@ -329,7 +332,7 @@ export async function createMergeRequest(options: {
     options.targetBranchName,
     options.title,
     {
-      description: options.body,
+      description: safeBody(options.body, MAX_GITLAB_PR_BODY_LENGTH),
     }
   )
   return res.iid

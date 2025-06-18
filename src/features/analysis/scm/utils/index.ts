@@ -11,6 +11,7 @@ import {
 } from '../types'
 
 export * from './broker'
+export * from './scm'
 
 type GetFixUrlParam = {
   appBaseUrl: string

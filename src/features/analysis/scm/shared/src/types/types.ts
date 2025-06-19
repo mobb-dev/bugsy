@@ -446,7 +446,7 @@ export const GetProjectMembersDataZ = z.object({
         }),
         user: z.object({
           id: z.string().uuid(),
-          picture: z.string().optional(),
+          picture: z.string().nullable().optional(),
           name: z.string().nullish(),
           email: z.string().email(),
         }),

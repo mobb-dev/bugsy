@@ -108,16 +108,8 @@ export class McpServer {
   ): Promise<ListToolsResult> {
     logInfo('Received list_tools request', { params: request.params })
 
-    logInfo('Environment', {
-      env: process.env,
-    })
-
     logInfo('Request', {
       request: JSON.parse(JSON.stringify(request)),
-    })
-
-    logInfo('Server', {
-      server: this.server,
     })
 
     void getMcpGQLClient()
@@ -146,16 +138,8 @@ export class McpServer {
     const { name, arguments: args } = request.params
     logInfo(`Received call tool request for ${name}`, { name, args })
 
-    logInfo('Environment', {
-      env: process.env,
-    })
-
     logInfo('Request', {
       request: JSON.parse(JSON.stringify(request)),
-    })
-
-    logInfo('Server', {
-      server: this.server,
     })
 
     try {

@@ -600,11 +600,29 @@ query GetLatestReportByRepoUrl(
   $offset: Int!
 ) {
   fixReport(
-    where: { repo: { originalUrl: { _eq: $repoUrl } } }
+    where: {
+      _and: [
+        { repo: { originalUrl: { _eq: $repoUrl } } },
+        { state: { _eq: Finished } }
+      ]
+    }
     order_by: { createdOn: desc }
     limit: 1
   ) {
     ...FixReportSummaryFields
+  }
+   expiredReport: fixReport(
+    where: {
+      _and: [
+        { repo: { originalUrl: { _eq: $repoUrl } } },
+        { state: { _eq: Expired } }
+      ]
+    }
+    order_by: { createdOn: desc }
+    limit: 1
+  ) {
+    id
+    expirationOn
   }
 }
 
@@ -614,7 +632,25 @@ query GetReportFixes(
   $limit: Int!
   $offset: Int!
 ) {
-  fixReport(where: { id: { _eq: $reportId } }) {
+  fixReport(
+    where: {
+      _and: [
+        { id: { _eq: $reportId } },
+        { state: { _eq: Finished } }
+      ]
+    }
+  ) {
     ...FixReportSummaryFields
+  }
+  expiredReport: fixReport(
+    where: {
+      _and: [
+        { id: { _eq: $reportId } },
+        { state: { _eq: Expired } }
+      ]
+    }
+  ) {
+    id
+    expirationOn
   }
 }

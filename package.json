@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.106",
+  "version": "1.0.107",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -15,6 +15,7 @@
     "test:mcp": "pnpm run build && pnpm run test:mcp:unit",
     "test:mcp:watch": "vitest watch __tests__/mcp/mcp.unit.test.ts",
     "test:mcp:verbose": "pnpm run build && NODE_ENV=test VERBOSE=true vitest run __tests__/mcp/",
+    "test:mcp:integration": "pnpm run build && GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) VERBOSE=1  vitest run __tests__/mcp/mcp.integration.test.ts",
     "test:unit": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --exclude='**/__tests__/integration.test.ts' --exclude='**/__tests__/mcp/**'",
     "test:integration": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run __tests__/integration.test.ts",
     "test:integration:watch": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest watch run __tests__/integration.test.ts",
@@ -34,7 +35,8 @@
     "dev:mcp": "pnpm run build && node dist/index.mjs mcp",
     "debug:mcp": "pnpm run build && node dist/index.mjs mcp --debug",
     "generate": "pnpm run env -- graphql-codegen -r dotenv/config --config client_codegen.ts",
-    "test:e2e": "cd ./__e2e__ && npm i && npm run test"
+    "test:e2e": "cd ./__e2e__ && npm i && npm run test && npm run test:mcp",
+    "test:e2e:mcp": "cd ./__e2e__ && npm i && npm run test:mcp"
   },
   "bin": {
     "mobbdev": "bin/cli.mjs"
@@ -47,7 +49,6 @@
     "@modelcontextprotocol/sdk": "1.12.1",
     "@octokit/core": "5.2.0",
     "@octokit/request-error": "5.1.1",
-    "@types/libsodium-wrappers": "0.7.14",
     "adm-zip": "0.5.16",
     "axios": "1.9.0",
     "azure-devops-node-api": "12.1.0",
@@ -118,11 +119,11 @@
     "eslint-plugin-simple-import-sort": "10.0.0",
     "msw": "2.8.5",
     "nock": "14.0.5",
-    "pino-pretty": "13.0.0",
     "prettier": "3.5.3",
     "tsup": "8.5.0",
     "typescript": "4.9.5",
-    "vitest": "3.2.3"
+    "vitest": "3.2.3",
+    "@types/libsodium-wrappers": "0.7.14"
   },
   "engines": {
     "node": ">=18.20.0"

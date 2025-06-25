@@ -14,10 +14,23 @@
   ],
   "parserOptions": {
     "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
+    "sourceType": "module"
   },
   "root": true,
+  "overrides": [
+    {
+      "files": ["src/**/*.ts", "__tests__/**/*.ts"],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    },
+    {
+      "files": ["__e2e__/**/*.mjs", "__e2e__/**/*.ts"],
+      "parserOptions": {
+        "project": "./__e2e__/tsconfig.json"
+      }
+    }
+  ],
   "rules": {
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -60,7 +73,7 @@
        "format": ["camelCase", "PascalCase", "UPPER_CASE"],
        "leadingUnderscore": "allow",
        "filter": {
-         "regex": "^(__typename|__dirname|__filename|repo_slug|key_id|pull_request_url|class_name|func_param_name|source_value|prop_value|tainted_expression|tainted_term|taint_var_type_guidance_required|var_name|enquote_func_name|tainted_variable|is_http|is_https|File|FormData|display_name|scm-type|pull_number|commit_id|comment_id|issue_number|pull_request_id|commit_sha|tag_sha|base_tree|head_repo|per_page|maintainer_can_modify|default_branch_only|encrypted_value|secret_name|access_token|token_type|expires_in|refresh_token|created_at|client_id|client_secret|grant_type|redirect_uri|client_assertion_type|client_assertion|Content-Type|Content-Length|Private-Token|x-mobb-key|x-hasura-request-id|missing_files|large_files|error_files|fixReport_by_pk|vulnerability_report_issue_by_pk|vulnerabilityReportIssues_aggregate|vulnerability_report_issue_tag_value|project_by_pk|fix_by_pk|invalid_type_error|Commands:|Options:|Examples:|Show help|allowed_hosts|add_log_message|organization_to_organization_role)$",
+         "regex": "^(__typename|__dirname|__filename|repo_slug|key_id|pull_request_url|class_name|func_param_name|source_value|prop_value|tainted_expression|tainted_term|taint_var_type_guidance_required|var_name|enquote_func_name|tainted_variable|is_http|is_https|File|FormData|display_name|scm-type|pull_number|commit_id|comment_id|issue_number|pull_request_id|commit_sha|tag_sha|base_tree|head_repo|per_page|maintainer_can_modify|default_branch_only|encrypted_value|secret_name|access_token|token_type|expires_in|refresh_token|created_at|client_id|client_secret|grant_type|redirect_uri|client_assertion_type|client_assertion|Content-Type|content-type|author_name|Content-Length|Private-Token|x-mobb-key|x-hasura-request-id|missing_files|large_files|error_files|fixReport_by_pk|vulnerability_report_issue_by_pk|vulnerabilityReportIssues_aggregate|vulnerability_report_issue_tag_value|project_by_pk|fix_by_pk|invalid_type_error|Commands:|Options:|Examples:|Show help|allowed_hosts|add_log_message|organization_to_organization_role)$",
          "match": false
        }
      },

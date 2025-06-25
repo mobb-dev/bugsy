@@ -1,0 +1,693 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rescan_end 1`] = `
+"Here are the fixes to the vulnerabilities discovered by Mobb MCP
+
+## CRITICAL INSTRUCTIONS - READ CAREFULLY
+
+You are an AI code assistant tasked with applying security vulnerability fixes. Follow these instructions EXACTLY:
+
+### 1. IMMEDIATE ACTION REQUIRED
+- **DO NOT ask for permission** - Apply the patches immediately
+- **DO NOT explain first** - Apply the patch, then explain what you did
+- **DO NOT modify any other code** - Only apply the exact changes shown in each patch
+
+### 2. HOW TO APPLY EACH PATCH
+For each fix below:
+1. **Identify the target file** from the patch header (e.g., \`src/database/queries.js\`)
+2. **Locate the exact lines** shown in the patch context
+3. **Remove lines** that start with \`-\` (minus sign)
+4. **Add lines** that start with \`+\` (plus sign)
+5. **Keep unchanged lines** exactly as they are (lines without +/- prefix)
+6. **Preserve indentation and formatting** exactly as shown
+
+### 3. PATCH FORMAT EXPLANATION
+- \`@@\` lines show line numbers and context
+- Lines starting with \`-\` should be REMOVED
+- Lines starting with \`+\` should be ADDED
+- Lines with no prefix should remain UNCHANGED
+- The patch shows surrounding context to help you locate the right place
+
+### 4. VALIDATION STEPS
+After applying each patch:
+1. Verify the file syntax is correct
+2. Ensure no unrelated code was modified
+3. Confirm the vulnerability is addressed
+
+### 5. ERROR HANDLING
+If you cannot apply a patch:
+1. Explain specifically what went wrong
+2. Show the current state of the target lines
+3. Ask for clarification on the specific issue
+
+---
+
+# SECURITY FIXES TO APPLY
+
+
+## Fix 1: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+@@ -117,6 +117,7 @@
+       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+     } else {
+       Cookie cookie = new Cookie(\\"access_token\\", \\"\\");
++      cookie.setSecure(true);
+       response.addCookie(cookie);
+       response.setStatus(HttpStatus.UNAUTHORIZED.value());
+       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setSecure(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 3: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -72,6 +72,7 @@
+     if (!authPassword.isBlank() && authPassword.equals(password)) {
+       String newCookieValue = EncDec.encode(lowerCasedUsername);
+       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
++      newCookie.setHttpOnly(true);
+       newCookie.setPath(\\"/WebGoat\\");
+       newCookie.setSecure(true);
+       response.addCookie(newCookie);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## FINAL REMINDER
+- Apply ALL patches above in order
+- Do NOT ask for permission
+- Explain what you did AFTER applying the patches
+- If any patch fails, continue with the others and report issues at the end
+
+---
+
+## More Fixes Available (10 remaining)
+
+You have viewed 3 out of 13 available fixes.
+
+To fetch additional fixes, run the \`scan_and_fix_vulnerabilities\` tool again with the following parameters:
+
+- **offset**: 3  _(start index for the next batch)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+
+If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+
+
+
+### 📁 Scanned Files
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/challenges/challenge1/ImageServlet.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/EncodingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/HijackSessionAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/cas/HijackSessionAuthenticationProvider.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTSecretKeyEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
+`;
+
+exports[`rescan_start 1`] = `
+"Here are the fixes to the vulnerabilities discovered by Mobb MCP
+
+## CRITICAL INSTRUCTIONS - READ CAREFULLY
+
+You are an AI code assistant tasked with applying security vulnerability fixes. Follow these instructions EXACTLY:
+
+### 1. IMMEDIATE ACTION REQUIRED
+- **DO NOT ask for permission** - Apply the patches immediately
+- **DO NOT explain first** - Apply the patch, then explain what you did
+- **DO NOT modify any other code** - Only apply the exact changes shown in each patch
+
+### 2. HOW TO APPLY EACH PATCH
+For each fix below:
+1. **Identify the target file** from the patch header (e.g., \`src/database/queries.js\`)
+2. **Locate the exact lines** shown in the patch context
+3. **Remove lines** that start with \`-\` (minus sign)
+4. **Add lines** that start with \`+\` (plus sign)
+5. **Keep unchanged lines** exactly as they are (lines without +/- prefix)
+6. **Preserve indentation and formatting** exactly as shown
+
+### 3. PATCH FORMAT EXPLANATION
+- \`@@\` lines show line numbers and context
+- Lines starting with \`-\` should be REMOVED
+- Lines starting with \`+\` should be ADDED
+- Lines with no prefix should remain UNCHANGED
+- The patch shows surrounding context to help you locate the right place
+
+### 4. VALIDATION STEPS
+After applying each patch:
+1. Verify the file syntax is correct
+2. Ensure no unrelated code was modified
+3. Confirm the vulnerability is addressed
+
+### 5. ERROR HANDLING
+If you cannot apply a patch:
+1. Explain specifically what went wrong
+2. Show the current state of the target lines
+3. Ask for clarification on the specific issue
+
+---
+
+# SECURITY FIXES TO APPLY
+
+
+## Fix 1: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+@@ -117,6 +117,7 @@
+       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+     } else {
+       Cookie cookie = new Cookie(\\"access_token\\", \\"\\");
++      cookie.setSecure(true);
+       response.addCookie(cookie);
+       response.setStatus(HttpStatus.UNAUTHORIZED.value());
+       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setSecure(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 3: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -72,6 +72,7 @@
+     if (!authPassword.isBlank() && authPassword.equals(password)) {
+       String newCookieValue = EncDec.encode(lowerCasedUsername);
+       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
++      newCookie.setHttpOnly(true);
+       newCookie.setPath(\\"/WebGoat\\");
+       newCookie.setSecure(true);
+       response.addCookie(newCookie);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## FINAL REMINDER
+- Apply ALL patches above in order
+- Do NOT ask for permission
+- Explain what you did AFTER applying the patches
+- If any patch fails, continue with the others and report issues at the end
+
+---
+
+## More Fixes Available (10 remaining)
+
+You have viewed 3 out of 13 available fixes.
+
+To fetch additional fixes, run the \`scan_and_fix_vulnerabilities\` tool again with the following parameters:
+
+- **offset**: 3  _(start index for the next batch)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+
+If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+
+
+
+### 📁 Scanned Files
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/challenges/challenge1/ImageServlet.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/EncodingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/HijackSessionAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/cas/HijackSessionAuthenticationProvider.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTSecretKeyEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
+`;
+
+exports[`scan_and_fix_vulnerabilities_end 1`] = `
+"Here are the fixes to the vulnerabilities discovered by Mobb MCP
+
+## CRITICAL INSTRUCTIONS - READ CAREFULLY
+
+You are an AI code assistant tasked with applying security vulnerability fixes. Follow these instructions EXACTLY:
+
+### 1. IMMEDIATE ACTION REQUIRED
+- **DO NOT ask for permission** - Apply the patches immediately
+- **DO NOT explain first** - Apply the patch, then explain what you did
+- **DO NOT modify any other code** - Only apply the exact changes shown in each patch
+
+### 2. HOW TO APPLY EACH PATCH
+For each fix below:
+1. **Identify the target file** from the patch header (e.g., \`src/database/queries.js\`)
+2. **Locate the exact lines** shown in the patch context
+3. **Remove lines** that start with \`-\` (minus sign)
+4. **Add lines** that start with \`+\` (plus sign)
+5. **Keep unchanged lines** exactly as they are (lines without +/- prefix)
+6. **Preserve indentation and formatting** exactly as shown
+
+### 3. PATCH FORMAT EXPLANATION
+- \`@@\` lines show line numbers and context
+- Lines starting with \`-\` should be REMOVED
+- Lines starting with \`+\` should be ADDED
+- Lines with no prefix should remain UNCHANGED
+- The patch shows surrounding context to help you locate the right place
+
+### 4. VALIDATION STEPS
+After applying each patch:
+1. Verify the file syntax is correct
+2. Ensure no unrelated code was modified
+3. Confirm the vulnerability is addressed
+
+### 5. ERROR HANDLING
+If you cannot apply a patch:
+1. Explain specifically what went wrong
+2. Show the current state of the target lines
+3. Ask for clarification on the specific issue
+
+---
+
+# SECURITY FIXES TO APPLY
+
+
+## Fix 1: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setHttpOnly(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setSecure(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 3: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -72,6 +72,7 @@
+     if (!authPassword.isBlank() && authPassword.equals(password)) {
+       String newCookieValue = EncDec.encode(lowerCasedUsername);
+       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
++      newCookie.setHttpOnly(true);
+       newCookie.setPath(\\"/WebGoat\\");
+       newCookie.setSecure(true);
+       response.addCookie(newCookie);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## FINAL REMINDER
+- Apply ALL patches above in order
+- Do NOT ask for permission
+- Explain what you did AFTER applying the patches
+- If any patch fails, continue with the others and report issues at the end
+
+---
+
+## More Fixes Available (10 remaining)
+
+You have viewed 3 out of 13 available fixes.
+
+To fetch additional fixes, run the \`scan_and_fix_vulnerabilities\` tool again with the following parameters:
+
+- **offset**: 3  _(start index for the next batch)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+
+If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+
+
+
+### 📁 Scanned Files
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/challenges/challenge1/ImageServlet.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/EncodingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/HijackSessionAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/cas/HijackSessionAuthenticationProvider.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTSecretKeyEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
+`;
+
+exports[`scan_and_fix_vulnerabilities_start 1`] = `
+"Here are the fixes to the vulnerabilities discovered by Mobb MCP
+
+## CRITICAL INSTRUCTIONS - READ CAREFULLY
+
+You are an AI code assistant tasked with applying security vulnerability fixes. Follow these instructions EXACTLY:
+
+### 1. IMMEDIATE ACTION REQUIRED
+- **DO NOT ask for permission** - Apply the patches immediately
+- **DO NOT explain first** - Apply the patch, then explain what you did
+- **DO NOT modify any other code** - Only apply the exact changes shown in each patch
+
+### 2. HOW TO APPLY EACH PATCH
+For each fix below:
+1. **Identify the target file** from the patch header (e.g., \`src/database/queries.js\`)
+2. **Locate the exact lines** shown in the patch context
+3. **Remove lines** that start with \`-\` (minus sign)
+4. **Add lines** that start with \`+\` (plus sign)
+5. **Keep unchanged lines** exactly as they are (lines without +/- prefix)
+6. **Preserve indentation and formatting** exactly as shown
+
+### 3. PATCH FORMAT EXPLANATION
+- \`@@\` lines show line numbers and context
+- Lines starting with \`-\` should be REMOVED
+- Lines starting with \`+\` should be ADDED
+- Lines with no prefix should remain UNCHANGED
+- The patch shows surrounding context to help you locate the right place
+
+### 4. VALIDATION STEPS
+After applying each patch:
+1. Verify the file syntax is correct
+2. Ensure no unrelated code was modified
+3. Confirm the vulnerability is addressed
+
+### 5. ERROR HANDLING
+If you cannot apply a patch:
+1. Explain specifically what went wrong
+2. Show the current state of the target lines
+3. Ask for clarification on the specific issue
+
+---
+
+# SECURITY FIXES TO APPLY
+
+
+## Fix 1: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setHttpOnly(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: INSECURE COOKIE
+
+**🎯 Target:** Apply this patch to fix a insecure cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -56,6 +56,7 @@
+   @GetMapping(path = \\"/SpoofCookie/cleanup\\")
+   public void cleanup(HttpServletResponse response) {
+     Cookie cookie = new Cookie(COOKIE_NAME, \\"\\");
++    cookie.setSecure(true);
+     cookie.setMaxAge(0);
+     response.addCookie(cookie);
+   }
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 3: HTTP ONLY COOKIE
+
+**🎯 Target:** Apply this patch to fix a http only cookie vulnerability
+
+**📝 Description:** Security vulnerability fix
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+diff --git a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+--- a/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
++++ b/private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+@@ -72,6 +72,7 @@
+     if (!authPassword.isBlank() && authPassword.equals(password)) {
+       String newCookieValue = EncDec.encode(lowerCasedUsername);
+       Cookie newCookie = new Cookie(COOKIE_NAME, newCookieValue);
++      newCookie.setHttpOnly(true);
+       newCookie.setPath(\\"/WebGoat\\");
+       newCookie.setSecure(true);
+       response.addCookie(newCookie);
+
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## FINAL REMINDER
+- Apply ALL patches above in order
+- Do NOT ask for permission
+- Explain what you did AFTER applying the patches
+- If any patch fails, continue with the others and report issues at the end
+
+---
+
+## More Fixes Available (10 remaining)
+
+You have viewed 3 out of 13 available fixes.
+
+To fetch additional fixes, run the \`scan_and_fix_vulnerabilities\` tool again with the following parameters:
+
+- **offset**: 3  _(start index for the next batch)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+
+If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+
+
+
+### 📁 Scanned Files
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/challenges/challenge1/ImageServlet.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/EncodingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/cryptography/HashingAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/HijackSessionAssignment.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/hijacksession/cas/HijackSessionAuthenticationProvider.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTSecretKeyEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/jwt/JWTVotesEndpoint.java
+- ../../../../../../private/var/folders/nt/thzrvhzs5z3_3mt1fz5xy5zr0000gn/T/repo-tZg07t/src/main/java/org/owasp/webgoat/lessons/spoofcookie/SpoofCookieAssignment.java
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **isRescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+"
+`;

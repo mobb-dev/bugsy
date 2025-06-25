@@ -20,6 +20,7 @@ export const applyFixesPrompt = ({
   nextOffset,
   shownCount,
   currentTool,
+  offset = 0,
 }: {
   fixes: McpFix[]
   hasMore: boolean
@@ -27,6 +28,7 @@ export const applyFixesPrompt = ({
   nextOffset: number
   shownCount: number
   currentTool: string
+  offset?: number
 }) => {
   if (fixes.length === 0) {
     return noFixesReturnedForParameters
@@ -95,7 +97,7 @@ If you cannot apply a patch:
 ${fixList
   .map(
     (fix, index) => `
-## Fix ${index + 1}: ${fix.vulnerabilityType}
+## Fix ${offset + index + 1}: ${fix.vulnerabilityType}
 
 **🎯 Target:** Apply this patch to fix a ${fix.vulnerabilityType.toLowerCase()} vulnerability
 
@@ -156,7 +158,7 @@ We were unable to find a previous vulnerability report for this repository. This
 
 ### 🎯 Recommended Actions
 1. **Run a new security scan** to analyze your codebase
-   - Use the \`fix_vulnerabilities\` tool to start a fresh scan
+   - Use the \`scan_and_fix_vulnerabilities\` tool to start a fresh scan
    - This will analyze your current code for security issues
 
 2. **Verify repository access**
@@ -170,6 +172,30 @@ We were unable to find a previous vulnerability report for this repository. This
 For assistance, please:
 - Visit our documentation at https://docs.mobb.ai
 - Contact support at support@mobb.ai`
+
+export const expiredReportPrompt = ({
+  lastReportDate,
+}: {
+  lastReportDate: string
+}) => `🔍 **MOBB SECURITY SCAN STATUS**
+
+## Out-of-Date Vulnerability Report
+
+Your most recent vulnerability report for this repository **expired on ${lastReportDate}** and is no longer available for fetching automated fixes.
+
+### 📋 Why Did This Happen?
+- Reports are automatically purged after a retention period for security and storage optimisation.
+- No new scans have been run since the last report expired.
+
+### 🎯 Recommended Actions
+1. **Run a fresh security scan** to generate an up-to-date vulnerability report.
+   - Use the \`scan_and_fix_vulnerabilities\` tool.
+2. **Verify repository access** if scans fail to run or the repository has moved.
+3. **Review your CI/CD pipeline** to ensure regular scans are triggered.
+
+For more help:
+- Documentation: https://docs.mobb.ai
+- Support: support@mobb.ai`
 
 export const noFixesAvailablePrompt = `There are no fixes available for this repository at this time.
 `
@@ -232,7 +258,8 @@ ${applyFixesPrompt({
   hasMore,
   nextOffset: 0,
   shownCount: fixReport.fixes.length,
-  currentTool: 'check_for_available_fixes',
+  currentTool: 'fetch_available_fixes',
+  offset,
 })}`
 }
 
@@ -245,10 +272,12 @@ export const fixesPrompt = ({
   fixes,
   totalCount,
   offset,
+  scannedFiles,
 }: {
   fixes: McpFix[]
   totalCount: number
   offset: number
+  scannedFiles: string[]
 }) => {
   //const fix = fixes[0]
   if (totalCount === 0) {
@@ -267,8 +296,12 @@ ${applyFixesPrompt({
   hasMore,
   nextOffset,
   shownCount,
-  currentTool: 'fix_vulnerabilities',
+  currentTool: 'scan_and_fix_vulnerabilities',
+  offset,
 })}
+
+### 📁 Scanned Files
+${scannedFiles.map((file) => `- ${file}`).join('\n')}
 
 ### 🔄 Running a Fresh Scan
 

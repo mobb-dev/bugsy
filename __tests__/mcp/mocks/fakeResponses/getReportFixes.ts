@@ -125,27 +125,31 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
           },
         },
         totalFixesCount: {
-          __typename: 'fix_aggregate',
+          __typename: 'fix_aggregate' as const,
           aggregate: {
-            __typename: 'fix_aggregate_fields',
-            count: 2,
+            count: 5,
           },
         },
         vulnerabilityReport: {
-          __typename: 'vulnerability_report',
+          __typename: 'vulnerability_report' as const,
           scanDate: '2024-01-01T01:00:00Z',
           vendor: Vulnerability_Report_Vendor_Enum.Snyk,
           totalVulnerabilityReportIssuesCount: {
-            __typename: 'vulnerability_report_issue_aggregate',
-            aggregate: { count: 2 },
+            __typename: 'vulnerability_report_issue_aggregate' as const,
+            aggregate: {
+              count: 5,
+            },
           },
           notFixableVulnerabilityReportIssuesCount: {
-            __typename: 'vulnerability_report_issue_aggregate',
-            aggregate: { count: 0 },
+            __typename: 'vulnerability_report_issue_aggregate' as const,
+            aggregate: {
+              count: 0,
+            },
           },
         },
       },
     ],
+    expiredReport: [],
   },
 }
 
@@ -174,33 +178,34 @@ export const mockGetReportFixesEmpty: { data: GetReportFixesQuery } = {
           },
         },
         totalFixesCount: {
-          __typename: 'fix_aggregate',
+          __typename: 'fix_aggregate' as const,
           aggregate: {
-            __typename: 'fix_aggregate_fields',
             count: 0,
           },
         },
         vulnerabilityReport: {
-          __typename: 'vulnerability_report',
+          __typename: 'vulnerability_report' as const,
           scanDate: '2024-01-01T01:00:00Z',
           vendor: Vulnerability_Report_Vendor_Enum.Snyk,
           totalVulnerabilityReportIssuesCount: {
-            __typename: 'vulnerability_report_issue_aggregate',
+            __typename: 'vulnerability_report_issue_aggregate' as const,
             aggregate: { count: 0 },
           },
           notFixableVulnerabilityReportIssuesCount: {
-            __typename: 'vulnerability_report_issue_aggregate',
+            __typename: 'vulnerability_report_issue_aggregate' as const,
             aggregate: { count: 0 },
           },
         },
       },
     ],
+    expiredReport: [],
   },
 }
 
 export const mockGetReportFixesNoReportForId: { data: GetReportFixesQuery } = {
   data: {
     fixReport: [],
+    expiredReport: [],
   },
 }
 

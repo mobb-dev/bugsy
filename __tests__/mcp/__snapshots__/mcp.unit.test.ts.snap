@@ -15,7 +15,7 @@ We were unable to find a previous vulnerability report for this repository. This
 
 ### 🎯 Recommended Actions
 1. **Run a new security scan** to analyze your codebase
-   - Use the \`fix_vulnerabilities\` tool to start a fresh scan
+   - Use the \`scan_and_fix_vulnerabilities\` tool to start a fresh scan
    - This will analyze your current code for security issues
 
 2. **Verify repository access**
@@ -122,7 +122,7 @@ test patch
 
 You have viewed 1 out of 5 available fixes.
 
-To fetch additional fixes, run the \`check_for_available_fixes\` tool again with the following parameters:
+To fetch additional fixes, run the \`fetch_available_fixes\` tool again with the following parameters:
 
 - **offset**: 0  _(start index for the next batch)_
 - **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
@@ -243,6 +243,9 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+
+### 📁 Scanned Files
+- sample.js
 
 ### 🔄 Running a Fresh Scan
 
@@ -369,6 +372,9 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+### 📁 Scanned Files
+- sample.js
+
 ### 🔄 Running a Fresh Scan
 
 To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
@@ -493,6 +499,9 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+
+### 📁 Scanned Files
+- sample.js
 
 ### 🔄 Running a Fresh Scan
 

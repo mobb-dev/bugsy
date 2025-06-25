@@ -1,3 +1,5 @@
+import { packageJson } from '../utils'
+
 const logglerUrl = 'http://localhost:4444/log'
 const isTestEnvironment =
   process.env['NODE_ENV'] === 'test' ||
@@ -88,6 +90,7 @@ class Logger {
       level: logEntry.level,
       message: logEntry.message,
       data: logEntry.data,
+      version: packageJson.version,
     }
 
     // Create an AbortController

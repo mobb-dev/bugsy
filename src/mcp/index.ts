@@ -1,9 +1,10 @@
 // 0. Import dependencies
+import { packageJson } from '../utils'
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
 import { BaseTool } from './tools/base/BaseTool'
-import { CheckForAvailableFixesTool } from './tools/checkForAvailableFixes/AvailableFixesTool'
-import { FixVulnerabilitiesTool } from './tools/fixVulnerabilities/FixVulnerabilitiesTool'
+import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
+import { ScanAndFixVulnerabilitiesTool } from './tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 
 /**
  * Creates and configures the MCP server with all tools and services
@@ -14,7 +15,7 @@ export function createMcpServer(): McpServer {
   // Create the server
   const server = new McpServer({
     name: 'mobb-mcp',
-    version: '1.0.0',
+    version: packageJson.version,
   })
 
   // Determine which tools should be enabled based on the TOOLS_ENABLED env variable.
@@ -40,12 +41,12 @@ export function createMcpServer(): McpServer {
   }
 
   // Create tools (instantiation is cheap and required to inspect the tool.name)
-  const fixVulnerabilitiesTool = new FixVulnerabilitiesTool()
-  const checkForAvailableFixesTool = new CheckForAvailableFixesTool()
+  const scanAndFixVulnerabilitiesTool = new ScanAndFixVulnerabilitiesTool()
+  const fetchAvailableFixesTool = new FetchAvailableFixesTool()
 
   // Conditionally register tools
-  registerIfEnabled(fixVulnerabilitiesTool)
-  registerIfEnabled(checkForAvailableFixesTool)
+  registerIfEnabled(scanAndFixVulnerabilitiesTool)
+  registerIfEnabled(fetchAvailableFixesTool)
 
   logInfo('MCP server created and configured')
   return server

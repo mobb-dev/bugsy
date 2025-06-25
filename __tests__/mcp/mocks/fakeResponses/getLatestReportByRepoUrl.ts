@@ -104,12 +104,14 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
         },
       },
     ],
+    expiredReport: [],
   },
 }
 
 export const mockGetLatestReportByRepoUrlEmpty: MockResponse = {
   data: {
     fixReport: [],
+    expiredReport: [],
   },
 }
 
@@ -123,4 +125,17 @@ export const mockGetLatestReportByRepoUrlError = (message: string) => ({
     },
   ],
 })
+
+export const mockGetLatestReportByRepoUrlExpired: MockResponse = {
+  data: {
+    fixReport: [],
+    expiredReport: [
+      {
+        __typename: 'fixReport' as const,
+        id: 'expired-report-id',
+        expirationOn: '2024-02-01T00:00:00Z',
+      },
+    ],
+  },
+}
 /* eslint-enable @typescript-eslint/naming-convention */

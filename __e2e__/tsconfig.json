@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "lib": ["es2021", "DOM"]
+  },
+  "include": ["./**/*.mjs", "./**/*.ts"],
+  "exclude": ["node_modules"]
+} 

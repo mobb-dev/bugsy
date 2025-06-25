@@ -4,15 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test index.mjs"
+    "test": "node --test index.mjs",
+    "test:mcp": "node --test mcp.mjs"
   },
   "dependencies": {
     "adm-zip": "0.5.16",
     "dotenv": "16.5.0",
     "node-pty": "1.0.0",
     "npm": "10.9.0",
-    "pino-pretty": "13.0.0",
-    "verdaccio": "6.0.5"
+    "verdaccio": "6.0.5",
+    "expect": "29.7.0",
+    "jest-snapshot": "29.7.0"
   },
   "author": "",
   "license": "ISC"

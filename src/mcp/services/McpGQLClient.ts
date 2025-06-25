@@ -23,13 +23,14 @@ import {
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { API_KEY_HEADER_NAME, DEFAULT_API_URL } from '../constants'
-import { logDebug, logError, logInfo } from '../Logger'
 import {
   ApiConnectionError,
   AuthenticationError,
   CliLoginError,
   FailedToGetApiTokenError,
-} from '../tools/fixVulnerabilities/errors/VulnerabilityFixErrors'
+} from '../core/Errors'
+import { logDebug, logError, logInfo } from '../Logger'
+import { FixReportSummary, McpFix } from '../types'
 
 export const LOGIN_MAX_WAIT = 10 * 1000 // 10 minutes
 export const LOGIN_CHECK_DELAY = 1 * 1000
@@ -58,6 +59,7 @@ export class McpGQLClient {
     this._auth = args
     const API_URL = process.env['API_URL'] || DEFAULT_API_URL
 
+    logDebug('creating graphql client', { API_URL, args })
     this.client = new GraphQLClient(API_URL, {
       headers:
         args.type === 'apiKey'
@@ -98,11 +100,13 @@ export class McpGQLClient {
       logDebug('GraphQL: Calling Me query for connection verification')
       // Use the SDK's Me method for consistency
       const result = await this.clientSdk.Me()
-      logInfo('GraphQL: Me query successful', { result })
+      logDebug('GraphQL: Me query successful', { result })
       return true
-    } catch (e) {
-      if (e?.toString().includes('FetchError')) {
-        logError('verify connection failed %o', e)
+    } catch (e: unknown) {
+      const error = e as Error
+      logDebug(`verify connection failed ${error.toString()}`)
+      if (error?.toString().includes('FetchError')) {
+        logError('verify connection failed', { error })
         return false
       }
     }
@@ -348,7 +352,10 @@ export class McpGQLClient {
     repoUrl: string
     limit?: number
     offset?: number
-  }) {
+  }): Promise<{
+    fixReport: FixReportSummary | null
+    expiredReport: { id: string; expirationOn?: string } | null
+  }> {
     try {
       logDebug('GraphQL: Calling GetLatestReportByRepoUrl query', {
         repoUrl,
@@ -364,7 +371,10 @@ export class McpGQLClient {
         result: res,
         reportCount: res.fixReport?.length || 0,
       })
-      return res.fixReport?.[0] || null
+      return {
+        fixReport: res.fixReport?.[0] || null,
+        expiredReport: res.expiredReport?.[0] || null,
+      }
     } catch (e) {
       logError('GraphQL: GetLatestReportByRepoUrl failed', {
         error: e,
@@ -387,7 +397,11 @@ export class McpGQLClient {
     offset?: number
     issueType?: string[]
     severity?: string[]
-  }) {
+  }): Promise<{
+    fixes: McpFix[]
+    totalCount: number
+    expiredReport: { id: string; expirationOn?: string } | null
+  } | null> {
     try {
       // Build filters object based on issueType and severity
       const filters: Record<string, unknown> = {}
@@ -431,6 +445,7 @@ export class McpGQLClient {
         fixes: res.fixReport?.[0]?.fixes || [],
         totalCount:
           res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
+        expiredReport: res.expiredReport?.[0] || null,
       }
     } catch (e) {
       logError('GraphQL: GetReportFixes failed', {
@@ -457,20 +472,25 @@ async function openBrowser(url: string) {
 export async function getMcpGQLClient(): Promise<McpGQLClient> {
   logDebug('getting config', { apiToken: config.get('apiToken') })
   const inGqlClient = new McpGQLClient({
-    apiKey: config.get('apiToken') || process.env['API_KEY'] || '',
+    apiKey:
+      process.env['MOBB_API_KEY'] ||
+      process.env['API_KEY'] || // fallback for backward compatibility
+      config.get('apiToken') ||
+      '',
     type: 'apiKey',
   })
 
   const isConnected = await inGqlClient.verifyConnection()
+  logDebug('isConnected', { isConnected })
   if (!isConnected) {
     throw new ApiConnectionError('Error: failed to connect to Mobb API')
   }
-
+  logDebug('verifying token')
   const userVerify = await inGqlClient.verifyToken()
   if (userVerify) {
     return inGqlClient
   }
-
+  logDebug('verifying token failed')
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 2048,
   })

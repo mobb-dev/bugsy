@@ -42,6 +42,7 @@ import {
   mockGetLatestReportByRepoUrl,
   mockGetLatestReportByRepoUrlEmpty,
   mockGetLatestReportByRepoUrlError,
+  mockGetLatestReportByRepoUrlExpired,
 } from './fakeResponses/getLatestReportByRepoUrl'
 import {
   createCliLoginHandler,
@@ -58,7 +59,7 @@ type MockState = {
   getOrgAndProjectId: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
-  getLatestReportByRepoUrl: 'success' | 'error' | 'empty'
+  getLatestReportByRepoUrl: 'success' | 'error' | 'empty' | 'expired'
   createCliLogin: 'success' | 'error'
   getEncryptedApiToken: 'success' | 'error'
   createCommunityUser: 'success' | 'error' | 'badApiKey'
@@ -205,6 +206,11 @@ export const graphqlHandlers = [
     }
     if (mockState.getLatestReportByRepoUrl === 'empty') {
       return HttpResponse.json({ data: mockGetLatestReportByRepoUrlEmpty.data })
+    }
+    if (mockState.getLatestReportByRepoUrl === 'expired') {
+      return HttpResponse.json({
+        data: mockGetLatestReportByRepoUrlExpired.data,
+      })
     }
     return HttpResponse.json({ data: mockGetLatestReportByRepoUrl.data })
   }),
@@ -387,6 +393,10 @@ export const mockGraphQL = (
       },
       returnsEmptyReport() {
         mockState.getLatestReportByRepoUrl = 'empty'
+        return this
+      },
+      returnsExpiredReport() {
+        mockState.getLatestReportByRepoUrl = 'expired'
         return this
       },
     }

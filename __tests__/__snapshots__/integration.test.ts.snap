@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mcp tests > should respond to mcp list_tools call 1`] = `
+{
+  "tools": [
+    {
+      "description": "Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
+
+When to invoke:
+• Use when the user explicitly asks to "scan for vulnerabilities", "run a security check", or "test for security issues" in a local repository.
+• The repository must exist on disk; supply its absolute path with the required "path" argument.
+• Ideal after the user makes code changes (added/modified/staged files) but before committing, or whenever they request a full rescan.
+
+How to invoke:
+• Required argument:
+  – path (string): absolute path to the repository root.
+• Optional arguments:
+  – offset (number): pagination offset used when the result set is large.
+  – limit (number): maximum number of fixes to include in the response.
+  – rescan (boolean): true to force a complete rescan even if cached results exist.
+
+Behaviour:
+• If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
+• By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
+• The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
+
+Return value:
+The response is an object with a single "content" array containing one text element. The text is either:
+• A human-readable summary of the fixes / patches, or
+• A diagnostic or error message if the scan fails or finds nothing to fix.
+
+Example payload:
+{
+  "path": "/home/user/my-project",
+  "limit": 20,
+  "rescan": false
+}",
+      "display_name": "Scan and Fix Vulnerabilities",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "description": "[Optional] maximum number of results to return",
+            "type": "number",
+          },
+          "offset": {
+            "description": "[Optional] offset for pagination",
+            "type": "number",
+          },
+          "path": {
+            "description": "Full local path to repository to scan and fix vulnerabilities",
+            "type": "string",
+          },
+          "rescan": {
+            "description": "[Optional] whether to rescan the repository",
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "path",
+        ],
+        "type": "object",
+      },
+      "name": "scan_and_fix_vulnerabilities",
+    },
+    {
+      "description": "Check the MOBB backend for pre-generated fixes (patch sets) that correspond to vulnerabilities detected in the supplied Git repository.
+
+Use when:
+• You already have a local clone of a Git repository and want to know if MOBB has fixes available for it.
+• A vulnerability scan has been run previously and uploaded to the MOBB backend and you want to fetch the list or count of ready-to-apply fixes before triggering a full scan-and-fix flow.
+
+Required argument:
+• path – absolute path to the local Git repository clone.
+
+Optional arguments:
+• offset – pagination offset (integer).
+• limit  – maximum number of fixes to return (integer).
+
+The tool will:
+1. Validate that the provided path is secure and exists.
+2. Verify that the directory is a valid Git repository with an "origin" remote.
+3. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
+
+Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixes summary and do NOT want to perform scanning or code modifications.",
+      "display_name": "Fetch Available Fixes",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "description": "[Optional] maximum number of results to return",
+            "type": "number",
+          },
+          "offset": {
+            "description": "[Optional] offset for pagination",
+            "type": "number",
+          },
+          "path": {
+            "description": "Full local path to the cloned git repository to check for available fixes",
+            "type": "string",
+          },
+        },
+        "required": [
+          "path",
+        ],
+        "type": "object",
+      },
+      "name": "fetch_available_fixes",
+    },
+  ],
+}
+`;

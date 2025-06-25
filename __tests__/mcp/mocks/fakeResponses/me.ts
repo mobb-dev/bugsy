@@ -32,7 +32,7 @@ export const mockMe = {
 export const mockMeConnectionError = {
   errors: [
     {
-      message: 'Failed to connect to the API. Please check your API_KEY',
+      message: 'Failed to connect to the API. Please check your MOBB_API_KEY',
       extensions: {
         code: 'NETWORK_ERROR',
       },
@@ -42,7 +42,7 @@ export const mockMeConnectionError = {
 
 export const mockMeFetchError = () => {
   const error = new Error(
-    'FetchError: Failed to connect to the API. Please check your API_KEY'
+    'FetchError: Failed to connect to the API. Please check your MOBB_API_KEY'
   )
   error.name = 'FetchError'
   return error

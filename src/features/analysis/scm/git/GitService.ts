@@ -290,7 +290,6 @@ export class GitService {
           date: '%ai',
           message: '%s',
           //the field name author_name can't follow the naming convention as we are using the git log command
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           author_name: '%an',
         },
       })

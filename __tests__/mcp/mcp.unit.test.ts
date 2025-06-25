@@ -1,9 +1,9 @@
 import { noReportFoundPrompt } from '@mobb/bugsy/mcp/core/prompts'
-import { CheckForAvailableFixesTool } from '@mobb/bugsy/mcp/tools/checkForAvailableFixes/AvailableFixesTool'
+import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFixes/FetchAvailableFixesTool'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-import { FixVulnerabilitiesTool } from '../../src/mcp/tools/fixVulnerabilities/FixVulnerabilitiesTool'
+import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 import { log } from './helpers/log'
 import {
   createActiveGitRepo,
@@ -329,7 +329,7 @@ describe('MCP Server', () => {
       }) // Set a higher timeout for this test
 
       it('should timeout when getEncryptedApiToken is not returning a token', async () => {
-        process.env['API_KEY'] = BAD_API_KEY
+        process.env['MOBB_API_KEY'] = BAD_API_KEY
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
         mockGraphQL().me().failsWithConnectionError()
@@ -348,7 +348,7 @@ describe('MCP Server', () => {
       })
 
       it('should complete the authentication flow', async () => {
-        process.env['API_KEY'] = BAD_API_KEY
+        process.env['MOBB_API_KEY'] = BAD_API_KEY
 
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getOrgAndProjectId().succeeds()
@@ -371,7 +371,7 @@ describe('MCP Server', () => {
 
     describe('when API call succeeds', () => {
       beforeEach(async () => {
-        process.env['API_KEY'] = 'test-working-key'
+        process.env['MOBB_API_KEY'] = 'test-working-key'
 
         // Clear all mocks including fetch
         vi.clearAllMocks()
@@ -464,7 +464,7 @@ describe('MCP Server', () => {
         const result = await tool.execute({ path: activeRepoPath })
 
         // === VERIFY COMPLETE FLOW LOGS ===
-        expectLogMessage('Executing tool: fix_vulnerabilities')
+        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
         expectLogMessage('FilePacking: packing files')
         expectLogMessage('Files packed successfully')
         expectLogMessage('Upload info retrieved')
@@ -645,7 +645,7 @@ describe('MCP Server', () => {
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: codeNotInGitRepoPath })
 
-        expectLogMessage('Executing tool: fix_vulnerabilities')
+        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
         expectDebugMessage(
           'Git repository validation failed, using all files in the repository'
         )
@@ -675,7 +675,7 @@ describe('MCP Server', () => {
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeNoChangesRepoPath })
 
-        expectLogMessage('Executing tool: fix_vulnerabilities')
+        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
         expectDebugMessage(
           'No changes found, using recently changed files from git history'
         )
@@ -738,8 +738,8 @@ describe('MCP Server', () => {
       })
 
       it('should handle connection errors gracefully', async () => {
-        // Set API_KEY to trigger connection verification
-        process.env['API_KEY'] = 'test-key'
+        // Set MOBB_API_KEY to trigger connection verification
+        process.env['MOBB_API_KEY'] = 'test-key'
 
         // Configure GraphQL mock to simulate connection error
         mockGraphQL().me().failsWithConnectionError()
@@ -872,28 +872,28 @@ describe('MCP Server', () => {
     })
 
     it('should handle missing path parameter', async () => {
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       await expect(tool.execute({} as { path: string })).rejects.toThrow(
         "Invalid arguments: Missing required parameter 'path'"
       )
     })
 
     it('should handle non-existent path', async () => {
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       await expect(tool.execute({ path: nonExistentPath })).rejects.toThrow(
         'Invalid path: potential security risk detected in path'
       )
     })
 
     it('should handle path that is not a git repository', async () => {
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       await expect(
         tool.execute({ path: codeNotInGitRepoPath })
       ).rejects.toThrow('Invalid git repository')
     })
 
     it('should handle No origin URL git repository', async () => {
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       await expect(tool.execute({ path: emptyRepoPath })).rejects.toThrow(
         'No origin URL found for the repository'
       )
@@ -903,7 +903,7 @@ describe('MCP Server', () => {
       // Configure GraphQL mock to return empty report
       mockGraphQL().getLatestReportByRepoUrl().returnsEmptyReport()
 
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       const result = await tool.execute({ path: activeRepoPath })
 
       expectValidResult(result)
@@ -920,8 +920,8 @@ describe('MCP Server', () => {
       // Verify info log was generated (only in non-test environment)
       expect(loggerMock.mocks.logInfo.mock.calls.length).toBeGreaterThan(0)
       expect(
-        loggerMock.mocks.logInfo.mock.calls.some(
-          (call) => call[0] === 'No report found for repository'
+        loggerMock.mocks.logInfo.mock.calls.some((call) =>
+          String(call[0]).includes('No report')
         )
       ).toBe(true)
 
@@ -929,11 +929,30 @@ describe('MCP Server', () => {
       expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
     })
 
+    it('should handle expired report with no active report', async () => {
+      // Configure GraphQL mock to return expired report
+      mockGraphQL().getLatestReportByRepoUrl().returnsExpiredReport()
+
+      const tool = new FetchAvailableFixesTool()
+      const result = await tool.execute({ path: activeRepoPath })
+
+      expectValidResult(result)
+      const responseText = result.content[0]?.text ?? ''
+      expect(responseText).toContain('Out-of-Date Vulnerability Report')
+
+      // Verify info log about expired report prompt
+      expect(
+        loggerMock.mocks.logInfo.mock.calls.some((call) =>
+          String(call[0]).includes('Expired report found')
+        )
+      ).toBe(true)
+    })
+
     it('should handle report with fixes', async () => {
       // Configure GraphQL mock to return report with fixes
       mockGraphQL().getLatestReportByRepoUrl().succeeds()
 
-      const tool = new CheckForAvailableFixesTool()
+      const tool = new FetchAvailableFixesTool()
       const result = await tool.execute({ path: activeRepoPath })
 
       expectValidResult(result)
@@ -951,7 +970,7 @@ describe('MCP Server', () => {
         loggerMock.mocks.logInfo.mock.calls.some(
           (call) =>
             call[0] ===
-            'CheckForAvailableFixesTool execution completed successfully'
+            'FetchAvailableFixesTool execution completed successfully'
         )
       ).toBe(true)
 

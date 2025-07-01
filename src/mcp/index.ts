@@ -3,6 +3,7 @@ import { packageJson } from '../utils'
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
 import { BaseTool } from './tools/base/BaseTool'
+import { CheckForNewAvailableFixesTool } from './tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool } from './tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 
@@ -43,10 +44,12 @@ export function createMcpServer(): McpServer {
   // Create tools (instantiation is cheap and required to inspect the tool.name)
   const scanAndFixVulnerabilitiesTool = new ScanAndFixVulnerabilitiesTool()
   const fetchAvailableFixesTool = new FetchAvailableFixesTool()
+  const checkForNewAvailableFixesTool = new CheckForNewAvailableFixesTool()
 
   // Conditionally register tools
   registerIfEnabled(scanAndFixVulnerabilitiesTool)
   registerIfEnabled(fetchAvailableFixesTool)
+  registerIfEnabled(checkForNewAvailableFixesTool)
 
   logInfo('MCP server created and configured')
   return server

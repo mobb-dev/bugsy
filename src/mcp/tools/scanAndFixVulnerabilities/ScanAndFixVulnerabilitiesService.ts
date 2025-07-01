@@ -1,34 +1,19 @@
-import path from 'path'
-
-import {
-  Fix_Report_State_Enum,
-  Scan_Source_Enum,
-  SubmitVulnerabilityReportMutationVariables,
-  UploadS3BucketInfoMutation,
-} from '../../../features/analysis/scm/generates/client_generates'
-import { uploadFile } from '../../../features/analysis/upload-file'
+import { MCP_REPORT_ID_EXPIRATION_MS } from '../../core/configs'
 import {
   ApiConnectionError,
-  FileProcessingError,
-  FileUploadError,
   GqlClientError,
   NoFilesError,
-  ReportInitializationError,
-  ScanError,
 } from '../../core/Errors'
 import { fixesPrompt } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
-import { FilePacking } from '../../services/FilePacking'
 import { getMcpGQLClient, McpGQLClient } from '../../services/McpGQLClient'
+import { scanFiles } from '../../services/ScanFiles'
 import { McpFix } from '../../types'
-
-export const VUL_REPORT_DIGEST_TIMEOUT_MS = 1000 * 60 * 5 // 5 minutes in msec
 
 export class ScanAndFixVulnerabilitiesService {
   private static instance: ScanAndFixVulnerabilitiesService
 
   private gqlClient?: McpGQLClient
-  private filePacking: FilePacking
   /**
    * Stores the fix report id that is created on the first run so that subsequent
    * calls can skip the expensive packing/uploading/scan flow and directly fetch
@@ -36,10 +21,11 @@ export class ScanAndFixVulnerabilitiesService {
    */
   private storedFixReportId?: string
   private currentOffset?: number = 0
-
-  private constructor() {
-    this.filePacking = new FilePacking()
-  }
+  /**
+   * Timestamp when the fixReportId was created
+   * Used to expire the fixReportId after REPORT_ID_EXPIRATION_MS hours
+   */
+  private fixReportIdTimestamp?: number
 
   public static getInstance(): ScanAndFixVulnerabilitiesService {
     if (!ScanAndFixVulnerabilitiesService.instance) {
@@ -52,6 +38,19 @@ export class ScanAndFixVulnerabilitiesService {
   public reset(): void {
     this.storedFixReportId = undefined
     this.currentOffset = undefined
+    this.fixReportIdTimestamp = undefined
+  }
+
+  /**
+   * Checks if the stored fixReportId has expired (older than 2 hours)
+   */
+  private isFixReportIdExpired(): boolean {
+    if (!this.fixReportIdTimestamp) {
+      return true
+    }
+
+    const currentTime = Date.now()
+    return currentTime - this.fixReportIdTimestamp > MCP_REPORT_ID_EXPIRATION_MS
   }
 
   public async processVulnerabilities({
@@ -72,23 +71,25 @@ export class ScanAndFixVulnerabilitiesService {
       logInfo('storedFixReportId', {
         storedFixReportId: this.storedFixReportId,
         currentOffset: this.currentOffset,
+        fixReportIdTimestamp: this.fixReportIdTimestamp,
+        isExpired: this.storedFixReportId ? this.isFixReportIdExpired() : null,
       })
 
       let fixReportId: string | undefined = this.storedFixReportId
 
-      if (!fixReportId || isRescan) {
+      // Reset and rescan if:
+      // 1. No stored fixReportId exists
+      // 2. isRescan is true
+      // 3. The stored fixReportId has expired
+      if (!fixReportId || isRescan || this.isFixReportIdExpired()) {
         this.reset()
         this.validateFiles(fileList)
-
-        const repoUploadInfo = await this.initializeReport()
-        fixReportId = repoUploadInfo!.fixReportId
-        this.storedFixReportId = fixReportId // cache for future calls
-
-        const zipBuffer = await this.packFiles(fileList, repositoryPath)
-        await this.uploadFiles(zipBuffer, repoUploadInfo)
-
-        const projectId = await this.getProjectId()
-        await this.runScan({ fixReportId, projectId })
+        const scanResult = await scanFiles(
+          fileList,
+          repositoryPath,
+          this.gqlClient
+        )
+        fixReportId = scanResult.fixReportId
       }
 
       // Use the provided offset when defined; otherwise fallback to currentOffset or 0.
@@ -102,13 +103,19 @@ export class ScanAndFixVulnerabilitiesService {
         limit
       )
 
-      // Update the current offset for subsequent pagination calls
+      // Only store fixReportId if fixes were found
+      if (fixes.totalCount > 0) {
+        this.storedFixReportId = fixReportId
+        this.fixReportIdTimestamp = Date.now()
+      } else {
+        this.reset()
+      }
 
       const prompt = fixesPrompt({
         fixes: fixes.fixes,
         totalCount: fixes.totalCount,
         offset: effectiveOffset,
-        scannedFiles: fileList.map((file) => path.basename(file)),
+        scannedFiles: [...fileList],
       })
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
       return prompt
@@ -150,134 +157,6 @@ export class ScanAndFixVulnerabilitiesService {
     }
 
     return gqlClient
-  }
-
-  private async initializeReport(): Promise<
-    UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
-  > {
-    if (!this.gqlClient) {
-      throw new GqlClientError()
-    }
-
-    try {
-      const {
-        uploadS3BucketInfo: { repoUploadInfo },
-      } = await this.gqlClient.uploadS3BucketInfo()
-      logInfo('Upload info retrieved', { uploadKey: repoUploadInfo?.uploadKey })
-      return repoUploadInfo
-    } catch (error) {
-      const message = (error as Error).message
-      throw new ReportInitializationError(
-        `Error initializing report: ${message}`
-      )
-    }
-  }
-
-  private async packFiles(
-    fileList: string[],
-    repositoryPath: string
-  ): Promise<Buffer> {
-    try {
-      const zipBuffer = await this.filePacking.packFiles(
-        repositoryPath,
-        fileList
-      )
-      logInfo('Files packed successfully', { fileCount: fileList.length })
-      return zipBuffer
-    } catch (error) {
-      const message = (error as Error).message
-      throw new FileProcessingError(`Error packing files: ${message}`)
-    }
-  }
-
-  private async uploadFiles(
-    zipBuffer: Buffer,
-    repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
-  ): Promise<void> {
-    if (!repoUploadInfo) {
-      throw new FileUploadError('Upload info is required')
-    }
-
-    try {
-      await uploadFile({
-        file: zipBuffer,
-        url: repoUploadInfo.url,
-        uploadFields: JSON.parse(repoUploadInfo.uploadFieldsJSON) as Record<
-          string,
-          string
-        >,
-        uploadKey: repoUploadInfo.uploadKey,
-      })
-      logInfo('File uploaded successfully')
-    } catch (error) {
-      logError('File upload failed', { error: (error as Error).message })
-      throw new FileUploadError(
-        `Failed to upload the file: ${(error as Error).message}`
-      )
-    }
-  }
-
-  private async getProjectId(): Promise<string> {
-    if (!this.gqlClient) {
-      throw new GqlClientError()
-    }
-
-    const projectId = await this.gqlClient.getProjectId()
-    logInfo('Project ID retrieved', { projectId })
-    return projectId
-  }
-
-  private async runScan(params: {
-    fixReportId: string
-    projectId: string
-  }): Promise<void> {
-    if (!this.gqlClient) {
-      throw new GqlClientError()
-    }
-
-    const { fixReportId, projectId } = params
-    logInfo('Starting scan', { fixReportId, projectId })
-
-    const submitVulnerabilityReportVariables: SubmitVulnerabilityReportMutationVariables =
-      {
-        fixReportId,
-        projectId,
-        repoUrl: '',
-        reference: 'no-branch',
-        scanSource: Scan_Source_Enum.Mcp,
-      }
-
-    logInfo('Submitting vulnerability report')
-    const submitRes = await this.gqlClient.submitVulnerabilityReport(
-      submitVulnerabilityReportVariables
-    )
-
-    if (
-      submitRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
-    ) {
-      logError('Vulnerability report submission failed', {
-        response: submitRes,
-      })
-      throw new ScanError('🕵️‍♂️ Mobb analysis failed')
-    }
-
-    logInfo('Vulnerability report submitted successfully', {
-      analysisId: submitRes.submitVulnerabilityReport.fixReportId,
-    })
-
-    logInfo('Starting analysis subscription')
-    await this.gqlClient.subscribeToGetAnalysis({
-      subscribeToAnalysisParams: {
-        analysisId: submitRes.submitVulnerabilityReport.fixReportId,
-      },
-      callback: () => {
-        /* empty */
-      },
-      callbackStates: [Fix_Report_State_Enum.Finished],
-      timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
-    })
-
-    logInfo('Analysis subscription completed')
   }
 
   private async getReportFixes(

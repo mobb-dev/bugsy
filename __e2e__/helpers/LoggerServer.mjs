@@ -56,7 +56,16 @@ export class LoggerServer {
       })
     })
 
-    await new Promise((resolve) => this.server.listen(this.port, resolve))
+    await new Promise((resolve, reject) => {
+      this.server.on('error', (error) => {
+        reject(
+          new Error(
+            `Failed to start logger server on port ${this.port}: ${error.message}`
+          )
+        )
+      })
+      this.server.listen(this.port, resolve)
+    })
     this.server.unref()
     // eslint-disable-next-line no-console
     console.log(`Logger server listening on port ${this.port}`)

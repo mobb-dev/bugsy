@@ -22,7 +22,13 @@ import {
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
-import { API_KEY_HEADER_NAME, DEFAULT_API_URL } from '../constants'
+import {
+  MCP_API_KEY_HEADER_NAME,
+  MCP_DEFAULT_API_URL,
+  MCP_LOGIN_CHECK_DELAY,
+  MCP_LOGIN_MAX_WAIT,
+  MCP_TOOLS_BROWSER_COOLDOWN_MS,
+} from '../core/configs'
 import {
   ApiConnectionError,
   AuthenticationError,
@@ -31,9 +37,6 @@ import {
 } from '../core/Errors'
 import { logDebug, logError, logInfo } from '../Logger'
 import { FixReportSummary, McpFix } from '../types'
-
-export const LOGIN_MAX_WAIT = 10 * 1000 // 10 minutes
-export const LOGIN_CHECK_DELAY = 1 * 1000
 
 type GQLClientArgs =
   | {
@@ -45,9 +48,7 @@ type GQLClientArgs =
       type: 'token'
     }
 
-const config = new Configstore(packageJson.name, { apiToken: '' })
-const BROWSER_COOLDOWN_MS = 5000 // 5 seconds cooldown
-let lastBrowserOpenTime = 0
+const mobbConfigStore = new Configstore(packageJson.name, { apiToken: '' })
 
 // Simple GQLClient for the fixVulnerabilities tool
 export class McpGQLClient {
@@ -57,13 +58,13 @@ export class McpGQLClient {
 
   constructor(args: GQLClientArgs) {
     this._auth = args
-    const API_URL = process.env['API_URL'] || DEFAULT_API_URL
+    const API_URL = process.env['API_URL'] || MCP_DEFAULT_API_URL
 
     logDebug('creating graphql client', { API_URL, args })
     this.client = new GraphQLClient(API_URL, {
       headers:
         args.type === 'apiKey'
-          ? { [API_KEY_HEADER_NAME]: args.apiKey || '' }
+          ? { [MCP_API_KEY_HEADER_NAME]: args.apiKey || '' }
           : {
               Authorization: `Bearer ${args.token}`,
             },
@@ -85,10 +86,10 @@ export class McpGQLClient {
 
   private getErrorContext() {
     return {
-      endpoint: process.env['API_URL'] || DEFAULT_API_URL,
+      endpoint: process.env['API_URL'] || MCP_DEFAULT_API_URL,
       apiKey: this._auth.type === 'apiKey' ? this._auth.apiKey : '',
       headers: {
-        [API_KEY_HEADER_NAME]:
+        [MCP_API_KEY_HEADER_NAME]:
           this._auth.type === 'apiKey' ? '[REDACTED]' : 'undefined',
         'x-hasura-request-id': '[DYNAMIC]',
       },
@@ -314,7 +315,7 @@ export class McpGQLClient {
     try {
       const res = await this.clientSdk.CreateCliLogin(variables, {
         // We may have outdated API key in the config storage. Avoid using it for the login request.
-        [API_KEY_HEADER_NAME]: '',
+        [MCP_API_KEY_HEADER_NAME]: '',
       })
 
       const loginId = res.insert_cli_login_one?.id || ''
@@ -335,7 +336,7 @@ export class McpGQLClient {
     try {
       const res = await this.clientSdk.GetEncryptedApiToken(variables, {
         // We may have outdated API key in the config storage. Avoid using it for the login request.
-        [API_KEY_HEADER_NAME]: '',
+        [MCP_API_KEY_HEADER_NAME]: '',
       })
       return res?.cli_login_by_pk?.encryptedApiToken || null
     } catch (e) {
@@ -458,24 +459,31 @@ export class McpGQLClient {
   }
 }
 
-async function openBrowser(url: string) {
-  const now = Date.now()
-  if (!process.env['TEST'] && now - lastBrowserOpenTime < BROWSER_COOLDOWN_MS) {
-    logDebug(`browser cooldown active, skipping open for ${url}`)
-    return
+async function openBrowser(url: string, isToolsCall: boolean) {
+  if (isToolsCall) {
+    const now = Date.now()
+    const lastBrowserOpenTime = mobbConfigStore.get('lastBrowserOpenTime') || 0
+    if (now - lastBrowserOpenTime < MCP_TOOLS_BROWSER_COOLDOWN_MS) {
+      logDebug(`browser cooldown active, skipping open for ${url}`)
+      return
+    }
   }
   logDebug(`opening browser url ${url}`)
   await open(url)
-  lastBrowserOpenTime = now
+  mobbConfigStore.set('lastBrowserOpenTime', Date.now())
 }
 
-export async function getMcpGQLClient(): Promise<McpGQLClient> {
-  logDebug('getting config', { apiToken: config.get('apiToken') })
+export async function getMcpGQLClient({
+  isToolsCall = false,
+}: {
+  isToolsCall?: boolean
+} = {}): Promise<McpGQLClient> {
+  logDebug('getting config', { apiToken: mobbConfigStore.get('apiToken') })
   const inGqlClient = new McpGQLClient({
     apiKey:
       process.env['MOBB_API_KEY'] ||
       process.env['API_KEY'] || // fallback for backward compatibility
-      config.get('apiToken') ||
+      mobbConfigStore.get('apiToken') ||
       '',
     type: 'apiKey',
   })
@@ -506,10 +514,10 @@ export async function getMcpGQLClient(): Promise<McpGQLClient> {
   const webLoginUrl = `${WEB_APP_URL}/cli-login`
   const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
   logDebug(`opening browser url ${browserUrl}`)
-  await openBrowser(browserUrl)
+  await openBrowser(browserUrl, isToolsCall)
   logDebug(`waiting for login to complete`)
   let newApiToken = null
-  for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
+  for (let i = 0; i < MCP_LOGIN_MAX_WAIT / MCP_LOGIN_CHECK_DELAY; i++) {
     const encryptedApiToken = await inGqlClient.getEncryptedApiToken({
       loginId,
     })
@@ -521,7 +529,7 @@ export async function getMcpGQLClient(): Promise<McpGQLClient> {
       logDebug('API token decrypted')
       break
     }
-    await sleep(LOGIN_CHECK_DELAY)
+    await sleep(MCP_LOGIN_CHECK_DELAY)
   }
 
   if (!newApiToken) {
@@ -534,7 +542,7 @@ export async function getMcpGQLClient(): Promise<McpGQLClient> {
   const loginSuccess = await newGqlClient.verifyToken()
   if (loginSuccess) {
     logDebug(`set api token ${newApiToken}`)
-    config.set('apiToken', newApiToken)
+    mobbConfigStore.set('apiToken', newApiToken)
   } else {
     throw new AuthenticationError('Invalid API token')
   }

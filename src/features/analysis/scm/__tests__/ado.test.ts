@@ -39,9 +39,9 @@ const testInputs: Record<TestNames, TestInput> = {
   accessTokenTest: {
     ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
     PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
-    ADO_URL: 'https://dev.azure.com/citestjob2/citestjob2/_git/webgoat',
+    ADO_URL: 'https://dev.azure.com/citestjob3/citestjob3/_git/webgoat',
     NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/citestjob2/_git/webgoat_non_existing',
+      'https://dev.azure.com/citestjob3/_git/webgoat_non_existing',
     EXISTING_COMMIT: 'd59153d6d7f4c403042823a0343cd8211b60766a',
     NON_EXISTING_BRANCH: 'non-existing-branch',
     EXISTING_TAG: 'test-tag',
@@ -53,9 +53,9 @@ const testInputs: Record<TestNames, TestInput> = {
     ADO_PAT: undefined,
     PAT_ORG: undefined,
     ADO_URL:
-      'https://dev.azure.com/citestjob2/test-public/_git/webgoat.mobbci.testjob',
+      'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob',
     NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/citestjob2/test-public/_git/test-public.non.existing',
+      'https://dev.azure.com/citestjob3/test-project/_git/test-project.non.existing',
     EXISTING_COMMIT: '4acf4a349fbc4c86603e7fff27aaf46ae869cdff',
     EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
@@ -69,7 +69,7 @@ const testInputs: Record<TestNames, TestInput> = {
     ADO_URL:
       'https://dev.azure.com/aidainnovazione0090/DeviceManager/_git/app-functions-sdk-go',
     NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/mobbtest/test-public/_git/repo%20with%20spaces1',
+      'https://dev.azure.com/mobbtest/test-project/_git/repo%20with%20spaces1',
     EXISTING_COMMIT: '7c9b2da4b58b151534a09fd7a0b2c10f18664204',
     EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
@@ -81,9 +81,9 @@ const testInputs: Record<TestNames, TestInput> = {
     ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
     PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
     ADO_URL:
-      'https://dev.azure.com/citestjob2/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
+      'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
     NON_EXISTING_ADO_URL:
-      'https://dev.azure.com/citestjob2/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20space.non.existing',
+      'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20space.non.existing',
     EXISTING_COMMIT: '048b6ada04867d5f2dddc345bfa6ae3f4611b9a8',
     EXISTING_BRANCH: 'main',
     NON_EXISTING_BRANCH: 'non-existing-branch',
@@ -384,11 +384,11 @@ describe('Ado scm general checks', () => {
         expect.objectContaining({
           repoIsPublic: true,
           repoLanguages: [],
-          repoName: 'test-public',
+          repoName: 'test-project',
           repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
-          repoUpdatedAt: 'Mon Feb 24 2025',
+          repoUpdatedAt: 'Mon Jun 30 2025',
           repoUrl:
-            'https://dev.azure.com/citestjob2/test-public/_git/test-public',
+            'https://dev.azure.com/citestjob3/test-project/_git/test-project',
         }),
         expect.objectContaining({
           repoIsPublic: false,
@@ -396,7 +396,7 @@ describe('Ado scm general checks', () => {
           repoName: 'webgoat',
           repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Tue Oct 29 2024',
-          repoUrl: 'https://dev.azure.com/citestjob2/citestjob2/_git/webgoat',
+          repoUrl: 'https://dev.azure.com/citestjob3/citestjob3/_git/webgoat',
         }),
         expect.objectContaining({
           repoIsPublic: true,
@@ -405,7 +405,7 @@ describe('Ado scm general checks', () => {
           repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Mon Feb 24 2025',
           repoUrl:
-            'https://dev.azure.com/citestjob2/test-public/_git/webgoat.mobbci.testjob',
+            'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob',
         }),
         expect.objectContaining({
           repoIsPublic: true,
@@ -414,7 +414,7 @@ describe('Ado scm general checks', () => {
           repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Mon Feb 24 2025',
           repoUrl:
-            'https://dev.azure.com/citestjob2/test-public/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
+            'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
         }),
       ])
     )
@@ -445,14 +445,14 @@ describe.each([
     },
   },
   {
-    ADO_URL: 'https://dev.azure.com/mobbtest/test-public/_git/repo-public',
+    ADO_URL: 'https://dev.azure.com/mobbtest/test-project/_git/repo-public',
     INVALID_URL: 'https://invalid.com/zj-gitlab',
     EXPECTED: {
       owner: 'mobbtest',
       repo: 'repo-public',
-      projectName: 'test-public',
-      projectPath: 'mobbtest/test-public/_git/repo-public',
-      pathElements: ['mobbtest', 'test-public', '_git', 'repo-public'],
+      projectName: 'test-project',
+      projectPath: 'mobbtest/test-project/_git/repo-public',
+      pathElements: ['mobbtest', 'test-project', '_git', 'repo-public'],
       origin: 'https://dev.azure.com',
     },
   },

@@ -17,7 +17,13 @@ export async function validatePath(
 ): Promise<PathValidationResult> {
   logDebug('Validating MCP path', { inputPath })
 
-  if (inputPath === '.') {
+  // If input path begins with "/<letter>:/", remove the initial '/'.
+  // This is to handle Windows-style paths like "/C:/Users/..."
+  if (/^\/[a-zA-Z]:\//.test(inputPath)) {
+    inputPath = inputPath.slice(1)
+  }
+
+  if (inputPath === '.' || inputPath === './') {
     if (process.env['WORKSPACE_FOLDER_PATHS']) {
       logDebug('Fallback to workspace folder path', {
         inputPath,

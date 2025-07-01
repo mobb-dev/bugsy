@@ -21,7 +21,13 @@ import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/gener
 import { GithubSCMLib } from '@mobb/bugsy/features/analysis/scm/github/GithubSCMLib'
 import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { createMcpServer } from '@mobb/bugsy/mcp'
+import { MCP_PERIODIC_CHECK_INTERVAL } from '@mobb/bugsy/mcp/core/configs'
+import {
+  initialScanInProgressPrompt,
+  noFreshFixesPrompt,
+} from '@mobb/bugsy/mcp/core/prompts'
 import { mobbCliCommand } from '@mobb/bugsy/types'
+import { sleep } from '@mobb/bugsy/utils'
 import {
   CallToolResult,
   ListToolsResult,
@@ -41,17 +47,22 @@ import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
-import { InlineMCPClient } from './mcp/helpers/InlineMCPClient'
 import {
-  createActiveGitRepo,
-  createActiveNoChangesGitRepo,
-  createActiveNonGitRepo,
-  createEmptyGitRepo,
-  deleteGitRepo,
-} from './mcp/helpers/utils'
+  benignFileContent,
+  multupleVulnerableFileContent,
+  vulnerableFileContent,
+} from './mcp/helpers/fileContents'
+import { InlineMCPClient } from './mcp/helpers/InlineMCPClient'
+import { MockRepo } from './mcp/helpers/MockRepo'
+import { waitFor } from './mcp/helpers/waitFor'
 
 dotenv.config({
   path: path.join(__dirname, '../../../__tests__/.env'),
+})
+
+// Use fake timers in auto-advance mode so async operations relying on timers still progress
+vi.useFakeTimers({
+  shouldAdvanceTime: true,
 })
 
 const TEST_GITHUB_USER_PATS = z
@@ -1039,6 +1050,11 @@ describe('mcp tests', () => {
   let activeNonGitRepoPath: string
   let nonRepoEmptyPath: string
 
+  let emptyRepo: MockRepo
+  let activeRepo: MockRepo
+  let activeNoChangesRepo: MockRepo
+  let nonGitRepo: MockRepo
+
   beforeAll(async () => {
     const server = createMcpServer()
 
@@ -1047,26 +1063,30 @@ describe('mcp tests', () => {
     // Create temp directory that is not a git repo
     nonRepoEmptyPath = mkdtempSync(join(tmpdir(), 'mcp-test-non-repo-'))
 
-    // Create an empty git repository
-    emptyRepoPath = createEmptyGitRepo()
+    emptyRepo = new MockRepo()
+    activeRepo = new MockRepo()
+    activeNoChangesRepo = new MockRepo()
+    nonGitRepo = new MockRepo()
 
-    // Create a git repository with a staged file
-    activeRepoPath = createActiveGitRepo()
-
-    // Create a git repository with no changes in `git status`
-    activeNoChangesRepoPath = createActiveNoChangesGitRepo()
-
-    activeNonGitRepoPath = createActiveNonGitRepo()
+    emptyRepoPath = await emptyRepo.createEmptyGitRepo()
+    activeRepoPath = await activeRepo.createActiveGitRepo()
+    activeNoChangesRepoPath =
+      await activeNoChangesRepo.createActiveNoChangesGitRepo()
+    activeNonGitRepoPath = await nonGitRepo.createActiveNonGitRepo()
 
     // Create a client connected to this process
     mcpClient = new InlineMCPClient(server)
   })
 
   afterAll(async () => {
-    // Clean up the process
-    deleteGitRepo(emptyRepoPath)
-    deleteGitRepo(activeRepoPath)
-    deleteGitRepo(activeNoChangesRepoPath)
+    // Clean up repositories created for the tests
+    const repoHelpers: MockRepo[] = [
+      emptyRepo,
+      activeRepo,
+      activeNoChangesRepo,
+      nonGitRepo,
+    ]
+    repoHelpers.forEach((helper) => helper.cleanupAll())
 
     // Clean up temp directories
     if (existsSync(nonRepoEmptyPath)) {
@@ -1163,7 +1183,7 @@ describe('mcp tests', () => {
     it('should handle active non-git repository path in scan_and_fix_vulnerabilities tool', async () => {
       // Verify the directory still exists before running the test
       expect(existsSync(activeNonGitRepoPath)).toBe(true)
-      expect(existsSync(join(activeNonGitRepoPath, 'sample.js'))).toBe(true)
+      expect(existsSync(join(activeNonGitRepoPath, 'sample1.py'))).toBe(true)
 
       await expect(
         mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
@@ -1264,6 +1284,186 @@ describe('mcp tests', () => {
           )
         }
       })
+    })
+  })
+  describe('check_for_new_available_fixes tool', () => {
+    // --------------------- Shared helper utilities --------------------- //
+    /**
+     * Assert that the first call returns the "initial scan in progress" prompt
+     * and return that response.
+     */
+    const expectInitialScanPrompt = async (
+      client: InlineMCPClient,
+      repoPath: string
+    ) => {
+      const firstResponse = await client.callTool<CallToolResult>(
+        'check_for_new_available_fixes',
+        { path: repoPath }
+      )
+
+      expect(firstResponse).toStrictEqual({
+        content: [
+          {
+            text: initialScanInProgressPrompt,
+            type: 'text',
+          },
+        ],
+      })
+
+      return firstResponse
+    }
+
+    /**
+     * Polls until scan completes, returning the first response that is **not**
+     * the "initial scan in progress" prompt.
+     */
+    const waitForScanCompletion = async (
+      client: InlineMCPClient,
+      repoPath: string
+    ) => {
+      let response = await expectInitialScanPrompt(client, repoPath)
+
+      const start = Date.now()
+      console.log('waiting for initial scan to complete')
+      while (response!.content![0]!.text === initialScanInProgressPrompt) {
+        // eslint-disable-next-line no-console
+        await sleep(1000)
+        response = await client.callTool<CallToolResult>(
+          'check_for_new_available_fixes',
+          { path: repoPath }
+        )
+      }
+      const end = Date.now()
+      console.log(
+        'initial scan complete',
+        Math.round((end - start) / 1000),
+        'seconds'
+      )
+      return response
+    }
+
+    const expectNoFreshFixes = async () => {
+      const res = await mcpClient.callTool<CallToolResult>(
+        'check_for_new_available_fixes',
+        { path: activeRepoPath }
+      )
+      expect(res!.content![0]!.text).toBe(noFreshFixesPrompt)
+    }
+
+    const expectSingleFix = async () => {
+      const res = await mcpClient.callTool<CallToolResult>(
+        'check_for_new_available_fixes',
+        { path: activeRepoPath }
+      )
+      expect(res!.content![0]!.text).toContain('## Fix 1:')
+      expect(res!.content![0]!.text).not.toContain('## Fix 2:')
+    }
+
+    it('should handle missing path parameter', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_new_available_fixes', {})
+      ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
+    })
+    it('should handle non-existent path', async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>('check_for_new_available_fixes', {
+          path: nonExistentPath,
+        })
+      ).rejects.toThrow(
+        'Invalid path: potential security risk detected in path'
+      )
+    })
+
+    it('no inital fixes', async () => {
+      activeRepo.updateFileContent(0, benignFileContent)
+      activeRepo.updateFileContent(1, benignFileContent)
+      activeRepo.updateFileContent(2, benignFileContent)
+      mcpClient = new InlineMCPClient(createMcpServer())
+
+      await waitForScanCompletion(mcpClient, activeRepoPath)
+
+      // After initial scan, there should be no fresh fixes
+      await expectNoFreshFixes()
+    })
+
+    it('should return 3 inital fixes in 1 batch', async () => {
+      mcpClient = new InlineMCPClient(createMcpServer())
+      activeRepo.updateFileContent(0, vulnerableFileContent)
+      activeRepo.updateFileContent(1, vulnerableFileContent)
+      activeRepo.updateFileContent(2, vulnerableFileContent)
+
+      const firstFixesRes = await waitForScanCompletion(
+        mcpClient,
+        activeRepoPath
+      )
+
+      console.log('initial scan complete, fetching fixes')
+      expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
+
+      await expectNoFreshFixes()
+    })
+
+    it('should return 4 inital fixes in 2 batches', async () => {
+      mcpClient = new InlineMCPClient(createMcpServer())
+      activeRepo.updateFileContent(0, vulnerableFileContent)
+      activeRepo.updateFileContent(1, vulnerableFileContent)
+      activeRepo.updateFileContent(2, multupleVulnerableFileContent)
+
+      const firstFixesRes = await waitForScanCompletion(
+        mcpClient,
+        activeRepoPath
+      )
+
+      expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
+
+      await expectSingleFix()
+
+      await expectNoFreshFixes()
+    })
+
+    it('should detect new fixes introduced after initial scan', async () => {
+      activeRepo.updateFileContent(0, benignFileContent)
+      activeRepo.updateFileContent(1, benignFileContent)
+      activeRepo.updateFileContent(2, benignFileContent)
+      mcpClient = new InlineMCPClient(createMcpServer())
+
+      await waitForScanCompletion(mcpClient, activeRepoPath)
+
+      // After initial scan, there should be no fresh fixes
+      await expectNoFreshFixes()
+
+      activeRepo.updateFileContent(0, vulnerableFileContent)
+      // Advance timers by the periodic interval to trigger scanning loop
+      vi.advanceTimersByTime(MCP_PERIODIC_CHECK_INTERVAL)
+      await waitFor(() => expectSingleFix(), { timeout: 30000 })
+      await expectNoFreshFixes()
+    })
+
+    it('should not report new fixes that moved', async () => {
+      activeRepo.updateFileContent(0, benignFileContent)
+      activeRepo.updateFileContent(1, benignFileContent)
+      activeRepo.updateFileContent(2, benignFileContent)
+      mcpClient = new InlineMCPClient(createMcpServer())
+
+      await waitForScanCompletion(mcpClient, activeRepoPath)
+
+      // After initial scan, there should be no fresh fixes
+      await expectNoFreshFixes()
+
+      activeRepo.updateFileContent(0, vulnerableFileContent)
+      // Advance timers by the periodic interval to trigger scanning loop
+      vi.advanceTimersByTime(MCP_PERIODIC_CHECK_INTERVAL)
+      await waitFor(() => expectSingleFix(), { timeout: 30000 })
+      await expectNoFreshFixes()
+      activeRepo.updateFileContent(
+        0,
+        `
+        
+        ${vulnerableFileContent}`
+      )
+      vi.advanceTimersByTime(MCP_PERIODIC_CHECK_INTERVAL)
+      await sleep(3000)
+      await expectNoFreshFixes()
     })
   })
 })

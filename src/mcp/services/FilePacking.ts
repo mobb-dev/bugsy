@@ -6,9 +6,8 @@ import AdmZip from 'adm-zip'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - istextorbinary module doesn't have proper TypeScript declarations
 import { FileUtils } from '../../features/analysis/scm/FileUtils'
+import { MCP_MAX_FILE_SIZE } from '../core/configs'
 import { logInfo } from '../Logger'
-
-const MAX_FILE_SIZE = 1024 * 1024 * 5 // 5MB
 
 export class FilePacking {
   public async packFiles(
@@ -25,7 +24,7 @@ export class FilePacking {
       const absoluteFilepath = path.join(sourceDirectoryPath, filepath)
 
       // Use FileUtils to check if file should be packed
-      if (!FileUtils.shouldPackFile(absoluteFilepath, MAX_FILE_SIZE)) {
+      if (!FileUtils.shouldPackFile(absoluteFilepath, MCP_MAX_FILE_SIZE)) {
         logInfo(
           `FilePacking: ignoring ${filepath} because it is excluded or invalid`
         )

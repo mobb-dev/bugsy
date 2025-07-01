@@ -160,10 +160,13 @@ How to invoke:
 • Optional arguments:
   – offset (number): pagination offset used when the result set is large.
   – limit (number): maximum number of fixes to include in the response.
+  – maxFiles (number): maximum number of files to scan (default: 10). Provide this value to increase the scope of the scan.
   – rescan (boolean): true to force a complete rescan even if cached results exist.
 
 Behaviour:
+• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the las commit.
 • If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
+• If maxFiles is provided, the tool scans the maxFiles most recently changed files in the repository.
 • By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
 • The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
 
@@ -176,6 +179,7 @@ Example payload:
 {
   "path": "/home/user/my-project",
   "limit": 20,
+  "maxFiles": 50,
   "rescan": false
 }`,
             inputSchema: {
@@ -197,6 +201,11 @@ Example payload:
                 offset: {
                   type: 'number',
                   description: '[Optional] offset for pagination',
+                },
+                maxFiles: {
+                  type: 'number',
+                  description:
+                    '[Optional] maximum number of files to scan (default: 10). Use higher values for more comprehensive scans or lower values for faster performance.',
                 },
               },
               required: ['path'],
@@ -239,6 +248,40 @@ Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixe
                 offset: {
                   type: 'number',
                   description: '[Optional] offset for pagination',
+                },
+              },
+              required: ['path'],
+            },
+          },
+          {
+            name: 'check_for_new_available_fixes',
+            display_name: 'Check for New Available Fixes',
+            description: `Continuesly monitors your code and scans for new security vulnerabilities.
+
+When to invoke:
+• ALWAYS call this tool ONCE at the very end of every reasoning / code-generation session (after all code edits, linting, tests, etc.).
+• Invoke when the user explicitly asks to "check for new fixes", "look for fresh patches", or similar.
+• The repository must exist locally and be a valid Git repo with an 'origin' remote configured.
+
+How to invoke:
+• Required argument:
+  – path (string): absolute path to the repository root.
+
+Behaviour:
+• If no new fixes are available, it returns a concise message indicating so.
+• If fixes are found, it returns a human-readable summary including total count and severity breakdown.
+
+Example payload:
+{
+  "path": "/home/user/my-project"
+}`,
+            inputSchema: {
+              type: 'object',
+              properties: {
+                path: {
+                  type: 'string',
+                  description:
+                    'Full local path to the cloned git repository to check for new available fixes',
                 },
               },
               required: ['path'],

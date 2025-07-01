@@ -1,17 +1,15 @@
-import { noReportFoundPrompt } from '@mobb/bugsy/mcp/core/prompts'
+import {
+  initialScanInProgressPrompt,
+  noReportFoundPrompt,
+} from '@mobb/bugsy/mcp/core/prompts'
 import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFixes/FetchAvailableFixesTool'
 import { tmpdir } from 'os'
 import { join } from 'path'
 
+import { CheckForNewAvailableFixesTool as CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 import { log } from './helpers/log'
-import {
-  createActiveGitRepo,
-  createActiveNoChangesGitRepo,
-  createActiveNonGitRepo,
-  createEmptyGitRepo,
-  deleteGitRepo,
-} from './helpers/utils'
+import { MockRepo } from './helpers/MockRepo'
 import { BAD_API_KEY } from './mocks/graphqlHandlers'
 import { MOCK_API_URL, mockGraphQL, server } from './mocks/mocks.js'
 
@@ -131,6 +129,12 @@ describe('MCP Server', () => {
   let codeNotInGitRepoPath: string
   let originalApiUrl: string | undefined
 
+  // Individual MockRepo helpers (one repo per instance)
+  let emptyRepo: MockRepo
+  let activeRepo: MockRepo
+  let activeNoChangesRepo: MockRepo
+  let nonGitRepo: MockRepo
+
   // Helper function for common result assertions
   const expectValidResult = (result: {
     content: { type: string; text: string }[]
@@ -159,19 +163,18 @@ describe('MCP Server', () => {
     log(`Created nonExistentPath: ${nonExistentPath}`)
 
     try {
-      emptyRepoPath = createEmptyGitRepo()
-      log(`Created emptyRepoPath: ${emptyRepoPath}`)
+      emptyRepo = new MockRepo()
+      activeRepo = new MockRepo()
+      activeNoChangesRepo = new MockRepo()
+      nonGitRepo = new MockRepo()
 
-      activeRepoPath = createActiveGitRepo()
-      log(`Created activeRepoPath: ${activeRepoPath}`)
+      emptyRepoPath = await emptyRepo.createEmptyGitRepo()
+      activeRepoPath = await activeRepo.createActiveGitRepo()
+      activeNoChangesRepoPath =
+        await activeNoChangesRepo.createActiveNoChangesGitRepo()
+      codeNotInGitRepoPath = await nonGitRepo.createActiveNonGitRepo()
 
-      // Create a git repository with no changes in `git status`
-      activeNoChangesRepoPath = createActiveNoChangesGitRepo()
-
-      // Create a directory with a code file that is not in a git repo
-      codeNotInGitRepoPath = createActiveNonGitRepo()
-
-      log(`Using codeNotInGitRepoPath: ${codeNotInGitRepoPath}`)
+      log('Created repos for test setup')
     } catch (e) {
       log('Error in beforeEach:', e)
       throw e
@@ -182,28 +185,19 @@ describe('MCP Server', () => {
   afterEach(async () => {
     log('Starting afterEach...')
     // Clean up repos after each test
-    if (emptyRepoPath) {
-      log(`Cleaning up emptyRepoPath: ${emptyRepoPath}`)
-      try {
-        deleteGitRepo(emptyRepoPath)
-      } catch (e) {
-        log('Error cleaning up emptyRepoPath:', e)
-      }
-    }
-    if (activeRepoPath) {
-      log(`Cleaning up activeRepoPath: ${activeRepoPath}`)
-      try {
-        deleteGitRepo(activeRepoPath)
-      } catch (e) {
-        log('Error cleaning up activeRepoPath:', e)
-      }
-    }
-    if (activeNoChangesRepoPath) {
-      log(`Cleaning up activeNoChangesRepoPath: ${activeNoChangesRepoPath}`)
-      try {
-        deleteGitRepo(activeNoChangesRepoPath)
-      } catch (e) {
-        log('Error cleaning up activeNoChangesRepoPath:', e)
+    const repoHelpers: (MockRepo | undefined)[] = [
+      emptyRepo,
+      activeRepo,
+      activeNoChangesRepo,
+      nonGitRepo,
+    ]
+    for (const helper of repoHelpers) {
+      if (helper) {
+        try {
+          helper.cleanupAll()
+        } catch (e) {
+          log('Error cleaning up repo helper:', e)
+        }
       }
     }
     // Reset the GraphQL mock system
@@ -236,10 +230,13 @@ describe('MCP Server', () => {
     console.log(`MSW server stopped`)
 
     // Clean up the git repos
-    deleteGitRepo(emptyRepoPath)
-    deleteGitRepo(activeRepoPath)
-    deleteGitRepo(activeNoChangesRepoPath)
-    deleteGitRepo(codeNotInGitRepoPath)
+    const repoHelpers: (MockRepo | undefined)[] = [
+      emptyRepo,
+      activeRepo,
+      activeNoChangesRepo,
+      nonGitRepo,
+    ]
+    repoHelpers.forEach((helper) => helper?.cleanupAll())
 
     log('afterAll completed.')
   })
@@ -267,10 +264,12 @@ describe('MCP Server', () => {
     })
 
     it('should handle path that is not a git repository', async () => {
+      log('Starting test...')
       const tool = new FixVulnerabilitiesTool()
       log('Executing tool with nonRepoPath...')
       const result = await tool.execute({ path: codeNotInGitRepoPath })
       log('Tool execution completed, validating result...')
+      log('Result', result)
       expectValidResult(result)
       log('Test completed: should handle path that is not a git repository')
     })
@@ -366,6 +365,52 @@ describe('MCP Server', () => {
         expect(result.content[0]?.text).toContain(
           'Here are the fixes to the vulnerabilities discovered by Mobb MCP'
         )
+      })
+
+      it('should reject path traversal attempts with actual malicious paths', async () => {
+        // Test actual malicious paths that should be blocked by validateMCPPath
+        const tool = new FixVulnerabilitiesTool()
+        const maliciousPaths = [
+          '../../../etc/passwd',
+          '..\\..\\..\\windows\\system32\\config\\sam',
+          '../.env',
+          '../../package.json',
+          '../../../home/user/.ssh/id_rsa',
+          'subdir/../../../etc/hosts',
+          './../../sensitive-file.txt',
+          'normal-file/../../../etc/passwd',
+        ]
+
+        for (const maliciousPath of maliciousPaths) {
+          await expect(tool.execute({ path: maliciousPath })).rejects.toThrow(
+            'Invalid path: potential security risk detected in path: Path contains path traversal patterns'
+          )
+        }
+      })
+      it('should window specific path as non existent', async () => {
+        // Test actual malicious paths that should be blocked by validateMCPPath
+        const tool = new FixVulnerabilitiesTool()
+        const windowsPaths = [
+          'c:/Users/Antony/.cursor/webgoat',
+          '/c:/Users/Antony/.cursor/webgoat',
+        ]
+
+        for (const windowsPath of windowsPaths) {
+          await expect(tool.execute({ path: windowsPath })).rejects.toThrow(
+            'Invalid path: potential security risk detected in path: Path does not exist or is not accessible:'
+          )
+        }
+      })
+      it('should not path traversal attempts with actual malicious paths', async () => {
+        // Test actual malicious paths that should be blocked by validateMCPPath
+        const tool = new FixVulnerabilitiesTool()
+        const dotPaths = ['.', './']
+
+        for (const dotPath of dotPaths) {
+          await expect(tool.execute({ path: dotPath })).rejects.toThrow(
+            'Invalid path: potential security risk detected in path: "." is not a valid path, please provide a full localpath to the repository'
+          )
+        }
       })
     })
 
@@ -660,7 +705,6 @@ describe('MCP Server', () => {
         expect(fixesText).toMatchSnapshot()
 
         expectErrorLogWithData('Path is not a valid git repository')
-        // Verify no error logs were generated
         expect(loggerMock.mocks.logError.mock.calls).toHaveLength(1)
       })
 
@@ -976,6 +1020,45 @@ describe('MCP Server', () => {
 
       // Verify no error logs were generated
       expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+    })
+  })
+
+  describe('CheckForNewAvailableFixesTool', () => {
+    beforeEach(() => {
+      // Reset all logger mocks before each test
+      Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
+    })
+
+    afterEach(() => {
+      // Restore all spies/mocks created with vi.spyOn
+      vi.restoreAllMocks()
+    })
+
+    it('should handle missing path parameter', async () => {
+      const tool = new CheckForNewAvailableFixesTool()
+      await expect(tool.execute({} as { path: string })).rejects.toThrow(
+        "Invalid arguments: Missing required parameter 'path'"
+      )
+    })
+
+    it('should handle non-existent path', async () => {
+      const tool = new CheckForNewAvailableFixesTool()
+      await expect(tool.execute({ path: nonExistentPath })).rejects.toThrow(
+        'Invalid path: potential security risk detected in path'
+      )
+    })
+
+    it('should return initial scan in progress prompt when initial scan is in progress', async () => {
+      mockGraphQL().me().succeeds()
+      mockGraphQL().uploadS3BucketInfo().succeeds()
+      mockGraphQL().getOrgAndProjectId().succeeds()
+      mockGraphQL().submitVulnerabilityReport().succeeds()
+      mockGraphQL().getReportFixes().succeeds()
+      const tool = new CheckForNewAvailableFixesTool()
+      const result = await tool.execute({ path: activeRepoPath })
+
+      expectValidResult(result)
+      expect(result.content[0]?.text).toBe(initialScanInProgressPrompt)
     })
   })
 })

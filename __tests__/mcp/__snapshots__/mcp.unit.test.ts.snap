@@ -244,18 +244,30 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+
 ### 📁 Scanned Files
-- sample.js
+- dir/dir2/sample3.py
+- dir/sample2.py
+- sample1.py
+
+### Extend the scan scope
+
+To scan a larger number of files, include the additional parameter:
+
+- **maxFiles**: <number_of_files_to_scan>
+
+This will scan up to the specified number of recently changed files.
 
 ### 🔄 Running a Fresh Scan
 
 To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
 
-- **isRescan**: true
+- **rescan**: true
 
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
 
 "
 `;
@@ -372,18 +384,30 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+
 ### 📁 Scanned Files
-- sample.js
+- dir/dir2/sample3.py
+- dir/sample2.py
+- sample1.py
+
+### Extend the scan scope
+
+To scan a larger number of files, include the additional parameter:
+
+- **maxFiles**: <number_of_files_to_scan>
+
+This will scan up to the specified number of recently changed files.
 
 ### 🔄 Running a Fresh Scan
 
 To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
 
-- **isRescan**: true
+- **rescan**: true
 
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
 
 "
 `;
@@ -500,18 +524,30 @@ diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
 
 
 
+
 ### 📁 Scanned Files
-- sample.js
+- dir/dir2/sample3.py
+- dir/sample2.py
+- sample1.py
+
+### Extend the scan scope
+
+To scan a larger number of files, include the additional parameter:
+
+- **maxFiles**: <number_of_files_to_scan>
+
+This will scan up to the specified number of recently changed files.
 
 ### 🔄 Running a Fresh Scan
 
 To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
 
-- **isRescan**: true
+- **rescan**: true
 
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
 
 "
 `;
@@ -520,5 +556,31 @@ exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should r
 "🔍 **MOBB SECURITY SCAN COMPLETED** 
 
 Mobb security scan completed successfully but found no automated fixes available at this time.
+
+
+### 📁 Scanned Files
+- dir/dir2/sample3.py
+- dir/sample2.py
+- sample1.py
+
+### Extend the scan scope
+
+To scan a larger number of files, include the additional parameter:
+
+- **maxFiles**: <number_of_files_to_scan>
+
+This will scan up to the specified number of recently changed files.
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **rescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+
 "
 `;

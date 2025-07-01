@@ -3,10 +3,15 @@ import fs from 'node:fs'
 import { isBinary } from 'istextorbinary'
 import path from 'path'
 
+import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../../mcp/core/configs'
+
 // Default excluded file patterns for source code analysis
 const EXCLUDED_FILE_PATTERNS = [
   // ... (copy the full array from FilePacking.ts)
   '.json',
+  '.snap',
+  '.env.vault',
+  '.env',
   '.yaml',
   '.yml',
   '.toml',
@@ -163,16 +168,25 @@ export class FileUtils {
     maxFileSize = 1024 * 1024 * 5
   ): boolean {
     const absoluteFilepath = path.resolve(filepath)
-    if (this.isExcludedFileType(filepath)) return false
-    if (!fs.existsSync(absoluteFilepath)) return false
-    if (fs.lstatSync(absoluteFilepath).size > maxFileSize) return false
+
+    if (this.isExcludedFileType(filepath)) {
+      return false
+    }
+    if (!fs.existsSync(absoluteFilepath)) {
+      return false
+    }
+    if (fs.lstatSync(absoluteFilepath).size > maxFileSize) {
+      return false
+    }
     let data: Buffer
     try {
       data = fs.readFileSync(absoluteFilepath)
     } catch {
       return false
     }
-    if (isBinary(null, data)) return false
+    if (isBinary(null, data)) {
+      return false
+    }
     return true
   }
 
@@ -201,8 +215,8 @@ export class FileUtils {
       return []
     }
 
-    // we already collected 100000 files, skip the current directory
-    if (results.length > 100000) {
+    // we already collected 1000 files, skip the current directory
+    if (results.length > 1000) {
       return []
     }
 
@@ -242,18 +256,22 @@ export class FileUtils {
     return results
   }
 
-  static getLastChangedFiles(
-    dir: string,
-    maxFileSize = 1024 * 1024 * 5,
-    count = 10
-  ): string[] {
+  static getLastChangedFiles({
+    dir,
+    maxFileSize,
+    maxFiles = MCP_DEFAULT_MAX_FILES_TO_SCAN,
+  }: {
+    dir: string
+    maxFileSize: number
+    maxFiles?: number
+  }): string[] {
     if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return []
 
     const files = this.getAllFiles(dir)
     return files
       .filter((file) => this.shouldPackFile(file.fullPath, maxFileSize))
       .sort((a, b) => b.time - a.time)
-      .slice(0, count)
+      .slice(0, maxFiles)
       .map((file) => file.relativePath)
   }
 }

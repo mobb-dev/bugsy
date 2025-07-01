@@ -474,6 +474,9 @@ fragment FixDetails on fix {
       vulnerability_report_issue_tag_value
     }
   }
+  sharedState{
+    id
+  }
   patchAndQuestions {
     __typename
     ... on FixData {

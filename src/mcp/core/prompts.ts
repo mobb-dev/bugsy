@@ -263,9 +263,39 @@ ${applyFixesPrompt({
 })}`
 }
 
-export const noFixesFoundPrompt = `🔍 **MOBB SECURITY SCAN COMPLETED** 
+const nextStepsPrompt = ({ scannedFiles }: { scannedFiles: string[] }) => `
+### 📁 Scanned Files
+${scannedFiles.map((file) => `- ${file}`).join('\n')}
+
+### Extend the scan scope
+
+To scan a larger number of files, include the additional parameter:
+
+- **maxFiles**: <number_of_files_to_scan>
+
+This will scan up to the specified number of recently changed files.
+
+### 🔄 Running a Fresh Scan
+
+To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+
+- **rescan**: true
+
+This will start a new analysis, discard any cached results.
+
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+
+`
+
+export const noFixesFoundPrompt = ({
+  scannedFiles,
+}: {
+  scannedFiles: string[]
+}) => `🔍 **MOBB SECURITY SCAN COMPLETED** 
 
 Mobb security scan completed successfully but found no automated fixes available at this time.
+
+${nextStepsPrompt({ scannedFiles })}
 `
 
 export const fixesPrompt = ({
@@ -281,7 +311,7 @@ export const fixesPrompt = ({
 }) => {
   //const fix = fixes[0]
   if (totalCount === 0) {
-    return noFixesFoundPrompt
+    return noFixesFoundPrompt({ scannedFiles })
   }
 
   const shownCount = fixes.length
@@ -300,19 +330,27 @@ ${applyFixesPrompt({
   offset,
 })}
 
-### 📁 Scanned Files
-${scannedFiles.map((file) => `- ${file}`).join('\n')}
+${nextStepsPrompt({ scannedFiles })}
+`
+}
 
-### 🔄 Running a Fresh Scan
+export const noFreshFixesPrompt = `No fresh fixes available for this repository at this time.
+`
 
-To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+export const initialScanInProgressPrompt = `Initial scan in progress. Call the tool again in 1 minute to check for available fixes.`
 
-- **isRescan**: true
+export const freshFixesPrompt = ({ fixes }: { fixes: McpFix[] }) => {
+  return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
 
-This will start a new analysis, discard any cached results.
-
-⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
-
+${applyFixesPrompt({
+  fixes,
+  totalCount: fixes.length,
+  hasMore: false,
+  nextOffset: 0,
+  shownCount: fixes.length,
+  currentTool: 'fetch_available_fixes',
+  offset: 0,
+})}
 `
 }
 

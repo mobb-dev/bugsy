@@ -1,8 +1,8 @@
 import z from 'zod'
 
-import { FileUtils } from '../../../features/analysis/scm/FileUtils'
-import { GitService } from '../../../features/analysis/scm/git/GitService'
-import { log, logDebug, logInfo } from '../../Logger'
+import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../core/configs'
+import { logInfo } from '../../Logger'
+import { getLocalFiles } from '../../services/GetLocalFiles'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
 // Reuse the existing vulnerability fix service implementation
@@ -25,10 +25,13 @@ How to invoke:
 • Optional arguments:
   – offset (number): pagination offset used when the result set is large.
   – limit (number): maximum number of fixes to include in the response.
+  – maxFiles (number): maximum number of files to scan (default: ${MCP_DEFAULT_MAX_FILES_TO_SCAN}). Provide this value to increase the scope of the scan.
   – rescan (boolean): true to force a complete rescan even if cached results exist.
 
 Behaviour:
+• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the las commit.
 • If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
+• If maxFiles is provided, the tool scans the maxFiles most recently changed files in the repository.
 • By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
 • The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
 
@@ -41,6 +44,7 @@ Example payload:
 {
   "path": "/home/user/my-project",
   "limit": 20,
+  "maxFiles": 50,
   "rescan": false
 }`
 
@@ -55,6 +59,12 @@ Example payload:
       .number()
       .optional()
       .describe('Optional maximum number of results to return'),
+    maxFiles: z
+      .number()
+      .optional()
+      .describe(
+        `Optional maximum number of files to scan (default: ${MCP_DEFAULT_MAX_FILES_TO_SCAN}). Increase for comprehensive scans of larger codebases or decrease for faster focused scans.`
+      ),
     rescan: z
       .boolean()
       .optional()
@@ -76,6 +86,10 @@ Example payload:
       limit: {
         type: 'number',
         description: '[Optional] maximum number of results to return',
+      },
+      maxFiles: {
+        type: 'number',
+        description: `[Optional] maximum number of files to scan (default: ${MCP_DEFAULT_MAX_FILES_TO_SCAN}). Use higher values for more comprehensive scans or lower values for faster performance.`,
       },
       rescan: {
         type: 'boolean',
@@ -100,7 +114,6 @@ Example payload:
     if (!args.path) {
       throw new Error("Invalid arguments: Missing required parameter 'path'")
     }
-
     // Validate the path for security and existence
     const pathValidationResult = await validatePath(args.path)
 
@@ -111,45 +124,13 @@ Example payload:
     }
 
     const path = pathValidationResult.path
+    const files = await getLocalFiles({
+      path,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
+      maxFiles: args.maxFiles,
+    })
 
-    // Validate git repository - let validation errors bubble up as MCP errors
-    const gitService = new GitService(path, log)
-    const gitValidation = await gitService.validateRepository()
-    let files: string[] = []
-    if (!gitValidation.isValid) {
-      logDebug(
-        'Git repository validation failed, using all files in the repository',
-        {
-          path,
-        }
-      )
-      files = FileUtils.getLastChangedFiles(path)
-      logDebug('Found files in the repository', {
-        files,
-        fileCount: files.length,
-      })
-    } else {
-      const gitResult = await gitService.getChangedFiles()
-      files = gitResult.files
-      if (files.length === 0) {
-        const recentResult = await gitService.getRecentlyChangedFiles()
-        files = recentResult.files
-        logDebug(
-          'No changes found, using recently changed files from git history',
-          {
-            files,
-            fileCount: files.length,
-            commitsChecked: recentResult.commitCount,
-          }
-        )
-      } else {
-        logDebug('Found changed files in the git repository', {
-          files,
-          fileCount: files.length,
-        })
-      }
-    }
-
+    logInfo('Files', { files })
     // Check if there are files to process
     if (files.length === 0) {
       return {
@@ -167,11 +148,11 @@ Example payload:
 
       const fixResult =
         await this.vulnerabilityFixService.processVulnerabilities({
-          fileList: files,
-          repositoryPath: path,
+          fileList: files.map((file) => file.relativePath),
+          repositoryPath: args.path,
           offset: args.offset,
           limit: args.limit,
-          isRescan: args.rescan,
+          isRescan: args.rescan || !!args.maxFiles,
         })
 
       const result = {

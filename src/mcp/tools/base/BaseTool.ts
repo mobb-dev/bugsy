@@ -37,8 +37,6 @@ export abstract class BaseTool {
   }
 
   public async execute(args: unknown): Promise<ToolResponse> {
-    logInfo(`Executing tool: ${this.name}`, { args })
-
     logInfo(`Authenticating tool: ${this.name}`, { args })
     const mcpGqlClient = await getMcpGQLClient()
     const userInfo = await mcpGqlClient.getUserInfo()

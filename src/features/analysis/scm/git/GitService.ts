@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { SimpleGit, simpleGit, StatusResult } from 'simple-git'
 
+import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../../../mcp/core/configs'
 import { FileUtils } from '../FileUtils'
 
 export type GitValidationResult = {
@@ -10,6 +11,7 @@ export type GitValidationResult = {
 
 export type GitStatusResult = {
   files: string[]
+  deletedFiles: string[]
   status: StatusResult
 }
 
@@ -88,36 +90,47 @@ export class GitService {
         this.repositoryPath
       )
 
-      // Adjust file paths to be relative to our working directory instead of git root
-      const files = status.files.map((file) => {
-        const gitRelativePath = file.path
+      // Identify deleted files first
+      const deletedFiles = status.files
+        .filter((file) => file.index === 'D' || file.working_dir === 'D')
+        .map((file) => file.path)
 
-        // If our working directory is the git root, return paths as-is
-        if (relativePathFromGitRoot === '') {
-          return gitRelativePath
-        }
+      // Adjust file paths to be relative, excluding deleted ones
+      const files = status.files
+        .filter((file) => {
+          return !(file.index === 'D' || file.working_dir === 'D')
+        })
+        .map((file) => {
+          const gitRelativePath = file.path
 
-        // If the file path starts with our relative path, remove that prefix
-        if (gitRelativePath.startsWith(relativePathFromGitRoot + '/')) {
-          return gitRelativePath.substring(relativePathFromGitRoot.length + 1)
-        }
+          // If our working directory is the git root, return paths as-is
+          if (relativePathFromGitRoot === '') {
+            return gitRelativePath
+          }
 
-        // If the file is outside our working directory, use relative path from working dir
-        return path.relative(
-          this.repositoryPath,
-          path.join(gitRoot, gitRelativePath)
-        )
-      })
+          // If the file path starts with our relative path, remove that prefix
+          if (gitRelativePath.startsWith(relativePathFromGitRoot + '/')) {
+            return gitRelativePath.substring(relativePathFromGitRoot.length + 1)
+          }
+
+          // If the file is outside our working directory, use relative path from working dir
+          return path.relative(
+            this.repositoryPath,
+            path.join(gitRoot, gitRelativePath)
+          )
+        })
 
       this.log('Git status retrieved', 'info', {
         fileCount: files.length,
         files: files.slice(0, 10), // Log first 10 files to avoid spam
+        deletedFileCount: deletedFiles.length,
+        deletedFiles: deletedFiles.slice(0, 10),
         gitRoot,
         workingDir: this.repositoryPath,
         relativePathFromGitRoot,
       })
 
-      return { files, status }
+      return { files, deletedFiles, status }
     } catch (error) {
       const errorMessage = `Failed to get git status: ${(error as Error).message}`
       this.log(errorMessage, 'error', { error })
@@ -259,11 +272,15 @@ export class GitService {
   }
 
   /**
-   * Gets the 10 most recently changed files based on commit history
+   * Gets the maxFiles most recently changed files based on commit history
    */
-  public async getRecentlyChangedFiles(): Promise<RecentFilesResult> {
+  public async getRecentlyChangedFiles({
+    maxFiles = MCP_DEFAULT_MAX_FILES_TO_SCAN,
+  }: {
+    maxFiles?: number
+  }): Promise<RecentFilesResult> {
     this.log(
-      'Getting the 10 most recently changed files from commit history',
+      `Getting the ${maxFiles} most recently changed files from commit history`,
       'debug'
     )
 
@@ -284,7 +301,7 @@ export class GitService {
 
       // Get a reasonable number of recent commits to search through
       const logResult = await this.git.log({
-        maxCount: 100, // Get last 100 commits - should be enough to find 10 unique files
+        maxCount: maxFiles * 5, // 5 times the max files to scan to ensure we find enough files
         format: {
           hash: '%H',
           date: '%ai',
@@ -296,7 +313,7 @@ export class GitService {
 
       // Process commits in chronological order (most recent first)
       for (const commit of logResult.all) {
-        if (files.length >= 10) {
+        if (files.length >= maxFiles) {
           break
         }
 
@@ -316,7 +333,7 @@ export class GitService {
             .filter((file) => file.trim() !== '')
 
           for (const file of commitFiles) {
-            if (files.length >= 10) {
+            if (files.length >= maxFiles) {
               break
             }
 
@@ -345,10 +362,11 @@ export class GitService {
 
             this.log(`Considering file: ${adjustedPath}`, 'debug')
 
-            // Only add if we haven't seen this file before
+            // Only add if we haven't seen this file before and it passes our filters
             if (
               !fileSet.has(adjustedPath) &&
-              FileUtils.shouldPackFile(path.join(gitRoot, gitRelativePath))
+              FileUtils.shouldPackFile(path.join(gitRoot, gitRelativePath)) &&
+              !adjustedPath.startsWith('..')
             ) {
               fileSet.add(adjustedPath)
               files.push(adjustedPath)
@@ -366,7 +384,7 @@ export class GitService {
         fileCount: files.length,
         commitsProcessed,
         totalCommitsAvailable: logResult.all.length,
-        files: files.slice(0, 10), // Log the files (should be all of them since we limit to 10)
+        files: files.slice(0, maxFiles), // Log the files (should be all of them since we limit to maxFiles)
         gitRoot,
         workingDir: this.repositoryPath,
         relativePathFromGitRoot,

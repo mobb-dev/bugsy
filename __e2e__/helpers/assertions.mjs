@@ -89,11 +89,15 @@ const highlightDiff = (
   unchangedColorFn,
   diffBgColorFn,
 ) => {
-  const maxLen = Math.max(base.length, compare.length)
+  // Convert to strings and handle undefined/null values
+  const baseStr = base != null ? String(base) : ''
+  const compareStr = compare != null ? String(compare) : ''
+  
+  const maxLen = Math.max(baseStr.length, compareStr.length)
   let res = ''
   for (let i = 0; i < maxLen; i += 1) {
-    const charBase = base[i] ?? ''
-    const charCompare = compare[i] ?? ''
+    const charBase = baseStr[i] ?? ''
+    const charCompare = compareStr[i] ?? ''
     if (charBase === charCompare) {
       res += unchangedColorFn(charBase)
     } else {

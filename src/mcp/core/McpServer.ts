@@ -112,7 +112,7 @@ export class McpServer {
       request: JSON.parse(JSON.stringify(request)),
     })
 
-    void getMcpGQLClient()
+    void getMcpGQLClient({ isToolsCall: true })
 
     const toolsDefinitions = this.toolRegistry.getAllTools()
     const response = {

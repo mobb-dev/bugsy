@@ -51,7 +51,7 @@ export const monitorNetworkCalls = (server: SetupServerApi) => {
       const json = await request.clone().json()
       if (process.env['VERBOSE']) {
         console.log(
-          `[MSW] GraphQL Request: ${json.operationName || 'unknown'}`,
+          `[MSW] GraphQL Request: ${String(json.operationName || 'unknown').replace(/\n|\r/g, '')}`,
           '\n[MSW] Request URL:',
           `${request.method} ${request.url}`,
           '\n[MSW] Request headers:',

@@ -122,7 +122,7 @@ export async function addSpaceToFiles(filePaths) {
 }
 
 /**
- * Finds and adds spaces to specific files by name regardless of their location
+ * Finds and adds spaces to specific files by name regardless of their locationm
  * @param {string} repoDir - The repository directory
  * @param {string[]} targetFileNames - List of target file names (e.g. 'User.java')
  * @returns {string[]} - List of modified file paths

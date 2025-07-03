@@ -7,6 +7,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { v4 as uuidv4 } from 'uuid'
 
 import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
+import { ReportDigestError } from '../../../mcp/core/Errors'
 import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   CreateCliLoginMutationVariables,
@@ -425,7 +426,12 @@ export class GQLClient {
           !data.analysis?.state ||
           data.analysis?.state === Fix_Report_State_Enum.Failed
         ) {
-          reject(new Error(`Analysis failed with id: ${data.analysis?.id}`))
+          const errorMessage =
+            data.analysis?.failReason ||
+            `Analysis failed with id: ${data.analysis?.id}`
+          reject(
+            new ReportDigestError(errorMessage, data.analysis?.failReason ?? '')
+          )
           return
         }
         if (callbackStates.includes(data.analysis?.state)) {

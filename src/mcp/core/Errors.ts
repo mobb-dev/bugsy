@@ -67,3 +67,24 @@ export class FailedToGetApiTokenError extends Error {
     this.name = 'FailedToGetApiTokenError'
   }
 }
+
+export class ReportDigestError extends Error {
+  static defaultMessage =
+    '🕵️‍♂️ Digesting report failed. Please verify that the file provided is of a valid supported report format.'
+
+  constructor(
+    message: string,
+    public failReason?: string
+  ) {
+    super(message)
+    this.name = 'ReportDigestError'
+    this.failReason = failReason
+  }
+
+  getDisplayMessage(): string {
+    if (this.failReason?.trim()) {
+      return `🕵️‍♂️ Digesting report failed. ${this.failReason}`
+    }
+    return ReportDigestError.defaultMessage
+  }
+}

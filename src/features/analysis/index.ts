@@ -32,6 +32,7 @@ import open from 'open'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import { ReportDigestError } from '../../mcp/core/Errors'
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { handleAutoPr } from './auto_pr_handler'
 import { getGitInfo, GetGitInfoResult } from './git'
@@ -842,25 +843,21 @@ export async function _digestReport({
         shouldScan,
       }
     )
-    try {
-      await gqlClient.subscribeToAnalysis({
-        subscribeToAnalysisParams: {
-          analysisId: fixReportId,
-        },
-        callback: () =>
-          digestSpinner.update({
-            text: progressMassages.processingVulnerabilityReportSuccess,
-          }),
+    await gqlClient.subscribeToAnalysis({
+      subscribeToAnalysisParams: {
+        analysisId: fixReportId,
+      },
+      callback: () =>
+        digestSpinner.update({
+          text: progressMassages.processingVulnerabilityReportSuccess,
+        }),
 
-        callbackStates: [
-          Fix_Report_State_Enum.Digested,
-          Fix_Report_State_Enum.Finished,
-        ],
-        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
-      })
-    } catch (e) {
-      throw new Error(progressMassages.processingVulnerabilityReportFailed)
-    }
+      callbackStates: [
+        Fix_Report_State_Enum.Digested,
+        Fix_Report_State_Enum.Finished,
+      ],
+      timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+    })
     const vulnFiles = await gqlClient.getVulnerabilityReportPaths(
       vulnerabilityReportId
     )
@@ -869,8 +866,12 @@ export async function _digestReport({
     })
     return vulnFiles
   } catch (e) {
+    const errorMessage =
+      e instanceof ReportDigestError
+        ? e.getDisplayMessage()
+        : ReportDigestError.defaultMessage
     digestSpinner.error({
-      text: '🕵️‍♂️ Digesting report failed. Please verify that the file provided is of a valid supported report format.',
+      text: errorMessage,
     })
     throw e
   }

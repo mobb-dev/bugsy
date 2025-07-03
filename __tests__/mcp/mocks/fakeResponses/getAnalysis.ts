@@ -5,6 +5,7 @@ export const mockGetAnalysis = {
     analysis: {
       id: 'test-analysis-id',
       state: Fix_Report_State_Enum.Finished,
+      failReason: '',
       repo: {
         commitSha: 'abc123def456',
         pullRequest: null,

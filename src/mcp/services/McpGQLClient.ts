@@ -12,6 +12,7 @@ import { subscribe } from '../../features/analysis/graphql/subscribe'
 import {
   CreateCliLoginMutationVariables,
   Fix_Report_State_Enum,
+  FixDownloadSource,
   GetAnalysisQuery,
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
@@ -196,12 +197,16 @@ export class McpGQLClient {
             !data.analysis?.state ||
             data.analysis?.state === Fix_Report_State_Enum.Failed
           ) {
+            const errorMessage =
+              data.analysis?.failReason ||
+              `Analysis failed with id: ${data.analysis?.id}`
             logError('GraphQL: Analysis failed', {
               analysisId: data.analysis?.id,
               state: data.analysis?.state,
+              failReason: data.analysis?.failReason,
               ...this.getErrorContext(),
             })
-            reject(new Error(`Analysis failed with id: ${data.analysis?.id}`))
+            reject(new Error(errorMessage))
             return
           }
           if (callbackStates.includes(data.analysis?.state)) {
@@ -241,7 +246,23 @@ export class McpGQLClient {
 
   async getProjectId() {
     try {
-      const projectName = 'MCP Scans'
+      const me = await this.getUserInfo()
+      if (!me) {
+        throw new Error('User not found')
+      }
+      const userEmail = me.email
+      if (!userEmail) {
+        throw new Error('User email not found')
+      }
+
+      const shortEmailHash = crypto
+        .createHash('sha256')
+        .update(userEmail)
+        .digest('hex')
+        .slice(0, 8)
+        .toUpperCase()
+
+      const projectName = `MCP Scans ${shortEmailHash}`
       logDebug('GraphQL: Calling getOrgAndProjectId query', { projectName })
       const getOrgAndProjectIdResult = await this.clientSdk.getOrgAndProjectId({
         filters: {},
@@ -345,6 +366,21 @@ export class McpGQLClient {
     }
   }
 
+  async _updateFixesArchiveState(fixIds: string[]) {
+    if (fixIds.length > 0) {
+      const resUpdate = await this.clientSdk.updateDownloadedFixData({
+        fixIds,
+        source: FixDownloadSource.Mcp,
+      })
+      logInfo('GraphQL: updateFixesArchiveState successful', {
+        result: resUpdate,
+        fixIds,
+      })
+    } else {
+      logInfo('GraphQL: No fixes found')
+    }
+  }
+
   async getLatestReportByRepoUrl({
     repoUrl,
     limit = 3,
@@ -372,6 +408,10 @@ export class McpGQLClient {
         result: res,
         reportCount: res.fixReport?.length || 0,
       })
+
+      const fixIds = res.fixReport?.[0]?.fixes?.map((fix) => fix.id) || []
+      await this._updateFixesArchiveState(fixIds)
+
       return {
         fixReport: res.fixReport?.[0] || null,
         expiredReport: res.expiredReport?.[0] || null,
@@ -441,6 +481,9 @@ export class McpGQLClient {
       if (res.fixReport.length === 0) {
         return null
       }
+
+      const fixIds = res.fixReport?.[0]?.fixes?.map((fix) => fix.id) || []
+      await this._updateFixesArchiveState(fixIds)
 
       return {
         fixes: res.fixReport?.[0]?.fixes || [],

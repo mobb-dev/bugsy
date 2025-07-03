@@ -95,6 +95,7 @@ export const ReportQueryResultZ = z.object({
     createdOn: z.string(),
     expirationOn: z.string().nullable(),
     state: z.nativeEnum(Fix_Report_State_Enum),
+    failReason: z.string().nullable(),
     fixes: z.array(
       z.object({
         id: z.string().uuid(),

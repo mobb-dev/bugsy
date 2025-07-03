@@ -181,6 +181,11 @@ export type FixData = {
   questions: Array<FixQuestion>;
 };
 
+export enum FixDownloadSource {
+  Mcp = 'MCP',
+  WebUi = 'WEB_UI'
+}
+
 export type FixExtraContextManifestActionRequiredResponse = {
   __typename?: 'FixExtraContextManifestActionRequiredResponse';
   action: ManifestAction;
@@ -3563,6 +3568,7 @@ export type FixReport = {
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn: Scalars['timestamptz']['output'];
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
+  failReason?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   falsePositives: Array<False_Positive>;
   /** An aggregate relationship */
@@ -3742,6 +3748,7 @@ export type FixReport_Bool_Exp = {
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   expirationOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  failReason?: InputMaybe<String_Comparison_Exp>;
   falsePositives?: InputMaybe<False_Positive_Bool_Exp>;
   falsePositives_aggregate?: InputMaybe<False_Positive_Aggregate_Bool_Exp>;
   fixes?: InputMaybe<Fix_Bool_Exp>;
@@ -3784,6 +3791,7 @@ export type FixReport_Insert_Input = {
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  failReason?: InputMaybe<Scalars['String']['input']>;
   falsePositives?: InputMaybe<False_Positive_Arr_Rel_Insert_Input>;
   fixes?: InputMaybe<Fix_Arr_Rel_Insert_Input>;
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
@@ -3806,6 +3814,7 @@ export type FixReport_Max_Fields = {
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
+  failReason?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "count_fix_isdone" */
   fixesDoneCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isinprogress" */
@@ -3828,6 +3837,7 @@ export type FixReport_Min_Fields = {
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
+  failReason?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "count_fix_isdone" */
   fixesDoneCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isinprogress" */
@@ -3874,6 +3884,7 @@ export type FixReport_Order_By = {
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
   expirationOn?: InputMaybe<Order_By>;
+  failReason?: InputMaybe<Order_By>;
   falsePositives_aggregate?: InputMaybe<False_Positive_Aggregate_Order_By>;
   fixesCountByEffort?: InputMaybe<Order_By>;
   fixesDoneCount?: InputMaybe<Order_By>;
@@ -3910,6 +3921,8 @@ export enum FixReport_Select_Column {
   /** column name */
   ExpirationOn = 'expirationOn',
   /** column name */
+  FailReason = 'failReason',
+  /** column name */
   HybridFixes = 'hybridFixes',
   /** column name */
   Id = 'id',
@@ -3932,6 +3945,7 @@ export type FixReport_Set_Input = {
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  failReason?: InputMaybe<Scalars['String']['input']>;
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3994,6 +4008,7 @@ export type FixReport_Stream_Cursor_Value_Input = {
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  failReason?: InputMaybe<Scalars['String']['input']>;
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4025,6 +4040,8 @@ export enum FixReport_Update_Column {
   CreatedOn = 'createdOn',
   /** column name */
   ExpirationOn = 'expirationOn',
+  /** column name */
+  FailReason = 'failReason',
   /** column name */
   HybridFixes = 'hybridFixes',
   /** column name */
@@ -4242,9 +4259,160 @@ export enum Fix_Constraint {
   FixPkey = 'fix_pkey'
 }
 
+/** columns and relationships of "fix_download_source" */
+export type Fix_Download_Source = {
+  __typename?: 'fix_download_source';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "fix_download_source" */
+export type Fix_Download_Source_Aggregate = {
+  __typename?: 'fix_download_source_aggregate';
+  aggregate?: Maybe<Fix_Download_Source_Aggregate_Fields>;
+  nodes: Array<Fix_Download_Source>;
+};
+
+/** aggregate fields of "fix_download_source" */
+export type Fix_Download_Source_Aggregate_Fields = {
+  __typename?: 'fix_download_source_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Fix_Download_Source_Max_Fields>;
+  min?: Maybe<Fix_Download_Source_Min_Fields>;
+};
+
+
+/** aggregate fields of "fix_download_source" */
+export type Fix_Download_Source_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Fix_Download_Source_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "fix_download_source". All fields are combined with a logical 'AND'. */
+export type Fix_Download_Source_Bool_Exp = {
+  _and?: InputMaybe<Array<Fix_Download_Source_Bool_Exp>>;
+  _not?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+  _or?: InputMaybe<Array<Fix_Download_Source_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "fix_download_source" */
+export enum Fix_Download_Source_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  FixDownloadSourcePkey = 'fix_download_source_pkey'
+}
+
+export enum Fix_Download_Source_Enum {
+  /** User downloaded fix from the MCP integration in the IDE */
+  Mcp = 'MCP',
+  /** Fix downloaded by user from the Mobb web UI */
+  WebUi = 'WEB_UI'
+}
+
+/** Boolean expression to compare columns of type "fix_download_source_enum". All fields are combined with logical 'AND'. */
+export type Fix_Download_Source_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Fix_Download_Source_Enum>;
+  _in?: InputMaybe<Array<Fix_Download_Source_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Fix_Download_Source_Enum>;
+  _nin?: InputMaybe<Array<Fix_Download_Source_Enum>>;
+};
+
+/** input type for inserting data into table "fix_download_source" */
+export type Fix_Download_Source_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Fix_Download_Source_Max_Fields = {
+  __typename?: 'fix_download_source_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Fix_Download_Source_Min_Fields = {
+  __typename?: 'fix_download_source_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "fix_download_source" */
+export type Fix_Download_Source_Mutation_Response = {
+  __typename?: 'fix_download_source_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Fix_Download_Source>;
+};
+
+/** on_conflict condition type for table "fix_download_source" */
+export type Fix_Download_Source_On_Conflict = {
+  constraint: Fix_Download_Source_Constraint;
+  update_columns?: Array<Fix_Download_Source_Update_Column>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "fix_download_source". */
+export type Fix_Download_Source_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: fix_download_source */
+export type Fix_Download_Source_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "fix_download_source" */
+export enum Fix_Download_Source_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "fix_download_source" */
+export type Fix_Download_Source_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "fix_download_source" */
+export type Fix_Download_Source_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Fix_Download_Source_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Fix_Download_Source_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "fix_download_source" */
+export enum Fix_Download_Source_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Fix_Download_Source_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Fix_Download_Source_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Fix_Download_Source_Bool_Exp;
+};
+
 /** This table creates many-to-many relationship between the fix and user */
 export type Fix_Download_To_User = {
   __typename?: 'fix_download_to_user';
+  downloadSource?: Maybe<Fix_Download_Source_Enum>;
   downloadedAt: Scalars['timestamptz']['output'];
   fixId: Scalars['uuid']['output'];
   fixSharedId: Scalars['uuid']['output'];
@@ -4306,6 +4474,7 @@ export type Fix_Download_To_User_Bool_Exp = {
   _and?: InputMaybe<Array<Fix_Download_To_User_Bool_Exp>>;
   _not?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
   _or?: InputMaybe<Array<Fix_Download_To_User_Bool_Exp>>;
+  downloadSource?: InputMaybe<Fix_Download_Source_Enum_Comparison_Exp>;
   downloadedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fixSharedId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -4322,6 +4491,7 @@ export enum Fix_Download_To_User_Constraint {
 
 /** input type for inserting data into table "fix_download_to_user" */
 export type Fix_Download_To_User_Insert_Input = {
+  downloadSource?: InputMaybe<Fix_Download_Source_Enum>;
   downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
@@ -4386,6 +4556,7 @@ export type Fix_Download_To_User_On_Conflict = {
 
 /** Ordering options when selecting data from "fix_download_to_user". */
 export type Fix_Download_To_User_Order_By = {
+  downloadSource?: InputMaybe<Order_By>;
   downloadedAt?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fixSharedId?: InputMaybe<Order_By>;
@@ -4402,6 +4573,8 @@ export type Fix_Download_To_User_Pk_Columns_Input = {
 /** select columns of table "fix_download_to_user" */
 export enum Fix_Download_To_User_Select_Column {
   /** column name */
+  DownloadSource = 'downloadSource',
+  /** column name */
   DownloadedAt = 'downloadedAt',
   /** column name */
   FixId = 'fixId',
@@ -4415,6 +4588,7 @@ export enum Fix_Download_To_User_Select_Column {
 
 /** input type for updating data in table "fix_download_to_user" */
 export type Fix_Download_To_User_Set_Input = {
+  downloadSource?: InputMaybe<Fix_Download_Source_Enum>;
   downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
@@ -4432,6 +4606,7 @@ export type Fix_Download_To_User_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Fix_Download_To_User_Stream_Cursor_Value_Input = {
+  downloadSource?: InputMaybe<Fix_Download_Source_Enum>;
   downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fixSharedId?: InputMaybe<Scalars['uuid']['input']>;
@@ -4441,6 +4616,8 @@ export type Fix_Download_To_User_Stream_Cursor_Value_Input = {
 
 /** update columns of table "fix_download_to_user" */
 export enum Fix_Download_To_User_Update_Column {
+  /** column name */
+  DownloadSource = 'downloadSource',
   /** column name */
   DownloadedAt = 'downloadedAt',
   /** column name */
@@ -8225,6 +8402,10 @@ export type Mutation_Root = {
   delete_fixReport_by_pk?: Maybe<FixReport>;
   /** delete single row from the table: "fix" */
   delete_fix_by_pk?: Maybe<Fix>;
+  /** delete data from the table: "fix_download_source" */
+  delete_fix_download_source?: Maybe<Fix_Download_Source_Mutation_Response>;
+  /** delete single row from the table: "fix_download_source" */
+  delete_fix_download_source_by_pk?: Maybe<Fix_Download_Source>;
   /** delete data from the table: "fix_download_to_user" */
   delete_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
   /** delete single row from the table: "fix_download_to_user" */
@@ -8472,6 +8653,10 @@ export type Mutation_Root = {
   insert_fixReport?: Maybe<FixReport_Mutation_Response>;
   /** insert a single row into the table: "fix_report" */
   insert_fixReport_one?: Maybe<FixReport>;
+  /** insert data into the table: "fix_download_source" */
+  insert_fix_download_source?: Maybe<Fix_Download_Source_Mutation_Response>;
+  /** insert a single row into the table: "fix_download_source" */
+  insert_fix_download_source_one?: Maybe<Fix_Download_Source>;
   /** insert data into the table: "fix_download_to_user" */
   insert_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
   /** insert a single row into the table: "fix_download_to_user" */
@@ -8760,6 +8945,12 @@ export type Mutation_Root = {
   update_fixReport_many?: Maybe<Array<Maybe<FixReport_Mutation_Response>>>;
   /** update single row of the table: "fix" */
   update_fix_by_pk?: Maybe<Fix>;
+  /** update data of the table: "fix_download_source" */
+  update_fix_download_source?: Maybe<Fix_Download_Source_Mutation_Response>;
+  /** update single row of the table: "fix_download_source" */
+  update_fix_download_source_by_pk?: Maybe<Fix_Download_Source>;
+  /** update multiples rows of table: "fix_download_source" */
+  update_fix_download_source_many?: Maybe<Array<Maybe<Fix_Download_Source_Mutation_Response>>>;
   /** update data of the table: "fix_download_to_user" */
   update_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
   /** update single row of the table: "fix_download_to_user" */
@@ -9323,6 +9514,18 @@ export type Mutation_RootDelete_FixReport_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Fix_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Download_SourceArgs = {
+  where: Fix_Download_Source_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Download_Source_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -10103,6 +10306,20 @@ export type Mutation_RootInsert_FixReportArgs = {
 export type Mutation_RootInsert_FixReport_OneArgs = {
   object: FixReport_Insert_Input;
   on_conflict?: InputMaybe<FixReport_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Download_SourceArgs = {
+  objects: Array<Fix_Download_Source_Insert_Input>;
+  on_conflict?: InputMaybe<Fix_Download_Source_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Download_Source_OneArgs = {
+  object: Fix_Download_Source_Insert_Input;
+  on_conflict?: InputMaybe<Fix_Download_Source_On_Conflict>;
 };
 
 
@@ -10933,7 +11150,8 @@ export type Mutation_RootUpdateBitbucketTokenArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdateDownloadedFixDataArgs = {
-  fixId: Scalars['String']['input'];
+  fixIds: Array<Scalars['String']['input']>;
+  source: FixDownloadSource;
 };
 
 
@@ -11183,6 +11401,26 @@ export type Mutation_RootUpdate_Fix_By_PkArgs = {
   _inc?: InputMaybe<Fix_Inc_Input>;
   _set?: InputMaybe<Fix_Set_Input>;
   pk_columns: Fix_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Download_SourceArgs = {
+  _set?: InputMaybe<Fix_Download_Source_Set_Input>;
+  where: Fix_Download_Source_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Download_Source_By_PkArgs = {
+  _set?: InputMaybe<Fix_Download_Source_Set_Input>;
+  pk_columns: Fix_Download_Source_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Download_Source_ManyArgs = {
+  updates: Array<Fix_Download_Source_Updates>;
 };
 
 
@@ -16283,6 +16521,12 @@ export type Query_Root = {
   fix_aggregate: Fix_Aggregate;
   /** fetch data from the table: "fix" using primary key columns */
   fix_by_pk?: Maybe<Fix>;
+  /** fetch data from the table: "fix_download_source" */
+  fix_download_source: Array<Fix_Download_Source>;
+  /** fetch aggregated fields from the table: "fix_download_source" */
+  fix_download_source_aggregate: Fix_Download_Source_Aggregate;
+  /** fetch data from the table: "fix_download_source" using primary key columns */
+  fix_download_source_by_pk?: Maybe<Fix_Download_Source>;
   /** fetch data from the table: "fix_download_to_user" */
   fix_download_to_user: Array<Fix_Download_To_User>;
   /** fetch aggregated fields from the table: "fix_download_to_user" */
@@ -16958,6 +17202,29 @@ export type Query_RootFix_AggregateArgs = {
 
 export type Query_RootFix_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootFix_Download_SourceArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_Source_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_Source_Order_By>>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Download_Source_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_Source_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_Source_Order_By>>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Download_Source_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -20188,6 +20455,14 @@ export type Subscription_Root = {
   fix_aggregate: Fix_Aggregate;
   /** fetch data from the table: "fix" using primary key columns */
   fix_by_pk?: Maybe<Fix>;
+  /** fetch data from the table: "fix_download_source" */
+  fix_download_source: Array<Fix_Download_Source>;
+  /** fetch aggregated fields from the table: "fix_download_source" */
+  fix_download_source_aggregate: Fix_Download_Source_Aggregate;
+  /** fetch data from the table: "fix_download_source" using primary key columns */
+  fix_download_source_by_pk?: Maybe<Fix_Download_Source>;
+  /** fetch data from the table in a streaming manner: "fix_download_source" */
+  fix_download_source_stream: Array<Fix_Download_Source>;
   /** fetch data from the table: "fix_download_to_user" */
   fix_download_to_user: Array<Fix_Download_To_User>;
   /** fetch aggregated fields from the table: "fix_download_to_user" */
@@ -21037,6 +21312,36 @@ export type Subscription_RootFix_AggregateArgs = {
 
 export type Subscription_RootFix_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootFix_Download_SourceArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_Source_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_Source_Order_By>>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Download_Source_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Download_Source_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Download_Source_Order_By>>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Download_Source_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootFix_Download_Source_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Fix_Download_Source_Stream_Cursor_Input>>;
+  where?: InputMaybe<Fix_Download_Source_Bool_Exp>;
 };
 
 
@@ -27451,14 +27756,14 @@ export type GetAnalysisSubscriptionSubscriptionVariables = Exact<{
 }>;
 
 
-export type GetAnalysisSubscriptionSubscription = { __typename?: 'subscription_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum } | null };
+export type GetAnalysisSubscriptionSubscription = { __typename?: 'subscription_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, failReason?: string | null } | null };
 
 export type GetAnalysisQueryVariables = Exact<{
   analysisId: Scalars['uuid']['input'];
 }>;
 
 
-export type GetAnalysisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
+export type GetAnalysisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, failReason?: string | null, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
 
 export type GetFixesQueryVariables = Exact<{
   filters: Fix_Bool_Exp;
@@ -27603,6 +27908,14 @@ export type GetReportFixesQueryVariables = Exact<{
 
 
 export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+
+export type UpdateDownloadedFixDataMutationVariables = Exact<{
+  fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  source: FixDownloadSource;
+}>;
+
+
+export type UpdateDownloadedFixDataMutation = { __typename?: 'mutation_root', updateDownloadedFixData?: { __typename?: 'StatusQueryResponse', status: Status } | null };
 
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
@@ -27784,6 +28097,7 @@ export const GetAnalysisSubscriptionDocument = `
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
+    failReason
   }
 }
     `;
@@ -27792,6 +28106,7 @@ export const GetAnalysisDocument = `
   analysis: fixReport_by_pk(id: $analysisId) {
     id
     state
+    failReason
     repo {
       commitSha
       pullRequest
@@ -28171,6 +28486,13 @@ export const GetReportFixesDocument = `
   }
 }
     ${FixReportSummaryFieldsFragmentDoc}`;
+export const UpdateDownloadedFixDataDocument = `
+    mutation updateDownloadedFixData($fixIds: [String!]!, $source: FixDownloadSource!) {
+  updateDownloadedFixData(fixIds: $fixIds, source: $source) {
+    status
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -28247,6 +28569,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetReportFixes(variables: GetReportFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetReportFixesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReportFixesQuery>({ document: GetReportFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetReportFixes', 'query', variables);
+    },
+    updateDownloadedFixData(variables: UpdateDownloadedFixDataMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateDownloadedFixDataMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateDownloadedFixDataMutation>({ document: UpdateDownloadedFixDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updateDownloadedFixData', 'mutation', variables);
     }
   };
 }

@@ -15,6 +15,8 @@ import type {
   MeQueryVariables,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
+  UpdateDownloadedFixDataMutation,
+  UpdateDownloadedFixDataMutationVariables,
   UploadS3BucketInfoMutation,
   UploadS3BucketInfoMutationVariables,
 } from '../../../src/features/analysis/scm/generates/client_generates'
@@ -44,6 +46,7 @@ import {
   mockGetLatestReportByRepoUrlError,
   mockGetLatestReportByRepoUrlExpired,
 } from './fakeResponses/getLatestReportByRepoUrl'
+import { mockUpdateDownloadedFixData } from './fakeResponses/updateDownloadedFixData'
 import {
   createCliLoginHandler,
   getEncryptedApiTokenHandler,
@@ -61,6 +64,7 @@ type MockState = {
   submitVulnerabilityReport: 'success' | 'error'
   getLatestReportByRepoUrl: 'success' | 'error' | 'empty' | 'expired'
   createCliLogin: 'success' | 'error'
+  updateDownloadedFixData: 'success'
   getEncryptedApiToken: 'success' | 'error'
   createCommunityUser: 'success' | 'error' | 'badApiKey'
   errorMessages: Record<string, string>
@@ -76,6 +80,7 @@ const mockState: MockState = {
   submitVulnerabilityReport: 'success',
   getLatestReportByRepoUrl: 'success',
   createCliLogin: 'success',
+  updateDownloadedFixData: 'success',
   getEncryptedApiToken: 'success',
   createCommunityUser: 'success',
   errorMessages: {},
@@ -166,6 +171,13 @@ export const graphqlHandlers = [
     return HttpResponse.json(mockSubmitVulnerabilityReport)
   }),
 
+  graphql.mutation<
+    UpdateDownloadedFixDataMutation,
+    UpdateDownloadedFixDataMutationVariables
+  >('updateDownloadedFixData', () => {
+    return HttpResponse.json(mockUpdateDownloadedFixData)
+  }),
+
   // Use the updated auth handlers directly
   createCliLoginHandler,
   getEncryptedApiTokenHandler,
@@ -251,6 +263,7 @@ export const mockGraphQL = (
         mockState.submitVulnerabilityReport = 'success'
         mockState.getLatestReportByRepoUrl = 'success'
         mockState.createCliLogin = 'success'
+        mockState.updateDownloadedFixData = 'success'
         mockState.getEncryptedApiToken = 'success'
         mockState.createCommunityUser = 'success'
         mockState.errorMessages = {}
@@ -346,6 +359,14 @@ export const mockGraphQL = (
       failsWithError(message: string) {
         mockState.createCliLogin = 'error'
         mockState.errorMessages['createCliLogin'] = message
+        return this
+      },
+    }
+  },
+  updateDownloadedFixData: () => {
+    return {
+      succeeds() {
+        mockState.updateDownloadedFixData = 'success'
         return this
       },
     }

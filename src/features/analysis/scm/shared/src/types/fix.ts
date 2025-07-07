@@ -75,6 +75,17 @@ export const FixRatingZ = z.object({
   }),
 })
 
+const IssueSharedStateZ = z.object({
+  id: z.string().uuid(),
+  isArchived: z.boolean(),
+  ticketIntegrationId: z.string().uuid().nullable(),
+  ticketIntegrations: z.array(
+    z.object({
+      url: z.string(),
+    })
+  ),
+})
+
 export const FixSharedStateZ = z
   .object({
     state: z.nativeEnum(Fix_State_Enum),
@@ -117,6 +128,11 @@ export const FixQueryZ = z.object({
       vendorIssueId: z.string(),
       issueLanguage: z.string(),
       parsedSeverity: ParsedSeverityZ,
+      sharedState: z.object({
+        id: z.string().uuid(),
+        isArchived: z.boolean(),
+        ticketIntegrationId: z.string().uuid().nullable(),
+      }),
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,
@@ -131,10 +147,15 @@ export const FixPartsForFixScreenZ = FixQueryZ.merge(
         vendorIssueId: z.string(),
         issueType: z.string(),
         issueLanguage: z.string(),
+        sharedState: IssueSharedStateZ,
       })
     ),
   })
 )
+
+export type VulnerabilityReportIssues = z.infer<
+  typeof FixPartsForFixScreenZ
+>['vulnerabilityReportIssues']
 
 export type FixQuery = z.infer<typeof FixQueryZ>
 export type ManifestActionRequired = z.infer<typeof ManifestActionRequiredZ>

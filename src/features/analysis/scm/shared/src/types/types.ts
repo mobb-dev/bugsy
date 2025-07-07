@@ -73,6 +73,17 @@ export const AnalysisReportDigestedZ = z.object({
   }),
 })
 
+const IssueSharedStateZ = z.object({
+  id: z.string().uuid(),
+  isArchived: z.boolean(),
+  ticketIntegrationId: z.string().uuid().nullable(),
+  ticketIntegrations: z.array(
+    z.object({
+      url: z.string(),
+    })
+  ),
+})
+
 export const ReportQueryResultZ = z.object({
   fixReport_by_pk: z.object({
     id: z.string().uuid(),
@@ -120,9 +131,9 @@ export const ReportQueryResultZ = z.object({
             issueType: z.string(),
             issueLanguage: z.string(),
             category: z.string(),
+            sharedState: IssueSharedStateZ,
           })
         ),
-        // scmSubmitFixRequests: ScmSubmitFixRequestsZ,
       })
     ),
     repo: z.object({
@@ -227,6 +238,7 @@ export const ReportFixesQueryFixZ = z.object({
       z.object({
         issueType: z.string(),
         issueLanguage: z.string(),
+        sharedState: IssueSharedStateZ,
       })
     )
     .min(1),

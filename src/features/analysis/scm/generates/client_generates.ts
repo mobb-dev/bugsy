@@ -153,6 +153,19 @@ export type CreateTokenResponse = {
   token: Scalars['String']['output'];
 };
 
+export type DeleteIntegrationResponse = DeleteIntegrationResponseError | DeleteIntegrationResponseSuccess;
+
+export type DeleteIntegrationResponseError = {
+  __typename?: 'DeleteIntegrationResponseError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type DeleteIntegrationResponseSuccess = {
+  __typename?: 'DeleteIntegrationResponseSuccess';
+  status: Status;
+};
+
 export type FalsePositiveData = {
   __typename?: 'FalsePositiveData';
   extraContext: Array<UnstructuredFixExtraContext>;
@@ -276,6 +289,19 @@ export type GetInvitationLinkResponse = {
   link: Scalars['String']['output'];
 };
 
+export type GetLinearIntegrationData = GetLinearIntegrationDataError | GetLinearIntegrationDataSuccess;
+
+export type GetLinearIntegrationDataError = {
+  __typename?: 'GetLinearIntegrationDataError';
+  error: Scalars['String']['output'];
+};
+
+export type GetLinearIntegrationDataSuccess = {
+  __typename?: 'GetLinearIntegrationDataSuccess';
+  id: Scalars['String']['output'];
+  teamId?: Maybe<Scalars['String']['output']>;
+};
+
 export type GetReposSuccess = {
   __typename?: 'GetReposSuccess';
   repos: Array<ScmRepo>;
@@ -360,6 +386,24 @@ export enum Language {
   Yaml = 'YAML'
 }
 
+export type LinearTeam = {
+  __typename?: 'LinearTeam';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type LinearTeamsResponse = LinearTeamsResponseError | LinearTeamsResponseSuccess;
+
+export type LinearTeamsResponseError = {
+  __typename?: 'LinearTeamsResponseError';
+  error: Scalars['String']['output'];
+};
+
+export type LinearTeamsResponseSuccess = {
+  __typename?: 'LinearTeamsResponseSuccess';
+  teams: Array<Maybe<LinearTeam>>;
+};
+
 export type ListOfProjectsSuccess = {
   __typename?: 'ListOfProjectsSuccess';
   projects: Array<CheckmarxProject>;
@@ -399,6 +443,19 @@ export type MobbProjectAccessError = BaseError & {
   __typename?: 'MobbProjectAccessError';
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
+};
+
+export type OpenFixTicketResponse = OpenFixTicketResponseError | OpenFixTicketResponseSuccess;
+
+export type OpenFixTicketResponseError = {
+  __typename?: 'OpenFixTicketResponseError';
+  error: Scalars['String']['output'];
+};
+
+export type OpenFixTicketResponseSuccess = {
+  __typename?: 'OpenFixTicketResponseSuccess';
+  id: Scalars['String']['output'];
+  url: Scalars['String']['output'];
 };
 
 export type OrganizationToRoleType = {
@@ -781,6 +838,11 @@ export type SubmitToScmSuccess = {
   submitFixRequestIds: Array<Scalars['String']['output']>;
 };
 
+export type TicketAccessToken = {
+  __typename?: 'TicketAccessToken';
+  accessToken: Scalars['String']['output'];
+};
+
 export type UnstructuredFixExtraContext = {
   __typename?: 'UnstructuredFixExtraContext';
   key: Scalars['String']['output'];
@@ -794,6 +856,19 @@ export type UpdateFixesAcrhiveStateResponse = {
 
 export type UpdateGithubTokenFromAuth0 = {
   __typename?: 'UpdateGithubTokenFromAuth0';
+  status: Status;
+};
+
+export type UpdateLinearConfigurationResponse = UpdateLinearConfigurationResponseError | UpdateLinearConfigurationResponseSuccess;
+
+export type UpdateLinearConfigurationResponseError = {
+  __typename?: 'UpdateLinearConfigurationResponseError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type UpdateLinearConfigurationResponseSuccess = {
+  __typename?: 'UpdateLinearConfigurationResponseSuccess';
   status: Status;
 };
 
@@ -848,6 +923,19 @@ export type ValidateCheckmarxConnectionResponse = ValidateCheckmarxConnectionErr
 
 export type ValidateCheckmarxConnectionSuccess = {
   __typename?: 'ValidateCheckmarxConnectionSuccess';
+  status: Status;
+};
+
+export type ValidateLinearConnectionError = {
+  __typename?: 'ValidateLinearConnectionError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type ValidateLinearConnectionResponse = ValidateLinearConnectionError | ValidateLinearConnectionSuccess;
+
+export type ValidateLinearConnectionSuccess = {
+  __typename?: 'ValidateLinearConnectionSuccess';
   status: Status;
 };
 
@@ -6994,7 +7082,9 @@ export enum Integration_Type_Constraint {
 
 export enum Integration_Type_Enum {
   /** checkmarx */
-  Checkmarx = 'checkmarx'
+  Checkmarx = 'checkmarx',
+  /** linear */
+  Linear = 'linear'
 }
 
 /** Boolean expression to compare columns of type "integration_type_enum". All fields are combined with logical 'AND'. */
@@ -8356,6 +8446,7 @@ export type Mutation_Root = {
   createPr?: Maybe<CreatePrResponse>;
   createProject: CreateProjectResponse;
   createToken?: Maybe<CreateTokenResponse>;
+  deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
   /** delete data from the table: "api_token" */
@@ -8482,6 +8573,10 @@ export type Mutation_Root = {
   delete_organization_issue_type_settings?: Maybe<Organization_Issue_Type_Settings_Mutation_Response>;
   /** delete single row from the table: "organization_issue_type_settings" */
   delete_organization_issue_type_settings_by_pk?: Maybe<Organization_Issue_Type_Settings>;
+  /** delete data from the table: "organization_raw_issue_type_blocklist" */
+  delete_organization_raw_issue_type_blocklist?: Maybe<Organization_Raw_Issue_Type_Blocklist_Mutation_Response>;
+  /** delete single row from the table: "organization_raw_issue_type_blocklist" */
+  delete_organization_raw_issue_type_blocklist_by_pk?: Maybe<Organization_Raw_Issue_Type_Blocklist>;
   /** delete data from the table: "organization_role" */
   delete_organization_role?: Maybe<Organization_Role_Mutation_Response>;
   /** delete single row from the table: "organization_role" */
@@ -8554,6 +8649,10 @@ export type Mutation_Root = {
   delete_submit_fix_request_state?: Maybe<Submit_Fix_Request_State_Mutation_Response>;
   /** delete single row from the table: "submit_fix_request_state" */
   delete_submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
+  /** delete data from the table: "ticket_integration" */
+  delete_ticket_integration?: Maybe<Ticket_Integration_Mutation_Response>;
+  /** delete single row from the table: "ticket_integration" */
+  delete_ticket_integration_by_pk?: Maybe<Ticket_Integration>;
   /** delete data from the table: "unfixable" */
   delete_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** delete single row from the table: "unfixable" */
@@ -8735,6 +8834,10 @@ export type Mutation_Root = {
   insert_organization_issue_type_settings_one?: Maybe<Organization_Issue_Type_Settings>;
   /** insert a single row into the table: "organization" */
   insert_organization_one?: Maybe<Organization>;
+  /** insert data into the table: "organization_raw_issue_type_blocklist" */
+  insert_organization_raw_issue_type_blocklist?: Maybe<Organization_Raw_Issue_Type_Blocklist_Mutation_Response>;
+  /** insert a single row into the table: "organization_raw_issue_type_blocklist" */
+  insert_organization_raw_issue_type_blocklist_one?: Maybe<Organization_Raw_Issue_Type_Blocklist>;
   /** insert data into the table: "organization_role" */
   insert_organization_role?: Maybe<Organization_Role_Mutation_Response>;
   /** insert a single row into the table: "organization_role" */
@@ -8807,6 +8910,10 @@ export type Mutation_Root = {
   insert_submit_fix_request_state?: Maybe<Submit_Fix_Request_State_Mutation_Response>;
   /** insert a single row into the table: "submit_fix_request_state" */
   insert_submit_fix_request_state_one?: Maybe<Submit_Fix_Request_State>;
+  /** insert data into the table: "ticket_integration" */
+  insert_ticket_integration?: Maybe<Ticket_Integration_Mutation_Response>;
+  /** insert a single row into the table: "ticket_integration" */
+  insert_ticket_integration_one?: Maybe<Ticket_Integration>;
   /** insert data into the table: "unfixable" */
   insert_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** insert a single row into the table: "unfixable" */
@@ -8859,6 +8966,7 @@ export type Mutation_Root = {
   insert_vulnerability_severity?: Maybe<Vulnerability_Severity_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_severity" */
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
+  openFixTicket?: Maybe<OpenFixTicketResponse>;
   performCliLogin?: Maybe<StatusQueryResponse>;
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
@@ -8880,6 +8988,8 @@ export type Mutation_Root = {
   updateGithubToken: ScmAccessToken;
   updateGithubTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateGitlabToken: ScmAccessToken;
+  updateLinearConfiguration: UpdateLinearConfigurationResponse;
+  updateLinearToken: TicketAccessToken;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
   /** update data of the table: "api_token" */
   update_api_token?: Maybe<Api_Token_Mutation_Response>;
@@ -9067,6 +9177,12 @@ export type Mutation_Root = {
   update_organization_issue_type_settings_many?: Maybe<Array<Maybe<Organization_Issue_Type_Settings_Mutation_Response>>>;
   /** update multiples rows of table: "organization" */
   update_organization_many?: Maybe<Array<Maybe<Organization_Mutation_Response>>>;
+  /** update data of the table: "organization_raw_issue_type_blocklist" */
+  update_organization_raw_issue_type_blocklist?: Maybe<Organization_Raw_Issue_Type_Blocklist_Mutation_Response>;
+  /** update single row of the table: "organization_raw_issue_type_blocklist" */
+  update_organization_raw_issue_type_blocklist_by_pk?: Maybe<Organization_Raw_Issue_Type_Blocklist>;
+  /** update multiples rows of table: "organization_raw_issue_type_blocklist" */
+  update_organization_raw_issue_type_blocklist_many?: Maybe<Array<Maybe<Organization_Raw_Issue_Type_Blocklist_Mutation_Response>>>;
   /** update data of the table: "organization_role" */
   update_organization_role?: Maybe<Organization_Role_Mutation_Response>;
   /** update single row of the table: "organization_role" */
@@ -9175,6 +9291,12 @@ export type Mutation_Root = {
   update_submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
   /** update multiples rows of table: "submit_fix_request_state" */
   update_submit_fix_request_state_many?: Maybe<Array<Maybe<Submit_Fix_Request_State_Mutation_Response>>>;
+  /** update data of the table: "ticket_integration" */
+  update_ticket_integration?: Maybe<Ticket_Integration_Mutation_Response>;
+  /** update single row of the table: "ticket_integration" */
+  update_ticket_integration_by_pk?: Maybe<Ticket_Integration>;
+  /** update multiples rows of table: "ticket_integration" */
+  update_ticket_integration_many?: Maybe<Array<Maybe<Ticket_Integration_Mutation_Response>>>;
   /** update data of the table: "unfixable" */
   update_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** update single row of the table: "unfixable" */
@@ -9369,6 +9491,12 @@ export type Mutation_RootCreateProjectArgs = {
 /** mutation root */
 export type Mutation_RootCreateTokenArgs = {
   tokenName: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDeleteIntegrationArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -9758,6 +9886,18 @@ export type Mutation_RootDelete_Organization_Issue_Type_Settings_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Organization_Raw_Issue_Type_BlocklistArgs = {
+  where: Organization_Raw_Issue_Type_Blocklist_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Organization_Raw_Issue_Type_Blocklist_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Organization_RoleArgs = {
   where: Organization_Role_Bool_Exp;
 };
@@ -9971,6 +10111,18 @@ export type Mutation_RootDelete_Submit_Fix_Request_StateArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Submit_Fix_Request_State_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ticket_IntegrationArgs = {
+  where: Ticket_Integration_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ticket_Integration_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -10597,6 +10749,20 @@ export type Mutation_RootInsert_Organization_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Organization_Raw_Issue_Type_BlocklistArgs = {
+  objects: Array<Organization_Raw_Issue_Type_Blocklist_Insert_Input>;
+  on_conflict?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Organization_Raw_Issue_Type_Blocklist_OneArgs = {
+  object: Organization_Raw_Issue_Type_Blocklist_Insert_Input;
+  on_conflict?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Organization_RoleArgs = {
   objects: Array<Organization_Role_Insert_Input>;
   on_conflict?: InputMaybe<Organization_Role_On_Conflict>;
@@ -10849,6 +11015,20 @@ export type Mutation_RootInsert_Submit_Fix_Request_State_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Ticket_IntegrationArgs = {
+  objects: Array<Ticket_Integration_Insert_Input>;
+  on_conflict?: InputMaybe<Ticket_Integration_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ticket_Integration_OneArgs = {
+  object: Ticket_Integration_Insert_Input;
+  on_conflict?: InputMaybe<Ticket_Integration_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_UnfixableArgs = {
   objects: Array<Unfixable_Insert_Input>;
   on_conflict?: InputMaybe<Unfixable_On_Conflict>;
@@ -11031,6 +11211,15 @@ export type Mutation_RootInsert_Vulnerability_Severity_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootOpenFixTicketArgs = {
+  commitDescription: Scalars['String']['input'];
+  commitTitle: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+  projectId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootPerformCliLoginArgs = {
   hostname?: InputMaybe<Scalars['String']['input']>;
   loginId: Scalars['String']['input'];
@@ -11173,6 +11362,20 @@ export type Mutation_RootUpdateGithubTokenArgs = {
 export type Mutation_RootUpdateGitlabTokenArgs = {
   code: Scalars['String']['input'];
   oauthConfId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdateLinearConfigurationArgs = {
+  organizationId: Scalars['String']['input'];
+  teamId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdateLinearTokenArgs = {
+  code: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -11835,6 +12038,26 @@ export type Mutation_RootUpdate_Organization_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Organization_Raw_Issue_Type_BlocklistArgs = {
+  _set?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Set_Input>;
+  where: Organization_Raw_Issue_Type_Blocklist_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Raw_Issue_Type_Blocklist_By_PkArgs = {
+  _set?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Set_Input>;
+  pk_columns: Organization_Raw_Issue_Type_Blocklist_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Raw_Issue_Type_Blocklist_ManyArgs = {
+  updates: Array<Organization_Raw_Issue_Type_Blocklist_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Organization_RoleArgs = {
   _set?: InputMaybe<Organization_Role_Set_Input>;
   where: Organization_Role_Bool_Exp;
@@ -12193,6 +12416,36 @@ export type Mutation_RootUpdate_Submit_Fix_Request_State_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Submit_Fix_Request_State_ManyArgs = {
   updates: Array<Submit_Fix_Request_State_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ticket_IntegrationArgs = {
+  _append?: InputMaybe<Ticket_Integration_Append_Input>;
+  _delete_at_path?: InputMaybe<Ticket_Integration_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Ticket_Integration_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Ticket_Integration_Delete_Key_Input>;
+  _prepend?: InputMaybe<Ticket_Integration_Prepend_Input>;
+  _set?: InputMaybe<Ticket_Integration_Set_Input>;
+  where: Ticket_Integration_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ticket_Integration_By_PkArgs = {
+  _append?: InputMaybe<Ticket_Integration_Append_Input>;
+  _delete_at_path?: InputMaybe<Ticket_Integration_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Ticket_Integration_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Ticket_Integration_Delete_Key_Input>;
+  _prepend?: InputMaybe<Ticket_Integration_Prepend_Input>;
+  _set?: InputMaybe<Ticket_Integration_Set_Input>;
+  pk_columns: Ticket_Integration_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ticket_Integration_ManyArgs = {
+  updates: Array<Ticket_Integration_Updates>;
 };
 
 
@@ -12779,6 +13032,10 @@ export type Organization = {
   projects: Array<Project>;
   /** An aggregate relationship */
   projects_aggregate: Project_Aggregate;
+  /** An array relationship */
+  rawIssueTypeBlocklist: Array<Organization_Raw_Issue_Type_Blocklist>;
+  /** An aggregate relationship */
+  rawIssueTypeBlocklist_aggregate: Organization_Raw_Issue_Type_Blocklist_Aggregate;
   remainingUnstableFixes: Scalars['Int']['output'];
   /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
@@ -12973,6 +13230,26 @@ export type OrganizationProjects_AggregateArgs = {
 
 
 /** columns and relationships of "organization" */
+export type OrganizationRawIssueTypeBlocklistArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRawIssueTypeBlocklist_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
 export type OrganizationResolvedAggregatedVulnerabilitySeveritiesArgs = {
   args: ResolvedAggregatedVulnerabilitySeverities_Organization_Args;
   distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
@@ -13089,6 +13366,8 @@ export type Organization_Bool_Exp = {
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Bool_Exp>;
   projects?: InputMaybe<Project_Bool_Exp>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Bool_Exp>;
+  rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+  rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp>;
   remainingUnstableFixes?: InputMaybe<Int_Comparison_Exp>;
   roiDevHourlyRate?: InputMaybe<Int_Comparison_Exp>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
@@ -13380,6 +13659,7 @@ export type Organization_Insert_Input = {
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
   projects?: InputMaybe<Project_Arr_Rel_Insert_Input>;
+  rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Arr_Rel_Insert_Input>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -13696,6 +13976,7 @@ export type Organization_Order_By = {
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Order_By>;
+  rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Order_By>;
   remainingUnstableFixes?: InputMaybe<Order_By>;
   roiDevHourlyRate?: InputMaybe<Order_By>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Order_By>;
@@ -13712,6 +13993,198 @@ export type Organization_Pk_Columns_Input = {
 export type Organization_Prepend_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** Table for storing raw issue types that should be blocked for an organization */
+export type Organization_Raw_Issue_Type_Blocklist = {
+  __typename?: 'organization_raw_issue_type_blocklist';
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  rawIssueType: Scalars['String']['output'];
+};
+
+/** aggregated selection of "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate = {
+  __typename?: 'organization_raw_issue_type_blocklist_aggregate';
+  aggregate?: Maybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Fields>;
+  nodes: Array<Organization_Raw_Issue_Type_Blocklist>;
+};
+
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp_Count>;
+};
+
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate_Fields = {
+  __typename?: 'organization_raw_issue_type_blocklist_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Organization_Raw_Issue_Type_Blocklist_Max_Fields>;
+  min?: Maybe<Organization_Raw_Issue_Type_Blocklist_Min_Fields>;
+};
+
+
+/** aggregate fields of "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Max_Order_By>;
+  min?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Arr_Rel_Insert_Input = {
+  data: Array<Organization_Raw_Issue_Type_Blocklist_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "organization_raw_issue_type_blocklist". All fields are combined with a logical 'AND'. */
+export type Organization_Raw_Issue_Type_Blocklist_Bool_Exp = {
+  _and?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>>;
+  _not?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+  _or?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  rawIssueType?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "organization_raw_issue_type_blocklist" */
+export enum Organization_Raw_Issue_Type_Blocklist_Constraint {
+  /** unique or primary key constraint on columns "organization_id", "raw_issue_type" */
+  OrganizationRawIssueTypeBlocklistOrganizationIdRawIssue = 'organization_raw_issue_type_blocklist_organization_id_raw_issue',
+  /** unique or primary key constraint on columns "id" */
+  OrganizationRawIssueTypeBlocklistPkey = 'organization_raw_issue_type_blocklist_pkey'
+}
+
+/** input type for inserting data into table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Insert_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawIssueType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Organization_Raw_Issue_Type_Blocklist_Max_Fields = {
+  __typename?: 'organization_raw_issue_type_blocklist_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  rawIssueType?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawIssueType?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Organization_Raw_Issue_Type_Blocklist_Min_Fields = {
+  __typename?: 'organization_raw_issue_type_blocklist_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  rawIssueType?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawIssueType?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Mutation_Response = {
+  __typename?: 'organization_raw_issue_type_blocklist_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Organization_Raw_Issue_Type_Blocklist>;
+};
+
+/** on_conflict condition type for table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_On_Conflict = {
+  constraint: Organization_Raw_Issue_Type_Blocklist_Constraint;
+  update_columns?: Array<Organization_Raw_Issue_Type_Blocklist_Update_Column>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "organization_raw_issue_type_blocklist". */
+export type Organization_Raw_Issue_Type_Blocklist_Order_By = {
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawIssueType?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: organization_raw_issue_type_blocklist */
+export type Organization_Raw_Issue_Type_Blocklist_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "organization_raw_issue_type_blocklist" */
+export enum Organization_Raw_Issue_Type_Blocklist_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RawIssueType = 'rawIssueType'
+}
+
+/** input type for updating data in table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Set_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawIssueType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "organization_raw_issue_type_blocklist" */
+export type Organization_Raw_Issue_Type_Blocklist_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Organization_Raw_Issue_Type_Blocklist_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Organization_Raw_Issue_Type_Blocklist_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawIssueType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "organization_raw_issue_type_blocklist" */
+export enum Organization_Raw_Issue_Type_Blocklist_Update_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RawIssueType = 'rawIssueType'
+}
+
+export type Organization_Raw_Issue_Type_Blocklist_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Organization_Raw_Issue_Type_Blocklist_Bool_Exp;
 };
 
 /** columns and relationships of "organization_role" */
@@ -16581,6 +17054,8 @@ export type Query_Root = {
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
+  getLinearIntegrationData: GetLinearIntegrationData;
+  getLinearTeams: LinearTeamsResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
@@ -16655,6 +17130,12 @@ export type Query_Root = {
   organization_issue_type_settings_aggregate: Organization_Issue_Type_Settings_Aggregate;
   /** fetch data from the table: "organization_issue_type_settings" using primary key columns */
   organization_issue_type_settings_by_pk?: Maybe<Organization_Issue_Type_Settings>;
+  /** fetch data from the table: "organization_raw_issue_type_blocklist" */
+  organization_raw_issue_type_blocklist: Array<Organization_Raw_Issue_Type_Blocklist>;
+  /** fetch aggregated fields from the table: "organization_raw_issue_type_blocklist" */
+  organization_raw_issue_type_blocklist_aggregate: Organization_Raw_Issue_Type_Blocklist_Aggregate;
+  /** fetch data from the table: "organization_raw_issue_type_blocklist" using primary key columns */
+  organization_raw_issue_type_blocklist_by_pk?: Maybe<Organization_Raw_Issue_Type_Blocklist>;
   /** fetch data from the table: "organization_role" */
   organization_role: Array<Organization_Role>;
   /** fetch aggregated fields from the table: "organization_role" */
@@ -16769,6 +17250,12 @@ export type Query_Root = {
   submit_fix_request_state_aggregate: Submit_Fix_Request_State_Aggregate;
   /** fetch data from the table: "submit_fix_request_state" using primary key columns */
   submit_fix_request_state_by_pk?: Maybe<Submit_Fix_Request_State>;
+  /** fetch data from the table: "ticket_integration" */
+  ticket_integration: Array<Ticket_Integration>;
+  /** fetch aggregated fields from the table: "ticket_integration" */
+  ticket_integration_aggregate: Ticket_Integration_Aggregate;
+  /** fetch data from the table: "ticket_integration" using primary key columns */
+  ticket_integration_by_pk?: Maybe<Ticket_Integration>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -16789,6 +17276,7 @@ export type Query_Root = {
   user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
   validateCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
   validateExistingCheckmarxConnection?: Maybe<ValidateCheckmarxConnectionResponse>;
+  validateExistingLinearConnection: ValidateLinearConnectionResponse;
   validateRepoUrl?: Maybe<RepoValidationResponse>;
   validateScmToken: ValidateScmTokenResponse;
   /** fetch data from the table: "view_project_resolved_vulnerabilities" */
@@ -17445,6 +17933,16 @@ export type Query_RootGetInvitationLinkArgs = {
 };
 
 
+export type Query_RootGetLinearIntegrationDataArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetLinearTeamsArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetScmReposArgs = {
   url: Scalars['String']['input'];
 };
@@ -17723,6 +18221,29 @@ export type Query_RootOrganization_Issue_Type_Settings_AggregateArgs = {
 
 
 export type Query_RootOrganization_Issue_Type_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOrganization_Raw_Issue_Type_BlocklistArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Raw_Issue_Type_Blocklist_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Raw_Issue_Type_Blocklist_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -18174,6 +18695,29 @@ export type Query_RootSubmit_Fix_Request_State_By_PkArgs = {
 };
 
 
+export type Query_RootTicket_IntegrationArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+export type Query_RootTicket_Integration_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+export type Query_RootTicket_Integration_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootUnfixableArgs = {
   distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -18252,6 +18796,11 @@ export type Query_RootValidateCheckmarxConnectionArgs = {
 
 
 export type Query_RootValidateExistingCheckmarxConnectionArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootValidateExistingLinearConnectionArgs = {
   organizationId: Scalars['String']['input'];
 };
 
@@ -20615,6 +21164,14 @@ export type Subscription_Root = {
   organization_issue_type_settings_by_pk?: Maybe<Organization_Issue_Type_Settings>;
   /** fetch data from the table in a streaming manner: "organization_issue_type_settings" */
   organization_issue_type_settings_stream: Array<Organization_Issue_Type_Settings>;
+  /** fetch data from the table: "organization_raw_issue_type_blocklist" */
+  organization_raw_issue_type_blocklist: Array<Organization_Raw_Issue_Type_Blocklist>;
+  /** fetch aggregated fields from the table: "organization_raw_issue_type_blocklist" */
+  organization_raw_issue_type_blocklist_aggregate: Organization_Raw_Issue_Type_Blocklist_Aggregate;
+  /** fetch data from the table: "organization_raw_issue_type_blocklist" using primary key columns */
+  organization_raw_issue_type_blocklist_by_pk?: Maybe<Organization_Raw_Issue_Type_Blocklist>;
+  /** fetch data from the table in a streaming manner: "organization_raw_issue_type_blocklist" */
+  organization_raw_issue_type_blocklist_stream: Array<Organization_Raw_Issue_Type_Blocklist>;
   /** fetch data from the table: "organization_role" */
   organization_role: Array<Organization_Role>;
   /** fetch aggregated fields from the table: "organization_role" */
@@ -20761,6 +21318,14 @@ export type Subscription_Root = {
   submit_fix_request_state_stream: Array<Submit_Fix_Request_State>;
   /** fetch data from the table in a streaming manner: "submit_fix_request" */
   submit_fix_request_stream: Array<Submit_Fix_Request>;
+  /** fetch data from the table: "ticket_integration" */
+  ticket_integration: Array<Ticket_Integration>;
+  /** fetch aggregated fields from the table: "ticket_integration" */
+  ticket_integration_aggregate: Ticket_Integration_Aggregate;
+  /** fetch data from the table: "ticket_integration" using primary key columns */
+  ticket_integration_by_pk?: Maybe<Ticket_Integration>;
+  /** fetch data from the table in a streaming manner: "ticket_integration" */
+  ticket_integration_stream: Array<Ticket_Integration>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -21915,6 +22480,36 @@ export type Subscription_RootOrganization_Issue_Type_Settings_StreamArgs = {
 };
 
 
+export type Subscription_RootOrganization_Raw_Issue_Type_BlocklistArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Raw_Issue_Type_Blocklist_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Raw_Issue_Type_Blocklist_Order_By>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Raw_Issue_Type_Blocklist_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOrganization_Raw_Issue_Type_Blocklist_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Organization_Raw_Issue_Type_Blocklist_Stream_Cursor_Input>>;
+  where?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
+};
+
+
 export type Subscription_RootOrganization_RoleArgs = {
   distinct_on?: InputMaybe<Array<Organization_Role_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -22463,6 +23058,36 @@ export type Subscription_RootSubmit_Fix_Request_StreamArgs = {
 };
 
 
+export type Subscription_RootTicket_IntegrationArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+export type Subscription_RootTicket_Integration_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+export type Subscription_RootTicket_Integration_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTicket_Integration_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ticket_Integration_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
 export type Subscription_RootUnfixableArgs = {
   distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -22950,6 +23575,373 @@ export type Subscription_RootVulnerability_Severity_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Vulnerability_Severity_Stream_Cursor_Input>>;
   where?: InputMaybe<Vulnerability_Severity_Bool_Exp>;
+};
+
+/** columns and relationships of "ticket_integration" */
+export type Ticket_Integration = {
+  __typename?: 'ticket_integration';
+  createdAt: Scalars['timestamptz']['output'];
+  description: Scalars['String']['output'];
+  externalId: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+  metadata?: Maybe<Scalars['jsonb']['output']>;
+  /** An object relationship */
+  project?: Maybe<Project>;
+  projectId: Scalars['uuid']['output'];
+  provider: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  teamName: Scalars['String']['output'];
+  ticketKey: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+  url: Scalars['String']['output'];
+};
+
+
+/** columns and relationships of "ticket_integration" */
+export type Ticket_IntegrationMetadataArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregated selection of "ticket_integration" */
+export type Ticket_Integration_Aggregate = {
+  __typename?: 'ticket_integration_aggregate';
+  aggregate?: Maybe<Ticket_Integration_Aggregate_Fields>;
+  nodes: Array<Ticket_Integration>;
+};
+
+export type Ticket_Integration_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ticket_Integration_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ticket_Integration_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ticket_Integration_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "ticket_integration" */
+export type Ticket_Integration_Aggregate_Fields = {
+  __typename?: 'ticket_integration_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ticket_Integration_Max_Fields>;
+  min?: Maybe<Ticket_Integration_Min_Fields>;
+};
+
+
+/** aggregate fields of "ticket_integration" */
+export type Ticket_Integration_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "ticket_integration" */
+export type Ticket_Integration_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ticket_Integration_Max_Order_By>;
+  min?: InputMaybe<Ticket_Integration_Min_Order_By>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Ticket_Integration_Append_Input = {
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** input type for inserting array relation for remote table "ticket_integration" */
+export type Ticket_Integration_Arr_Rel_Insert_Input = {
+  data: Array<Ticket_Integration_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ticket_Integration_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "ticket_integration". All fields are combined with a logical 'AND'. */
+export type Ticket_Integration_Bool_Exp = {
+  _and?: InputMaybe<Array<Ticket_Integration_Bool_Exp>>;
+  _not?: InputMaybe<Ticket_Integration_Bool_Exp>;
+  _or?: InputMaybe<Array<Ticket_Integration_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  description?: InputMaybe<String_Comparison_Exp>;
+  externalId?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  metadata?: InputMaybe<Jsonb_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  provider?: InputMaybe<String_Comparison_Exp>;
+  status?: InputMaybe<String_Comparison_Exp>;
+  teamName?: InputMaybe<String_Comparison_Exp>;
+  ticketKey?: InputMaybe<String_Comparison_Exp>;
+  title?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  url?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ticket_integration" */
+export enum Ticket_Integration_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  TicketIntegrationPkey = 'ticket_integration_pkey'
+}
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Ticket_Integration_Delete_At_Path_Input = {
+  metadata?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Ticket_Integration_Delete_Elem_Input = {
+  metadata?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Ticket_Integration_Delete_Key_Input = {
+  metadata?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** input type for inserting data into table "ticket_integration" */
+export type Ticket_Integration_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  teamName?: InputMaybe<Scalars['String']['input']>;
+  ticketKey?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ticket_Integration_Max_Fields = {
+  __typename?: 'ticket_integration_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  externalId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  teamName?: Maybe<Scalars['String']['output']>;
+  ticketKey?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "ticket_integration" */
+export type Ticket_Integration_Max_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
+  teamName?: InputMaybe<Order_By>;
+  ticketKey?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Ticket_Integration_Min_Fields = {
+  __typename?: 'ticket_integration_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  externalId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  teamName?: Maybe<Scalars['String']['output']>;
+  ticketKey?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "ticket_integration" */
+export type Ticket_Integration_Min_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
+  teamName?: InputMaybe<Order_By>;
+  ticketKey?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "ticket_integration" */
+export type Ticket_Integration_Mutation_Response = {
+  __typename?: 'ticket_integration_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ticket_Integration>;
+};
+
+/** on_conflict condition type for table "ticket_integration" */
+export type Ticket_Integration_On_Conflict = {
+  constraint: Ticket_Integration_Constraint;
+  update_columns?: Array<Ticket_Integration_Update_Column>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ticket_integration". */
+export type Ticket_Integration_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  metadata?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
+  teamName?: InputMaybe<Order_By>;
+  ticketKey?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ticket_integration */
+export type Ticket_Integration_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Ticket_Integration_Prepend_Input = {
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** select columns of table "ticket_integration" */
+export enum Ticket_Integration_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  ExternalId = 'externalId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Metadata = 'metadata',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  TeamName = 'teamName',
+  /** column name */
+  TicketKey = 'ticketKey',
+  /** column name */
+  Title = 'title',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  Url = 'url'
+}
+
+/** input type for updating data in table "ticket_integration" */
+export type Ticket_Integration_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  teamName?: InputMaybe<Scalars['String']['input']>;
+  ticketKey?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ticket_integration" */
+export type Ticket_Integration_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ticket_Integration_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ticket_Integration_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  teamName?: InputMaybe<Scalars['String']['input']>;
+  ticketKey?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ticket_integration" */
+export enum Ticket_Integration_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  ExternalId = 'externalId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Metadata = 'metadata',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  TeamName = 'teamName',
+  /** column name */
+  TicketKey = 'ticketKey',
+  /** column name */
+  Title = 'title',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  Url = 'url'
+}
+
+export type Ticket_Integration_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Ticket_Integration_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Ticket_Integration_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Ticket_Integration_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Ticket_Integration_Delete_Key_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Ticket_Integration_Prepend_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ticket_Integration_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ticket_Integration_Bool_Exp;
 };
 
 /** Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'. */
@@ -26086,6 +27078,55 @@ export type Vulnerability_Report_Issue_Shared_State = {
   project: Project;
   projectId: Scalars['uuid']['output'];
   repoUrl: Scalars['String']['output'];
+  ticketIntegrationId?: Maybe<Scalars['uuid']['output']>;
+  /** An array relationship */
+  ticketIntegrations: Array<Ticket_Integration>;
+  /** An aggregate relationship */
+  ticketIntegrations_aggregate: Ticket_Integration_Aggregate;
+  /** An array relationship */
+  vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
+  /** An aggregate relationship */
+  vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateTicketIntegrationsArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateTicketIntegrations_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ticket_Integration_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ticket_Integration_Order_By>>;
+  where?: InputMaybe<Ticket_Integration_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateVulnerabilityReportIssuesArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateVulnerabilityReportIssues_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
 };
 
 /** aggregated selection of "vulnerability_report_issue_shared_state" */
@@ -26121,6 +27162,11 @@ export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
   project?: InputMaybe<Project_Bool_Exp>;
   projectId?: InputMaybe<Uuid_Comparison_Exp>;
   repoUrl?: InputMaybe<String_Comparison_Exp>;
+  ticketIntegrationId?: InputMaybe<Uuid_Comparison_Exp>;
+  ticketIntegrations?: InputMaybe<Ticket_Integration_Bool_Exp>;
+  ticketIntegrations_aggregate?: InputMaybe<Ticket_Integration_Aggregate_Bool_Exp>;
+  vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+  vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "vulnerability_report_issue_shared_state" */
@@ -26139,6 +27185,9 @@ export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
   project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
   repoUrl?: InputMaybe<Scalars['String']['input']>;
+  ticketIntegrationId?: InputMaybe<Scalars['uuid']['input']>;
+  ticketIntegrations?: InputMaybe<Ticket_Integration_Arr_Rel_Insert_Input>;
+  vulnerabilityReportIssues?: InputMaybe<Vulnerability_Report_Issue_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -26148,6 +27197,7 @@ export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
   repoUrl?: Maybe<Scalars['String']['output']>;
+  ticketIntegrationId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** aggregate min on columns */
@@ -26157,6 +27207,7 @@ export type Vulnerability_Report_Issue_Shared_State_Min_Fields = {
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
   repoUrl?: Maybe<Scalars['String']['output']>;
+  ticketIntegrationId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** response of any mutation on the table "vulnerability_report_issue_shared_state" */
@@ -26190,6 +27241,9 @@ export type Vulnerability_Report_Issue_Shared_State_Order_By = {
   project?: InputMaybe<Project_Order_By>;
   projectId?: InputMaybe<Order_By>;
   repoUrl?: InputMaybe<Order_By>;
+  ticketIntegrationId?: InputMaybe<Order_By>;
+  ticketIntegrations_aggregate?: InputMaybe<Ticket_Integration_Aggregate_Order_By>;
+  vulnerabilityReportIssues_aggregate?: InputMaybe<Vulnerability_Report_Issue_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: vulnerability_report_issue_shared_state */
@@ -26208,7 +27262,9 @@ export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
   /** column name */
   ProjectId = 'projectId',
   /** column name */
-  RepoUrl = 'repoUrl'
+  RepoUrl = 'repoUrl',
+  /** column name */
+  TicketIntegrationId = 'ticketIntegrationId'
 }
 
 /** input type for updating data in table "vulnerability_report_issue_shared_state" */
@@ -26218,6 +27274,7 @@ export type Vulnerability_Report_Issue_Shared_State_Set_Input = {
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
   repoUrl?: InputMaybe<Scalars['String']['input']>;
+  ticketIntegrationId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** Streaming cursor of the table "vulnerability_report_issue_shared_state" */
@@ -26235,6 +27292,7 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = 
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
   repoUrl?: InputMaybe<Scalars['String']['input']>;
+  ticketIntegrationId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** update columns of table "vulnerability_report_issue_shared_state" */
@@ -26248,7 +27306,9 @@ export enum Vulnerability_Report_Issue_Shared_State_Update_Column {
   /** column name */
   ProjectId = 'projectId',
   /** column name */
-  RepoUrl = 'repoUrl'
+  RepoUrl = 'repoUrl',
+  /** column name */
+  TicketIntegrationId = 'ticketIntegrationId'
 }
 
 export type Vulnerability_Report_Issue_Shared_State_Updates = {

@@ -28,6 +28,12 @@ export const VulnerabilityReportIssueSharedStateZ = z
   .object({
     id: z.string().uuid(),
     isArchived: z.boolean(),
+    ticketIntegrationId: z.string().uuid().nullable(),
+    ticketIntegrations: z.array(
+      z.object({
+        url: z.string(),
+      })
+    ),
   })
   .nullish()
 export const BaseIssuePartsZ = z.object({

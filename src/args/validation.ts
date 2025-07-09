@@ -57,7 +57,7 @@ export function validateRepoUrl(
   }
 }
 
-const supportExtensions = ['.json', '.xml', '.fpr', '.sarif']
+const supportExtensions = ['.json', '.xml', '.fpr', '.sarif', '.zip']
 export function validateReportFileFormat(reportFile: string) {
   if (!supportExtensions.includes(path.extname(reportFile))) {
     throw new CliError(

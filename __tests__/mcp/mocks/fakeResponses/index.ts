@@ -6,10 +6,10 @@ export { mockCreateProject, mockCreateProjectError } from './createProject'
 export { mockGetAnalysis } from './getAnalysis'
 export { mockGetFixDiff } from './getFixDiff'
 export {
-  mockGetOrgAndProjectId,
-  mockGetOrgAndProjectIdError,
-  mockGetOrgAndProjectIdProjectNotFound,
-} from './getOrgAndProjectId'
+  mockGetLastOrgAndNamedProject,
+  mockGetLastOrgAndNamedProjectError,
+  mockGetLastOrgAndNamedProjectProjectNotFound,
+} from './getLastOrgAndNamedProject'
 export {
   mockGetReportFixes,
   mockGetReportFixesEmpty,

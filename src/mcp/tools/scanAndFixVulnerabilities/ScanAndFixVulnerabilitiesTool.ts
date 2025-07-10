@@ -1,7 +1,10 @@
 import z from 'zod'
 
-import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../core/configs'
-import { logInfo } from '../../Logger'
+import {
+  MCP_DEFAULT_MAX_FILES_TO_SCAN,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from '../../core/configs'
+import { logDebug, logError } from '../../Logger'
 import { getLocalFiles } from '../../services/GetLocalFiles'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
@@ -9,7 +12,7 @@ import { BaseTool } from '../base/BaseTool'
 import { ScanAndFixVulnerabilitiesService } from './ScanAndFixVulnerabilitiesService'
 
 export class ScanAndFixVulnerabilitiesTool extends BaseTool {
-  name = 'scan_and_fix_vulnerabilities'
+  name = MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES
   displayName = 'Scan and Fix Vulnerabilities'
   // A detailed description to guide the LLM on when and how to invoke this tool.
   description = `Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
@@ -109,7 +112,9 @@ Example payload:
   }
 
   async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
-    logInfo('Executing tool: scan_and_fix_vulnerabilities', { path: args.path })
+    logDebug(`Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`, {
+      path: args.path,
+    })
 
     if (!args.path) {
       throw new Error("Invalid arguments: Missing required parameter 'path'")
@@ -130,7 +135,7 @@ Example payload:
       maxFiles: args.maxFiles,
     })
 
-    logInfo('Files', { files })
+    logDebug('Files', { files })
     // Check if there are files to process
     if (files.length === 0) {
       return {
@@ -155,39 +160,25 @@ Example payload:
           isRescan: args.rescan || !!args.maxFiles,
         })
 
-      const result = {
-        content: [
-          {
-            type: 'text',
-            text: fixResult,
-          },
-        ],
-      }
+      const successResponse = this.createSuccessResponse(fixResult)
 
-      logInfo('Tool execution completed successfully', {
+      logDebug('Tool execution completed successfully', {
         resultLength: fixResult.length,
         fileCount: files.length,
-        result: result,
+        result: successResponse,
       })
 
-      return result
+      return successResponse
     } catch (error) {
       // Return error as text content for processing errors (not validation errors)
-      const errorResult = {
-        content: [
-          {
-            type: 'text',
-            text: (error as Error).message,
-          },
-        ],
-      }
+      const errorResponse = this.createSuccessResponse((error as Error).message)
 
-      logInfo('Tool execution failed', {
+      logError('Tool execution failed', {
         error: (error as Error).message,
-        result: errorResult,
+        result: errorResponse,
       })
 
-      return errorResult
+      return errorResponse
     }
   }
 }

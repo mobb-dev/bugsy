@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { logDebug, logInfo } from '../../Logger'
-import { getMcpGQLClient } from '../../services/McpGQLClient'
+import { createAuthenticatedMcpGQLClient } from '../../services/McpGQLClient'
 
 export type ToolResponse = {
   content: {
@@ -37,10 +37,10 @@ export abstract class BaseTool {
   }
 
   public async execute(args: unknown): Promise<ToolResponse> {
-    logInfo(`Authenticating tool: ${this.name}`, { args })
-    const mcpGqlClient = await getMcpGQLClient()
+    logDebug(`Authenticating tool: ${this.name}`, { args })
+    const mcpGqlClient = await createAuthenticatedMcpGQLClient()
     const userInfo = await mcpGqlClient.getUserInfo()
-    logDebug('Authenticated', { userInfo })
+    logDebug('User authenticated successfully', { userInfo })
 
     // Validate input arguments - let validation errors bubble up as MCP errors
     const validatedArgs = this.validateInput(args)
@@ -49,6 +49,7 @@ export abstract class BaseTool {
     })
 
     // Execute the tool logic
+    logInfo(`Executing tool: ${this.name}`)
     const result = await this.executeInternal(validatedArgs)
     logInfo(`Tool ${this.name} executed successfully`)
 

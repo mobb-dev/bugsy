@@ -1,13 +1,17 @@
 import { z } from 'zod'
 
 import { GitService } from '../../../features/analysis/scm/git/GitService'
-import { log, logInfo } from '../../Logger'
+import {
+  MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from '../../core/configs'
+import { log, logDebug } from '../../Logger'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
 import { FetchAvailableFixesService } from './FetchAvailableFixesService'
 
 export class FetchAvailableFixesTool extends BaseTool {
-  name = 'fetch_available_fixes'
+  name = MCP_TOOL_FETCH_AVAILABLE_FIXES
   displayName = 'Fetch Available Fixes'
   description = `Check the MOBB backend for pre-generated fixes (patch sets) that correspond to vulnerabilities detected in the supplied Git repository.
 
@@ -27,7 +31,7 @@ The tool will:
 2. Verify that the directory is a valid Git repository with an "origin" remote.
 3. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
 
-Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixes summary and do NOT want to perform scanning or code modifications.`
+Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only need a fixes summary and do NOT want to perform scanning or code modifications.`
 
   inputSchema = {
     type: 'object' as const,
@@ -70,10 +74,6 @@ Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixe
   }
 
   async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
-    // override async executeInternal(
-    //   args: z.infer<typeof this.inputSchema>
-    // ): Promise<ToolResponse> {
-    // Validate the path for security and existence
     const pathValidationResult = await validatePath(args.path)
 
     if (!pathValidationResult.isValid) {
@@ -109,59 +109,9 @@ Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixe
       limit: args.limit,
       offset: args.offset,
     })
-    logInfo('FetchAvailableFixesTool execution completed successfully', {
+    logDebug('FetchAvailableFixesTool execution completed successfully', {
       fixResult,
     })
-    return {
-      content: [
-        {
-          type: 'text',
-          text: fixResult,
-        },
-      ],
-    }
+    return this.createSuccessResponse(fixResult)
   }
 }
-
-//     // If latestReport is a string, it's the noReportFoundPrompt
-//     if (typeof latestReport === 'string') {
-//       return {
-//         content: [
-//           {
-//             type: 'text',
-//             text: latestReport,
-//           },
-//         ],
-//       }
-//     }
-
-//     // At this point, latestReport is guaranteed to be a FixReport
-//     const report = latestReport as FixReport
-
-//     // Format the response with fix counts by severity
-//     const fixCounts = {
-//       total: report.fixes_aggregate?.aggregate?.count ?? 0,
-//       critical: report.CRITICAL?.aggregate?.count ?? 0,
-//       high: report.HIGH?.aggregate?.count ?? 0,
-//       medium: report.MEDIUM?.aggregate?.count ?? 0,
-//       low: report.LOW?.aggregate?.count ?? 0,
-//     }
-
-//     const responseText = `Found ${fixCounts.total} available fixes:
-// - Critical: ${fixCounts.critical}
-// - High: ${fixCounts.high}
-// - Medium: ${fixCounts.medium}
-// - Low: ${fixCounts.low}
-
-// Latest scan date: ${report.vulnerabilityReport?.scanDate ? new Date(report.vulnerabilityReport.scanDate).toLocaleString() : 'Unknown'}
-// Vendor: ${report.vulnerabilityReport?.vendor || 'Unknown'}`
-
-//     return {
-//       content: [
-//         {
-//           type: 'text',
-//           text: responseText,
-//         },
-//       ],
-//     }
-//   }

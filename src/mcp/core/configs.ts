@@ -7,10 +7,10 @@ export const MCP_DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
 export const MCP_API_KEY_HEADER_NAME = 'x-mobb-key'
 
 // Maximum time (ms) to wait for the user to complete browser-based login flow before aborting
-export const MCP_LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
+export const MCP_LOGIN_MAX_WAIT = 2 * 60 * 1000 // 2 minutes
 
 // Interval (ms) between successive polling attempts while waiting for login to complete
-export const MCP_LOGIN_CHECK_DELAY = 1 * 1000 // 1 second
+export const MCP_LOGIN_CHECK_DELAY = 2 * 1000 // 2 seconds
 
 // Timeout (ms) for digesting vulnerability report data received from the backend
 export const MCP_VUL_REPORT_DIGEST_TIMEOUT_MS = 5 * 60 * 1000 // 5 minutes
@@ -29,3 +29,12 @@ export const MCP_REPORT_ID_EXPIRATION_MS = 2 * 60 * 60 * 1000 // 2 hours
 
 // Time (ms) after which a browser can be opened again after a previous open
 export const MCP_TOOLS_BROWSER_COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours
+
+//tools
+export const MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES =
+  'check_for_new_available_fixes'
+
+export const MCP_TOOL_FETCH_AVAILABLE_FIXES = 'fetch_available_fixes'
+
+export const MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES =
+  'scan_and_fix_vulnerabilities'

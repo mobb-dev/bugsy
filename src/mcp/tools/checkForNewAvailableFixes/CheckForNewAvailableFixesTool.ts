@@ -1,12 +1,14 @@
 import { z } from 'zod'
 
+import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../../core/configs'
 import { logInfo } from '../../Logger'
+import { McpGQLClient } from '../../services/McpGQLClient'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
 import { CheckForNewAvailableFixesService } from './CheckForNewAvailableFixesService'
 
 export class CheckForNewAvailableFixesTool extends BaseTool {
-  name = 'check_for_new_available_fixes'
+  name = MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES
   displayName = 'Check for New Available Fixes'
   // A detailed description to guide the LLM on when and how to invoke this tool.
   description = `Continuesly monitors your code and scans for new security vulnerabilities.
@@ -56,6 +58,10 @@ Example payload:
     this.newFixesService = new CheckForNewAvailableFixesService()
   }
 
+  triggerScan(args: { path: string; gqlClient: McpGQLClient }) {
+    this.newFixesService.triggerScan(args)
+  }
+
   async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
     // Validate the path for security and existence
     const pathValidationResult = await validatePath(args.path)
@@ -76,13 +82,6 @@ Example payload:
       resultText,
     })
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: resultText,
-        },
-      ],
-    }
+    return this.createSuccessResponse(resultText)
   }
 }

@@ -1,8 +1,12 @@
 import { GetLatestReportByRepoUrlQuery } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 
-import { McpFix } from '../types'
+import { McpFix } from '../../mcp/types'
+import {
+  MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from './configs'
 
-function frienlyType(s: string) {
+function friendlyType(s: string) {
   // First replace underscores with spaces
   const withoutUnderscores = s.replace(/_/g, ' ')
   // Then handle camelCase by adding spaces before capital letters (but not at the start)
@@ -35,7 +39,7 @@ export const applyFixesPrompt = ({
   }
 
   const fixList = fixes.map((fix: McpFix) => {
-    const vulnerabilityType = frienlyType(fix.safeIssueType!)
+    const vulnerabilityType = friendlyType(fix.safeIssueType!)
     const vulnerabilityDescription =
       fix.patchAndQuestions?.__typename === 'FixData'
         ? fix.patchAndQuestions.extraContext?.fixDescription
@@ -46,10 +50,13 @@ export const applyFixesPrompt = ({
         ? fix.patchAndQuestions.patch
         : undefined
 
+    const gitBlameLogin = fix.gitBlameLogin
+
     return {
       vulnerabilityType: vulnerabilityType,
       vulnerabilityDescription: vulnerabilityDescription,
       patch,
+      gitBlameLogin,
     }
   })
 
@@ -103,7 +110,13 @@ ${fixList
 
 **📝 Description:** ${fix.vulnerabilityDescription || 'Security vulnerability fix'}
 
-**🔧 Action Required:** Apply the following patch exactly as shown
+${
+  fix.gitBlameLogin
+    ? `**👤 Git Blame:** The code that needs to be fixed was last modified by: \`${fix.gitBlameLogin}\`
+
+`
+    : ''
+}**🔧 Action Required:** Apply the following patch exactly as shown
 
 **📁 Patch to Apply:**
 \`\`\`diff
@@ -158,7 +171,7 @@ We were unable to find a previous vulnerability report for this repository. This
 
 ### 🎯 Recommended Actions
 1. **Run a new security scan** to analyze your codebase
-   - Use the \`scan_and_fix_vulnerabilities\` tool to start a fresh scan
+   - Use the \`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\` tool to start a fresh scan
    - This will analyze your current code for security issues
 
 2. **Verify repository access**
@@ -189,7 +202,7 @@ Your most recent vulnerability report for this repository **expired on ${lastRep
 
 ### 🎯 Recommended Actions
 1. **Run a fresh security scan** to generate an up-to-date vulnerability report.
-   - Use the \`scan_and_fix_vulnerabilities\` tool.
+   - Use the \`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\` tool.
 2. **Verify repository access** if scans fail to run or the repository has moved.
 3. **Review your CI/CD pipeline** to ensure regular scans are triggered.
 
@@ -204,7 +217,7 @@ export const fixesFoundPrompt = ({
   fixReport,
   offset,
 }: {
-  fixReport: FixReport
+  fixReport: Omit<FixReport, 'userFixes'>
   offset: number
 }) => {
   const totalFixes = fixReport.filteredFixesCount.aggregate?.count || 0
@@ -258,7 +271,7 @@ ${applyFixesPrompt({
   hasMore,
   nextOffset: 0,
   shownCount: fixReport.fixes.length,
-  currentTool: 'fetch_available_fixes',
+  currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset,
 })}`
 }
@@ -284,7 +297,6 @@ To perform a **rescan** of your repository (fetching a brand-new vulnerability r
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
-
 `
 
 export const noFixesFoundPrompt = ({
@@ -309,7 +321,6 @@ export const fixesPrompt = ({
   offset: number
   scannedFiles: string[]
 }) => {
-  //const fix = fixes[0]
   if (totalCount === 0) {
     return noFixesFoundPrompt({ scannedFiles })
   }
@@ -322,11 +333,11 @@ export const fixesPrompt = ({
 
 ${applyFixesPrompt({
   fixes,
-  totalCount,
   hasMore,
+  totalCount,
   nextOffset,
   shownCount,
-  currentTool: 'scan_and_fix_vulnerabilities',
+  currentTool: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
   offset,
 })}
 
@@ -334,10 +345,9 @@ ${nextStepsPrompt({ scannedFiles })}
 `
 }
 
-export const noFreshFixesPrompt = `No fresh fixes available for this repository at this time.
-`
+export const noFreshFixesPrompt = `No fresh fixes available for this repository at this time. No user message needed. Do not show any comments to the user.`
 
-export const initialScanInProgressPrompt = `Initial scan in progress. Call the tool again in 1 minute to check for available fixes.`
+export const initialScanInProgressPrompt = `Initial scan is still in progress. No user message needed. Do not show any comments to the user.`
 
 export const freshFixesPrompt = ({ fixes }: { fixes: McpFix[] }) => {
   return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
@@ -348,7 +358,7 @@ ${applyFixesPrompt({
   hasMore: false,
   nextOffset: 0,
   shownCount: fixes.length,
-  currentTool: 'fetch_available_fixes',
+  currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset: 0,
 })}
 `

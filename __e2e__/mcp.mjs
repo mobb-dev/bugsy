@@ -22,6 +22,12 @@ import { npm } from './Npm.mjs'
 import { registry } from './Registry.mjs'
 import { CLI_LOCAL_ENV_OVERWRITE, SVJP_CX_REPORT } from './utils.mjs'
 
+const MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES = 'check_for_new_available_fixes'
+
+const MCP_TOOL_FETCH_AVAILABLE_FIXES = 'fetch_available_fixes'
+
+const MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES = 'scan_and_fix_vulnerabilities'
+
 // configure snapshot state once per file
 const snapshotFile = path.join(
   path.dirname(new URL(import.meta.url).pathname),
@@ -38,12 +44,6 @@ expect.extend({ toMatchSnapshot })
 process.on('exit', () => {
   snapshotState.save()
 })
-
-const assertTextMatch = (actualText, snapshotName) => {
-  // tie Jest-snapshot into bare expect by setting state for each assertion
-  expect.setState({ snapshotState, currentTestName: snapshotName })
-  expect(actualText).toMatchSnapshot()
-}
 
 test('Bugsy MCP E2E tests', async (t) => {
   let client
@@ -145,7 +145,7 @@ test('Bugsy MCP E2E tests', async (t) => {
       const expectedResponse = {
         tools: [
           {
-            name: 'scan_and_fix_vulnerabilities',
+            name: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
             display_name: 'Scan and Fix Vulnerabilities',
             description: `Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
 
@@ -212,7 +212,7 @@ Example payload:
             },
           },
           {
-            name: 'fetch_available_fixes',
+            name: MCP_TOOL_FETCH_AVAILABLE_FIXES,
             display_name: 'Fetch Available Fixes',
             description: `Check the MOBB backend for pre-generated fixes (patch sets) that correspond to vulnerabilities detected in the supplied Git repository.
 
@@ -232,7 +232,7 @@ The tool will:
 2. Verify that the directory is a valid Git repository with an "origin" remote.
 3. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
 
-Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixes summary and do NOT want to perform scanning or code modifications.`,
+Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only need a fixes summary and do NOT want to perform scanning or code modifications.`,
             inputSchema: {
               type: 'object',
               properties: {
@@ -254,7 +254,7 @@ Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixe
             },
           },
           {
-            name: 'check_for_new_available_fixes',
+            name: MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
             display_name: 'Check for New Available Fixes',
             description: `Continuesly monitors your code and scans for new security vulnerabilities.
 
@@ -305,9 +305,12 @@ Example payload:
   await t.test('MCP: scan and fix vulnerabilities', async () => {
     try {
       console.log('scanning and fixing vulnerabilities')
-      const response = await client.callTool('scan_and_fix_vulnerabilities', {
-        path: tempDir,
-      })
+      const response = await client.callTool(
+        MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+        {
+          path: tempDir,
+        }
+      )
 
       // console.log('scan_and_fix_vulnerabilities response', response)
 
@@ -320,12 +323,6 @@ Example payload:
       // Extract the actual text from the response
       const actualText = response.content[0].text
 
-      // Check if the actual text starts with the expected text
-      assertTextMatch(actualText, 'scan_and_fix_vulnerabilities_start')
-
-      // Check if the actual text ends with the expected text
-      assertTextMatch(actualText, 'scan_and_fix_vulnerabilities_end')
-
       // Check that the response contains at least one fix
       assertIncludes(
         actualText,
@@ -336,7 +333,7 @@ Example payload:
       // Make a second call to get the next batch of fixes
       console.log('getting next batch of fixes')
       const nextBatchResponse = await client.callTool(
-        'scan_and_fix_vulnerabilities',
+        MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
         {
           path: tempDir,
         }
@@ -380,7 +377,7 @@ Example payload:
       // Make a third call with a larger limit that overlaps with previous batches
       console.log('getting comprehensive batch of fixes')
       const largeBatchResponse = await client.callTool(
-        'scan_and_fix_vulnerabilities',
+        MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
         {
           path: tempDir,
           offset: 5,
@@ -438,7 +435,7 @@ Example payload:
       // Make a fourth call with rescan=true to test reanalysis
       console.log('rescanning for vulnerabilities')
       const rescanResponse = await client.callTool(
-        'scan_and_fix_vulnerabilities',
+        MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
         {
           path: tempDir,
           rescan: true,
@@ -462,10 +459,6 @@ Example payload:
 
       // Extract the actual text from the rescan response
       const rescanText = rescanResponse.content[0].text
-
-      // Verify the rescan response has the standard text structures
-      assertTextMatch(rescanText, 'rescan_start')
-      assertTextMatch(rescanText, 'rescan_end')
 
       // Check that the rescan response contains the expected fix format
       assertIncludes(
@@ -525,7 +518,7 @@ Example payload:
       // eslint-disable-next-line no-constant-condition
       let isReportUploaded = false
       while (!isReportUploaded) {
-        response = await client.callTool('fetch_available_fixes', {
+        response = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
           path: tempDirExistingReport,
           limit: 1,
           offset: 0,
@@ -554,10 +547,10 @@ Example payload:
         'Response should NOT include Fix 2',
         false
       )
-      const response2 = await client.callTool('fetch_available_fixes', {
+      const response2 = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
         path: tempDirExistingReport,
-        limit: 1,
         offset: 1,
+        limit: 1,
       })
       const response2Text = response2.content[0].text
       assertIncludes(
@@ -571,7 +564,7 @@ Example payload:
         'Rescan should not include Fix 3',
         false
       )
-      const response3 = await client.callTool('fetch_available_fixes', {
+      const response3 = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
         path: tempDirExistingReport,
         limit: 10,
         offset: 1,

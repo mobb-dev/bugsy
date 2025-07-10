@@ -1,6 +1,6 @@
 import { packageJson } from '../utils'
 
-const logglerUrl = 'http://localhost:4444/log'
+const loggerUrl = 'http://localhost:4444/log'
 const isTestEnvironment =
   process.env['NODE_ENV'] === 'test' ||
   process.env['VITEST'] ||
@@ -77,14 +77,18 @@ class Logger {
       return
     }
 
-    // Check if logglerUrl is reachable
-    const isReachable = await this.isUrlReachable(logglerUrl)
+    // Check if loggerUrl is reachable
+    const isReachable = await this.isUrlReachable(loggerUrl)
     if (!isReachable) {
       // URL is not reachable, trigger circuit breaker
       this.triggerCircuitBreaker()
       return
     }
 
+    await this.sendLogEntry(logEntry)
+  }
+
+  private async sendLogEntry(logEntry: LogMessage) {
     const logMessage = {
       timestamp: new Date().toISOString(),
       level: logEntry.level,
@@ -102,27 +106,26 @@ class Logger {
     }, 500) // 500ms timeout
 
     // Send the log message
-    fetch(logglerUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(logMessage),
-      redirect: 'error', // do not follow redirects
-      signal: controller.signal,
-    })
-      .then((_response) => {
-        // Remove the processed item from queue
-        this.queue.shift()
+    try {
+      await fetch(loggerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logMessage),
+        redirect: 'error', // do not follow redirects
+        signal: controller.signal,
+      })
+      // Remove the processed item from queue
+      this.queue.shift()
 
-        // Process next item
-        setTimeout(() => this.processQueue(), 0)
-      })
-      .catch(() => {
-        // On failure, trigger circuit breaker
-        this.triggerCircuitBreaker()
-      })
-      .finally(() => {
-        clearTimeout(timeoutId)
-      })
+      // Process next item
+      setTimeout(() => this.processQueue(), 0)
+    } catch (error) {
+      // On failure, trigger circuit breaker
+      this.triggerCircuitBreaker()
+      logError('Failed to send log entry', error) // Added error logging
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
   private triggerCircuitBreaker() {

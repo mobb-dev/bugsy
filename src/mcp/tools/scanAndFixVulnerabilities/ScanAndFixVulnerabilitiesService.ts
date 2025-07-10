@@ -6,7 +6,10 @@ import {
 } from '../../core/Errors'
 import { fixesPrompt } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
-import { getMcpGQLClient, McpGQLClient } from '../../services/McpGQLClient'
+import {
+  createAuthenticatedMcpGQLClient,
+  McpGQLClient,
+} from '../../services/McpGQLClient'
 import { scanFiles } from '../../services/ScanFiles'
 import { McpFix } from '../../types'
 
@@ -66,9 +69,10 @@ export class ScanAndFixVulnerabilitiesService {
     limit?: number
     isRescan?: boolean
   }): Promise<string> {
+    logInfo('Processing vulnerabilities')
     try {
       this.gqlClient = await this.initializeGqlClient()
-      logInfo('storedFixReportId', {
+      logDebug('storedFixReportId', {
         storedFixReportId: this.storedFixReportId,
         currentOffset: this.currentOffset,
         fixReportIdTimestamp: this.fixReportIdTimestamp,
@@ -82,6 +86,7 @@ export class ScanAndFixVulnerabilitiesService {
       // 2. isRescan is true
       // 3. The stored fixReportId has expired
       if (!fixReportId || isRescan || this.isFixReportIdExpired()) {
+        logInfo('Scanning files')
         this.reset()
         this.validateFiles(fileList)
         const scanResult = await scanFiles(
@@ -90,6 +95,8 @@ export class ScanAndFixVulnerabilitiesService {
           this.gqlClient
         )
         fixReportId = scanResult.fixReportId
+      } else {
+        logInfo('Using stored fixReportId')
       }
 
       // Use the provided offset when defined; otherwise fallback to currentOffset or 0.
@@ -104,6 +111,7 @@ export class ScanAndFixVulnerabilitiesService {
       )
 
       // Only store fixReportId if fixes were found
+      logInfo(`Found ${fixes.totalCount} fixes`)
       if (fixes.totalCount > 0) {
         this.storedFixReportId = fixReportId
         this.fixReportIdTimestamp = Date.now()
@@ -117,6 +125,7 @@ export class ScanAndFixVulnerabilitiesService {
         offset: effectiveOffset,
         scannedFiles: [...fileList],
       })
+
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
       return prompt
     } catch (error) {
@@ -147,15 +156,16 @@ export class ScanAndFixVulnerabilitiesService {
   }
 
   private async initializeGqlClient(): Promise<McpGQLClient> {
-    const gqlClient = await getMcpGQLClient()
+    const gqlClient = await createAuthenticatedMcpGQLClient()
 
-    const isConnected = await gqlClient.verifyConnection()
+    const isConnected = await gqlClient.verifyApiConnection()
     if (!isConnected) {
       throw new ApiConnectionError(
         'Failed to connect to the API. Please check your MOBB_API_KEY'
       )
     }
 
+    this.gqlClient = gqlClient
     return gqlClient
   }
 
@@ -177,7 +187,7 @@ export class ScanAndFixVulnerabilitiesService {
       offset,
       limit,
     })
-    logInfo('Fixes retrieved', { fixCount: fixes?.fixes?.length })
+    logDebug(`${fixes?.fixes?.length} fixes retrieved`)
     return {
       fixes: fixes?.fixes || [],
       totalCount: fixes?.totalCount || 0,

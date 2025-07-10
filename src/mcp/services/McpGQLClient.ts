@@ -1,11 +1,7 @@
-import crypto from 'node:crypto'
-import os from 'node:os' // 5 sec
-
-import { WEB_APP_URL } from '@mobb/bugsy/constants'
-import { packageJson, sleep } from '@mobb/bugsy/utils'
+import { packageJson } from '@mobb/bugsy/utils'
 import Configstore from 'configstore'
+import crypto from 'crypto'
 import { GraphQLClient } from 'graphql-request'
-import open from 'open'
 import { v4 as uuidv4 } from 'uuid'
 
 import { subscribe } from '../../features/analysis/graphql/subscribe'
@@ -23,21 +19,11 @@ import {
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
-import {
-  MCP_API_KEY_HEADER_NAME,
-  MCP_DEFAULT_API_URL,
-  MCP_LOGIN_CHECK_DELAY,
-  MCP_LOGIN_MAX_WAIT,
-  MCP_TOOLS_BROWSER_COOLDOWN_MS,
-} from '../core/configs'
-import {
-  ApiConnectionError,
-  AuthenticationError,
-  CliLoginError,
-  FailedToGetApiTokenError,
-} from '../core/Errors'
-import { logDebug, logError, logInfo } from '../Logger'
+import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_API_URL } from '../core/configs'
+import { ApiConnectionError } from '../core/Errors'
+import { logDebug, logError } from '../Logger'
 import { FixReportSummary, McpFix } from '../types'
+import { McpAuthService } from './McpAuthService'
 
 type GQLClientArgs =
   | {
@@ -97,18 +83,18 @@ export class McpGQLClient {
     }
   }
 
-  async verifyConnection(): Promise<boolean> {
+  async verifyApiConnection(): Promise<boolean> {
     try {
-      logDebug('GraphQL: Calling Me query for connection verification')
+      logDebug('GraphQL: Calling Me query for API connection verification')
       // Use the SDK's Me method for consistency
       const result = await this.clientSdk.Me()
       logDebug('GraphQL: Me query successful', { result })
       return true
     } catch (e: unknown) {
       const error = e as Error
-      logDebug(`verify connection failed ${error.toString()}`)
+      logDebug(`API connection verification failed ${error.toString()}`)
       if (error?.toString().includes('FetchError')) {
-        logError('verify connection failed', { error })
+        logError('API connection verification failed', { error })
         return false
       }
     }
@@ -122,7 +108,7 @@ export class McpGQLClient {
       const result = await this.clientSdk.uploadS3BucketInfo({
         fileName: 'report.json',
       })
-      logInfo('GraphQL: uploadS3BucketInfo successful', { result })
+      logDebug('GraphQL: uploadS3BucketInfo successful', { result })
       return result
     } catch (e) {
       logError('GraphQL: uploadS3BucketInfo failed', {
@@ -139,7 +125,7 @@ export class McpGQLClient {
       const res = await this.clientSdk.getAnalysis({
         analysisId,
       })
-      logInfo('GraphQL: getAnalysis successful', { result: res })
+      logDebug('GraphQL: getAnalysis successful', { result: res })
       if (!res.analysis) {
         throw new Error(`Analysis not found: ${analysisId}`)
       }
@@ -162,7 +148,7 @@ export class McpGQLClient {
         variables,
       })
       const result = await this.clientSdk.SubmitVulnerabilityReport(variables)
-      logInfo('GraphQL: SubmitVulnerabilityReport successful', { result })
+      logDebug('GraphQL: SubmitVulnerabilityReport successful', { result })
       return result
     } catch (e) {
       logError('GraphQL: SubmitVulnerabilityReport failed', {
@@ -210,7 +196,7 @@ export class McpGQLClient {
             return
           }
           if (callbackStates.includes(data.analysis?.state)) {
-            logInfo('GraphQL: Analysis state matches callback states', {
+            logDebug('GraphQL: Analysis state matches callback states', {
               analysisId: data.analysis.id,
               state: data.analysis.state,
               callbackStates,
@@ -232,7 +218,7 @@ export class McpGQLClient {
               timeoutInMs: params.timeoutInMs,
             }
       )
-      logInfo('GraphQL: GetAnalysis subscription completed', { result })
+      logDebug('GraphQL: GetAnalysis subscription completed', { result })
       return result
     } catch (e) {
       logError('GraphQL: GetAnalysis subscription failed', {
@@ -263,44 +249,47 @@ export class McpGQLClient {
         .toUpperCase()
 
       const projectName = `MCP Scans ${shortEmailHash}`
-      logDebug('GraphQL: Calling getOrgAndProjectId query', { projectName })
-      const getOrgAndProjectIdResult = await this.clientSdk.getOrgAndProjectId({
-        filters: {},
-        limit: 1,
+      logDebug('GraphQL: Calling getLastOrgAndNamedProject query', {
+        projectName,
       })
-      logInfo('GraphQL: getOrgAndProjectId successful', {
-        result: getOrgAndProjectIdResult,
+      const orgAndProjectRes = await this.clientSdk.getLastOrgAndNamedProject({
+        email: userEmail,
+        projectName,
+      })
+      logDebug('GraphQL: getLastOrgAndNamedProject successful', {
+        result: orgAndProjectRes,
       })
 
-      const [organizationToOrganizationRole] =
-        getOrgAndProjectIdResult.organization_to_organization_role
-      if (!organizationToOrganizationRole) {
-        throw new Error('Organization not found')
+      if (
+        !orgAndProjectRes.user?.[0]
+          ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization?.id
+      ) {
+        throw new Error(
+          `The user with email:${userEmail}  is not associated with any organization`
+        )
       }
+      const organization =
+        orgAndProjectRes.user?.[0]
+          ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization
+      const projectId = organization?.projects?.[0]?.id
 
-      const { organization: org } = organizationToOrganizationRole
-      const project = projectName
-        ? (org?.projects.find((project) => project.name === projectName) ??
-          null)
-        : org?.projects[0]
-
-      if (project?.id) {
-        logInfo('GraphQL: Found existing project', {
-          projectId: project.id,
+      if (projectId) {
+        logDebug('GraphQL: Found existing project', {
+          projectId,
           projectName,
         })
-        return project.id
+        return projectId
       }
 
       logDebug('GraphQL: Project not found, creating new project', {
-        organizationId: org.id,
+        organizationId: organization.id,
         projectName,
       })
       const createdProject = await this.clientSdk.CreateProject({
-        organizationId: org.id,
+        organizationId: organization.id,
         projectName: projectName,
       })
-      logInfo('GraphQL: CreateProject successful', { result: createdProject })
+      logDebug('GraphQL: CreateProject successful', { result: createdProject })
       return createdProject.createProject.projectId
     } catch (e) {
       logError('GraphQL: getProjectId failed', {
@@ -316,16 +305,16 @@ export class McpGQLClient {
     return me
   }
 
-  async verifyToken() {
-    logDebug('verifying token')
+  async validateUserToken() {
+    logDebug('validating user token')
 
     try {
       await this.clientSdk.CreateCommunityUser()
       const info = await this.getUserInfo()
-      logDebug('token verified')
+      logDebug('user token validated successfully')
       return info?.email || true
     } catch (e) {
-      logError('verify token failed')
+      logError('user token validation failed')
       return false
     }
   }
@@ -366,18 +355,47 @@ export class McpGQLClient {
     }
   }
 
-  async _updateFixesArchiveState(fixIds: string[]) {
+  private mergeUserAndSystemFixes(
+    reportData: { userFixes?: McpFix[]; fixes?: McpFix[] } | undefined,
+    limit: number
+  ): McpFix[] {
+    if (!reportData) return []
+
+    const { userFixes = [], fixes = [] } = reportData
+
+    // Use Map for O(1) deduplication instead of O(n²) array operations
+    const fixMap = new Map<string, McpFix>()
+
+    // Prioritize user fixes
+    for (const fix of userFixes) {
+      if (fix.id) {
+        fixMap.set(fix.id, fix)
+      }
+    }
+
+    // Add system fixes that aren't duplicates
+    for (const fix of fixes) {
+      if (fix.id && !fixMap.has(fix.id)) {
+        fixMap.set(fix.id, fix)
+      }
+    }
+
+    // Convert to array and apply limit
+    return Array.from(fixMap.values()).slice(0, limit)
+  }
+
+  async updateFixesDownloadStatus(fixIds: string[]) {
     if (fixIds.length > 0) {
       const resUpdate = await this.clientSdk.updateDownloadedFixData({
         fixIds,
         source: FixDownloadSource.Mcp,
       })
-      logInfo('GraphQL: updateFixesArchiveState successful', {
+      logDebug('GraphQL: updateFixesDownloadStatus successful', {
         result: resUpdate,
         fixIds,
       })
     } else {
-      logInfo('GraphQL: No fixes found')
+      logDebug('GraphQL: No fixes found to update download status')
     }
   }
 
@@ -390,7 +408,7 @@ export class McpGQLClient {
     limit?: number
     offset?: number
   }): Promise<{
-    fixReport: FixReportSummary | null
+    fixReport: Omit<FixReportSummary, 'userFixes'> | null
     expiredReport: { id: string; expirationOn?: string } | null
   }> {
     try {
@@ -399,21 +417,43 @@ export class McpGQLClient {
         limit,
         offset,
       })
+
+      // Get the current user info to add email with wildcards
+      let currentUserEmail = '%@%' // Default pattern to match any email
+      try {
+        const userInfo = await this.getUserInfo()
+        if (userInfo?.email) {
+          // Add wildcards for partial matching
+          currentUserEmail = `%${userInfo.email}%`
+        }
+      } catch (err) {
+        logDebug('Failed to get user email, using default pattern', {
+          error: err,
+        })
+      }
+
       const res = await this.clientSdk.GetLatestReportByRepoUrl({
         repoUrl,
         limit,
         offset,
+        currentUserEmail,
       })
-      logInfo('GraphQL: GetLatestReportByRepoUrl successful', {
+      logDebug('GraphQL: GetLatestReportByRepoUrl successful', {
         result: res,
         reportCount: res.fixReport?.length || 0,
       })
 
-      const fixIds = res.fixReport?.[0]?.fixes?.map((fix) => fix.id) || []
-      await this._updateFixesArchiveState(fixIds)
+      const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
+      const fixIds = fixes.map((fix) => fix.id)
+      await this.updateFixesDownloadStatus(fixIds)
 
       return {
-        fixReport: res.fixReport?.[0] || null,
+        fixReport: res.fixReport?.[0]
+          ? {
+              ...res.fixReport?.[0],
+              fixes,
+            }
+          : null,
         expiredReport: res.expiredReport?.[0] || null,
       }
     } catch (e) {
@@ -443,18 +483,18 @@ export class McpGQLClient {
     totalCount: number
     expiredReport: { id: string; expirationOn?: string } | null
   } | null> {
+    // Build filters object based on issueType and severity
+    const filters: Record<string, unknown> = {}
+
+    if (issueType && issueType.length > 0) {
+      filters['safeIssueType'] = { _in: issueType }
+    }
+
+    if (severity && severity.length > 0) {
+      filters['severityText'] = { _in: severity }
+    }
+
     try {
-      // Build filters object based on issueType and severity
-      const filters: Record<string, unknown> = {}
-
-      if (issueType && issueType.length > 0) {
-        filters['safeIssueType'] = { _in: issueType }
-      }
-
-      if (severity && severity.length > 0) {
-        filters['severityText'] = { _in: severity }
-      }
-
       logDebug('GraphQL: Calling GetReportFixes query', {
         reportId,
         limit,
@@ -464,14 +504,29 @@ export class McpGQLClient {
         severity,
       })
 
+      // Get the current user info to add email with wildcards
+      let currentUserEmail = '%@%' // Default pattern to match any email
+      try {
+        const userInfo = await this.getUserInfo()
+        if (userInfo?.email) {
+          // Add wildcards for partial matching
+          currentUserEmail = `%${userInfo.email}%`
+        }
+      } catch (err) {
+        logDebug('Failed to get user email, using default pattern', {
+          error: err,
+        })
+      }
+
       const res = await this.clientSdk.GetReportFixes({
         reportId,
         limit,
         offset,
         filters,
+        currentUserEmail,
       })
 
-      logInfo('GraphQL: GetReportFixes successful', {
+      logDebug('GraphQL: GetReportFixes successful', {
         result: res,
         fixCount: res.fixReport?.[0]?.fixes?.length || 0,
         totalCount:
@@ -482,11 +537,12 @@ export class McpGQLClient {
         return null
       }
 
-      const fixIds = res.fixReport?.[0]?.fixes?.map((fix) => fix.id) || []
-      await this._updateFixesArchiveState(fixIds)
+      const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
+      const fixIds = fixes.map((fix) => fix.id)
+      await this.updateFixesDownloadStatus(fixIds)
 
       return {
-        fixes: res.fixReport?.[0]?.fixes || [],
+        fixes,
         totalCount:
           res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
         expiredReport: res.expiredReport?.[0] || null,
@@ -502,27 +558,13 @@ export class McpGQLClient {
   }
 }
 
-async function openBrowser(url: string, isToolsCall: boolean) {
-  if (isToolsCall) {
-    const now = Date.now()
-    const lastBrowserOpenTime = mobbConfigStore.get('lastBrowserOpenTime') || 0
-    if (now - lastBrowserOpenTime < MCP_TOOLS_BROWSER_COOLDOWN_MS) {
-      logDebug(`browser cooldown active, skipping open for ${url}`)
-      return
-    }
-  }
-  logDebug(`opening browser url ${url}`)
-  await open(url)
-  mobbConfigStore.set('lastBrowserOpenTime', Date.now())
-}
-
-export async function getMcpGQLClient({
-  isToolsCall = false,
+export async function createAuthenticatedMcpGQLClient({
+  isBackgoundCall = false,
 }: {
-  isToolsCall?: boolean
+  isBackgoundCall?: boolean
 } = {}): Promise<McpGQLClient> {
   logDebug('getting config', { apiToken: mobbConfigStore.get('apiToken') })
-  const inGqlClient = new McpGQLClient({
+  const initialClient = new McpGQLClient({
     apiKey:
       process.env['MOBB_API_KEY'] ||
       process.env['API_KEY'] || // fallback for backward compatibility
@@ -531,63 +573,25 @@ export async function getMcpGQLClient({
     type: 'apiKey',
   })
 
-  const isConnected = await inGqlClient.verifyConnection()
-  logDebug('isConnected', { isConnected })
+  const isConnected = await initialClient.verifyApiConnection()
+  logDebug('API connection status', { isConnected })
   if (!isConnected) {
     throw new ApiConnectionError('Error: failed to connect to Mobb API')
   }
-  logDebug('verifying token')
-  const userVerify = await inGqlClient.verifyToken()
+
+  logDebug('validating user token')
+  const userVerify = await initialClient.validateUserToken()
   if (userVerify) {
-    return inGqlClient
-  }
-  logDebug('verifying token failed')
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-  })
-  logDebug('creating cli login')
-  const loginId = await inGqlClient.createCliLogin({
-    publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
-  })
-  if (!loginId) {
-    throw new CliLoginError('Error: createCliLogin failed')
+    return initialClient
   }
 
-  logDebug(`cli login created ${loginId}`)
-  const webLoginUrl = `${WEB_APP_URL}/cli-login`
-  const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
-  logDebug(`opening browser url ${browserUrl}`)
-  await openBrowser(browserUrl, isToolsCall)
-  logDebug(`waiting for login to complete`)
-  let newApiToken = null
-  for (let i = 0; i < MCP_LOGIN_MAX_WAIT / MCP_LOGIN_CHECK_DELAY; i++) {
-    const encryptedApiToken = await inGqlClient.getEncryptedApiToken({
-      loginId,
-    })
-    if (encryptedApiToken) {
-      logDebug('encrypted API token received')
-      newApiToken = crypto
-        .privateDecrypt(privateKey, Buffer.from(encryptedApiToken, 'base64'))
-        .toString('utf-8')
-      logDebug('API token decrypted')
-      break
-    }
-    await sleep(MCP_LOGIN_CHECK_DELAY)
-  }
+  // Token verification failed, authenticate using the auth service
+  const authService = new McpAuthService(initialClient)
+  const newApiToken = await authService.authenticate(isBackgoundCall)
 
-  if (!newApiToken) {
-    throw new FailedToGetApiTokenError(
-      'Error: failed to get encrypted api token'
-    )
-  }
+  // Store the new token for future use
+  mobbConfigStore.set('apiToken', newApiToken)
 
-  const newGqlClient = new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })
-  const loginSuccess = await newGqlClient.verifyToken()
-  if (loginSuccess) {
-    logDebug(`set api token ${newApiToken}`)
-    mobbConfigStore.set('apiToken', newApiToken)
-  } else {
-    throw new AuthenticationError('Invalid API token')
-  }
-  return newGqlClient
+  // Return a client with the new token
+  return new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })
 }

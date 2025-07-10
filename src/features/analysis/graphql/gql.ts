@@ -135,7 +135,7 @@ export class GQLClient {
     return res.insert_cli_login_one?.id || ''
   }
 
-  async verifyConnection() {
+  async verifyApiConnection() {
     try {
       await this.getUserInfo()
     } catch (e) {
@@ -147,7 +147,7 @@ export class GQLClient {
     return true
   }
 
-  async verifyToken() {
+  async validateUserToken() {
     await this.createCommunityUser()
 
     let info
@@ -160,42 +160,57 @@ export class GQLClient {
     return info?.email || true
   }
 
-  async getOrgAndProjectId(
-    params: {
-      projectName?: string
-      userDefinedOrganizationId?: string
-    } = {}
-  ) {
-    const { projectName, userDefinedOrganizationId } = params
-    const getOrgAndProjectIdResult = await this._clientSdk.getOrgAndProjectId({
-      filters: userDefinedOrganizationId
-        ? { organizationId: { _eq: userDefinedOrganizationId } }
-        : {},
-      limit: 1,
-    })
-    const [organizationToOrganizationRole] =
-      getOrgAndProjectIdResult.organization_to_organization_role
-    if (!organizationToOrganizationRole) {
-      throw new Error('Organization not found')
+  async getLastOrgAndNamedProject(params: {
+    projectName: string
+    userDefinedOrganizationId?: string
+  }) {
+    const me = await this.getUserInfo()
+    const email = me?.email
+    if (!email) {
+      throw new Error('User email not found')
     }
-    const { organization: org } = organizationToOrganizationRole
-    const project = projectName
-      ? (org?.projects.find((project) => project.name === projectName) ?? null)
-      : org?.projects[0]
-    let projectId = project?.id
+    const { projectName, userDefinedOrganizationId } = params
+    if (!projectName) {
+      throw new Error('Project name is required')
+    }
+    const orgAndProjectRes = await this._clientSdk.getLastOrgAndNamedProject({
+      email,
+      projectName,
+    })
+    if (
+      !orgAndProjectRes.user?.[0]
+        ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization?.id
+    ) {
+      throw new Error(
+        `The user with email:${email}  is not associated with any organization`
+      )
+    }
+    const organization = orgAndProjectRes.user
+      ?.at(0)
+      ?.userOrganizationsAndUserOrganizationRoles.map((org) => org.organization)
+      .filter((org) =>
+        userDefinedOrganizationId ? org.id === userDefinedOrganizationId : true
+      )
+      ?.at(0)
+    if (!organization) {
+      throw new Error(
+        `Organization with id:${userDefinedOrganizationId} not found`
+      )
+    }
+    let projectId = organization?.projects?.[0]?.id
     if (!projectId) {
       const createdProject = await this._clientSdk.CreateProject({
-        organizationId: org.id,
+        organizationId: organization.id,
         projectName: projectName || 'My project',
       })
       projectId = createdProject.createProject.projectId
     }
-    if (!project?.id) {
+    if (!projectId) {
       throw new Error('Project not found')
     }
 
     return {
-      organizationId: org.id,
+      organizationId: organization.id,
       projectId: projectId,
     }
   }

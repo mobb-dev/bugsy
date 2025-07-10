@@ -4,7 +4,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["@typescript-eslint", "simple-import-sort", "import"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "import", "graphql"],
   "parser": "@typescript-eslint/parser",
   "ignorePatterns": [
     "**/dist",
@@ -28,6 +28,14 @@
       "files": ["__e2e__/**/*.mjs", "__e2e__/**/*.ts"],
       "parserOptions": {
         "project": "./__e2e__/tsconfig.json"
+      }
+    },
+    {
+      "files": ["**/*.graphql"],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": ["graphql"],
+      "rules": {
+        "prettier/prettier": "error"
       }
     }
   ],

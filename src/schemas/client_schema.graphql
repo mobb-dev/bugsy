@@ -26,20 +26,17 @@ query Me {
   }
 }
 
-query getOrgAndProjectId(
-  $filters: organization_to_organization_role_bool_exp
-  $limit: Int
-) {
-  organization_to_organization_role(
-    where: $filters
-    order_by: { organization: { createdOn: desc } }
-    limit: $limit
-  ) {
-    organization {
+query getLastOrgAndNamedProject($email: String!, $projectName: String!) {
+  user(where: { email: { _eq: $email } }) {
+    id
+    userOrganizationsAndUserOrganizationRoles(order_by: { createdOn: desc }) {
       id
-      projects(order_by: { updatedAt: desc }) {
+      organization {
         id
-        name
+        projects(where: { name: { _eq: $projectName } }) {
+          name
+          id
+        }
       }
     }
   }
@@ -469,6 +466,8 @@ fragment FixDetails on fix {
   confidence
   safeIssueType
   severityText
+  gitBlameLogin
+  severityValue
   vulnerabilityReportIssues {
     parsedIssueType
     parsedSeverity
@@ -476,7 +475,7 @@ fragment FixDetails on fix {
       vulnerability_report_issue_tag_value
     }
   }
-  sharedState{
+  sharedState {
     id
   }
   patchAndQuestions {
@@ -554,6 +553,12 @@ fragment FixReportSummaryFields on fixReport {
     where: {
       _and: [
         { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        {
+          _or: [
+            { gitBlameLogin: { _is_null: true } }
+            { _not: { gitBlameLogin: { _ilike: $currentUserEmail } } }
+          ]
+        }
         $filters
       ]
     }
@@ -563,6 +568,21 @@ fragment FixReportSummaryFields on fixReport {
   ) {
     ...FixDetails
   }
+  userFixes: fixes(
+    where: {
+      _and: [
+        { gitBlameLogin: { _ilike: $currentUserEmail } }
+        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        $filters
+      ]
+    }
+    order_by: { severityValue: desc }
+    limit: $limit
+    offset: $offset
+  ) {
+    ...FixDetails
+  }
+
   filteredFixesCount: fixes_aggregate(
     where: {
       _and: [
@@ -598,11 +618,32 @@ fragment FixReportSummaryFields on fixReport {
   }
 }
 
+query GetReportFixes(
+  $reportId: uuid!
+  $filters: fix_bool_exp = {}
+  $limit: Int!
+  $offset: Int!
+  $currentUserEmail: String!
+) {
+  fixReport(
+    where: { _and: [{ id: { _eq: $reportId } }, { state: { _eq: Finished } }] }
+  ) {
+    ...FixReportSummaryFields
+  }
+  expiredReport: fixReport(
+    where: { _and: [{ id: { _eq: $reportId } }, { state: { _eq: Expired } }] }
+  ) {
+    id
+    expirationOn
+  }
+}
+
 query GetLatestReportByRepoUrl(
   $repoUrl: String!
   $filters: fix_bool_exp = {}
   $limit: Int!
   $offset: Int!
+  $currentUserEmail: String!
 ) {
   fixReport(
     where: {
@@ -625,25 +666,6 @@ query GetLatestReportByRepoUrl(
     }
     order_by: { createdOn: desc }
     limit: 1
-  ) {
-    id
-    expirationOn
-  }
-}
-
-query GetReportFixes(
-  $reportId: uuid!
-  $filters: fix_bool_exp = {}
-  $limit: Int!
-  $offset: Int!
-) {
-  fixReport(
-    where: { _and: [{ id: { _eq: $reportId } }, { state: { _eq: Finished } }] }
-  ) {
-    ...FixReportSummaryFields
-  }
-  expiredReport: fixReport(
-    where: { _and: [{ id: { _eq: $reportId } }, { state: { _eq: Expired } }] }
   ) {
     id
     expirationOn

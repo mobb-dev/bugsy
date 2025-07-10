@@ -4,12 +4,14 @@ import {
   noReportFoundPrompt,
 } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
-import { getMcpGQLClient } from '../../services/McpGQLClient'
+import { createAuthenticatedMcpGQLClient } from '../../services/McpGQLClient'
 
 export class FetchAvailableFixesService {
   private static instance: FetchAvailableFixesService
 
-  private gqlClient: Awaited<ReturnType<typeof getMcpGQLClient>> | null = null
+  private gqlClient: Awaited<
+    ReturnType<typeof createAuthenticatedMcpGQLClient>
+  > | null = null
   private currentOffset: number = 0
 
   private constructor() {
@@ -29,7 +31,7 @@ export class FetchAvailableFixesService {
 
   private async initializeGqlClient() {
     if (!this.gqlClient) {
-      this.gqlClient = await getMcpGQLClient()
+      this.gqlClient = await createAuthenticatedMcpGQLClient()
     }
     return this.gqlClient
   }
@@ -66,25 +68,22 @@ export class FetchAvailableFixesService {
       if (!fixReport) {
         // No up-to-date report. Inform the user if an expired one exists.
         if (expiredReport) {
+          logInfo('Expired report found')
           const lastReportDate = expiredReport.expirationOn
             ? new Date(expiredReport.expirationOn).toLocaleString()
             : 'Unknown date'
-          logInfo('Expired report found', {
+          logDebug('Expired report ', {
             repoUrl,
             expirationOn: expiredReport.expirationOn,
           })
           return expiredReportPrompt({ lastReportDate })
         }
 
-        logInfo('No report (active or expired) found for repository', {
-          repoUrl,
-        })
+        logInfo(`No report (active or expired) found for repository ${repoUrl}`)
         return noReportFoundPrompt
       }
 
-      logInfo('Successfully retrieved available fixes', {
-        reportFound: true,
-      })
+      logInfo(`Successfully retrieved available fixes for ${repoUrl}`)
 
       const prompt = fixesFoundPrompt({
         fixReport,

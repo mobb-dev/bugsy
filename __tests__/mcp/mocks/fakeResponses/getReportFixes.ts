@@ -30,6 +30,8 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             confidence: 85,
             safeIssueType: 'SQL_INJECTION',
             severityText: 'HIGH',
+            severityValue: 80,
+            gitBlameLogin: 'fix-user-1',
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
@@ -76,6 +78,8 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             confidence: 75,
             safeIssueType: 'XSS',
             severityText: 'MEDIUM',
+            severityValue: 60,
+            gitBlameLogin: 'fix-user-2',
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
@@ -112,6 +116,35 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
                 __typename: 'FixExtraContextResponse' as const,
                 fixDescription:
                   'Fixed XSS vulnerability by sanitizing user input',
+                extraContext: [],
+              },
+            },
+          },
+        ],
+        userFixes: [
+          {
+            __typename: 'fix' as const,
+            id: 'user-test-fix-1',
+            confidence: 90,
+            safeIssueType: 'CSRF',
+            severityText: 'HIGH',
+            severityValue: 75,
+            gitBlameLogin: 'fix-user-3',
+            vulnerabilityReportIssues: [
+              {
+                __typename: 'vulnerability_report_issue' as const,
+                parsedIssueType: IssueType_Enum.Csrf,
+                parsedSeverity: Vulnerability_Severity_Enum.High,
+                vulnerabilityReportIssueTags: [],
+              },
+            ],
+            patchAndQuestions: {
+              __typename: 'FixData' as const,
+              patch: 'User fix patch content',
+              patchOriginalEncodingBase64: 'VXNlciBmaXggcGF0Y2ggY29udGVudA==',
+              extraContext: {
+                __typename: 'FixExtraContextResponse' as const,
+                fixDescription: 'Fixed CSRF vulnerability by adding CSRF token',
                 extraContext: [],
               },
             },
@@ -170,6 +203,7 @@ export const mockGetReportFixesEmpty: { data: GetReportFixesQuery } = {
         MEDIUM: { __typename: 'fix_aggregate', aggregate: { count: 0 } },
         LOW: { __typename: 'fix_aggregate', aggregate: { count: 0 } },
         fixes: [],
+        userFixes: [],
         filteredFixesCount: {
           __typename: 'fix_aggregate',
           aggregate: {

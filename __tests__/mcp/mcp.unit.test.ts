@@ -6,7 +6,8 @@ import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFix
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-import { CheckForNewAvailableFixesTool as CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
+import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../../src/mcp/core/configs'
+import { CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 import { log } from './helpers/log'
 import { MockRepo } from './helpers/MockRepo'
@@ -120,6 +121,36 @@ vi.mock('../../src/features/analysis/graphql/subscribe', () => ({
     },
   }),
 }))
+
+// Move expectDebugMessage to a higher scope so it is available in all describe blocks
+const expectDebugMessage = (message: string, expectedData?: unknown) => {
+  const allLogCalls = loggerMock.mocks.logDebug.mock.calls.map(
+    (call: unknown[]) => String(call[0])
+  )
+  // Check if message exists in debug logs
+  expect(
+    allLogCalls.some((msg: string) => msg.includes(message)),
+    `Expected to find debug message "${message}" in:\n${allLogCalls.map((msg, i) => `  ${i + 1}. ${msg}`).join('\n')}`
+  ).toBe(true)
+  // If expectedData is provided, also check that data
+  if (expectedData !== undefined) {
+    const matchingCall = loggerMock.mocks.logDebug.mock.calls.find(
+      (call: unknown[]) => String(call[0]).includes(message)
+    )
+    expect(matchingCall?.[1]).toEqual(expectedData)
+  }
+}
+
+// Add expectLogMessage helper
+const expectLogMessage = (message: string) => {
+  const allLogCalls = loggerMock.mocks.logInfo.mock.calls.map(
+    (call: unknown[]) => String(call[0])
+  )
+  expect(
+    allLogCalls.some((msg: string) => msg.includes(message)),
+    `Expected to find log message "${message}" in:\n${allLogCalls.map((msg, i) => `  ${i + 1}. ${msg}`).join('\n')}`
+  ).toBe(true)
+}
 
 describe('MCP Server', () => {
   let nonExistentPath: string
@@ -300,7 +331,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete successful flow
 
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
         mockGraphQL().createCommunityUser().succeeds()
@@ -330,7 +361,7 @@ describe('MCP Server', () => {
       it('should timeout when getEncryptedApiToken is not returning a token', async () => {
         process.env['MOBB_API_KEY'] = BAD_API_KEY
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().me().failsWithConnectionError()
         mockGraphQL().createCliLogin().succeeds()
         mockGraphQL().createCommunityUser().failsWithBadApiKey()
@@ -350,7 +381,7 @@ describe('MCP Server', () => {
         process.env['MOBB_API_KEY'] = BAD_API_KEY
 
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
         mockGraphQL().me().succeeds()
@@ -424,40 +455,6 @@ describe('MCP Server', () => {
         Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
       })
 
-      // Helper function to check if a debug message exists
-      const expectDebugMessage = (message: string) => {
-        const allLogCalls = loggerMock.mocks.logDebug.mock.calls.map(
-          (call: unknown[]) => String(call[0])
-        )
-        expect(allLogCalls.some((msg: string) => msg.includes(message))).toBe(
-          true
-        )
-      }
-
-      // Helper function to check if a log message exists
-      const expectLogMessage = (message: string) => {
-        const allLogCalls = loggerMock.mocks.logInfo.mock.calls.map(
-          (call: unknown[]) => String(call[0])
-        )
-        expect(allLogCalls.some((msg: string) => msg.includes(message))).toBe(
-          true
-        )
-      }
-
-      // Helper function to check if a log message with specific data exists
-      const expectLogMessageWithData = (
-        message: string,
-        expectedData?: unknown
-      ) => {
-        const matchingCall = loggerMock.mocks.logInfo.mock.calls.find(
-          (call: unknown[]) => String(call[0]).includes(message)
-        )
-        expect(matchingCall).toBeDefined()
-        if (expectedData !== undefined) {
-          expect(matchingCall?.[1]).toEqual(expectedData)
-        }
-      }
-
       // Helper function to check if an error log with specific data exists
       const expectErrorLogWithData = (
         message: string,
@@ -493,7 +490,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete successful flow
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
 
@@ -509,23 +506,25 @@ describe('MCP Server', () => {
         const result = await tool.execute({ path: activeRepoPath })
 
         // === VERIFY COMPLETE FLOW LOGS ===
-        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
-        expectLogMessage('FilePacking: packing files')
+        expectLogMessage(
+          `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
+        )
+        expectDebugMessage('FilePacking: packing files')
         expectLogMessage('Files packed successfully')
-        expectLogMessage('Upload info retrieved')
+        expectDebugMessage('Upload info retrieved')
         expectLogMessage('File uploaded successfully')
-        expectLogMessage('Project ID retrieved')
+        expectDebugMessage('Project ID retrieved')
 
         // Verify runScan flow logs
         expectLogMessage('Starting scan')
         expectLogMessage('Submitting vulnerability report')
         expectLogMessage('Vulnerability report submitted successfully')
-        expectLogMessage('Starting analysis subscription')
-        expectLogMessage('Analysis subscription completed')
+        expectDebugMessage('GraphQL: Starting GetAnalysis subscription')
+        expectDebugMessage('GraphQL: GetAnalysis subscription completed')
 
         // Verify getMCPFixes logs with data
-        expectLogMessage('Fixes retrieved')
-        expectLogMessageWithData('GraphQL: GetReportFixes successful', {
+        expectDebugMessage('3 fixes retrieved')
+        expectDebugMessage('GraphQL: GetReportFixes successful', {
           result: expect.objectContaining({
             fixReport: expect.arrayContaining([
               expect.objectContaining({
@@ -596,7 +595,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for scenario where project doesn't exist
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().projectNotFound()
+        mockGraphQL().getLastOrgAndNamedProject().projectNotFound()
         mockGraphQL().createProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
@@ -605,7 +604,7 @@ describe('MCP Server', () => {
         const result = await tool.execute({ path: activeRepoPath })
 
         // Verify that the new project ID was created and used
-        expectLogMessage('Project ID retrieved')
+        expectDebugMessage('Project ID retrieved')
 
         // Verify successful completion
         expectValidResult(result)
@@ -618,7 +617,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks with submitVulnerabilityReport failure
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL()
           .submitVulnerabilityReport()
           .failsWithError('Submission failed')
@@ -657,7 +656,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks with getMCPFixes failure
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL()
           .getReportFixes()
@@ -683,18 +682,20 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete flow including getMCPFixes
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: codeNotInGitRepoPath })
 
-        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
+        expectLogMessage(
+          `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
+        )
         expectDebugMessage(
           'Git repository validation failed, using all files in the repository'
         )
-        expectLogMessage('FilePacking: packing files')
+        expectDebugMessage('FilePacking: packing files')
         expectLogMessage('Files packed successfully')
 
         // Verify successful completion
@@ -712,18 +713,20 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete flow including getMCPFixes
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeNoChangesRepoPath })
 
-        expectLogMessage('Executing tool: scan_and_fix_vulnerabilities')
+        expectLogMessage(
+          `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
+        )
         expectDebugMessage(
           'No changes found, using recently changed files from git history'
         )
-        expectLogMessage('FilePacking: packing files')
+        expectDebugMessage('FilePacking: packing files')
         expectLogMessage('Files packed successfully')
 
         // Verify successful completion
@@ -741,7 +744,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete flow including getMCPFixes
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
 
@@ -763,7 +766,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for complete flow but with empty fixes
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().returnsEmptyFixes()
 
@@ -827,7 +830,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks for success up to the point where we'd call getAnalysis
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().succeeds()
+        mockGraphQL().getLastOrgAndNamedProject().succeeds()
         mockGraphQL().submitVulnerabilityReport().succeeds()
         mockGraphQL().getReportFixes().succeeds()
 
@@ -862,11 +865,13 @@ describe('MCP Server', () => {
         })
       })
 
-      it('should handle getOrgAndProjectId failure gracefully', async () => {
-        // Configure GraphQL mocks with getOrgAndProjectId failure
+      it('should handle getLastOrgAndNamedProject failure gracefully', async () => {
+        // Configure GraphQL mocks with getLastOrgAndNamedProject failure
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().failsWithError('Organization error')
+        mockGraphQL()
+          .getLastOrgAndNamedProject()
+          .failsWithError('Organization error')
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -888,7 +893,7 @@ describe('MCP Server', () => {
         // Configure GraphQL mocks with createProject failure
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getOrgAndProjectId().projectNotFound()
+        mockGraphQL().getLastOrgAndNamedProject().projectNotFound()
         mockGraphQL().createProject().failsWithError('Create project failed')
 
         const tool = new FixVulnerabilitiesTool()
@@ -1011,7 +1016,7 @@ describe('MCP Server', () => {
       // Verify info log was generated (only in non-test environment)
       expect(loggerMock.mocks.logInfo.mock.calls.length).toBeGreaterThan(0)
       expect(
-        loggerMock.mocks.logInfo.mock.calls.some(
+        loggerMock.mocks.logDebug.mock.calls.some(
           (call) =>
             call[0] ===
             'FetchAvailableFixesTool execution completed successfully'
@@ -1051,7 +1056,7 @@ describe('MCP Server', () => {
     it('should return initial scan in progress prompt when initial scan is in progress', async () => {
       mockGraphQL().me().succeeds()
       mockGraphQL().uploadS3BucketInfo().succeeds()
-      mockGraphQL().getOrgAndProjectId().succeeds()
+      mockGraphQL().getLastOrgAndNamedProject().succeeds()
       mockGraphQL().submitVulnerabilityReport().succeeds()
       mockGraphQL().getReportFixes().succeeds()
       const tool = new CheckForNewAvailableFixesTool()

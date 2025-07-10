@@ -367,4 +367,10 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.NoNestedTry]: undefined,
   [IssueType_Enum.Redos]: undefined,
   [IssueType_Enum.DoNotThrowGenericException]: undefined,
+  [IssueType_Enum.BufferOverflow]: {
+    issueDescription:
+      'Buffer Overflow occurs when a program writes data beyond the allocated memory space, leading to unexpected behavior or security vulnerabilities.',
+    fixInstructions:
+      'Implement proper input validation and bounds checking to prevent buffer overflows. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
+  },
 }

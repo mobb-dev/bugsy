@@ -205,7 +205,7 @@ export async function handleMobbLogin({
 }) {
   const { createSpinner } = Spinner({ ci: skipPrompts })
 
-  const isConnected = await inGqlClient.verifyConnection()
+  const isConnected = await inGqlClient.verifyApiConnection()
   if (!isConnected) {
     createSpinner().start().error({
       text: '🔓 Connection to Mobb: failed to connect to the Mobb server',
@@ -218,7 +218,7 @@ export async function handleMobbLogin({
     text: `🔓 Connection to Mobb: succeeded`,
   })
 
-  const userVerify = await inGqlClient.verifyToken()
+  const userVerify = await inGqlClient.validateUserToken()
   if (userVerify) {
     createSpinner()
       .start()
@@ -290,7 +290,7 @@ export async function handleMobbLogin({
 
   const newGqlClient = new GQLClient({ apiKey: newApiToken, type: 'apiKey' })
 
-  const loginSuccess = await newGqlClient.verifyToken()
+  const loginSuccess = await newGqlClient.validateUserToken()
   if (loginSuccess) {
     debug(`set api token ${newApiToken}`)
     config.set('apiToken', newApiToken)

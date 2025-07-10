@@ -59,6 +59,8 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             confidence: 85,
             safeIssueType: 'SQL_INJECTION',
             severityText: 'critical',
+            severityValue: 100,
+            gitBlameLogin: 'test-user',
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue',
@@ -74,6 +76,35 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
               extraContext: {
                 __typename: 'FixExtraContextResponse',
                 fixDescription: 'test fix description',
+                extraContext: [],
+              },
+            },
+          },
+        ],
+        userFixes: [
+          {
+            __typename: 'fix' as const,
+            id: 'user-test-fix-1',
+            confidence: 90,
+            safeIssueType: 'XSS',
+            severityText: 'high',
+            severityValue: 80,
+            gitBlameLogin: 'another-user',
+            vulnerabilityReportIssues: [
+              {
+                __typename: 'vulnerability_report_issue',
+                parsedIssueType: IssueType_Enum.Xss,
+                parsedSeverity: Vulnerability_Severity_Enum.High,
+                vulnerabilityReportIssueTags: [],
+              },
+            ],
+            patchAndQuestions: {
+              __typename: 'FixData',
+              patch: 'user test patch',
+              patchOriginalEncodingBase64: 'dXNlciB0ZXN0IHBhdGNo',
+              extraContext: {
+                __typename: 'FixExtraContextResponse',
+                fixDescription: 'user fix description',
                 extraContext: [],
               },
             },

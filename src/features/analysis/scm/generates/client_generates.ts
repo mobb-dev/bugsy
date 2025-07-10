@@ -8073,6 +8073,8 @@ export enum IssueType_Enum {
   AvoidBuiltinShadowing = 'AVOID_BUILTIN_SHADOWING',
   /** AVOID_IDENTITY_COMPARISON_CACHED_TYPES */
   AvoidIdentityComparisonCachedTypes = 'AVOID_IDENTITY_COMPARISON_CACHED_TYPES',
+  /** Buffer Overflow */
+  BufferOverflow = 'BUFFER_OVERFLOW',
   /** Client DOM Stored Code Injection */
   ClientDomStoredCodeInjection = 'CLIENT_DOM_STORED_CODE_INJECTION',
   /** Command Injection */
@@ -28782,13 +28784,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'query_root', me?: { __typename?: 'MeResponse', id: string, email: string, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'OrganizationToRoleType', organization?: { __typename?: 'OrganizationType', brokerHosts: Array<{ __typename?: 'BrokerHostsType', realDomain: string, virtualDomain: string } | null> } | null } | null>, scmConfigs: Array<{ __typename?: 'ScmConfig', id: string, orgId?: string | null, refreshToken?: string | null, scmType: string, scmUrl: string, scmUsername?: string | null, token?: string | null, tokenLastUpdate?: string | null, userId?: string | null, scmOrg?: string | null, isTokenAvailable: boolean } | null> } | null };
 
-export type GetOrgAndProjectIdQueryVariables = Exact<{
-  filters?: InputMaybe<Organization_To_Organization_Role_Bool_Exp>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
+export type GetLastOrgAndNamedProjectQueryVariables = Exact<{
+  email: Scalars['String']['input'];
+  projectName: Scalars['String']['input'];
 }>;
 
 
-export type GetOrgAndProjectIdQuery = { __typename?: 'query_root', organization_to_organization_role: Array<{ __typename?: 'organization_to_organization_role', organization: { __typename?: 'organization', id: any, projects: Array<{ __typename?: 'project', id: any, name: string }> } }> };
+export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
 
 export type GetEncryptedApiTokenQueryVariables = Exact<{
   loginId: Scalars['uuid']['input'];
@@ -28945,29 +28947,31 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
-export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
-export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
-
-export type GetLatestReportByRepoUrlQueryVariables = Exact<{
-  repoUrl: Scalars['String']['input'];
-  filters?: InputMaybe<Fix_Bool_Exp>;
-  limit: Scalars['Int']['input'];
-  offset: Scalars['Int']['input'];
-}>;
-
-
-export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
 
 export type GetReportFixesQueryVariables = Exact<{
   reportId: Scalars['uuid']['input'];
   filters?: InputMaybe<Fix_Bool_Exp>;
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
+  currentUserEmail: Scalars['String']['input'];
 }>;
 
 
-export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+
+export type GetLatestReportByRepoUrlQueryVariables = Exact<{
+  repoUrl: Scalars['String']['input'];
+  filters?: InputMaybe<Fix_Bool_Exp>;
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  currentUserEmail: Scalars['String']['input'];
+}>;
+
+
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type UpdateDownloadedFixDataMutationVariables = Exact<{
   fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -28983,6 +28987,8 @@ export const FixDetailsFragmentDoc = `
   confidence
   safeIssueType
   severityText
+  gitBlameLogin
+  severityValue
   vulnerabilityReportIssues {
     parsedIssueType
     parsedSeverity
@@ -29046,7 +29052,15 @@ export const FixReportSummaryFieldsFragmentDoc = `
     }
   }
   fixes(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, $filters]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {_or: [{gitBlameLogin: {_is_null: true}}, {_not: {gitBlameLogin: {_ilike: $currentUserEmail}}}]}, $filters]}
+    order_by: {severityValue: desc}
+    limit: $limit
+    offset: $offset
+  ) {
+    ...FixDetails
+  }
+  userFixes: fixes(
+    where: {_and: [{gitBlameLogin: {_ilike: $currentUserEmail}}, {vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, $filters]}
     order_by: {severityValue: desc}
     limit: $limit
     offset: $offset
@@ -29112,18 +29126,18 @@ export const MeDocument = `
   }
 }
     `;
-export const GetOrgAndProjectIdDocument = `
-    query getOrgAndProjectId($filters: organization_to_organization_role_bool_exp, $limit: Int) {
-  organization_to_organization_role(
-    where: $filters
-    order_by: {organization: {createdOn: desc}}
-    limit: $limit
-  ) {
-    organization {
+export const GetLastOrgAndNamedProjectDocument = `
+    query getLastOrgAndNamedProject($email: String!, $projectName: String!) {
+  user(where: {email: {_eq: $email}}) {
+    id
+    userOrganizationsAndUserOrganizationRoles(order_by: {createdOn: desc}) {
       id
-      projects(order_by: {updatedAt: desc}) {
+      organization {
         id
-        name
+        projects(where: {name: {_eq: $projectName}}) {
+          name
+          id
+        }
       }
     }
   }
@@ -29514,8 +29528,21 @@ export const AutoPrAnalysisDocument = `
   }
 }
     `;
+export const GetReportFixesDocument = `
+    query GetReportFixes($reportId: uuid!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
+  fixReport(where: {_and: [{id: {_eq: $reportId}}, {state: {_eq: Finished}}]}) {
+    ...FixReportSummaryFields
+  }
+  expiredReport: fixReport(
+    where: {_and: [{id: {_eq: $reportId}}, {state: {_eq: Expired}}]}
+  ) {
+    id
+    expirationOn
+  }
+}
+    ${FixReportSummaryFieldsFragmentDoc}`;
 export const GetLatestReportByRepoUrlDocument = `
-    query GetLatestReportByRepoUrl($repoUrl: String!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!) {
+    query GetLatestReportByRepoUrl($repoUrl: String!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
   fixReport(
     where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}]}
     order_by: {createdOn: desc}
@@ -29527,19 +29554,6 @@ export const GetLatestReportByRepoUrlDocument = `
     where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}]}
     order_by: {createdOn: desc}
     limit: 1
-  ) {
-    id
-    expirationOn
-  }
-}
-    ${FixReportSummaryFieldsFragmentDoc}`;
-export const GetReportFixesDocument = `
-    query GetReportFixes($reportId: uuid!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!) {
-  fixReport(where: {_and: [{id: {_eq: $reportId}}, {state: {_eq: Finished}}]}) {
-    ...FixReportSummaryFields
-  }
-  expiredReport: fixReport(
-    where: {_and: [{id: {_eq: $reportId}}, {state: {_eq: Expired}}]}
   ) {
     id
     expirationOn
@@ -29564,8 +29578,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     Me(variables?: MeQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<MeQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<MeQuery>({ document: MeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Me', 'query', variables);
     },
-    getOrgAndProjectId(variables?: GetOrgAndProjectIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetOrgAndProjectIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetOrgAndProjectIdQuery>({ document: GetOrgAndProjectIdDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getOrgAndProjectId', 'query', variables);
+    getLastOrgAndNamedProject(variables: GetLastOrgAndNamedProjectQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLastOrgAndNamedProjectQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLastOrgAndNamedProjectQuery>({ document: GetLastOrgAndNamedProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getLastOrgAndNamedProject', 'query', variables);
     },
     GetEncryptedApiToken(variables: GetEncryptedApiTokenQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetEncryptedApiTokenQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetEncryptedApiTokenQuery>({ document: GetEncryptedApiTokenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetEncryptedApiToken', 'query', variables);
@@ -29624,11 +29638,11 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AutoPrAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>({ document: AutoPrAnalysisDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'autoPrAnalysis', 'mutation', variables);
     },
-    GetLatestReportByRepoUrl(variables: GetLatestReportByRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLatestReportByRepoUrlQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetLatestReportByRepoUrlQuery>({ document: GetLatestReportByRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetLatestReportByRepoUrl', 'query', variables);
-    },
     GetReportFixes(variables: GetReportFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetReportFixesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReportFixesQuery>({ document: GetReportFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetReportFixes', 'query', variables);
+    },
+    GetLatestReportByRepoUrl(variables: GetLatestReportByRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLatestReportByRepoUrlQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLatestReportByRepoUrlQuery>({ document: GetLatestReportByRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetLatestReportByRepoUrl', 'query', variables);
     },
     updateDownloadedFixData(variables: UpdateDownloadedFixDataMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UpdateDownloadedFixDataMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateDownloadedFixDataMutation>({ document: UpdateDownloadedFixDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'updateDownloadedFixData', 'mutation', variables);

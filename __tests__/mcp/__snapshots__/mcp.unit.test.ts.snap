@@ -93,11 +93,32 @@ If you cannot apply a patch:
 # SECURITY FIXES TO APPLY
 
 
-## Fix 1: SQL INJECTION
+## Fix 1: XSS
+
+**🎯 Target:** Apply this patch to fix a xss vulnerability
+
+**📝 Description:** user fix description
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`another-user\`
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+user test patch
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: SQL INJECTION
 
 **🎯 Target:** Apply this patch to fix a sql injection vulnerability
 
 **📝 Description:** test fix description
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`test-user\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -120,7 +141,7 @@ test patch
 
 ## More Fixes Available (5 remaining)
 
-You have viewed 1 out of 5 available fixes.
+You have viewed 2 out of 5 available fixes.
 
 To fetch additional fixes, run the \`fetch_available_fixes\` tool again with the following parameters:
 
@@ -177,11 +198,32 @@ If you cannot apply a patch:
 # SECURITY FIXES TO APPLY
 
 
-## Fix 1: SQL INJECTION
+## Fix 1: CSRF
+
+**🎯 Target:** Apply this patch to fix a csrf vulnerability
+
+**📝 Description:** Fixed CSRF vulnerability by adding CSRF token
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-3\`
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+User fix patch content
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: SQL INJECTION
 
 **🎯 Target:** Apply this patch to fix a sql injection vulnerability
 
 **📝 Description:** Fixed SQL injection vulnerability by using parameterized queries
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-1\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -206,11 +248,13 @@ diff --git a/src/database/queries.js b/src/database/queries.js
 
 ---
 
-## Fix 2: XSS
+## Fix 3: XSS
 
 **🎯 Target:** Apply this patch to fix a xss vulnerability
 
 **📝 Description:** Fixed XSS vulnerability by sanitizing user input
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-2\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -267,7 +311,6 @@ To perform a **rescan** of your repository (fetching a brand-new vulnerability r
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
-
 
 "
 `;
@@ -317,11 +360,32 @@ If you cannot apply a patch:
 # SECURITY FIXES TO APPLY
 
 
-## Fix 1: SQL INJECTION
+## Fix 1: CSRF
+
+**🎯 Target:** Apply this patch to fix a csrf vulnerability
+
+**📝 Description:** Fixed CSRF vulnerability by adding CSRF token
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-3\`
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+User fix patch content
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: SQL INJECTION
 
 **🎯 Target:** Apply this patch to fix a sql injection vulnerability
 
 **📝 Description:** Fixed SQL injection vulnerability by using parameterized queries
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-1\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -346,11 +410,13 @@ diff --git a/src/database/queries.js b/src/database/queries.js
 
 ---
 
-## Fix 2: XSS
+## Fix 3: XSS
 
 **🎯 Target:** Apply this patch to fix a xss vulnerability
 
 **📝 Description:** Fixed XSS vulnerability by sanitizing user input
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-2\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -407,7 +473,6 @@ To perform a **rescan** of your repository (fetching a brand-new vulnerability r
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
-
 
 "
 `;
@@ -457,11 +522,32 @@ If you cannot apply a patch:
 # SECURITY FIXES TO APPLY
 
 
-## Fix 1: SQL INJECTION
+## Fix 1: CSRF
+
+**🎯 Target:** Apply this patch to fix a csrf vulnerability
+
+**📝 Description:** Fixed CSRF vulnerability by adding CSRF token
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-3\`
+
+**🔧 Action Required:** Apply the following patch exactly as shown
+
+**📁 Patch to Apply:**
+\`\`\`diff
+User fix patch content
+\`\`\`
+
+**✅ Expected Result:** The vulnerability will be fixed and the code will be more secure
+
+---
+
+## Fix 2: SQL INJECTION
 
 **🎯 Target:** Apply this patch to fix a sql injection vulnerability
 
 **📝 Description:** Fixed SQL injection vulnerability by using parameterized queries
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-1\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -486,11 +572,13 @@ diff --git a/src/database/queries.js b/src/database/queries.js
 
 ---
 
-## Fix 2: XSS
+## Fix 3: XSS
 
 **🎯 Target:** Apply this patch to fix a xss vulnerability
 
 **📝 Description:** Fixed XSS vulnerability by sanitizing user input
+
+**👤 Git Blame:** The code that needs to be fixed was last modified by: \`fix-user-2\`
 
 **🔧 Action Required:** Apply the following patch exactly as shown
 
@@ -548,7 +636,6 @@ This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
 
-
 "
 `;
 
@@ -580,7 +667,6 @@ To perform a **rescan** of your repository (fetching a brand-new vulnerability r
 This will start a new analysis, discard any cached results.
 
 ⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
-
 
 "
 `;

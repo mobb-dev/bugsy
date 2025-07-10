@@ -21,7 +21,6 @@ import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/gener
 import { GithubSCMLib } from '@mobb/bugsy/features/analysis/scm/github/GithubSCMLib'
 import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { createMcpServer } from '@mobb/bugsy/mcp'
-import { MCP_PERIODIC_CHECK_INTERVAL } from '@mobb/bugsy/mcp/core/configs'
 import {
   initialScanInProgressPrompt,
   noFreshFixesPrompt,
@@ -47,6 +46,12 @@ import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
+import {
+  MCP_PERIODIC_CHECK_INTERVAL,
+  MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+  MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from '../src/mcp/core/configs'
 import {
   benignFileContent,
   multupleVulnerableFileContent,
@@ -229,6 +234,7 @@ describe('Basic Analyze tests', () => {
         autoPr: true,
         commitDirectly: true,
         pullRequest: 1,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -315,6 +321,7 @@ describe('Basic Analyze tests', () => {
           srcPath: path.join(__dirname, srcPath),
           ci: false,
           command: 'analyze',
+          mobbProjectName: 'My first project',
         },
         { skipPrompts: true }
       )
@@ -343,6 +350,7 @@ describe('Basic Analyze tests', () => {
         srcPath: path.join(__dirname, 'assets/scandata.fpr'),
         ci: false,
         command: 'analyze',
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -371,6 +379,7 @@ describe('Basic Analyze tests', () => {
         autoPr: true,
         commitDirectly: true,
         pullRequest: prNumber,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -414,6 +423,7 @@ describe('Basic Analyze tests', () => {
         scanFile: reportPath,
         command: mobbCliCommand.review,
         ci: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -510,6 +520,7 @@ describe('Basic Analyze tests', () => {
         command: mobbCliCommand.review,
         ci: true,
         experimentalEnabled: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -605,6 +616,7 @@ describe('Basic Analyze tests', () => {
         command: mobbCliCommand.review,
         ci: true,
         experimentalEnabled: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -701,6 +713,7 @@ describe('Basic Analyze tests', () => {
         command: mobbCliCommand.review,
         ci: true,
         experimentalEnabled: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -797,6 +810,7 @@ describe('Basic Analyze tests', () => {
         command: mobbCliCommand.review,
         ci: true,
         experimentalEnabled: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -893,6 +907,7 @@ describe('Basic Analyze tests', () => {
         command: mobbCliCommand.review,
         ci: true,
         experimentalEnabled: true,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -991,6 +1006,7 @@ describe('create-one-pr flag tests', () => {
         autoPr: true,
         commitDirectly: false,
         pullRequest: prNumber,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -1022,6 +1038,7 @@ describe('create-one-pr flag tests', () => {
         createOnePr: true,
         autoPr: true,
         commitDirectly: false,
+        mobbProjectName: 'My first project',
       },
       { skipPrompts: true }
     )
@@ -1107,28 +1124,37 @@ describe('mcp tests', () => {
     expect(listToolsResponse).toMatchSnapshot()
   })
 
-  describe('scan_and_fix_vulnerabilities tool', () => {
-    it('should handle missing path parameter in scan_and_fix_vulnerabilities tool', async () => {
+  describe(`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, () => {
+    it(`should handle missing path parameter in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {})
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {}
+        )
       ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
     })
 
-    it('should handle non-existent path in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle non-existent path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: nonExistentPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: nonExistentPath,
+          }
+        )
       ).rejects.toThrow(
         'Invalid path: potential security risk detected in path'
       )
     })
 
-    it('should handle empty git repository in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle empty git repository in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: emptyRepoPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: emptyRepoPath,
+          }
+        )
       ).resolves.toStrictEqual({
         content: [
           {
@@ -1155,9 +1181,12 @@ describe('mcp tests', () => {
 
         for (const maliciousPath of maliciousPaths) {
           await expect(
-            mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-              path: maliciousPath,
-            })
+            mcpClient.callTool<CallToolResult>(
+              MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+              {
+                path: maliciousPath,
+              }
+            )
           ).rejects.toThrow(
             'Invalid path: potential security risk detected in path'
           )
@@ -1165,11 +1194,14 @@ describe('mcp tests', () => {
       })
     })
 
-    it('should handle path that is not a git repository in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle path that is not a git repository in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: nonRepoEmptyPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: nonRepoEmptyPath,
+          }
+        )
       ).resolves.toStrictEqual({
         content: [
           {
@@ -1180,15 +1212,18 @@ describe('mcp tests', () => {
       })
     })
 
-    it('should handle active non-git repository path in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       // Verify the directory still exists before running the test
       expect(existsSync(activeNonGitRepoPath)).toBe(true)
       expect(existsSync(join(activeNonGitRepoPath, 'sample1.py'))).toBe(true)
 
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: activeNonGitRepoPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: activeNonGitRepoPath,
+          }
+        )
       ).resolves.toStrictEqual({
         content: [
           {
@@ -1198,11 +1233,14 @@ describe('mcp tests', () => {
         ],
       })
     })
-    it('should handle active git repository path in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle active git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: activeRepoPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: activeRepoPath,
+          }
+        )
       ).resolves.toStrictEqual({
         content: [
           {
@@ -1212,11 +1250,14 @@ describe('mcp tests', () => {
         ],
       })
     })
-    it('should handle active (no changes) git repository path in scan_and_fix_vulnerabilities tool', async () => {
+    it(`should handle active (no changes) git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('scan_and_fix_vulnerabilities', {
-          path: activeNoChangesRepoPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: activeNoChangesRepoPath,
+          }
+        )
       ).resolves.toStrictEqual({
         content: [
           {
@@ -1227,16 +1268,16 @@ describe('mcp tests', () => {
       })
     })
   })
-  describe('fetch_available_fixes tool', () => {
+  describe(`${MCP_TOOL_FETCH_AVAILABLE_FIXES} tool`, () => {
     it('should handle missing path parameter', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('fetch_available_fixes', {})
+        mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {})
       ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
     })
 
     it('should handle non-existent path', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('fetch_available_fixes', {
+        mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
           path: nonExistentPath,
         })
       ).rejects.toThrow(
@@ -1246,7 +1287,7 @@ describe('mcp tests', () => {
 
     it('should handle path that is not a git repository', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('fetch_available_fixes', {
+        mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
           path: nonRepoEmptyPath,
         })
       ).rejects.toThrow('Invalid git repository')
@@ -1254,7 +1295,7 @@ describe('mcp tests', () => {
 
     it('should handle empty git repository with no origin', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('fetch_available_fixes', {
+        mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
           path: emptyRepoPath,
         })
       ).rejects.toThrow('No origin URL found for the repository')
@@ -1276,7 +1317,7 @@ describe('mcp tests', () => {
 
         for (const maliciousPath of maliciousPaths) {
           await expect(
-            mcpClient.callTool<CallToolResult>('fetch_available_fixes', {
+            mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
               path: maliciousPath,
             })
           ).rejects.toThrow(
@@ -1286,7 +1327,7 @@ describe('mcp tests', () => {
       })
     })
   })
-  describe('check_for_new_available_fixes tool', () => {
+  describe(`${MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES} tool`, () => {
     // --------------------- Shared helper utilities --------------------- //
     /**
      * Assert that the first call returns the "initial scan in progress" prompt
@@ -1297,7 +1338,7 @@ describe('mcp tests', () => {
       repoPath: string
     ) => {
       const firstResponse = await client.callTool<CallToolResult>(
-        'check_for_new_available_fixes',
+        MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
         { path: repoPath }
       )
 
@@ -1329,7 +1370,7 @@ describe('mcp tests', () => {
         // eslint-disable-next-line no-console
         await sleep(1000)
         response = await client.callTool<CallToolResult>(
-          'check_for_new_available_fixes',
+          MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
           { path: repoPath }
         )
       }
@@ -1344,7 +1385,7 @@ describe('mcp tests', () => {
 
     const expectNoFreshFixes = async () => {
       const res = await mcpClient.callTool<CallToolResult>(
-        'check_for_new_available_fixes',
+        MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
         { path: activeRepoPath }
       )
       expect(res!.content![0]!.text).toBe(noFreshFixesPrompt)
@@ -1352,7 +1393,7 @@ describe('mcp tests', () => {
 
     const expectSingleFix = async () => {
       const res = await mcpClient.callTool<CallToolResult>(
-        'check_for_new_available_fixes',
+        MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
         { path: activeRepoPath }
       )
       expect(res!.content![0]!.text).toContain('## Fix 1:')
@@ -1361,14 +1402,20 @@ describe('mcp tests', () => {
 
     it('should handle missing path parameter', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('check_for_new_available_fixes', {})
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+          {}
+        )
       ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
     })
     it('should handle non-existent path', async () => {
       await expect(
-        mcpClient.callTool<CallToolResult>('check_for_new_available_fixes', {
-          path: nonExistentPath,
-        })
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+          {
+            path: nonExistentPath,
+          }
+        )
       ).rejects.toThrow(
         'Invalid path: potential security risk detected in path'
       )

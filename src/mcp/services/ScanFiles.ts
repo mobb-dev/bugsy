@@ -1,11 +1,3 @@
-import fs from 'node:fs'
-import path from 'node:path'
-
-import AdmZip from 'adm-zip'
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - istextorbinary module doesn't have proper TypeScript declarations
-import { FileUtils } from '../../features/analysis/scm/FileUtils'
 import {
   Fix_Report_State_Enum,
   Scan_Source_Enum,
@@ -18,13 +10,13 @@ import {
   MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
 } from '../core/configs'
 import {
-  FileProcessingError,
   FileUploadError,
   GqlClientError,
   ReportInitializationError,
   ScanError,
 } from '../core/Errors'
-import { logError, logInfo } from '../Logger'
+import { logDebug, logError, logInfo } from '../Logger'
+import { FileOperations } from './FileOperations'
 import { McpGQLClient } from './McpGQLClient'
 
 export const scanFiles = async (
@@ -35,21 +27,28 @@ export const scanFiles = async (
   fixReportId: string
   projectId: string
 }> => {
-  const repoUploadInfo = await initializeReport(gqlClient)
+  const repoUploadInfo = await initializeSecurityReport(gqlClient)
   const fixReportId = repoUploadInfo!.fixReportId
 
-  const zipBuffer = await packFiles(fileList, repositoryPath)
-  await uploadFiles(zipBuffer, repoUploadInfo)
+  const fileOperations = new FileOperations()
+  const packingResult = await fileOperations.createSourceCodeArchive(
+    fileList,
+    repositoryPath,
+    MCP_MAX_FILE_SIZE
+  )
+
+  await uploadSourceCodeArchive(packingResult.archive, repoUploadInfo)
 
   const projectId = await getProjectId(gqlClient)
-  await runScan({ fixReportId, projectId, gqlClient })
+  await executeSecurityScan({ fixReportId, projectId, gqlClient })
+
   return {
     fixReportId,
     projectId,
   }
 }
 
-const initializeReport = async (
+const initializeSecurityReport = async (
   gqlClient: McpGQLClient
 ): Promise<
   UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
@@ -62,85 +61,27 @@ const initializeReport = async (
     const {
       uploadS3BucketInfo: { repoUploadInfo },
     } = await gqlClient.uploadS3BucketInfo()
-    logInfo('Upload info retrieved', { uploadKey: repoUploadInfo?.uploadKey })
+    logDebug('Upload info retrieved')
     return repoUploadInfo
   } catch (error) {
     const message = (error as Error).message
-    throw new ReportInitializationError(`Error initializing report: ${message}`)
-  }
-}
-
-const packFiles = async (
-  fileList: string[],
-  repositoryPath: string
-): Promise<Buffer> => {
-  try {
-    logInfo(`FilePacking: packing files from ${repositoryPath}`)
-
-    const zip = new AdmZip()
-    let packedFilesCount = 0
-
-    // Resolve the repository path to get the canonical absolute path
-    const resolvedRepoPath = path.resolve(repositoryPath)
-
-    logInfo('FilePacking: compressing files')
-    for (const filepath of fileList) {
-      const absoluteFilepath = path.join(repositoryPath, filepath)
-
-      // Security check: Validate the file path doesn't escape the repository directory
-      const resolvedFilePath = path.resolve(absoluteFilepath)
-      if (!resolvedFilePath.startsWith(resolvedRepoPath)) {
-        logInfo(
-          `FilePacking: skipping ${filepath} due to potential path traversal`
-        )
-        continue
-      }
-
-      // Use FileUtils to check if file should be packed
-      if (!FileUtils.shouldPackFile(absoluteFilepath, MCP_MAX_FILE_SIZE)) {
-        logInfo(
-          `FilePacking: ignoring ${filepath} because it is excluded or invalid`
-        )
-        continue
-      }
-
-      let data: Buffer
-      try {
-        data = fs.readFileSync(absoluteFilepath)
-      } catch (fsError) {
-        logInfo(
-          `FilePacking: failed to read ${filepath} from filesystem: ${fsError}`
-        )
-        continue
-      }
-
-      zip.addFile(filepath, data)
-      packedFilesCount++
-    }
-
-    const zipBuffer = zip.toBuffer()
-    logInfo(
-      `FilePacking: read ${packedFilesCount} source files. total size: ${zipBuffer.length} bytes`
+    throw new ReportInitializationError(
+      `Error initializing security report: ${message}`
     )
-    logInfo('Files packed successfully', { fileCount: fileList.length })
-    return zipBuffer
-  } catch (error) {
-    const message = (error as Error).message
-    throw new FileProcessingError(`Error packing files: ${message}`)
   }
 }
 
-const uploadFiles = async (
-  zipBuffer: Buffer,
+const uploadSourceCodeArchive = async (
+  archiveBuffer: Buffer,
   repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
 ): Promise<void> => {
   if (!repoUploadInfo) {
-    throw new FileUploadError('Upload info is required')
+    throw new FileUploadError('Upload info is required for source code archive')
   }
 
   try {
     await uploadFile({
-      file: zipBuffer,
+      file: archiveBuffer,
       url: repoUploadInfo.url,
       uploadFields: JSON.parse(repoUploadInfo.uploadFieldsJSON) as Record<
         string,
@@ -150,9 +91,11 @@ const uploadFiles = async (
     })
     logInfo('File uploaded successfully')
   } catch (error) {
-    logError('File upload failed', { error: (error as Error).message })
+    logError('Source code archive upload failed', {
+      error: (error as Error).message,
+    })
     throw new FileUploadError(
-      `Failed to upload the file: ${(error as Error).message}`
+      `Failed to upload source code archive: ${(error as Error).message}`
     )
   }
 }
@@ -163,11 +106,11 @@ const getProjectId = async (gqlClient: McpGQLClient): Promise<string> => {
   }
 
   const projectId = await gqlClient.getProjectId()
-  logInfo('Project ID retrieved', { projectId })
+  logDebug('Project ID retrieved')
   return projectId
 }
 
-const runScan = async ({
+const executeSecurityScan = async ({
   fixReportId,
   projectId,
   gqlClient,
@@ -179,7 +122,8 @@ const runScan = async ({
   if (!gqlClient) {
     throw new GqlClientError()
   }
-  logInfo('Starting scan', { fixReportId, projectId })
+
+  logInfo('Starting scan')
 
   const submitVulnerabilityReportVariables: SubmitVulnerabilityReportMutationVariables =
     {
@@ -198,27 +142,29 @@ const runScan = async ({
   if (
     submitRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
   ) {
-    logError('Vulnerability report submission failed', {
-      response: submitRes,
-    })
-    throw new ScanError('🕵️‍♂️ Mobb analysis failed')
+    throw new ScanError(
+      `Security scan submission failed: ${submitRes.submitVulnerabilityReport.__typename}`
+    )
   }
 
-  logInfo('Vulnerability report submitted successfully', {
-    analysisId: submitRes.submitVulnerabilityReport.fixReportId,
-  })
+  const analysisId = submitRes.submitVulnerabilityReport.fixReportId
+  logInfo('Vulnerability report submitted successfully')
 
-  logInfo('Starting analysis subscription')
-  await gqlClient.subscribeToGetAnalysis({
-    subscribeToAnalysisParams: {
-      analysisId: submitRes.submitVulnerabilityReport.fixReportId,
-    },
-    callback: () => {
-      /* empty */
-    },
-    callbackStates: [Fix_Report_State_Enum.Finished],
-    timeoutInMs: MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
-  })
+  try {
+    await gqlClient.subscribeToGetAnalysis({
+      subscribeToAnalysisParams: { analysisId },
+      callback: async (completedAnalysisId: string) => {
+        logInfo('Security analysis completed successfully', {
+          analysisId: completedAnalysisId,
+        })
+      },
+      callbackStates: [Fix_Report_State_Enum.Finished],
+      timeoutInMs: MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
+    })
+  } catch (error) {
+    logError('Security analysis failed or timed out', { error, analysisId })
+    throw new ScanError(`Security analysis failed: ${(error as Error).message}`)
+  }
 
-  logInfo('Analysis subscription completed')
+  logDebug('Security scan completed successfully', { fixReportId, projectId })
 }

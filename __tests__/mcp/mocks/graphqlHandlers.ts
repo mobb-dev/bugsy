@@ -5,10 +5,10 @@ import type {
   CreateCommunityUserMutationVariables,
   CreateProjectMutation,
   CreateProjectMutationVariables,
+  GetLastOrgAndNamedProjectQuery,
+  GetLastOrgAndNamedProjectQueryVariables,
   GetLatestReportByRepoUrlQuery,
   GetLatestReportByRepoUrlQueryVariables,
-  GetOrgAndProjectIdQuery,
-  GetOrgAndProjectIdQueryVariables,
   GetReportFixesQuery,
   GetReportFixesQueryVariables,
   MeQuery,
@@ -25,9 +25,9 @@ import {
   mockCreateCommunityUserError,
   mockCreateProject,
   mockCreateProjectError,
-  mockGetOrgAndProjectId,
-  mockGetOrgAndProjectIdError,
-  mockGetOrgAndProjectIdProjectNotFound,
+  mockGetLastOrgAndNamedProject,
+  mockGetLastOrgAndNamedProjectError,
+  mockGetLastOrgAndNamedProjectProjectNotFound,
   mockGetReportFixes,
   mockGetReportFixesEmpty,
   mockGetReportFixesError,
@@ -59,7 +59,7 @@ export const BAD_API_KEY = 'bad-api-key'
 type MockState = {
   me: 'success' | 'connectionError' | 'error' | 'fetchError'
   uploadS3BucketInfo: 'success' | 'error'
-  getOrgAndProjectId: 'success' | 'projectNotFound' | 'error'
+  getLastOrgAndNamedProject: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
   getLatestReportByRepoUrl: 'success' | 'error' | 'empty' | 'expired'
@@ -75,7 +75,7 @@ type MockState = {
 const mockState: MockState = {
   me: 'success',
   uploadS3BucketInfo: 'success',
-  getOrgAndProjectId: 'success',
+  getLastOrgAndNamedProject: 'success',
   createProject: 'success',
   submitVulnerabilityReport: 'success',
   getLatestReportByRepoUrl: 'success',
@@ -122,23 +122,24 @@ export const graphqlHandlers = [
     return HttpResponse.json(mockUploadS3BucketInfo)
   }),
 
-  graphql.query<GetOrgAndProjectIdQuery, GetOrgAndProjectIdQueryVariables>(
-    'getOrgAndProjectId',
-    () => {
-      if (mockState.getOrgAndProjectId === 'error') {
-        return HttpResponse.json(
-          mockGetOrgAndProjectIdError(
-            mockState.errorMessages['getOrgAndProjectId'] || 'Project Error'
-          ),
-          { status: 500 }
-        )
-      }
-      if (mockState.getOrgAndProjectId === 'projectNotFound') {
-        return HttpResponse.json(mockGetOrgAndProjectIdProjectNotFound)
-      }
-      return HttpResponse.json(mockGetOrgAndProjectId)
+  graphql.query<
+    GetLastOrgAndNamedProjectQuery,
+    GetLastOrgAndNamedProjectQueryVariables
+  >('getLastOrgAndNamedProject', () => {
+    if (mockState.getLastOrgAndNamedProject === 'error') {
+      return HttpResponse.json(
+        mockGetLastOrgAndNamedProjectError(
+          mockState.errorMessages['getLastOrgAndNamedProject'] ||
+            'Project Error'
+        ),
+        { status: 500 }
+      )
     }
-  ),
+    if (mockState.getLastOrgAndNamedProject === 'projectNotFound') {
+      return HttpResponse.json(mockGetLastOrgAndNamedProjectProjectNotFound)
+    }
+    return HttpResponse.json(mockGetLastOrgAndNamedProject)
+  }),
 
   graphql.mutation<CreateProjectMutation, CreateProjectMutationVariables>(
     'CreateProject',
@@ -258,7 +259,7 @@ export const mockGraphQL = (
       try {
         mockState.me = 'success'
         mockState.uploadS3BucketInfo = 'success'
-        mockState.getOrgAndProjectId = 'success'
+        mockState.getLastOrgAndNamedProject = 'success'
         mockState.createProject = 'success'
         mockState.submitVulnerabilityReport = 'success'
         mockState.getLatestReportByRepoUrl = 'success'
@@ -307,19 +308,19 @@ export const mockGraphQL = (
       },
     }
   },
-  getOrgAndProjectId: () => {
+  getLastOrgAndNamedProject: () => {
     return {
       succeeds() {
-        mockState.getOrgAndProjectId = 'success'
+        mockState.getLastOrgAndNamedProject = 'success'
         return this
       },
       projectNotFound() {
-        mockState.getOrgAndProjectId = 'projectNotFound'
+        mockState.getLastOrgAndNamedProject = 'projectNotFound'
         return this
       },
       failsWithError(message: string) {
-        mockState.getOrgAndProjectId = 'error'
-        mockState.errorMessages['getOrgAndProjectId'] = message
+        mockState.getLastOrgAndNamedProject = 'error'
+        mockState.errorMessages['getLastOrgAndNamedProject'] = message
         return this
       },
     }

@@ -372,10 +372,15 @@ export async function _scan(
     apiKey,
   })
 
-  const { projectId, organizationId } = await gqlClient.getOrgAndProjectId({
-    projectName: mobbProjectName,
-    userDefinedOrganizationId: userOrganizationId,
-  })
+  if (!mobbProjectName) {
+    throw new Error('mobbProjectName is required')
+  }
+
+  const { projectId, organizationId } =
+    await gqlClient.getLastOrgAndNamedProject({
+      projectName: mobbProjectName,
+      userDefinedOrganizationId: userOrganizationId,
+    })
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()

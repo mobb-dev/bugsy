@@ -373,4 +373,10 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
     fixInstructions:
       'Implement proper input validation and bounds checking to prevent buffer overflows. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
   },
+  [IssueType_Enum.StringTerminationError]: {
+    issueDescription:
+      'String Termination Error occurs when a string is not properly terminated, leading to unexpected behavior or security vulnerabilities.',
+    fixInstructions:
+      'Implement proper input validation and bounds checking to prevent string termination errors. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
+  },
 }

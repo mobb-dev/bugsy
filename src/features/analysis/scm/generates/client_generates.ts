@@ -8235,6 +8235,8 @@ export enum IssueType_Enum {
   Ssrf = 'SSRF',
   /** Composite format strings should be used correctly */
   StringFormatMisuse = 'STRING_FORMAT_MISUSE',
+  /** STRING_TERMINATION_ERROR */
+  StringTerminationError = 'STRING_TERMINATION_ERROR',
   /** SYSTEM_EXIT_SHOULD_RERAISE */
   SystemExitShouldReraise = 'SYSTEM_EXIT_SHOULD_RERAISE',
   /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
@@ -10287,6 +10289,7 @@ export type Mutation_RootDelete_Vulnerability_Severity_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootDigestVulnerabilityReportArgs = {
   fixReportId: Scalars['String']['input'];
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
   reference?: InputMaybe<Scalars['String']['input']>;
   repoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -11307,6 +11310,7 @@ export type Mutation_RootSubmitExternalVulnerabilityReportArgs = {
 export type Mutation_RootSubmitVulnerabilityReportArgs = {
   experimentalEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   fixReportId: Scalars['String']['input'];
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
   reference: Scalars['String']['input'];

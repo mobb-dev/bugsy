@@ -1,10 +1,11 @@
 import { GetLatestReportByRepoUrlQuery } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 
-import { McpFix } from '../../mcp/types'
 import {
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-} from './configs'
+} from '../tools/toolNames'
+import { type McpFix } from '../types'
+import { MCP_DEFAULT_LIMIT } from './configs'
 
 function friendlyType(s: string) {
   // First replace underscores with spaces
@@ -17,6 +18,53 @@ function friendlyType(s: string) {
 export const noFixesReturnedForParameters = `No fixes returned for the given offset and limit parameters.
 `
 
+export const noFixesReturnedForParametersWithGuidance = ({
+  offset,
+  limit,
+  totalCount,
+  currentTool,
+}: {
+  offset: number
+  limit: number
+  totalCount: number
+  currentTool: string
+}) => `## No Fixes Returned for Current Parameters
+
+**📄 Current Request:**
+- **Page:** ${Math.floor(offset / limit) + 1}
+- **Offset:** ${offset}
+- **Limit:** ${limit}
+
+**❌ Result:** No fixes returned for the given offset and limit parameters.
+
+**ℹ️ Available Fixes:** ${totalCount} total fixes are available, but your current offset (${offset}) is beyond the available range.
+
+**✅ How to Get the Fixes:**
+
+To retrieve the available fixes, use one of these approaches:
+
+1. **Start from the beginning:**
+   \`\`\`
+   offset: 0
+   \`\`\`
+
+2. **Go to the first page:**
+   \`\`\`
+   offset: 0
+   limit: ${limit}
+   \`\`\`
+
+3. **Get all fixes at once:**
+   \`\`\`
+   offset: 0
+   limit: ${totalCount}
+   \`\`\`
+
+**📋 Valid offset range:** 0 to ${Math.max(0, totalCount - 1)}
+
+To fetch the fixes, run the \`${currentTool}\` tool again with the corrected parameters.
+`
+
 export const applyFixesPrompt = ({
   fixes,
   hasMore,
@@ -24,7 +72,8 @@ export const applyFixesPrompt = ({
   nextOffset,
   shownCount,
   currentTool,
-  offset = 0,
+  offset,
+  limit,
 }: {
   fixes: McpFix[]
   hasMore: boolean
@@ -32,11 +81,23 @@ export const applyFixesPrompt = ({
   nextOffset: number
   shownCount: number
   currentTool: string
-  offset?: number
+  offset: number
+  limit: number
 }) => {
   if (fixes.length === 0) {
+    if (totalCount > 0) {
+      return noFixesReturnedForParametersWithGuidance({
+        offset,
+        limit,
+        totalCount,
+        currentTool,
+      })
+    }
     return noFixesReturnedForParameters
   }
+
+  const currentPage = Math.floor(offset / limit) + 1
+  const totalPages = Math.ceil(totalCount / limit)
 
   const fixList = fixes.map((fix: McpFix) => {
     const vulnerabilityType = friendlyType(fix.safeIssueType!)
@@ -101,6 +162,12 @@ If you cannot apply a patch:
 
 # SECURITY FIXES TO APPLY
 
+## 📄 Pagination Info
+- **Page:** ${currentPage} of ${totalPages}
+- **Offset:** ${offset}
+- **Limit:** ${limit}
+- **Showing:** ${shownCount} of ${totalCount} total fixes
+
 ${fixList
   .map(
     (fix, index) => `
@@ -146,9 +213,9 @@ You have viewed ${shownCount} out of ${totalCount} available fixes.
 To fetch additional fixes, run the \`${currentTool}\` tool again with the following parameters:
 
 - **offset**: ${nextOffset}  _(start index for the next batch)_
-- **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
+- **limit**:  <number_of_fixes_to_return>  _(optional – default is ${MCP_DEFAULT_LIMIT})_
 
-If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
+If you omit both **offset** and **limit**, the command will automatically return the next ${MCP_DEFAULT_LIMIT} fixes.
 `
     : ''
 }
@@ -216,9 +283,11 @@ export const noFixesAvailablePrompt = `There are no fixes available for this rep
 export const fixesFoundPrompt = ({
   fixReport,
   offset,
+  limit,
 }: {
   fixReport: Omit<FixReport, 'userFixes'>
   offset: number
+  limit: number
 }) => {
   const totalFixes = fixReport.filteredFixesCount.aggregate?.count || 0
 
@@ -269,10 +338,11 @@ ${applyFixesPrompt({
   fixes: fixReport.fixes,
   totalCount: totalFixes,
   hasMore,
-  nextOffset: 0,
+  nextOffset,
   shownCount: fixReport.fixes.length,
   currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset,
+  limit,
 })}`
 }
 
@@ -315,11 +385,13 @@ export const fixesPrompt = ({
   totalCount,
   offset,
   scannedFiles,
+  limit,
 }: {
   fixes: McpFix[]
   totalCount: number
   offset: number
   scannedFiles: string[]
+  limit: number
 }) => {
   if (totalCount === 0) {
     return noFixesFoundPrompt({ scannedFiles })
@@ -339,6 +411,7 @@ ${applyFixesPrompt({
   shownCount,
   currentTool: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
   offset,
+  limit,
 })}
 
 ${nextStepsPrompt({ scannedFiles })}
@@ -349,7 +422,13 @@ export const noFreshFixesPrompt = `No fresh fixes available for this repository 
 
 export const initialScanInProgressPrompt = `Initial scan is still in progress. No user message needed. Do not show any comments to the user.`
 
-export const freshFixesPrompt = ({ fixes }: { fixes: McpFix[] }) => {
+export const freshFixesPrompt = ({
+  fixes,
+  limit,
+}: {
+  fixes: McpFix[]
+  limit: number
+}) => {
   return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
 
 ${applyFixesPrompt({
@@ -360,6 +439,7 @@ ${applyFixesPrompt({
   shownCount: fixes.length,
   currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset: 0,
+  limit,
 })}
 `
 }

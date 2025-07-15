@@ -240,6 +240,34 @@ export class GitService {
   }
 
   /**
+   * Gets both the current commit hash and current branch name
+   */
+  public async getCurrentCommitAndBranch(): Promise<{
+    hash: string
+    branch: string
+  }> {
+    this.log('Getting current commit hash and branch', 'debug')
+
+    try {
+      const [hash, branch] = await Promise.all([
+        this.git.revparse(['HEAD']),
+        this.git.revparse(['--abbrev-ref', 'HEAD']),
+      ])
+
+      this.log('Current commit hash and branch retrieved', 'debug', {
+        hash,
+        branch,
+      })
+
+      return { hash, branch }
+    } catch (error) {
+      const errorMessage = `Failed to get current commit hash and branch: ${(error as Error).message}`
+      this.log(errorMessage, 'error', { error })
+      return { hash: '', branch: '' }
+    }
+  }
+
+  /**
    * Gets the remote repository URL
    */
   public async getRemoteUrl(): Promise<string> {
@@ -272,7 +300,7 @@ export class GitService {
   }
 
   /**
-   * Gets the maxFiles most recently changed files based on commit history
+   * Gets the maxFiles most recently changed files, starting with current changes and then from commit history
    */
   public async getRecentlyChangedFiles({
     maxFiles = MCP_DEFAULT_MAX_FILES_TO_SCAN,
@@ -280,11 +308,14 @@ export class GitService {
     maxFiles?: number
   }): Promise<RecentFilesResult> {
     this.log(
-      `Getting the ${maxFiles} most recently changed files from commit history`,
+      `Getting the ${maxFiles} most recently changed files, starting with current changes`,
       'debug'
     )
 
     try {
+      // Start with files from current changes (staged/unstaged)
+      const currentChanges = await this.getChangedFiles()
+
       // Get the git repository root
       const gitRoot = await this.git.revparse(['--show-toplevel'])
 
@@ -296,8 +327,25 @@ export class GitService {
 
       // Track files we've already seen and the order they were found
       const fileSet = new Set<string>()
-      const files: string[] = []
       let commitsProcessed = 0
+
+      // Add current changed files first
+      for (const file of currentChanges.files) {
+        if (fileSet.size >= maxFiles) {
+          break
+        }
+
+        // Check if file should be included (using same logic as commit history files)
+        const fullPath = path.join(this.repositoryPath, file)
+        if (FileUtils.shouldPackFile(fullPath) && !file.startsWith('..')) {
+          fileSet.add(file)
+        }
+      }
+
+      this.log(`Added ${fileSet.size} files from current changes`, 'debug', {
+        filesFromCurrentChanges: fileSet.size,
+        currentChangesTotal: currentChanges.files.length,
+      })
 
       // Get a reasonable number of recent commits to search through
       const logResult = await this.git.log({
@@ -313,7 +361,7 @@ export class GitService {
 
       // Process commits in chronological order (most recent first)
       for (const commit of logResult.all) {
-        if (files.length >= maxFiles) {
+        if (fileSet.size >= maxFiles) {
           break
         }
 
@@ -333,7 +381,7 @@ export class GitService {
             .filter((file) => file.trim() !== '')
 
           for (const file of commitFiles) {
-            if (files.length >= maxFiles) {
+            if (fileSet.size >= maxFiles) {
               break
             }
 
@@ -369,7 +417,6 @@ export class GitService {
               !adjustedPath.startsWith('..')
             ) {
               fileSet.add(adjustedPath)
-              files.push(adjustedPath)
             }
           }
         } catch (showError) {
@@ -379,6 +426,8 @@ export class GitService {
           })
         }
       }
+
+      const files = Array.from(fileSet)
 
       this.log('Recently changed files retrieved', 'info', {
         fileCount: files.length,

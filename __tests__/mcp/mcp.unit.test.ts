@@ -6,9 +6,9 @@ import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFix
 import { tmpdir } from 'os'
 import { join } from 'path'
 
-import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../../src/mcp/core/configs'
 import { CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
+import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../../src/mcp/tools/toolNames'
 import { log } from './helpers/log'
 import { MockRepo } from './helpers/MockRepo'
 import { BAD_API_KEY } from './mocks/graphqlHandlers'

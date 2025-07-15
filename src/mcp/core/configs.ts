@@ -30,11 +30,5 @@ export const MCP_REPORT_ID_EXPIRATION_MS = 2 * 60 * 60 * 1000 // 2 hours
 // Time (ms) after which a browser can be opened again after a previous open
 export const MCP_TOOLS_BROWSER_COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours
 
-//tools
-export const MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES =
-  'check_for_new_available_fixes'
-
-export const MCP_TOOL_FETCH_AVAILABLE_FIXES = 'fetch_available_fixes'
-
-export const MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES =
-  'scan_and_fix_vulnerabilities'
+// Default limit for paginated responses
+export const MCP_DEFAULT_LIMIT = 3

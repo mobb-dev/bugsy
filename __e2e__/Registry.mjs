@@ -44,12 +44,33 @@ export class Registry {
           proxy: 'npmjs',
         },
       },
+      auth: {
+        htpasswd: {
+          file: './htpasswd',
+          max_users: 1000,
+          algorithm: 'bcrypt',
+        },
+      },
+      security: {
+        api: {
+          legacy: true,
+        },
+        web: {
+          enable: false,
+        },
+      },
       self_path: this.#tmpDir,
       logs: { type: 'stdout', format: 'pretty', level: 'error' },
     })
 
-    await new Promise((resolve) => {
-      this.#server.listen(this.#port, resolve)
+    await new Promise((resolve, reject) => {
+      this.#server.listen(this.#port, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
     })
   }
 
@@ -59,9 +80,13 @@ export class Registry {
    * @returns {Promise<void>}
    */
   async stop() {
-    this.#server.close()
-    this.#server.closeAllConnections()
-    await run(['rm', '-rf', this.#tmpDir])
+    if (this.#server) {
+      this.#server.close()
+      this.#server.closeAllConnections()
+    }
+    if (this.#tmpDir) {
+      await run(['rm', '-rf', this.#tmpDir])
+    }
   }
 }
 

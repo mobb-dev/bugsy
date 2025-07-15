@@ -46,12 +46,12 @@ import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
+import { MCP_PERIODIC_CHECK_INTERVAL } from '../src/mcp/core/configs'
 import {
-  MCP_PERIODIC_CHECK_INTERVAL,
   MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-} from '../src/mcp/core/configs'
+} from '../src/mcp/tools/toolNames'
 import {
   benignFileContent,
   multupleVulnerableFileContent,

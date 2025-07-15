@@ -19,7 +19,11 @@ import {
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
-import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_API_URL } from '../core/configs'
+import {
+  MCP_API_KEY_HEADER_NAME,
+  MCP_DEFAULT_API_URL,
+  MCP_DEFAULT_LIMIT,
+} from '../core/configs'
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, McpFix } from '../types'
@@ -401,7 +405,7 @@ export class McpGQLClient {
 
   async getLatestReportByRepoUrl({
     repoUrl,
-    limit = 3,
+    limit = MCP_DEFAULT_LIMIT,
     offset = 0,
   }: {
     repoUrl: string
@@ -468,7 +472,7 @@ export class McpGQLClient {
 
   async getReportFixesPaginated({
     reportId,
-    limit = 3,
+    limit = MCP_DEFAULT_LIMIT,
     offset = 0,
     issueType,
     severity,

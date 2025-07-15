@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import type { GetLatestReportByRepoUrlQuery } from '../../../../src/features/analysis/scm/generates/client_generates'
 import {
   IssueType_Enum,
@@ -169,4 +168,3 @@ export const mockGetLatestReportByRepoUrlExpired: MockResponse = {
     ],
   },
 }
-/* eslint-enable @typescript-eslint/naming-convention */

@@ -116,7 +116,10 @@ export async function addSpaceToFiles(filePaths) {
       const content = await fs.readFile(filePath, 'utf-8')
       await fs.writeFile(filePath, content + ' ', 'utf-8')
     } catch (error) {
-      console.error(`Error adding space to ${filePath}:`, error)
+      console.error(
+        `Error adding space to ${String(filePath).replace(/\n|\r/g, '')}:`,
+        error
+      )
     }
   }
 }
@@ -152,7 +155,10 @@ export async function addSpaceToSpecificFiles(repoDir, targetFileNames) {
           await fs.writeFile(filePath, content + ' ', 'utf-8')
           modifiedFiles.push(filePath)
         } catch (fileError) {
-          console.error(`Error adding space to ${filePath}:`, fileError)
+          console.error(
+            `Error adding space to ${String(filePath).replace(/\n|\r/g, '')}:`,
+            fileError
+          )
         }
       }
     }

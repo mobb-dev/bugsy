@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../../core/configs'
 import { logInfo } from '../../Logger'
 import { McpGQLClient } from '../../services/McpGQLClient'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
+import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../toolNames'
 import { CheckForNewAvailableFixesService } from './CheckForNewAvailableFixesService'
 
 export class CheckForNewAvailableFixesTool extends BaseTool {

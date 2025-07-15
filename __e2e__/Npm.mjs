@@ -13,6 +13,7 @@ import { CLI_DIR_PATH, run } from './utils.mjs'
 export class Npm {
   #tmpDir
   #npmRunParams
+  #packageVersion
 
   /**
    * Configure npm to run from local registry and publish fresh mobbdev (Bugsy)
@@ -22,6 +23,7 @@ export class Npm {
    */
   async init() {
     this.#tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'npm'))
+
     this.#npmRunParams = {
       cwd: this.#tmpDir,
       env: {
@@ -31,28 +33,45 @@ export class Npm {
       },
     }
 
-    await fs.mkdir(path.join(this.#tmpDir, 'bin'))
-    // Mock `open` command to prevent browser opening during the tests.
-    await fs.writeFile(
-      path.join(this.#tmpDir, 'bin', 'open'),
-      '#!/bin/sh\necho "open"'
-    )
-    await fs.chmod(path.join(this.#tmpDir, 'bin', 'open'), 0o777)
+    // Create mock 'open' command to prevent actual browser opening in tests
+    const binDir = path.join(this.#tmpDir, 'bin')
+    await fs.mkdir(binDir)
+    await fs.writeFile(path.join(binDir, 'open'), '#!/bin/sh\necho "open"')
+    await fs.chmod(path.join(binDir, 'open'), 0o777)
 
-    await run(
-      `npm config set registry http://localhost:${REGISTRY_PORT}`,
-      this.#npmRunParams
+    // Configure npm for local registry
+    const registryUrl = `http://localhost:${REGISTRY_PORT}`
+    const registryHost = `localhost:${REGISTRY_PORT}`
+
+    // Create .npmrc file directly for better CI compatibility
+    const npmrcContent = [
+      `registry=${registryUrl}`,
+      `//${registryHost}/:_authToken=fake-token`,
+      `//${registryHost}/:always-auth=true`,
+      `//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}`,
+    ].join('\n')
+
+    await fs.writeFile(path.join(this.#tmpDir, '.npmrc'), npmrcContent)
+
+    // Also set via npm config as fallback
+    await Promise.all([
+      run(`npm config set registry ${registryUrl}`, this.#npmRunParams),
+      run(
+        `npm config set //${registryHost}/:_authToken fake-token`,
+        this.#npmRunParams
+      ),
+    ])
+
+    // Get version and publish
+    const packageJson = JSON.parse(
+      await fs.readFile(path.join(CLI_DIR_PATH, 'package.json'), 'utf8')
     )
-    await run(
-      `npm config set //localhost:${REGISTRY_PORT}/:_authToken=fake`,
-      this.#npmRunParams
-    )
-    await run(
-      `npm publish --registry http://localhost:${REGISTRY_PORT}`,
-      Object.assign({}, this.#npmRunParams, {
-        cwd: CLI_DIR_PATH,
-      })
-    )
+    this.#packageVersion = packageJson.version
+
+    await run(`npm publish --registry ${registryUrl} --ignore-scripts`, {
+      ...this.#npmRunParams,
+      cwd: CLI_DIR_PATH,
+    })
   }
 
   /**
@@ -63,13 +82,44 @@ export class Npm {
    * @param {string} cwd - Working directory.
    * @returns {TerminalEmulator} - Instance of the TerminalEmulator.
    */
-  npx(args, env = {}, cwd = this.#tmpDir) {
-    const options = Object.assign({}, this.#npmRunParams, {
-      cwd,
-    })
+  async npx(args, env = {}, cwd = this.#tmpDir) {
+    const fakeGlobalDir = `${this.#tmpDir}/fake-global`
+    await fs.mkdir(fakeGlobalDir, { recursive: true })
 
-    options.env = Object.assign({}, options.env, env)
-    return new TerminalEmulator('npx', ['-y', ...args], options)
+    const registryUrl = `http://localhost:${REGISTRY_PORT}`
+    const options = {
+      ...this.#npmRunParams,
+      cwd,
+      env: {
+        ...this.#npmRunParams.env,
+        ...env,
+        PATH: [
+          `${this.#tmpDir}/bin`,
+          ...(env.PATH?.split(':') ||
+            process.env.PATH?.split(':') || [
+              '/usr/local/bin',
+              '/usr/bin',
+              '/bin',
+            ]),
+        ]
+          .filter(Boolean)
+          .join(':'),
+        npm_config_registry: registryUrl,
+        npm_config_prefix: fakeGlobalDir,
+        npm_config_prefer_online: 'true',
+      },
+    }
+
+    const npxArgs = [
+      '-y',
+      '--registry',
+      registryUrl,
+      '--package',
+      `mobbdev@latest`,
+      ...args,
+    ]
+
+    return new TerminalEmulator('npx', npxArgs, options)
   }
 
   /**

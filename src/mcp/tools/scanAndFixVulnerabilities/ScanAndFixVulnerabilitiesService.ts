@@ -1,4 +1,7 @@
-import { MCP_REPORT_ID_EXPIRATION_MS } from '../../core/configs'
+import {
+  MCP_DEFAULT_LIMIT,
+  MCP_REPORT_ID_EXPIRATION_MS,
+} from '../../core/configs'
 import {
   ApiConnectionError,
   GqlClientError,
@@ -89,11 +92,11 @@ export class ScanAndFixVulnerabilitiesService {
         logInfo('Scanning files')
         this.reset()
         this.validateFiles(fileList)
-        const scanResult = await scanFiles(
+        const scanResult = await scanFiles({
           fileList,
           repositoryPath,
-          this.gqlClient
-        )
+          gqlClient: this.gqlClient,
+        })
         fixReportId = scanResult.fixReportId
       } else {
         logInfo('Using stored fixReportId')
@@ -101,13 +104,13 @@ export class ScanAndFixVulnerabilitiesService {
 
       // Use the provided offset when defined; otherwise fallback to currentOffset or 0.
       const effectiveOffset: number = offset ?? (this.currentOffset || 0)
-
+      const effectiveLimit: number = limit ?? MCP_DEFAULT_LIMIT
       logDebug('effectiveOffset', { effectiveOffset })
 
       const fixes = await this.getReportFixes(
         fixReportId,
         effectiveOffset,
-        limit
+        effectiveLimit
       )
 
       // Only store fixReportId if fixes were found
@@ -124,6 +127,7 @@ export class ScanAndFixVulnerabilitiesService {
         totalCount: fixes.totalCount,
         offset: effectiveOffset,
         scannedFiles: [...fileList],
+        limit: effectiveLimit,
       })
 
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)

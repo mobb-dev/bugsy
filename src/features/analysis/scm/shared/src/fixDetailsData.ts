@@ -379,4 +379,10 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
     fixInstructions:
       'Implement proper input validation and bounds checking to prevent string termination errors. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
   },
+  [IssueType_Enum.HttpParameterPollution]: {
+    issueDescription:
+      'HTTP Parameter Pollution occurs when an attacker can manipulate the parameters of an HTTP request to change the behavior of the server.',
+    fixInstructions:
+      'Implement proper input validation and bounds checking to prevent HTTP parameter pollution. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
+  },
 }

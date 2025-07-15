@@ -77,7 +77,7 @@ test('Bugsy E2E tests', async (t) => {
         )
       )
       zip.extractAllTo(tmpDir)
-      const bugsy = npm.npx(
+      const bugsy = await npm.npx(
         ['mobbdev', 'analyze', '-p', tmpDir, '-r', 'https://example.com'],
         CLI_LOCAL_ENV_OVERWRITE
       )
@@ -115,7 +115,7 @@ test('Bugsy E2E tests', async (t) => {
     'analyze: login with browser, public GitHub repo and opengrep scan',
     async () => {
       // Arrange
-      const bugsy = npm.npx(
+      const bugsy = await npm.npx(
         [
           'mobbdev',
           'analyze',
@@ -156,7 +156,7 @@ test('Bugsy E2E tests', async (t) => {
 
   await t.test('analyze: login with browser, public GitHub repo', async () => {
     // Arrange
-    const bugsy = npm.npx(
+    const bugsy = await npm.npx(
       [
         'mobbdev',
         'analyze',
@@ -198,7 +198,7 @@ test('Bugsy E2E tests', async (t) => {
     'scan: login with browser, Snyk, public GitHub repo (stop after Snyk login request)',
     async () => {
       // Arrange
-      const bugsy = npm.npx(
+      const bugsy = await npm.npx(
         [
           'mobbdev',
           'scan',
@@ -249,7 +249,7 @@ test('Bugsy E2E tests', async (t) => {
     // Arrange
     await cleanupCheckmarxCliConfig()
     const apiKey = await mobbApi.createApiToken()
-    const bugsy = npm.npx(
+    const bugsy = await npm.npx(
       [
         'mobbdev',
         'scan',

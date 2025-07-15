@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
 import { GitService } from '../../../features/analysis/scm/git/GitService'
-import {
-  MCP_TOOL_FETCH_AVAILABLE_FIXES,
-  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-} from '../../core/configs'
 import { log, logDebug } from '../../Logger'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
+import {
+  MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from '../toolNames'
 import { FetchAvailableFixesService } from './FetchAvailableFixesService'
 
 export class FetchAvailableFixesTool extends BaseTool {

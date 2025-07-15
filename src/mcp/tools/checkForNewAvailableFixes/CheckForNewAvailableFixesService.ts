@@ -1,4 +1,5 @@
 import {
+  MCP_DEFAULT_LIMIT,
   MCP_MAX_FILE_SIZE,
   MCP_PERIODIC_CHECK_INTERVAL,
 } from '../../core/configs'
@@ -106,11 +107,11 @@ export class CheckForNewAvailableFixesService {
     }
 
     logDebug('Files requiring security scan', { filesToScan })
-    const { fixReportId, projectId } = await scanFiles(
-      filesToScan.map((file) => file.relativePath),
-      path,
-      this.gqlClient
-    )
+    const { fixReportId, projectId } = await scanFiles({
+      fileList: filesToScan.map((file) => file.relativePath),
+      repositoryPath: path,
+      gqlClient: this.gqlClient,
+    })
 
     logInfo(
       `Security scan completed for ${path} reportId: ${fixReportId} projectId: ${projectId}`
@@ -240,11 +241,11 @@ export class CheckForNewAvailableFixesService {
 
   private generateFreshFixesResponse(): string {
     // Extract up to 3 fixes from the front of the array
-    const freshFixes = this.freshFixes.splice(0, 3)
+    const freshFixes = this.freshFixes.splice(0, MCP_DEFAULT_LIMIT)
 
     if (freshFixes.length > 0) {
       this.reportedFixes.push(...freshFixes)
-      return freshFixesPrompt({ fixes: freshFixes })
+      return freshFixesPrompt({ fixes: freshFixes, limit: MCP_DEFAULT_LIMIT })
     }
 
     return noFreshFixesPrompt

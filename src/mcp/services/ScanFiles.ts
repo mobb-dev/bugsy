@@ -1,3 +1,5 @@
+import { GitService } from '@mobb/bugsy/features/analysis/scm/git/GitService'
+
 import {
   Fix_Report_State_Enum,
   Scan_Source_Enum,
@@ -19,11 +21,15 @@ import { logDebug, logError, logInfo } from '../Logger'
 import { FileOperations } from './FileOperations'
 import { McpGQLClient } from './McpGQLClient'
 
-export const scanFiles = async (
-  fileList: string[],
-  repositoryPath: string,
+export const scanFiles = async ({
+  fileList,
+  repositoryPath,
+  gqlClient,
+}: {
+  fileList: string[]
+  repositoryPath: string
   gqlClient: McpGQLClient
-): Promise<{
+}): Promise<{
   fixReportId: string
   projectId: string
 }> => {
@@ -40,7 +46,17 @@ export const scanFiles = async (
   await uploadSourceCodeArchive(packingResult.archive, repoUploadInfo)
 
   const projectId = await getProjectId(gqlClient)
-  await executeSecurityScan({ fixReportId, projectId, gqlClient })
+  const gitService = new GitService(repositoryPath)
+  const { branch } = await gitService.getCurrentCommitAndBranch()
+  const repoUrl = await gitService.getRemoteUrl()
+  await executeSecurityScan({
+    fixReportId,
+    projectId,
+    gqlClient,
+    repoUrl: repoUrl || '',
+    branchName: branch || 'no-branch',
+    sha: '0123456789abcdef',
+  })
 
   return {
     fixReportId,
@@ -114,10 +130,16 @@ const executeSecurityScan = async ({
   fixReportId,
   projectId,
   gqlClient,
+  repoUrl,
+  branchName,
+  sha,
 }: {
   fixReportId: string
   projectId: string
   gqlClient: McpGQLClient
+  repoUrl: string
+  branchName: string
+  sha: string
 }): Promise<void> => {
   if (!gqlClient) {
     throw new GqlClientError()
@@ -129,12 +151,16 @@ const executeSecurityScan = async ({
     {
       fixReportId,
       projectId,
-      repoUrl: '',
-      reference: 'no-branch',
+      repoUrl,
+      reference: branchName,
       scanSource: Scan_Source_Enum.Mcp,
+      sha,
     }
 
   logInfo('Submitting vulnerability report')
+  logDebug('Submit vulnerability report variables', {
+    submitVulnerabilityReportVariables,
+  })
   const submitRes = await gqlClient.submitVulnerabilityReport(
     submitVulnerabilityReportVariables
   )

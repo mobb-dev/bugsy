@@ -1,13 +1,11 @@
 import z from 'zod'
 
-import {
-  MCP_DEFAULT_MAX_FILES_TO_SCAN,
-  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-} from '../../core/configs'
+import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../core/configs'
 import { logDebug, logError } from '../../Logger'
 import { getLocalFiles } from '../../services/GetLocalFiles'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'
+import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../toolNames'
 // Reuse the existing vulnerability fix service implementation
 import { ScanAndFixVulnerabilitiesService } from './ScanAndFixVulnerabilitiesService'
 
@@ -154,7 +152,7 @@ Example payload:
       const fixResult =
         await this.vulnerabilityFixService.processVulnerabilities({
           fileList: files.map((file) => file.relativePath),
-          repositoryPath: args.path,
+          repositoryPath: path,
           offset: args.offset,
           limit: args.limit,
           isRescan: args.rescan || !!args.maxFiles,

@@ -481,7 +481,7 @@ Example payload:
 
   await t.test('MCP: fetch available fixes', async () => {
     try {
-      const bugsy = npm.npx(
+      const bugsy = await npm.npx(
         [
           'mobbdev',
           'analyze',

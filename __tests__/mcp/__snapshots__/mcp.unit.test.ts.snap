@@ -92,6 +92,12 @@ If you cannot apply a patch:
 
 # SECURITY FIXES TO APPLY
 
+## 📄 Pagination Info
+- **Page:** 1 of 2
+- **Offset:** 0
+- **Limit:** 3
+- **Showing:** 2 of 5 total fixes
+
 
 ## Fix 1: XSS
 
@@ -139,13 +145,13 @@ test patch
 
 ---
 
-## More Fixes Available (5 remaining)
+## More Fixes Available (3 remaining)
 
 You have viewed 2 out of 5 available fixes.
 
 To fetch additional fixes, run the \`fetch_available_fixes\` tool again with the following parameters:
 
-- **offset**: 0  _(start index for the next batch)_
+- **offset**: 2  _(start index for the next batch)_
 - **limit**:  <number_of_fixes_to_return>  _(optional – default is 3)_
 
 If you omit both **offset** and **limit**, the command will automatically return the next 3 fixes.
@@ -196,6 +202,12 @@ If you cannot apply a patch:
 ---
 
 # SECURITY FIXES TO APPLY
+
+## 📄 Pagination Info
+- **Page:** 1 of 1
+- **Offset:** 0
+- **Limit:** 3
+- **Showing:** 3 of 2 total fixes
 
 
 ## Fix 1: CSRF
@@ -359,6 +371,12 @@ If you cannot apply a patch:
 
 # SECURITY FIXES TO APPLY
 
+## 📄 Pagination Info
+- **Page:** 1 of 1
+- **Offset:** 0
+- **Limit:** 3
+- **Showing:** 3 of 2 total fixes
+
 
 ## Fix 1: CSRF
 
@@ -520,6 +538,12 @@ If you cannot apply a patch:
 ---
 
 # SECURITY FIXES TO APPLY
+
+## 📄 Pagination Info
+- **Page:** 1 of 1
+- **Offset:** 0
+- **Limit:** 3
+- **Showing:** 3 of 2 total fixes
 
 
 ## Fix 1: CSRF

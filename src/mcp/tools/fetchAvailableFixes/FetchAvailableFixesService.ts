@@ -1,3 +1,4 @@
+import { MCP_DEFAULT_LIMIT } from '../../core/configs'
 import {
   expiredReportPrompt,
   fixesFoundPrompt,
@@ -38,7 +39,7 @@ export class FetchAvailableFixesService {
 
   public async checkForAvailableFixes({
     repoUrl,
-    limit = 3,
+    limit = MCP_DEFAULT_LIMIT,
     offset,
   }: {
     repoUrl: string
@@ -88,6 +89,7 @@ export class FetchAvailableFixesService {
       const prompt = fixesFoundPrompt({
         fixReport,
         offset: effectiveOffset,
+        limit,
       })
       this.currentOffset = effectiveOffset + (fixReport.fixes?.length || 0)
       return prompt

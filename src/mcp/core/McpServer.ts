@@ -12,7 +12,7 @@ import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
-import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from './configs'
+import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'
 import { ToolRegistry } from './ToolRegistry'
 
 export type McpServerConfig = {

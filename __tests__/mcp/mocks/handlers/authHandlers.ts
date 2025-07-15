@@ -82,7 +82,6 @@ export const createCliLoginHandler = graphql.mutation<
   return HttpResponse.json({
     data: {
       __typename: 'mutation_root',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       insert_cli_login_one: {
         __typename: 'cli_login',
         id: loginId,
@@ -112,7 +111,6 @@ export const getEncryptedApiTokenHandler = graphql.query<
     return HttpResponse.json({
       data: {
         __typename: 'query_root',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         cli_login_by_pk: null,
       },
     })
@@ -133,7 +131,6 @@ export const getEncryptedApiTokenHandler = graphql.query<
     return HttpResponse.json({
       data: {
         __typename: 'query_root',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         cli_login_by_pk: {
           __typename: 'cli_login',
           encryptedApiToken: encryptedToken,

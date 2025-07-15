@@ -8129,6 +8129,8 @@ export enum IssueType_Enum {
   HtmlCommentInJsp = 'HTML_COMMENT_IN_JSP',
   /** HTTP only cookie */
   HttpOnlyCookie = 'HTTP_ONLY_COOKIE',
+  /** HTTP_PARAMETER_POLLUTION */
+  HttpParameterPollution = 'HTTP_PARAMETER_POLLUTION',
   /** HTTP response splitting */
   HttpResponseSplitting = 'HTTP_RESPONSE_SPLITTING',
   /** Client use of iframe without sandbox */

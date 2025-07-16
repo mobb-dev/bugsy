@@ -67,7 +67,7 @@ export class McpAuthService {
     }
 
     logDebug(`cli login created ${loginId}`)
-    const webLoginUrl = `${WEB_APP_URL}/cli-login`
+    const webLoginUrl = `${WEB_APP_URL}/mvs-login`
     const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
 
     await this.openBrowser(browserUrl, isBackgoundCall)

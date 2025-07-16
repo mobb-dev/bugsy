@@ -59,7 +59,6 @@ export const SVJP_CX_REPORT = path.join(
  * @type {Object}
  */
 export const CLI_LOCAL_ENV_OVERWRITE = {
-  WEB_LOGIN_URL: 'http://localhost:5173/cli-login',
   API_URL: 'http://localhost:8080/v1/graphql',
   WEB_APP_URL: 'http://localhost:5173',
 }

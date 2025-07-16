@@ -142,9 +142,9 @@ const mockedOpen = vi.spyOn(openExport, 'default')
 
 vi.mock('open', () => ({
   default: vi.fn().mockImplementation(async (url: string) => {
-    const match = url.match(/\/cli-login\/(.*?)\?.*$/)
-    if (match && match.length == 2) {
-      const loginId = match[1]
+    const match = url.match(/\/(cli-login|mvs-login)\/(.*?)\?.*$/)
+    if (match && match.length == 3) {
+      const loginId = match[2]
       const gqlClient = new GQLClient({
         token,
         type: 'token',

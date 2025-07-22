@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.118",
+  "version": "1.0.119",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -66,6 +66,7 @@
     "graphql-ws": "5.16.2",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.6",
+    "ignore": "7.0.5",
     "inquirer": "9.3.7",
     "isomorphic-ws": "5.0.0",
     "istextorbinary": "6.0.0",
@@ -132,7 +133,7 @@
   },
   "files": [
     "bin/cli.mjs",
-    "dist/index.mjs",
+    "dist",
     ".env",
     "src/post_install"
   ]

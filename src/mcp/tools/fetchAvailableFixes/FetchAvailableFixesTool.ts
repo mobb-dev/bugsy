@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { GitService } from '../../../features/analysis/scm/git/GitService'
+import { GitService } from '../../../features/analysis/scm/services/GitService'
 import { log, logDebug } from '../../Logger'
 import { validatePath } from '../../services/PathValidation'
 import { BaseTool } from '../base/BaseTool'

@@ -8,6 +8,7 @@ export default defineConfig(({ env }) => {
     format: ['esm'],
     minify: false,
     bundle: true,
+    splitting: false,
     watch: !isProd,
     target: 'es2020',
     entry: ['src/index.ts'],

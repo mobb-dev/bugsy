@@ -342,6 +342,7 @@ mutation SubmitVulnerabilityReport(
   $experimentalEnabled: Boolean
   $vulnerabilityReportFileName: String
   $pullRequest: Int
+  $isFullScan: Boolean
 ) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
@@ -350,6 +351,7 @@ mutation SubmitVulnerabilityReport(
     sha: $sha
     experimentalEnabled: $experimentalEnabled
     pullRequest: $pullRequest
+    isFullScan: $isFullScan
     projectId: $projectId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     scanSource: $scanSource
@@ -614,6 +616,21 @@ fragment FixReportSummaryFields on fixReport {
       aggregate {
         count
       }
+    }
+  }
+}
+
+query GetFixReportsByRepoUrl($repoUrl: String!) {
+  fixReport(where: { repo: { originalUrl: { _eq: $repoUrl } } }) {
+    id
+    state
+    createdOn
+    repo {
+      originalUrl
+    }
+    vulnerabilityReport {
+      scanDate
+      vendor
     }
   }
 }

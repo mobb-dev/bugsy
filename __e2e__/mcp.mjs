@@ -515,9 +515,8 @@ Example payload:
       assert(bugsy.getExitCode() === 0, 'Bugsy should exit with code 0')
 
       let response
-      // eslint-disable-next-line no-constant-condition
       let isReportUploaded = false
-      while (!isReportUploaded) {
+      while (isReportUploaded === false) {
         response = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
           path: tempDirExistingReport,
           limit: 1,

@@ -1,8 +1,9 @@
 import fs from 'fs/promises'
 import nodePath from 'path'
 
-import { FileUtils } from '../../features/analysis/scm/FileUtils'
-import { GitService } from '../../features/analysis/scm/git/GitService'
+import { FileUtils } from '../../features/analysis/scm/services/FileUtils'
+import { GitService } from '../../features/analysis/scm/services/GitService'
+import { MCP_MAX_FILE_SIZE } from '../core/configs'
 import { log, logDebug } from '../Logger'
 
 export type LocalFile = {
@@ -14,12 +15,14 @@ export type LocalFile = {
 
 export const getLocalFiles = async ({
   path,
-  maxFileSize = 1024 * 1024 * 5,
+  maxFileSize = MCP_MAX_FILE_SIZE,
   maxFiles,
+  isAllFilesScan,
 }: {
   path: string
   maxFileSize?: number
   maxFiles?: number
+  isAllFilesScan?: boolean
 }): Promise<LocalFile[]> => {
   // Validate git repository - let validation errors bubble up as MCP errors
   // Resolve the repository path to eliminate symlink prefixes (e.g., /var vs /private/var on macOS)
@@ -28,17 +31,18 @@ export const getLocalFiles = async ({
   const gitService = new GitService(resolvedRepoPath, log)
   const gitValidation = await gitService.validateRepository()
   let files: string[] = []
-  if (!gitValidation.isValid) {
+  if (!gitValidation.isValid || isAllFilesScan) {
     logDebug(
       'Git repository validation failed, using all files in the repository',
       {
         path,
       }
     )
-    files = FileUtils.getLastChangedFiles({
+    files = await FileUtils.getLastChangedFiles({
       dir: path,
       maxFileSize,
       maxFiles,
+      isAllFilesScan,
     })
     logDebug('Found files in the repository', {
       files,

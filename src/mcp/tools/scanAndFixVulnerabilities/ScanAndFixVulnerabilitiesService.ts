@@ -96,6 +96,7 @@ export class ScanAndFixVulnerabilitiesService {
           fileList,
           repositoryPath,
           gqlClient: this.gqlClient,
+          scanContext: 'SCAN_AND_FIX_TOOL',
         })
         fixReportId = scanResult.fixReportId
       } else {

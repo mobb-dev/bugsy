@@ -1,4 +1,4 @@
-import { GitService } from '@mobb/bugsy/features/analysis/scm/git/GitService'
+import { GitService } from '@mobb/bugsy/features/analysis/scm/services/GitService'
 
 import {
   Fix_Report_State_Enum,
@@ -25,15 +25,19 @@ export const scanFiles = async ({
   fileList,
   repositoryPath,
   gqlClient,
+  isAllDetectionRulesScan = false,
+  scanContext,
 }: {
   fileList: string[]
   repositoryPath: string
   gqlClient: McpGQLClient
+  isAllDetectionRulesScan?: boolean
+  scanContext: string
 }): Promise<{
   fixReportId: string
   projectId: string
 }> => {
-  const repoUploadInfo = await initializeSecurityReport(gqlClient)
+  const repoUploadInfo = await initializeSecurityReport(gqlClient, scanContext)
   const fixReportId = repoUploadInfo!.fixReportId
 
   const fileOperations = new FileOperations()
@@ -42,10 +46,17 @@ export const scanFiles = async ({
     repositoryPath,
     MCP_MAX_FILE_SIZE
   )
+  logDebug(
+    `[${scanContext}] Files ${packingResult.packedFilesCount} packed successfully, ${packingResult.totalSize} bytes`
+  )
 
-  await uploadSourceCodeArchive(packingResult.archive, repoUploadInfo)
+  await uploadSourceCodeArchive(
+    packingResult.archive,
+    repoUploadInfo,
+    scanContext
+  )
 
-  const projectId = await getProjectId(gqlClient)
+  const projectId = await getProjectId(gqlClient, scanContext)
   const gitService = new GitService(repositoryPath)
   const { branch } = await gitService.getCurrentCommitAndBranch()
   const repoUrl = await gitService.getRemoteUrl()
@@ -53,9 +64,11 @@ export const scanFiles = async ({
     fixReportId,
     projectId,
     gqlClient,
+    isAllDetectionRulesScan,
     repoUrl: repoUrl || '',
     branchName: branch || 'no-branch',
     sha: '0123456789abcdef',
+    scanContext,
   })
 
   return {
@@ -65,7 +78,8 @@ export const scanFiles = async ({
 }
 
 const initializeSecurityReport = async (
-  gqlClient: McpGQLClient
+  gqlClient: McpGQLClient,
+  scanContext: string
 ): Promise<
   UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
 > => {
@@ -77,7 +91,7 @@ const initializeSecurityReport = async (
     const {
       uploadS3BucketInfo: { repoUploadInfo },
     } = await gqlClient.uploadS3BucketInfo()
-    logDebug('Upload info retrieved')
+    logDebug(`[${scanContext}] Upload info retrieved`)
     return repoUploadInfo
   } catch (error) {
     const message = (error as Error).message
@@ -89,7 +103,8 @@ const initializeSecurityReport = async (
 
 const uploadSourceCodeArchive = async (
   archiveBuffer: Buffer,
-  repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
+  repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo'],
+  scanContext: string
 ): Promise<void> => {
   if (!repoUploadInfo) {
     throw new FileUploadError('Upload info is required for source code archive')
@@ -105,9 +120,9 @@ const uploadSourceCodeArchive = async (
       >,
       uploadKey: repoUploadInfo.uploadKey,
     })
-    logInfo('File uploaded successfully')
+    logInfo(`[${scanContext}] File uploaded successfully`)
   } catch (error) {
-    logError('Source code archive upload failed', {
+    logError(`[${scanContext}] Source code archive upload failed`, {
       error: (error as Error).message,
     })
     throw new FileUploadError(
@@ -116,13 +131,16 @@ const uploadSourceCodeArchive = async (
   }
 }
 
-const getProjectId = async (gqlClient: McpGQLClient): Promise<string> => {
+const getProjectId = async (
+  gqlClient: McpGQLClient,
+  scanContext: string
+): Promise<string> => {
   if (!gqlClient) {
     throw new GqlClientError()
   }
 
   const projectId = await gqlClient.getProjectId()
-  logDebug('Project ID retrieved')
+  logDebug(`[${scanContext}] Project ID retrieved`)
   return projectId
 }
 
@@ -130,22 +148,26 @@ const executeSecurityScan = async ({
   fixReportId,
   projectId,
   gqlClient,
+  isAllDetectionRulesScan = false,
   repoUrl,
   branchName,
   sha,
+  scanContext,
 }: {
   fixReportId: string
   projectId: string
   gqlClient: McpGQLClient
+  isAllDetectionRulesScan: boolean
   repoUrl: string
   branchName: string
   sha: string
+  scanContext: string
 }): Promise<void> => {
   if (!gqlClient) {
     throw new GqlClientError()
   }
 
-  logInfo('Starting scan')
+  logInfo(`[${scanContext}] Starting scan`)
 
   const submitVulnerabilityReportVariables: SubmitVulnerabilityReportMutationVariables =
     {
@@ -154,11 +176,12 @@ const executeSecurityScan = async ({
       repoUrl,
       reference: branchName,
       scanSource: Scan_Source_Enum.Mcp,
+      isFullScan: !!isAllDetectionRulesScan,
       sha,
     }
 
-  logInfo('Submitting vulnerability report')
-  logDebug('Submit vulnerability report variables', {
+  logInfo(`[${scanContext}] Submitting vulnerability report`)
+  logDebug(`[${scanContext}] Submit vulnerability report variables`, {
     submitVulnerabilityReportVariables,
   })
   const submitRes = await gqlClient.submitVulnerabilityReport(
@@ -174,13 +197,13 @@ const executeSecurityScan = async ({
   }
 
   const analysisId = submitRes.submitVulnerabilityReport.fixReportId
-  logInfo('Vulnerability report submitted successfully')
+  logInfo(`[${scanContext}] Vulnerability report submitted successfully`)
 
   try {
     await gqlClient.subscribeToGetAnalysis({
       subscribeToAnalysisParams: { analysisId },
       callback: async (completedAnalysisId: string) => {
-        logInfo('Security analysis completed successfully', {
+        logInfo(`[${scanContext}] Security analysis completed successfully`, {
           analysisId: completedAnalysisId,
         })
       },
@@ -188,9 +211,15 @@ const executeSecurityScan = async ({
       timeoutInMs: MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
     })
   } catch (error) {
-    logError('Security analysis failed or timed out', { error, analysisId })
+    logError(`[${scanContext}] Security analysis failed or timed out`, {
+      error,
+      analysisId,
+    })
     throw new ScanError(`Security analysis failed: ${(error as Error).message}`)
   }
 
-  logDebug('Security scan completed successfully', { fixReportId, projectId })
+  logDebug(`[${scanContext}] Security scan completed successfully`, {
+    fixReportId,
+    projectId,
+  })
 }

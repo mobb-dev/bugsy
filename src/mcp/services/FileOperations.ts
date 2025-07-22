@@ -3,9 +3,7 @@ import path from 'node:path'
 
 import AdmZip from 'adm-zip'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - istextorbinary module doesn't have proper TypeScript declarations
-import { FileUtils } from '../../features/analysis/scm/FileUtils'
+import { FileUtils } from '../../features/analysis/scm/services/FileUtils'
 import { logDebug, logError, logInfo } from '../Logger'
 
 export type FileData = {
@@ -74,7 +72,9 @@ export class FileOperations {
       totalSize: archiveBuffer.length,
     }
 
-    logInfo('Files packed successfully')
+    logInfo(
+      `Files packed successfully ${packedFilesCount} files, ${result.totalSize} bytes`
+    )
     return result
   }
 

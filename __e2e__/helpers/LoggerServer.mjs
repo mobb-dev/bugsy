@@ -67,7 +67,7 @@ export class LoggerServer {
       this.server.listen(this.port, resolve)
     })
     this.server.unref()
-    // eslint-disable-next-line no-console
+    // Using console.log for server information - this is expected in test output
     console.log(`Logger server listening on port ${this.port}`)
   }
 
@@ -90,13 +90,13 @@ export class LoggerServer {
   dump() {
     console.log('*************** MCP Logs start ***************')
     for (const entry of this.buffer) {
-      // eslint-disable-next-line no-console
+      // Using console.log for test logs output - needed for test debugging
       console.log(
         `[${entry.time}] [${entry.level}]${entry.version ? ` [${entry.version}]` : ''} ${entry.message}`
       )
 
       if (entry.data && Object.keys(entry.data).length > 0) {
-        // eslint-disable-next-line no-console
+        // Using console.log for structured test data - needed for test debugging
         console.log(util.inspect(entry.data, { colors: true, depth: null }))
       }
     }

@@ -10,7 +10,13 @@ import { CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAv
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../../src/mcp/tools/toolNames'
 import { log } from './helpers/log'
-import { MockRepo } from './helpers/MockRepo'
+import {
+  ActiveGitRepo,
+  EmptyGitRepo,
+  MockRepo,
+  NoChangesGitRepo,
+  NonGitRepo,
+} from './helpers/MockRepo'
 import { BAD_API_KEY } from './mocks/graphqlHandlers'
 import { MOCK_API_URL, mockGraphQL, server } from './mocks/mocks.js'
 
@@ -194,16 +200,15 @@ describe('MCP Server', () => {
     log(`Created nonExistentPath: ${nonExistentPath}`)
 
     try {
-      emptyRepo = new MockRepo()
-      activeRepo = new MockRepo()
-      activeNoChangesRepo = new MockRepo()
-      nonGitRepo = new MockRepo()
+      emptyRepo = new EmptyGitRepo()
+      activeRepo = new ActiveGitRepo()
+      activeNoChangesRepo = new NoChangesGitRepo()
+      nonGitRepo = new NonGitRepo()
 
-      emptyRepoPath = await emptyRepo.createEmptyGitRepo()
-      activeRepoPath = await activeRepo.createActiveGitRepo()
-      activeNoChangesRepoPath =
-        await activeNoChangesRepo.createActiveNoChangesGitRepo()
-      codeNotInGitRepoPath = await nonGitRepo.createActiveNonGitRepo()
+      emptyRepoPath = emptyRepo.getRepoPath()!
+      activeRepoPath = activeRepo.getRepoPath()!
+      activeNoChangesRepoPath = activeNoChangesRepo.getRepoPath()!
+      codeNotInGitRepoPath = nonGitRepo.getRepoPath()!
 
       log('Created repos for test setup')
     } catch (e) {

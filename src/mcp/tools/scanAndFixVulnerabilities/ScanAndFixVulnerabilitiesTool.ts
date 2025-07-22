@@ -1,6 +1,9 @@
 import z from 'zod'
 
-import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../core/configs'
+import {
+  MCP_DEFAULT_MAX_FILES_TO_SCAN,
+  MCP_MAX_FILE_SIZE,
+} from '../../core/configs'
 import { logDebug, logError } from '../../Logger'
 import { getLocalFiles } from '../../services/GetLocalFiles'
 import { validatePath } from '../../services/PathValidation'
@@ -129,7 +132,7 @@ Example payload:
     const path = pathValidationResult.path
     const files = await getLocalFiles({
       path,
-      maxFileSize: 1024 * 1024 * 5, // 5MB
+      maxFileSize: MCP_MAX_FILE_SIZE,
       maxFiles: args.maxFiles,
     })
 

@@ -21,6 +21,7 @@ export type Scalars = {
   json: { input: any; output: any; }
   jsonb: { input: any; output: any; }
   smallint: { input: any; output: any; }
+  timestamp: { input: any; output: any; }
   timestamptz: { input: any; output: any; }
   uuid: { input: any; output: any; }
 };
@@ -1416,6 +1417,3989 @@ export type Aggregated_Severities_Var_Samp_Fields = {
 export type Aggregated_Severities_Variance_Fields = {
   __typename?: 'aggregated_severities_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends';
+  activeRepositories: Scalars['Int']['output'];
+  analysisRuns: Scalars['Int']['output'];
+  endDate: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  startDate: Scalars['timestamptz']['output'];
+  statsReportId: Scalars['uuid']['output'];
+  /** An object relationship */
+  statsReportTimePeriod: Analytics_Stats_Report_Time_Period;
+};
+
+/** aggregated selection of "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_aggregate';
+  aggregate?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Fields>;
+  nodes: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+};
+
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_aggregate_fields';
+  avg?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Max_Fields>;
+  min?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Min_Fields>;
+  stddev?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Order_By = {
+  avg?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Max_Order_By>;
+  min?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Min_Order_By>;
+  stddev?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Sum_Order_By>;
+  var_pop?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Samp_Order_By>;
+  variance?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Avg_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_avg_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Avg_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.active_repositories_analysis_runs_trends". All fields are combined with a logical 'AND'. */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>>;
+  activeRepositories?: InputMaybe<Int_Comparison_Exp>;
+  analysisRuns?: InputMaybe<Int_Comparison_Exp>;
+  endDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  startDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  statsReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.active_repositories_analysis_runs_trends" */
+export enum Analytics_Active_Repositories_Analysis_Runs_Trends_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  ActiveRepositoriesAnalysisRunsTrendsPkey = 'active_repositories_analysis_runs_trends_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Inc_Input = {
+  activeRepositories?: InputMaybe<Scalars['Int']['input']>;
+  analysisRuns?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Insert_Input = {
+  activeRepositories?: InputMaybe<Scalars['Int']['input']>;
+  analysisRuns?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportId?: InputMaybe<Scalars['uuid']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Max_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_max_fields';
+  activeRepositories?: Maybe<Scalars['Int']['output']>;
+  analysisRuns?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Max_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Min_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_min_fields';
+  activeRepositories?: Maybe<Scalars['Int']['output']>;
+  analysisRuns?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Min_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+};
+
+/** on_conflict condition type for table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_On_Conflict = {
+  constraint: Analytics_Active_Repositories_Analysis_Runs_Trends_Constraint;
+  update_columns?: Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Update_Column>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.active_repositories_analysis_runs_trends". */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportId?: InputMaybe<Order_By>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Order_By>;
+};
+
+/** primary key columns input for table: analytics.active_repositories_analysis_runs_trends */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.active_repositories_analysis_runs_trends" */
+export enum Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column {
+  /** column name */
+  ActiveRepositories = 'activeRepositories',
+  /** column name */
+  AnalysisRuns = 'analysisRuns',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportId = 'statsReportId'
+}
+
+/** input type for updating data in table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Set_Input = {
+  activeRepositories?: InputMaybe<Scalars['Int']['input']>;
+  analysisRuns?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_stddev_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Pop_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_stddev_pop_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Pop_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Samp_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_stddev_samp_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stddev_Samp_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "analytics_active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Active_Repositories_Analysis_Runs_Trends_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Stream_Cursor_Value_Input = {
+  activeRepositories?: InputMaybe<Scalars['Int']['input']>;
+  analysisRuns?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Sum_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_sum_fields';
+  activeRepositories?: Maybe<Scalars['Int']['output']>;
+  analysisRuns?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Sum_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "analytics.active_repositories_analysis_runs_trends" */
+export enum Analytics_Active_Repositories_Analysis_Runs_Trends_Update_Column {
+  /** column name */
+  ActiveRepositories = 'activeRepositories',
+  /** column name */
+  AnalysisRuns = 'analysisRuns',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportId = 'statsReportId'
+}
+
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Pop_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_var_pop_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Pop_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Samp_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_var_samp_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Var_Samp_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Variance_Fields = {
+  __typename?: 'analytics_active_repositories_analysis_runs_trends_variance_fields';
+  activeRepositories?: Maybe<Scalars['Float']['output']>;
+  analysisRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "analytics.active_repositories_analysis_runs_trends" */
+export type Analytics_Active_Repositories_Analysis_Runs_Trends_Variance_Order_By = {
+  activeRepositories?: InputMaybe<Order_By>;
+  analysisRuns?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats = {
+  __typename?: 'analytics_fix_coverage_stats';
+  deployedTotalFixesCurrent: Scalars['Int']['output'];
+  deployedTotalFixesPrevious: Scalars['Int']['output'];
+  deployedTotalIssuesCurrent: Scalars['Int']['output'];
+  deployedTotalIssuesPrevious: Scalars['Int']['output'];
+  generatedTotalFixesCurrent: Scalars['Int']['output'];
+  generatedTotalFixesPrevious: Scalars['Int']['output'];
+  generatedTotalIssuesCurrent: Scalars['Int']['output'];
+  generatedTotalIssuesPrevious: Scalars['Int']['output'];
+  id: Scalars['uuid']['output'];
+  /** An array relationship */
+  statsReportTimePeriod: Array<Analytics_Stats_Report_Time_Period>;
+  /** An aggregate relationship */
+  statsReportTimePeriod_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+};
+
+
+/** columns and relationships of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_StatsStatsReportTimePeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_StatsStatsReportTimePeriod_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** columns and relationships of "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends';
+  endDate: Scalars['timestamptz']['output'];
+  fixesDeployed: Scalars['Int']['output'];
+  fixesGenerated: Scalars['Int']['output'];
+  id: Scalars['uuid']['output'];
+  recorded_at: Scalars['timestamptz']['output'];
+  startDate: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  statsReportTimePeriod: Analytics_Stats_Report_Time_Period;
+  statsReportTimePeriodId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_aggregate';
+  aggregate?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Fields>;
+  nodes: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+};
+
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_aggregate_fields';
+  avg?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Max_Fields>;
+  min?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Min_Fields>;
+  stddev?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Order_By = {
+  avg?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Max_Order_By>;
+  min?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Min_Order_By>;
+  stddev?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Sum_Order_By>;
+  var_pop?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Samp_Order_By>;
+  variance?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Avg_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_avg_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Avg_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.fix_coverage_stats_activity_trends". All fields are combined with a logical 'AND'. */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>>;
+  endDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixesDeployed?: InputMaybe<Int_Comparison_Exp>;
+  fixesGenerated?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  recorded_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  startDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriodId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.fix_coverage_stats_activity_trends" */
+export enum Analytics_Fix_Coverage_Stats_Activity_Trends_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixCoverageStatsActivityTrendsPkey = 'fix_coverage_stats_activity_trends_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Inc_Input = {
+  fixesDeployed?: InputMaybe<Scalars['Int']['input']>;
+  fixesGenerated?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Insert_Input = {
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixesDeployed?: InputMaybe<Scalars['Int']['input']>;
+  fixesGenerated?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Max_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_max_fields';
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  fixesDeployed?: Maybe<Scalars['Int']['output']>;
+  fixesGenerated?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  recorded_at?: Maybe<Scalars['timestamptz']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Max_Order_By = {
+  endDate?: InputMaybe<Order_By>;
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Min_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_min_fields';
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  fixesDeployed?: Maybe<Scalars['Int']['output']>;
+  fixesGenerated?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  recorded_at?: Maybe<Scalars['timestamptz']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Min_Order_By = {
+  endDate?: InputMaybe<Order_By>;
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Mutation_Response = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+};
+
+/** on_conflict condition type for table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_On_Conflict = {
+  constraint: Analytics_Fix_Coverage_Stats_Activity_Trends_Constraint;
+  update_columns?: Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Update_Column>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.fix_coverage_stats_activity_trends". */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By = {
+  endDate?: InputMaybe<Order_By>;
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.fix_coverage_stats_activity_trends */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.fix_coverage_stats_activity_trends" */
+export enum Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column {
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  FixesDeployed = 'fixesDeployed',
+  /** column name */
+  FixesGenerated = 'fixesGenerated',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RecordedAt = 'recorded_at',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+/** input type for updating data in table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Set_Input = {
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixesDeployed?: InputMaybe<Scalars['Int']['input']>;
+  fixesGenerated?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_stddev_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Pop_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_stddev_pop_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Pop_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Samp_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_stddev_samp_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stddev_Samp_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "analytics_fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Fix_Coverage_Stats_Activity_Trends_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Stream_Cursor_Value_Input = {
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixesDeployed?: InputMaybe<Scalars['Int']['input']>;
+  fixesGenerated?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Sum_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_sum_fields';
+  fixesDeployed?: Maybe<Scalars['Int']['output']>;
+  fixesGenerated?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Sum_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "analytics.fix_coverage_stats_activity_trends" */
+export enum Analytics_Fix_Coverage_Stats_Activity_Trends_Update_Column {
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  FixesDeployed = 'fixesDeployed',
+  /** column name */
+  FixesGenerated = 'fixesGenerated',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RecordedAt = 'recorded_at',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Pop_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_var_pop_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Pop_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Samp_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_var_samp_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Var_Samp_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Variance_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_activity_trends_variance_fields';
+  fixesDeployed?: Maybe<Scalars['Float']['output']>;
+  fixesGenerated?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "analytics.fix_coverage_stats_activity_trends" */
+export type Analytics_Fix_Coverage_Stats_Activity_Trends_Variance_Order_By = {
+  fixesDeployed?: InputMaybe<Order_By>;
+  fixesGenerated?: InputMaybe<Order_By>;
+};
+
+/** aggregated selection of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Aggregate = {
+  __typename?: 'analytics_fix_coverage_stats_aggregate';
+  aggregate?: Maybe<Analytics_Fix_Coverage_Stats_Aggregate_Fields>;
+  nodes: Array<Analytics_Fix_Coverage_Stats>;
+};
+
+/** aggregate fields of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Aggregate_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_aggregate_fields';
+  avg?: Maybe<Analytics_Fix_Coverage_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Fix_Coverage_Stats_Max_Fields>;
+  min?: Maybe<Analytics_Fix_Coverage_Stats_Min_Fields>;
+  stddev?: Maybe<Analytics_Fix_Coverage_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Fix_Coverage_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Fix_Coverage_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Fix_Coverage_Stats_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Fix_Coverage_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Fix_Coverage_Stats_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Fix_Coverage_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Fix_Coverage_Stats_Avg_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_avg_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.fix_coverage_stats". All fields are combined with a logical 'AND'. */
+export type Analytics_Fix_Coverage_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Bool_Exp>>;
+  deployedTotalFixesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  deployedTotalFixesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  deployedTotalIssuesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  deployedTotalIssuesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  generatedTotalFixesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  generatedTotalFixesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  generatedTotalIssuesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  generatedTotalIssuesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.fix_coverage_stats" */
+export enum Analytics_Fix_Coverage_Stats_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixCoverageStatsPkey = 'fix_coverage_stats_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Inc_Input = {
+  deployedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Insert_Input = {
+  deployedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Fix_Coverage_Stats_Max_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_max_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Fix_Coverage_Stats_Min_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_min_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Mutation_Response = {
+  __typename?: 'analytics_fix_coverage_stats_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Fix_Coverage_Stats>;
+};
+
+/** input type for inserting object relation for remote table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Obj_Rel_Insert_Input = {
+  data: Analytics_Fix_Coverage_Stats_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_On_Conflict>;
+};
+
+/** on_conflict condition type for table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_On_Conflict = {
+  constraint: Analytics_Fix_Coverage_Stats_Constraint;
+  update_columns?: Array<Analytics_Fix_Coverage_Stats_Update_Column>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.fix_coverage_stats". */
+export type Analytics_Fix_Coverage_Stats_Order_By = {
+  deployedTotalFixesCurrent?: InputMaybe<Order_By>;
+  deployedTotalFixesPrevious?: InputMaybe<Order_By>;
+  deployedTotalIssuesCurrent?: InputMaybe<Order_By>;
+  deployedTotalIssuesPrevious?: InputMaybe<Order_By>;
+  generatedTotalFixesCurrent?: InputMaybe<Order_By>;
+  generatedTotalFixesPrevious?: InputMaybe<Order_By>;
+  generatedTotalIssuesCurrent?: InputMaybe<Order_By>;
+  generatedTotalIssuesPrevious?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  statsReportTimePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Order_By>;
+};
+
+/** primary key columns input for table: analytics.fix_coverage_stats */
+export type Analytics_Fix_Coverage_Stats_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.fix_coverage_stats" */
+export enum Analytics_Fix_Coverage_Stats_Select_Column {
+  /** column name */
+  DeployedTotalFixesCurrent = 'deployedTotalFixesCurrent',
+  /** column name */
+  DeployedTotalFixesPrevious = 'deployedTotalFixesPrevious',
+  /** column name */
+  DeployedTotalIssuesCurrent = 'deployedTotalIssuesCurrent',
+  /** column name */
+  DeployedTotalIssuesPrevious = 'deployedTotalIssuesPrevious',
+  /** column name */
+  GeneratedTotalFixesCurrent = 'generatedTotalFixesCurrent',
+  /** column name */
+  GeneratedTotalFixesPrevious = 'generatedTotalFixesPrevious',
+  /** column name */
+  GeneratedTotalIssuesCurrent = 'generatedTotalIssuesCurrent',
+  /** column name */
+  GeneratedTotalIssuesPrevious = 'generatedTotalIssuesPrevious',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "analytics.fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Set_Input = {
+  deployedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Fix_Coverage_Stats_Stddev_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_stddev_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Fix_Coverage_Stats_Stddev_Pop_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_stddev_pop_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Fix_Coverage_Stats_Stddev_Samp_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_stddev_samp_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "analytics_fix_coverage_stats" */
+export type Analytics_Fix_Coverage_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Fix_Coverage_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Fix_Coverage_Stats_Stream_Cursor_Value_Input = {
+  deployedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  deployedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  generatedTotalIssuesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Fix_Coverage_Stats_Sum_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_sum_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Int']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "analytics.fix_coverage_stats" */
+export enum Analytics_Fix_Coverage_Stats_Update_Column {
+  /** column name */
+  DeployedTotalFixesCurrent = 'deployedTotalFixesCurrent',
+  /** column name */
+  DeployedTotalFixesPrevious = 'deployedTotalFixesPrevious',
+  /** column name */
+  DeployedTotalIssuesCurrent = 'deployedTotalIssuesCurrent',
+  /** column name */
+  DeployedTotalIssuesPrevious = 'deployedTotalIssuesPrevious',
+  /** column name */
+  GeneratedTotalFixesCurrent = 'generatedTotalFixesCurrent',
+  /** column name */
+  GeneratedTotalFixesPrevious = 'generatedTotalFixesPrevious',
+  /** column name */
+  GeneratedTotalIssuesCurrent = 'generatedTotalIssuesCurrent',
+  /** column name */
+  GeneratedTotalIssuesPrevious = 'generatedTotalIssuesPrevious',
+  /** column name */
+  Id = 'id'
+}
+
+export type Analytics_Fix_Coverage_Stats_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Fix_Coverage_Stats_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Fix_Coverage_Stats_Var_Pop_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_var_pop_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Fix_Coverage_Stats_Var_Samp_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_var_samp_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Fix_Coverage_Stats_Variance_Fields = {
+  __typename?: 'analytics_fix_coverage_stats_variance_fields';
+  deployedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  deployedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalFixesPrevious?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesCurrent?: Maybe<Scalars['Float']['output']>;
+  generatedTotalIssuesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats = {
+  __typename?: 'analytics_fix_engagement_stats';
+  committedDirectlyCurrent: Scalars['Int']['output'];
+  committedDirectlyPrevious: Scalars['Int']['output'];
+  createdPrsCurrent: Scalars['Int']['output'];
+  createdPrsPrevious: Scalars['Int']['output'];
+  downloadedFixesCurrent: Scalars['Int']['output'];
+  downloadedFixesPrevious: Scalars['Int']['output'];
+  fixGenerationType: Analytics_Fix_Generation_Type_Enum;
+  id: Scalars['uuid']['output'];
+  recorded_at: Scalars['timestamp']['output'];
+  /** An object relationship */
+  statsReportTimePeriod: Analytics_Stats_Report_Time_Period;
+  stats_report_time_period_id: Scalars['uuid']['output'];
+};
+
+/** columns and relationships of "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends';
+  createdPrs: Scalars['Int']['output'];
+  endDate: Scalars['timestamptz']['output'];
+  fixGenerationType: Analytics_Fix_Generation_Type_Enum;
+  fixesCommittedDirectly: Scalars['Int']['output'];
+  fixesDownloaded: Scalars['Int']['output'];
+  id: Scalars['uuid']['output'];
+  startDate: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  statsReportTimePeriod: Analytics_Stats_Report_Time_Period;
+  statsReportTimePeriodId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_aggregate';
+  aggregate?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Fields>;
+  nodes: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+};
+
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_aggregate_fields';
+  avg?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Max_Fields>;
+  min?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Min_Fields>;
+  stddev?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Order_By = {
+  avg?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Max_Order_By>;
+  min?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Min_Order_By>;
+  stddev?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Sum_Order_By>;
+  var_pop?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Samp_Order_By>;
+  variance?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Avg_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_avg_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Avg_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.fix_engagement_stats_activity_trends". All fields are combined with a logical 'AND'. */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>>;
+  createdPrs?: InputMaybe<Int_Comparison_Exp>;
+  endDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum_Comparison_Exp>;
+  fixesCommittedDirectly?: InputMaybe<Int_Comparison_Exp>;
+  fixesDownloaded?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  startDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriodId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.fix_engagement_stats_activity_trends" */
+export enum Analytics_Fix_Engagement_Stats_Activity_Trends_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixEngagementStatsActivityTrendsPkey = 'fix_engagement_stats_activity_trends_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Inc_Input = {
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  fixesCommittedDirectly?: InputMaybe<Scalars['Int']['input']>;
+  fixesDownloaded?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Insert_Input = {
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  fixesCommittedDirectly?: InputMaybe<Scalars['Int']['input']>;
+  fixesDownloaded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Max_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_max_fields';
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Int']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Max_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Min_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_min_fields';
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Int']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Min_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Mutation_Response = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+};
+
+/** on_conflict condition type for table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_On_Conflict = {
+  constraint: Analytics_Fix_Engagement_Stats_Activity_Trends_Constraint;
+  update_columns?: Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Update_Column>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.fix_engagement_stats_activity_trends". */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  fixGenerationType?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.fix_engagement_stats_activity_trends */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.fix_engagement_stats_activity_trends" */
+export enum Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column {
+  /** column name */
+  CreatedPrs = 'createdPrs',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  FixGenerationType = 'fixGenerationType',
+  /** column name */
+  FixesCommittedDirectly = 'fixesCommittedDirectly',
+  /** column name */
+  FixesDownloaded = 'fixesDownloaded',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+/** input type for updating data in table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Set_Input = {
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  fixesCommittedDirectly?: InputMaybe<Scalars['Int']['input']>;
+  fixesDownloaded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_stddev_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Pop_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_stddev_pop_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Pop_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Samp_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_stddev_samp_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stddev_Samp_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "analytics_fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Fix_Engagement_Stats_Activity_Trends_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Stream_Cursor_Value_Input = {
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  fixesCommittedDirectly?: InputMaybe<Scalars['Int']['input']>;
+  fixesDownloaded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Sum_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_sum_fields';
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Int']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Sum_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "analytics.fix_engagement_stats_activity_trends" */
+export enum Analytics_Fix_Engagement_Stats_Activity_Trends_Update_Column {
+  /** column name */
+  CreatedPrs = 'createdPrs',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  FixGenerationType = 'fixGenerationType',
+  /** column name */
+  FixesCommittedDirectly = 'fixesCommittedDirectly',
+  /** column name */
+  FixesDownloaded = 'fixesDownloaded',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Pop_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_var_pop_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Pop_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Samp_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_var_samp_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Var_Samp_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Variance_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_activity_trends_variance_fields';
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  fixesCommittedDirectly?: Maybe<Scalars['Float']['output']>;
+  fixesDownloaded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "analytics.fix_engagement_stats_activity_trends" */
+export type Analytics_Fix_Engagement_Stats_Activity_Trends_Variance_Order_By = {
+  createdPrs?: InputMaybe<Order_By>;
+  fixesCommittedDirectly?: InputMaybe<Order_By>;
+  fixesDownloaded?: InputMaybe<Order_By>;
+};
+
+/** aggregated selection of "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Aggregate = {
+  __typename?: 'analytics_fix_engagement_stats_aggregate';
+  aggregate?: Maybe<Analytics_Fix_Engagement_Stats_Aggregate_Fields>;
+  nodes: Array<Analytics_Fix_Engagement_Stats>;
+};
+
+export type Analytics_Fix_Engagement_Stats_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Fix_Engagement_Stats_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Fix_Engagement_Stats_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Aggregate_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_aggregate_fields';
+  avg?: Maybe<Analytics_Fix_Engagement_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Fix_Engagement_Stats_Max_Fields>;
+  min?: Maybe<Analytics_Fix_Engagement_Stats_Min_Fields>;
+  stddev?: Maybe<Analytics_Fix_Engagement_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Fix_Engagement_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Fix_Engagement_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Fix_Engagement_Stats_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Fix_Engagement_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Fix_Engagement_Stats_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Fix_Engagement_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Aggregate_Order_By = {
+  avg?: InputMaybe<Analytics_Fix_Engagement_Stats_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Fix_Engagement_Stats_Max_Order_By>;
+  min?: InputMaybe<Analytics_Fix_Engagement_Stats_Min_Order_By>;
+  stddev?: InputMaybe<Analytics_Fix_Engagement_Stats_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Analytics_Fix_Engagement_Stats_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Analytics_Fix_Engagement_Stats_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Analytics_Fix_Engagement_Stats_Sum_Order_By>;
+  var_pop?: InputMaybe<Analytics_Fix_Engagement_Stats_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Analytics_Fix_Engagement_Stats_Var_Samp_Order_By>;
+  variance?: InputMaybe<Analytics_Fix_Engagement_Stats_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Fix_Engagement_Stats_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Fix_Engagement_Stats_Avg_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_avg_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Avg_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.fix_engagement_stats". All fields are combined with a logical 'AND'. */
+export type Analytics_Fix_Engagement_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Bool_Exp>>;
+  committedDirectlyCurrent?: InputMaybe<Int_Comparison_Exp>;
+  committedDirectlyPrevious?: InputMaybe<Int_Comparison_Exp>;
+  createdPrsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  createdPrsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  downloadedFixesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  downloadedFixesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  recorded_at?: InputMaybe<Timestamp_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  stats_report_time_period_id?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.fix_engagement_stats" */
+export enum Analytics_Fix_Engagement_Stats_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixEngagementStatsPkey = 'fix_engagement_stats_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Inc_Input = {
+  committedDirectlyCurrent?: InputMaybe<Scalars['Int']['input']>;
+  committedDirectlyPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Insert_Input = {
+  committedDirectlyCurrent?: InputMaybe<Scalars['Int']['input']>;
+  committedDirectlyPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamp']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input>;
+  stats_report_time_period_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Fix_Engagement_Stats_Max_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_max_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Int']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  recorded_at?: Maybe<Scalars['timestamp']['output']>;
+  stats_report_time_period_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Max_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  stats_report_time_period_id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Fix_Engagement_Stats_Min_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_min_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Int']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  recorded_at?: Maybe<Scalars['timestamp']['output']>;
+  stats_report_time_period_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Min_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  stats_report_time_period_id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Mutation_Response = {
+  __typename?: 'analytics_fix_engagement_stats_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Fix_Engagement_Stats>;
+};
+
+/** on_conflict condition type for table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_On_Conflict = {
+  constraint: Analytics_Fix_Engagement_Stats_Constraint;
+  update_columns?: Array<Analytics_Fix_Engagement_Stats_Update_Column>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.fix_engagement_stats". */
+export type Analytics_Fix_Engagement_Stats_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+  fixGenerationType?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  recorded_at?: InputMaybe<Order_By>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Order_By>;
+  stats_report_time_period_id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.fix_engagement_stats */
+export type Analytics_Fix_Engagement_Stats_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.fix_engagement_stats" */
+export enum Analytics_Fix_Engagement_Stats_Select_Column {
+  /** column name */
+  CommittedDirectlyCurrent = 'committedDirectlyCurrent',
+  /** column name */
+  CommittedDirectlyPrevious = 'committedDirectlyPrevious',
+  /** column name */
+  CreatedPrsCurrent = 'createdPrsCurrent',
+  /** column name */
+  CreatedPrsPrevious = 'createdPrsPrevious',
+  /** column name */
+  DownloadedFixesCurrent = 'downloadedFixesCurrent',
+  /** column name */
+  DownloadedFixesPrevious = 'downloadedFixesPrevious',
+  /** column name */
+  FixGenerationType = 'fixGenerationType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RecordedAt = 'recorded_at',
+  /** column name */
+  StatsReportTimePeriodId = 'stats_report_time_period_id'
+}
+
+/** input type for updating data in table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Set_Input = {
+  committedDirectlyCurrent?: InputMaybe<Scalars['Int']['input']>;
+  committedDirectlyPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamp']['input']>;
+  stats_report_time_period_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Fix_Engagement_Stats_Stddev_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_stddev_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Stddev_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Fix_Engagement_Stats_Stddev_Pop_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_stddev_pop_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Stddev_Pop_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Fix_Engagement_Stats_Stddev_Samp_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_stddev_samp_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Stddev_Samp_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "analytics_fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Fix_Engagement_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Fix_Engagement_Stats_Stream_Cursor_Value_Input = {
+  committedDirectlyCurrent?: InputMaybe<Scalars['Int']['input']>;
+  committedDirectlyPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  downloadedFixesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  fixGenerationType?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  recorded_at?: InputMaybe<Scalars['timestamp']['input']>;
+  stats_report_time_period_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Fix_Engagement_Stats_Sum_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_sum_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Int']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Int']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Sum_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "analytics.fix_engagement_stats" */
+export enum Analytics_Fix_Engagement_Stats_Update_Column {
+  /** column name */
+  CommittedDirectlyCurrent = 'committedDirectlyCurrent',
+  /** column name */
+  CommittedDirectlyPrevious = 'committedDirectlyPrevious',
+  /** column name */
+  CreatedPrsCurrent = 'createdPrsCurrent',
+  /** column name */
+  CreatedPrsPrevious = 'createdPrsPrevious',
+  /** column name */
+  DownloadedFixesCurrent = 'downloadedFixesCurrent',
+  /** column name */
+  DownloadedFixesPrevious = 'downloadedFixesPrevious',
+  /** column name */
+  FixGenerationType = 'fixGenerationType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RecordedAt = 'recorded_at',
+  /** column name */
+  StatsReportTimePeriodId = 'stats_report_time_period_id'
+}
+
+export type Analytics_Fix_Engagement_Stats_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Fix_Engagement_Stats_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Fix_Engagement_Stats_Var_Pop_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_var_pop_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Var_Pop_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Fix_Engagement_Stats_Var_Samp_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_var_samp_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Var_Samp_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Fix_Engagement_Stats_Variance_Fields = {
+  __typename?: 'analytics_fix_engagement_stats_variance_fields';
+  committedDirectlyCurrent?: Maybe<Scalars['Float']['output']>;
+  committedDirectlyPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesCurrent?: Maybe<Scalars['Float']['output']>;
+  downloadedFixesPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "analytics.fix_engagement_stats" */
+export type Analytics_Fix_Engagement_Stats_Variance_Order_By = {
+  committedDirectlyCurrent?: InputMaybe<Order_By>;
+  committedDirectlyPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  downloadedFixesCurrent?: InputMaybe<Order_By>;
+  downloadedFixesPrevious?: InputMaybe<Order_By>;
+};
+
+/** indicate if the fix was created through automatic-pr or my manual scan */
+export type Analytics_Fix_Generation_Type = {
+  __typename?: 'analytics_fix_generation_type';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Aggregate = {
+  __typename?: 'analytics_fix_generation_type_aggregate';
+  aggregate?: Maybe<Analytics_Fix_Generation_Type_Aggregate_Fields>;
+  nodes: Array<Analytics_Fix_Generation_Type>;
+};
+
+/** aggregate fields of "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Aggregate_Fields = {
+  __typename?: 'analytics_fix_generation_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Fix_Generation_Type_Max_Fields>;
+  min?: Maybe<Analytics_Fix_Generation_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Fix_Generation_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.fix_generation_type". All fields are combined with a logical 'AND'. */
+export type Analytics_Fix_Generation_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Fix_Generation_Type_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Fix_Generation_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.fix_generation_type" */
+export enum Analytics_Fix_Generation_Type_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  FixGenerationTypePkey = 'fix_generation_type_pkey'
+}
+
+export enum Analytics_Fix_Generation_Type_Enum {
+  /** initiated by auto-pr, github fixer */
+  Automatic = 'automatic',
+  /** initiated by the user */
+  Manual = 'manual'
+}
+
+/** Boolean expression to compare columns of type "analytics_fix_generation_type_enum". All fields are combined with logical 'AND'. */
+export type Analytics_Fix_Generation_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  _in?: InputMaybe<Array<Analytics_Fix_Generation_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Analytics_Fix_Generation_Type_Enum>;
+  _nin?: InputMaybe<Array<Analytics_Fix_Generation_Type_Enum>>;
+};
+
+/** input type for inserting data into table "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Fix_Generation_Type_Max_Fields = {
+  __typename?: 'analytics_fix_generation_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Fix_Generation_Type_Min_Fields = {
+  __typename?: 'analytics_fix_generation_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Mutation_Response = {
+  __typename?: 'analytics_fix_generation_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Fix_Generation_Type>;
+};
+
+/** on_conflict condition type for table "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_On_Conflict = {
+  constraint: Analytics_Fix_Generation_Type_Constraint;
+  update_columns?: Array<Analytics_Fix_Generation_Type_Update_Column>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.fix_generation_type". */
+export type Analytics_Fix_Generation_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.fix_generation_type */
+export type Analytics_Fix_Generation_Type_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "analytics.fix_generation_type" */
+export enum Analytics_Fix_Generation_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "analytics.fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "analytics_fix_generation_type" */
+export type Analytics_Fix_Generation_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Fix_Generation_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Fix_Generation_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "analytics.fix_generation_type" */
+export enum Analytics_Fix_Generation_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Analytics_Fix_Generation_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Fix_Generation_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Fix_Generation_Type_Bool_Exp;
+};
+
+/** columns and relationships of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats = {
+  __typename?: 'analytics_pr_conversion_stats';
+  closedPrsCurrent: Scalars['Int']['output'];
+  closedPrsPrevious: Scalars['Int']['output'];
+  createdPrsCurrent: Scalars['Int']['output'];
+  createdPrsPrevious: Scalars['Int']['output'];
+  id: Scalars['uuid']['output'];
+  mergedPrsCurrent: Scalars['Int']['output'];
+  mergedPrsPrevious: Scalars['Int']['output'];
+  /** An array relationship */
+  statsReportTimePeriod: Array<Analytics_Stats_Report_Time_Period>;
+  /** An aggregate relationship */
+  statsReportTimePeriod_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+};
+
+
+/** columns and relationships of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_StatsStatsReportTimePeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_StatsStatsReportTimePeriod_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** columns and relationships of "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends';
+  closedPrs: Scalars['Int']['output'];
+  createdPrs: Scalars['Int']['output'];
+  endDate: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  mergedPrs: Scalars['Int']['output'];
+  startDate: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  statsReportTimePeriod: Analytics_Stats_Report_Time_Period;
+  statsReportTimePeriodId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_aggregate';
+  aggregate?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Fields>;
+  nodes: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+};
+
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_aggregate_fields';
+  avg?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Max_Fields>;
+  min?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Min_Fields>;
+  stddev?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Order_By = {
+  avg?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Max_Order_By>;
+  min?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Min_Order_By>;
+  stddev?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Sum_Order_By>;
+  var_pop?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Samp_Order_By>;
+  variance?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Avg_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_avg_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Avg_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.pr_conversion_stats_activity_trends". All fields are combined with a logical 'AND'. */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>>;
+  closedPrs?: InputMaybe<Int_Comparison_Exp>;
+  createdPrs?: InputMaybe<Int_Comparison_Exp>;
+  endDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  mergedPrs?: InputMaybe<Int_Comparison_Exp>;
+  startDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriodId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.pr_conversion_stats_activity_trends" */
+export enum Analytics_Pr_Conversion_Stats_Activity_Trends_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  PrConversionStatsActivityTrendsPkey = 'pr_conversion_stats_activity_trends_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Inc_Input = {
+  closedPrs?: InputMaybe<Scalars['Int']['input']>;
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrs?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Insert_Input = {
+  closedPrs?: InputMaybe<Scalars['Int']['input']>;
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrs?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Max_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_max_fields';
+  closedPrs?: Maybe<Scalars['Int']['output']>;
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mergedPrs?: Maybe<Scalars['Int']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Max_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Min_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_min_fields';
+  closedPrs?: Maybe<Scalars['Int']['output']>;
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  endDate?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mergedPrs?: Maybe<Scalars['Int']['output']>;
+  startDate?: Maybe<Scalars['timestamptz']['output']>;
+  statsReportTimePeriodId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Min_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Mutation_Response = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+};
+
+/** on_conflict condition type for table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_On_Conflict = {
+  constraint: Analytics_Pr_Conversion_Stats_Activity_Trends_Constraint;
+  update_columns?: Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Update_Column>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.pr_conversion_stats_activity_trends". */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  endDate?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+  startDate?: InputMaybe<Order_By>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Order_By>;
+  statsReportTimePeriodId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.pr_conversion_stats_activity_trends */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.pr_conversion_stats_activity_trends" */
+export enum Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column {
+  /** column name */
+  ClosedPrs = 'closedPrs',
+  /** column name */
+  CreatedPrs = 'createdPrs',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MergedPrs = 'mergedPrs',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+/** input type for updating data in table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Set_Input = {
+  closedPrs?: InputMaybe<Scalars['Int']['input']>;
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrs?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_stddev_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Pop_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_stddev_pop_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Pop_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Samp_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_stddev_samp_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stddev_Samp_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "analytics_pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Pr_Conversion_Stats_Activity_Trends_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Stream_Cursor_Value_Input = {
+  closedPrs?: InputMaybe<Scalars['Int']['input']>;
+  createdPrs?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrs?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  statsReportTimePeriodId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Sum_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_sum_fields';
+  closedPrs?: Maybe<Scalars['Int']['output']>;
+  createdPrs?: Maybe<Scalars['Int']['output']>;
+  mergedPrs?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Sum_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "analytics.pr_conversion_stats_activity_trends" */
+export enum Analytics_Pr_Conversion_Stats_Activity_Trends_Update_Column {
+  /** column name */
+  ClosedPrs = 'closedPrs',
+  /** column name */
+  CreatedPrs = 'createdPrs',
+  /** column name */
+  EndDate = 'endDate',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MergedPrs = 'mergedPrs',
+  /** column name */
+  StartDate = 'startDate',
+  /** column name */
+  StatsReportTimePeriodId = 'statsReportTimePeriodId'
+}
+
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Pop_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_var_pop_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Pop_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Samp_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_var_samp_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Var_Samp_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Variance_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_activity_trends_variance_fields';
+  closedPrs?: Maybe<Scalars['Float']['output']>;
+  createdPrs?: Maybe<Scalars['Float']['output']>;
+  mergedPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "analytics.pr_conversion_stats_activity_trends" */
+export type Analytics_Pr_Conversion_Stats_Activity_Trends_Variance_Order_By = {
+  closedPrs?: InputMaybe<Order_By>;
+  createdPrs?: InputMaybe<Order_By>;
+  mergedPrs?: InputMaybe<Order_By>;
+};
+
+/** aggregated selection of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Aggregate = {
+  __typename?: 'analytics_pr_conversion_stats_aggregate';
+  aggregate?: Maybe<Analytics_Pr_Conversion_Stats_Aggregate_Fields>;
+  nodes: Array<Analytics_Pr_Conversion_Stats>;
+};
+
+/** aggregate fields of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Aggregate_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_aggregate_fields';
+  avg?: Maybe<Analytics_Pr_Conversion_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Pr_Conversion_Stats_Max_Fields>;
+  min?: Maybe<Analytics_Pr_Conversion_Stats_Min_Fields>;
+  stddev?: Maybe<Analytics_Pr_Conversion_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Pr_Conversion_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Pr_Conversion_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Pr_Conversion_Stats_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Pr_Conversion_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Pr_Conversion_Stats_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Pr_Conversion_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Pr_Conversion_Stats_Avg_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_avg_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.pr_conversion_stats". All fields are combined with a logical 'AND'. */
+export type Analytics_Pr_Conversion_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Bool_Exp>>;
+  closedPrsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  closedPrsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  createdPrsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  createdPrsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  mergedPrsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  mergedPrsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.pr_conversion_stats" */
+export enum Analytics_Pr_Conversion_Stats_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  PrConversionStatsPkey = 'pr_conversion_stats_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Inc_Input = {
+  closedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  closedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Insert_Input = {
+  closedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  closedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  statsReportTimePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Pr_Conversion_Stats_Max_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_max_fields';
+  closedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Pr_Conversion_Stats_Min_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_min_fields';
+  closedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** response of any mutation on the table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Mutation_Response = {
+  __typename?: 'analytics_pr_conversion_stats_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Pr_Conversion_Stats>;
+};
+
+/** input type for inserting object relation for remote table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Obj_Rel_Insert_Input = {
+  data: Analytics_Pr_Conversion_Stats_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_On_Conflict>;
+};
+
+/** on_conflict condition type for table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_On_Conflict = {
+  constraint: Analytics_Pr_Conversion_Stats_Constraint;
+  update_columns?: Array<Analytics_Pr_Conversion_Stats_Update_Column>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.pr_conversion_stats". */
+export type Analytics_Pr_Conversion_Stats_Order_By = {
+  closedPrsCurrent?: InputMaybe<Order_By>;
+  closedPrsPrevious?: InputMaybe<Order_By>;
+  createdPrsCurrent?: InputMaybe<Order_By>;
+  createdPrsPrevious?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mergedPrsCurrent?: InputMaybe<Order_By>;
+  mergedPrsPrevious?: InputMaybe<Order_By>;
+  statsReportTimePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Order_By>;
+};
+
+/** primary key columns input for table: analytics.pr_conversion_stats */
+export type Analytics_Pr_Conversion_Stats_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.pr_conversion_stats" */
+export enum Analytics_Pr_Conversion_Stats_Select_Column {
+  /** column name */
+  ClosedPrsCurrent = 'closedPrsCurrent',
+  /** column name */
+  ClosedPrsPrevious = 'closedPrsPrevious',
+  /** column name */
+  CreatedPrsCurrent = 'createdPrsCurrent',
+  /** column name */
+  CreatedPrsPrevious = 'createdPrsPrevious',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MergedPrsCurrent = 'mergedPrsCurrent',
+  /** column name */
+  MergedPrsPrevious = 'mergedPrsPrevious'
+}
+
+/** input type for updating data in table "analytics.pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Set_Input = {
+  closedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  closedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Pr_Conversion_Stats_Stddev_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_stddev_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Pr_Conversion_Stats_Stddev_Pop_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_stddev_pop_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Pr_Conversion_Stats_Stddev_Samp_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_stddev_samp_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "analytics_pr_conversion_stats" */
+export type Analytics_Pr_Conversion_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Pr_Conversion_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Pr_Conversion_Stats_Stream_Cursor_Value_Input = {
+  closedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  closedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  createdPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mergedPrsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  mergedPrsPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Pr_Conversion_Stats_Sum_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_sum_fields';
+  closedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Int']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Int']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "analytics.pr_conversion_stats" */
+export enum Analytics_Pr_Conversion_Stats_Update_Column {
+  /** column name */
+  ClosedPrsCurrent = 'closedPrsCurrent',
+  /** column name */
+  ClosedPrsPrevious = 'closedPrsPrevious',
+  /** column name */
+  CreatedPrsCurrent = 'createdPrsCurrent',
+  /** column name */
+  CreatedPrsPrevious = 'createdPrsPrevious',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MergedPrsCurrent = 'mergedPrsCurrent',
+  /** column name */
+  MergedPrsPrevious = 'mergedPrsPrevious'
+}
+
+export type Analytics_Pr_Conversion_Stats_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Pr_Conversion_Stats_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Pr_Conversion_Stats_Var_Pop_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_var_pop_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Pr_Conversion_Stats_Var_Samp_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_var_samp_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Pr_Conversion_Stats_Variance_Fields = {
+  __typename?: 'analytics_pr_conversion_stats_variance_fields';
+  closedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  closedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  createdPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
+  mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
+  mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "analytics.stats_report" */
+export type Analytics_Stats_Report = {
+  __typename?: 'analytics_stats_report';
+  createdOn: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  /** An array relationship */
+  statsReportTimePeriods: Array<Analytics_Stats_Report_Time_Period>;
+  /** An aggregate relationship */
+  statsReportTimePeriods_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+};
+
+
+/** columns and relationships of "analytics.stats_report" */
+export type Analytics_Stats_ReportStatsReportTimePeriodsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report" */
+export type Analytics_Stats_ReportStatsReportTimePeriods_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** aggregated selection of "analytics.stats_report" */
+export type Analytics_Stats_Report_Aggregate = {
+  __typename?: 'analytics_stats_report_aggregate';
+  aggregate?: Maybe<Analytics_Stats_Report_Aggregate_Fields>;
+  nodes: Array<Analytics_Stats_Report>;
+};
+
+/** aggregate fields of "analytics.stats_report" */
+export type Analytics_Stats_Report_Aggregate_Fields = {
+  __typename?: 'analytics_stats_report_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Stats_Report_Max_Fields>;
+  min?: Maybe<Analytics_Stats_Report_Min_Fields>;
+};
+
+
+/** aggregate fields of "analytics.stats_report" */
+export type Analytics_Stats_Report_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Stats_Report_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.stats_report". All fields are combined with a logical 'AND'. */
+export type Analytics_Stats_Report_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Stats_Report_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Stats_Report_Bool_Exp>>;
+  createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  statsReportTimePeriods?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportTimePeriods_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.stats_report" */
+export enum Analytics_Stats_Report_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  StatsReportPkey = 'stats_report_pkey'
+}
+
+/** input type for inserting data into table "analytics.stats_report" */
+export type Analytics_Stats_Report_Insert_Input = {
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  statsReportTimePeriods?: InputMaybe<Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Stats_Report_Max_Fields = {
+  __typename?: 'analytics_stats_report_max_fields';
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Stats_Report_Min_Fields = {
+  __typename?: 'analytics_stats_report_min_fields';
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "analytics.stats_report" */
+export type Analytics_Stats_Report_Mutation_Response = {
+  __typename?: 'analytics_stats_report_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Stats_Report>;
+};
+
+/** input type for inserting object relation for remote table "analytics.stats_report" */
+export type Analytics_Stats_Report_Obj_Rel_Insert_Input = {
+  data: Analytics_Stats_Report_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Stats_Report_On_Conflict>;
+};
+
+/** on_conflict condition type for table "analytics.stats_report" */
+export type Analytics_Stats_Report_On_Conflict = {
+  constraint: Analytics_Stats_Report_Constraint;
+  update_columns?: Array<Analytics_Stats_Report_Update_Column>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.stats_report". */
+export type Analytics_Stats_Report_Order_By = {
+  createdOn?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  statsReportTimePeriods_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Order_By>;
+};
+
+/** primary key columns input for table: analytics.stats_report */
+export type Analytics_Stats_Report_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.stats_report" */
+export enum Analytics_Stats_Report_Select_Column {
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+/** input type for updating data in table "analytics.stats_report" */
+export type Analytics_Stats_Report_Set_Input = {
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "analytics_stats_report" */
+export type Analytics_Stats_Report_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Stats_Report_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Stats_Report_Stream_Cursor_Value_Input = {
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period = {
+  __typename?: 'analytics_stats_report_time_period';
+  /** An array relationship */
+  activeRepositoriesAnalysisRunsTrends: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** An aggregate relationship */
+  activeRepositoriesAnalysisRunsTrends_aggregate: Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate;
+  /** An object relationship */
+  fixCoverageStat: Analytics_Fix_Coverage_Stats;
+  /** An array relationship */
+  fixCoverageStatsActivityTrends: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** An aggregate relationship */
+  fixCoverageStatsActivityTrends_aggregate: Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate;
+  /** An array relationship */
+  fixEngagementStats: Array<Analytics_Fix_Engagement_Stats>;
+  /** An array relationship */
+  fixEngagementStatsActivityTrends: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** An aggregate relationship */
+  fixEngagementStatsActivityTrends_aggregate: Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate;
+  /** An aggregate relationship */
+  fixEngagementStats_aggregate: Analytics_Fix_Engagement_Stats_Aggregate;
+  fix_coverage_stats_id: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  prConversionStat: Analytics_Pr_Conversion_Stats;
+  /** An array relationship */
+  prConversionStatsActivityTrends: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** An aggregate relationship */
+  prConversionStatsActivityTrends_aggregate: Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate;
+  pr_conversion_stats_id: Scalars['uuid']['output'];
+  /** An object relationship */
+  statsReport: Analytics_Stats_Report;
+  stats_report_id: Scalars['uuid']['output'];
+  /** An object relationship */
+  systemUsageStat: Analytics_System_Usage_Stats;
+  system_usage_stats_id: Scalars['uuid']['output'];
+  timePeriod: Analytics_Time_Period_Enum;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodActiveRepositoriesAnalysisRunsTrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodActiveRepositoriesAnalysisRunsTrends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixCoverageStatsActivityTrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixCoverageStatsActivityTrends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixEngagementStatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixEngagementStatsActivityTrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixEngagementStatsActivityTrends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodFixEngagementStats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodPrConversionStatsActivityTrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_PeriodPrConversionStatsActivityTrends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+/** aggregated selection of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Aggregate = {
+  __typename?: 'analytics_stats_report_time_period_aggregate';
+  aggregate?: Maybe<Analytics_Stats_Report_Time_Period_Aggregate_Fields>;
+  nodes: Array<Analytics_Stats_Report_Time_Period>;
+};
+
+export type Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp_Count>;
+};
+
+export type Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Aggregate_Fields = {
+  __typename?: 'analytics_stats_report_time_period_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Stats_Report_Time_Period_Max_Fields>;
+  min?: Maybe<Analytics_Stats_Report_Time_Period_Min_Fields>;
+};
+
+
+/** aggregate fields of "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Analytics_Stats_Report_Time_Period_Max_Order_By>;
+  min?: InputMaybe<Analytics_Stats_Report_Time_Period_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input = {
+  data: Array<Analytics_Stats_Report_Time_Period_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Stats_Report_Time_Period_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.stats_report_time_period". All fields are combined with a logical 'AND'. */
+export type Analytics_Stats_Report_Time_Period_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Bool_Exp>>;
+  activeRepositoriesAnalysisRunsTrends?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+  activeRepositoriesAnalysisRunsTrends_aggregate?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Bool_Exp>;
+  fixCoverageStat?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+  fixCoverageStatsActivityTrends?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+  fixCoverageStatsActivityTrends_aggregate?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Bool_Exp>;
+  fixEngagementStats?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+  fixEngagementStatsActivityTrends?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+  fixEngagementStatsActivityTrends_aggregate?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Bool_Exp>;
+  fixEngagementStats_aggregate?: InputMaybe<Analytics_Fix_Engagement_Stats_Aggregate_Bool_Exp>;
+  fix_coverage_stats_id?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  prConversionStat?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+  prConversionStatsActivityTrends?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+  prConversionStatsActivityTrends_aggregate?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Bool_Exp>;
+  pr_conversion_stats_id?: InputMaybe<Uuid_Comparison_Exp>;
+  statsReport?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+  stats_report_id?: InputMaybe<Uuid_Comparison_Exp>;
+  systemUsageStat?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+  system_usage_stats_id?: InputMaybe<Uuid_Comparison_Exp>;
+  timePeriod?: InputMaybe<Analytics_Time_Period_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.stats_report_time_period" */
+export enum Analytics_Stats_Report_Time_Period_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  StatsReportTimePeriodPkey = 'stats_report_time_period_pkey',
+  /** unique or primary key constraint on columns "time_period", "stats_report_id" */
+  StatsReportTimePeriodStatsReportIdTimePeriodKey = 'stats_report_time_period_stats_report_id_time_period_key'
+}
+
+/** input type for inserting data into table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Insert_Input = {
+  activeRepositoriesAnalysisRunsTrends?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Arr_Rel_Insert_Input>;
+  fixCoverageStat?: InputMaybe<Analytics_Fix_Coverage_Stats_Obj_Rel_Insert_Input>;
+  fixCoverageStatsActivityTrends?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Arr_Rel_Insert_Input>;
+  fixEngagementStats?: InputMaybe<Analytics_Fix_Engagement_Stats_Arr_Rel_Insert_Input>;
+  fixEngagementStatsActivityTrends?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Arr_Rel_Insert_Input>;
+  fix_coverage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  prConversionStat?: InputMaybe<Analytics_Pr_Conversion_Stats_Obj_Rel_Insert_Input>;
+  prConversionStatsActivityTrends?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Arr_Rel_Insert_Input>;
+  pr_conversion_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  statsReport?: InputMaybe<Analytics_Stats_Report_Obj_Rel_Insert_Input>;
+  stats_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  systemUsageStat?: InputMaybe<Analytics_System_Usage_Stats_Obj_Rel_Insert_Input>;
+  system_usage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  timePeriod?: InputMaybe<Analytics_Time_Period_Enum>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Stats_Report_Time_Period_Max_Fields = {
+  __typename?: 'analytics_stats_report_time_period_max_fields';
+  fix_coverage_stats_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  pr_conversion_stats_id?: Maybe<Scalars['uuid']['output']>;
+  stats_report_id?: Maybe<Scalars['uuid']['output']>;
+  system_usage_stats_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Max_Order_By = {
+  fix_coverage_stats_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  pr_conversion_stats_id?: InputMaybe<Order_By>;
+  stats_report_id?: InputMaybe<Order_By>;
+  system_usage_stats_id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Stats_Report_Time_Period_Min_Fields = {
+  __typename?: 'analytics_stats_report_time_period_min_fields';
+  fix_coverage_stats_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  pr_conversion_stats_id?: Maybe<Scalars['uuid']['output']>;
+  stats_report_id?: Maybe<Scalars['uuid']['output']>;
+  system_usage_stats_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Min_Order_By = {
+  fix_coverage_stats_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  pr_conversion_stats_id?: InputMaybe<Order_By>;
+  stats_report_id?: InputMaybe<Order_By>;
+  system_usage_stats_id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Mutation_Response = {
+  __typename?: 'analytics_stats_report_time_period_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Stats_Report_Time_Period>;
+};
+
+/** input type for inserting object relation for remote table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Obj_Rel_Insert_Input = {
+  data: Analytics_Stats_Report_Time_Period_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_Stats_Report_Time_Period_On_Conflict>;
+};
+
+/** on_conflict condition type for table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_On_Conflict = {
+  constraint: Analytics_Stats_Report_Time_Period_Constraint;
+  update_columns?: Array<Analytics_Stats_Report_Time_Period_Update_Column>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.stats_report_time_period". */
+export type Analytics_Stats_Report_Time_Period_Order_By = {
+  activeRepositoriesAnalysisRunsTrends_aggregate?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate_Order_By>;
+  fixCoverageStat?: InputMaybe<Analytics_Fix_Coverage_Stats_Order_By>;
+  fixCoverageStatsActivityTrends_aggregate?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate_Order_By>;
+  fixEngagementStatsActivityTrends_aggregate?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate_Order_By>;
+  fixEngagementStats_aggregate?: InputMaybe<Analytics_Fix_Engagement_Stats_Aggregate_Order_By>;
+  fix_coverage_stats_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  prConversionStat?: InputMaybe<Analytics_Pr_Conversion_Stats_Order_By>;
+  prConversionStatsActivityTrends_aggregate?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate_Order_By>;
+  pr_conversion_stats_id?: InputMaybe<Order_By>;
+  statsReport?: InputMaybe<Analytics_Stats_Report_Order_By>;
+  stats_report_id?: InputMaybe<Order_By>;
+  systemUsageStat?: InputMaybe<Analytics_System_Usage_Stats_Order_By>;
+  system_usage_stats_id?: InputMaybe<Order_By>;
+  timePeriod?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.stats_report_time_period */
+export type Analytics_Stats_Report_Time_Period_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.stats_report_time_period" */
+export enum Analytics_Stats_Report_Time_Period_Select_Column {
+  /** column name */
+  FixCoverageStatsId = 'fix_coverage_stats_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  PrConversionStatsId = 'pr_conversion_stats_id',
+  /** column name */
+  StatsReportId = 'stats_report_id',
+  /** column name */
+  SystemUsageStatsId = 'system_usage_stats_id',
+  /** column name */
+  TimePeriod = 'timePeriod'
+}
+
+/** input type for updating data in table "analytics.stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Set_Input = {
+  fix_coverage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  pr_conversion_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  stats_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  system_usage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  timePeriod?: InputMaybe<Analytics_Time_Period_Enum>;
+};
+
+/** Streaming cursor of the table "analytics_stats_report_time_period" */
+export type Analytics_Stats_Report_Time_Period_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Stats_Report_Time_Period_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Stats_Report_Time_Period_Stream_Cursor_Value_Input = {
+  fix_coverage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  pr_conversion_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  stats_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  system_usage_stats_id?: InputMaybe<Scalars['uuid']['input']>;
+  timePeriod?: InputMaybe<Analytics_Time_Period_Enum>;
+};
+
+/** update columns of table "analytics.stats_report_time_period" */
+export enum Analytics_Stats_Report_Time_Period_Update_Column {
+  /** column name */
+  FixCoverageStatsId = 'fix_coverage_stats_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  PrConversionStatsId = 'pr_conversion_stats_id',
+  /** column name */
+  StatsReportId = 'stats_report_id',
+  /** column name */
+  SystemUsageStatsId = 'system_usage_stats_id',
+  /** column name */
+  TimePeriod = 'timePeriod'
+}
+
+export type Analytics_Stats_Report_Time_Period_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Stats_Report_Time_Period_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Stats_Report_Time_Period_Bool_Exp;
+};
+
+/** update columns of table "analytics.stats_report" */
+export enum Analytics_Stats_Report_Update_Column {
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+export type Analytics_Stats_Report_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Stats_Report_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Stats_Report_Bool_Exp;
+};
+
+/** columns and relationships of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats = {
+  __typename?: 'analytics_system_usage_stats';
+  activeProjectsCurrent: Scalars['Int']['output'];
+  activeProjectsPrevious: Scalars['Int']['output'];
+  activeRepositoriesCurrent: Scalars['Int']['output'];
+  activeRepositoriesPrevious: Scalars['Int']['output'];
+  activeUsersCurrent: Scalars['Int']['output'];
+  activeUsersPrevious: Scalars['Int']['output'];
+  analysisRunsCurrent: Scalars['Int']['output'];
+  analysisRunsPrevious: Scalars['Int']['output'];
+  id: Scalars['uuid']['output'];
+  /** An array relationship */
+  statsReportsTmePeriod: Array<Analytics_Stats_Report_Time_Period>;
+  /** An aggregate relationship */
+  statsReportsTmePeriod_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+};
+
+
+/** columns and relationships of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_StatsStatsReportsTmePeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+/** columns and relationships of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_StatsStatsReportsTmePeriod_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+/** aggregated selection of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Aggregate = {
+  __typename?: 'analytics_system_usage_stats_aggregate';
+  aggregate?: Maybe<Analytics_System_Usage_Stats_Aggregate_Fields>;
+  nodes: Array<Analytics_System_Usage_Stats>;
+};
+
+/** aggregate fields of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Aggregate_Fields = {
+  __typename?: 'analytics_system_usage_stats_aggregate_fields';
+  avg?: Maybe<Analytics_System_Usage_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_System_Usage_Stats_Max_Fields>;
+  min?: Maybe<Analytics_System_Usage_Stats_Min_Fields>;
+  stddev?: Maybe<Analytics_System_Usage_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_System_Usage_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_System_Usage_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_System_Usage_Stats_Sum_Fields>;
+  var_pop?: Maybe<Analytics_System_Usage_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_System_Usage_Stats_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_System_Usage_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_System_Usage_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_System_Usage_Stats_Avg_Fields = {
+  __typename?: 'analytics_system_usage_stats_avg_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.system_usage_stats". All fields are combined with a logical 'AND'. */
+export type Analytics_System_Usage_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_System_Usage_Stats_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_System_Usage_Stats_Bool_Exp>>;
+  activeProjectsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  activeProjectsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  activeRepositoriesCurrent?: InputMaybe<Int_Comparison_Exp>;
+  activeRepositoriesPrevious?: InputMaybe<Int_Comparison_Exp>;
+  activeUsersCurrent?: InputMaybe<Int_Comparison_Exp>;
+  activeUsersPrevious?: InputMaybe<Int_Comparison_Exp>;
+  analysisRunsCurrent?: InputMaybe<Int_Comparison_Exp>;
+  analysisRunsPrevious?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  statsReportsTmePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+  statsReportsTmePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.system_usage_stats" */
+export enum Analytics_System_Usage_Stats_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  SystemUsageStatsPkey = 'system_usage_stats_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Inc_Input = {
+  activeProjectsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeProjectsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersPrevious?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsPrevious?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Insert_Input = {
+  activeProjectsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeProjectsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersPrevious?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  statsReportsTmePeriod?: InputMaybe<Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Analytics_System_Usage_Stats_Max_Fields = {
+  __typename?: 'analytics_system_usage_stats_max_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Int']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Int']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Int']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Int']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Int']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_System_Usage_Stats_Min_Fields = {
+  __typename?: 'analytics_system_usage_stats_min_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Int']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Int']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Int']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Int']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Int']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Mutation_Response = {
+  __typename?: 'analytics_system_usage_stats_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_System_Usage_Stats>;
+};
+
+/** input type for inserting object relation for remote table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Obj_Rel_Insert_Input = {
+  data: Analytics_System_Usage_Stats_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Analytics_System_Usage_Stats_On_Conflict>;
+};
+
+/** on_conflict condition type for table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_On_Conflict = {
+  constraint: Analytics_System_Usage_Stats_Constraint;
+  update_columns?: Array<Analytics_System_Usage_Stats_Update_Column>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.system_usage_stats". */
+export type Analytics_System_Usage_Stats_Order_By = {
+  activeProjectsCurrent?: InputMaybe<Order_By>;
+  activeProjectsPrevious?: InputMaybe<Order_By>;
+  activeRepositoriesCurrent?: InputMaybe<Order_By>;
+  activeRepositoriesPrevious?: InputMaybe<Order_By>;
+  activeUsersCurrent?: InputMaybe<Order_By>;
+  activeUsersPrevious?: InputMaybe<Order_By>;
+  analysisRunsCurrent?: InputMaybe<Order_By>;
+  analysisRunsPrevious?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  statsReportsTmePeriod_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Order_By>;
+};
+
+/** primary key columns input for table: analytics.system_usage_stats */
+export type Analytics_System_Usage_Stats_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "analytics.system_usage_stats" */
+export enum Analytics_System_Usage_Stats_Select_Column {
+  /** column name */
+  ActiveProjectsCurrent = 'activeProjectsCurrent',
+  /** column name */
+  ActiveProjectsPrevious = 'activeProjectsPrevious',
+  /** column name */
+  ActiveRepositoriesCurrent = 'activeRepositoriesCurrent',
+  /** column name */
+  ActiveRepositoriesPrevious = 'activeRepositoriesPrevious',
+  /** column name */
+  ActiveUsersCurrent = 'activeUsersCurrent',
+  /** column name */
+  ActiveUsersPrevious = 'activeUsersPrevious',
+  /** column name */
+  AnalysisRunsCurrent = 'analysisRunsCurrent',
+  /** column name */
+  AnalysisRunsPrevious = 'analysisRunsPrevious',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "analytics.system_usage_stats" */
+export type Analytics_System_Usage_Stats_Set_Input = {
+  activeProjectsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeProjectsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersPrevious?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_System_Usage_Stats_Stddev_Fields = {
+  __typename?: 'analytics_system_usage_stats_stddev_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_System_Usage_Stats_Stddev_Pop_Fields = {
+  __typename?: 'analytics_system_usage_stats_stddev_pop_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_System_Usage_Stats_Stddev_Samp_Fields = {
+  __typename?: 'analytics_system_usage_stats_stddev_samp_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "analytics_system_usage_stats" */
+export type Analytics_System_Usage_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_System_Usage_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_System_Usage_Stats_Stream_Cursor_Value_Input = {
+  activeProjectsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeProjectsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeRepositoriesPrevious?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersCurrent?: InputMaybe<Scalars['Int']['input']>;
+  activeUsersPrevious?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsCurrent?: InputMaybe<Scalars['Int']['input']>;
+  analysisRunsPrevious?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_System_Usage_Stats_Sum_Fields = {
+  __typename?: 'analytics_system_usage_stats_sum_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Int']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Int']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Int']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Int']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Int']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Int']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "analytics.system_usage_stats" */
+export enum Analytics_System_Usage_Stats_Update_Column {
+  /** column name */
+  ActiveProjectsCurrent = 'activeProjectsCurrent',
+  /** column name */
+  ActiveProjectsPrevious = 'activeProjectsPrevious',
+  /** column name */
+  ActiveRepositoriesCurrent = 'activeRepositoriesCurrent',
+  /** column name */
+  ActiveRepositoriesPrevious = 'activeRepositoriesPrevious',
+  /** column name */
+  ActiveUsersCurrent = 'activeUsersCurrent',
+  /** column name */
+  ActiveUsersPrevious = 'activeUsersPrevious',
+  /** column name */
+  AnalysisRunsCurrent = 'analysisRunsCurrent',
+  /** column name */
+  AnalysisRunsPrevious = 'analysisRunsPrevious',
+  /** column name */
+  Id = 'id'
+}
+
+export type Analytics_System_Usage_Stats_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_System_Usage_Stats_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_System_Usage_Stats_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_System_Usage_Stats_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_System_Usage_Stats_Var_Pop_Fields = {
+  __typename?: 'analytics_system_usage_stats_var_pop_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_System_Usage_Stats_Var_Samp_Fields = {
+  __typename?: 'analytics_system_usage_stats_var_samp_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_System_Usage_Stats_Variance_Fields = {
+  __typename?: 'analytics_system_usage_stats_variance_fields';
+  activeProjectsCurrent?: Maybe<Scalars['Float']['output']>;
+  activeProjectsPrevious?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesCurrent?: Maybe<Scalars['Float']['output']>;
+  activeRepositoriesPrevious?: Maybe<Scalars['Float']['output']>;
+  activeUsersCurrent?: Maybe<Scalars['Float']['output']>;
+  activeUsersPrevious?: Maybe<Scalars['Float']['output']>;
+  analysisRunsCurrent?: Maybe<Scalars['Float']['output']>;
+  analysisRunsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "analytics.time_period" */
+export type Analytics_Time_Period = {
+  __typename?: 'analytics_time_period';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "analytics.time_period" */
+export type Analytics_Time_Period_Aggregate = {
+  __typename?: 'analytics_time_period_aggregate';
+  aggregate?: Maybe<Analytics_Time_Period_Aggregate_Fields>;
+  nodes: Array<Analytics_Time_Period>;
+};
+
+/** aggregate fields of "analytics.time_period" */
+export type Analytics_Time_Period_Aggregate_Fields = {
+  __typename?: 'analytics_time_period_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Time_Period_Max_Fields>;
+  min?: Maybe<Analytics_Time_Period_Min_Fields>;
+};
+
+
+/** aggregate fields of "analytics.time_period" */
+export type Analytics_Time_Period_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Time_Period_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.time_period". All fields are combined with a logical 'AND'. */
+export type Analytics_Time_Period_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Time_Period_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Time_Period_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.time_period" */
+export enum Analytics_Time_Period_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  TimePeriodPkey = 'time_period_pkey'
+}
+
+export enum Analytics_Time_Period_Enum {
+  /** no timeframe limit */
+  AllTime = 'allTime',
+  /** last 24 hours */
+  Day = 'day',
+  /** last 30 days */
+  Month = 'month',
+  /** last 7 days */
+  Week = 'week'
+}
+
+/** Boolean expression to compare columns of type "analytics_time_period_enum". All fields are combined with logical 'AND'. */
+export type Analytics_Time_Period_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Analytics_Time_Period_Enum>;
+  _in?: InputMaybe<Array<Analytics_Time_Period_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Analytics_Time_Period_Enum>;
+  _nin?: InputMaybe<Array<Analytics_Time_Period_Enum>>;
+};
+
+/** input type for inserting data into table "analytics.time_period" */
+export type Analytics_Time_Period_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Time_Period_Max_Fields = {
+  __typename?: 'analytics_time_period_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Time_Period_Min_Fields = {
+  __typename?: 'analytics_time_period_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "analytics.time_period" */
+export type Analytics_Time_Period_Mutation_Response = {
+  __typename?: 'analytics_time_period_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Time_Period>;
+};
+
+/** on_conflict condition type for table "analytics.time_period" */
+export type Analytics_Time_Period_On_Conflict = {
+  constraint: Analytics_Time_Period_Constraint;
+  update_columns?: Array<Analytics_Time_Period_Update_Column>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.time_period". */
+export type Analytics_Time_Period_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.time_period */
+export type Analytics_Time_Period_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "analytics.time_period" */
+export enum Analytics_Time_Period_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "analytics.time_period" */
+export type Analytics_Time_Period_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "analytics_time_period" */
+export type Analytics_Time_Period_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Time_Period_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Time_Period_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "analytics.time_period" */
+export enum Analytics_Time_Period_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Analytics_Time_Period_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Time_Period_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Time_Period_Bool_Exp;
 };
 
 /** columns and relationships of "api_token" */
@@ -8143,6 +12127,8 @@ export enum IssueType_Enum {
   ImproperStringFormatting = 'IMPROPER_STRING_FORMATTING',
   /** Incomplete Hostname Regex */
   IncompleteHostnameRegex = 'INCOMPLETE_HOSTNAME_REGEX',
+  /** INCOMPLETE_SANITIZATION */
+  IncompleteSanitization = 'INCOMPLETE_SANITIZATION',
   /** A case where the validation on the url is partial */
   IncompleteUrlSanitization = 'INCOMPLETE_URL_SANITIZATION',
   /** Incomplete URL Scheme Check */
@@ -8455,6 +12441,54 @@ export type Mutation_Root = {
   deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
+  /** delete data from the table: "analytics.active_repositories_analysis_runs_trends" */
+  delete_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
+  /** delete single row from the table: "analytics.active_repositories_analysis_runs_trends" */
+  delete_analytics_active_repositories_analysis_runs_trends_by_pk?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** delete data from the table: "analytics.fix_coverage_stats" */
+  delete_analytics_fix_coverage_stats?: Maybe<Analytics_Fix_Coverage_Stats_Mutation_Response>;
+  /** delete data from the table: "analytics.fix_coverage_stats_activity_trends" */
+  delete_analytics_fix_coverage_stats_activity_trends?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Mutation_Response>;
+  /** delete single row from the table: "analytics.fix_coverage_stats_activity_trends" */
+  delete_analytics_fix_coverage_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** delete single row from the table: "analytics.fix_coverage_stats" */
+  delete_analytics_fix_coverage_stats_by_pk?: Maybe<Analytics_Fix_Coverage_Stats>;
+  /** delete data from the table: "analytics.fix_engagement_stats" */
+  delete_analytics_fix_engagement_stats?: Maybe<Analytics_Fix_Engagement_Stats_Mutation_Response>;
+  /** delete data from the table: "analytics.fix_engagement_stats_activity_trends" */
+  delete_analytics_fix_engagement_stats_activity_trends?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Mutation_Response>;
+  /** delete single row from the table: "analytics.fix_engagement_stats_activity_trends" */
+  delete_analytics_fix_engagement_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** delete single row from the table: "analytics.fix_engagement_stats" */
+  delete_analytics_fix_engagement_stats_by_pk?: Maybe<Analytics_Fix_Engagement_Stats>;
+  /** delete data from the table: "analytics.fix_generation_type" */
+  delete_analytics_fix_generation_type?: Maybe<Analytics_Fix_Generation_Type_Mutation_Response>;
+  /** delete single row from the table: "analytics.fix_generation_type" */
+  delete_analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** delete data from the table: "analytics.pr_conversion_stats" */
+  delete_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
+  /** delete data from the table: "analytics.pr_conversion_stats_activity_trends" */
+  delete_analytics_pr_conversion_stats_activity_trends?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Mutation_Response>;
+  /** delete single row from the table: "analytics.pr_conversion_stats_activity_trends" */
+  delete_analytics_pr_conversion_stats_activity_trends_by_pk?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** delete single row from the table: "analytics.pr_conversion_stats" */
+  delete_analytics_pr_conversion_stats_by_pk?: Maybe<Analytics_Pr_Conversion_Stats>;
+  /** delete data from the table: "analytics.stats_report" */
+  delete_analytics_stats_report?: Maybe<Analytics_Stats_Report_Mutation_Response>;
+  /** delete single row from the table: "analytics.stats_report" */
+  delete_analytics_stats_report_by_pk?: Maybe<Analytics_Stats_Report>;
+  /** delete data from the table: "analytics.stats_report_time_period" */
+  delete_analytics_stats_report_time_period?: Maybe<Analytics_Stats_Report_Time_Period_Mutation_Response>;
+  /** delete single row from the table: "analytics.stats_report_time_period" */
+  delete_analytics_stats_report_time_period_by_pk?: Maybe<Analytics_Stats_Report_Time_Period>;
+  /** delete data from the table: "analytics.system_usage_stats" */
+  delete_analytics_system_usage_stats?: Maybe<Analytics_System_Usage_Stats_Mutation_Response>;
+  /** delete single row from the table: "analytics.system_usage_stats" */
+  delete_analytics_system_usage_stats_by_pk?: Maybe<Analytics_System_Usage_Stats>;
+  /** delete data from the table: "analytics.time_period" */
+  delete_analytics_time_period?: Maybe<Analytics_Time_Period_Mutation_Response>;
+  /** delete single row from the table: "analytics.time_period" */
+  delete_analytics_time_period_by_pk?: Maybe<Analytics_Time_Period>;
   /** delete data from the table: "api_token" */
   delete_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** delete single row from the table: "api_token" */
@@ -8716,6 +12750,54 @@ export type Mutation_Root = {
   generateDiffsFile?: Maybe<FileDiffsResponse>;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
+  /** insert data into the table: "analytics.active_repositories_analysis_runs_trends" */
+  insert_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
+  /** insert a single row into the table: "analytics.active_repositories_analysis_runs_trends" */
+  insert_analytics_active_repositories_analysis_runs_trends_one?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** insert data into the table: "analytics.fix_coverage_stats" */
+  insert_analytics_fix_coverage_stats?: Maybe<Analytics_Fix_Coverage_Stats_Mutation_Response>;
+  /** insert data into the table: "analytics.fix_coverage_stats_activity_trends" */
+  insert_analytics_fix_coverage_stats_activity_trends?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Mutation_Response>;
+  /** insert a single row into the table: "analytics.fix_coverage_stats_activity_trends" */
+  insert_analytics_fix_coverage_stats_activity_trends_one?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** insert a single row into the table: "analytics.fix_coverage_stats" */
+  insert_analytics_fix_coverage_stats_one?: Maybe<Analytics_Fix_Coverage_Stats>;
+  /** insert data into the table: "analytics.fix_engagement_stats" */
+  insert_analytics_fix_engagement_stats?: Maybe<Analytics_Fix_Engagement_Stats_Mutation_Response>;
+  /** insert data into the table: "analytics.fix_engagement_stats_activity_trends" */
+  insert_analytics_fix_engagement_stats_activity_trends?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Mutation_Response>;
+  /** insert a single row into the table: "analytics.fix_engagement_stats_activity_trends" */
+  insert_analytics_fix_engagement_stats_activity_trends_one?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** insert a single row into the table: "analytics.fix_engagement_stats" */
+  insert_analytics_fix_engagement_stats_one?: Maybe<Analytics_Fix_Engagement_Stats>;
+  /** insert data into the table: "analytics.fix_generation_type" */
+  insert_analytics_fix_generation_type?: Maybe<Analytics_Fix_Generation_Type_Mutation_Response>;
+  /** insert a single row into the table: "analytics.fix_generation_type" */
+  insert_analytics_fix_generation_type_one?: Maybe<Analytics_Fix_Generation_Type>;
+  /** insert data into the table: "analytics.pr_conversion_stats" */
+  insert_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
+  /** insert data into the table: "analytics.pr_conversion_stats_activity_trends" */
+  insert_analytics_pr_conversion_stats_activity_trends?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Mutation_Response>;
+  /** insert a single row into the table: "analytics.pr_conversion_stats_activity_trends" */
+  insert_analytics_pr_conversion_stats_activity_trends_one?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** insert a single row into the table: "analytics.pr_conversion_stats" */
+  insert_analytics_pr_conversion_stats_one?: Maybe<Analytics_Pr_Conversion_Stats>;
+  /** insert data into the table: "analytics.stats_report" */
+  insert_analytics_stats_report?: Maybe<Analytics_Stats_Report_Mutation_Response>;
+  /** insert a single row into the table: "analytics.stats_report" */
+  insert_analytics_stats_report_one?: Maybe<Analytics_Stats_Report>;
+  /** insert data into the table: "analytics.stats_report_time_period" */
+  insert_analytics_stats_report_time_period?: Maybe<Analytics_Stats_Report_Time_Period_Mutation_Response>;
+  /** insert a single row into the table: "analytics.stats_report_time_period" */
+  insert_analytics_stats_report_time_period_one?: Maybe<Analytics_Stats_Report_Time_Period>;
+  /** insert data into the table: "analytics.system_usage_stats" */
+  insert_analytics_system_usage_stats?: Maybe<Analytics_System_Usage_Stats_Mutation_Response>;
+  /** insert a single row into the table: "analytics.system_usage_stats" */
+  insert_analytics_system_usage_stats_one?: Maybe<Analytics_System_Usage_Stats>;
+  /** insert data into the table: "analytics.time_period" */
+  insert_analytics_time_period?: Maybe<Analytics_Time_Period_Mutation_Response>;
+  /** insert a single row into the table: "analytics.time_period" */
+  insert_analytics_time_period_one?: Maybe<Analytics_Time_Period>;
   /** insert data into the table: "api_token" */
   insert_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** insert a single row into the table: "api_token" */
@@ -8997,6 +13079,78 @@ export type Mutation_Root = {
   updateLinearConfiguration: UpdateLinearConfigurationResponse;
   updateLinearToken: TicketAccessToken;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
+  /** update data of the table: "analytics.active_repositories_analysis_runs_trends" */
+  update_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
+  /** update single row of the table: "analytics.active_repositories_analysis_runs_trends" */
+  update_analytics_active_repositories_analysis_runs_trends_by_pk?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** update multiples rows of table: "analytics.active_repositories_analysis_runs_trends" */
+  update_analytics_active_repositories_analysis_runs_trends_many?: Maybe<Array<Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>>>;
+  /** update data of the table: "analytics.fix_coverage_stats" */
+  update_analytics_fix_coverage_stats?: Maybe<Analytics_Fix_Coverage_Stats_Mutation_Response>;
+  /** update data of the table: "analytics.fix_coverage_stats_activity_trends" */
+  update_analytics_fix_coverage_stats_activity_trends?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Mutation_Response>;
+  /** update single row of the table: "analytics.fix_coverage_stats_activity_trends" */
+  update_analytics_fix_coverage_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** update multiples rows of table: "analytics.fix_coverage_stats_activity_trends" */
+  update_analytics_fix_coverage_stats_activity_trends_many?: Maybe<Array<Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Mutation_Response>>>;
+  /** update single row of the table: "analytics.fix_coverage_stats" */
+  update_analytics_fix_coverage_stats_by_pk?: Maybe<Analytics_Fix_Coverage_Stats>;
+  /** update multiples rows of table: "analytics.fix_coverage_stats" */
+  update_analytics_fix_coverage_stats_many?: Maybe<Array<Maybe<Analytics_Fix_Coverage_Stats_Mutation_Response>>>;
+  /** update data of the table: "analytics.fix_engagement_stats" */
+  update_analytics_fix_engagement_stats?: Maybe<Analytics_Fix_Engagement_Stats_Mutation_Response>;
+  /** update data of the table: "analytics.fix_engagement_stats_activity_trends" */
+  update_analytics_fix_engagement_stats_activity_trends?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Mutation_Response>;
+  /** update single row of the table: "analytics.fix_engagement_stats_activity_trends" */
+  update_analytics_fix_engagement_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** update multiples rows of table: "analytics.fix_engagement_stats_activity_trends" */
+  update_analytics_fix_engagement_stats_activity_trends_many?: Maybe<Array<Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Mutation_Response>>>;
+  /** update single row of the table: "analytics.fix_engagement_stats" */
+  update_analytics_fix_engagement_stats_by_pk?: Maybe<Analytics_Fix_Engagement_Stats>;
+  /** update multiples rows of table: "analytics.fix_engagement_stats" */
+  update_analytics_fix_engagement_stats_many?: Maybe<Array<Maybe<Analytics_Fix_Engagement_Stats_Mutation_Response>>>;
+  /** update data of the table: "analytics.fix_generation_type" */
+  update_analytics_fix_generation_type?: Maybe<Analytics_Fix_Generation_Type_Mutation_Response>;
+  /** update single row of the table: "analytics.fix_generation_type" */
+  update_analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** update multiples rows of table: "analytics.fix_generation_type" */
+  update_analytics_fix_generation_type_many?: Maybe<Array<Maybe<Analytics_Fix_Generation_Type_Mutation_Response>>>;
+  /** update data of the table: "analytics.pr_conversion_stats" */
+  update_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
+  /** update data of the table: "analytics.pr_conversion_stats_activity_trends" */
+  update_analytics_pr_conversion_stats_activity_trends?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Mutation_Response>;
+  /** update single row of the table: "analytics.pr_conversion_stats_activity_trends" */
+  update_analytics_pr_conversion_stats_activity_trends_by_pk?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** update multiples rows of table: "analytics.pr_conversion_stats_activity_trends" */
+  update_analytics_pr_conversion_stats_activity_trends_many?: Maybe<Array<Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Mutation_Response>>>;
+  /** update single row of the table: "analytics.pr_conversion_stats" */
+  update_analytics_pr_conversion_stats_by_pk?: Maybe<Analytics_Pr_Conversion_Stats>;
+  /** update multiples rows of table: "analytics.pr_conversion_stats" */
+  update_analytics_pr_conversion_stats_many?: Maybe<Array<Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>>>;
+  /** update data of the table: "analytics.stats_report" */
+  update_analytics_stats_report?: Maybe<Analytics_Stats_Report_Mutation_Response>;
+  /** update single row of the table: "analytics.stats_report" */
+  update_analytics_stats_report_by_pk?: Maybe<Analytics_Stats_Report>;
+  /** update multiples rows of table: "analytics.stats_report" */
+  update_analytics_stats_report_many?: Maybe<Array<Maybe<Analytics_Stats_Report_Mutation_Response>>>;
+  /** update data of the table: "analytics.stats_report_time_period" */
+  update_analytics_stats_report_time_period?: Maybe<Analytics_Stats_Report_Time_Period_Mutation_Response>;
+  /** update single row of the table: "analytics.stats_report_time_period" */
+  update_analytics_stats_report_time_period_by_pk?: Maybe<Analytics_Stats_Report_Time_Period>;
+  /** update multiples rows of table: "analytics.stats_report_time_period" */
+  update_analytics_stats_report_time_period_many?: Maybe<Array<Maybe<Analytics_Stats_Report_Time_Period_Mutation_Response>>>;
+  /** update data of the table: "analytics.system_usage_stats" */
+  update_analytics_system_usage_stats?: Maybe<Analytics_System_Usage_Stats_Mutation_Response>;
+  /** update single row of the table: "analytics.system_usage_stats" */
+  update_analytics_system_usage_stats_by_pk?: Maybe<Analytics_System_Usage_Stats>;
+  /** update multiples rows of table: "analytics.system_usage_stats" */
+  update_analytics_system_usage_stats_many?: Maybe<Array<Maybe<Analytics_System_Usage_Stats_Mutation_Response>>>;
+  /** update data of the table: "analytics.time_period" */
+  update_analytics_time_period?: Maybe<Analytics_Time_Period_Mutation_Response>;
+  /** update single row of the table: "analytics.time_period" */
+  update_analytics_time_period_by_pk?: Maybe<Analytics_Time_Period>;
+  /** update multiples rows of table: "analytics.time_period" */
+  update_analytics_time_period_many?: Maybe<Array<Maybe<Analytics_Time_Period_Mutation_Response>>>;
   /** update data of the table: "api_token" */
   update_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** update single row of the table: "api_token" */
@@ -9516,6 +13670,150 @@ export type Mutation_RootDeleteProjectArgs = {
 export type Mutation_RootDeleteUserFromOrganizationArgs = {
   organizationId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Active_Repositories_Analysis_Runs_TrendsArgs = {
+  where: Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Active_Repositories_Analysis_Runs_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Coverage_StatsArgs = {
+  where: Analytics_Fix_Coverage_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Coverage_Stats_Activity_TrendsArgs = {
+  where: Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Coverage_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Coverage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Engagement_StatsArgs = {
+  where: Analytics_Fix_Engagement_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Engagement_Stats_Activity_TrendsArgs = {
+  where: Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Engagement_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Engagement_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Generation_TypeArgs = {
+  where: Analytics_Fix_Generation_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Fix_Generation_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Pr_Conversion_StatsArgs = {
+  where: Analytics_Pr_Conversion_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Pr_Conversion_Stats_Activity_TrendsArgs = {
+  where: Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Pr_Conversion_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Pr_Conversion_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Stats_ReportArgs = {
+  where: Analytics_Stats_Report_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Stats_Report_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Stats_Report_Time_PeriodArgs = {
+  where: Analytics_Stats_Report_Time_Period_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Stats_Report_Time_Period_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_System_Usage_StatsArgs = {
+  where: Analytics_System_Usage_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_System_Usage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Time_PeriodArgs = {
+  where: Analytics_Time_Period_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Time_Period_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -10318,6 +14616,174 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 export type Mutation_RootInitOrganizationAndProjectAdminArgs = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   userEmail: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Active_Repositories_Analysis_Runs_TrendsArgs = {
+  objects: Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Active_Repositories_Analysis_Runs_Trends_OneArgs = {
+  object: Analytics_Active_Repositories_Analysis_Runs_Trends_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Coverage_StatsArgs = {
+  objects: Array<Analytics_Fix_Coverage_Stats_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Coverage_Stats_Activity_TrendsArgs = {
+  objects: Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Coverage_Stats_Activity_Trends_OneArgs = {
+  object: Analytics_Fix_Coverage_Stats_Activity_Trends_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Coverage_Stats_OneArgs = {
+  object: Analytics_Fix_Coverage_Stats_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Fix_Coverage_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Engagement_StatsArgs = {
+  objects: Array<Analytics_Fix_Engagement_Stats_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Engagement_Stats_Activity_TrendsArgs = {
+  objects: Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Engagement_Stats_Activity_Trends_OneArgs = {
+  object: Analytics_Fix_Engagement_Stats_Activity_Trends_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Engagement_Stats_OneArgs = {
+  object: Analytics_Fix_Engagement_Stats_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Fix_Engagement_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Generation_TypeArgs = {
+  objects: Array<Analytics_Fix_Generation_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Fix_Generation_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Fix_Generation_Type_OneArgs = {
+  object: Analytics_Fix_Generation_Type_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Fix_Generation_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Pr_Conversion_StatsArgs = {
+  objects: Array<Analytics_Pr_Conversion_Stats_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Pr_Conversion_Stats_Activity_TrendsArgs = {
+  objects: Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Pr_Conversion_Stats_Activity_Trends_OneArgs = {
+  object: Analytics_Pr_Conversion_Stats_Activity_Trends_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Pr_Conversion_Stats_OneArgs = {
+  object: Analytics_Pr_Conversion_Stats_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Pr_Conversion_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Stats_ReportArgs = {
+  objects: Array<Analytics_Stats_Report_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Stats_Report_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Stats_Report_OneArgs = {
+  object: Analytics_Stats_Report_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Stats_Report_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Stats_Report_Time_PeriodArgs = {
+  objects: Array<Analytics_Stats_Report_Time_Period_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Stats_Report_Time_Period_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Stats_Report_Time_Period_OneArgs = {
+  object: Analytics_Stats_Report_Time_Period_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Stats_Report_Time_Period_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_System_Usage_StatsArgs = {
+  objects: Array<Analytics_System_Usage_Stats_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_System_Usage_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_System_Usage_Stats_OneArgs = {
+  object: Analytics_System_Usage_Stats_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_System_Usage_Stats_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Time_PeriodArgs = {
+  objects: Array<Analytics_Time_Period_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Time_Period_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Time_Period_OneArgs = {
+  object: Analytics_Time_Period_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Time_Period_On_Conflict>;
 };
 
 
@@ -11394,6 +15860,262 @@ export type Mutation_RootUpdateScmTokenArgs = {
   scmType: Scalars['String']['input'];
   token: Scalars['String']['input'];
   url: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Active_Repositories_Analysis_Runs_TrendsArgs = {
+  _inc?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Set_Input>;
+  where: Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Active_Repositories_Analysis_Runs_Trends_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Set_Input>;
+  pk_columns: Analytics_Active_Repositories_Analysis_Runs_Trends_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Active_Repositories_Analysis_Runs_Trends_ManyArgs = {
+  updates: Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_StatsArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Set_Input>;
+  where: Analytics_Fix_Coverage_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_Stats_Activity_TrendsArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Set_Input>;
+  where: Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_Stats_Activity_Trends_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Set_Input>;
+  pk_columns: Analytics_Fix_Coverage_Stats_Activity_Trends_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_Stats_Activity_Trends_ManyArgs = {
+  updates: Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_Stats_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Coverage_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Coverage_Stats_Set_Input>;
+  pk_columns: Analytics_Fix_Coverage_Stats_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Coverage_Stats_ManyArgs = {
+  updates: Array<Analytics_Fix_Coverage_Stats_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_StatsArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Set_Input>;
+  where: Analytics_Fix_Engagement_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_Stats_Activity_TrendsArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Set_Input>;
+  where: Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_Stats_Activity_Trends_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Set_Input>;
+  pk_columns: Analytics_Fix_Engagement_Stats_Activity_Trends_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_Stats_Activity_Trends_ManyArgs = {
+  updates: Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_Stats_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Fix_Engagement_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Fix_Engagement_Stats_Set_Input>;
+  pk_columns: Analytics_Fix_Engagement_Stats_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Engagement_Stats_ManyArgs = {
+  updates: Array<Analytics_Fix_Engagement_Stats_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Generation_TypeArgs = {
+  _set?: InputMaybe<Analytics_Fix_Generation_Type_Set_Input>;
+  where: Analytics_Fix_Generation_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Generation_Type_By_PkArgs = {
+  _set?: InputMaybe<Analytics_Fix_Generation_Type_Set_Input>;
+  pk_columns: Analytics_Fix_Generation_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Fix_Generation_Type_ManyArgs = {
+  updates: Array<Analytics_Fix_Generation_Type_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_StatsArgs = {
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Set_Input>;
+  where: Analytics_Pr_Conversion_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_Stats_Activity_TrendsArgs = {
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Set_Input>;
+  where: Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_Stats_Activity_Trends_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Inc_Input>;
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Set_Input>;
+  pk_columns: Analytics_Pr_Conversion_Stats_Activity_Trends_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_Stats_Activity_Trends_ManyArgs = {
+  updates: Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_Stats_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Pr_Conversion_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_Pr_Conversion_Stats_Set_Input>;
+  pk_columns: Analytics_Pr_Conversion_Stats_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Pr_Conversion_Stats_ManyArgs = {
+  updates: Array<Analytics_Pr_Conversion_Stats_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_ReportArgs = {
+  _set?: InputMaybe<Analytics_Stats_Report_Set_Input>;
+  where: Analytics_Stats_Report_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_Report_By_PkArgs = {
+  _set?: InputMaybe<Analytics_Stats_Report_Set_Input>;
+  pk_columns: Analytics_Stats_Report_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_Report_ManyArgs = {
+  updates: Array<Analytics_Stats_Report_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_Report_Time_PeriodArgs = {
+  _set?: InputMaybe<Analytics_Stats_Report_Time_Period_Set_Input>;
+  where: Analytics_Stats_Report_Time_Period_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_Report_Time_Period_By_PkArgs = {
+  _set?: InputMaybe<Analytics_Stats_Report_Time_Period_Set_Input>;
+  pk_columns: Analytics_Stats_Report_Time_Period_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Stats_Report_Time_Period_ManyArgs = {
+  updates: Array<Analytics_Stats_Report_Time_Period_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_System_Usage_StatsArgs = {
+  _inc?: InputMaybe<Analytics_System_Usage_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_System_Usage_Stats_Set_Input>;
+  where: Analytics_System_Usage_Stats_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_System_Usage_Stats_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_System_Usage_Stats_Inc_Input>;
+  _set?: InputMaybe<Analytics_System_Usage_Stats_Set_Input>;
+  pk_columns: Analytics_System_Usage_Stats_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_System_Usage_Stats_ManyArgs = {
+  updates: Array<Analytics_System_Usage_Stats_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Time_PeriodArgs = {
+  _set?: InputMaybe<Analytics_Time_Period_Set_Input>;
+  where: Analytics_Time_Period_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Time_Period_By_PkArgs = {
+  _set?: InputMaybe<Analytics_Time_Period_Set_Input>;
+  pk_columns: Analytics_Time_Period_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Time_Period_ManyArgs = {
+  updates: Array<Analytics_Time_Period_Updates>;
 };
 
 
@@ -13054,6 +17776,10 @@ export type Organization = {
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
   scmConfigs_aggregate: Scm_Config_Aggregate;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
 };
@@ -13289,6 +18015,18 @@ export type OrganizationScmConfigs_AggregateArgs = {
 
 
 /** columns and relationships of "organization" */
+export type OrganizationUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
+};
+
+
+/** columns and relationships of "organization" */
 export type OrganizationUnresolvedAggregatedVulnerabilitySeveritiesArgs = {
   args: UnresolvedAggregatedVulnerabilitySeverities_Organization_Args;
   distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
@@ -13342,6 +18080,22 @@ export type Organization_Avg_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate avg on columns */
+export type Organization_Avg_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate avg on columns */
+export type Organization_Avg_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** Boolean expression to filter rows from the table "organization". All fields are combined with a logical 'AND'. */
@@ -13926,6 +18680,22 @@ export type Organization_Max_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate max on columns */
+export type Organization_Max_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate max on columns */
+export type Organization_Max_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate min on columns */
@@ -13939,6 +18709,22 @@ export type Organization_Min_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate min on columns */
+export type Organization_Min_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate min on columns */
+export type Organization_Min_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** response of any mutation on the table "organization" */
@@ -14624,6 +19410,22 @@ export type Organization_Stddev_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev on columns */
+export type Organization_Stddev_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate stddev on columns */
+export type Organization_Stddev_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate stddev_pop on columns */
@@ -14634,6 +19436,22 @@ export type Organization_Stddev_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev_pop on columns */
+export type Organization_Stddev_Pop_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate stddev_pop on columns */
+export type Organization_Stddev_Pop_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate stddev_samp on columns */
@@ -14644,6 +19462,22 @@ export type Organization_Stddev_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev_samp on columns */
+export type Organization_Stddev_Samp_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate stddev_samp on columns */
+export type Organization_Stddev_Samp_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** Streaming cursor of the table "organization" */
@@ -14682,6 +19516,22 @@ export type Organization_Sum_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate sum on columns */
+export type Organization_Sum_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate sum on columns */
+export type Organization_Sum_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** columns and relationships of "organization_to_organization_role" */
@@ -15205,6 +20055,22 @@ export type Organization_Var_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate var_pop on columns */
+export type Organization_Var_Pop_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate var_pop on columns */
+export type Organization_Var_Pop_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate var_samp on columns */
@@ -15215,6 +20081,22 @@ export type Organization_Var_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate var_samp on columns */
+export type Organization_Var_Samp_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate var_samp on columns */
+export type Organization_Var_Samp_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate variance on columns */
@@ -15225,6 +20107,22 @@ export type Organization_Variance_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
+  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
+  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate variance on columns */
+export type Organization_Variance_FieldsUniqueDeployedVulsArgs = {
+  args: UniqueDeployedVuls_Organization_Args;
+};
+
+
+/** aggregate variance on columns */
+export type Organization_Variance_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
+  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** columns and relationships of "pr_status" */
@@ -16930,6 +21828,78 @@ export type Query_Root = {
   aggregated_severities: Array<Aggregated_Severities>;
   /** fetch aggregated fields from the table: "aggregated_severities" */
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
+  /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" */
+  analytics_active_repositories_analysis_runs_trends: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** fetch aggregated fields from the table: "analytics.active_repositories_analysis_runs_trends" */
+  analytics_active_repositories_analysis_runs_trends_aggregate: Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate;
+  /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" using primary key columns */
+  analytics_active_repositories_analysis_runs_trends_by_pk?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** fetch data from the table: "analytics.fix_coverage_stats" */
+  analytics_fix_coverage_stats: Array<Analytics_Fix_Coverage_Stats>;
+  /** fetch data from the table: "analytics.fix_coverage_stats_activity_trends" */
+  analytics_fix_coverage_stats_activity_trends: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_coverage_stats_activity_trends" */
+  analytics_fix_coverage_stats_activity_trends_aggregate: Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.fix_coverage_stats_activity_trends" using primary key columns */
+  analytics_fix_coverage_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_coverage_stats" */
+  analytics_fix_coverage_stats_aggregate: Analytics_Fix_Coverage_Stats_Aggregate;
+  /** fetch data from the table: "analytics.fix_coverage_stats" using primary key columns */
+  analytics_fix_coverage_stats_by_pk?: Maybe<Analytics_Fix_Coverage_Stats>;
+  /** fetch data from the table: "analytics.fix_engagement_stats" */
+  analytics_fix_engagement_stats: Array<Analytics_Fix_Engagement_Stats>;
+  /** fetch data from the table: "analytics.fix_engagement_stats_activity_trends" */
+  analytics_fix_engagement_stats_activity_trends: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_engagement_stats_activity_trends" */
+  analytics_fix_engagement_stats_activity_trends_aggregate: Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.fix_engagement_stats_activity_trends" using primary key columns */
+  analytics_fix_engagement_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_engagement_stats" */
+  analytics_fix_engagement_stats_aggregate: Analytics_Fix_Engagement_Stats_Aggregate;
+  /** fetch data from the table: "analytics.fix_engagement_stats" using primary key columns */
+  analytics_fix_engagement_stats_by_pk?: Maybe<Analytics_Fix_Engagement_Stats>;
+  /** fetch data from the table: "analytics.fix_generation_type" */
+  analytics_fix_generation_type: Array<Analytics_Fix_Generation_Type>;
+  /** fetch aggregated fields from the table: "analytics.fix_generation_type" */
+  analytics_fix_generation_type_aggregate: Analytics_Fix_Generation_Type_Aggregate;
+  /** fetch data from the table: "analytics.fix_generation_type" using primary key columns */
+  analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** fetch data from the table: "analytics.pr_conversion_stats" */
+  analytics_pr_conversion_stats: Array<Analytics_Pr_Conversion_Stats>;
+  /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" */
+  analytics_pr_conversion_stats_activity_trends: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.pr_conversion_stats_activity_trends" */
+  analytics_pr_conversion_stats_activity_trends_aggregate: Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" using primary key columns */
+  analytics_pr_conversion_stats_activity_trends_by_pk?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.pr_conversion_stats" */
+  analytics_pr_conversion_stats_aggregate: Analytics_Pr_Conversion_Stats_Aggregate;
+  /** fetch data from the table: "analytics.pr_conversion_stats" using primary key columns */
+  analytics_pr_conversion_stats_by_pk?: Maybe<Analytics_Pr_Conversion_Stats>;
+  /** fetch data from the table: "analytics.stats_report" */
+  analytics_stats_report: Array<Analytics_Stats_Report>;
+  /** fetch aggregated fields from the table: "analytics.stats_report" */
+  analytics_stats_report_aggregate: Analytics_Stats_Report_Aggregate;
+  /** fetch data from the table: "analytics.stats_report" using primary key columns */
+  analytics_stats_report_by_pk?: Maybe<Analytics_Stats_Report>;
+  /** fetch data from the table: "analytics.stats_report_time_period" */
+  analytics_stats_report_time_period: Array<Analytics_Stats_Report_Time_Period>;
+  /** fetch aggregated fields from the table: "analytics.stats_report_time_period" */
+  analytics_stats_report_time_period_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+  /** fetch data from the table: "analytics.stats_report_time_period" using primary key columns */
+  analytics_stats_report_time_period_by_pk?: Maybe<Analytics_Stats_Report_Time_Period>;
+  /** fetch data from the table: "analytics.system_usage_stats" */
+  analytics_system_usage_stats: Array<Analytics_System_Usage_Stats>;
+  /** fetch aggregated fields from the table: "analytics.system_usage_stats" */
+  analytics_system_usage_stats_aggregate: Analytics_System_Usage_Stats_Aggregate;
+  /** fetch data from the table: "analytics.system_usage_stats" using primary key columns */
+  analytics_system_usage_stats_by_pk?: Maybe<Analytics_System_Usage_Stats>;
+  /** fetch data from the table: "analytics.time_period" */
+  analytics_time_period: Array<Analytics_Time_Period>;
+  /** fetch aggregated fields from the table: "analytics.time_period" */
+  analytics_time_period_aggregate: Analytics_Time_Period_Aggregate;
+  /** fetch data from the table: "analytics.time_period" using primary key columns */
+  analytics_time_period_by_pk?: Maybe<Analytics_Time_Period>;
   /** fetch data from the table: "api_token" */
   api_token: Array<Api_Token>;
   /** fetch aggregated fields from the table: "api_token" */
@@ -17417,6 +22387,282 @@ export type Query_RootAggregated_Severities_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Active_Repositories_Analysis_Runs_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Active_Repositories_Analysis_Runs_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Active_Repositories_Analysis_Runs_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Coverage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Engagement_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Fix_Generation_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Generation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Generation_Type_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Generation_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Generation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Generation_Type_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Fix_Generation_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Pr_Conversion_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Stats_ReportArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Stats_Report_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Stats_Report_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Stats_Report_Time_PeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Stats_Report_Time_Period_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Stats_Report_Time_Period_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_System_Usage_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_System_Usage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_System_Usage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_System_Usage_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_System_Usage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_System_Usage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_System_Usage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAnalytics_Time_PeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Time_Period_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Time_Period_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -20920,6 +26166,102 @@ export type Subscription_Root = {
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
   /** fetch data from the table in a streaming manner: "aggregated_severities" */
   aggregated_severities_stream: Array<Aggregated_Severities>;
+  /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" */
+  analytics_active_repositories_analysis_runs_trends: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** fetch aggregated fields from the table: "analytics.active_repositories_analysis_runs_trends" */
+  analytics_active_repositories_analysis_runs_trends_aggregate: Analytics_Active_Repositories_Analysis_Runs_Trends_Aggregate;
+  /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" using primary key columns */
+  analytics_active_repositories_analysis_runs_trends_by_pk?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** fetch data from the table in a streaming manner: "analytics.active_repositories_analysis_runs_trends" */
+  analytics_active_repositories_analysis_runs_trends_stream: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
+  /** fetch data from the table: "analytics.fix_coverage_stats" */
+  analytics_fix_coverage_stats: Array<Analytics_Fix_Coverage_Stats>;
+  /** fetch data from the table: "analytics.fix_coverage_stats_activity_trends" */
+  analytics_fix_coverage_stats_activity_trends: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_coverage_stats_activity_trends" */
+  analytics_fix_coverage_stats_activity_trends_aggregate: Analytics_Fix_Coverage_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.fix_coverage_stats_activity_trends" using primary key columns */
+  analytics_fix_coverage_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** fetch data from the table in a streaming manner: "analytics.fix_coverage_stats_activity_trends" */
+  analytics_fix_coverage_stats_activity_trends_stream: Array<Analytics_Fix_Coverage_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_coverage_stats" */
+  analytics_fix_coverage_stats_aggregate: Analytics_Fix_Coverage_Stats_Aggregate;
+  /** fetch data from the table: "analytics.fix_coverage_stats" using primary key columns */
+  analytics_fix_coverage_stats_by_pk?: Maybe<Analytics_Fix_Coverage_Stats>;
+  /** fetch data from the table in a streaming manner: "analytics.fix_coverage_stats" */
+  analytics_fix_coverage_stats_stream: Array<Analytics_Fix_Coverage_Stats>;
+  /** fetch data from the table: "analytics.fix_engagement_stats" */
+  analytics_fix_engagement_stats: Array<Analytics_Fix_Engagement_Stats>;
+  /** fetch data from the table: "analytics.fix_engagement_stats_activity_trends" */
+  analytics_fix_engagement_stats_activity_trends: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_engagement_stats_activity_trends" */
+  analytics_fix_engagement_stats_activity_trends_aggregate: Analytics_Fix_Engagement_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.fix_engagement_stats_activity_trends" using primary key columns */
+  analytics_fix_engagement_stats_activity_trends_by_pk?: Maybe<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** fetch data from the table in a streaming manner: "analytics.fix_engagement_stats_activity_trends" */
+  analytics_fix_engagement_stats_activity_trends_stream: Array<Analytics_Fix_Engagement_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.fix_engagement_stats" */
+  analytics_fix_engagement_stats_aggregate: Analytics_Fix_Engagement_Stats_Aggregate;
+  /** fetch data from the table: "analytics.fix_engagement_stats" using primary key columns */
+  analytics_fix_engagement_stats_by_pk?: Maybe<Analytics_Fix_Engagement_Stats>;
+  /** fetch data from the table in a streaming manner: "analytics.fix_engagement_stats" */
+  analytics_fix_engagement_stats_stream: Array<Analytics_Fix_Engagement_Stats>;
+  /** fetch data from the table: "analytics.fix_generation_type" */
+  analytics_fix_generation_type: Array<Analytics_Fix_Generation_Type>;
+  /** fetch aggregated fields from the table: "analytics.fix_generation_type" */
+  analytics_fix_generation_type_aggregate: Analytics_Fix_Generation_Type_Aggregate;
+  /** fetch data from the table: "analytics.fix_generation_type" using primary key columns */
+  analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** fetch data from the table in a streaming manner: "analytics.fix_generation_type" */
+  analytics_fix_generation_type_stream: Array<Analytics_Fix_Generation_Type>;
+  /** fetch data from the table: "analytics.pr_conversion_stats" */
+  analytics_pr_conversion_stats: Array<Analytics_Pr_Conversion_Stats>;
+  /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" */
+  analytics_pr_conversion_stats_activity_trends: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.pr_conversion_stats_activity_trends" */
+  analytics_pr_conversion_stats_activity_trends_aggregate: Analytics_Pr_Conversion_Stats_Activity_Trends_Aggregate;
+  /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" using primary key columns */
+  analytics_pr_conversion_stats_activity_trends_by_pk?: Maybe<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** fetch data from the table in a streaming manner: "analytics.pr_conversion_stats_activity_trends" */
+  analytics_pr_conversion_stats_activity_trends_stream: Array<Analytics_Pr_Conversion_Stats_Activity_Trends>;
+  /** fetch aggregated fields from the table: "analytics.pr_conversion_stats" */
+  analytics_pr_conversion_stats_aggregate: Analytics_Pr_Conversion_Stats_Aggregate;
+  /** fetch data from the table: "analytics.pr_conversion_stats" using primary key columns */
+  analytics_pr_conversion_stats_by_pk?: Maybe<Analytics_Pr_Conversion_Stats>;
+  /** fetch data from the table in a streaming manner: "analytics.pr_conversion_stats" */
+  analytics_pr_conversion_stats_stream: Array<Analytics_Pr_Conversion_Stats>;
+  /** fetch data from the table: "analytics.stats_report" */
+  analytics_stats_report: Array<Analytics_Stats_Report>;
+  /** fetch aggregated fields from the table: "analytics.stats_report" */
+  analytics_stats_report_aggregate: Analytics_Stats_Report_Aggregate;
+  /** fetch data from the table: "analytics.stats_report" using primary key columns */
+  analytics_stats_report_by_pk?: Maybe<Analytics_Stats_Report>;
+  /** fetch data from the table in a streaming manner: "analytics.stats_report" */
+  analytics_stats_report_stream: Array<Analytics_Stats_Report>;
+  /** fetch data from the table: "analytics.stats_report_time_period" */
+  analytics_stats_report_time_period: Array<Analytics_Stats_Report_Time_Period>;
+  /** fetch aggregated fields from the table: "analytics.stats_report_time_period" */
+  analytics_stats_report_time_period_aggregate: Analytics_Stats_Report_Time_Period_Aggregate;
+  /** fetch data from the table: "analytics.stats_report_time_period" using primary key columns */
+  analytics_stats_report_time_period_by_pk?: Maybe<Analytics_Stats_Report_Time_Period>;
+  /** fetch data from the table in a streaming manner: "analytics.stats_report_time_period" */
+  analytics_stats_report_time_period_stream: Array<Analytics_Stats_Report_Time_Period>;
+  /** fetch data from the table: "analytics.system_usage_stats" */
+  analytics_system_usage_stats: Array<Analytics_System_Usage_Stats>;
+  /** fetch aggregated fields from the table: "analytics.system_usage_stats" */
+  analytics_system_usage_stats_aggregate: Analytics_System_Usage_Stats_Aggregate;
+  /** fetch data from the table: "analytics.system_usage_stats" using primary key columns */
+  analytics_system_usage_stats_by_pk?: Maybe<Analytics_System_Usage_Stats>;
+  /** fetch data from the table in a streaming manner: "analytics.system_usage_stats" */
+  analytics_system_usage_stats_stream: Array<Analytics_System_Usage_Stats>;
+  /** fetch data from the table: "analytics.time_period" */
+  analytics_time_period: Array<Analytics_Time_Period>;
+  /** fetch aggregated fields from the table: "analytics.time_period" */
+  analytics_time_period_aggregate: Analytics_Time_Period_Aggregate;
+  /** fetch data from the table: "analytics.time_period" using primary key columns */
+  analytics_time_period_by_pk?: Maybe<Analytics_Time_Period>;
+  /** fetch data from the table in a streaming manner: "analytics.time_period" */
+  analytics_time_period_stream: Array<Analytics_Time_Period>;
   /** fetch data from the table: "api_token" */
   api_token: Array<Api_Token>;
   /** fetch aggregated fields from the table: "api_token" */
@@ -21537,6 +26879,366 @@ export type Subscription_RootAggregated_Severities_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Aggregated_Severities_Stream_Cursor_Input>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Active_Repositories_Analysis_Runs_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Active_Repositories_Analysis_Runs_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Active_Repositories_Analysis_Runs_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Active_Repositories_Analysis_Runs_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Active_Repositories_Analysis_Runs_Trends_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_Activity_Trends_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Coverage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Fix_Coverage_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Fix_Coverage_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Fix_Coverage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_Activity_Trends_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Engagement_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Fix_Engagement_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Fix_Engagement_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Fix_Engagement_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Generation_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Generation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Generation_Type_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Generation_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Fix_Generation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Fix_Generation_Type_Order_By>>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Fix_Generation_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Fix_Generation_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Fix_Generation_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_Activity_TrendsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_Activity_Trends_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Activity_Trends_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_Activity_Trends_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_Activity_Trends_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Activity_Trends_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Pr_Conversion_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Pr_Conversion_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Pr_Conversion_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Pr_Conversion_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_ReportArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Stats_Report_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Stats_Report_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_Time_PeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_Time_Period_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Stats_Report_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_Time_Period_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Stats_Report_Time_Period_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Stats_Report_Time_Period_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_System_Usage_StatsArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_System_Usage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_System_Usage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_System_Usage_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_System_Usage_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_System_Usage_Stats_Order_By>>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_System_Usage_Stats_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAnalytics_System_Usage_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_System_Usage_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_System_Usage_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Time_PeriodArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Time_Period_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Time_Period_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Time_Period_Order_By>>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Time_Period_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Time_Period_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Time_Period_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Time_Period_Bool_Exp>;
 };
 
 
@@ -23952,6 +29654,19 @@ export type Ticket_Integration_Updates = {
   where: Ticket_Integration_Bool_Exp;
 };
 
+/** Boolean expression to compare columns of type "timestamp". All fields are combined with logical 'AND'. */
+export type Timestamp_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['timestamp']['input']>;
+  _gt?: InputMaybe<Scalars['timestamp']['input']>;
+  _gte?: InputMaybe<Scalars['timestamp']['input']>;
+  _in?: InputMaybe<Array<Scalars['timestamp']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['timestamp']['input']>;
+  _lte?: InputMaybe<Scalars['timestamp']['input']>;
+  _neq?: InputMaybe<Scalars['timestamp']['input']>;
+  _nin?: InputMaybe<Array<Scalars['timestamp']['input']>>;
+};
+
 /** Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'. */
 export type Timestamptz_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -24143,6 +29858,16 @@ export type Unfixable_Updates = {
   _set?: InputMaybe<Unfixable_Set_Input>;
   /** filter the rows which have to be updated */
   where: Unfixable_Bool_Exp;
+};
+
+export type UniqueDeployedVuls_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type UniqueVulnerabilitiesWithDateRange_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 export type UnresolvedAggregatedVulnerabilitySeverities_Organization_Args = {
@@ -28896,6 +34621,7 @@ export type SubmitVulnerabilityReportMutationVariables = Exact<{
   experimentalEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -28956,6 +34682,13 @@ export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnaly
 export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
 export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
+
+export type GetFixReportsByRepoUrlQueryVariables = Exact<{
+  repoUrl: Scalars['String']['input'];
+}>;
+
+
+export type GetFixReportsByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, createdOn: any, repo?: { __typename?: 'repo', originalUrl: string } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null } }> };
 
 export type GetReportFixesQueryVariables = Exact<{
   reportId: Scalars['uuid']['input'];
@@ -29413,7 +35146,7 @@ export const DigestVulnerabilityReportDocument = `
 }
     `;
 export const SubmitVulnerabilityReportDocument = `
-    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int) {
+    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int, $isFullScan: Boolean) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
     repoUrl: $repoUrl
@@ -29421,6 +35154,7 @@ export const SubmitVulnerabilityReportDocument = `
     sha: $sha
     experimentalEnabled: $experimentalEnabled
     pullRequest: $pullRequest
+    isFullScan: $isFullScan
     projectId: $projectId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     scanSource: $scanSource
@@ -29534,6 +35268,22 @@ export const AutoPrAnalysisDocument = `
   }
 }
     `;
+export const GetFixReportsByRepoUrlDocument = `
+    query GetFixReportsByRepoUrl($repoUrl: String!) {
+  fixReport(where: {repo: {originalUrl: {_eq: $repoUrl}}}) {
+    id
+    state
+    createdOn
+    repo {
+      originalUrl
+    }
+    vulnerabilityReport {
+      scanDate
+      vendor
+    }
+  }
+}
+    `;
 export const GetReportFixesDocument = `
     query GetReportFixes($reportId: uuid!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
   fixReport(where: {_and: [{id: {_eq: $reportId}}, {state: {_eq: Finished}}]}) {
@@ -29643,6 +35393,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AutoPrAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>({ document: AutoPrAnalysisDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'autoPrAnalysis', 'mutation', variables);
+    },
+    GetFixReportsByRepoUrl(variables: GetFixReportsByRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFixReportsByRepoUrlQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFixReportsByRepoUrlQuery>({ document: GetFixReportsByRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFixReportsByRepoUrl', 'query', variables);
     },
     GetReportFixes(variables: GetReportFixesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetReportFixesQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetReportFixesQuery>({ document: GetReportFixesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetReportFixes', 'query', variables);

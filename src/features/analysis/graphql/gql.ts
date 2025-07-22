@@ -467,6 +467,14 @@ export class GQLClient {
           }
     )
   }
+
+  async getFixReportsByRepoUrl({ repoUrl }: { repoUrl: string }) {
+    const res = await this._clientSdk.GetFixReportsByRepoUrl({
+      repoUrl,
+    })
+    return res
+  }
+
   async getAnalysis(analysisId: string) {
     const res = await this._clientSdk.getAnalysis({
       analysisId,

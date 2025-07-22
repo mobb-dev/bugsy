@@ -17,7 +17,7 @@ export async function waitFor(
     }
 
     // wait before next attempt
-    // eslint-disable-next-line no-await-in-loop
+    // Sequential polling is intentional - we need to check each attempt in order
     await new Promise((r) => setTimeout(r, interval))
   }
 

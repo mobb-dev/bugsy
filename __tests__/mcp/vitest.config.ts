@@ -1,8 +1,8 @@
-// eslint-disable-next-line import/no-default-export
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
 // eslint-disable-next-line import/no-default-export
+// Default export is required by Vitest configuration standard
 export default defineConfig({
   test: {
     globals: true,

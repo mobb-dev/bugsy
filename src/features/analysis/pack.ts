@@ -9,9 +9,10 @@ import { simpleGit } from 'simple-git'
 import { parseStringPromise } from 'xml2js'
 import { z } from 'zod'
 
+import { MCP_MAX_FILE_SIZE } from '../../mcp/core/configs'
+
 const debug = Debug('mobbdev:pack')
 
-const MAX_FILE_SIZE = 1024 * 1024 * 5
 const FPR_SOURCE_CODE_FILE_MAPPING_SCHEMA = z.object({
   properties: z.object({
     entry: z.array(
@@ -96,7 +97,7 @@ export async function pack(
       }
     }
 
-    if (fs.lstatSync(absFilepath).size > MAX_FILE_SIZE) {
+    if (fs.lstatSync(absFilepath).size > MCP_MAX_FILE_SIZE) {
       debug('ignoring %s because the size is > 5MB', filepath)
       continue
     }

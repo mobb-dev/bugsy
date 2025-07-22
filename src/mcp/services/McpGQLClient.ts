@@ -96,7 +96,7 @@ export class McpGQLClient {
       return true
     } catch (e: unknown) {
       const error = e as Error
-      logDebug(`API connection verification failed ${error.toString()}`)
+      logDebug(`API connection verification failed`, { error })
       if (error?.toString().includes('FetchError')) {
         logError('API connection verification failed', { error })
         return false

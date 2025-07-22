@@ -389,17 +389,21 @@ export function getGithubSdk(params: OctokitOptions = {}) {
           .then((response) => response.data.object.sha),
       })
       const decodedContent = Buffer.from(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        sourceFileContentResponse.data.content,
+        // Check if file content exists and handle different response types
+        typeof sourceFileContentResponse.data === 'object' &&
+          !Array.isArray(sourceFileContentResponse.data) &&
+          'content' in sourceFileContentResponse.data &&
+          typeof sourceFileContentResponse.data.content === 'string'
+          ? sourceFileContentResponse.data.content
+          : '',
         'base64'
       ).toString('utf-8')
 
       const tree = [
         {
           path: sourceFilePath,
-          mode: '100644',
-          type: 'blob',
+          mode: '100644' as const,
+          type: 'blob' as const,
           content: decodedContent,
         },
       ]
@@ -411,16 +415,20 @@ export function getGithubSdk(params: OctokitOptions = {}) {
           path: '/' + secondFilePath,
         })
         const secondDecodedContent = Buffer.from(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          secondFileContentResponse.data.content,
+          // Check if file content exists and handle different response types
+          typeof secondFileContentResponse.data === 'object' &&
+            !Array.isArray(secondFileContentResponse.data) &&
+            'content' in secondFileContentResponse.data &&
+            typeof secondFileContentResponse.data.content === 'string'
+            ? secondFileContentResponse.data.content
+            : '',
           'base64'
         ).toString('utf-8')
 
         tree.push({
           path: secondFilePath,
-          mode: '100644',
-          type: 'blob',
+          mode: '100644' as const,
+          type: 'blob' as const,
           content: secondDecodedContent,
         })
       }
@@ -432,8 +440,6 @@ export function getGithubSdk(params: OctokitOptions = {}) {
         base_tree: await octokit.rest.git
           .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
           .then((response) => response.data.object.sha),
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         tree,
       })
 

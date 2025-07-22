@@ -1,6 +1,8 @@
+import { packageJson } from '@mobb/bugsy/utils'
+import Configstore from 'configstore'
+
 import {
   MCP_DEFAULT_LIMIT,
-  MCP_MAX_FILE_SIZE,
   MCP_PERIODIC_CHECK_INTERVAL,
 } from '../../core/configs'
 import {
@@ -70,29 +72,40 @@ export class CheckForNewAvailableFixesService {
    */
   private async scanForSecurityVulnerabilities({
     path,
+    isAllDetectionRulesScan,
+    isAllFilesScan,
+    scanContext,
   }: {
     path: string
+    isAllDetectionRulesScan?: boolean
+    isAllFilesScan?: boolean
+    scanContext: 'FULL_SCAN' | 'BACKGROUND_INITIAL' | 'BACKGROUND_PERIODIC'
   }): Promise<void> {
-    logDebug('Scanning for new security vulnerabilities', { path })
+    logDebug(`[${scanContext}] Scanning for new security vulnerabilities`, {
+      path,
+    })
     if (!this.gqlClient) {
-      logInfo('No GQL client found, skipping scan')
+      logInfo(`[${scanContext}] No GQL client found, skipping scan`)
       return
     }
 
     const isConnected = await this.gqlClient.verifyApiConnection()
 
     if (!isConnected) {
-      logError('Failed to connect to the API, scan aborted')
+      logError(`[${scanContext}] Failed to connect to the API, scan aborted`)
       return
     }
 
-    logDebug('Connected to the API, assembling list of files to scan', { path })
+    logDebug(
+      `[${scanContext}] Connected to the API, assembling list of files to scan`,
+      { path }
+    )
     const files = await getLocalFiles({
       path,
-      maxFileSize: MCP_MAX_FILE_SIZE,
+      isAllFilesScan,
     })
 
-    logDebug('Active files', { files })
+    logDebug(`[${scanContext}] Active files`, { files })
     const filesToScan = files.filter((file) => {
       const lastScannedEditTime = this.filesLastScanned[file.fullPath]
       if (!lastScannedEditTime) {
@@ -102,20 +115,26 @@ export class CheckForNewAvailableFixesService {
     })
 
     if (filesToScan.length === 0) {
-      logInfo('No files require scanning')
+      logInfo(`[${scanContext}] No files require scanning`)
       return
     }
 
-    logDebug('Files requiring security scan', { filesToScan })
+    logDebug(`[${scanContext}] Files requiring security scan`, { filesToScan })
     const { fixReportId, projectId } = await scanFiles({
       fileList: filesToScan.map((file) => file.relativePath),
       repositoryPath: path,
       gqlClient: this.gqlClient,
+      isAllDetectionRulesScan,
+      scanContext,
     })
 
     logInfo(
-      `Security scan completed for ${path} reportId: ${fixReportId} projectId: ${projectId}`
+      `[${scanContext}] Security scan completed for ${path} reportId: ${fixReportId} projectId: ${projectId}`
     )
+
+    if (isAllFilesScan) {
+      return
+    }
 
     const fixes = await this.gqlClient.getReportFixesPaginated({
       reportId: fixReportId,
@@ -128,7 +147,7 @@ export class CheckForNewAvailableFixesService {
     )
 
     logInfo(
-      `Security fixes retrieved, total: ${fixes?.fixes?.length || 0}, new: ${
+      `[${scanContext}] Security fixes retrieved, total: ${fixes?.fixes?.length || 0}, new: ${
         newFixes?.length || 0
       }`
     )
@@ -215,6 +234,7 @@ export class CheckForNewAvailableFixesService {
     if (!this.intervalId) {
       this.startPeriodicScanning(path)
       this.executeInitialScan(path)
+      this.executeInitialFullScan(path)
     }
   }
 
@@ -225,16 +245,52 @@ export class CheckForNewAvailableFixesService {
 
     this.intervalId = setInterval(() => {
       logDebug('Triggering periodic security scan', { path })
-      this.scanForSecurityVulnerabilities({ path }).catch((error) => {
+      this.scanForSecurityVulnerabilities({
+        path,
+        scanContext: 'BACKGROUND_PERIODIC',
+      }).catch((error) => {
         logError('Error during periodic security scan', { error })
       })
     }, MCP_PERIODIC_CHECK_INTERVAL)
   }
 
+  private executeInitialFullScan(path: string): void {
+    logDebug('Triggering initial full security scan', { path })
+    const mobbConfigStore = new Configstore(packageJson.name, { apiToken: '' })
+    const fullScanPathsScanned =
+      mobbConfigStore.get('fullScanPathsScanned') || []
+    logDebug('Full scan paths scanned', { fullScanPathsScanned })
+    if (fullScanPathsScanned.includes(path)) {
+      logDebug('Full scan already executed for this path', { path })
+      return
+    }
+
+    mobbConfigStore.set('fullScanPathsScanned', [...fullScanPathsScanned, path])
+    this.scanForSecurityVulnerabilities({
+      path,
+      isAllFilesScan: true,
+      isAllDetectionRulesScan: true,
+      scanContext: 'FULL_SCAN',
+    })
+      .catch((error) => {
+        logError('Error during initial full security scan', { error })
+      })
+      .then(() => {
+        const fullScanPathsScanned =
+          mobbConfigStore.get('fullScanPathsScanned') || []
+        fullScanPathsScanned.push(path)
+        mobbConfigStore.set('fullScanPathsScanned', fullScanPathsScanned)
+        logDebug('Full scan completed', { path })
+      })
+  }
+
   private executeInitialScan(path: string): void {
     logDebug('Triggering initial security scan', { path })
 
-    this.scanForSecurityVulnerabilities({ path }).catch((error) => {
+    this.scanForSecurityVulnerabilities({
+      path,
+      scanContext: 'BACKGROUND_INITIAL',
+    }).catch((error) => {
       logError('Error during initial security scan', { error })
     })
   }

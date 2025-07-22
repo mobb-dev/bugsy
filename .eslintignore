@@ -5,6 +5,7 @@ html
 src/features/analysis/scm/generates/client_generates.ts
 src/mcp/client_generates.ts
 client_codegen.ts
+tsup.config.js
 __tests__/assets/github_fixer_demo/**/*.js
 __tests__/assets/github_fixer_demo/irrelevant_vendor_code/repo/vendor/xss-example.js
 __tests__/assets/github_fixer_demo/false_positive_no_fix/repo/main.js

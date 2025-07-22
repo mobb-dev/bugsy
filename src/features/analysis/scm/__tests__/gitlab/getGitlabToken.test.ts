@@ -1,4 +1,4 @@
-import { fetch as undiciFetch } from 'undici'
+import { fetch as undiciFetch, type Response } from 'undici'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getGitlabToken, GitlabTokenRequestTypeEnum } from '../../gitlab'
@@ -30,11 +30,10 @@ describe('getGitlabToken', () => {
       created_at: 1234567890,
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    undiciFetch.mockResolvedValueOnce({
+    // Mock the fetch response with proper type
+    vi.mocked(undiciFetch).mockResolvedValueOnce({
       json: () => Promise.resolve(mockResponse),
-    })
+    } as unknown as Response)
 
     const result = await getGitlabToken({
       token: 'mock_token',
@@ -67,11 +66,10 @@ describe('getGitlabToken', () => {
   })
 
   it('should use ProxyAgent when isBrokerUrl returns true', async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    undiciFetch.mockResolvedValueOnce({
+    // Mock the fetch response with proper type
+    vi.mocked(undiciFetch).mockResolvedValueOnce({
       json: () => Promise.resolve({}),
-    })
+    } as unknown as Response)
     const isBrokerUrlSpy = vi.spyOn(scmUtils, 'isBrokerUrl')
     const onPremDoamain = '46dc2338-3ec3-4b36-87ee-65c2c3ab4a75'
     await getGitlabToken({
@@ -99,11 +97,10 @@ describe('getGitlabToken', () => {
   })
 
   it('should return unsuccessful response when GitlabAuthResultZ parse fails', async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    undiciFetch.mockResolvedValueOnce({
+    // Mock the fetch response with proper type
+    vi.mocked(undiciFetch).mockResolvedValueOnce({
       json: () => Promise.resolve({ invalid: 'response' }),
-    })
+    } as unknown as Response)
     const result = await getGitlabToken({
       token: 'mock_token',
       gitlabClientId: 'mock_client_id',
@@ -118,11 +115,10 @@ describe('getGitlabToken', () => {
   })
 
   it('should use refresh_token grant type when tokenType is REFRESH_TOKEN', async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    undiciFetch.mockResolvedValueOnce({
+    // Mock the fetch response with proper type
+    vi.mocked(undiciFetch).mockResolvedValueOnce({
       json: () => Promise.resolve({}),
-    })
+    } as unknown as Response)
 
     await getGitlabToken({
       token: 'mock_refresh_token',

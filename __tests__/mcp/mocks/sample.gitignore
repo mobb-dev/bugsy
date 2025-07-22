@@ -1,0 +1,49 @@
+# This is a sample .gitignore file demonstrating various pattern types
+
+# Blank line for readability (matches no files)
+
+# Comment line (ignored by git)
+
+\# This is not a comment because of the backslash
+
+# Trailing spaces are ignored unless quoted
+filename   
+
+# Literal exclamation mark at the beginning
+\!important!.py
+
+# Separator at the beginning - relative to .gitignore file location
+/root_level_only.py
+
+# Separator in the middle - path relative to .gitignore file
+docs/generated/
+
+
+# Separator at the end - matches only directories, not files
+logs/
+dist
+
+# No separator - matches at any level
+TODO.js
+
+# Asterisk matches anything except slash
+*.java
+
+# Question mark matches any one character except slash
+file?.js
+
+# Range notation matches characters in the range
+[a-z]est.js
+
+# Leading ** followed by slash - matches in all directories
+**/node_modules
+
+# Trailing ** - matches everything inside the directory
+generated/**
+
+# ** between directories - matches zero or more directories
+doc/**/temp
+
+# Multiple patterns combined
+dist/**/node_modules/*.
+ 

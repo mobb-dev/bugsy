@@ -1,6 +1,6 @@
 import Debug from 'debug'
 
-import { GitService } from './scm/git/GitService'
+import { GitService } from './scm/services/GitService'
 
 const debug = Debug('mobbdev:git')
 

@@ -1,5 +1,12 @@
 import { execSync } from 'child_process'
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
+import fs, {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'fs'
 import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import simpleGit from 'simple-git'
@@ -8,205 +15,353 @@ import { benignFileContent } from './fileContents'
 import { log } from './log'
 
 /**
- * MockRepo encapsulates helper methods for creating and cleaning up
- * temporary Git / non-Git repositories that are used throughout the test
- * suites. All methods are instance methods (not static) so that the helper can
- * maintain internal state, namely the list of repositories that were created
- * during a test run.
+ * Base MockRepo class that encapsulates helper methods for creating and cleaning up
+ * temporary repositories that are used throughout the test suites.
  */
 export class MockRepo {
-  /** Holds a single repo path managed by this instance (null until created) */
-  private createdRepoPath: string | null = null
+  /** Holds the path of the temporary repository managed by this instance */
+  protected readonly repoPath: string
 
   /** Default set of sample files used by multiple helpers */
-  private readonly sampleFiles: string[] = [
+  protected readonly sampleFiles: string[] = [
     'sample1.py',
     'dir/sample2.py',
     'dir/dir2/sample3.py',
   ]
 
-  constructor() {
-    // Cleanup is triggered manually by tests to avoid accumulating listeners.
+  /** The list of files to create in the repository */
+  protected readonly files: string[]
+
+  /** Path to the sample .gitignore file */
+  protected readonly sampleGitignorePath = join(
+    __dirname,
+    '..',
+    'mocks',
+    'sample.gitignore'
+  )
+
+  /**
+   * Creates a new MockRepo instance
+   * @param files Optional list of files to create in the repository (defaults to sampleFiles)
+   * @param customPath Optional custom path for the repository. If not provided, a temporary directory will be created.
+   */
+  constructor(files?: string[], customPath?: string) {
+    // Use provided files or default to sampleFiles
+    this.files = files || this.sampleFiles
+
+    // Use custom path or create a temporary directory
+    this.repoPath = customPath || mkdtempSync(join(tmpdir(), 'mcp-test-repo-'))
+    log('Created repository directory at:', this.repoPath)
   }
 
   /**
-   * Creates an empty git repository in a temporary directory.
-   * @returns Path to the created git repository
+   * Returns the path to the created repository
+   * @returns Path to the repository
    */
-  async createEmptyGitRepo(): Promise<string> {
-    if (this.createdRepoPath !== null) {
-      throw new Error('MockRepo instance already manages a repository')
-    }
-
-    try {
-      // Create temp directory and initialize a git repo
-      const repoPath = mkdtempSync(join(tmpdir(), 'mcp-test-empty-repo-'))
-      log('Created empty repo at:', repoPath)
-
-      // Track for cleanup
-      this.createdRepoPath = repoPath
-
-      // Initialize git repo in the empty directory with quiet flag and explicit branch name
-      const git = simpleGit(repoPath)
-      try {
-        await git.raw(['init', '--initial-branch=main', '--quiet'])
-      } catch (error) {
-        // Fallback for older git versions lacking --initial-branch
-        log('Git init with --initial-branch failed, trying without it')
-        await git.raw(['init', '--quiet'])
-      }
-
-      // Make an initial commit so the repo has a HEAD
-      try {
-        await git.addConfig('user.name', 'Test User')
-        await git.addConfig('user.email', 'test@example.com')
-        await git.raw(['commit', '--allow-empty', '-m', 'Initial commit'])
-        log('Git repository initialized with empty commit')
-      } catch (error) {
-        log('Error making initial commit:', error)
-        // Even if commit fails, we should return the repo path
-      }
-
-      return repoPath
-    } catch (error) {
-      console.error('Error creating empty git repo:', error)
-      // Return a fallback path in case of error
-      const fallbackPath = join(tmpdir(), 'mcp-test-fallback-' + Date.now())
-      log('Using fallback path:', fallbackPath)
-      return fallbackPath
-    }
+  getRepoPath(): string {
+    return this.repoPath
   }
 
   /**
-   * Creates a git repository with modified files in the working directory.
-   * Files are committed once, then modified so they appear as changed.
+   * Adds a file to the current repository
+   * @param fileName Path to the file relative to the repo root, supports nested directories
+   * @param fileContent Optional content to write to the file, defaults to benignFileContent if not provided
+   * @returns Full path to the created file
    */
-  async createActiveGitRepo(): Promise<string> {
-    const files = this.sampleFiles
+  addFile(fileName: string, fileContent?: string): string {
+    const filePath = join(this.repoPath, fileName)
+    const dirPath = dirname(filePath)
 
-    try {
-      // First create an empty repo
-      const repoPath = await this.createEmptyGitRepo()
+    // Create any necessary directories
+    mkdirSync(dirPath, { recursive: true })
 
-      // Create each file, ensuring directories exist
-      files.forEach((file) => {
-        const filePath = join(repoPath, file)
-        const dirPath = dirname(filePath)
-        mkdirSync(dirPath, { recursive: true })
+    // Write the file with content or default content
+    const content = fileContent !== undefined ? fileContent : benignFileContent
+    writeFileSync(filePath, content)
+    log(`Created file ${fileName} in repo`)
 
-        writeFileSync(filePath, benignFileContent)
-        log(`Created file ${file} in repo`)
-      })
-
-      try {
-        // Stage all files and commit them
-        const git = simpleGit(repoPath)
-        await git.add('.')
-        log('Added all files to git staging')
-
-        await git.commit('Add sample files')
-        log('Committed sample files to HEAD')
-
-        // Add a remote origin URL for testing
-        await git.addRemote(
-          'origin',
-          'https://github.com/test-org/test-repo.git'
-        )
-        log('Added remote origin URL')
-
-        // Modify each file so they appear as changed in git status
-        files.forEach((file) => {
-          const filePath = join(repoPath, file)
-          writeFileSync(filePath, benignFileContent + ' ')
-          log(`Modified ${file} to create changes`)
-        })
-      } catch (error) {
-        log('Error in git operations:', error)
-        // Continue even if git operations fail
-      }
-
-      return repoPath
-    } catch (error) {
-      console.error('Error creating active git repo:', error)
-      const fallbackPath = join(
-        tmpdir(),
-        'mcp-test-fallback-active-' + Date.now()
-      )
-      log('Using fallback path:', fallbackPath)
-      return fallbackPath
-    }
+    return filePath
   }
 
   /**
-   * Creates a filesystem directory structure with files but **without** a Git repository.
+   * Adds multiple files to the repository
+   * @param files Array of file objects with fileName, fileContent and isCommited properties
+   * @returns Array of paths to the created files
    */
-  async createActiveNonGitRepo(): Promise<string> {
-    if (this.createdRepoPath !== null) {
-      throw new Error('MockRepo instance already manages a repository')
-    }
-    const files = this.sampleFiles
-    try {
-      const repoPath = mkdtempSync(join(tmpdir(), 'mcp-test-non-repo-active'))
-      this.createdRepoPath = repoPath
+  addFiles(
+    files: {
+      fileName: string
+      fileContent?: string
+      isCommited: boolean
+    }[]
+  ): string[] {
+    const filesToCommit: string[] = []
+    const filePaths: string[] = []
 
-      // Create each file, ensuring parent directories exist first
-      files.forEach((file) => {
-        const filePath = join(repoPath, file)
-        const dirPath = dirname(filePath)
-        mkdirSync(dirPath, { recursive: true })
-
-        writeFileSync(filePath, benignFileContent)
-        log(`Created file ${file} in repo`)
-      })
-
-      return repoPath
-    } catch (error) {
-      console.error('Error creating active non-git repo:', error)
-      const fallbackPath = join(
-        tmpdir(),
-        'mcp-test-fallback-non-git-' + Date.now()
-      )
-      log('Using fallback path:', fallbackPath)
-      return fallbackPath
-    }
-  }
-
-  /**
-   * Creates a repository with no outstanding changes after commit.
-   */
-  async createActiveNoChangesGitRepo(): Promise<string> {
-    const files = this.sampleFiles
-
-    const repoPath = await this.createEmptyGitRepo()
-
+    // Add each file
     files.forEach((file) => {
-      const filePath = join(repoPath, file)
-      const dirPath = dirname(filePath)
-      mkdirSync(dirPath, { recursive: true })
+      const path = this.addFile(file.fileName, file.fileContent)
+      filePaths.push(path)
 
-      writeFileSync(filePath, benignFileContent)
-      log(`Created file ${file} in repo`)
+      if (file.isCommited) {
+        filesToCommit.push(file.fileName)
+      }
     })
 
-    const git = simpleGit(repoPath)
-    await git.add('.')
-    log('Added all files to git staging')
+    // Commit files marked for committing
+    if (filesToCommit.length > 0) {
+      this.commitFiles(
+        filesToCommit,
+        `Add ${filesToCommit.length} files`
+      ).catch((error) => {
+        console.error('Error committing files:', error)
+      })
+    }
 
-    await git.commit('Add sample files')
-    log('Committed sample files to HEAD')
-
-    return repoPath
+    return filePaths
   }
 
   /**
-   * Deletes a repository from disk and internal tracking list.
+   * Adds and commits the specified files to Git
+   * @param fileNames Array of file paths relative to the repo root to commit, or a single file path
+   * @param commitMessage Optional commit message, defaults to "Add files"
+   * @returns true if commit successful, false otherwise
    */
-  deleteGitRepo(repoPath: string): void {
+  async commitFiles(
+    fileNames: string | string[],
+    commitMessage?: string
+  ): Promise<boolean> {
     try {
-      if (existsSync(repoPath)) {
+      const git = simpleGit(this.repoPath)
+
+      // Check if this is a git repository
+      try {
+        await git.revparse(['--is-inside-work-tree'])
+      } catch (error) {
+        log('Not a git repository, skipping commit')
+        return false
+      }
+
+      // Convert single file name to array
+      const files = Array.isArray(fileNames) ? fileNames : [fileNames]
+
+      // Stage the files
+      await git.add(files)
+      log(`Added ${files.length} files to git staging`)
+
+      // Create commit
+      const message = commitMessage || 'Add files'
+      await git.commit(message)
+      log(`Committed files with message: ${message}`)
+
+      return true
+    } catch (error) {
+      log('Error committing files:', error)
+      return false
+    }
+  }
+
+  /**
+   * Adds a file to the repository and optionally commits it
+   * @param fileName Path to the file relative to the repo root
+   * @param fileContent Optional content to write to the file
+   * @param isCommitEnabled Whether to commit the file after adding it
+   * @param commitMessage Optional commit message
+   * @returns Full path to the created file
+   */
+  async addAndCommitFile(
+    fileName: string,
+    fileContent?: string,
+    isCommitEnabled: boolean = true,
+    commitMessage?: string
+  ): Promise<string> {
+    // Add the file
+    const filePath = this.addFile(fileName, fileContent)
+
+    // Commit if requested
+    if (isCommitEnabled) {
+      await this.commitFiles(fileName, commitMessage || `Add ${fileName}`)
+    }
+
+    return filePath
+  }
+
+  /**
+   * Initializes a git repository in the current path
+   * @returns true if successful, false otherwise
+   */
+  protected initGitRepo(): boolean {
+    try {
+      log('Initializing git repository at:', this.repoPath)
+      execSync('git init --initial-branch=main -q', {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      return true
+    } catch (error) {
+      log('Git init failed:', error)
+      return false
+    }
+  }
+
+  /**
+   * Configures git user name and email
+   * @returns true if successful, false otherwise
+   */
+  protected configureGitUser(): boolean {
+    try {
+      execSync('git config user.name "Test User"', {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      execSync('git config user.email "test@example.com"', {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      return true
+    } catch (error) {
+      log('Git user configuration failed:', error)
+      return false
+    }
+  }
+
+  /**
+   * Creates an empty commit
+   * @param message The commit message
+   * @returns true if successful, false otherwise
+   */
+  protected createEmptyCommit(message: string = 'Initial commit'): boolean {
+    try {
+      execSync(`git commit --allow-empty -m "${message}"`, {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      log('Created empty commit with message:', message)
+      return true
+    } catch (error) {
+      log('Failed to create empty commit:', error)
+      return false
+    }
+  }
+
+  /**
+   * Adds all files to git staging
+   * @returns true if successful, false otherwise
+   */
+  protected stageAllFiles(): boolean {
+    try {
+      execSync('git add .', {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      log('Added all files to git staging')
+      return true
+    } catch (error) {
+      log('Failed to stage files:', error)
+      return false
+    }
+  }
+
+  /**
+   * Creates a commit with all staged files
+   * @param message The commit message
+   * @returns true if successful, false otherwise
+   */
+  protected commitStagedFiles(message: string = 'Add sample files'): boolean {
+    try {
+      execSync(`git commit -m "${message}"`, {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      log(`Committed staged files with message: ${message}`)
+      return true
+    } catch (error) {
+      log('Failed to commit staged files:', error)
+      return false
+    }
+  }
+
+  /**
+   * Adds a remote origin to the git repository
+   * @param url The remote URL
+   * @returns true if successful, false otherwise
+   */
+  protected addRemoteOrigin(
+    url: string = 'https://github.com/test-org/test-repo.git'
+  ): boolean {
+    try {
+      execSync(`git remote add origin ${url}`, {
+        cwd: this.repoPath,
+        stdio: 'ignore',
+      })
+      log('Added remote origin URL:', url)
+      return true
+    } catch (error) {
+      log('Failed to add remote origin:', error)
+      return false
+    }
+  }
+
+  /**
+   * Reads the sample.gitignore content
+   * @returns Content of the sample .gitignore file
+   */
+  protected getSampleGitignoreContent(): string {
+    try {
+      return readFileSync(this.sampleGitignorePath, 'utf-8')
+    } catch (error) {
+      console.error('Error reading sample.gitignore file:', error)
+      return '# Default gitignore\nnode_modules/\ndist/\n*.log'
+    }
+  }
+
+  /**
+   * Creates .gitignore file in repository
+   */
+  protected createGitignoreFile(): void {
+    try {
+      const gitignoreContent = this.getSampleGitignoreContent()
+      this.addFiles([
+        {
+          fileName: '.gitignore',
+          fileContent: gitignoreContent,
+          isCommited: false,
+        },
+      ])
+      log('Created .gitignore file in repository')
+    } catch (error) {
+      console.error('Error creating .gitignore file:', error)
+    }
+  }
+
+  /**
+   * Creates all sample files defined in this.files inside the provided repository path.
+   * Ensures that every file's parent directories exist before writing.
+   *
+   * @param content The content to write to each file. Defaults to benignFileContent.
+   */
+  protected generateFiles(content: string = benignFileContent): void {
+    this.files.forEach((file, idx) => {
+      const filePath = join(this.repoPath, file)
+      const dirPath = dirname(filePath)
+      mkdirSync(dirPath, { recursive: true })
+      writeFileSync(filePath, content)
+      // Stagger modification times so later files appear newer
+      const time = Date.now() + idx * 1000
+      fs.utimesSync(filePath, time / 1000, time / 1000)
+      log(`Created file ${file} in repo`)
+    })
+  }
+
+  /**
+   * Deletes a repository from disk.
+   */
+  deleteGitRepo(): void {
+    try {
+      if (existsSync(this.repoPath)) {
         // Try to clean up git hooks if they exist
         try {
-          const hooksDir = join(repoPath, '.git', 'hooks')
+          const hooksDir = join(this.repoPath, '.git', 'hooks')
           if (existsSync(hooksDir)) {
             execSync(`chmod -R 755 ${hooksDir}`, { stdio: 'ignore' })
           }
@@ -214,14 +369,12 @@ export class MockRepo {
           log(`Warning: Could not clean up git hooks: ${e}`)
         }
 
-        rmSync(repoPath, { recursive: true, force: true })
-        log(`Cleaned up repo at: ${repoPath}`)
-
-        this.createdRepoPath = null
+        rmSync(this.repoPath, { recursive: true, force: true })
+        log(`Cleaned up repo at: ${this.repoPath}`)
       }
     } catch (e) {
       console.error(
-        `Error cleaning up repo at ${String(repoPath).replace(/\n|\r/g, '')}:`,
+        `Error cleaning up repo at ${String(this.repoPath).replace(/\n|\r/g, '')}:`,
         e
       )
     }
@@ -229,46 +382,189 @@ export class MockRepo {
 
   /** Remove any leftover repositories this helper knows about */
   cleanupAll(): void {
-    log(`Cleaning up ${this.createdRepoPath ? 1 : 0} remaining repos`)
-    if (this.createdRepoPath) {
-      try {
-        if (existsSync(this.createdRepoPath)) {
-          rmSync(this.createdRepoPath, { recursive: true, force: true })
-          log(`Cleaned up repo at: ${this.createdRepoPath}`)
-        }
-      } catch (e) {
-        console.error(
-          `Error cleaning up repo at ${String(this.createdRepoPath).replace(/\n|\r/g, '')}:`,
-          e
-        )
+    log('Cleaning up repository')
+    try {
+      if (existsSync(this.repoPath)) {
+        rmSync(this.repoPath, { recursive: true, force: true })
+        log(`Cleaned up repo at: ${this.repoPath}`)
       }
+    } catch (e) {
+      console.error(
+        `Error cleaning up repo at ${String(this.repoPath).replace(/\n|\r/g, '')}:`,
+        e
+      )
     }
-    this.createdRepoPath = null
   }
 
   /**
-   * Overwrite an existing sample file (by its index in sampleFiles) with new content.
-   * @param fileIndex Index into this.sampleFiles (0-based)
+   * Overwrite an existing sample file (by its index in files) with new content.
+   * @param fileIndex Index into this.files (0-based)
    * @param content   New file contents
    */
   updateFileContent(fileIndex: number, content: string): void {
-    if (this.createdRepoPath === null) {
-      throw new Error('No repository managed by this MockRepo instance')
-    }
-    if (fileIndex < 0 || fileIndex >= this.sampleFiles.length) {
+    if (fileIndex < 0 || fileIndex >= this.files.length) {
       throw new RangeError('fileIndex out of bounds')
     }
 
-    const relativeFilePath = this.sampleFiles[fileIndex] as string
-    const repoRoot = this.createdRepoPath!
+    const relativeFilePath = this.files[fileIndex] as string
     try {
-      const filePath = join(repoRoot, relativeFilePath)
+      const filePath = join(this.repoPath, relativeFilePath)
       const dirPath = dirname(filePath)
       mkdirSync(dirPath, { recursive: true })
       writeFileSync(filePath, content)
-      log(`Updated file ${relativeFilePath} in repo ${repoRoot}`)
+      log(`Updated file ${relativeFilePath} in repo ${this.repoPath}`)
     } catch (error) {
       console.error('Error updating file content:', error)
     }
+  }
+}
+
+/**
+ * EmptyGitRepo creates an empty git repository with just an initial commit.
+ */
+export class EmptyGitRepo extends MockRepo {
+  /**
+   * Creates a new EmptyGitRepo instance
+   * @param files Optional list of files to create in the repository (defaults to sampleFiles)
+   * @param _options Additional options for repository creation (not used, kept for API consistency)
+   */
+  constructor(files?: string[], _options: { repoUrl?: string } = {}) {
+    super(files ?? [])
+    this.initializeEmptyGitRepo()
+  }
+
+  /**
+   * Initializes an empty git repository with an initial commit
+   */
+  private initializeEmptyGitRepo(): void {
+    try {
+      // Initialize git repository and configure user
+      this.initGitRepo()
+      this.configureGitUser()
+
+      // Create .gitignore file with sample content
+      this.createGitignoreFile()
+
+      // Create initial commit
+      this.createEmptyCommit()
+    } catch (e) {
+      log('Git init failed (non-fatal for tests):', e)
+    }
+  }
+}
+
+/**
+ * ActiveGitRepo creates a git repository with committed files that are modified,
+ * resulting in uncommitted changes in the working directory.
+ */
+export class ActiveGitRepo extends MockRepo {
+  /**
+   * Creates a new ActiveGitRepo instance with committed files that are modified
+   * @param files Optional list of files to create in the repository (defaults to sampleFiles)
+   * @param options Additional options for repository creation
+   */
+  constructor(files?: string[], options: { repoUrl?: string } = {}) {
+    super(files)
+    this.initializeActiveGitRepo(options)
+  }
+
+  /**
+   * Initializes a git repository with files that are committed and then modified
+   * @param options Additional options for repository creation
+   */
+  private initializeActiveGitRepo(options: { repoUrl?: string }): void {
+    try {
+      // Initialize git repo and configure user
+      this.initGitRepo()
+      this.configureGitUser()
+
+      // .gitignore and sample files
+      this.createGitignoreFile()
+      this.generateFiles()
+
+      // stage and commit
+      this.stageAllFiles()
+      this.commitStagedFiles()
+
+      // add remote origin
+      const remoteUrl =
+        options.repoUrl || 'https://github.com/test-org/test-repo.git'
+      this.addRemoteOrigin(remoteUrl)
+
+      // modify files to create changes
+      this.files.forEach((file) => {
+        const filePath = join(this.repoPath, file)
+        writeFileSync(filePath, benignFileContent + ' ')
+      })
+    } catch (e) {
+      log('Synchronous ACTIVE repo setup failed:', e)
+    }
+  }
+}
+
+/**
+ * NoChangesGitRepo creates a git repository with committed files without any modifications.
+ */
+export class NoChangesGitRepo extends MockRepo {
+  /**
+   * Creates a new NoChangesGitRepo instance with committed files but no modifications
+   * @param files Optional list of files to create in the repository (defaults to sampleFiles)
+   * @param options Additional options for repository creation
+   */
+  constructor(files?: string[], options: { repoUrl?: string } = {}) {
+    super(files)
+    this.initializeNoChangesGitRepo(options)
+  }
+
+  /**
+   * Initializes a git repository with files that are committed but not modified
+   * @param options Additional options for repository creation
+   */
+  private initializeNoChangesGitRepo(options: { repoUrl?: string }): void {
+    try {
+      // Initialize git repo and configure user
+      this.initGitRepo()
+      this.configureGitUser()
+
+      // .gitignore and sample files
+      this.createGitignoreFile()
+      this.generateFiles()
+
+      // stage and commit
+      this.stageAllFiles()
+      this.commitStagedFiles()
+
+      // add remote origin
+      const remoteUrl =
+        options.repoUrl || 'https://github.com/test-org/test-repo.git'
+      this.addRemoteOrigin(remoteUrl)
+    } catch (e) {
+      log('Synchronous NO_CHANGES repo setup failed:', e)
+    }
+  }
+}
+
+/**
+ * NonGitRepo creates a filesystem directory structure with files but without initializing a git repository.
+ */
+export class NonGitRepo extends MockRepo {
+  /**
+   * Creates a new NonGitRepo instance with files but no git repository
+   * @param files Optional list of files to create in the repository (defaults to sampleFiles)
+   */
+  constructor(files?: string[]) {
+    super(files)
+    this.initializeNonGitRepo()
+  }
+
+  /**
+   * Creates a filesystem directory structure with files but without a Git repository
+   */
+  private initializeNonGitRepo(): void {
+    // Create .gitignore file even in non-Git repos for testing purposes
+    this.createGitignoreFile()
+
+    // Generate sample files inside the repository
+    this.generateFiles()
   }
 }

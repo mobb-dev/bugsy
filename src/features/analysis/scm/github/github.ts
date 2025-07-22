@@ -345,13 +345,17 @@ export function getGithubSdk(params: OctokitOptions = {}) {
       if (!res?.repository?.object?.blame?.ranges) {
         return []
       }
-      return res.repository.object.blame.ranges.map((range) => ({
-        startingLine: range.startingLine,
-        endingLine: range.endingLine,
-        email: range.commit.author.user?.email || '',
-        name: range.commit.author.user?.name || '',
-        login: range.commit.author.user?.login || '',
-      }))
+      return res.repository.object.blame.ranges.map(
+        (
+          range: GithubBlameResponse['repository']['object']['blame']['ranges'][0]
+        ) => ({
+          startingLine: range.startingLine,
+          endingLine: range.endingLine,
+          email: range.commit.author.user?.email || '',
+          name: range.commit.author.user?.name || '',
+          login: range.commit.author.user?.login || '',
+        })
+      )
     },
     // todo: refactor the name for this function
     async createPr(params: {

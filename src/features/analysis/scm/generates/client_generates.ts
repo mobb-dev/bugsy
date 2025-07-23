@@ -10783,6 +10783,11 @@ export type Fix_Variance_Order_By = {
   confidence?: InputMaybe<Order_By>;
 };
 
+export type GeneratedFixAndVulUnique_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
 /** columns and relationships of "integration" */
 export type Integration = {
   __typename?: 'integration';
@@ -17732,6 +17737,8 @@ export type Organization = {
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter: Scalars['Boolean']['output'];
+  /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
+  generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
   id: Scalars['uuid']['output'];
   includeSuppressed: Scalars['Boolean']['output'];
   isAiEnabled: Scalars['Boolean']['output'];
@@ -17776,10 +17783,6 @@ export type Organization = {
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
   scmConfigs_aggregate: Scm_Config_Aggregate;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
 };
@@ -17840,6 +17843,13 @@ export type OrganizationBrokerHosts_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Broker_Host_Order_By>>;
   where?: InputMaybe<Broker_Host_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationGeneratedFixAndVulUniqueArgs = {
+  args: GeneratedFixAndVulUnique_Organization_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -18015,18 +18025,6 @@ export type OrganizationScmConfigs_AggregateArgs = {
 
 
 /** columns and relationships of "organization" */
-export type OrganizationUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** columns and relationships of "organization" */
-export type OrganizationUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
-};
-
-
-/** columns and relationships of "organization" */
 export type OrganizationUnresolvedAggregatedVulnerabilitySeveritiesArgs = {
   args: UnresolvedAggregatedVulnerabilitySeverities_Organization_Args;
   distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
@@ -18080,22 +18078,6 @@ export type Organization_Avg_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate avg on columns */
-export type Organization_Avg_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate avg on columns */
-export type Organization_Avg_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** Boolean expression to filter rows from the table "organization". All fields are combined with a logical 'AND'. */
@@ -18680,22 +18662,6 @@ export type Organization_Max_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate max on columns */
-export type Organization_Max_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate max on columns */
-export type Organization_Max_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate min on columns */
@@ -18709,22 +18675,6 @@ export type Organization_Min_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate min on columns */
-export type Organization_Min_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate min on columns */
-export type Organization_Min_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** response of any mutation on the table "organization" */
@@ -19410,22 +19360,6 @@ export type Organization_Stddev_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev on columns */
-export type Organization_Stddev_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate stddev on columns */
-export type Organization_Stddev_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate stddev_pop on columns */
@@ -19436,22 +19370,6 @@ export type Organization_Stddev_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev_pop on columns */
-export type Organization_Stddev_Pop_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate stddev_pop on columns */
-export type Organization_Stddev_Pop_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate stddev_samp on columns */
@@ -19462,22 +19380,6 @@ export type Organization_Stddev_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate stddev_samp on columns */
-export type Organization_Stddev_Samp_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate stddev_samp on columns */
-export type Organization_Stddev_Samp_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** Streaming cursor of the table "organization" */
@@ -19516,22 +19418,6 @@ export type Organization_Sum_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate sum on columns */
-export type Organization_Sum_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate sum on columns */
-export type Organization_Sum_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** columns and relationships of "organization_to_organization_role" */
@@ -20055,22 +19941,6 @@ export type Organization_Var_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate var_pop on columns */
-export type Organization_Var_Pop_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate var_pop on columns */
-export type Organization_Var_Pop_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate var_samp on columns */
@@ -20081,22 +19951,6 @@ export type Organization_Var_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate var_samp on columns */
-export type Organization_Var_Samp_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate var_samp on columns */
-export type Organization_Var_Samp_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** aggregate variance on columns */
@@ -20107,22 +19961,6 @@ export type Organization_Variance_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
-  /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
-  uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
-  uniqueVulnerabilitiesWithDateRange?: Maybe<Scalars['Int']['output']>;
-};
-
-
-/** aggregate variance on columns */
-export type Organization_Variance_FieldsUniqueDeployedVulsArgs = {
-  args: UniqueDeployedVuls_Organization_Args;
-};
-
-
-/** aggregate variance on columns */
-export type Organization_Variance_FieldsUniqueVulnerabilitiesWithDateRangeArgs = {
-  args: UniqueVulnerabilitiesWithDateRange_Organization_Args;
 };
 
 /** columns and relationships of "pr_status" */
@@ -29858,16 +29696,6 @@ export type Unfixable_Updates = {
   _set?: InputMaybe<Unfixable_Set_Input>;
   /** filter the rows which have to be updated */
   where: Unfixable_Bool_Exp;
-};
-
-export type UniqueDeployedVuls_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
-};
-
-export type UniqueVulnerabilitiesWithDateRange_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 export type UnresolvedAggregatedVulnerabilitySeverities_Organization_Args = {

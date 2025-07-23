@@ -75,16 +75,18 @@ export const FixRatingZ = z.object({
   }),
 })
 
-const IssueSharedStateZ = z.object({
-  id: z.string().uuid(),
-  isArchived: z.boolean(),
-  ticketIntegrationId: z.string().uuid().nullable(),
-  ticketIntegrations: z.array(
-    z.object({
-      url: z.string(),
-    })
-  ),
-})
+const IssueSharedStateZ = z
+  .object({
+    id: z.string().uuid(),
+    isArchived: z.boolean(),
+    ticketIntegrationId: z.string().uuid().nullable(),
+    ticketIntegrations: z.array(
+      z.object({
+        url: z.string(),
+      })
+    ),
+  })
+  .nullable()
 
 export const FixSharedStateZ = z
   .object({
@@ -128,11 +130,13 @@ export const FixQueryZ = z.object({
       vendorIssueId: z.string(),
       issueLanguage: z.string(),
       parsedSeverity: ParsedSeverityZ,
-      sharedState: z.object({
-        id: z.string().uuid(),
-        isArchived: z.boolean(),
-        ticketIntegrationId: z.string().uuid().nullable(),
-      }),
+      sharedState: z
+        .object({
+          id: z.string().uuid(),
+          isArchived: z.boolean(),
+          ticketIntegrationId: z.string().uuid().nullable(),
+        })
+        .nullable(),
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,

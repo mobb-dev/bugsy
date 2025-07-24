@@ -137,6 +137,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.StringTerminationError]: 'String Termination Error',
   [IssueType_Enum.HttpParameterPollution]: 'HTTP Parameter Pollution',
   [IssueType_Enum.IncompleteSanitization]: 'Incomplete Sanitization',
+  [IssueType_Enum.CredentialDisclosure]: 'Credential Disclosure',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

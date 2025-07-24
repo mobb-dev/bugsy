@@ -12074,6 +12074,8 @@ export enum IssueType_Enum {
   CodeInComment = 'CODE_IN_COMMENT',
   /** A data member and a function have the same name which can be confusing to the developer */
   ConfusingNaming = 'CONFUSING_NAMING',
+  /** CREDENTIAL_DISCLOSURE */
+  CredentialDisclosure = 'CREDENTIAL_DISCLOSURE',
   /** Cross-Site Request Forgery (CSRF) occurs when an attacker tricks a user into performing actions they did not intend on a web application in which they are authenticated, potentially leading to unauthorized actions or data manipulation */
   Csrf = 'CSRF',
   /** Use of dangerous function */

@@ -386,4 +386,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'Implement proper input validation and bounds checking to prevent HTTP parameter pollution. Use safe string manipulation functions and ensure that the buffer size is properly managed.',
   },
   [IssueType_Enum.IncompleteSanitization]: undefined,
+  [IssueType_Enum.CredentialDisclosure]: undefined,
 }

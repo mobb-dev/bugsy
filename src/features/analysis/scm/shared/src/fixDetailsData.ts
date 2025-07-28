@@ -387,4 +387,11 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   },
   [IssueType_Enum.IncompleteSanitization]: undefined,
   [IssueType_Enum.CredentialDisclosure]: undefined,
+  [IssueType_Enum.InsecurePostmessage]: undefined,
+  [IssueType_Enum.MissingUser]: {
+    issueDescription:
+      'Missing User occurs when a user is not specified in the Dockerfile, leading to security vulnerabilities.',
+    fixInstructions:
+      'Specify a user in the Dockerfile to prevent security vulnerabilities.',
+  },
 }

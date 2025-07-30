@@ -359,7 +359,7 @@ describe('MCP Server', () => {
         // Create the tool and execute it
         const tool = new FixVulnerabilitiesTool()
         await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
-          'Error: failed to connect to Mobb API'
+          'Error: failed to reach Mobb GraphQL endpoint'
         )
       }) // Set a higher timeout for this test
 

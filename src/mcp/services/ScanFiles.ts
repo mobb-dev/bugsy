@@ -95,6 +95,25 @@ const initializeSecurityReport = async (
     return repoUploadInfo
   } catch (error) {
     const message = (error as Error).message
+
+    // Handle authentication-specific errors more gracefully
+    if (
+      message.includes('Authentication hook unauthorized') ||
+      message.includes('access-denied')
+    ) {
+      logError(
+        'Authentication failed during security report initialization. Please re-authenticate.',
+        {
+          error: message,
+        }
+      )
+      throw new ReportInitializationError(
+        'Authentication failed. Please re-authenticate and try again.'
+      )
+    }
+
+    // Handle other errors
+    logError('Error initializing security report', { error: message })
     throw new ReportInitializationError(
       `Error initializing security report: ${message}`
     )
@@ -209,6 +228,7 @@ const executeSecurityScan = async ({
       },
       callbackStates: [Fix_Report_State_Enum.Finished],
       timeoutInMs: MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
+      scanContext,
     })
   } catch (error) {
     logError(`[${scanContext}] Security analysis failed or timed out`, {

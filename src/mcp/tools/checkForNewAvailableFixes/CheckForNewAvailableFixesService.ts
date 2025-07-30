@@ -1,16 +1,15 @@
-import { packageJson } from '@mobb/bugsy/utils'
-import Configstore from 'configstore'
-
 import {
   MCP_DEFAULT_LIMIT,
   MCP_PERIODIC_CHECK_INTERVAL,
 } from '../../core/configs'
+import { ApiConnectionError } from '../../core/Errors'
 import {
   freshFixesPrompt,
   initialScanInProgressPrompt,
   noFreshFixesPrompt,
 } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
+import { configStore } from '../../services/ConfigStoreService'
 import { getLocalFiles, LocalFile } from '../../services/GetLocalFiles'
 import {
   createAuthenticatedMcpGQLClient,
@@ -43,6 +42,7 @@ export class CheckForNewAvailableFixesService {
   private intervalId: NodeJS.Timeout | null = null
   private isInitialScanComplete: boolean = false
   private gqlClient: McpGQLClient | null = null
+  private fullScanPathsScanned: string[] = []
 
   public static getInstance(): CheckForNewAvailableFixesService {
     if (!CheckForNewAvailableFixesService.instance) {
@@ -50,6 +50,10 @@ export class CheckForNewAvailableFixesService {
         new CheckForNewAvailableFixesService()
     }
     return CheckForNewAvailableFixesService.instance
+  }
+
+  constructor() {
+    this.fullScanPathsScanned = configStore.get('fullScanPathsScanned') || []
   }
 
   /**
@@ -60,6 +64,7 @@ export class CheckForNewAvailableFixesService {
     this.filesLastScanned = {}
     this.freshFixes = []
     this.reportedFixes = []
+    this.fullScanPathsScanned = configStore.get('fullScanPathsScanned') || []
     if (this.intervalId) {
       clearInterval(this.intervalId)
       this.intervalId = null
@@ -86,75 +91,107 @@ export class CheckForNewAvailableFixesService {
     })
     if (!this.gqlClient) {
       logInfo(`[${scanContext}] No GQL client found, skipping scan`)
-      return
+      throw new Error('No GQL client found')
     }
 
-    const isConnected = await this.gqlClient.verifyApiConnection()
-
-    if (!isConnected) {
-      logError(`[${scanContext}] Failed to connect to the API, scan aborted`)
-      return
-    }
-
-    logDebug(
-      `[${scanContext}] Connected to the API, assembling list of files to scan`,
-      { path }
-    )
-    const files = await getLocalFiles({
-      path,
-      isAllFilesScan,
-    })
-
-    logDebug(`[${scanContext}] Active files`, { files })
-    const filesToScan = files.filter((file) => {
-      const lastScannedEditTime = this.filesLastScanned[file.fullPath]
-      if (!lastScannedEditTime) {
-        return true
+    try {
+      const isConnected = await this.gqlClient.verifyApiConnection()
+      if (!isConnected) {
+        logError(`[${scanContext}] Failed to connect to the API, scan aborted`)
+        throw new ApiConnectionError()
       }
-      return file.lastEdited > lastScannedEditTime
-    })
 
-    if (filesToScan.length === 0) {
-      logInfo(`[${scanContext}] No files require scanning`)
-      return
+      logDebug(
+        `[${scanContext}] Connected to the API, assembling list of files to scan`,
+        { path }
+      )
+      const files = await getLocalFiles({
+        path,
+        isAllFilesScan,
+      })
+
+      logDebug(`[${scanContext}] Active files`, { files })
+      const filesToScan = files.filter((file) => {
+        const lastScannedEditTime = this.filesLastScanned[file.fullPath]
+        if (!lastScannedEditTime) {
+          return true
+        }
+        return file.lastEdited > lastScannedEditTime
+      })
+
+      if (filesToScan.length === 0) {
+        logInfo(`[${scanContext}] No files require scanning`)
+        return
+      }
+
+      logDebug(`[${scanContext}] Files requiring security scan`, {
+        filesToScan,
+      })
+      const { fixReportId, projectId } = await scanFiles({
+        fileList: filesToScan.map((file) => file.relativePath),
+        repositoryPath: path,
+        gqlClient: this.gqlClient,
+        isAllDetectionRulesScan,
+        scanContext,
+      })
+
+      logInfo(
+        `[${scanContext}] Security scan completed for ${path} reportId: ${fixReportId} projectId: ${projectId}`
+      )
+
+      if (isAllFilesScan) {
+        return
+      }
+
+      const fixes = await this.gqlClient.getReportFixesPaginated({
+        reportId: fixReportId,
+        offset: 0,
+        limit: 1000,
+      })
+
+      const newFixes = fixes?.fixes?.filter(
+        (fix) => !this.isFixAlreadyReported(fix)
+      )
+
+      logInfo(
+        `[${scanContext}] Security fixes retrieved, total: ${fixes?.fixes?.length || 0}, new: ${
+          newFixes?.length || 0
+        }`
+      )
+
+      this.updateFreshFixesCache(newFixes || [], filesToScan)
+      this.updateFilesScanTimestamps(filesToScan)
+      this.isInitialScanComplete = true
+    } catch (error) {
+      const errorMessage = (error as Error).message
+
+      // Handle authentication-specific errors gracefully
+      if (
+        errorMessage.includes('Authentication failed') ||
+        errorMessage.includes('access-denied') ||
+        errorMessage.includes('Authentication hook unauthorized')
+      ) {
+        logError(
+          'Periodic scan skipped due to authentication failure. Please re-authenticate by running a manual scan.',
+          {
+            error: errorMessage,
+          }
+        )
+        return
+      }
+
+      // Handle other ReportInitializationErrors
+      if (errorMessage.includes('ReportInitializationError')) {
+        logError('Periodic scan failed during report initialization', {
+          error: errorMessage,
+        })
+        return
+      }
+
+      // Re-throw unexpected errors
+      logError('Unexpected error during periodic security scan', { error })
+      throw error
     }
-
-    logDebug(`[${scanContext}] Files requiring security scan`, { filesToScan })
-    const { fixReportId, projectId } = await scanFiles({
-      fileList: filesToScan.map((file) => file.relativePath),
-      repositoryPath: path,
-      gqlClient: this.gqlClient,
-      isAllDetectionRulesScan,
-      scanContext,
-    })
-
-    logInfo(
-      `[${scanContext}] Security scan completed for ${path} reportId: ${fixReportId} projectId: ${projectId}`
-    )
-
-    if (isAllFilesScan) {
-      return
-    }
-
-    const fixes = await this.gqlClient.getReportFixesPaginated({
-      reportId: fixReportId,
-      offset: 0,
-      limit: 1000,
-    })
-
-    const newFixes = fixes?.fixes?.filter(
-      (fix) => !this.isFixAlreadyReported(fix)
-    )
-
-    logInfo(
-      `[${scanContext}] Security fixes retrieved, total: ${fixes?.fixes?.length || 0}, new: ${
-        newFixes?.length || 0
-      }`
-    )
-
-    this.updateFreshFixesCache(newFixes || [], filesToScan)
-    this.updateFilesScanTimestamps(filesToScan)
-    this.isInitialScanComplete = true
   }
 
   private updateFreshFixesCache(
@@ -234,7 +271,7 @@ export class CheckForNewAvailableFixesService {
     if (!this.intervalId) {
       this.startPeriodicScanning(path)
       this.executeInitialScan(path)
-      this.executeInitialFullScan(path)
+      void this.executeInitialFullScan(path)
     }
   }
 
@@ -254,44 +291,51 @@ export class CheckForNewAvailableFixesService {
     }, MCP_PERIODIC_CHECK_INTERVAL)
   }
 
-  private executeInitialFullScan(path: string): void {
-    logDebug('Triggering initial full security scan', { path })
-    const mobbConfigStore = new Configstore(packageJson.name, { apiToken: '' })
-    const fullScanPathsScanned =
-      mobbConfigStore.get('fullScanPathsScanned') || []
-    logDebug('Full scan paths scanned', { fullScanPathsScanned })
-    if (fullScanPathsScanned.includes(path)) {
-      logDebug('Full scan already executed for this path', { path })
+  private async executeInitialFullScan(path: string): Promise<void> {
+    const scanContext = 'FULL_SCAN'
+    logDebug(`[${scanContext}] Triggering initial full security scan`, { path })
+
+    logDebug(`[${scanContext}] Full scan paths scanned`, {
+      fullScanPathsScanned: this.fullScanPathsScanned,
+    })
+    if (this.fullScanPathsScanned.includes(path)) {
+      logDebug(`[${scanContext}] Full scan already executed for this path`, {
+        path,
+      })
       return
     }
 
-    mobbConfigStore.set('fullScanPathsScanned', [...fullScanPathsScanned, path])
-    this.scanForSecurityVulnerabilities({
+    configStore.set('fullScanPathsScanned', [
+      ...this.fullScanPathsScanned,
       path,
-      isAllFilesScan: true,
-      isAllDetectionRulesScan: true,
-      scanContext: 'FULL_SCAN',
-    })
-      .catch((error) => {
-        logError('Error during initial full security scan', { error })
+    ])
+    try {
+      await this.scanForSecurityVulnerabilities({
+        path,
+        isAllFilesScan: true,
+        isAllDetectionRulesScan: true,
+        scanContext: 'FULL_SCAN',
       })
-      .then(() => {
-        const fullScanPathsScanned =
-          mobbConfigStore.get('fullScanPathsScanned') || []
-        fullScanPathsScanned.push(path)
-        mobbConfigStore.set('fullScanPathsScanned', fullScanPathsScanned)
-        logDebug('Full scan completed', { path })
-      })
+      // Only update the class member and configstore after successful scan completion
+      if (!this.fullScanPathsScanned.includes(path)) {
+        this.fullScanPathsScanned.push(path)
+        configStore.set('fullScanPathsScanned', this.fullScanPathsScanned)
+      }
+      logInfo(`[${scanContext}] Full scan completed`, { path })
+    } catch (error) {
+      logError('Error during initial full security scan', { error })
+    }
   }
 
   private executeInitialScan(path: string): void {
-    logDebug('Triggering initial security scan', { path })
+    const scanContext = 'BACKGROUND_INITIAL'
+    logDebug(`[${scanContext}] Triggering initial security scan`, { path })
 
     this.scanForSecurityVulnerabilities({
       path,
       scanContext: 'BACKGROUND_INITIAL',
     }).catch((error) => {
-      logError('Error during initial security scan', { error })
+      logError(`[${scanContext}] Error during initial security scan`, { error })
     })
   }
 

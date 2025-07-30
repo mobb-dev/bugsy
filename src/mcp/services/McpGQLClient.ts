@@ -1,5 +1,3 @@
-import { packageJson } from '@mobb/bugsy/utils'
-import Configstore from 'configstore'
 import crypto from 'crypto'
 import { GraphQLClient } from 'graphql-request'
 import { v4 as uuidv4 } from 'uuid'
@@ -15,6 +13,7 @@ import {
   GetAnalysisSubscriptionSubscriptionVariables,
   GetEncryptedApiTokenQueryVariables,
   getSdk,
+  MeQuery,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
@@ -27,6 +26,7 @@ import {
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, McpFix } from '../types'
+import { configStore } from './ConfigStoreService'
 import { McpAuthService } from './McpAuthService'
 
 type GQLClientArgs =
@@ -39,20 +39,20 @@ type GQLClientArgs =
       type: 'token'
     }
 
-const mobbConfigStore = new Configstore(packageJson.name, { apiToken: '' })
-
 // Simple GQLClient for the fixVulnerabilities tool
 export class McpGQLClient {
   private client: GraphQLClient
   private clientSdk: ReturnType<typeof getSdk>
   _auth: GQLClientArgs
+  private currentUser: MeQuery['me'] | null = null
+  private readonly apiUrl: string
 
   constructor(args: GQLClientArgs) {
     this._auth = args
-    const API_URL = process.env['API_URL'] || MCP_DEFAULT_API_URL
+    this.apiUrl = process.env['API_URL'] || MCP_DEFAULT_API_URL
 
-    logDebug('creating graphql client', { API_URL, args })
-    this.client = new GraphQLClient(API_URL, {
+    logDebug(`creating graphql client with api url ${this.apiUrl}`, { args })
+    this.client = new GraphQLClient(this.apiUrl, {
       headers:
         args.type === 'apiKey'
           ? { [MCP_API_KEY_HEADER_NAME]: args.apiKey || '' }
@@ -77,7 +77,7 @@ export class McpGQLClient {
 
   private getErrorContext() {
     return {
-      endpoint: process.env['API_URL'] || MCP_DEFAULT_API_URL,
+      endpoint: this.apiUrl,
       apiKey: this._auth.type === 'apiKey' ? this._auth.apiKey : '',
       headers: {
         [MCP_API_KEY_HEADER_NAME]:
@@ -87,11 +87,11 @@ export class McpGQLClient {
     }
   }
 
-  async verifyApiConnection(): Promise<boolean> {
+  async isApiEndpointReachable(): Promise<boolean> {
     try {
       logDebug('GraphQL: Calling Me query for API connection verification')
-      // Use the SDK's Me method for consistency
-      const result = await this.clientSdk.Me()
+      // Use the getUserInfo method for consistency
+      const result = await this.getUserInfo()
       logDebug('GraphQL: Me query successful', { result })
       return true
     } catch (e: unknown) {
@@ -103,6 +103,27 @@ export class McpGQLClient {
       }
     }
     return true
+  }
+
+  /**
+   * Verifies both API endpoint reachability and user authentication
+   * @returns true if both API is reachable and user is authenticated
+   */
+  async verifyApiConnection(): Promise<boolean> {
+    // First check if API endpoint is reachable
+    const isReachable = await this.isApiEndpointReachable()
+    if (!isReachable) {
+      return false
+    }
+
+    // Then validate user token
+    try {
+      await this.validateUserToken()
+      return true
+    } catch (e) {
+      logError('User token validation failed', { error: e })
+      return false
+    }
   }
 
   async uploadS3BucketInfo(): Promise<UploadS3BucketInfoMutation> {
@@ -169,9 +190,11 @@ export class McpGQLClient {
     callback: (analysisId: string) => void
     callbackStates: Fix_Report_State_Enum[]
     timeoutInMs?: number
+    scanContext: string
   }): Promise<GetAnalysisSubscriptionSubscription> {
+    const { scanContext } = params
     try {
-      logDebug('GraphQL: Starting GetAnalysis subscription', {
+      logDebug(`[${scanContext}] GraphQL: Starting GetAnalysis subscription`, {
         params: params.subscribeToAnalysisParams,
       })
       const { callbackStates } = params
@@ -182,7 +205,10 @@ export class McpGQLClient {
         GetAnalysisSubscriptionDocument,
         params.subscribeToAnalysisParams,
         async (resolve, reject, data) => {
-          logDebug('GraphQL: GetAnalysis subscription data received', { data })
+          logDebug(
+            `[${scanContext}] GraphQL: GetAnalysis subscription data received ${data.analysis?.state}`,
+            { data }
+          )
           if (
             !data.analysis?.state ||
             data.analysis?.state === Fix_Report_State_Enum.Failed
@@ -190,7 +216,7 @@ export class McpGQLClient {
             const errorMessage =
               data.analysis?.failReason ||
               `Analysis failed with id: ${data.analysis?.id}`
-            logError('GraphQL: Analysis failed', {
+            logError(`[${scanContext}] GraphQL: Analysis failed`, {
               analysisId: data.analysis?.id,
               state: data.analysis?.state,
               failReason: data.analysis?.failReason,
@@ -200,11 +226,14 @@ export class McpGQLClient {
             return
           }
           if (callbackStates.includes(data.analysis?.state)) {
-            logDebug('GraphQL: Analysis state matches callback states', {
-              analysisId: data.analysis.id,
-              state: data.analysis.state,
-              callbackStates,
-            })
+            logDebug(
+              `[${scanContext}] GraphQL: Analysis state matches callback states: ${data.analysis.state}`,
+              {
+                analysisId: data.analysis.id,
+                state: data.analysis.state,
+                callbackStates,
+              }
+            )
             await params.callback(data.analysis.id)
             resolve(data)
           }
@@ -222,10 +251,12 @@ export class McpGQLClient {
               timeoutInMs: params.timeoutInMs,
             }
       )
-      logDebug('GraphQL: GetAnalysis subscription completed', { result })
+      logDebug(`[${scanContext}] GraphQL: GetAnalysis subscription completed`, {
+        result,
+      })
       return result
     } catch (e) {
-      logError('GraphQL: GetAnalysis subscription failed', {
+      logError(`[${scanContext}] GraphQL: GetAnalysis subscription failed`, {
         error: e,
         params: params.subscribeToAnalysisParams,
         ...this.getErrorContext(),
@@ -306,7 +337,12 @@ export class McpGQLClient {
 
   async getUserInfo() {
     const { me } = await this.clientSdk.Me()
+    this.currentUser = me
     return me
+  }
+
+  getCurrentUser(): MeQuery['me'] | null {
+    return this.currentUser
   }
 
   async validateUserToken() {
@@ -567,20 +603,20 @@ export async function createAuthenticatedMcpGQLClient({
 }: {
   isBackgoundCall?: boolean
 } = {}): Promise<McpGQLClient> {
-  logDebug('getting config', { apiToken: mobbConfigStore.get('apiToken') })
+  logDebug('getting config', { apiToken: configStore.get('apiToken') })
   const initialClient = new McpGQLClient({
     apiKey:
       process.env['MOBB_API_KEY'] ||
       process.env['API_KEY'] || // fallback for backward compatibility
-      mobbConfigStore.get('apiToken') ||
+      configStore.get('apiToken') ||
       '',
     type: 'apiKey',
   })
 
-  const isConnected = await initialClient.verifyApiConnection()
-  logDebug('API connection status', { isConnected })
-  if (!isConnected) {
-    throw new ApiConnectionError('Error: failed to connect to Mobb API')
+  const isApiEndpointReachable = await initialClient.isApiEndpointReachable()
+  logDebug('API connection status', { isApiEndpointReachable })
+  if (!isApiEndpointReachable) {
+    throw new ApiConnectionError('Error: failed to reach Mobb GraphQL endpoint')
   }
 
   logDebug('validating user token')
@@ -594,7 +630,7 @@ export async function createAuthenticatedMcpGQLClient({
   const newApiToken = await authService.authenticate(isBackgoundCall)
 
   // Store the new token for future use
-  mobbConfigStore.set('apiToken', newApiToken)
+  configStore.set('apiToken', newApiToken)
 
   // Return a client with the new token
   return new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })

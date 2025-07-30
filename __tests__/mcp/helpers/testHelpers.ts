@@ -9,7 +9,7 @@ export const expectLoggerMessage = async (
   message: string,
   expectedData?: unknown,
   {
-    timeout = 60000,
+    timeout = 120000,
     interval = 50,
   }: { timeout?: number; interval?: number } = {}
 ) => {

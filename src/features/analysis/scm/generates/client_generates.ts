@@ -35525,14 +35525,14 @@ export const GetReportFixesDocument = `
 export const GetLatestReportByRepoUrlDocument = `
     query GetLatestReportByRepoUrl($repoUrl: String!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
   fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}]}
+    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}, {vulnerabilityReport: {_or: [{vendor: {_is_null: true}}, {vendor: {_nin: [semgrep, opengrep]}}]}}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {
     ...FixReportSummaryFields
   }
   expiredReport: fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}]}
+    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}, {_or: [{vulnerabilityReport: {vendor: {_is_null: true}}}, {vulnerabilityReport: {vendor: {_nin: [semgrep, opengrep]}}}]}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {

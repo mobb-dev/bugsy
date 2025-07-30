@@ -32,3 +32,6 @@ export const MCP_TOOLS_BROWSER_COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 // Default limit for paginated responses
 export const MCP_DEFAULT_LIMIT = 3
+
+// Whether to automatically scan for new available fixes (defaults to true)
+export const isAutoScan = process.env['AUTO_SCAN'] !== 'false'

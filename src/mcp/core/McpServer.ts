@@ -13,6 +13,7 @@ import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'
+import { isAutoScan } from './configs'
 import { ToolRegistry } from './ToolRegistry'
 
 export type McpServerConfig = {
@@ -72,6 +73,21 @@ export class McpServer {
       } else {
         logWarn(`${message} (exit code: ${exitCode})`, { signal, exitCode })
       }
+    } else if (signal === 'unhandledRejection') {
+      // Enhanced logging for unhandled promise rejections
+      const errorDetails = {
+        signal,
+        errorType: error?.constructor?.name || 'Unknown',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        errorString: error?.toString(),
+        errorJson: JSON.stringify(error, null, 2),
+        timestamp: new Date().toISOString(),
+      }
+      logError(`${message} - Enhanced error details`, errorDetails)
+
+      // Also log the raw error object for debugging
+      logError(`${message} - Raw error object`, { error, signal })
     } else if (error) {
       logError(`${message}`, { error, signal })
     } else {
@@ -131,32 +147,52 @@ export class McpServer {
   }
 
   private async triggerScanForNewAvailableFixes(): Promise<void> {
-    //this triggers browser login flow
-    const gqlClient = await createAuthenticatedMcpGQLClient({
-      isBackgoundCall: true,
-    })
-    const isConnected = await gqlClient.verifyApiConnection()
-    if (!isConnected) {
-      logError('Failed to connect to the API, skipping scan')
-      return
-    }
-
-    if (process.env['WORKSPACE_FOLDER_PATHS']) {
-      logDebug('WORKSPACE_FOLDER_PATHS is set', {
-        WORKSPACE_FOLDER_PATHS: process.env['WORKSPACE_FOLDER_PATHS'],
+    try {
+      // Try to create authenticated client for background use
+      const gqlClient = await createAuthenticatedMcpGQLClient({
+        isBackgoundCall: true,
       })
-      try {
-        const checkForNewAvailableFixesTool = this.toolRegistry.getTool(
-          MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES
-        ) as CheckForNewAvailableFixesTool
-        logInfo('Triggering periodic scan for new available fixes')
-        checkForNewAvailableFixesTool.triggerScan({
-          path: process.env['WORKSPACE_FOLDER_PATHS'],
-          gqlClient,
-        })
-      } catch (error) {
-        logError('Error getting workspace folder path tool', { error })
+
+      const isConnected = await gqlClient.verifyApiConnection()
+      if (!isConnected) {
+        logError('Failed to connect to the API, skipping background scan')
+        return
       }
+
+      if (process.env['WORKSPACE_FOLDER_PATHS']) {
+        logDebug('WORKSPACE_FOLDER_PATHS is set', {
+          WORKSPACE_FOLDER_PATHS: process.env['WORKSPACE_FOLDER_PATHS'],
+        })
+        try {
+          const checkForNewAvailableFixesTool = this.toolRegistry.getTool(
+            MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES
+          ) as CheckForNewAvailableFixesTool
+          logInfo('Triggering periodic scan for new available fixes')
+          checkForNewAvailableFixesTool.triggerScan({
+            path: process.env['WORKSPACE_FOLDER_PATHS'],
+            gqlClient,
+          })
+        } catch (error) {
+          logError('Error getting workspace folder path tool', { error })
+        }
+      }
+    } catch (error) {
+      // Handle authentication failures gracefully in background scans
+      if (
+        error instanceof Error &&
+        (error.message.includes('Authentication') ||
+          error.message.includes('failed to connect to Mobb API'))
+      ) {
+        logError(
+          'Background scan skipped due to authentication failure. Please re-authenticate by running a manual scan.',
+          {
+            error: error.message,
+          }
+        )
+        return
+      }
+
+      logError('Unexpected error during background scan', { error })
     }
   }
 
@@ -176,7 +212,11 @@ export class McpServer {
       env: process.env,
     })
 
-    void this.triggerScanForNewAvailableFixes()
+    if (isAutoScan) {
+      void this.triggerScanForNewAvailableFixes()
+    } else {
+      logDebug('Auto scan disabled, skipping triggerScanForNewAvailableFixes')
+    }
 
     const toolsDefinitions = this.toolRegistry.getAllTools()
     const response = {

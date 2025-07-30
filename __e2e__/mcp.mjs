@@ -3,8 +3,7 @@ import { test } from 'node:test'
 import path from 'path'
 import { expect } from 'expect'
 import { SnapshotState, toMatchSnapshot } from 'jest-snapshot'
-import { LoggerServer } from './helpers/LoggerServer.mjs'
-
+import { dumpLogs } from './helpers/dumpLogs.mjs'
 import {
   assert,
   assertDeepEqual,
@@ -51,7 +50,6 @@ test('Bugsy MCP E2E tests', async (t) => {
   let tempDir
   let tempDirExistingReport
   /** @type {LoggerServer} */
-  let loggerServer
 
   await t.before(async () => {
     // Clone WebGoat repository to a temporary directory
@@ -86,12 +84,6 @@ test('Bugsy MCP E2E tests', async (t) => {
     // Start local Verdaccio registry
     await registry.start()
     await npm.init()
-
-    // Start lightweight HTTP logger server
-    loggerServer = new LoggerServer()
-    await loggerServer.start()
-
-    console.log('Logger server listening on port 4444')
   })
 
   await t.beforeEach(async () => {
@@ -107,7 +99,6 @@ test('Bugsy MCP E2E tests', async (t) => {
       }
     )
     console.log('connected to MCP server')
-    loggerServer.reset()
     await npm.cleanConfigstore()
   })
 
@@ -125,10 +116,6 @@ test('Bugsy MCP E2E tests', async (t) => {
     await cleanupRepository(tempDir)
     await registry.stop()
     await npm.destroy()
-
-    if (loggerServer) {
-      await loggerServer.stop()
-    }
   })
 
   await t.test('MCP: list tools', async () => {
@@ -297,7 +284,7 @@ Example payload:
         'List tools response should match expected structure'
       )
     } catch (error) {
-      loggerServer.dump()
+      dumpLogs(tempDir)
       throw error
     }
   })
@@ -474,7 +461,7 @@ Example payload:
         'Rescan should find at least 3 fixes'
       )
     } catch (error) {
-      loggerServer.dump()
+      dumpLogs(tempDir)
       throw error
     }
   })
@@ -587,7 +574,7 @@ Example payload:
         false
       )
     } catch (error) {
-      loggerServer.dump()
+      dumpLogs(tempDirExistingReport)
       throw error
     }
   })

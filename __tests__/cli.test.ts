@@ -80,6 +80,33 @@ describe('cli commands', () => {
       }
     )
   })
+
+  it('should pass createOnePr parameter to runAnalysis when --create-one-pr is used', async () => {
+    const baseAnalyzeOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      scanFile: reportPath,
+      autoPr: true,
+      createOnePr: true,
+    }
+    const rawArgs = Object.entries(baseAnalyzeOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.analyze, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        createOnePr: true,
+        autoPr: true,
+        command: 'analyze',
+      }),
+      expect.any(Object)
+    )
+  })
 })
 
 function runCommand(args: string[]) {

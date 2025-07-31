@@ -81,6 +81,7 @@ export async function analyze(
     mobbProjectName,
     organizationId,
     autoPr,
+    createOnePr,
     commitDirectly,
     pullRequest,
   }: AnalyzeOptions,
@@ -103,6 +104,7 @@ export async function analyze(
       autoPr,
       commitDirectly,
       pullRequest,
+      createOnePr,
     },
     { skipPrompts }
   )

@@ -994,7 +994,7 @@ For specific requests [contact us](https://content.mobb.ai/contact) and we'll do
 })
 
 describe('create-one-pr flag tests', () => {
-  it('should successfully run analysis with create-one-pr and auto-pr', async () => {
+  it('should successy run analysis with create-one-pr and auto-pr', async () => {
     const consoleMock = vi.spyOn(console, 'log')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
     const prNumber = 1
@@ -1621,7 +1621,6 @@ describe('mcp tests', () => {
         intervalCallback = callback
         return 123 as unknown as NodeJS.Timeout // Return a dummy timer ID
       })
-
       mcpClient = new InlineMCPClient(createMcpServer())
 
       await waitForScanCompletion(mcpClient, activeRepoPath)

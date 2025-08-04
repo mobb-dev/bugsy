@@ -1,3 +1,5 @@
+import { ScanContext } from '@mobb/bugsy/types'
+
 import {
   MCP_DEFAULT_LIMIT,
   MCP_REPORT_ID_EXPIRATION_MS,
@@ -96,7 +98,7 @@ export class ScanAndFixVulnerabilitiesService {
           fileList,
           repositoryPath,
           gqlClient: this.gqlClient,
-          scanContext: 'SCAN_AND_FIX_TOOL',
+          scanContext: ScanContext.USER_REQUEST,
         })
         fixReportId = scanResult.fixReportId
       } else {

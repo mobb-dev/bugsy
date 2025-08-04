@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MCP Server > CheckForAvailableFixesTool > should handle empty report array 1`] = `
+exports[`MCP Server > fetch_available_fixes > should handle empty report array 1`] = `
 "🔍 **MOBB SECURITY SCAN STATUS**
 
 ## No Vulnerability Report Found
@@ -31,7 +31,7 @@ For assistance, please:
 - Contact support at support@mobb.ai"
 `;
 
-exports[`MCP Server > CheckForAvailableFixesTool > should handle report with fixes 1`] = `
+exports[`MCP Server > fetch_available_fixes > should handle report with fixes 1`] = `
 "🔍 **MOBB SECURITY SCAN RESULTS**
 
 ## 📊 Scan Report Summary
@@ -159,7 +159,7 @@ If you omit both **offset** and **limit**, the command will automatically return
 "
 `;
 
-exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should format fixes prompt with vulnerability details and patches 1`] = `
+exports[`MCP Server > scan_and_fix_vulnerabilities > when API call succeeds > should format fixes prompt with vulnerability details and patches 1`] = `
 "Here are the fixes to the vulnerabilities discovered by Mobb MCP
 
 ## CRITICAL INSTRUCTIONS - READ CAREFULLY
@@ -327,7 +327,7 @@ This will start a new analysis, discard any cached results.
 "
 `;
 
-exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should format fixes prompt with vulnerability details and patches when code is not in git repo 1`] = `
+exports[`MCP Server > scan_and_fix_vulnerabilities > when API call succeeds > should format fixes prompt with vulnerability details and patches when code is not in git repo 1`] = `
 "Here are the fixes to the vulnerabilities discovered by Mobb MCP
 
 ## CRITICAL INSTRUCTIONS - READ CAREFULLY
@@ -495,7 +495,7 @@ This will start a new analysis, discard any cached results.
 "
 `;
 
-exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should format fixes prompt with vulnerability details and patches when no changes in git status 1`] = `
+exports[`MCP Server > scan_and_fix_vulnerabilities > when API call succeeds > should format fixes prompt with vulnerability details and patches when no changes in git status 1`] = `
 "Here are the fixes to the vulnerabilities discovered by Mobb MCP
 
 ## CRITICAL INSTRUCTIONS - READ CAREFULLY
@@ -663,7 +663,7 @@ This will start a new analysis, discard any cached results.
 "
 `;
 
-exports[`MCP Server > FixVulnerabilitiesTool > when API call succeeds > should return no fixes found prompt when no fixes are available 1`] = `
+exports[`MCP Server > scan_and_fix_vulnerabilities > when API call succeeds > should return no fixes found prompt when no fixes are available 1`] = `
 "🔍 **MOBB SECURITY SCAN COMPLETED** 
 
 Mobb security scan completed successfully but found no automated fixes available at this time.

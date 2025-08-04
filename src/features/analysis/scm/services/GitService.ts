@@ -49,28 +49,30 @@ export class GitService {
     this.log = log || noopLog
     this.git = simpleGit(repositoryPath, { binary: 'git' })
     this.repositoryPath = repositoryPath
-    this.log('Git service initialized', 'debug', { repositoryPath })
+    this.log('[GitService] Git service initialized', 'debug', {
+      repositoryPath,
+    })
   }
 
   /**
    * Validates that the path is a valid git repository
    */
   public async validateRepository(): Promise<GitValidationResult> {
-    this.log('Validating git repository', 'debug')
+    this.log('[GitService] Validating git repository', 'debug')
 
     try {
       const isRepo = await this.git.checkIsRepo()
       if (!isRepo) {
-        const error = 'Path is not a valid git repository'
+        const error = '[GitService] Path is not a valid git repository'
         this.log(error, 'error')
         return { isValid: false, error }
       }
 
-      this.log('Git repository validation successful', 'debug')
+      this.log('[GitService] Git repository validation successful', 'debug')
       return { isValid: true }
     } catch (error) {
       const errorMessage = `Failed to verify git repository: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       return { isValid: false, error: errorMessage }
     }
   }
@@ -79,7 +81,7 @@ export class GitService {
    * Gets the current git status and returns changed files
    */
   public async getChangedFiles(): Promise<GitStatusResult> {
-    this.log('Getting git status', 'debug')
+    this.log('[GitService] Getting git status', 'debug')
 
     try {
       const status = await this.git.status()
@@ -123,7 +125,7 @@ export class GitService {
           )
         })
 
-      this.log('Git status retrieved', 'info', {
+      this.log('[GitService] Git status retrieved', 'info', {
         fileCount: files.length,
         files: files.slice(0, 10), // Log first 10 files to avoid spam
         deletedFileCount: deletedFiles.length,
@@ -136,7 +138,7 @@ export class GitService {
       return { files, deletedFiles, status }
     } catch (error) {
       const errorMessage = `Failed to get git status: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -145,7 +147,7 @@ export class GitService {
    * Gets git repository information including remote URL, current commit hash, and branch name
    */
   public async getGitInfo(): Promise<GitInfo> {
-    this.log('Getting git repository information', 'debug')
+    this.log('[GitService] Getting git repository information', 'debug')
 
     try {
       const [repoUrl, hash, reference] = await Promise.all([
@@ -166,7 +168,7 @@ export class GitService {
         )
       }
 
-      this.log('Git repository information retrieved', 'debug', {
+      this.log('[GitService] Git repository information retrieved', 'debug', {
         repoUrl: normalizedRepoUrl,
         hash,
         reference,
@@ -179,7 +181,7 @@ export class GitService {
       }
     } catch (error) {
       const errorMessage = `Failed to get git repository information: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -188,7 +190,7 @@ export class GitService {
    * Validates if a branch name is valid according to git's rules
    */
   public async isValidBranchName(branchName: string): Promise<boolean> {
-    this.log('Validating branch name', 'debug', { branchName })
+    this.log('[GitService] Validating branch name', 'debug', { branchName })
 
     try {
       const result = await this.git.raw([
@@ -197,13 +199,16 @@ export class GitService {
         branchName,
       ])
       const isValid = Boolean(result)
-      this.log('Branch name validation result', 'debug', {
+      this.log('[GitService] Branch name validation result', 'debug', {
         branchName,
         isValid,
       })
       return isValid
     } catch (error) {
-      this.log('Branch name validation failed', 'debug', { branchName, error })
+      this.log('[GitService] Branch name validation failed', 'debug', {
+        branchName,
+        error,
+      })
       return false
     }
   }
@@ -212,15 +217,15 @@ export class GitService {
    * Gets the current branch name
    */
   public async getCurrentBranch(): Promise<string> {
-    this.log('Getting current branch name', 'debug')
+    this.log('[GitService] Getting current branch name', 'debug')
 
     try {
       const branch = await this.git.revparse(['--abbrev-ref', 'HEAD'])
-      this.log('Current branch retrieved', 'debug', { branch })
+      this.log('[GitService] Current branch retrieved', 'debug', { branch })
       return branch
     } catch (error) {
       const errorMessage = `Failed to get current branch: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -229,15 +234,15 @@ export class GitService {
    * Gets the current commit hash
    */
   public async getCurrentCommitHash(): Promise<string> {
-    this.log('Getting current commit hash', 'debug')
+    this.log('[GitService] Getting current commit hash', 'debug')
 
     try {
       const hash = await this.git.revparse(['HEAD'])
-      this.log('Current commit hash retrieved', 'debug', { hash })
+      this.log('[GitService] Current commit hash retrieved', 'debug', { hash })
       return hash
     } catch (error) {
       const errorMessage = `Failed to get current commit hash: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -249,7 +254,7 @@ export class GitService {
     hash: string
     branch: string
   }> {
-    this.log('Getting current commit hash and branch', 'debug')
+    this.log('[GitService] Getting current commit hash and branch', 'debug')
 
     try {
       const [hash, branch] = await Promise.all([
@@ -257,15 +262,19 @@ export class GitService {
         this.git.revparse(['--abbrev-ref', 'HEAD']),
       ])
 
-      this.log('Current commit hash and branch retrieved', 'debug', {
-        hash,
-        branch,
-      })
+      this.log(
+        '[GitService] Current commit hash and branch retrieved',
+        'debug',
+        {
+          hash,
+          branch,
+        }
+      )
 
       return { hash, branch }
     } catch (error) {
       const errorMessage = `Failed to get current commit hash and branch: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       return { hash: '', branch: '' }
     }
   }
@@ -274,7 +283,7 @@ export class GitService {
    * Gets the remote repository URL
    */
   public async getRemoteUrl(): Promise<string> {
-    this.log('Getting remote repository URL', 'debug')
+    this.log('[GitService] Getting remote repository URL', 'debug')
 
     try {
       const remoteUrl = await this.git.getConfig('remote.origin.url')
@@ -291,13 +300,13 @@ export class GitService {
         )
       }
 
-      this.log('Remote repository URL retrieved', 'debug', {
+      this.log('[GitService] Remote repository URL retrieved', 'debug', {
         url: normalizedUrl,
       })
       return normalizedUrl
     } catch (error) {
       const errorMessage = `Failed to get remote repository URL: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -311,7 +320,7 @@ export class GitService {
     maxFiles?: number
   }): Promise<RecentFilesResult> {
     this.log(
-      `Getting the ${maxFiles} most recently changed files, starting with current changes`,
+      `[GitService] Getting the ${maxFiles} most recently changed files, starting with current changes`,
       'debug'
     )
 
@@ -348,10 +357,14 @@ export class GitService {
         }
       }
 
-      this.log(`Added ${fileSet.size} files from current changes`, 'debug', {
-        filesFromCurrentChanges: fileSet.size,
-        currentChangesTotal: currentChanges.files.length,
-      })
+      this.log(
+        `[GitService] Added ${fileSet.size} files from current changes`,
+        'debug',
+        {
+          filesFromCurrentChanges: fileSet.size,
+          currentChangesTotal: currentChanges.files.length,
+        }
+      )
 
       // Get a reasonable number of recent commits to search through
       const logResult = await this.git.log({
@@ -414,7 +427,7 @@ export class GitService {
               )
             }
 
-            this.log(`Considering file: ${adjustedPath}`, 'debug')
+            this.log(`[GitService] Considering file: ${adjustedPath}`, 'debug')
 
             // Only add if we haven't seen this file before and it passes our filters
             if (
@@ -429,15 +442,19 @@ export class GitService {
           }
         } catch (showError) {
           // If we can't get files for this commit, continue with the next one
-          this.log(`Could not get files for commit ${commit.hash}`, 'debug', {
-            error: showError,
-          })
+          this.log(
+            `[GitService] Could not get files for commit ${commit.hash}`,
+            'debug',
+            {
+              error: showError,
+            }
+          )
         }
       }
 
       const files = Array.from(fileSet)
 
-      this.log('Recently changed files retrieved', 'info', {
+      this.log('[GitService] Recently changed files retrieved', 'info', {
         fileCount: files.length,
         commitsProcessed,
         totalCommitsAvailable: logResult.all.length,
@@ -453,7 +470,7 @@ export class GitService {
       }
     } catch (error) {
       const errorMessage = `Failed to get recently changed files: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -522,7 +539,7 @@ export class GitService {
   public async getRepoUrls(): Promise<
     Record<string, { fetch: string; push: string }>
   > {
-    this.log('Getting all remote repository URLs', 'debug')
+    this.log('[GitService] Getting all remote repository URLs', 'debug')
 
     try {
       const remotes = await this.git.remote(['-v'])
@@ -557,13 +574,13 @@ export class GitService {
         }
       })
 
-      this.log('Remote repository URLs retrieved', 'debug', {
+      this.log('[GitService] Remote repository URLs retrieved', 'debug', {
         remotes: remoteMap,
       })
       return remoteMap
     } catch (error) {
       const errorMessage = `Failed to get remote repository URLs: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }
   }
@@ -573,7 +590,7 @@ export class GitService {
    * @returns The contents of the .gitignore file as a string, or null if the file doesn't exist
    */
   public async getGitignoreContent(): Promise<string | null> {
-    this.log('Getting .gitignore contents', 'debug')
+    this.log('[GitService] Getting .gitignore contents', 'debug')
 
     try {
       let combinedContent = ''
@@ -600,22 +617,25 @@ export class GitService {
       } catch (rootErr) {
         // If for some reason we cannot determine the git root, log the error and continue
         this.log(
-          'Unable to resolve git root while reading .gitignore',
+          '[GitService] Unable to resolve git root while reading .gitignore',
           'debug',
           { error: rootErr }
         )
       }
 
       if (combinedContent.trim() === '') {
-        this.log('.gitignore file not found', 'debug')
+        this.log('[GitService] .gitignore file not found', 'debug')
         return null
       }
 
-      this.log('.gitignore contents retrieved successfully', 'debug')
+      this.log(
+        '[GitService] .gitignore contents retrieved successfully',
+        'debug'
+      )
       return combinedContent.trimEnd()
     } catch (error) {
       const errorMessage = `Failed to get .gitignore contents: ${(error as Error).message}`
-      this.log(errorMessage, 'error', { error })
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
       return null
     }
   }

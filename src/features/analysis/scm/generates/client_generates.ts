@@ -7689,6 +7689,10 @@ export type FixReport = {
   repo?: Maybe<Repo>;
   repoArchiveId?: Maybe<Scalars['uuid']['output']>;
   s3RefreshedOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** An array relationship */
+  scans: Array<Scan>;
+  /** An aggregate relationship */
+  scans_aggregate: Scan_Aggregate;
   state: Fix_Report_State_Enum;
   /** An object relationship */
   vulnerabilityReport: Vulnerability_Report;
@@ -7779,6 +7783,26 @@ export type FixReportIssueTypesArgs = {
 
 
 /** columns and relationships of "fix_report" */
+export type FixReportScansArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_report" */
+export type FixReportScans_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fix_report" */
 export type FixReportVulnerabilitySeveritiesArgs = {
   path?: InputMaybe<Scalars['String']['input']>;
 };
@@ -7857,6 +7881,8 @@ export type FixReport_Bool_Exp = {
   repo?: InputMaybe<Repo_Bool_Exp>;
   repoArchiveId?: InputMaybe<Uuid_Comparison_Exp>;
   s3RefreshedOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  scans?: InputMaybe<Scan_Bool_Exp>;
+  scans_aggregate?: InputMaybe<Scan_Aggregate_Bool_Exp>;
   state?: InputMaybe<Fix_Report_State_Enum_Comparison_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReportId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -7891,6 +7917,7 @@ export type FixReport_Insert_Input = {
   repo?: InputMaybe<Repo_Obj_Rel_Insert_Input>;
   repoArchiveId?: InputMaybe<Scalars['uuid']['input']>;
   s3RefreshedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  scans?: InputMaybe<Scan_Arr_Rel_Insert_Input>;
   state?: InputMaybe<Fix_Report_State_Enum>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
@@ -7991,6 +8018,7 @@ export type FixReport_Order_By = {
   repo?: InputMaybe<Repo_Order_By>;
   repoArchiveId?: InputMaybe<Order_By>;
   s3RefreshedOn?: InputMaybe<Order_By>;
+  scans_aggregate?: InputMaybe<Scan_Aggregate_Order_By>;
   state?: InputMaybe<Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
@@ -12696,6 +12724,10 @@ export type Mutation_Root = {
   delete_repo?: Maybe<Repo_Mutation_Response>;
   /** delete single row from the table: "repo" */
   delete_repo_by_pk?: Maybe<Repo>;
+  /** delete data from the table: "scan" */
+  delete_scan?: Maybe<Scan_Mutation_Response>;
+  /** delete single row from the table: "scan" */
+  delete_scan_by_pk?: Maybe<Scan>;
   /** delete data from the table: "scan_source" */
   delete_scan_source?: Maybe<Scan_Source_Mutation_Response>;
   /** delete single row from the table: "scan_source" */
@@ -13005,6 +13037,10 @@ export type Mutation_Root = {
   insert_repo?: Maybe<Repo_Mutation_Response>;
   /** insert a single row into the table: "repo" */
   insert_repo_one?: Maybe<Repo>;
+  /** insert data into the table: "scan" */
+  insert_scan?: Maybe<Scan_Mutation_Response>;
+  /** insert a single row into the table: "scan" */
+  insert_scan_one?: Maybe<Scan>;
   /** insert data into the table: "scan_source" */
   insert_scan_source?: Maybe<Scan_Source_Mutation_Response>;
   /** insert a single row into the table: "scan_source" */
@@ -13446,6 +13482,12 @@ export type Mutation_Root = {
   update_repo_by_pk?: Maybe<Repo>;
   /** update multiples rows of table: "repo" */
   update_repo_many?: Maybe<Array<Maybe<Repo_Mutation_Response>>>;
+  /** update data of the table: "scan" */
+  update_scan?: Maybe<Scan_Mutation_Response>;
+  /** update single row of the table: "scan" */
+  update_scan_by_pk?: Maybe<Scan>;
+  /** update multiples rows of table: "scan" */
+  update_scan_many?: Maybe<Array<Maybe<Scan_Mutation_Response>>>;
   /** update data of the table: "scan_source" */
   update_scan_source?: Maybe<Scan_Source_Mutation_Response>;
   /** update single row of the table: "scan_source" */
@@ -14373,6 +14415,18 @@ export type Mutation_RootDelete_RepoArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Repo_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_ScanArgs = {
+  where: Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Scan_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -15435,6 +15489,20 @@ export type Mutation_RootInsert_Repo_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_ScanArgs = {
+  objects: Array<Scan_Insert_Input>;
+  on_conflict?: InputMaybe<Scan_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Scan_OneArgs = {
+  object: Scan_Insert_Input;
+  on_conflict?: InputMaybe<Scan_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Scan_SourceArgs = {
   objects: Array<Scan_Source_Insert_Input>;
   on_conflict?: InputMaybe<Scan_Source_On_Conflict>;
@@ -15808,12 +15876,14 @@ export type Mutation_RootSubmitExternalVulnerabilityReportArgs = {
 /** mutation root */
 export type Mutation_RootSubmitVulnerabilityReportArgs = {
   experimentalEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  fileCount?: InputMaybe<Scalars['Int']['input']>;
   fixReportId: Scalars['String']['input'];
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
   reference: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
+  scanContext?: InputMaybe<Scalars['String']['input']>;
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
@@ -17057,6 +17127,28 @@ export type Mutation_RootUpdate_Repo_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Repo_ManyArgs = {
   updates: Array<Repo_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_ScanArgs = {
+  _inc?: InputMaybe<Scan_Inc_Input>;
+  _set?: InputMaybe<Scan_Set_Input>;
+  where: Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Scan_By_PkArgs = {
+  _inc?: InputMaybe<Scan_Inc_Input>;
+  _set?: InputMaybe<Scan_Set_Input>;
+  pk_columns: Scan_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Scan_ManyArgs = {
+  updates: Array<Scan_Updates>;
 };
 
 
@@ -22412,6 +22504,12 @@ export type Query_Root = {
   repo_aggregate: Repo_Aggregate;
   /** fetch data from the table: "repo" using primary key columns */
   repo_by_pk?: Maybe<Repo>;
+  /** fetch data from the table: "scan" */
+  scan: Array<Scan>;
+  /** fetch aggregated fields from the table: "scan" */
+  scan_aggregate: Scan_Aggregate;
+  /** fetch data from the table: "scan" using primary key columns */
+  scan_by_pk?: Maybe<Scan>;
   /** fetch data from the table: "scan_source" */
   scan_source: Array<Scan_Source>;
   /** fetch aggregated fields from the table: "scan_source" */
@@ -24009,6 +24107,29 @@ export type Query_RootRepo_By_PkArgs = {
 };
 
 
+export type Query_RootScanArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+export type Query_RootScan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+export type Query_RootScan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootScan_SourceArgs = {
   distinct_on?: InputMaybe<Array<Scan_Source_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -24898,6 +25019,286 @@ export type ResolvedAggregatedVulnerabilitySeverities_Organization_Args = {
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
 };
 
+/** columns and relationships of "scan" */
+export type Scan = {
+  __typename?: 'scan';
+  context: Scalars['String']['output'];
+  duration: Scalars['Int']['output'];
+  file_count: Scalars['Int']['output'];
+  /** An object relationship */
+  fix_report: FixReport;
+  fix_report_id: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  is_git_repo: Scalars['Boolean']['output'];
+  rule_count: Scalars['Int']['output'];
+  /** An object relationship */
+  scan_vendor?: Maybe<Vulnerability_Report_Vendor>;
+  vendor: Scalars['String']['output'];
+};
+
+/** aggregated selection of "scan" */
+export type Scan_Aggregate = {
+  __typename?: 'scan_aggregate';
+  aggregate?: Maybe<Scan_Aggregate_Fields>;
+  nodes: Array<Scan>;
+};
+
+export type Scan_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Scan_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Scan_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Scan_Aggregate_Bool_Exp_Count>;
+};
+
+export type Scan_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Scan_Select_Column_Scan_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Scan_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Scan_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Scan_Select_Column_Scan_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Scan_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Scan_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Scan_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Scan_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "scan" */
+export type Scan_Aggregate_Fields = {
+  __typename?: 'scan_aggregate_fields';
+  avg?: Maybe<Scan_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Scan_Max_Fields>;
+  min?: Maybe<Scan_Min_Fields>;
+  stddev?: Maybe<Scan_Stddev_Fields>;
+  stddev_pop?: Maybe<Scan_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Scan_Stddev_Samp_Fields>;
+  sum?: Maybe<Scan_Sum_Fields>;
+  var_pop?: Maybe<Scan_Var_Pop_Fields>;
+  var_samp?: Maybe<Scan_Var_Samp_Fields>;
+  variance?: Maybe<Scan_Variance_Fields>;
+};
+
+
+/** aggregate fields of "scan" */
+export type Scan_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Scan_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "scan" */
+export type Scan_Aggregate_Order_By = {
+  avg?: InputMaybe<Scan_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Scan_Max_Order_By>;
+  min?: InputMaybe<Scan_Min_Order_By>;
+  stddev?: InputMaybe<Scan_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Scan_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Scan_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Scan_Sum_Order_By>;
+  var_pop?: InputMaybe<Scan_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Scan_Var_Samp_Order_By>;
+  variance?: InputMaybe<Scan_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "scan" */
+export type Scan_Arr_Rel_Insert_Input = {
+  data: Array<Scan_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Scan_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Scan_Avg_Fields = {
+  __typename?: 'scan_avg_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "scan" */
+export type Scan_Avg_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "scan". All fields are combined with a logical 'AND'. */
+export type Scan_Bool_Exp = {
+  _and?: InputMaybe<Array<Scan_Bool_Exp>>;
+  _not?: InputMaybe<Scan_Bool_Exp>;
+  _or?: InputMaybe<Array<Scan_Bool_Exp>>;
+  context?: InputMaybe<String_Comparison_Exp>;
+  duration?: InputMaybe<Int_Comparison_Exp>;
+  file_count?: InputMaybe<Int_Comparison_Exp>;
+  fix_report?: InputMaybe<FixReport_Bool_Exp>;
+  fix_report_id?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  is_git_repo?: InputMaybe<Boolean_Comparison_Exp>;
+  rule_count?: InputMaybe<Int_Comparison_Exp>;
+  scan_vendor?: InputMaybe<Vulnerability_Report_Vendor_Bool_Exp>;
+  vendor?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "scan" */
+export enum Scan_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  ScanPkey = 'scan_pkey'
+}
+
+/** input type for incrementing numeric columns in table "scan" */
+export type Scan_Inc_Input = {
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  file_count?: InputMaybe<Scalars['Int']['input']>;
+  rule_count?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "scan" */
+export type Scan_Insert_Input = {
+  context?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  file_count?: InputMaybe<Scalars['Int']['input']>;
+  fix_report?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  is_git_repo?: InputMaybe<Scalars['Boolean']['input']>;
+  rule_count?: InputMaybe<Scalars['Int']['input']>;
+  scan_vendor?: InputMaybe<Vulnerability_Report_Vendor_Obj_Rel_Insert_Input>;
+  vendor?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Scan_Max_Fields = {
+  __typename?: 'scan_max_fields';
+  context?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Int']['output']>;
+  file_count?: Maybe<Scalars['Int']['output']>;
+  fix_report_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  rule_count?: Maybe<Scalars['Int']['output']>;
+  vendor?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "scan" */
+export type Scan_Max_Order_By = {
+  context?: InputMaybe<Order_By>;
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  fix_report_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+  vendor?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Scan_Min_Fields = {
+  __typename?: 'scan_min_fields';
+  context?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Int']['output']>;
+  file_count?: Maybe<Scalars['Int']['output']>;
+  fix_report_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  rule_count?: Maybe<Scalars['Int']['output']>;
+  vendor?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "scan" */
+export type Scan_Min_Order_By = {
+  context?: InputMaybe<Order_By>;
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  fix_report_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+  vendor?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "scan" */
+export type Scan_Mutation_Response = {
+  __typename?: 'scan_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Scan>;
+};
+
+/** on_conflict condition type for table "scan" */
+export type Scan_On_Conflict = {
+  constraint: Scan_Constraint;
+  update_columns?: Array<Scan_Update_Column>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "scan". */
+export type Scan_Order_By = {
+  context?: InputMaybe<Order_By>;
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  fix_report?: InputMaybe<FixReport_Order_By>;
+  fix_report_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  is_git_repo?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+  scan_vendor?: InputMaybe<Vulnerability_Report_Vendor_Order_By>;
+  vendor?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: scan */
+export type Scan_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "scan" */
+export enum Scan_Select_Column {
+  /** column name */
+  Context = 'context',
+  /** column name */
+  Duration = 'duration',
+  /** column name */
+  FileCount = 'file_count',
+  /** column name */
+  FixReportId = 'fix_report_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsGitRepo = 'is_git_repo',
+  /** column name */
+  RuleCount = 'rule_count',
+  /** column name */
+  Vendor = 'vendor'
+}
+
+/** select "scan_aggregate_bool_exp_bool_and_arguments_columns" columns of table "scan" */
+export enum Scan_Select_Column_Scan_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  IsGitRepo = 'is_git_repo'
+}
+
+/** select "scan_aggregate_bool_exp_bool_or_arguments_columns" columns of table "scan" */
+export enum Scan_Select_Column_Scan_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsGitRepo = 'is_git_repo'
+}
+
+/** input type for updating data in table "scan" */
+export type Scan_Set_Input = {
+  context?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  file_count?: InputMaybe<Scalars['Int']['input']>;
+  fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  is_git_repo?: InputMaybe<Scalars['Boolean']['input']>;
+  rule_count?: InputMaybe<Scalars['Int']['input']>;
+  vendor?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** columns and relationships of "scan_source" */
 export type Scan_Source = {
   __typename?: 'scan_source';
@@ -25074,6 +25475,160 @@ export type Scan_Source_Updates = {
   _set?: InputMaybe<Scan_Source_Set_Input>;
   /** filter the rows which have to be updated */
   where: Scan_Source_Bool_Exp;
+};
+
+/** aggregate stddev on columns */
+export type Scan_Stddev_Fields = {
+  __typename?: 'scan_stddev_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "scan" */
+export type Scan_Stddev_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Scan_Stddev_Pop_Fields = {
+  __typename?: 'scan_stddev_pop_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "scan" */
+export type Scan_Stddev_Pop_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Scan_Stddev_Samp_Fields = {
+  __typename?: 'scan_stddev_samp_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "scan" */
+export type Scan_Stddev_Samp_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "scan" */
+export type Scan_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Scan_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Scan_Stream_Cursor_Value_Input = {
+  context?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  file_count?: InputMaybe<Scalars['Int']['input']>;
+  fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  is_git_repo?: InputMaybe<Scalars['Boolean']['input']>;
+  rule_count?: InputMaybe<Scalars['Int']['input']>;
+  vendor?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Scan_Sum_Fields = {
+  __typename?: 'scan_sum_fields';
+  duration?: Maybe<Scalars['Int']['output']>;
+  file_count?: Maybe<Scalars['Int']['output']>;
+  rule_count?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "scan" */
+export type Scan_Sum_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "scan" */
+export enum Scan_Update_Column {
+  /** column name */
+  Context = 'context',
+  /** column name */
+  Duration = 'duration',
+  /** column name */
+  FileCount = 'file_count',
+  /** column name */
+  FixReportId = 'fix_report_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsGitRepo = 'is_git_repo',
+  /** column name */
+  RuleCount = 'rule_count',
+  /** column name */
+  Vendor = 'vendor'
+}
+
+export type Scan_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Scan_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Scan_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Scan_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Scan_Var_Pop_Fields = {
+  __typename?: 'scan_var_pop_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "scan" */
+export type Scan_Var_Pop_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Scan_Var_Samp_Fields = {
+  __typename?: 'scan_var_samp_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "scan" */
+export type Scan_Var_Samp_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Scan_Variance_Fields = {
+  __typename?: 'scan_variance_fields';
+  duration?: Maybe<Scalars['Float']['output']>;
+  file_count?: Maybe<Scalars['Float']['output']>;
+  rule_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "scan" */
+export type Scan_Variance_Order_By = {
+  duration?: InputMaybe<Order_By>;
+  file_count?: InputMaybe<Order_By>;
+  rule_count?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "scm_config" */
@@ -26845,6 +27400,12 @@ export type Subscription_Root = {
   repo_by_pk?: Maybe<Repo>;
   /** fetch data from the table in a streaming manner: "repo" */
   repo_stream: Array<Repo>;
+  /** fetch data from the table: "scan" */
+  scan: Array<Scan>;
+  /** fetch aggregated fields from the table: "scan" */
+  scan_aggregate: Scan_Aggregate;
+  /** fetch data from the table: "scan" using primary key columns */
+  scan_by_pk?: Maybe<Scan>;
   /** fetch data from the table: "scan_source" */
   scan_source: Array<Scan_Source>;
   /** fetch aggregated fields from the table: "scan_source" */
@@ -26853,6 +27414,8 @@ export type Subscription_Root = {
   scan_source_by_pk?: Maybe<Scan_Source>;
   /** fetch data from the table in a streaming manner: "scan_source" */
   scan_source_stream: Array<Scan_Source>;
+  /** fetch data from the table in a streaming manner: "scan" */
+  scan_stream: Array<Scan>;
   /** fetch data from the table: "scm_config" */
   scm_config: Array<Scm_Config>;
   /** fetch aggregated fields from the table: "scm_config" */
@@ -28813,6 +29376,29 @@ export type Subscription_RootRepo_StreamArgs = {
 };
 
 
+export type Subscription_RootScanArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootScan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Scan_Order_By>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootScan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Subscription_RootScan_SourceArgs = {
   distinct_on?: InputMaybe<Array<Scan_Source_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -28840,6 +29426,13 @@ export type Subscription_RootScan_Source_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Scan_Source_Stream_Cursor_Input>>;
   where?: InputMaybe<Scan_Source_Bool_Exp>;
+};
+
+
+export type Subscription_RootScan_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Scan_Stream_Cursor_Input>>;
+  where?: InputMaybe<Scan_Bool_Exp>;
 };
 
 
@@ -34520,6 +35113,13 @@ export type Vulnerability_Report_Vendor_Mutation_Response = {
   returning: Array<Vulnerability_Report_Vendor>;
 };
 
+/** input type for inserting object relation for remote table "vulnerability_report_vendor" */
+export type Vulnerability_Report_Vendor_Obj_Rel_Insert_Input = {
+  data: Vulnerability_Report_Vendor_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Vulnerability_Report_Vendor_On_Conflict>;
+};
+
 /** on_conflict condition type for table "vulnerability_report_vendor" */
 export type Vulnerability_Report_Vendor_On_Conflict = {
   constraint: Vulnerability_Report_Vendor_Constraint;
@@ -34847,6 +35447,8 @@ export type SubmitVulnerabilityReportMutationVariables = Exact<{
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
+  scanContext: Scalars['String']['input'];
+  fileCount?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -35371,7 +35973,7 @@ export const DigestVulnerabilityReportDocument = `
 }
     `;
 export const SubmitVulnerabilityReportDocument = `
-    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int, $isFullScan: Boolean) {
+    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int, $isFullScan: Boolean, $scanContext: String!, $fileCount: Int) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
     repoUrl: $repoUrl
@@ -35383,6 +35985,8 @@ export const SubmitVulnerabilityReportDocument = `
     projectId: $projectId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     scanSource: $scanSource
+    scanContext: $scanContext
+    fileCount: $fileCount
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -35525,14 +36129,14 @@ export const GetReportFixesDocument = `
 export const GetLatestReportByRepoUrlDocument = `
     query GetLatestReportByRepoUrl($repoUrl: String!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
   fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}, {vulnerabilityReport: {_or: [{vendor: {_is_null: true}}, {vendor: {_nin: [semgrep, opengrep]}}]}}]}
+    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {
     ...FixReportSummaryFields
   }
   expiredReport: fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}, {_or: [{vulnerabilityReport: {vendor: {_is_null: true}}}, {vulnerabilityReport: {vendor: {_nin: [semgrep, opengrep]}}}]}]}
+    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {

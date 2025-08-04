@@ -1,10 +1,11 @@
+import { ScanContext } from '@mobb/bugsy/types'
 import fs from 'fs/promises'
 import nodePath from 'path'
 
 import { FileUtils } from '../../features/analysis/scm/services/FileUtils'
 import { GitService } from '../../features/analysis/scm/services/GitService'
 import { MCP_MAX_FILE_SIZE } from '../core/configs'
-import { log, logDebug } from '../Logger'
+import { log, logDebug, logError } from '../Logger'
 
 export type LocalFile = {
   filename: string
@@ -18,89 +19,146 @@ export const getLocalFiles = async ({
   maxFileSize = MCP_MAX_FILE_SIZE,
   maxFiles,
   isAllFilesScan,
+  scanContext,
 }: {
   path: string
   maxFileSize?: number
   maxFiles?: number
   isAllFilesScan?: boolean
+  scanContext: ScanContext
 }): Promise<LocalFile[]> => {
-  // Validate git repository - let validation errors bubble up as MCP errors
-  // Resolve the repository path to eliminate symlink prefixes (e.g., /var vs /private/var on macOS)
-  const resolvedRepoPath = await fs.realpath(path)
+  logDebug(`[${scanContext}] Starting getLocalFiles`, {
+    path,
+    maxFileSize,
+    maxFiles,
+    isAllFilesScan,
+  })
 
-  const gitService = new GitService(resolvedRepoPath, log)
-  const gitValidation = await gitService.validateRepository()
-  let files: string[] = []
-  if (!gitValidation.isValid || isAllFilesScan) {
-    logDebug(
-      'Git repository validation failed, using all files in the repository',
-      {
-        path,
-      }
-    )
-    files = await FileUtils.getLastChangedFiles({
-      dir: path,
-      maxFileSize,
-      maxFiles,
+  try {
+    // Validate git repository - let validation errors bubble up as MCP errors
+    // Resolve the repository path to eliminate symlink prefixes (e.g., /var vs /private/var on macOS)
+    const resolvedRepoPath = await fs.realpath(path)
+    logDebug(`[${scanContext}] Resolved repository path`, {
+      resolvedRepoPath,
+      originalPath: path,
+    })
+
+    const gitService = new GitService(resolvedRepoPath, log)
+
+    const gitValidation = await gitService.validateRepository()
+    logDebug(`[${scanContext}] Git repository validation result`, {
+      isValid: gitValidation.isValid,
+      error: gitValidation.error,
       isAllFilesScan,
     })
-    logDebug('Found files in the repository', {
-      files,
-      fileCount: files.length,
-    })
-  } else {
-    logDebug('maxFiles', {
-      maxFiles,
-    })
-    const gitResult = await gitService.getChangedFiles()
-    files = gitResult.files
-    if (files.length === 0 || maxFiles) {
-      const recentResult = await gitService.getRecentlyChangedFiles({
-        maxFiles,
-      })
-      files = recentResult.files
-      logDebug(
-        'No changes found, using recently changed files from git history',
-        {
-          files,
-          fileCount: files.length,
-          commitsChecked: recentResult.commitCount,
-        }
-      )
-    } else {
-      logDebug('Found changed files in the git repository', {
-        files,
-        fileCount: files.length,
-      })
-    }
-  }
-  files = files.filter((file) =>
-    FileUtils.shouldPackFile(
-      nodePath.resolve(resolvedRepoPath, file),
-      maxFileSize
-    )
-  )
-  const filesWithStats = await Promise.all(
-    files.map(async (file) => {
-      // Ensure we always work with an absolute path for the file first
-      const absoluteFilePath = nodePath.resolve(resolvedRepoPath, file)
 
-      const relativePath = nodePath.relative(resolvedRepoPath, absoluteFilePath)
-      let fileStat
+    let files: string[] = []
+    if (!gitValidation.isValid || isAllFilesScan) {
       try {
-        fileStat = await fs.stat(absoluteFilePath)
-      } catch (e) {
-        logDebug('File not found', {
-          file,
+        files = await FileUtils.getLastChangedFiles({
+          dir: path,
+          maxFileSize,
+          maxFiles,
+          isAllFilesScan,
         })
+        logDebug(`[${scanContext}] Found files in the repository`, {
+          fileCount: files.length,
+        })
+      } catch (error) {
+        logError(`${scanContext}Error getting last changed files`, {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        })
+        throw error
       }
-      return {
-        filename: nodePath.basename(absoluteFilePath),
-        relativePath,
-        fullPath: absoluteFilePath,
-        lastEdited: fileStat?.mtime.getTime() ?? 0,
+    } else {
+      try {
+        const gitResult = await gitService.getChangedFiles()
+        files = gitResult.files
+
+        if (files.length === 0 || maxFiles) {
+          logDebug(
+            `[${scanContext}] No changes found or maxFiles specified, getting recently changed files`,
+            { maxFiles }
+          )
+
+          const recentResult = await gitService.getRecentlyChangedFiles({
+            maxFiles,
+          })
+          files = recentResult.files
+          logDebug(
+            `[${scanContext}] Using recently changed files from git history`,
+            {
+              fileCount: files.length,
+              commitsChecked: recentResult.commitCount,
+            }
+          )
+        } else {
+          logDebug(
+            `[${scanContext}] Found changed files in the git repository`,
+            {
+              fileCount: files.length,
+            }
+          )
+        }
+      } catch (error) {
+        logError(`${scanContext}Error getting files from git`, {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        })
+        throw error
       }
+    }
+
+    files = files.filter((file) => {
+      const fullPath = nodePath.resolve(resolvedRepoPath, file)
+      const isPackable = FileUtils.shouldPackFile(fullPath, maxFileSize)
+      return isPackable
     })
-  )
-  return filesWithStats.filter((file) => file.lastEdited > 0)
+
+    const filesWithStats = await Promise.all(
+      files.map(async (file) => {
+        // Ensure we always work with an absolute path for the file first
+        const absoluteFilePath = nodePath.resolve(resolvedRepoPath, file)
+        const relativePath = nodePath.relative(
+          resolvedRepoPath,
+          absoluteFilePath
+        )
+
+        try {
+          const fileStat = await fs.stat(absoluteFilePath)
+
+          return {
+            filename: nodePath.basename(absoluteFilePath),
+            relativePath,
+            fullPath: absoluteFilePath,
+            lastEdited: fileStat.mtime.getTime(),
+          }
+        } catch (e) {
+          logError(`[${scanContext}] Error getting file stats`, {
+            file,
+            absoluteFilePath,
+            error: e instanceof Error ? e.message : String(e),
+          })
+
+          return {
+            filename: nodePath.basename(absoluteFilePath),
+            relativePath,
+            fullPath: absoluteFilePath,
+            lastEdited: 0,
+          }
+        }
+      })
+    )
+
+    const result = filesWithStats.filter((file) => file.lastEdited > 0)
+    return result
+  } catch (error) {
+    logError(`${scanContext}Unexpected error in getLocalFiles`, {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      path,
+    })
+    throw error
+  }
 }

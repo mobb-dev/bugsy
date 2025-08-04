@@ -1,3 +1,4 @@
+import { ScanContext } from '@mobb/bugsy/types'
 import { sleep } from '@mobb/bugsy/utils'
 import fetchOrig from 'cross-fetch'
 import Debug from 'debug'
@@ -382,6 +383,7 @@ export class GQLClient {
       sha: sha || '',
       experimentalEnabled: !!experimentalEnabled,
       scanSource: params.scanSource,
+      scanContext: ScanContext.BUGSY,
     })
   }
 

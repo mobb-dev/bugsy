@@ -45,7 +45,7 @@ describe('GitService', () => {
 
       expect(gitService).toBeDefined()
       expect(logSpy).toHaveBeenCalledWith(
-        'Git service initialized',
+        '[GitService] Git service initialized',
         'debug',
         expect.objectContaining({ repositoryPath: repoPath })
       )
@@ -70,9 +70,12 @@ describe('GitService', () => {
       const isValidResult = await gitService.validateRepository()
 
       expect(isValidResult).toEqual({ isValid: true })
-      expect(logSpy).toHaveBeenCalledWith('Validating git repository', 'debug')
       expect(logSpy).toHaveBeenCalledWith(
-        'Git repository validation successful',
+        '[GitService] Validating git repository',
+        'debug'
+      )
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Git repository validation successful',
         'debug'
       )
     })
@@ -86,11 +89,14 @@ describe('GitService', () => {
 
       expect(isValidResult).toEqual({
         isValid: false,
-        error: 'Path is not a valid git repository',
+        error: '[GitService] Path is not a valid git repository',
       })
-      expect(logSpy).toHaveBeenCalledWith('Validating git repository', 'debug')
       expect(logSpy).toHaveBeenCalledWith(
-        'Path is not a valid git repository',
+        '[GitService] Validating git repository',
+        'debug'
+      )
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Path is not a valid git repository',
         'error'
       )
     })
@@ -133,9 +139,12 @@ describe('GitService', () => {
       expect(changedFiles.files.length).toBeGreaterThan(0)
       expect(changedFiles.deletedFiles).toEqual([])
       expect(changedFiles.status).toBeDefined()
-      expect(logSpy).toHaveBeenCalledWith('Getting git status', 'debug')
       expect(logSpy).toHaveBeenCalledWith(
-        'Git status retrieved',
+        '[GitService] Getting git status',
+        'debug'
+      )
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Git status retrieved',
         'info',
         expect.anything()
       )
@@ -195,11 +204,11 @@ describe('GitService', () => {
         reference: expect.any(String),
       })
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting git repository information',
+        '[GitService] Getting git repository information',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        'Git repository information retrieved',
+        '[GitService] Git repository information retrieved',
         'debug',
         expect.anything()
       )
@@ -246,11 +255,15 @@ describe('GitService', () => {
       const isValid = await gitService.isValidBranchName(validBranchName)
 
       expect(isValid).toBe(true)
-      expect(logSpy).toHaveBeenCalledWith('Validating branch name', 'debug', {
-        branchName: validBranchName,
-      })
       expect(logSpy).toHaveBeenCalledWith(
-        'Branch name validation result',
+        '[GitService] Validating branch name',
+        'debug',
+        {
+          branchName: validBranchName,
+        }
+      )
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Branch name validation result',
         'debug',
         { branchName: validBranchName, isValid: true }
       )
@@ -265,11 +278,15 @@ describe('GitService', () => {
       const isValid = await gitService.isValidBranchName(invalidBranchName)
 
       expect(isValid).toBe(false)
-      expect(logSpy).toHaveBeenCalledWith('Validating branch name', 'debug', {
-        branchName: invalidBranchName,
-      })
       expect(logSpy).toHaveBeenCalledWith(
-        'Branch name validation failed',
+        '[GitService] Validating branch name',
+        'debug',
+        {
+          branchName: invalidBranchName,
+        }
+      )
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Branch name validation failed',
         'debug',
         expect.objectContaining({ branchName: invalidBranchName })
       )
@@ -287,12 +304,16 @@ describe('GitService', () => {
       expect(typeof branch).toBe('string')
       expect(branch).toBeTruthy()
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting current branch name',
+        '[GitService] Getting current branch name',
         'debug'
       )
-      expect(logSpy).toHaveBeenCalledWith('Current branch retrieved', 'debug', {
-        branch,
-      })
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] Current branch retrieved',
+        'debug',
+        {
+          branch,
+        }
+      )
     })
 
     it('should handle errors when getting current branch', async () => {
@@ -325,11 +346,11 @@ describe('GitService', () => {
       expect(typeof hash).toBe('string')
       expect(hash).toMatch(/^[a-f0-9]+$/) // Hash should be hexadecimal
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting current commit hash',
+        '[GitService] Getting current commit hash',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        'Current commit hash retrieved',
+        '[GitService] Current commit hash retrieved',
         'debug',
         { hash }
       )
@@ -367,11 +388,11 @@ describe('GitService', () => {
         branch: expect.any(String),
       })
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting current commit hash and branch',
+        '[GitService] Getting current commit hash and branch',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        'Current commit hash and branch retrieved',
+        '[GitService] Current commit hash and branch retrieved',
         'debug',
         {
           hash: expect.any(String),
@@ -412,11 +433,11 @@ describe('GitService', () => {
 
       expect(url).toBe(testRepoUrl)
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting remote repository URL',
+        '[GitService] Getting remote repository URL',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        'Remote repository URL retrieved',
+        '[GitService] Remote repository URL retrieved',
         'debug',
         { url }
       )
@@ -569,11 +590,11 @@ describe('GitService', () => {
       expect(remotes['origin']).toHaveProperty('fetch')
       expect(remotes['origin']).toHaveProperty('push')
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting all remote repository URLs',
+        '[GitService] Getting all remote repository URLs',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        'Remote repository URLs retrieved',
+        '[GitService] Remote repository URLs retrieved',
         'debug',
         expect.anything()
       )
@@ -663,11 +684,11 @@ describe('GitService', () => {
 
       expect(content).toBe(gitignoreContent)
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting .gitignore contents',
+        '[GitService] Getting .gitignore contents',
         'debug'
       )
       expect(logSpy).toHaveBeenCalledWith(
-        '.gitignore contents retrieved successfully',
+        '[GitService] .gitignore contents retrieved successfully',
         'debug'
       )
     })
@@ -686,10 +707,13 @@ describe('GitService', () => {
 
       expect(content).toBeNull()
       expect(logSpy).toHaveBeenCalledWith(
-        'Getting .gitignore contents',
+        '[GitService] Getting .gitignore contents',
         'debug'
       )
-      expect(logSpy).toHaveBeenCalledWith('.gitignore file not found', 'debug')
+      expect(logSpy).toHaveBeenCalledWith(
+        '[GitService] .gitignore file not found',
+        'debug'
+      )
     })
 
     it('should handle errors when reading gitignore', async () => {

@@ -66,70 +66,28 @@ export class FileUtils {
       isFile: boolean
     }[]
   > {
-    // Check access to directory
-    try {
-      await fsPromises.access(dir, fs.constants.R_OK)
-    } catch {
-      return []
-    }
+    // Keep track of visited directories to prevent circular symlink recursion
+    const visitedDirs = new Set<string>()
 
-    const items = await fsPromises.readdir(dir)
-    const results: {
-      name: string
-      fullPath: string
-      relativePath: string
-      time: number
-      isFile: boolean
-    }[] = []
-
-    // Process files and directories at root level
-    const filePromises = []
-
-    for (const item of items) {
-      const fullPath = path.join(dir, item)
-
-      try {
-        await fsPromises.access(fullPath, fs.constants.R_OK)
-        const stat = await fsPromises.stat(fullPath)
-
-        if (stat.isDirectory()) {
-          // At root level, apply excluded root directory exclusions
-          if (excludedRootDirectories.includes(item)) {
-            continue
-          }
-
-          // Process subdirectory (without applying root exclusions again)
-          filePromises.push(this.processSubdirectory(fullPath, dir, 1))
-        } else {
-          results.push({
-            name: item,
-            fullPath,
-            relativePath: item,
-            time: stat.mtime.getTime(),
-            isFile: true,
-          })
-        }
-      } catch {
-        continue
-      }
-    }
-
-    // Wait for all subdirectory processing to complete
-    const subdirResults = await Promise.all(filePromises)
-
-    // Combine all results
-    for (const subdirResult of subdirResults) {
-      results.push(...subdirResult)
-    }
-
-    return results
+    // Process directories without applying root exclusions
+    return this.processDirectory(
+      dir,
+      dir,
+      excludedRootDirectories,
+      0,
+      visitedDirs,
+      true
+    )
   }
 
-  // Process subdirectories without applying root exclusions
-  private static async processSubdirectory(
+  // Process directories with tracking to prevent circular symlink recursion
+  private static async processDirectory(
     dir: string,
     rootDir: string,
-    depth: number
+    excludedRootDirectories: string[] = [],
+    depth: number = 0,
+    visitedDirs: Set<string> = new Set(),
+    isRootLevel: boolean = false
   ): Promise<
     {
       name: string
@@ -141,6 +99,22 @@ export class FileUtils {
   > {
     // Skip if depth exceeds limit (prevent infinite recursion)
     if (depth > 20) {
+      return []
+    }
+
+    // Get canonical path to handle symlinks
+    let canonicalPath
+    try {
+      canonicalPath = await fsPromises.realpath(dir)
+
+      // Skip if we've already visited this directory (prevents circular symlinks)
+      if (visitedDirs.has(canonicalPath)) {
+        return []
+      }
+
+      // Add to visited set
+      visitedDirs.add(canonicalPath)
+    } catch {
       return []
     }
 
@@ -171,9 +145,14 @@ export class FileUtils {
         const stat = await fsPromises.stat(fullPath)
 
         if (stat.isDirectory()) {
-          // Process subdirectory recursively (no root exclusion here)
+          // At root level, apply excluded root directory exclusions
+          if (isRootLevel && excludedRootDirectories.includes(item)) {
+            continue
+          }
+
+          // Process subdirectory
           filePromises.push(
-            this.processSubdirectory(fullPath, rootDir, depth + 1)
+            this.processDirectory(fullPath, rootDir, [], depth + 1, visitedDirs)
           )
         } else {
           results.push({

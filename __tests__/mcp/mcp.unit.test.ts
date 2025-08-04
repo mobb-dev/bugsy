@@ -8,7 +8,11 @@ import { join } from 'path'
 
 import { CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
-import { MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES } from '../../src/mcp/tools/toolNames'
+import {
+  MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+  MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+} from '../../src/mcp/tools/toolNames'
 import { log } from './helpers/log'
 import {
   ActiveGitRepo,
@@ -278,13 +282,22 @@ describe('MCP Server', () => {
   })
 
   // Create a global error handler
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
-    // Force process to continue
-    process.exit(1)
+  process.on('unhandledRejection', (reason: unknown) => {
+    // Silently handle expected errors, specifically ApiConnectionError from CheckForNewAvailableFixesTool
+    // when mocks shut down during test cleanup
+    const isExpectedError =
+      reason instanceof Error &&
+      reason.message.includes('Failed to connect to the API')
+
+    if (!isExpectedError) {
+      // Only log unexpected errors
+      console.error('Unexpected unhandled rejection:', reason)
+      process.exit(1)
+    }
+    // Do not exit process - allow test to complete
   })
 
-  describe('FixVulnerabilitiesTool', () => {
+  describe(MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES, () => {
     it('should handle missing path parameter', async () => {
       const tool = new FixVulnerabilitiesTool()
       await expect(tool.execute({} as { path: string })).rejects.toThrow(
@@ -514,7 +527,7 @@ describe('MCP Server', () => {
         expectLogMessage(
           `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
         )
-        expectDebugMessage('FilePacking: packing files')
+        expectDebugMessage('[FileOperations] Packing files')
         expectLogMessage('Files packed successfully')
         expectDebugMessage('Upload info retrieved')
         expectLogMessage('File uploaded successfully')
@@ -524,12 +537,16 @@ describe('MCP Server', () => {
         expectLogMessage('Starting scan')
         expectLogMessage('Submitting vulnerability report')
         expectLogMessage('Vulnerability report submitted successfully')
-        expectDebugMessage('GraphQL: Starting GetAnalysis subscription')
-        expectDebugMessage('GraphQL: GetAnalysis subscription completed')
+        expectDebugMessage(
+          '[USER_REQUEST] GraphQL: Starting GetAnalysis subscription'
+        )
+        expectDebugMessage(
+          '[USER_REQUEST] GraphQL: GetAnalysis subscription completed'
+        )
 
         // Verify getMCPFixes logs with data
         expectDebugMessage('3 fixes retrieved')
-        expectDebugMessage('GraphQL: GetReportFixes successful', {
+        expectDebugMessage('[GraphQL] GetReportFixes successful', {
           result: expect.objectContaining({
             fixReport: expect.arrayContaining([
               expect.objectContaining({
@@ -583,7 +600,7 @@ describe('MCP Server', () => {
         expect(subscribeCall?.[3]).toEqual({
           apiKey: expect.any(String),
           type: 'apiKey',
-          timeoutInMs: 300000, // 5 minutes
+          timeoutInMs: 1800000, // 30 minutes
         }) // wsClientOptions
 
         // === VERIFY FINAL RESULT ===
@@ -641,7 +658,7 @@ describe('MCP Server', () => {
 
         // Verify error was logged with data
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: SubmitVulnerabilityReport failed', {
+        expectErrorLogWithData('[GraphQL] SubmitVulnerabilityReport failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Submission failed'),
             response: expect.objectContaining({
@@ -675,7 +692,7 @@ describe('MCP Server', () => {
 
         // Verify error was logged with data
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: GetReportFixes failed', {
+        expectErrorLogWithData('[GraphQL] GetReportFixes failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Failed to retrieve fixes'),
           }),
@@ -697,10 +714,8 @@ describe('MCP Server', () => {
         expectLogMessage(
           `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
         )
-        expectDebugMessage(
-          'Git repository validation failed, using all files in the repository'
-        )
-        expectDebugMessage('FilePacking: packing files')
+        expectDebugMessage('Found files in the repository')
+        expectDebugMessage('[FileOperations] Packing files')
         expectLogMessage('Files packed successfully')
 
         // Verify successful completion
@@ -728,10 +743,8 @@ describe('MCP Server', () => {
         expectLogMessage(
           `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
         )
-        expectDebugMessage(
-          'No changes found, using recently changed files from git history'
-        )
-        expectDebugMessage('FilePacking: packing files')
+        expectDebugMessage('Using recently changed files from git history')
+        expectDebugMessage('[FileOperations] Packing files')
         expectLogMessage('Files packed successfully')
 
         // Verify successful completion
@@ -863,7 +876,7 @@ describe('MCP Server', () => {
 
         // Verify error was logged with enhanced context
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: uploadS3BucketInfo failed', {
+        expectErrorLogWithData('[GraphQL] uploadS3BucketInfo failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Upload failed'),
           }),
@@ -887,7 +900,7 @@ describe('MCP Server', () => {
 
         // Verify error was logged with enhanced context
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: getProjectId failed', {
+        expectErrorLogWithData('[GraphQL] getProjectId failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Organization error'),
           }),
@@ -910,7 +923,7 @@ describe('MCP Server', () => {
 
         // Verify error was logged with enhanced context
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
-        expectErrorLogWithData('GraphQL: getProjectId failed', {
+        expectErrorLogWithData('[GraphQL] getProjectId failed', {
           error: expect.objectContaining({
             message: expect.stringContaining('Create project failed'),
           }),
@@ -919,7 +932,7 @@ describe('MCP Server', () => {
     })
   })
 
-  describe('CheckForAvailableFixesTool', () => {
+  describe(MCP_TOOL_FETCH_AVAILABLE_FIXES, () => {
     beforeEach(() => {
       // Reset all logger mocks before each test
       Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
@@ -1033,7 +1046,7 @@ describe('MCP Server', () => {
     })
   })
 
-  describe('CheckForNewAvailableFixesTool', () => {
+  describe(MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES, () => {
     beforeEach(() => {
       // Reset all logger mocks before each test
       Object.values(loggerMock.mocks).forEach((mock) => mock.mockClear())
@@ -1066,7 +1079,6 @@ describe('MCP Server', () => {
       mockGraphQL().getReportFixes().succeeds()
       const tool = new CheckForNewAvailableFixesTool()
       const result = await tool.execute({ path: activeRepoPath })
-
       expectValidResult(result)
       expect(result.content[0]?.text).toBe(initialScanInProgressPrompt)
     })

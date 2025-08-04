@@ -1,3 +1,4 @@
+import { ScanContext } from '@mobb/bugsy/types'
 import z from 'zod'
 
 import {
@@ -134,6 +135,7 @@ Example payload:
       path,
       maxFileSize: MCP_MAX_FILE_SIZE,
       maxFiles: args.maxFiles,
+      scanContext: ScanContext.USER_REQUEST,
     })
 
     logDebug('Files', { files })

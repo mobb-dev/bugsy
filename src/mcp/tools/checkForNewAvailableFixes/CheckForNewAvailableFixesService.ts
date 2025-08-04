@@ -1,3 +1,5 @@
+import { ScanContext } from '@mobb/bugsy/types'
+
 import {
   MCP_DEFAULT_LIMIT,
   MCP_PERIODIC_CHECK_INTERVAL,
@@ -84,7 +86,7 @@ export class CheckForNewAvailableFixesService {
     path: string
     isAllDetectionRulesScan?: boolean
     isAllFilesScan?: boolean
-    scanContext: 'FULL_SCAN' | 'BACKGROUND_INITIAL' | 'BACKGROUND_PERIODIC'
+    scanContext: ScanContext
   }): Promise<void> {
     logDebug(`[${scanContext}] Scanning for new security vulnerabilities`, {
       path,
@@ -108,6 +110,7 @@ export class CheckForNewAvailableFixesService {
       const files = await getLocalFiles({
         path,
         isAllFilesScan,
+        scanContext,
       })
 
       logDebug(`[${scanContext}] Active files`, { files })
@@ -159,7 +162,7 @@ export class CheckForNewAvailableFixesService {
         }`
       )
 
-      this.updateFreshFixesCache(newFixes || [], filesToScan)
+      this.updateFreshFixesCache(newFixes || [], filesToScan, scanContext)
       this.updateFilesScanTimestamps(filesToScan)
       this.isInitialScanComplete = true
     } catch (error) {
@@ -172,7 +175,7 @@ export class CheckForNewAvailableFixesService {
         errorMessage.includes('Authentication hook unauthorized')
       ) {
         logError(
-          'Periodic scan skipped due to authentication failure. Please re-authenticate by running a manual scan.',
+          `[${scanContext}] Periodic scan skipped due to authentication failure. Please re-authenticate by running a manual scan.`,
           {
             error: errorMessage,
           }
@@ -182,30 +185,39 @@ export class CheckForNewAvailableFixesService {
 
       // Handle other ReportInitializationErrors
       if (errorMessage.includes('ReportInitializationError')) {
-        logError('Periodic scan failed during report initialization', {
-          error: errorMessage,
-        })
+        logError(
+          `[${scanContext}] Periodic scan failed during report initialization`,
+          {
+            error: errorMessage,
+          }
+        )
         return
       }
 
       // Re-throw unexpected errors
-      logError('Unexpected error during periodic security scan', { error })
+      logError(
+        `[${scanContext}] Unexpected error during periodic security scan`,
+        { error }
+      )
       throw error
     }
   }
 
   private updateFreshFixesCache(
     newFixes: McpFix[],
-    filesToScan: LocalFile[]
+    filesToScan: LocalFile[],
+    scanContext: ScanContext
   ): void {
     this.freshFixes = this.freshFixes
-      .filter((fix) => !this.isFixFromOldScan(fix, filesToScan))
+      .filter((fix) => !this.isFixFromOldScan(fix, filesToScan, scanContext))
       .concat(newFixes)
       .sort((a: McpFix, b: McpFix) => {
         return (b.severityValue ?? 0) - (a.severityValue ?? 0)
       })
 
-    logInfo(`Fresh fixes cache updated, total: ${this.freshFixes.length}`)
+    logInfo(
+      `[${scanContext}] Fresh fixes cache updated, total: ${this.freshFixes.length}`
+    )
   }
 
   private updateFilesScanTimestamps(filesToScan: LocalFile[]): void {
@@ -220,7 +232,11 @@ export class CheckForNewAvailableFixesService {
     )
   }
 
-  private isFixFromOldScan(fix: McpFix, filesToScan: LocalFile[]): boolean {
+  private isFixFromOldScan(
+    fix: McpFix,
+    filesToScan: LocalFile[],
+    scanContext: ScanContext
+  ): boolean {
     const patch =
       fix.patchAndQuestions?.__typename === 'FixData'
         ? fix.patchAndQuestions.patch
@@ -231,7 +247,7 @@ export class CheckForNewAvailableFixesService {
       return false
     }
 
-    logDebug('Checking if fix is from old scan', {
+    logDebug(`[${scanContext}] Checking if fix is from old scan`, {
       fixFile,
       filesToScan,
       isFromOldScan: filesToScan.some((file) => file.relativePath === fixFile),
@@ -241,16 +257,19 @@ export class CheckForNewAvailableFixesService {
   }
 
   public async getFreshFixes({ path }: { path: string }): Promise<string> {
+    const scanContext = ScanContext.USER_REQUEST
+    logDebug(`[${scanContext}] Getting fresh fixes`, { path })
     if (this.path !== path) {
       this.path = path
       this.reset()
+      logInfo(`[${scanContext}] Reset service state for new path`, { path })
     }
     this.gqlClient = await createAuthenticatedMcpGQLClient()
 
     this.triggerScan({ path, gqlClient: this.gqlClient })
 
     if (this.freshFixes.length > 0) {
-      return this.generateFreshFixesResponse()
+      return this.generateFreshFixesResponse(scanContext)
     }
 
     if (!this.isInitialScanComplete) {
@@ -276,23 +295,29 @@ export class CheckForNewAvailableFixesService {
   }
 
   private startPeriodicScanning(path: string): void {
-    logDebug('Starting periodic scan for new security vulnerabilities', {
-      path,
-    })
+    const scanContext = ScanContext.BACKGROUND_PERIODIC
+    logDebug(
+      `[${scanContext}] Starting periodic scan for new security vulnerabilities`,
+      {
+        path,
+      }
+    )
 
     this.intervalId = setInterval(() => {
-      logDebug('Triggering periodic security scan', { path })
+      logDebug(`[${scanContext}] Triggering periodic security scan`, { path })
       this.scanForSecurityVulnerabilities({
         path,
-        scanContext: 'BACKGROUND_PERIODIC',
+        scanContext,
       }).catch((error) => {
-        logError('Error during periodic security scan', { error })
+        logError(`[${scanContext}] Error during periodic security scan`, {
+          error,
+        })
       })
     }, MCP_PERIODIC_CHECK_INTERVAL)
   }
 
   private async executeInitialFullScan(path: string): Promise<void> {
-    const scanContext = 'FULL_SCAN'
+    const scanContext = ScanContext.FULL_SCAN
     logDebug(`[${scanContext}] Triggering initial full security scan`, { path })
 
     logDebug(`[${scanContext}] Full scan paths scanned`, {
@@ -314,7 +339,7 @@ export class CheckForNewAvailableFixesService {
         path,
         isAllFilesScan: true,
         isAllDetectionRulesScan: true,
-        scanContext: 'FULL_SCAN',
+        scanContext: ScanContext.FULL_SCAN,
       })
       // Only update the class member and configstore after successful scan completion
       if (!this.fullScanPathsScanned.includes(path)) {
@@ -323,30 +348,38 @@ export class CheckForNewAvailableFixesService {
       }
       logInfo(`[${scanContext}] Full scan completed`, { path })
     } catch (error) {
-      logError('Error during initial full security scan', { error })
+      logError(`[${scanContext}] Error during initial full security scan`, {
+        error,
+      })
     }
   }
 
   private executeInitialScan(path: string): void {
-    const scanContext = 'BACKGROUND_INITIAL'
+    const scanContext = ScanContext.BACKGROUND_INITIAL
     logDebug(`[${scanContext}] Triggering initial security scan`, { path })
 
     this.scanForSecurityVulnerabilities({
       path,
-      scanContext: 'BACKGROUND_INITIAL',
+      scanContext: ScanContext.BACKGROUND_INITIAL,
     }).catch((error) => {
       logError(`[${scanContext}] Error during initial security scan`, { error })
     })
   }
 
-  private generateFreshFixesResponse(): string {
+  private generateFreshFixesResponse(
+    scanContext: ScanContext = ScanContext.USER_REQUEST
+  ): string {
     // Extract up to 3 fixes from the front of the array
     const freshFixes = this.freshFixes.splice(0, MCP_DEFAULT_LIMIT)
 
     if (freshFixes.length > 0) {
+      logInfo(
+        `[${scanContext}] Reporting ${freshFixes.length} fresh fixes to user`
+      )
       this.reportedFixes.push(...freshFixes)
       return freshFixesPrompt({ fixes: freshFixes, limit: MCP_DEFAULT_LIMIT })
     }
+    logInfo(`[${scanContext}] No fresh fixes to report`)
 
     return noFreshFixesPrompt
   }

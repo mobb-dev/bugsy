@@ -13,7 +13,7 @@ export const MCP_LOGIN_MAX_WAIT = 2 * 60 * 1000 // 2 minutes
 export const MCP_LOGIN_CHECK_DELAY = 2 * 1000 // 2 seconds
 
 // Timeout (ms) for digesting vulnerability report data received from the backend
-export const MCP_VUL_REPORT_DIGEST_TIMEOUT_MS = 5 * 60 * 1000 // 5 minutes
+export const MCP_VUL_REPORT_DIGEST_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 
 // Maximum size (bytes) of a single source file that will be packed and uploaded for analysis
 export const MCP_MAX_FILE_SIZE = MAX_UPLOAD_FILE_SIZE_MB * 1024 * 1024 // 5 MB

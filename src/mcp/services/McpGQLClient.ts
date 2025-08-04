@@ -51,7 +51,9 @@ export class McpGQLClient {
     this._auth = args
     this.apiUrl = process.env['API_URL'] || MCP_DEFAULT_API_URL
 
-    logDebug(`creating graphql client with api url ${this.apiUrl}`, { args })
+    logDebug(`[GraphQL] Creating graphql client with api url ${this.apiUrl}`, {
+      args,
+    })
     this.client = new GraphQLClient(this.apiUrl, {
       headers:
         args.type === 'apiKey'
@@ -89,16 +91,16 @@ export class McpGQLClient {
 
   async isApiEndpointReachable(): Promise<boolean> {
     try {
-      logDebug('GraphQL: Calling Me query for API connection verification')
+      logDebug('[GraphQL] Calling Me query for API connection verification')
       // Use the getUserInfo method for consistency
       const result = await this.getUserInfo()
-      logDebug('GraphQL: Me query successful', { result })
+      logDebug('[GraphQL] Me query successful', { result })
       return true
     } catch (e: unknown) {
       const error = e as Error
-      logDebug(`API connection verification failed`, { error })
+      logDebug(`[GraphQL] API connection verification failed`, { error })
       if (error?.toString().includes('FetchError')) {
-        logError('API connection verification failed', { error })
+        logError('[GraphQL] API connection verification failed', { error })
         return false
       }
     }
@@ -128,15 +130,15 @@ export class McpGQLClient {
 
   async uploadS3BucketInfo(): Promise<UploadS3BucketInfoMutation> {
     try {
-      logDebug('GraphQL: Calling uploadS3BucketInfo mutation')
+      logDebug('[GraphQL] Calling uploadS3BucketInfo mutation')
       // Use the SDK's uploadS3BucketInfo method
       const result = await this.clientSdk.uploadS3BucketInfo({
         fileName: 'report.json',
       })
-      logDebug('GraphQL: uploadS3BucketInfo successful', { result })
+      logDebug('[GraphQL] uploadS3BucketInfo successful', { result })
       return result
     } catch (e) {
-      logError('GraphQL: uploadS3BucketInfo failed', {
+      logError('[GraphQL] uploadS3BucketInfo failed', {
         error: e,
         ...this.getErrorContext(),
       })
@@ -146,17 +148,17 @@ export class McpGQLClient {
 
   async getAnalysis(analysisId: string): Promise<GetAnalysisQuery['analysis']> {
     try {
-      logDebug('GraphQL: Calling getAnalysis query', { analysisId })
+      logDebug('[GraphQL] Calling getAnalysis query', { analysisId })
       const res = await this.clientSdk.getAnalysis({
         analysisId,
       })
-      logDebug('GraphQL: getAnalysis successful', { result: res })
+      logDebug('[GraphQL] getAnalysis successful', { result: res })
       if (!res.analysis) {
         throw new Error(`Analysis not found: ${analysisId}`)
       }
       return res.analysis
     } catch (e) {
-      logError('GraphQL: getAnalysis failed', {
+      logError('[GraphQL] getAnalysis failed', {
         error: e,
         analysisId,
         ...this.getErrorContext(),
@@ -169,14 +171,14 @@ export class McpGQLClient {
     variables: SubmitVulnerabilityReportMutationVariables
   ): Promise<SubmitVulnerabilityReportMutation> {
     try {
-      logDebug('GraphQL: Calling SubmitVulnerabilityReport mutation', {
+      logDebug('[GraphQL] Calling SubmitVulnerabilityReport mutation', {
         variables,
       })
       const result = await this.clientSdk.SubmitVulnerabilityReport(variables)
-      logDebug('GraphQL: SubmitVulnerabilityReport successful', { result })
+      logDebug('[GraphQL] SubmitVulnerabilityReport successful', { result })
       return result
     } catch (e) {
-      logError('GraphQL: SubmitVulnerabilityReport failed', {
+      logError('[GraphQL] SubmitVulnerabilityReport failed', {
         error: e,
         variables,
         ...this.getErrorContext(),
@@ -284,14 +286,14 @@ export class McpGQLClient {
         .toUpperCase()
 
       const projectName = `MCP Scans ${shortEmailHash}`
-      logDebug('GraphQL: Calling getLastOrgAndNamedProject query', {
+      logDebug('[GraphQL] Calling getLastOrgAndNamedProject query', {
         projectName,
       })
       const orgAndProjectRes = await this.clientSdk.getLastOrgAndNamedProject({
         email: userEmail,
         projectName,
       })
-      logDebug('GraphQL: getLastOrgAndNamedProject successful', {
+      logDebug('[GraphQL] getLastOrgAndNamedProject successful', {
         result: orgAndProjectRes,
       })
 
@@ -309,14 +311,14 @@ export class McpGQLClient {
       const projectId = organization?.projects?.[0]?.id
 
       if (projectId) {
-        logDebug('GraphQL: Found existing project', {
+        logDebug('[GraphQL] Found existing project', {
           projectId,
           projectName,
         })
         return projectId
       }
 
-      logDebug('GraphQL: Project not found, creating new project', {
+      logDebug('[GraphQL] Project not found, creating new project', {
         organizationId: organization.id,
         projectName,
       })
@@ -324,10 +326,10 @@ export class McpGQLClient {
         organizationId: organization.id,
         projectName: projectName,
       })
-      logDebug('GraphQL: CreateProject successful', { result: createdProject })
+      logDebug('[GraphQL] CreateProject successful', { result: createdProject })
       return createdProject.createProject.projectId
     } catch (e) {
-      logError('GraphQL: getProjectId failed', {
+      logError('[GraphQL] getProjectId failed', {
         error: e,
         ...this.getErrorContext(),
       })
@@ -346,15 +348,15 @@ export class McpGQLClient {
   }
 
   async validateUserToken() {
-    logDebug('validating user token')
+    logDebug('[GraphQL] Validating user token')
 
     try {
       await this.clientSdk.CreateCommunityUser()
       const info = await this.getUserInfo()
-      logDebug('user token validated successfully')
+      logDebug('[GraphQL] User token validated successfully')
       return info?.email || true
     } catch (e) {
-      logError('user token validation failed')
+      logError('[GraphQL] User token validation failed')
       return false
     }
   }
@@ -370,12 +372,12 @@ export class McpGQLClient {
 
       const loginId = res.insert_cli_login_one?.id || ''
       if (!loginId) {
-        logError('create cli login failed - no login ID returned')
+        logError('[GraphQL] Create cli login failed - no login ID returned')
         return ''
       }
       return loginId
     } catch (e) {
-      logError('create cli login failed', { error: e })
+      logError('[GraphQL] Create cli login failed', { error: e })
       return ''
     }
   }
@@ -390,7 +392,7 @@ export class McpGQLClient {
       })
       return res?.cli_login_by_pk?.encryptedApiToken || null
     } catch (e) {
-      logError('get encrypted api token failed', { error: e })
+      logError('[GraphQL] Get encrypted api token failed', { error: e })
       return null
     }
   }
@@ -430,12 +432,12 @@ export class McpGQLClient {
         fixIds,
         source: FixDownloadSource.Mcp,
       })
-      logDebug('GraphQL: updateFixesDownloadStatus successful', {
+      logDebug('[GraphQL] updateFixesDownloadStatus successful', {
         result: resUpdate,
         fixIds,
       })
     } else {
-      logDebug('GraphQL: No fixes found to update download status')
+      logDebug('[GraphQL] No fixes found to update download status')
     }
   }
 
@@ -452,7 +454,7 @@ export class McpGQLClient {
     expiredReport: { id: string; expirationOn?: string } | null
   }> {
     try {
-      logDebug('GraphQL: Calling GetLatestReportByRepoUrl query', {
+      logDebug('[GraphQL] Calling GetLatestReportByRepoUrl query', {
         repoUrl,
         limit,
         offset,
@@ -467,7 +469,7 @@ export class McpGQLClient {
           currentUserEmail = `%${userInfo.email}%`
         }
       } catch (err) {
-        logDebug('Failed to get user email, using default pattern', {
+        logDebug('[GraphQL] Failed to get user email, using default pattern', {
           error: err,
         })
       }
@@ -478,7 +480,7 @@ export class McpGQLClient {
         offset,
         currentUserEmail,
       })
-      logDebug('GraphQL: GetLatestReportByRepoUrl successful', {
+      logDebug('[GraphQL] GetLatestReportByRepoUrl successful', {
         result: res,
         reportCount: res.fixReport?.length || 0,
       })
@@ -497,7 +499,7 @@ export class McpGQLClient {
         expiredReport: res.expiredReport?.[0] || null,
       }
     } catch (e) {
-      logError('GraphQL: GetLatestReportByRepoUrl failed', {
+      logError('[GraphQL] GetLatestReportByRepoUrl failed', {
         error: e,
         repoUrl,
         ...this.getErrorContext(),
@@ -535,7 +537,7 @@ export class McpGQLClient {
     }
 
     try {
-      logDebug('GraphQL: Calling GetReportFixes query', {
+      logDebug('[GraphQL] Calling GetReportFixes query', {
         reportId,
         limit,
         offset,
@@ -553,7 +555,7 @@ export class McpGQLClient {
           currentUserEmail = `%${userInfo.email}%`
         }
       } catch (err) {
-        logDebug('Failed to get user email, using default pattern', {
+        logDebug('[GraphQL] Failed to get user email, using default pattern', {
           error: err,
         })
       }
@@ -566,7 +568,7 @@ export class McpGQLClient {
         currentUserEmail,
       })
 
-      logDebug('GraphQL: GetReportFixes successful', {
+      logDebug('[GraphQL] GetReportFixes successful', {
         result: res,
         fixCount: res.fixReport?.[0]?.fixes?.length || 0,
         totalCount:
@@ -588,7 +590,7 @@ export class McpGQLClient {
         expiredReport: res.expiredReport?.[0] || null,
       }
     } catch (e) {
-      logError('GraphQL: GetReportFixes failed', {
+      logError('[GraphQL] GetReportFixes failed', {
         error: e,
         reportId,
         ...this.getErrorContext(),
@@ -603,7 +605,9 @@ export async function createAuthenticatedMcpGQLClient({
 }: {
   isBackgoundCall?: boolean
 } = {}): Promise<McpGQLClient> {
-  logDebug('getting config', { apiToken: configStore.get('apiToken') })
+  logDebug('[GraphQL] Getting config', {
+    apiToken: configStore.get('apiToken'),
+  })
   const initialClient = new McpGQLClient({
     apiKey:
       process.env['MOBB_API_KEY'] ||
@@ -614,12 +618,12 @@ export async function createAuthenticatedMcpGQLClient({
   })
 
   const isApiEndpointReachable = await initialClient.isApiEndpointReachable()
-  logDebug('API connection status', { isApiEndpointReachable })
+  logDebug('[GraphQL] API connection status', { isApiEndpointReachable })
   if (!isApiEndpointReachable) {
     throw new ApiConnectionError('Error: failed to reach Mobb GraphQL endpoint')
   }
 
-  logDebug('validating user token')
+  logDebug('[GraphQL] Validating user token')
   const userVerify = await initialClient.validateUserToken()
   if (userVerify) {
     return initialClient

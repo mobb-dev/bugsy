@@ -343,6 +343,8 @@ mutation SubmitVulnerabilityReport(
   $vulnerabilityReportFileName: String
   $pullRequest: Int
   $isFullScan: Boolean
+  $scanContext: String!
+  $fileCount: Int
 ) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
@@ -355,6 +357,8 @@ mutation SubmitVulnerabilityReport(
     projectId: $projectId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
     scanSource: $scanSource
+    scanContext: $scanContext
+    fileCount: $fileCount
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -667,14 +671,7 @@ query GetLatestReportByRepoUrl(
       _and: [
         { repo: { originalUrl: { _eq: $repoUrl } } }
         { state: { _eq: Finished } }
-        {
-          vulnerabilityReport: {
-            _or: [
-              { vendor: { _is_null: true } },
-              { vendor: { _nin: [semgrep, opengrep] } }
-            ]
-          }
-        }
+        { vulnerabilityReport: { scanSource: { _neq: MCP } } }
       ]
     }
     order_by: { createdOn: desc }
@@ -687,12 +684,7 @@ query GetLatestReportByRepoUrl(
       _and: [
         { repo: { originalUrl: { _eq: $repoUrl } } }
         { state: { _eq: Expired } }
-        {
-          _or: [
-            { vulnerabilityReport: { vendor: { _is_null: true } } }
-            { vulnerabilityReport: { vendor: { _nin: [semgrep, opengrep] } } }
-          ]
-        }
+        { vulnerabilityReport: { scanSource: { _neq: MCP } } }
       ]
     }
     order_by: { createdOn: desc }

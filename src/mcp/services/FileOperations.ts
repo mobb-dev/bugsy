@@ -31,7 +31,7 @@ export class FileOperations {
     repositoryPath: string,
     maxFileSize: number
   ): Promise<PackingResult> {
-    logDebug('FilePacking: packing files')
+    logDebug('[FileOperations] Packing files')
 
     const zip = new AdmZip()
     let packedFilesCount = 0
@@ -45,7 +45,7 @@ export class FileOperations {
       const resolvedFilePath = path.resolve(absoluteFilepath)
       if (!resolvedFilePath.startsWith(resolvedRepoPath)) {
         logDebug(
-          `Skipping ${filepath} due to potential path traversal security risk`
+          `[FileOperations] Skipping ${filepath} due to potential path traversal security risk`
         )
         continue
       }
@@ -53,7 +53,7 @@ export class FileOperations {
       // Use FileUtils to check if file should be packed
       if (!FileUtils.shouldPackFile(absoluteFilepath, maxFileSize)) {
         logDebug(
-          `Excluding ${filepath} - file is too large, binary, or matches exclusion rules`
+          `[FileOperations] Excluding ${filepath} - file is too large, binary, or matches exclusion rules`
         )
         continue
       }
@@ -73,7 +73,7 @@ export class FileOperations {
     }
 
     logInfo(
-      `Files packed successfully ${packedFilesCount} files, ${result.totalSize} bytes`
+      `[FileOperations] Files packed successfully ${packedFilesCount} files, ${result.totalSize} bytes`
     )
     return result
   }
@@ -97,7 +97,9 @@ export class FileOperations {
 
       // Security check: Prevent path traversal attacks
       if (!resolvedFilePath.startsWith(resolvedRepoPath)) {
-        logDebug(`Rejecting ${filepath} - path traversal attempt detected`)
+        logDebug(
+          `[FileOperations] Rejecting ${filepath} - path traversal attempt detected`
+        )
         continue
       }
 
@@ -106,7 +108,9 @@ export class FileOperations {
         await fs.promises.access(absoluteFilepath, fs.constants.R_OK)
         validatedPaths.push(filepath)
       } catch (error) {
-        logDebug(`Skipping ${filepath} - file is not accessible: ${error}`)
+        logDebug(
+          `[FileOperations] Skipping ${filepath} - file is not accessible: ${error}`
+        )
       }
     }
 
@@ -132,7 +136,9 @@ export class FileOperations {
           content,
         })
       } catch (error) {
-        logError(`Failed to read file ${absolutePath}: ${error}`)
+        logError(
+          `[FileOperations] Failed to read file ${absolutePath}: ${error}`
+        )
       }
     }
 
@@ -152,7 +158,9 @@ export class FileOperations {
     try {
       return await fs.promises.readFile(absoluteFilepath)
     } catch (fsError) {
-      logError(`Failed to read ${relativeFilepath} from filesystem: ${fsError}`)
+      logError(
+        `[FileOperations] Failed to read ${relativeFilepath} from filesystem: ${fsError}`
+      )
       return null
     }
   }

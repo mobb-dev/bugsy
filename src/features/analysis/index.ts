@@ -19,7 +19,7 @@ import {
   VUL_REPORT_DIGEST_TIMEOUT_MS,
   WEB_APP_URL,
 } from '@mobb/bugsy/constants'
-import { MobbCliCommand } from '@mobb/bugsy/types'
+import { MobbCliCommand, ScanContext } from '@mobb/bugsy/types'
 import * as utils from '@mobb/bugsy/utils'
 import { getTopLevelDirName, packageJson, sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
@@ -521,6 +521,7 @@ export async function _scan(
       experimentalEnabled: !!experimentalEnabled,
       pullRequest: params.pullRequest,
       scanSource: _getScanSource(command, ci),
+      scanContext: ScanContext.BUGSY,
     },
   })
   if (
@@ -722,6 +723,7 @@ export async function _scan(
           scanSource: _getScanSource(command, ci),
           pullRequest: params.pullRequest,
           experimentalEnabled: !!experimentalEnabled,
+          scanContext: ScanContext.BUGSY,
         },
       })
 

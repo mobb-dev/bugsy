@@ -150,6 +150,7 @@ export const FixPartsForFixScreenZ = FixQueryZ.merge(
       z.object({
         vendorIssueId: z.string(),
         issueType: z.string(),
+        issueLanguage: z.string(),
         sharedState: IssueSharedStateZ,
       })
     ),

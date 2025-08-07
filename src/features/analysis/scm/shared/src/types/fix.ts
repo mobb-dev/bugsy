@@ -77,7 +77,9 @@ export const FixRatingZ = z.object({
 
 const IssueSharedStateZ = z
   .object({
+    id: z.string(),
     isArchived: z.boolean(),
+    ticketIntegrationId: z.string().nullable(),
     ticketIntegrations: z.array(
       z.object({
         url: z.string(),
@@ -146,6 +148,7 @@ export const FixPartsForFixScreenZ = FixQueryZ.merge(
   z.object({
     vulnerabilityReportIssues: z.array(
       z.object({
+        vendorIssueId: z.string(),
         issueType: z.string(),
         sharedState: IssueSharedStateZ,
       })

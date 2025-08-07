@@ -14,6 +14,7 @@ export const CATEGORY = {
   FalsePositive: 'FalsePositive',
   Fixable: 'Fixable',
   Filtered: 'Filtered',
+  Pending: 'Pending',
 } as const
 export const ValidCategoriesZ = z.union([
   z.literal(CATEGORY.NoFix),
@@ -22,6 +23,7 @@ export const ValidCategoriesZ = z.union([
   z.literal(CATEGORY.FalsePositive),
   z.literal(CATEGORY.Fixable),
   z.literal(CATEGORY.Filtered),
+  z.literal(CATEGORY.Pending),
 ])
 
 export const VulnerabilityReportIssueSharedStateZ = z
@@ -36,6 +38,7 @@ export const VulnerabilityReportIssueSharedStateZ = z
     ),
   })
   .nullish()
+
 export const BaseIssuePartsZ = z.object({
   id: z.string().uuid(),
   safeIssueType: z.string(),
@@ -136,6 +139,7 @@ const GeneralIssueZ = BaseIssuePartsZ.merge(
       z.literal(CATEGORY.Unsupported),
       z.literal(CATEGORY.Fixable),
       z.literal(CATEGORY.Filtered),
+      z.literal(CATEGORY.Pending),
     ]),
   })
 )
@@ -182,11 +186,12 @@ export const mapCategoryToBucket: Record<IssueCategory, IssueBucket> = {
   NoFix: 'remaining',
   Unsupported: 'remaining',
   Fixable: 'fixable',
-  Filtered: 'remaining',
+  Filtered: 'irrelevant',
+  Pending: 'remaining',
 }
 
 export const mapBucketTypeToCategory: Record<IssueBucket, IssueCategory[]> = {
-  irrelevant: ['FalsePositive', 'Irrelevant'],
-  remaining: ['NoFix', 'Unsupported'],
+  irrelevant: ['FalsePositive', 'Irrelevant', 'Filtered'],
+  remaining: ['NoFix', 'Unsupported', 'Pending'],
   fixable: ['Fixable'],
 }

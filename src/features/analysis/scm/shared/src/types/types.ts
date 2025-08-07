@@ -361,7 +361,7 @@ const ProjectVulnerabilityReport = z.object({
   fixReport: z.object({
     id: z.string().uuid(),
     createdOn: z.string(),
-    vulnerabilityReportIssuesFixedCount: z.object({
+    vulnerabilityReportIrrelevantIssuesCount: z.object({
       vulnerabilityReportIssues_aggregate: z.object({
         aggregate: z.object({ count: z.number() }),
       }),

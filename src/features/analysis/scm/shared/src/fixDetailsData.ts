@@ -394,4 +394,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
     fixInstructions:
       'Specify a user in the Dockerfile to prevent security vulnerabilities.',
   },
+  [IssueType_Enum.MissingEncodingFileOpen]: undefined,
 }

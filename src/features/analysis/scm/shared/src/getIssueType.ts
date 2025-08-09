@@ -140,6 +140,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.CredentialDisclosure]: 'Credential Disclosure',
   [IssueType_Enum.InsecurePostmessage]: 'Insecure Postmessage',
   [IssueType_Enum.MissingUser]: 'Missing User',
+  [IssueType_Enum.MissingEncodingFileOpen]: 'Missing Encoding File Open',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

@@ -290,6 +290,19 @@ export type GetInvitationLinkResponse = {
   link: Scalars['String']['output'];
 };
 
+export type GetIssuesResponse = GetIssuesResponseError | GetIssuesResponseSuccess;
+
+export type GetIssuesResponseError = {
+  __typename?: 'GetIssuesResponseError';
+  error: Scalars['String']['output'];
+};
+
+export type GetIssuesResponseSuccess = {
+  __typename?: 'GetIssuesResponseSuccess';
+  vulnerability_report_issue: Array<VulnerabilityReportIssue>;
+  vulnerability_report_issue_total: VulnerabilityReportIssueTotal;
+};
+
 export type GetLinearIntegrationData = GetLinearIntegrationDataError | GetLinearIntegrationDataSuccess;
 
 export type GetLinearIntegrationDataError = {
@@ -969,6 +982,43 @@ export type VoteOnFixResponse = {
   status: Status;
 };
 
+export type VulnReportFix = {
+  __typename?: 'VulnReportFix';
+  effortToApplyFix: Scalars['String']['output'];
+  gitBlameLogin?: Maybe<Scalars['String']['output']>;
+  isArchived: Scalars['Boolean']['output'];
+  isExpired: Scalars['Boolean']['output'];
+  numberOfVulnerabilityIssues: Scalars['Int']['output'];
+  state: Scalars['String']['output'];
+  submitFixRequests: Array<VulnReportFixToSubmitFixRequest>;
+};
+
+export type VulnReportFixToSubmitFixRequest = {
+  __typename?: 'VulnReportFixToSubmitFixRequest';
+  submitFixRequest: VulnReportSubmitFixRequest;
+};
+
+export type VulnReportScmSubmitFixRequest = {
+  __typename?: 'VulnReportScmSubmitFixRequest';
+  commitUrl?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type VulnReportSubmitFixRequest = {
+  __typename?: 'VulnReportSubmitFixRequest';
+  createdByUser: VulnReportUser;
+  createdOn: Scalars['String']['output'];
+  scmSubmitFixRequests: Array<VulnReportScmSubmitFixRequest>;
+  title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type VulnReportUser = {
+  __typename?: 'VulnReportUser';
+  email: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+};
+
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
   fixReport: FixReportSubmitReport;
@@ -982,6 +1032,36 @@ export type VulnerabilityReportDownloadError = BaseError & {
   __typename?: 'VulnerabilityReportDownloadError';
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
+};
+
+export type VulnerabilityReportIssue = {
+  __typename?: 'VulnerabilityReportIssue';
+  createdAt: Scalars['String']['output'];
+  fingerprintHash?: Maybe<Scalars['String']['output']>;
+  fix?: Maybe<VulnReportFix>;
+  id: Scalars['String']['output'];
+  issueLanguage: Scalars['String']['output'];
+  issueType: Scalars['String']['output'];
+  severity: Scalars['String']['output'];
+  state: Scalars['String']['output'];
+  vendorInstanceId?: Maybe<Scalars['String']['output']>;
+  vendorIssueId: Scalars['String']['output'];
+  vulnerabilityReportIssueTags: Array<VulnerabilityReportIssueTag>;
+};
+
+export type VulnerabilityReportIssueAggregate = {
+  __typename?: 'VulnerabilityReportIssueAggregate';
+  count: Scalars['Int']['output'];
+};
+
+export type VulnerabilityReportIssueTag = {
+  __typename?: 'VulnerabilityReportIssueTag';
+  vulnerability_report_issue_tag_value: Scalars['String']['output'];
+};
+
+export type VulnerabilityReportIssueTotal = {
+  __typename?: 'VulnerabilityReportIssueTotal';
+  aggregate: VulnerabilityReportIssueAggregate;
 };
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
@@ -12218,6 +12298,8 @@ export enum IssueType_Enum {
   MissingCheckAgainstNull = 'MISSING_CHECK_AGAINST_NULL',
   /** Missing CSP Header */
   MissingCspHeader = 'MISSING_CSP_HEADER',
+  /** MISSING_ENCODING_FILE_OPEN */
+  MissingEncodingFileOpen = 'MISSING_ENCODING_FILE_OPEN',
   /** Missing equals or hashcode method */
   MissingEqualsOrHashcode = 'MISSING_EQUALS_OR_HASHCODE',
   /** Missing HSTS Header */
@@ -22349,6 +22431,7 @@ export type Query_Root = {
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
+  getIssues: GetIssuesResponse;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
@@ -23507,6 +23590,14 @@ export type Query_RootGetFixArgs = {
 export type Query_RootGetInvitationLinkArgs = {
   id: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetIssuesArgs = {
+  createdAfter: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Scalars['String']['input']>;
 };
 
 

@@ -4380,6 +4380,9 @@ export type Analytics_Stats_Report = {
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
+  /** An object relationship */
+  project?: Maybe<Project>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
   /** An array relationship */
   statsReportTimePeriods: Array<Analytics_Stats_Report_Time_Period>;
   /** An aggregate relationship */
@@ -4437,6 +4440,8 @@ export type Analytics_Stats_Report_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
   statsReportTimePeriods?: InputMaybe<Analytics_Stats_Report_Time_Period_Bool_Exp>;
   statsReportTimePeriods_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Bool_Exp>;
 };
@@ -4453,6 +4458,8 @@ export type Analytics_Stats_Report_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
   statsReportTimePeriods?: InputMaybe<Analytics_Stats_Report_Time_Period_Arr_Rel_Insert_Input>;
 };
 
@@ -4462,6 +4469,7 @@ export type Analytics_Stats_Report_Max_Fields = {
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** aggregate min on columns */
@@ -4470,6 +4478,7 @@ export type Analytics_Stats_Report_Min_Fields = {
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** response of any mutation on the table "analytics.stats_report" */
@@ -4501,6 +4510,8 @@ export type Analytics_Stats_Report_Order_By = {
   id?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
   statsReportTimePeriods_aggregate?: InputMaybe<Analytics_Stats_Report_Time_Period_Aggregate_Order_By>;
 };
 
@@ -4516,7 +4527,9 @@ export enum Analytics_Stats_Report_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  OrganizationId = 'organizationId'
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProjectId = 'projectId'
 }
 
 /** input type for updating data in table "analytics.stats_report" */
@@ -4524,6 +4537,7 @@ export type Analytics_Stats_Report_Set_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** Streaming cursor of the table "analytics_stats_report" */
@@ -4539,6 +4553,7 @@ export type Analytics_Stats_Report_Stream_Cursor_Value_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** columns and relationships of "analytics.stats_report_time_period" */
@@ -4575,8 +4590,8 @@ export type Analytics_Stats_Report_Time_Period = {
   statsReport: Analytics_Stats_Report;
   stats_report_id: Scalars['uuid']['output'];
   /** An object relationship */
-  systemUsageStat: Analytics_System_Usage_Stats;
-  system_usage_stats_id: Scalars['uuid']['output'];
+  systemUsageStat?: Maybe<Analytics_System_Usage_Stats>;
+  system_usage_stats_id?: Maybe<Scalars['uuid']['output']>;
   timePeriod: Analytics_Time_Period_Enum;
 };
 
@@ -4940,7 +4955,9 @@ export enum Analytics_Stats_Report_Update_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  OrganizationId = 'organizationId'
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProjectId = 'projectId'
 }
 
 export type Analytics_Stats_Report_Updates = {
@@ -6377,7 +6394,17 @@ export type DeployedFixesCount_Organization_Args = {
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
+export type DeployedFixesCount_Project_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
 export type DeployedVulnerabilityIssuesCount_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type DeployedVulnerabilityIssuesCount_Project_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -10910,6 +10937,11 @@ export type Fix_Variance_Order_By = {
 };
 
 export type GeneratedFixAndVulUnique_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type GeneratedFixAndVulUnique_Project_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -20688,6 +20720,12 @@ export type Project = {
   /** An aggregate relationship */
   aggregatedVulnerabilitySeveritiesView_aggregate: View_Project_Vulnerability_Severities_Aggregate;
   createdOn: Scalars['timestamptz']['output'];
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_generated_fix_and_vul_unique" */
+  generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
   id: Scalars['uuid']['output'];
   isDefault?: Maybe<Scalars['Boolean']['output']>;
   isDeleted: Scalars['Boolean']['output'];
@@ -20758,6 +20796,25 @@ export type ProjectAggregatedVulnerabilitySeveritiesView_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
   where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
+
+/** columns and relationships of "project" */
+export type ProjectGeneratedFixAndVulUniqueArgs = {
+  args: GeneratedFixAndVulUnique_Project_Args;
+  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -20887,9 +20944,17 @@ export type Project_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "project" */
 export type Project_Aggregate_Fields = {
   __typename?: 'project_aggregate_fields';
+  avg?: Maybe<Project_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Project_Max_Fields>;
   min?: Maybe<Project_Min_Fields>;
+  stddev?: Maybe<Project_Stddev_Fields>;
+  stddev_pop?: Maybe<Project_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Project_Stddev_Samp_Fields>;
+  sum?: Maybe<Project_Sum_Fields>;
+  var_pop?: Maybe<Project_Var_Pop_Fields>;
+  var_samp?: Maybe<Project_Var_Samp_Fields>;
+  variance?: Maybe<Project_Variance_Fields>;
 };
 
 
@@ -20911,6 +20976,27 @@ export type Project_Arr_Rel_Insert_Input = {
   data: Array<Project_Insert_Input>;
   /** upsert condition */
   on_conflict?: InputMaybe<Project_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Project_Avg_Fields = {
+  __typename?: 'project_avg_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate avg on columns */
+export type Project_Avg_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate avg on columns */
+export type Project_Avg_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
 };
 
 /** Boolean expression to filter rows from the table "project". All fields are combined with a logical 'AND'. */
@@ -21215,10 +21301,26 @@ export type Project_Issue_Type_Settings_Updates = {
 export type Project_Max_Fields = {
   __typename?: 'project_max_fields';
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+
+/** aggregate max on columns */
+export type Project_Max_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate max on columns */
+export type Project_Max_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
 };
 
 /** order by max() on columns of table "project" */
@@ -21234,10 +21336,26 @@ export type Project_Max_Order_By = {
 export type Project_Min_Fields = {
   __typename?: 'project_min_fields';
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+
+/** aggregate min on columns */
+export type Project_Min_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate min on columns */
+export type Project_Min_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
 };
 
 /** order by min() on columns of table "project" */
@@ -21732,6 +21850,69 @@ export type Project_Set_Input = {
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
+/** aggregate stddev on columns */
+export type Project_Stddev_Fields = {
+  __typename?: 'project_stddev_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev on columns */
+export type Project_Stddev_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate stddev on columns */
+export type Project_Stddev_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
+/** aggregate stddev_pop on columns */
+export type Project_Stddev_Pop_Fields = {
+  __typename?: 'project_stddev_pop_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev_pop on columns */
+export type Project_Stddev_Pop_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate stddev_pop on columns */
+export type Project_Stddev_Pop_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
+/** aggregate stddev_samp on columns */
+export type Project_Stddev_Samp_Fields = {
+  __typename?: 'project_stddev_samp_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate stddev_samp on columns */
+export type Project_Stddev_Samp_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate stddev_samp on columns */
+export type Project_Stddev_Samp_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
 /** Streaming cursor of the table "project" */
 export type Project_Stream_Cursor_Input = {
   /** Stream column input with initial value */
@@ -21749,6 +21930,27 @@ export type Project_Stream_Cursor_Value_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Project_Sum_Fields = {
+  __typename?: 'project_sum_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate sum on columns */
+export type Project_Sum_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate sum on columns */
+export type Project_Sum_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
 };
 
 /** columns and relationships of "project_to_project_role" */
@@ -22211,6 +22413,69 @@ export type Project_Updates = {
   _set?: InputMaybe<Project_Set_Input>;
   /** filter the rows which have to be updated */
   where: Project_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Project_Var_Pop_Fields = {
+  __typename?: 'project_var_pop_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate var_pop on columns */
+export type Project_Var_Pop_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate var_pop on columns */
+export type Project_Var_Pop_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
+/** aggregate var_samp on columns */
+export type Project_Var_Samp_Fields = {
+  __typename?: 'project_var_samp_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate var_samp on columns */
+export type Project_Var_Samp_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate var_samp on columns */
+export type Project_Var_Samp_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
+};
+
+/** aggregate variance on columns */
+export type Project_Variance_Fields = {
+  __typename?: 'project_variance_fields';
+  /** A computed field, executes function "project_deployed_fixes_count" */
+  deployedFixesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
+  deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** aggregate variance on columns */
+export type Project_Variance_FieldsDeployedFixesCountArgs = {
+  args: DeployedFixesCount_Project_Args;
+};
+
+
+/** aggregate variance on columns */
+export type Project_Variance_FieldsDeployedVulnerabilityIssuesCountArgs = {
+  args: DeployedVulnerabilityIssuesCount_Project_Args;
 };
 
 export type Query_Root = {

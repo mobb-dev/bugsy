@@ -395,4 +395,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'Specify a user in the Dockerfile to prevent security vulnerabilities.',
   },
   [IssueType_Enum.MissingEncodingFileOpen]: undefined,
+  [IssueType_Enum.PortAllInterfaces]: undefined,
+  [IssueType_Enum.WritableFilesystemService]: undefined,
+  [IssueType_Enum.NoNewPrivileges]: undefined,
 }

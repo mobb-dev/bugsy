@@ -7,6 +7,7 @@ import java from './java'
 import js from './js'
 import python from './python'
 import xml from './xml'
+import yaml from './yaml'
 
 export * from './optionValues'
 
@@ -30,6 +31,7 @@ export const languages: {
   [IssueLanguage_Enum.CSharp as string]: csharp,
   [IssueLanguage_Enum.Python as string]: python,
   [IssueLanguage_Enum.Go as string]: go,
+  [IssueLanguage_Enum.Yaml as string]: yaml,
 }
 
 export type SQLInjection = typeof java.SQL_Injection

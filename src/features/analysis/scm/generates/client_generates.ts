@@ -12354,6 +12354,8 @@ export enum IssueType_Enum {
   NoLimitsOrThrottling = 'NO_LIMITS_OR_THROTTLING',
   /** NO_NESTED_TRY */
   NoNestedTry = 'NO_NESTED_TRY',
+  /** NO_NEW_PRIVILEGES */
+  NoNewPrivileges = 'NO_NEW_PRIVILEGES',
   /** NO_OP_OVERHEAD */
   NoOpOverhead = 'NO_OP_OVERHEAD',
   /** NO_PRINT_STATEMENT */
@@ -12374,6 +12376,8 @@ export enum IssueType_Enum {
   PasswordInComment = 'PASSWORD_IN_COMMENT',
   /** Catch blocks with nothing inside or just a comment. */
   PoorErrorHandlingEmptyCatchBlock = 'POOR_ERROR_HANDLING_EMPTY_CATCH_BLOCK',
+  /** PORT_ALL_INTERFACES */
+  PortAllInterfaces = 'PORT_ALL_INTERFACES',
   /** Privacy Violation */
   PrivacyViolation = 'PRIVACY_VIOLATION',
   /** Prototype Pollution */
@@ -12444,6 +12448,8 @@ export enum IssueType_Enum {
   WebsocketMissingOriginCheck = 'WEBSOCKET_MISSING_ORIGIN_CHECK',
   /** WILDCARD_IMPORTS */
   WildcardImports = 'WILDCARD_IMPORTS',
+  /** WRITABLE_FILESYSTEM_SERVICE */
+  WritableFilesystemService = 'WRITABLE_FILESYSTEM_SERVICE',
   /** Cross Site Scripting */
   Xss = 'XSS',
   /** XXE */
@@ -17980,6 +17986,8 @@ export type Organization = {
   id: Scalars['uuid']['output'];
   includeSuppressed: Scalars['Boolean']['output'];
   isAiEnabled: Scalars['Boolean']['output'];
+  isDashboardActivityOrg: Scalars['Boolean']['output'];
+  isDashboardActivityProject: Scalars['Boolean']['output'];
   isPrivateRepoEnabled: Scalars['Boolean']['output'];
   isSendInvitationEnabled: Scalars['Boolean']['output'];
   /** An array relationship */
@@ -18400,6 +18408,8 @@ export type Organization_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   includeSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
+  isDashboardActivityOrg?: InputMaybe<Boolean_Comparison_Exp>;
+  isDashboardActivityProject?: InputMaybe<Boolean_Comparison_Exp>;
   isPrivateRepoEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isSendInvitationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
@@ -18699,6 +18709,8 @@ export type Organization_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
@@ -19080,6 +19092,8 @@ export type Organization_Order_By = {
   id?: InputMaybe<Order_By>;
   includeSuppressed?: InputMaybe<Order_By>;
   isAiEnabled?: InputMaybe<Order_By>;
+  isDashboardActivityOrg?: InputMaybe<Order_By>;
+  isDashboardActivityProject?: InputMaybe<Order_By>;
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   isSendInvitationEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
@@ -19686,6 +19700,10 @@ export enum Organization_Select_Column {
   /** column name */
   IsAiEnabled = 'isAiEnabled',
   /** column name */
+  IsDashboardActivityOrg = 'isDashboardActivityOrg',
+  /** column name */
+  IsDashboardActivityProject = 'isDashboardActivityProject',
+  /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */
   IsSendInvitationEnabled = 'isSendInvitationEnabled',
@@ -19712,6 +19730,8 @@ export type Organization_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -19866,6 +19886,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
+  isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -20395,6 +20417,10 @@ export enum Organization_Update_Column {
   IncludeSuppressed = 'includeSuppressed',
   /** column name */
   IsAiEnabled = 'isAiEnabled',
+  /** column name */
+  IsDashboardActivityOrg = 'isDashboardActivityOrg',
+  /** column name */
+  IsDashboardActivityProject = 'isDashboardActivityProject',
   /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */

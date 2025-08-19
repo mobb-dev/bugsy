@@ -6651,8 +6651,6 @@ export type False_Positive = {
   __typename?: 'false_positive';
   created_on: Scalars['timestamptz']['output'];
   /** An object relationship */
-  fixInfoFile: File;
-  /** An object relationship */
   fixReport: FixReport;
   /** An object relationship */
   fpInfoFile?: Maybe<File>;
@@ -6714,7 +6712,6 @@ export type False_Positive_Bool_Exp = {
   _not?: InputMaybe<False_Positive_Bool_Exp>;
   _or?: InputMaybe<Array<False_Positive_Bool_Exp>>;
   created_on?: InputMaybe<Timestamptz_Comparison_Exp>;
-  fixInfoFile?: InputMaybe<File_Bool_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   fpInfoFile?: InputMaybe<File_Bool_Exp>;
   fpInfoFileId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -6731,7 +6728,6 @@ export enum False_Positive_Constraint {
 /** input type for inserting data into table "false_positive" */
 export type False_Positive_Insert_Input = {
   created_on?: InputMaybe<Scalars['timestamptz']['input']>;
-  fixInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   fpInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   fpInfoFileId?: InputMaybe<Scalars['uuid']['input']>;
@@ -6799,7 +6795,6 @@ export type False_Positive_On_Conflict = {
 /** Ordering options when selecting data from "false_positive". */
 export type False_Positive_Order_By = {
   created_on?: InputMaybe<Order_By>;
-  fixInfoFile?: InputMaybe<File_Order_By>;
   fixReport?: InputMaybe<FixReport_Order_By>;
   fpInfoFile?: InputMaybe<File_Order_By>;
   fpInfoFileId?: InputMaybe<Order_By>;
@@ -30885,8 +30880,6 @@ export type Unfixable = {
   __typename?: 'unfixable';
   created_on: Scalars['timestamptz']['output'];
   /** An object relationship */
-  fixInfoFile: File;
-  /** An object relationship */
   fixReport: FixReport;
   id: Scalars['uuid']['output'];
   /** An object relationship */
@@ -30923,7 +30916,6 @@ export type Unfixable_Bool_Exp = {
   _not?: InputMaybe<Unfixable_Bool_Exp>;
   _or?: InputMaybe<Array<Unfixable_Bool_Exp>>;
   created_on?: InputMaybe<Timestamptz_Comparison_Exp>;
-  fixInfoFile?: InputMaybe<File_Bool_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   infoFile?: InputMaybe<File_Bool_Exp>;
@@ -30940,7 +30932,6 @@ export enum Unfixable_Constraint {
 /** input type for inserting data into table "unfixable" */
 export type Unfixable_Insert_Input = {
   created_on?: InputMaybe<Scalars['timestamptz']['input']>;
-  fixInfoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   infoFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
@@ -30992,7 +30983,6 @@ export type Unfixable_On_Conflict = {
 /** Ordering options when selecting data from "unfixable". */
 export type Unfixable_Order_By = {
   created_on?: InputMaybe<Order_By>;
-  fixInfoFile?: InputMaybe<File_Order_By>;
   fixReport?: InputMaybe<FixReport_Order_By>;
   id?: InputMaybe<Order_By>;
   infoFile?: InputMaybe<File_Order_By>;

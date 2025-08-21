@@ -398,4 +398,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.PortAllInterfaces]: undefined,
   [IssueType_Enum.WritableFilesystemService]: undefined,
   [IssueType_Enum.NoNewPrivileges]: undefined,
+  [IssueType_Enum.UselessTernary]: undefined,
 }

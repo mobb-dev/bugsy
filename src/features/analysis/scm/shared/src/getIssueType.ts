@@ -144,6 +144,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.PortAllInterfaces]: 'Port All Interfaces',
   [IssueType_Enum.WritableFilesystemService]: 'Writable Filesystem Service',
   [IssueType_Enum.NoNewPrivileges]: 'No New Privileges',
+  [IssueType_Enum.UselessTernary]: 'Useless Ternary',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

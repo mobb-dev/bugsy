@@ -20,6 +20,8 @@ export type Scalars = {
   date: { input: any; output: any; }
   json: { input: any; output: any; }
   jsonb: { input: any; output: any; }
+  organization_scalar: { input: any; output: any; }
+  project_scalar: { input: any; output: any; }
   smallint: { input: any; output: any; }
   timestamp: { input: any; output: any; }
   timestamptz: { input: any; output: any; }
@@ -301,6 +303,13 @@ export type GetIssuesResponseSuccess = {
   __typename?: 'GetIssuesResponseSuccess';
   vulnerability_report_issue: Array<VulnerabilityReportIssue>;
   vulnerability_report_issue_total: VulnerabilityReportIssueTotal;
+};
+
+export type GetIssuesV3Response = GetIssuesResponseError | GetIssuesV3ResponseSuccess;
+
+export type GetIssuesV3ResponseSuccess = {
+  __typename?: 'GetIssuesV3ResponseSuccess';
+  vulnerability_report_issue: Array<VulnerabilityReportIssue>;
 };
 
 export type GetLinearIntegrationData = GetLinearIntegrationDataError | GetLinearIntegrationDataSuccess;
@@ -10941,6 +10950,11 @@ export type GeneratedFixAndVulUnique_Project_Args = {
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
+export type Get_Vulnerability_Report_Issues_For_User_Args = {
+  created_after?: InputMaybe<Scalars['timestamptz']['input']>;
+  user_email?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** columns and relationships of "integration" */
 export type Integration = {
   __typename?: 'integration';
@@ -12423,6 +12437,8 @@ export enum IssueType_Enum {
   UnvalidatedPublicMethodArgument = 'UNVALIDATED_PUBLIC_METHOD_ARGUMENT',
   /** Useless regular-expression character escape */
   UselessRegexpCharEscape = 'USELESS_REGEXP_CHAR_ESCAPE',
+  /** USELESS_TERNARY */
+  UselessTernary = 'USELESS_TERNARY',
   /** Use_of_Hard_coded_Cryptographic_Key */
   UseOfHardCodedCryptographicKey = 'USE_OF_HARD_CODED_CRYPTOGRAPHIC_KEY',
   /** Printing logs in assorted way to the sys out/err */
@@ -18340,6 +18356,11 @@ export type Organization_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type Organization_Aggregated_Vulnerabilities_Args = {
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  organization_row?: InputMaybe<Scalars['organization_scalar']['input']>;
+};
+
 /** append existing jsonb value of filtered columns with new jsonb value */
 export type Organization_Append_Input = {
   /** This is a deprecated field it should be deleted */
@@ -20992,6 +21013,11 @@ export type Project_Aggregate_Order_By = {
   min?: InputMaybe<Project_Min_Order_By>;
 };
 
+export type Project_Aggregated_Vulnerability_Severities_Args = {
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  project_row?: InputMaybe<Scalars['project_scalar']['input']>;
+};
+
 /** input type for inserting array relation for remote table "project" */
 export type Project_Arr_Rel_Insert_Input = {
   data: Array<Project_Insert_Input>;
@@ -22718,11 +22744,16 @@ export type Query_Root = {
   getFix: RegisterUserResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
   getIssues: GetIssuesResponse;
+  getIssuesApiV3: GetIssuesV3Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
+  /** execute function "get_vulnerability_report_issues_for_user" which returns "vulnerability_report_issue" */
+  get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
+  /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
+  get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
   gitReference?: Maybe<GitReferenceResponse>;
   /** fetch data from the table: "integration" */
   integration: Array<Integration>;
@@ -22780,6 +22811,10 @@ export type Query_Root = {
   organization: Array<Organization>;
   /** fetch aggregated fields from the table: "organization" */
   organization_aggregate: Organization_Aggregate;
+  /** execute function "organization_aggregated_vulnerabilities" which returns "aggregated_fix_state" */
+  organization_aggregated_vulnerabilities: Array<Aggregated_Fix_State>;
+  /** execute function "organization_aggregated_vulnerabilities" and query aggregates on result of table type "aggregated_fix_state" */
+  organization_aggregated_vulnerabilities_aggregate: Aggregated_Fix_State_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
   /** fetch data from the table: "organization_files_matching_settings" */
@@ -22835,6 +22870,10 @@ export type Query_Root = {
   projectIssueStats: ProjectIssueStats;
   /** fetch aggregated fields from the table: "project" */
   project_aggregate: Project_Aggregate;
+  /** execute function "project_aggregated_vulnerability_severities" which returns "aggregated_severities" */
+  project_aggregated_vulnerability_severities: Array<Aggregated_Severities>;
+  /** execute function "project_aggregated_vulnerability_severities" and query aggregates on result of table type "aggregated_severities" */
+  project_aggregated_vulnerability_severities_aggregate: Aggregated_Severities_Aggregate;
   /** fetch data from the table: "project" using primary key columns */
   project_by_pk?: Maybe<Project>;
   /** fetch data from the table: "project_issue_type_settings" */
@@ -23887,6 +23926,11 @@ export type Query_RootGetIssuesArgs = {
 };
 
 
+export type Query_RootGetIssuesApiV3Args = {
+  createdAfter: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetLinearIntegrationDataArgs = {
   organizationId: Scalars['String']['input'];
 };
@@ -23912,6 +23956,26 @@ export type Query_RootGetSplitFixArgs = {
   fixId: Scalars['uuid']['input'];
   loadAnswers: Scalars['Boolean']['input'];
   userInput?: InputMaybe<Array<QuestionAnswer>>;
+};
+
+
+export type Query_RootGet_Vulnerability_Report_Issues_For_UserArgs = {
+  args: Get_Vulnerability_Report_Issues_For_User_Args;
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+export type Query_RootGet_Vulnerability_Report_Issues_For_User_AggregateArgs = {
+  args: Get_Vulnerability_Report_Issues_For_User_Args;
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
 };
 
 
@@ -24128,6 +24192,26 @@ export type Query_RootOrganization_AggregateArgs = {
 };
 
 
+export type Query_RootOrganization_Aggregated_VulnerabilitiesArgs = {
+  args: Organization_Aggregated_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Fix_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
+  where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Aggregated_Vulnerabilities_AggregateArgs = {
+  args: Organization_Aggregated_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Fix_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
+  where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
 export type Query_RootOrganization_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
@@ -24337,6 +24421,26 @@ export type Query_RootProject_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Project_Order_By>>;
   where?: InputMaybe<Project_Bool_Exp>;
+};
+
+
+export type Query_RootProject_Aggregated_Vulnerability_SeveritiesArgs = {
+  args: Project_Aggregated_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
+  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootProject_Aggregated_Vulnerability_Severities_AggregateArgs = {
+  args: Project_Aggregated_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
+  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
 };
 
 
@@ -27585,6 +27689,10 @@ export type Subscription_Root = {
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   /** fetch data from the table in a streaming manner: "fix_to_submit_fix_request" */
   fix_to_submit_fix_request_stream: Array<Fix_To_Submit_Fix_Request>;
+  /** execute function "get_vulnerability_report_issues_for_user" which returns "vulnerability_report_issue" */
+  get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
+  /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
+  get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
   /** fetch data from the table: "integration" */
   integration: Array<Integration>;
   /** fetch aggregated fields from the table: "integration" */
@@ -27653,6 +27761,10 @@ export type Subscription_Root = {
   organization: Array<Organization>;
   /** fetch aggregated fields from the table: "organization" */
   organization_aggregate: Organization_Aggregate;
+  /** execute function "organization_aggregated_vulnerabilities" which returns "aggregated_fix_state" */
+  organization_aggregated_vulnerabilities: Array<Aggregated_Fix_State>;
+  /** execute function "organization_aggregated_vulnerabilities" and query aggregates on result of table type "aggregated_fix_state" */
+  organization_aggregated_vulnerabilities_aggregate: Aggregated_Fix_State_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
   /** fetch data from the table: "organization_files_matching_settings" */
@@ -27725,6 +27837,10 @@ export type Subscription_Root = {
   project: Array<Project>;
   /** fetch aggregated fields from the table: "project" */
   project_aggregate: Project_Aggregate;
+  /** execute function "project_aggregated_vulnerability_severities" which returns "aggregated_severities" */
+  project_aggregated_vulnerability_severities: Array<Aggregated_Severities>;
+  /** execute function "project_aggregated_vulnerability_severities" and query aggregates on result of table type "aggregated_severities" */
+  project_aggregated_vulnerability_severities_aggregate: Aggregated_Severities_Aggregate;
   /** fetch data from the table: "project" using primary key columns */
   project_by_pk?: Maybe<Project>;
   /** fetch data from the table: "project_issue_type_settings" */
@@ -29032,6 +29148,26 @@ export type Subscription_RootFix_To_Submit_Fix_Request_StreamArgs = {
 };
 
 
+export type Subscription_RootGet_Vulnerability_Report_Issues_For_UserArgs = {
+  args: Get_Vulnerability_Report_Issues_For_User_Args;
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+export type Subscription_RootGet_Vulnerability_Report_Issues_For_User_AggregateArgs = {
+  args: Get_Vulnerability_Report_Issues_For_User_Args;
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
 export type Subscription_RootIntegrationArgs = {
   distinct_on?: InputMaybe<Array<Integration_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -29287,6 +29423,26 @@ export type Subscription_RootOrganization_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Organization_Order_By>>;
   where?: InputMaybe<Organization_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Aggregated_VulnerabilitiesArgs = {
+  args: Organization_Aggregated_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Fix_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
+  where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Aggregated_Vulnerabilities_AggregateArgs = {
+  args: Organization_Aggregated_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Fix_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
+  where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
 };
 
 
@@ -29557,6 +29713,26 @@ export type Subscription_RootProject_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Project_Order_By>>;
   where?: InputMaybe<Project_Bool_Exp>;
+};
+
+
+export type Subscription_RootProject_Aggregated_Vulnerability_SeveritiesArgs = {
+  args: Project_Aggregated_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
+  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootProject_Aggregated_Vulnerability_Severities_AggregateArgs = {
+  args: Project_Aggregated_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
+  where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
 };
 
 

@@ -399,4 +399,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.WritableFilesystemService]: undefined,
   [IssueType_Enum.NoNewPrivileges]: undefined,
   [IssueType_Enum.UselessTernary]: undefined,
+  [IssueType_Enum.RequestParametersBoundViaInput]: undefined,
 }

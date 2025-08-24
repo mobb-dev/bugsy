@@ -8,6 +8,7 @@ import { logForging } from './logForging'
 import { overlyBroadCatch } from './overlyBroadCatch'
 import { pt } from './pt'
 import { regexMissingTimeout } from './regexMissingTimeout'
+import { requestParametersBoundViaInput } from './requestParametersBoundViaInput'
 import { sqlInjection } from './sqlInjection'
 import { ssrf } from './ssrf'
 import { sysLeak } from './sysLeak'
@@ -39,6 +40,8 @@ const vulnerabilities = {
   [IssueType_Enum.InsecureRandomness as string]: insecureRandomness,
   [IssueType_Enum.InsufficientLogging as string]: insufficientLogging,
   [IssueType_Enum.SqlInjection as string]: sqlInjection,
+  [IssueType_Enum.RequestParametersBoundViaInput as string]:
+    requestParametersBoundViaInput,
 }
 
 export default vulnerabilities

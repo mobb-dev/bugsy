@@ -12401,6 +12401,8 @@ export enum IssueType_Enum {
   RegexInjection = 'REGEX_INJECTION',
   /** REGEX_MISSING_TIMEOUT */
   RegexMissingTimeout = 'REGEX_MISSING_TIMEOUT',
+  /** REQUEST_PARAMETERS_BOUND_VIA_INPUT */
+  RequestParametersBoundViaInput = 'REQUEST_PARAMETERS_BOUND_VIA_INPUT',
   /** RETURN_SHOULD_NOT_BE_INVARIANT */
   ReturnShouldNotBeInvariant = 'RETURN_SHOULD_NOT_BE_INVARIANT',
   /** SQL Injection */

@@ -145,6 +145,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.WritableFilesystemService]: 'Writable Filesystem Service',
   [IssueType_Enum.NoNewPrivileges]: 'No New Privileges',
   [IssueType_Enum.UselessTernary]: 'Useless Ternary',
+  [IssueType_Enum.RequestParametersBoundViaInput]:
+    'Request Parameters Bound Via Input',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

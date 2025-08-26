@@ -6575,7 +6575,7 @@ export type Effort_To_Apply_Fix_Updates = {
   where: Effort_To_Apply_Fix_Bool_Exp;
 };
 
-/** columns and relationships of "expiring_report_paths" */
+/** Optimized view that uses CTE to evaluate fix_report WHERE clause once instead of in each UNION branch, significantly improving performance for maintenance operations */
 export type Expiring_Report_Paths = {
   __typename?: 'expiring_report_paths';
   path?: Maybe<Scalars['String']['output']>;
@@ -20776,6 +20776,8 @@ export type Project = {
   /** fetches the latest vul report for  repo-url, reference, vendor tuple */
   lastAnalysedVulReports?: Maybe<Array<Vulnerability_Report>>;
   name: Scalars['String']['output'];
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
@@ -21034,6 +21036,8 @@ export type Project_Avg_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -21063,6 +21067,7 @@ export type Project_Bool_Exp = {
   isDeleted?: InputMaybe<Boolean_Comparison_Exp>;
   lastAnalysedVulReports?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
+  numberOfUniqueRepos?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
@@ -21356,6 +21361,8 @@ export type Project_Max_Fields = {
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -21391,6 +21398,8 @@ export type Project_Min_Fields = {
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -21449,6 +21458,7 @@ export type Project_Order_By = {
   isDeleted?: InputMaybe<Order_By>;
   lastAnalysedVulReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
+  numberOfUniqueRepos?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Order_By>;
@@ -21906,6 +21916,8 @@ export type Project_Stddev_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -21927,6 +21939,8 @@ export type Project_Stddev_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -21948,6 +21962,8 @@ export type Project_Stddev_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -21988,6 +22004,8 @@ export type Project_Sum_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -22471,6 +22489,8 @@ export type Project_Var_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -22492,6 +22512,8 @@ export type Project_Var_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -22513,6 +22535,8 @@ export type Project_Variance_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "project_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "get_number_of_unique_repos" */
+  numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -31263,6 +31287,7 @@ export type User = {
   isImpersonationAllowed: Scalars['Boolean']['output'];
   isSignedUp: Scalars['Boolean']['output'];
   joined_at: Scalars['timestamptz']['output'];
+  lastActivity?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
@@ -31460,6 +31485,7 @@ export type User_Bool_Exp = {
   isImpersonationAllowed?: InputMaybe<Boolean_Comparison_Exp>;
   isSignedUp?: InputMaybe<Boolean_Comparison_Exp>;
   joined_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  lastActivity?: InputMaybe<Timestamptz_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   picture?: InputMaybe<String_Comparison_Exp>;
   scmConfigs?: InputMaybe<Scm_Config_Bool_Exp>;
@@ -31682,6 +31708,7 @@ export type User_Insert_Input = {
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
   joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  lastActivity?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
@@ -31698,6 +31725,7 @@ export type User_Max_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
   joined_at?: Maybe<Scalars['timestamptz']['output']>;
+  lastActivity?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
 };
@@ -31710,6 +31738,7 @@ export type User_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
   joined_at?: InputMaybe<Order_By>;
+  lastActivity?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
 };
@@ -31723,6 +31752,7 @@ export type User_Min_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   impersonatedUserEmail?: Maybe<Scalars['String']['output']>;
   joined_at?: Maybe<Scalars['timestamptz']['output']>;
+  lastActivity?: Maybe<Scalars['timestamptz']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   picture?: Maybe<Scalars['String']['output']>;
 };
@@ -31735,6 +31765,7 @@ export type User_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   impersonatedUserEmail?: InputMaybe<Order_By>;
   joined_at?: InputMaybe<Order_By>;
+  lastActivity?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
 };
@@ -31775,6 +31806,7 @@ export type User_Order_By = {
   isImpersonationAllowed?: InputMaybe<Order_By>;
   isSignedUp?: InputMaybe<Order_By>;
   joined_at?: InputMaybe<Order_By>;
+  lastActivity?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   picture?: InputMaybe<Order_By>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Order_By>;
@@ -31805,6 +31837,8 @@ export enum User_Select_Column {
   IsSignedUp = 'isSignedUp',
   /** column name */
   JoinedAt = 'joined_at',
+  /** column name */
+  LastActivity = 'lastActivity',
   /** column name */
   Name = 'name',
   /** column name */
@@ -31837,6 +31871,7 @@ export type User_Set_Input = {
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
   joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  lastActivity?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
 };
@@ -31859,6 +31894,7 @@ export type User_Stream_Cursor_Value_Input = {
   isImpersonationAllowed?: InputMaybe<Scalars['Boolean']['input']>;
   isSignedUp?: InputMaybe<Scalars['Boolean']['input']>;
   joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  lastActivity?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   picture?: InputMaybe<Scalars['String']['input']>;
 };
@@ -31881,6 +31917,8 @@ export enum User_Update_Column {
   IsSignedUp = 'isSignedUp',
   /** column name */
   JoinedAt = 'joined_at',
+  /** column name */
+  LastActivity = 'lastActivity',
   /** column name */
   Name = 'name',
   /** column name */

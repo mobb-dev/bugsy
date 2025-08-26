@@ -394,30 +394,18 @@ const ProjectVulnerabilityReport = z.object({
   }),
 })
 
-const ProjectGetProjectZ = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  vulnerabilityReports: z
-    .object({
-      vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
-      fixReport: z.object({
-        issueLanguages: z
-          .record(z.nativeEnum(IssueLanguage_Enum), z.number())
-          .nullable(),
-        state: z.nativeEnum(Fix_Report_State_Enum),
-        repo: z.object({
-          originalUrl: z.string(),
-          reference: z.string(),
-        }),
-        expirationOn: z.string(),
-      }),
-    })
-    .array(),
+export const GetProjectsQueryZ = z.object({
+  organization: z.object({
+    id: z.string(),
+    projects: z.array(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+        numberOfUniqueRepos: z.number(),
+      })
+    ),
+  }),
 })
-
-export type ProjectGetProjectType = z.infer<typeof ProjectGetProjectZ>
-
-export const GetProjectsQueryZ = z.array(ProjectGetProjectZ)
 
 export const ProjectPageQueryResultZ = z.object({
   name: z.string(),

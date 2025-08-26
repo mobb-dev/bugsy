@@ -292,23 +292,16 @@ export type GetInvitationLinkResponse = {
   link: Scalars['String']['output'];
 };
 
-export type GetIssuesResponse = GetIssuesResponseError | GetIssuesResponseSuccess;
-
 export type GetIssuesResponseError = {
   __typename?: 'GetIssuesResponseError';
   error: Scalars['String']['output'];
 };
 
-export type GetIssuesResponseSuccess = {
-  __typename?: 'GetIssuesResponseSuccess';
-  vulnerability_report_issue: Array<VulnerabilityReportIssue>;
-  vulnerability_report_issue_total: VulnerabilityReportIssueTotal;
-};
+export type GetIssuesV4Response = GetIssuesResponseError | GetIssuesV4ResponseSuccess;
 
-export type GetIssuesV3Response = GetIssuesResponseError | GetIssuesV3ResponseSuccess;
-
-export type GetIssuesV3ResponseSuccess = {
-  __typename?: 'GetIssuesV3ResponseSuccess';
+export type GetIssuesV4ResponseSuccess = {
+  __typename?: 'GetIssuesV4ResponseSuccess';
+  hasNextPage: Scalars['Boolean']['output'];
   vulnerability_report_issue: Array<VulnerabilityReportIssue>;
 };
 
@@ -993,7 +986,7 @@ export type VoteOnFixResponse = {
 
 export type VulnReportFix = {
   __typename?: 'VulnReportFix';
-  effortToApplyFix: Scalars['String']['output'];
+  effortToApplyFix?: Maybe<Scalars['String']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   isArchived: Scalars['Boolean']['output'];
   isExpired: Scalars['Boolean']['output'];
@@ -1051,26 +1044,16 @@ export type VulnerabilityReportIssue = {
   id: Scalars['String']['output'];
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
-  severity: Scalars['String']['output'];
+  severity?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId: Scalars['String']['output'];
   vulnerabilityReportIssueTags: Array<VulnerabilityReportIssueTag>;
 };
 
-export type VulnerabilityReportIssueAggregate = {
-  __typename?: 'VulnerabilityReportIssueAggregate';
-  count: Scalars['Int']['output'];
-};
-
 export type VulnerabilityReportIssueTag = {
   __typename?: 'VulnerabilityReportIssueTag';
   vulnerability_report_issue_tag_value: Scalars['String']['output'];
-};
-
-export type VulnerabilityReportIssueTotal = {
-  __typename?: 'VulnerabilityReportIssueTotal';
-  aggregate: VulnerabilityReportIssueAggregate;
 };
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
@@ -10951,7 +10934,10 @@ export type GeneratedFixAndVulUnique_Project_Args = {
 };
 
 export type Get_Vulnerability_Report_Issues_For_User_Args = {
-  created_after?: InputMaybe<Scalars['timestamptz']['input']>;
+  created_after_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_after_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  created_before_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  limit_count?: InputMaybe<Scalars['Int']['input']>;
   user_email?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -22769,8 +22755,7 @@ export type Query_Root = {
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
-  getIssues: GetIssuesResponse;
-  getIssuesApiV3: GetIssuesV3Response;
+  getIssuesApiV4: GetIssuesV4Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
@@ -23944,16 +23929,8 @@ export type Query_RootGetInvitationLinkArgs = {
 };
 
 
-export type Query_RootGetIssuesArgs = {
-  createdAfter: Scalars['String']['input'];
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type Query_RootGetIssuesApiV3Args = {
-  createdAfter: Scalars['String']['input'];
+export type Query_RootGetIssuesApiV4Args = {
+  issueId?: InputMaybe<Scalars['String']['input']>;
 };
 
 

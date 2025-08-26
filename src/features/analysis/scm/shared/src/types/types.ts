@@ -354,6 +354,28 @@ export const GetReportFixesQueryZ = z
   })
   .nullish()
 
+export const GetFixReportStatsQueryZ = z.object({
+  project_by_pk: z
+    .object({
+      vulnerabilityReports: z.array(
+        z.object({
+          fixReport: z.object({
+            id: z.string().uuid(),
+            vulnerabilitySeverities: z
+              .record(z.nativeEnum(Vulnerability_Severity_Enum), z.number())
+              .nullable(),
+            vulnerabilityReportIrrelevantIssuesCount: z.object({
+              vulnerabilityReportIssues_aggregate: z.object({
+                aggregate: z.object({ count: z.number() }),
+              }),
+            }),
+          }),
+        })
+      ),
+    })
+    .nullable(),
+})
+
 const ProjectVulnerabilityReport = z.object({
   id: z.string().uuid(),
   name: z.string().nullable(),
@@ -361,11 +383,6 @@ const ProjectVulnerabilityReport = z.object({
   fixReport: z.object({
     id: z.string().uuid(),
     createdOn: z.string(),
-    vulnerabilityReportIrrelevantIssuesCount: z.object({
-      vulnerabilityReportIssues_aggregate: z.object({
-        aggregate: z.object({ count: z.number() }),
-      }),
-    }),
     issueTypes: z.record(z.string(), z.number()).nullable(),
     issueLanguages: z
       .record(z.nativeEnum(IssueLanguage_Enum), z.number())
@@ -373,12 +390,6 @@ const ProjectVulnerabilityReport = z.object({
     fixesCountByEffort: z
       .record(z.nativeEnum(Effort_To_Apply_Fix_Enum), z.number())
       .nullable(),
-    vulnerabilitySeverities: z
-      .record(z.nativeEnum(Vulnerability_Severity_Enum), z.number())
-      .nullable(),
-    fixesDoneCount: z.number(),
-    fixesInprogressCount: z.number(),
-    fixesReadyCount: z.number(),
     repo: z.object({
       originalUrl: z.string(),
       reference: z.string(),
@@ -459,6 +470,7 @@ export const GetProjectMembersDataZ = z.object({
 })
 
 export type GetProjectMembersData = z.infer<typeof GetProjectMembersDataZ>
+export type GetFixReportStatsQuery = z.infer<typeof GetFixReportStatsQueryZ>
 
 export const RepoArgsZ = z.object({
   originalUrl: z.string().url(),

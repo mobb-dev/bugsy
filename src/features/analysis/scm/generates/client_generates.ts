@@ -10936,7 +10936,7 @@ export type GeneratedFixAndVulUnique_Project_Args = {
 export type Get_Vulnerability_Report_Issues_For_User_Args = {
   created_after_id?: InputMaybe<Scalars['uuid']['input']>;
   created_after_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
-  created_before_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  end_interval_days?: InputMaybe<Scalars['Int']['input']>;
   limit_count?: InputMaybe<Scalars['Int']['input']>;
   user_email?: InputMaybe<Scalars['String']['input']>;
 };

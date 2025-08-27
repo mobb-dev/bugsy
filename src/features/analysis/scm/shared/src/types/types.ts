@@ -355,23 +355,17 @@ export const GetReportFixesQueryZ = z
   .nullish()
 
 export const GetFixReportStatsQueryZ = z.object({
-  project_by_pk: z
+  fixReport_by_pk: z
     .object({
-      vulnerabilityReports: z.array(
-        z.object({
-          fixReport: z.object({
-            id: z.string().uuid(),
-            vulnerabilitySeverities: z
-              .record(z.nativeEnum(Vulnerability_Severity_Enum), z.number())
-              .nullable(),
-            vulnerabilityReportIrrelevantIssuesCount: z.object({
-              vulnerabilityReportIssues_aggregate: z.object({
-                aggregate: z.object({ count: z.number() }),
-              }),
-            }),
-          }),
-        })
-      ),
+      id: z.string().uuid(),
+      vulnerabilitySeverities: z
+        .record(z.nativeEnum(Vulnerability_Severity_Enum), z.number())
+        .nullable(),
+      vulnerabilityReportIrrelevantIssuesCount: z.object({
+        vulnerabilityReportIssues_aggregate: z.object({
+          aggregate: z.object({ count: z.number() }),
+        }),
+      }),
     })
     .nullable(),
 })

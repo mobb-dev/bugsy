@@ -20,11 +20,25 @@ import {
 import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { GithubSCMLib } from '@mobb/bugsy/features/analysis/scm/github/GithubSCMLib'
 import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
+// import { createMcpServer } from '@mobb/bugsy/mcp'
+// import {
+//   initialScanInProgressPrompt,
+//   noFreshFixesPrompt,
+// } from '@mobb/bugsy/mcp/core/prompts'
+// import * as LoggerModule from '@mobb/bugsy/mcp/Logger'
 import { mobbCliCommand } from '@mobb/bugsy/types'
+// import { sleep } from '@mobb/bugsy/utils'
+// import {
+//   CallToolResult,
+//   ListToolsResult,
+// } from '@modelcontextprotocol/sdk/types'
 import AdmZip from 'adm-zip'
 import * as dotenv from 'dotenv'
+// import { existsSync, mkdtempSync, rmSync } from 'fs'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import * as openExport from 'open'
+// import { tmpdir } from 'os'
+// import { join } from 'path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
@@ -33,6 +47,25 @@ import { PROJECT_PAGE_REGEX } from '../src/constants'
 import * as analysisExports from '../src/features/analysis'
 import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
+// import {
+//   MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+//   MCP_TOOL_FETCH_AVAILABLE_FIXES,
+//   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+// } from '../src/mcp/tools/toolNames'
+// import {
+//   benignFileContent,
+//   multupleVulnerableFileContent,
+//   vulnerableFileContent,
+// } from './mcp/helpers/fileContents'
+// import { InlineMCPClient } from './mcp/helpers/InlineMCPClient'
+// import { MockRepo } from './mcp/helpers/MockRepo'
+// import {
+//   ActiveGitRepo,
+//   EmptyGitRepo,
+//   NoChangesGitRepo,
+//   NonGitRepo,
+// } from './mcp/helpers/MockRepo'
+// import { expectLoggerMessage } from './mcp/helpers/testHelpers'
 
 dotenv.config({
   path: path.join(__dirname, '../../../__tests__/.env'),
@@ -1029,13 +1062,13 @@ describe('create-one-pr flag tests', () => {
   })
 })
 
-// TODO: it takes a lot of time and it's not stable. Need to resolve it.
 // const randomRepoUrl = `https://github.com/test-org/test-repo-${Math.random()
 //   .toString(36)
 //   .substring(2, 15)}`
+
 // describe('mcp tests', () => {
 //   let mcpClient: InlineMCPClient
-//
+
 //   let nonExistentPath: string
 //   let emptyRepoPath: string
 //   let activeRepoPath: string
@@ -1043,38 +1076,38 @@ describe('create-one-pr flag tests', () => {
 //   let activeNoChangesRepoPath: string
 //   let activeNonGitRepoPath: string
 //   let nonRepoEmptyPath: string
-//
+
 //   let emptyRepo: MockRepo
 //   let activeRepo: MockRepo
 //   let activeSecondRepo: MockRepo
 //   let activeNoChangesRepo: MockRepo
 //   let nonGitRepo: MockRepo
 //   let logs: { message: string; data: unknown }[] = []
-//
+
 //   beforeAll(async () => {
 //     const server = createMcpServer()
-//
+
 //     nonExistentPath = join(tmpdir(), 'mcp-test-non-existent-' + Date.now())
-//
+
 //     // Create temp directory that is not a git repo
 //     nonRepoEmptyPath = mkdtempSync(join(tmpdir(), 'mcp-test-non-repo-'))
-//
+
 //     emptyRepo = new EmptyGitRepo()
 //     activeRepo = new ActiveGitRepo()
 //     activeSecondRepo = new ActiveGitRepo(undefined, { repoUrl: randomRepoUrl })
 //     activeNoChangesRepo = new NoChangesGitRepo()
 //     nonGitRepo = new NonGitRepo()
-//
+
 //     emptyRepoPath = emptyRepo.getRepoPath()
 //     activeRepoPath = activeRepo.getRepoPath()
 //     activeSecondRepoPath = activeSecondRepo.getRepoPath()
 //     activeNoChangesRepoPath = activeNoChangesRepo.getRepoPath()
 //     activeNonGitRepoPath = nonGitRepo.getRepoPath()
-//
+
 //     // Create a client connected to this process
 //     mcpClient = new InlineMCPClient(server)
 //   })
-//
+
 //   beforeEach(() => {
 //     logs = []
 //     vi.spyOn(LoggerModule, 'logDebug').mockImplementation((message, data) => {
@@ -1093,11 +1126,11 @@ describe('create-one-pr flag tests', () => {
 //       logs.push({ message, data })
 //     })
 //   })
-//
+
 //   afterEach((context) => {
 //     // Clear all mocks after each test
 //     vi.clearAllMocks()
-//
+
 //     if (context.task.result?.state === 'fail') {
 //       console.log('---------------mcp logs-----------------')
 //       for (const log of logs) {
@@ -1106,7 +1139,7 @@ describe('create-one-pr flag tests', () => {
 //       console.log('---------------end mcp logs-----------------')
 //     }
 //   })
-//
+
 //   afterAll(async () => {
 //     // Clean up repositories created for the tests
 //     const repoHelpers: MockRepo[] = [
@@ -1116,7 +1149,7 @@ describe('create-one-pr flag tests', () => {
 //       nonGitRepo,
 //     ]
 //     repoHelpers.forEach((helper) => helper.cleanupAll())
-//
+
 //     // Clean up temp directories
 //     if (existsSync(nonRepoEmptyPath)) {
 //       rmSync(nonRepoEmptyPath, { recursive: true, force: true })
@@ -1125,17 +1158,17 @@ describe('create-one-pr flag tests', () => {
 //       rmSync(activeNonGitRepoPath, { recursive: true, force: true })
 //     }
 //   })
-//
+
 //   it('should respond to mcp list_tools call', async () => {
 //     const response = await mcpClient.listTools()
-//
+
 //     const listToolsResponse = response as ListToolsResult
 //     expect(Array.isArray(listToolsResponse.tools)).toBe(true)
-//
+
 //     // Snapshot the tools list for easier maintenance
 //     expect(listToolsResponse).toMatchSnapshot()
 //   })
-//
+
 //   describe(`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, () => {
 //     it(`should handle missing path parameter in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
 //       await expect(
@@ -1145,7 +1178,7 @@ describe('create-one-pr flag tests', () => {
 //         )
 //       ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
 //     })
-//
+
 //     it(`should handle non-existent path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(
@@ -1158,7 +1191,7 @@ describe('create-one-pr flag tests', () => {
 //         'Invalid path: potential security risk detected in path'
 //       )
 //     })
-//
+
 //     it(`should handle empty git repository in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(
@@ -1176,7 +1209,7 @@ describe('create-one-pr flag tests', () => {
 //         ],
 //       })
 //     })
-//
+
 //     describe('Path Validation Security Tests', () => {
 //       it('should reject path traversal attempts with actual malicious paths', async () => {
 //         // Test actual malicious paths that should be blocked by validateMCPPath
@@ -1190,7 +1223,7 @@ describe('create-one-pr flag tests', () => {
 //           './../../sensitive-file.txt',
 //           'normal-file/../../../etc/passwd',
 //         ]
-//
+
 //         for (const maliciousPath of maliciousPaths) {
 //           await expect(
 //             mcpClient.callTool<CallToolResult>(
@@ -1205,7 +1238,7 @@ describe('create-one-pr flag tests', () => {
 //         }
 //       })
 //     })
-//
+
 //     it(`should handle path that is not a git repository in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(
@@ -1223,12 +1256,12 @@ describe('create-one-pr flag tests', () => {
 //         ],
 //       })
 //     })
-//
+
 //     it(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
 //       // Verify the directory still exists before running the test
 //       expect(existsSync(activeNonGitRepoPath)).toBe(true)
 //       expect(existsSync(join(activeNonGitRepoPath, 'sample1.py'))).toBe(true)
-//
+
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(
 //           MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -1286,7 +1319,7 @@ describe('create-one-pr flag tests', () => {
 //         mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {})
 //       ).rejects.toThrow("Invalid arguments: Missing required parameter 'path'")
 //     })
-//
+
 //     it('should handle non-existent path', async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
@@ -1296,7 +1329,7 @@ describe('create-one-pr flag tests', () => {
 //         'Invalid path: potential security risk detected in path'
 //       )
 //     })
-//
+
 //     it('should handle path that is not a git repository', async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
@@ -1304,7 +1337,7 @@ describe('create-one-pr flag tests', () => {
 //         })
 //       ).rejects.toThrow('Invalid git repository')
 //     })
-//
+
 //     it('should handle empty git repository with no origin', async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
@@ -1312,7 +1345,7 @@ describe('create-one-pr flag tests', () => {
 //         })
 //       ).rejects.toThrow('No origin URL found for the repository')
 //     })
-//
+
 //     describe('Path Validation Security Tests', () => {
 //       it('should reject path traversal attempts with malicious paths', async () => {
 //         // Test actual malicious paths that should be blocked by validateMCPPath
@@ -1326,7 +1359,7 @@ describe('create-one-pr flag tests', () => {
 //           './../../sensitive-file.txt',
 //           'normal-file/../../../etc/passwd',
 //         ]
-//
+
 //         for (const maliciousPath of maliciousPaths) {
 //           await expect(
 //             mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
@@ -1353,7 +1386,7 @@ describe('create-one-pr flag tests', () => {
 //         MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
 //         { path: repoPath }
 //       )
-//
+
 //       expect(firstResponse).toStrictEqual({
 //         content: [
 //           {
@@ -1362,10 +1395,10 @@ describe('create-one-pr flag tests', () => {
 //           },
 //         ],
 //       })
-//
+
 //       return firstResponse
 //     }
-//
+
 //     /**
 //      * Polls until scan completes, returning the first response that is **not**
 //      * the "initial scan in progress" prompt.
@@ -1375,7 +1408,7 @@ describe('create-one-pr flag tests', () => {
 //       repoPath: string
 //     ) => {
 //       let response = await expectInitialScanPrompt(client, repoPath)
-//
+
 //       const start = Date.now()
 //       console.log('waiting for initial scan to complete')
 //       while (response!.content![0]!.text === initialScanInProgressPrompt) {
@@ -1398,7 +1431,7 @@ describe('create-one-pr flag tests', () => {
 //       )
 //       return response
 //     }
-//
+
 //     const expectNoFreshFixes = async () => {
 //       const res = await mcpClient.callTool<CallToolResult>(
 //         MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
@@ -1406,11 +1439,11 @@ describe('create-one-pr flag tests', () => {
 //       )
 //       expect(res!.content![0]!.text).toBe(noFreshFixesPrompt)
 //     }
-//
+
 //     const expectSingleFix = async (timeout = 60000, interval = 50) => {
 //       const start = Date.now()
 //       let lastError: unknown
-//
+
 //       while (Date.now() - start < timeout) {
 //         try {
 //           const res = await mcpClient.callTool<CallToolResult>(
@@ -1423,18 +1456,18 @@ describe('create-one-pr flag tests', () => {
 //         } catch (err) {
 //           lastError = err
 //         }
-//
+
 //         // wait before next attempt
 //         // Sequential polling is intentional - we need to check status in order
 //         await sleep(interval)
 //       }
-//
+
 //       // timeout exceeded
 //       throw lastError instanceof Error
 //         ? lastError
 //         : new Error(`expectSingleFix: condition not met within ${timeout}ms`)
 //     }
-//
+
 //     it('should run the initial full scan', async () => {
 //       const gqlClient = new GQLClient({
 //         token,
@@ -1443,13 +1476,13 @@ describe('create-one-pr flag tests', () => {
 //       process.env['WORKSPACE_FOLDER_PATHS'] = activeSecondRepoPath
 //       mcpClient = new InlineMCPClient(createMcpServer())
 //       await mcpClient.listTools()
-//
+
 //       await expectLoggerMessage(logs, 'Triggering initial full security scan')
 //       await expectLoggerMessage(logs, 'Security fixes retrieved')
 //       await expectLoggerMessage(logs, 'Full scan completed', {
 //         path: activeSecondRepoPath,
 //       })
-//
+
 //       const reports = await gqlClient.getFixReportsByRepoUrl({
 //         repoUrl: randomRepoUrl,
 //       })
@@ -1466,7 +1499,7 @@ describe('create-one-pr flag tests', () => {
 //       expect(reports2.fixReport[1]?.state).toBe('Finished')
 //       delete process.env['WORKSPACE_FOLDER_PATHS']
 //     }, 200000)
-//
+
 //     it('should handle missing path parameter', async () => {
 //       await expect(
 //         mcpClient.callTool<CallToolResult>(
@@ -1487,139 +1520,139 @@ describe('create-one-pr flag tests', () => {
 //         'Invalid path: potential security risk detected in path'
 //       )
 //     })
-//
+
 //     it('no inital fixes', async () => {
 //       activeRepo.updateFileContent(0, benignFileContent)
 //       activeRepo.updateFileContent(1, benignFileContent)
 //       activeRepo.updateFileContent(2, benignFileContent)
 //       mcpClient = new InlineMCPClient(createMcpServer())
-//
+
 //       await waitForScanCompletion(mcpClient, activeRepoPath)
-//
+
 //       // After initial scan, there should be no fresh fixes
 //       await expectNoFreshFixes()
 //     }, 200000)
-//
+
 //     it('should return 3 inital fixes in 1 batch', async () => {
 //       mcpClient = new InlineMCPClient(createMcpServer())
 //       activeRepo.updateFileContent(0, vulnerableFileContent)
 //       activeRepo.updateFileContent(1, vulnerableFileContent)
 //       activeRepo.updateFileContent(2, vulnerableFileContent)
-//
+
 //       const firstFixesRes = await waitForScanCompletion(
 //         mcpClient,
 //         activeRepoPath
 //       )
-//
+
 //       console.log('initial scan complete, fetching fixes')
 //       expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
-//
+
 //       await expectNoFreshFixes()
 //     }, 200000)
-//
+
 //     it('should return 4 inital fixes in 2 batches', async () => {
 //       mcpClient = new InlineMCPClient(createMcpServer())
 //       activeRepo.updateFileContent(0, vulnerableFileContent)
 //       activeRepo.updateFileContent(1, vulnerableFileContent)
 //       activeRepo.updateFileContent(2, multupleVulnerableFileContent)
-//
+
 //       const firstFixesRes = await waitForScanCompletion(
 //         mcpClient,
 //         activeRepoPath
 //       )
-//
+
 //       expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
-//
+
 //       await expectSingleFix()
-//
+
 //       await expectNoFreshFixes()
 //     }, 200000)
-//
+
 //     it('should detect new fixes introduced after initial scan', async () => {
 //       activeRepo.updateFileContent(0, benignFileContent)
 //       activeRepo.updateFileContent(1, benignFileContent)
 //       activeRepo.updateFileContent(2, benignFileContent)
-//
+
 //       // Mock setInterval before creating the MCP client
 //       const originalSetInterval = global.setInterval
 //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //       let intervalCallback: any = null
-//
+
 //       global.setInterval = vi.fn().mockImplementation((callback, _interval) => {
 //         // Store the callback but don't automatically schedule it
 //         intervalCallback = callback
 //         return 123 as unknown as NodeJS.Timeout // Return a dummy timer ID
 //       })
-//
+
 //       mcpClient = new InlineMCPClient(createMcpServer())
-//
+
 //       await waitForScanCompletion(mcpClient, activeRepoPath)
-//
+
 //       // After initial scan, there should be no fresh fixes
 //       await expectNoFreshFixes()
-//
+
 //       // Update content to vulnerable and manually trigger the periodic scan
 //       activeRepo.updateFileContent(0, vulnerableFileContent)
-//
+
 //       // Instead of advancing timers, manually invoke the callback once
 //       if (intervalCallback) {
 //         intervalCallback()
 //       }
-//
+
 //       await expectSingleFix()
 //       await expectNoFreshFixes()
-//
+
 //       // Restore the original setInterval
 //       global.setInterval = originalSetInterval
 //     }, 200000)
-//
+
 //     it('should not report new fixes that moved', async () => {
 //       activeRepo.updateFileContent(0, benignFileContent)
 //       activeRepo.updateFileContent(1, benignFileContent)
 //       activeRepo.updateFileContent(2, benignFileContent)
-//
+
 //       // Mock setInterval before creating the MCP client
 //       const originalSetInterval = global.setInterval
 //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //       let intervalCallback: any = null
-//
+
 //       global.setInterval = vi.fn().mockImplementation((callback, _interval) => {
 //         // Store the callback but don't automatically schedule it
 //         intervalCallback = callback
 //         return 123 as unknown as NodeJS.Timeout // Return a dummy timer ID
 //       })
 //       mcpClient = new InlineMCPClient(createMcpServer())
-//
+
 //       await waitForScanCompletion(mcpClient, activeRepoPath)
-//
+
 //       // After initial scan, there should be no fresh fixes
 //       await expectNoFreshFixes()
-//
+
 //       activeRepo.updateFileContent(0, vulnerableFileContent)
-//
+
 //       // Instead of advancing timers, manually invoke the callback once
 //       if (intervalCallback) {
 //         intervalCallback()
 //       }
-//
+
 //       await expectSingleFix()
 //       await expectNoFreshFixes()
-//
+
 //       activeRepo.updateFileContent(
 //         0,
 //         `
-//
+
 //         ${vulnerableFileContent}`
 //       )
-//
+
 //       // Trigger second scan manually
 //       if (intervalCallback) {
 //         intervalCallback()
 //       }
-//
+
 //       await sleep(3000)
 //       await expectNoFreshFixes()
-//
+
 //       // Restore the original setInterval
 //       global.setInterval = originalSetInterval
 //     }, 200000)

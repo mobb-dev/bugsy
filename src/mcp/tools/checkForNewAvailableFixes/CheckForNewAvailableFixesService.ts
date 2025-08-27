@@ -377,7 +377,11 @@ export class CheckForNewAvailableFixesService {
         `[${scanContext}] Reporting ${freshFixes.length} fresh fixes to user`
       )
       this.reportedFixes.push(...freshFixes)
-      return freshFixesPrompt({ fixes: freshFixes, limit: MCP_DEFAULT_LIMIT })
+      return freshFixesPrompt({
+        fixes: freshFixes,
+        limit: MCP_DEFAULT_LIMIT,
+        gqlClient: this.gqlClient!,
+      })
     }
     logInfo(`[${scanContext}] No fresh fixes to report`)
 

@@ -131,6 +131,7 @@ export class ScanAndFixVulnerabilitiesService {
         offset: effectiveOffset,
         scannedFiles: [...fileList],
         limit: effectiveLimit,
+        gqlClient: this.gqlClient,
       })
 
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)

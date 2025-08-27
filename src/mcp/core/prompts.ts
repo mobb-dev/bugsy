@@ -1,5 +1,6 @@
 import { GetLatestReportByRepoUrlQuery } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 
+import { McpGQLClient } from '../services/McpGQLClient'
 import {
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -74,6 +75,7 @@ export const applyFixesPrompt = ({
   currentTool,
   offset,
   limit,
+  gqlClient,
 }: {
   fixes: McpFix[]
   hasMore: boolean
@@ -83,6 +85,7 @@ export const applyFixesPrompt = ({
   currentTool: string
   offset: number
   limit: number
+  gqlClient: McpGQLClient
 }) => {
   if (fixes.length === 0) {
     if (totalCount > 0) {
@@ -118,8 +121,11 @@ export const applyFixesPrompt = ({
       vulnerabilityDescription: vulnerabilityDescription,
       patch,
       gitBlameLogin,
+      id: fix.id,
     }
   })
+  const fixIds = fixList.map((fix) => fix.id)
+  void gqlClient.updateFixesDownloadStatus(fixIds)
 
   return `## CRITICAL INSTRUCTIONS - READ CAREFULLY
 
@@ -284,10 +290,12 @@ export const fixesFoundPrompt = ({
   fixReport,
   offset,
   limit,
+  gqlClient,
 }: {
   fixReport: Omit<FixReport, 'userFixes'>
   offset: number
   limit: number
+  gqlClient: McpGQLClient
 }) => {
   const totalFixes = fixReport.filteredFixesCount.aggregate?.count || 0
 
@@ -343,6 +351,7 @@ ${applyFixesPrompt({
   currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset,
   limit,
+  gqlClient,
 })}`
 }
 
@@ -386,12 +395,14 @@ export const fixesPrompt = ({
   offset,
   scannedFiles,
   limit,
+  gqlClient,
 }: {
   fixes: McpFix[]
   totalCount: number
   offset: number
   scannedFiles: string[]
   limit: number
+  gqlClient: McpGQLClient
 }) => {
   if (totalCount === 0) {
     return noFixesFoundPrompt({ scannedFiles })
@@ -412,6 +423,7 @@ ${applyFixesPrompt({
   currentTool: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
   offset,
   limit,
+  gqlClient,
 })}
 
 ${nextStepsPrompt({ scannedFiles })}
@@ -425,9 +437,11 @@ export const initialScanInProgressPrompt = `Initial scan is still in progress. N
 export const freshFixesPrompt = ({
   fixes,
   limit,
+  gqlClient,
 }: {
   fixes: McpFix[]
   limit: number
+  gqlClient: McpGQLClient
 }) => {
   return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
 
@@ -440,6 +454,7 @@ ${applyFixesPrompt({
   currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
   offset: 0,
   limit,
+  gqlClient,
 })}
 `
 }

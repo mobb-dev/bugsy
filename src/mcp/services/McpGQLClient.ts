@@ -486,8 +486,6 @@ export class McpGQLClient {
       })
 
       const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
-      const fixIds = fixes.map((fix) => fix.id)
-      await this.updateFixesDownloadStatus(fixIds)
 
       return {
         fixReport: res.fixReport?.[0]
@@ -580,8 +578,6 @@ export class McpGQLClient {
       }
 
       const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
-      const fixIds = fixes.map((fix) => fix.id)
-      await this.updateFixesDownloadStatus(fixIds)
 
       return {
         fixes,

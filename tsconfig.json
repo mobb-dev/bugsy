@@ -39,5 +39,12 @@
     "skipDefaultLibCheck": true
   },
   "include": ["src", "__tests__"],
-  "exclude": ["node_modules", "dist", "static", "**/*.json", "__tests__/assets/**/*.js", "__e2e__"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "static",
+    "**/*.json",
+    "__tests__/assets/**/*.js",
+    "__e2e__"
+  ]
 }

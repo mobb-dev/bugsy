@@ -19,6 +19,7 @@ import {
   Response as UndiciResponse,
 } from 'undici'
 
+import { contextLogger } from '../../../../utils/contextLogger'
 import { MAX_BRANCHES_FETCH } from '../constants'
 import { GIT_PROXY_HOST, GITLAB_API_TOKEN } from '../env'
 import {
@@ -29,8 +30,7 @@ import {
 } from '../errors'
 import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { ReferenceType } from '../types'
-import { isBrokerUrl, shouldValidateUrl } from '../utils'
-import { safeBody } from '../utils'
+import { isBrokerUrl, safeBody, shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
 import {
   GetGitlabTokenParams,
@@ -223,7 +223,7 @@ export async function createMarkdownCommentOnPullRequest({
   accessToken: string
   repoUrl: string
   mrNumber: number
-}) {
+}): Promise<unknown> {
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
   return api.MergeRequestNotes.create(projectPath, mrNumber, markdownComment)
@@ -506,14 +506,33 @@ export async function getGitlabToken({
   scmUrl,
   brokerHosts,
 }: GetGitlabTokenParams): Promise<GetGitlabTokenRes> {
+  contextLogger.info('Starting getGitlabToken', {
+    tokenType,
+    scmUrl,
+    hasBrokerHosts: !!brokerHosts?.length,
+    brokerHostsCount: brokerHosts?.length || 0,
+  })
+
   const scmFinalUrl = scmUrl ? scmUrl : scmCloudUrl.GitLab
+  contextLogger.info('Resolved SCM URL', {
+    originalUrl: scmUrl,
+    finalUrl: scmFinalUrl,
+  })
+
   const effectiveUrl = getBrokerEffectiveUrl({
     url: scmFinalUrl,
     brokerHosts,
   })
+  contextLogger.info('Determined effective URL', {
+    effectiveUrl,
+    isBroker: isBrokerUrl(effectiveUrl),
+  })
 
   let dispatcher = undefined
   if (isBrokerUrl(effectiveUrl)) {
+    contextLogger.info('Setting up proxy dispatcher for broker URL', {
+      proxyHost: GIT_PROXY_HOST,
+    })
     dispatcher = new ProxyAgent({
       uri: GIT_PROXY_HOST,
       requestTls: {
@@ -524,6 +543,31 @@ export async function getGitlabToken({
 
   try {
     const tokenUrl = `${effectiveUrl}/oauth/token`
+    contextLogger.info('Making token request', {
+      tokenUrl,
+      tokenType,
+      grantType:
+        tokenType === GitlabTokenRequestTypeEnum.CODE
+          ? 'authorization_code'
+          : 'refresh_token',
+    })
+
+    const requestBody = querystring.stringify({
+      client_id: gitlabClientId,
+      client_secret: gitlabClientSecret,
+      [tokenType]: token,
+      grant_type:
+        tokenType === GitlabTokenRequestTypeEnum.CODE
+          ? 'authorization_code'
+          : 'refresh_token',
+      redirect_uri: callbackUrl,
+    })
+
+    contextLogger.info('Request body prepared', {
+      bodyLength: requestBody.length,
+      hasDispatcher: !!dispatcher,
+    })
+
     const res = await undiciFetch(tokenUrl, {
       dispatcher,
       method: 'POST',
@@ -531,30 +575,58 @@ export async function getGitlabToken({
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: querystring.stringify({
-        client_id: gitlabClientId,
-        client_secret: gitlabClientSecret,
-        [tokenType]: token,
-        grant_type:
-          tokenType === GitlabTokenRequestTypeEnum.CODE
-            ? 'authorization_code'
-            : 'refresh_token',
-        redirect_uri: callbackUrl,
-      }),
+      body: requestBody,
     })
-    const authResult = await res.json()
+
+    contextLogger.info('Received response from GitLab', {
+      status: res.status,
+      statusText: res.statusText,
+      contentType: res?.headers?.get('content-type'),
+    })
+
+    const authResult = (await res.json()) as {
+      access_token?: string
+      refresh_token?: string
+      token_type?: string
+      expires_in?: number
+    }
+    contextLogger.info('Parsed response JSON', {
+      hasAccessToken: !!authResult.access_token,
+      hasRefreshToken: !!authResult.refresh_token,
+      tokenType: authResult.token_type,
+      expiresIn: authResult.expires_in,
+    })
+
     const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
     if (!parsedAuthResult.success) {
+      contextLogger.error('Failed to validate auth result schema', {
+        tokenType,
+        validationErrors: parsedAuthResult.error.issues,
+        authResult,
+      })
       debug(`error using: ${tokenType} for gitlab`, authResult)
       return {
         success: false,
       }
     }
+
+    contextLogger.info('Successfully obtained and validated GitLab token', {
+      tokenType,
+      hasAccessToken: !!parsedAuthResult.data.access_token,
+      hasRefreshToken: !!parsedAuthResult.data.refresh_token,
+    })
+
     return {
       success: true,
       authResult: parsedAuthResult.data,
     }
   } catch (e) {
+    contextLogger.error('Exception occurred during token request', {
+      error: e instanceof Error ? e.message : String(e),
+      tokenType,
+      effectiveUrl,
+      stack: e instanceof Error ? e.stack : undefined,
+    })
     debug(`failed to get gitlab token:`, e)
     return {
       success: false,

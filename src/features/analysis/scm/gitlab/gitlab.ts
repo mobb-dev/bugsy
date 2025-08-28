@@ -506,33 +506,13 @@ export async function getGitlabToken({
   scmUrl,
   brokerHosts,
 }: GetGitlabTokenParams): Promise<GetGitlabTokenRes> {
-  contextLogger.info('Starting getGitlabToken', {
-    tokenType,
-    scmUrl,
-    hasBrokerHosts: !!brokerHosts?.length,
-    brokerHostsCount: brokerHosts?.length || 0,
-  })
-
   const scmFinalUrl = scmUrl ? scmUrl : scmCloudUrl.GitLab
-  contextLogger.info('Resolved SCM URL', {
-    originalUrl: scmUrl,
-    finalUrl: scmFinalUrl,
-  })
-
   const effectiveUrl = getBrokerEffectiveUrl({
     url: scmFinalUrl,
     brokerHosts,
   })
-  contextLogger.info('Determined effective URL', {
-    effectiveUrl,
-    isBroker: isBrokerUrl(effectiveUrl),
-  })
-
   let dispatcher = undefined
   if (isBrokerUrl(effectiveUrl)) {
-    contextLogger.info('Setting up proxy dispatcher for broker URL', {
-      proxyHost: GIT_PROXY_HOST,
-    })
     dispatcher = new ProxyAgent({
       uri: GIT_PROXY_HOST,
       requestTls: {
@@ -543,7 +523,7 @@ export async function getGitlabToken({
 
   try {
     const tokenUrl = `${effectiveUrl}/oauth/token`
-    contextLogger.info('Making token request', {
+    contextLogger.info('Making token request to GitLab', {
       tokenUrl,
       tokenType,
       grantType:
@@ -563,11 +543,6 @@ export async function getGitlabToken({
       redirect_uri: callbackUrl,
     })
 
-    contextLogger.info('Request body prepared', {
-      bodyLength: requestBody.length,
-      hasDispatcher: !!dispatcher,
-    })
-
     const res = await undiciFetch(tokenUrl, {
       dispatcher,
       method: 'POST',
@@ -578,7 +553,7 @@ export async function getGitlabToken({
       body: requestBody,
     })
 
-    contextLogger.info('Received response from GitLab', {
+    contextLogger.info('Received response from GitLab for token request', {
       status: res.status,
       statusText: res.statusText,
       contentType: res?.headers?.get('content-type'),
@@ -599,11 +574,14 @@ export async function getGitlabToken({
 
     const parsedAuthResult = GitlabAuthResultZ.safeParse(authResult)
     if (!parsedAuthResult.success) {
-      contextLogger.error('Failed to validate auth result schema', {
-        tokenType,
-        validationErrors: parsedAuthResult.error.issues,
-        authResult,
-      })
+      contextLogger.error(
+        'Failed to validate auth result schema for GitLab token response. This can happen because of a race condition of multiple requests from the same user. React query retries should solve this on the frontend side.',
+        {
+          tokenType,
+          validationErrors: parsedAuthResult.error.issues,
+          authResult,
+        }
+      )
       debug(`error using: ${tokenType} for gitlab`, authResult)
       return {
         success: false,
@@ -621,12 +599,15 @@ export async function getGitlabToken({
       authResult: parsedAuthResult.data,
     }
   } catch (e) {
-    contextLogger.error('Exception occurred during token request', {
-      error: e instanceof Error ? e.message : String(e),
-      tokenType,
-      effectiveUrl,
-      stack: e instanceof Error ? e.stack : undefined,
-    })
+    contextLogger.error(
+      'Exception occurred during token request to GitLab for tokenType: ${tokenType}',
+      {
+        error: e instanceof Error ? e.message : String(e),
+        tokenType,
+        effectiveUrl,
+        stack: e instanceof Error ? e.stack : undefined,
+      }
+    )
     debug(`failed to get gitlab token:`, e)
     return {
       success: false,

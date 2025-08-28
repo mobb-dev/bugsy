@@ -48,7 +48,7 @@ export async function uploadFile({
   } else {
     debug('upload file from buffer')
     logInfo(`FileUpload: upload file from buffer`)
-    form.append('file', new File([file], 'file'))
+    form.append('file', new File([new Uint8Array(file)], 'file'))
   }
   const agent = getProxyAgent(url)
   const response = await fetch(url, {

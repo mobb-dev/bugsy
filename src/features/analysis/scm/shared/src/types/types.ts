@@ -381,9 +381,6 @@ const ProjectVulnerabilityReport = z.object({
     issueLanguages: z
       .record(z.nativeEnum(IssueLanguage_Enum), z.number())
       .nullable(),
-    fixesCountByEffort: z
-      .record(z.nativeEnum(Effort_To_Apply_Fix_Enum), z.number())
-      .nullable(),
     repo: z.object({
       originalUrl: z.string(),
       reference: z.string(),

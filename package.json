@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.156",
+  "version": "1.0.157",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.js",
@@ -30,7 +30,6 @@
     "test:watch": "TOKEN=$(../../scripts/login_auth0.sh) vitest",
     "test:integration:proxy": "GIT_PROXY_HOST=http://tinyproxy:8888 HTTP_PROXY=http://localhost:8888 API_URL=http://app-api:8080/v1/graphql TOKEN=$(../../scripts/login_auth0.sh) vitest run --sequence.concurrent=false false integration.test.ts",
     "lint": "eslint --cache --max-warnings 0 --ignore-path .eslintignore --ext .ts,.tsx,.jsx,.graphql .",
-    "lint:fix": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx,.graphql . && prettier --write \"src/**/*.graphql\"",
     "lint:fix:files": "eslint --fix --cache --max-warnings 0 --ignore-path .eslintignore --ext .js,.ts,.tsx,.jsx,.graphql",
     "prepack": "dotenv-vault pull production .env && pnpm build",
     "dev:mcp": "pnpm run build && node dist/index.mjs mcp",

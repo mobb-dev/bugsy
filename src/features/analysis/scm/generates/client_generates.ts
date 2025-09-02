@@ -12295,6 +12295,8 @@ export enum IssueType_Enum {
   IncompleteUrlSanitization = 'INCOMPLETE_URL_SANITIZATION',
   /** Incomplete URL Scheme Check */
   IncompleteUrlSchemeCheck = 'INCOMPLETE_URL_SCHEME_CHECK',
+  /** INCORRECT_SQL_API_USAGE */
+  IncorrectSqlApiUsage = 'INCORRECT_SQL_API_USAGE',
   /** Information Exposure via Headers */
   InformationExposureViaHeaders = 'INFORMATION_EXPOSURE_VIA_HEADERS',
   /** Insecure Binder Configuration */
@@ -12431,6 +12433,10 @@ export enum IssueType_Enum {
   UseOfHardCodedCryptographicKey = 'USE_OF_HARD_CODED_CRYPTOGRAPHIC_KEY',
   /** Printing logs in assorted way to the sys out/err */
   UseOfSystemOutputStream = 'USE_OF_SYSTEM_OUTPUT_STREAM',
+  /** USE_RAISE_FOR_STATUS */
+  UseRaiseForStatus = 'USE_RAISE_FOR_STATUS',
+  /** USE_SYS_EXIT */
+  UseSysExit = 'USE_SYS_EXIT',
   /** A variable is assigned a value that is never read */
   ValueNeverRead = 'VALUE_NEVER_READ',
   /** Value Shadowing */
@@ -12863,6 +12869,10 @@ export type Mutation_Root = {
   delete_submit_fix_request?: Maybe<Submit_Fix_Request_Mutation_Response>;
   /** delete single row from the table: "submit_fix_request" */
   delete_submit_fix_request_by_pk?: Maybe<Submit_Fix_Request>;
+  /** delete data from the table: "submit_fix_request_creation_type" */
+  delete_submit_fix_request_creation_type?: Maybe<Submit_Fix_Request_Creation_Type_Mutation_Response>;
+  /** delete single row from the table: "submit_fix_request_creation_type" */
+  delete_submit_fix_request_creation_type_by_pk?: Maybe<Submit_Fix_Request_Creation_Type>;
   /** delete data from the table: "submit_fix_request_scm_type" */
   delete_submit_fix_request_scm_type?: Maybe<Submit_Fix_Request_Scm_Type_Mutation_Response>;
   /** delete single row from the table: "submit_fix_request_scm_type" */
@@ -13174,6 +13184,10 @@ export type Mutation_Root = {
   insert_scm_submit_fix_request_one?: Maybe<Scm_Submit_Fix_Request>;
   /** insert data into the table: "submit_fix_request" */
   insert_submit_fix_request?: Maybe<Submit_Fix_Request_Mutation_Response>;
+  /** insert data into the table: "submit_fix_request_creation_type" */
+  insert_submit_fix_request_creation_type?: Maybe<Submit_Fix_Request_Creation_Type_Mutation_Response>;
+  /** insert a single row into the table: "submit_fix_request_creation_type" */
+  insert_submit_fix_request_creation_type_one?: Maybe<Submit_Fix_Request_Creation_Type>;
   /** insert a single row into the table: "submit_fix_request" */
   insert_submit_fix_request_one?: Maybe<Submit_Fix_Request>;
   /** insert data into the table: "submit_fix_request_scm_type" */
@@ -13629,6 +13643,12 @@ export type Mutation_Root = {
   update_submit_fix_request?: Maybe<Submit_Fix_Request_Mutation_Response>;
   /** update single row of the table: "submit_fix_request" */
   update_submit_fix_request_by_pk?: Maybe<Submit_Fix_Request>;
+  /** update data of the table: "submit_fix_request_creation_type" */
+  update_submit_fix_request_creation_type?: Maybe<Submit_Fix_Request_Creation_Type_Mutation_Response>;
+  /** update single row of the table: "submit_fix_request_creation_type" */
+  update_submit_fix_request_creation_type_by_pk?: Maybe<Submit_Fix_Request_Creation_Type>;
+  /** update multiples rows of table: "submit_fix_request_creation_type" */
+  update_submit_fix_request_creation_type_many?: Maybe<Array<Maybe<Submit_Fix_Request_Creation_Type_Mutation_Response>>>;
   /** update multiples rows of table: "submit_fix_request" */
   update_submit_fix_request_many?: Maybe<Array<Maybe<Submit_Fix_Request_Mutation_Response>>>;
   /** update data of the table: "submit_fix_request_scm_type" */
@@ -13790,6 +13810,7 @@ export type Mutation_RootClaimInvitationArgs = {
 /** mutation root */
 export type Mutation_RootCommitToDifferentBranchArgs = {
   baseBranch: Scalars['String']['input'];
+  creationType?: InputMaybe<Scalars['String']['input']>;
   fixIds: Array<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
   prStrategy?: InputMaybe<PrStrategy>;
@@ -14595,6 +14616,18 @@ export type Mutation_RootDelete_Submit_Fix_RequestArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Submit_Fix_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Submit_Fix_Request_Creation_TypeArgs = {
+  where: Submit_Fix_Request_Creation_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Submit_Fix_Request_Creation_Type_By_PkArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -15667,6 +15700,20 @@ export type Mutation_RootInsert_Scm_Submit_Fix_Request_OneArgs = {
 export type Mutation_RootInsert_Submit_Fix_RequestArgs = {
   objects: Array<Submit_Fix_Request_Insert_Input>;
   on_conflict?: InputMaybe<Submit_Fix_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Submit_Fix_Request_Creation_TypeArgs = {
+  objects: Array<Submit_Fix_Request_Creation_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Submit_Fix_Request_Creation_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Submit_Fix_Request_Creation_Type_OneArgs = {
+  object: Submit_Fix_Request_Creation_Type_Insert_Input;
+  on_conflict?: InputMaybe<Submit_Fix_Request_Creation_Type_On_Conflict>;
 };
 
 
@@ -17342,6 +17389,26 @@ export type Mutation_RootUpdate_Submit_Fix_RequestArgs = {
 export type Mutation_RootUpdate_Submit_Fix_Request_By_PkArgs = {
   _set?: InputMaybe<Submit_Fix_Request_Set_Input>;
   pk_columns: Submit_Fix_Request_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Submit_Fix_Request_Creation_TypeArgs = {
+  _set?: InputMaybe<Submit_Fix_Request_Creation_Type_Set_Input>;
+  where: Submit_Fix_Request_Creation_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Submit_Fix_Request_Creation_Type_By_PkArgs = {
+  _set?: InputMaybe<Submit_Fix_Request_Creation_Type_Set_Input>;
+  pk_columns: Submit_Fix_Request_Creation_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Submit_Fix_Request_Creation_Type_ManyArgs = {
+  updates: Array<Submit_Fix_Request_Creation_Type_Updates>;
 };
 
 
@@ -22958,6 +23025,12 @@ export type Query_Root = {
   submit_fix_request_aggregate: Submit_Fix_Request_Aggregate;
   /** fetch data from the table: "submit_fix_request" using primary key columns */
   submit_fix_request_by_pk?: Maybe<Submit_Fix_Request>;
+  /** fetch data from the table: "submit_fix_request_creation_type" */
+  submit_fix_request_creation_type: Array<Submit_Fix_Request_Creation_Type>;
+  /** fetch aggregated fields from the table: "submit_fix_request_creation_type" */
+  submit_fix_request_creation_type_aggregate: Submit_Fix_Request_Creation_Type_Aggregate;
+  /** fetch data from the table: "submit_fix_request_creation_type" using primary key columns */
+  submit_fix_request_creation_type_by_pk?: Maybe<Submit_Fix_Request_Creation_Type>;
   /** fetch data from the table: "submit_fix_request_scm_type" */
   submit_fix_request_scm_type: Array<Submit_Fix_Request_Scm_Type>;
   /** fetch aggregated fields from the table: "submit_fix_request_scm_type" */
@@ -24730,6 +24803,29 @@ export type Query_RootSubmit_Fix_Request_AggregateArgs = {
 
 export type Query_RootSubmit_Fix_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootSubmit_Fix_Request_Creation_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Order_By>>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+};
+
+
+export type Query_RootSubmit_Fix_Request_Creation_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Order_By>>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+};
+
+
+export type Query_RootSubmit_Fix_Request_Creation_Type_By_PkArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -26777,6 +26873,7 @@ export type Submit_Fix_Request = {
   createdByUser: User;
   createdByUserId: Scalars['uuid']['output'];
   createdOn: Scalars['timestamptz']['output'];
+  creationType: Submit_Fix_Request_Creation_Type_Enum;
   description: Scalars['String']['output'];
   error?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
@@ -26870,6 +26967,7 @@ export type Submit_Fix_Request_Bool_Exp = {
   createdByUser?: InputMaybe<User_Bool_Exp>;
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  creationType?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum_Comparison_Exp>;
   description?: InputMaybe<String_Comparison_Exp>;
   error?: InputMaybe<String_Comparison_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
@@ -26893,12 +26991,163 @@ export enum Submit_Fix_Request_Constraint {
   SubmitFixRequestPkey = 'submit_fix_request_pkey'
 }
 
+/** columns and relationships of "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type = {
+  __typename?: 'submit_fix_request_creation_type';
+  comment: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+/** aggregated selection of "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Aggregate = {
+  __typename?: 'submit_fix_request_creation_type_aggregate';
+  aggregate?: Maybe<Submit_Fix_Request_Creation_Type_Aggregate_Fields>;
+  nodes: Array<Submit_Fix_Request_Creation_Type>;
+};
+
+/** aggregate fields of "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Aggregate_Fields = {
+  __typename?: 'submit_fix_request_creation_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Submit_Fix_Request_Creation_Type_Max_Fields>;
+  min?: Maybe<Submit_Fix_Request_Creation_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "submit_fix_request_creation_type". All fields are combined with a logical 'AND'. */
+export type Submit_Fix_Request_Creation_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Bool_Exp>>;
+  _not?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "submit_fix_request_creation_type" */
+export enum Submit_Fix_Request_Creation_Type_Constraint {
+  /** unique or primary key constraint on columns "name" */
+  SubmitFixRequestCreationTypePkey = 'submit_fix_request_creation_type_pkey'
+}
+
+export enum Submit_Fix_Request_Creation_Type_Enum {
+  /** Created by Auto-Pr pipeline */
+  Automatic = 'Automatic',
+  /** Created by direct user interaction  */
+  Manual = 'Manual'
+}
+
+/** Boolean expression to compare columns of type "submit_fix_request_creation_type_enum". All fields are combined with logical 'AND'. */
+export type Submit_Fix_Request_Creation_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum>;
+  _in?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum>;
+  _nin?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Enum>>;
+};
+
+/** input type for inserting data into table "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Submit_Fix_Request_Creation_Type_Max_Fields = {
+  __typename?: 'submit_fix_request_creation_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Submit_Fix_Request_Creation_Type_Min_Fields = {
+  __typename?: 'submit_fix_request_creation_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Mutation_Response = {
+  __typename?: 'submit_fix_request_creation_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Submit_Fix_Request_Creation_Type>;
+};
+
+/** on_conflict condition type for table "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_On_Conflict = {
+  constraint: Submit_Fix_Request_Creation_Type_Constraint;
+  update_columns?: Array<Submit_Fix_Request_Creation_Type_Update_Column>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "submit_fix_request_creation_type". */
+export type Submit_Fix_Request_Creation_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: submit_fix_request_creation_type */
+export type Submit_Fix_Request_Creation_Type_Pk_Columns_Input = {
+  name: Scalars['String']['input'];
+};
+
+/** select columns of table "submit_fix_request_creation_type" */
+export enum Submit_Fix_Request_Creation_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Name = 'name'
+}
+
+/** input type for updating data in table "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "submit_fix_request_creation_type" */
+export type Submit_Fix_Request_Creation_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Submit_Fix_Request_Creation_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Submit_Fix_Request_Creation_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "submit_fix_request_creation_type" */
+export enum Submit_Fix_Request_Creation_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Name = 'name'
+}
+
+export type Submit_Fix_Request_Creation_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Submit_Fix_Request_Creation_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Submit_Fix_Request_Creation_Type_Bool_Exp;
+};
+
 /** input type for inserting data into table "submit_fix_request" */
 export type Submit_Fix_Request_Insert_Input = {
   commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  creationType?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum>;
   description?: InputMaybe<Scalars['String']['input']>;
   error?: InputMaybe<Scalars['String']['input']>;
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
@@ -26973,6 +27222,7 @@ export type Submit_Fix_Request_Order_By = {
   createdByUser?: InputMaybe<User_Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
+  creationType?: InputMaybe<Order_By>;
   description?: InputMaybe<Order_By>;
   error?: InputMaybe<Order_By>;
   fixReport?: InputMaybe<FixReport_Order_By>;
@@ -27156,6 +27406,8 @@ export enum Submit_Fix_Request_Select_Column {
   /** column name */
   CreatedOn = 'createdOn',
   /** column name */
+  CreationType = 'creationType',
+  /** column name */
   Description = 'description',
   /** column name */
   Error = 'error',
@@ -27182,6 +27434,7 @@ export type Submit_Fix_Request_Set_Input = {
   commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  creationType?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum>;
   description?: InputMaybe<Scalars['String']['input']>;
   error?: InputMaybe<Scalars['String']['input']>;
   fixReportId?: InputMaybe<Scalars['uuid']['input']>;
@@ -27361,6 +27614,7 @@ export type Submit_Fix_Request_Stream_Cursor_Value_Input = {
   commitToSameBranch?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  creationType?: InputMaybe<Submit_Fix_Request_Creation_Type_Enum>;
   description?: InputMaybe<Scalars['String']['input']>;
   error?: InputMaybe<Scalars['String']['input']>;
   fixReportId?: InputMaybe<Scalars['uuid']['input']>;
@@ -27381,6 +27635,8 @@ export enum Submit_Fix_Request_Update_Column {
   CreatedByUserId = 'createdByUserId',
   /** column name */
   CreatedOn = 'createdOn',
+  /** column name */
+  CreationType = 'creationType',
   /** column name */
   Description = 'description',
   /** column name */
@@ -27934,6 +28190,14 @@ export type Subscription_Root = {
   submit_fix_request_aggregate: Submit_Fix_Request_Aggregate;
   /** fetch data from the table: "submit_fix_request" using primary key columns */
   submit_fix_request_by_pk?: Maybe<Submit_Fix_Request>;
+  /** fetch data from the table: "submit_fix_request_creation_type" */
+  submit_fix_request_creation_type: Array<Submit_Fix_Request_Creation_Type>;
+  /** fetch aggregated fields from the table: "submit_fix_request_creation_type" */
+  submit_fix_request_creation_type_aggregate: Submit_Fix_Request_Creation_Type_Aggregate;
+  /** fetch data from the table: "submit_fix_request_creation_type" using primary key columns */
+  submit_fix_request_creation_type_by_pk?: Maybe<Submit_Fix_Request_Creation_Type>;
+  /** fetch data from the table in a streaming manner: "submit_fix_request_creation_type" */
+  submit_fix_request_creation_type_stream: Array<Submit_Fix_Request_Creation_Type>;
   /** fetch data from the table: "submit_fix_request_scm_type" */
   submit_fix_request_scm_type: Array<Submit_Fix_Request_Scm_Type>;
   /** fetch aggregated fields from the table: "submit_fix_request_scm_type" */
@@ -30072,6 +30336,36 @@ export type Subscription_RootSubmit_Fix_Request_AggregateArgs = {
 
 export type Subscription_RootSubmit_Fix_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootSubmit_Fix_Request_Creation_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Order_By>>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootSubmit_Fix_Request_Creation_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Submit_Fix_Request_Creation_Type_Order_By>>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootSubmit_Fix_Request_Creation_Type_By_PkArgs = {
+  name: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootSubmit_Fix_Request_Creation_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Submit_Fix_Request_Creation_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Submit_Fix_Request_Creation_Type_Bool_Exp>;
 };
 
 

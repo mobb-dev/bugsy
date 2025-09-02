@@ -10,17 +10,40 @@ import {
   MCP_MAX_FILE_SIZE,
 } from '../../../../mcp/core/configs'
 import { EXCLUDED_DIRS } from './ExcludedDirs'
-import { EXCLUDED_FILE_PATTERNS } from './ExcludedFilePatterns'
+import {
+  EXCLUDED_FILE_PATTERNS,
+  IMPORTANT_PROJECT_FILES,
+  SUPPORTED_EXTENSIONS,
+} from './FilePatterns'
 
 export class FileUtils {
+  // Important project configuration files that should always be included
+
   static isExcludedFileType(filepath: string): boolean {
     const basename = path.basename(filepath).toLowerCase()
-    if (basename === '.env' || basename.startsWith('.env.')) {
+
+    // Always allow important project configuration files
+    if (IMPORTANT_PROJECT_FILES.includes(basename)) {
+      return false
+    }
+
+    // Check if file has a supported extension
+    const ext = path.extname(filepath).toLowerCase()
+    const isSupported =
+      SUPPORTED_EXTENSIONS.includes(ext) ||
+      SUPPORTED_EXTENSIONS.includes(basename) // For files like 'Dockerfile'
+
+    // If not a supported extension, exclude it
+    if (!isSupported) {
       return true
     }
+
+    // If supported extension, check against additional exclusion patterns
+    // (patterns have been cleaned to avoid conflicts with whitelist)
     if (EXCLUDED_FILE_PATTERNS.some((pattern) => basename.endsWith(pattern))) {
       return true
     }
+
     return false
   }
 

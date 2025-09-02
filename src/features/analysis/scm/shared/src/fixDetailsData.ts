@@ -400,4 +400,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.NoNewPrivileges]: undefined,
   [IssueType_Enum.UselessTernary]: undefined,
   [IssueType_Enum.RequestParametersBoundViaInput]: undefined,
+  [IssueType_Enum.UseSysExit]: undefined,
+  [IssueType_Enum.IncorrectSqlApiUsage]: undefined,
+  [IssueType_Enum.UseRaiseForStatus]: undefined,
 }

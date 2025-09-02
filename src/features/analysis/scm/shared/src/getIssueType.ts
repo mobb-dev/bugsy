@@ -147,6 +147,9 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.UselessTernary]: 'Useless Ternary',
   [IssueType_Enum.RequestParametersBoundViaInput]:
     'Request Parameters Bound Via Input',
+  [IssueType_Enum.UseSysExit]: 'Use Sys Exit',
+  [IssueType_Enum.IncorrectSqlApiUsage]: 'Incorrect SQL API Usage',
+  [IssueType_Enum.UseRaiseForStatus]: 'Use Raise For Status',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

@@ -18095,6 +18095,7 @@ export type Organization = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** An array relationship */
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
@@ -18438,6 +18439,7 @@ export type Organization_Avg_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -18506,6 +18508,7 @@ export type Organization_Bool_Exp = {
   roiDevHourlyRate?: InputMaybe<Int_Comparison_Exp>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
+  roiTriageTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
   scmConfigs?: InputMaybe<Scm_Config_Bool_Exp>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Bool_Exp>;
 };
@@ -18770,6 +18773,7 @@ export type Organization_Inc_Input = {
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "organization" */
@@ -18800,6 +18804,7 @@ export type Organization_Insert_Input = {
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
 };
 
@@ -19058,6 +19063,7 @@ export type Organization_Max_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -19103,6 +19109,7 @@ export type Organization_Min_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -19183,6 +19190,7 @@ export type Organization_Order_By = {
   roiDevHourlyRate?: InputMaybe<Order_By>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Order_By>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Order_By>;
+  roiTriageTimeInMinutes?: InputMaybe<Order_By>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Order_By>;
 };
 
@@ -19791,7 +19799,9 @@ export enum Organization_Select_Column {
   /** column name */
   RoiIndustryFixingTimeInMinutes = 'roiIndustryFixingTimeInMinutes',
   /** column name */
-  RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes'
+  RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes',
+  /** column name */
+  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes'
 }
 
 /** input type for updating data in table "organization" */
@@ -19814,6 +19824,7 @@ export type Organization_Set_Input = {
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -19828,6 +19839,7 @@ export type Organization_Stddev_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -19870,6 +19882,7 @@ export type Organization_Stddev_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -19912,6 +19925,7 @@ export type Organization_Stddev_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -19970,6 +19984,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -19984,6 +19999,7 @@ export type Organization_Sum_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -20509,7 +20525,9 @@ export enum Organization_Update_Column {
   /** column name */
   RoiIndustryFixingTimeInMinutes = 'roiIndustryFixingTimeInMinutes',
   /** column name */
-  RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes'
+  RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes',
+  /** column name */
+  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes'
 }
 
 export type Organization_Updates = {
@@ -20543,6 +20561,7 @@ export type Organization_Var_Pop_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -20585,6 +20604,7 @@ export type Organization_Var_Samp_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */
@@ -20627,6 +20647,7 @@ export type Organization_Variance_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
+  roiTriageTimeInMinutes?: Maybe<Scalars['Float']['output']>;
   /** A computed field, executes function "organization_count_unique_deployed_vuls_w_date" */
   uniqueDeployedVuls?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_count_unique_vulnerabilities_with_date_range" */

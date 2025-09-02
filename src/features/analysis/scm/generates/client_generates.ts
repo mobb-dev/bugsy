@@ -12437,6 +12437,8 @@ export enum IssueType_Enum {
   UseRaiseForStatus = 'USE_RAISE_FOR_STATUS',
   /** USE_SYS_EXIT */
   UseSysExit = 'USE_SYS_EXIT',
+  /** USE_TIMEOUT */
+  UseTimeout = 'USE_TIMEOUT',
   /** A variable is assigned a value that is never read */
   ValueNeverRead = 'VALUE_NEVER_READ',
   /** Value Shadowing */

@@ -403,4 +403,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.UseSysExit]: undefined,
   [IssueType_Enum.IncorrectSqlApiUsage]: undefined,
   [IssueType_Enum.UseRaiseForStatus]: undefined,
+  [IssueType_Enum.UseTimeout]: undefined,
 }

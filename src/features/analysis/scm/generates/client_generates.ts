@@ -12425,6 +12425,8 @@ export enum IssueType_Enum {
   UnsafeWebThread = 'UNSAFE_WEB_THREAD',
   /** A public method agument is not checked for null */
   UnvalidatedPublicMethodArgument = 'UNVALIDATED_PUBLIC_METHOD_ARGUMENT',
+  /** USELESS_IF_BODY */
+  UselessIfBody = 'USELESS_IF_BODY',
   /** Useless regular-expression character escape */
   UselessRegexpCharEscape = 'USELESS_REGEXP_CHAR_ESCAPE',
   /** USELESS_TERNARY */

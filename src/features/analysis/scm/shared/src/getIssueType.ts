@@ -151,6 +151,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.IncorrectSqlApiUsage]: 'Incorrect SQL API Usage',
   [IssueType_Enum.UseRaiseForStatus]: 'Use Raise For Status',
   [IssueType_Enum.UseTimeout]: 'Use Timeout',
+  [IssueType_Enum.UselessIfBody]: 'Useless If Body',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

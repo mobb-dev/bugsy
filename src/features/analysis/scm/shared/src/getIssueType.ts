@@ -144,6 +144,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.PortAllInterfaces]: 'Port All Interfaces',
   [IssueType_Enum.WritableFilesystemService]: 'Writable Filesystem Service',
   [IssueType_Enum.NoNewPrivileges]: 'No New Privileges',
+  [IssueType_Enum.MissingTemplateStringIndicator]:
+    'Missing Template String Indicator',
   [IssueType_Enum.UselessTernary]: 'Useless Ternary',
   [IssueType_Enum.RequestParametersBoundViaInput]:
     'Request Parameters Bound Via Input',

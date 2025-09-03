@@ -12335,6 +12335,8 @@ export enum IssueType_Enum {
   MissingHstsHeader = 'MISSING_HSTS_HEADER',
   /** Missing TLS MinVersion */
   MissingSslMinversion = 'MISSING_SSL_MINVERSION',
+  /** MISSING_TEMPLATE_STRING_INDICATOR */
+  MissingTemplateStringIndicator = 'MISSING_TEMPLATE_STRING_INDICATOR',
   /** MISSING_USER */
   MissingUser = 'MISSING_USER',
   /** MISSING_WHITESPACE */
@@ -12909,6 +12911,10 @@ export type Mutation_Root = {
   delete_vulnerability_report_issue?: Maybe<Vulnerability_Report_Issue_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue" */
   delete_vulnerability_report_issue_by_pk?: Maybe<Vulnerability_Report_Issue>;
+  /** delete data from the table: "vulnerability_report_issue_category" */
+  delete_vulnerability_report_issue_category?: Maybe<Vulnerability_Report_Issue_Category_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_report_issue_category" */
+  delete_vulnerability_report_issue_category_by_pk?: Maybe<Vulnerability_Report_Issue_Category>;
   /** delete data from the table: "vulnerability_report_issue_code_node" */
   delete_vulnerability_report_issue_code_node?: Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_code_node" */
@@ -13222,6 +13228,10 @@ export type Mutation_Root = {
   insert_vulnerability_report?: Maybe<Vulnerability_Report_Mutation_Response>;
   /** insert data into the table: "vulnerability_report_issue" */
   insert_vulnerability_report_issue?: Maybe<Vulnerability_Report_Issue_Mutation_Response>;
+  /** insert data into the table: "vulnerability_report_issue_category" */
+  insert_vulnerability_report_issue_category?: Maybe<Vulnerability_Report_Issue_Category_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_report_issue_category" */
+  insert_vulnerability_report_issue_category_one?: Maybe<Vulnerability_Report_Issue_Category>;
   /** insert data into the table: "vulnerability_report_issue_code_node" */
   insert_vulnerability_report_issue_code_node?: Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_report_issue_code_node" */
@@ -13699,6 +13709,12 @@ export type Mutation_Root = {
   update_vulnerability_report_issue?: Maybe<Vulnerability_Report_Issue_Mutation_Response>;
   /** update single row of the table: "vulnerability_report_issue" */
   update_vulnerability_report_issue_by_pk?: Maybe<Vulnerability_Report_Issue>;
+  /** update data of the table: "vulnerability_report_issue_category" */
+  update_vulnerability_report_issue_category?: Maybe<Vulnerability_Report_Issue_Category_Mutation_Response>;
+  /** update single row of the table: "vulnerability_report_issue_category" */
+  update_vulnerability_report_issue_category_by_pk?: Maybe<Vulnerability_Report_Issue_Category>;
+  /** update multiples rows of table: "vulnerability_report_issue_category" */
+  update_vulnerability_report_issue_category_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Category_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report_issue_code_node" */
   update_vulnerability_report_issue_code_node?: Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>;
   /** update single row of the table: "vulnerability_report_issue_code_node" */
@@ -14728,6 +14744,18 @@ export type Mutation_RootDelete_Vulnerability_Report_IssueArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Vulnerability_Report_Issue_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_CategoryArgs = {
+  where: Vulnerability_Report_Issue_Category_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_Category_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -15823,6 +15851,20 @@ export type Mutation_RootInsert_Vulnerability_ReportArgs = {
 export type Mutation_RootInsert_Vulnerability_Report_IssueArgs = {
   objects: Array<Vulnerability_Report_Issue_Insert_Input>;
   on_conflict?: InputMaybe<Vulnerability_Report_Issue_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_CategoryArgs = {
+  objects: Array<Vulnerability_Report_Issue_Category_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Category_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_Category_OneArgs = {
+  object: Vulnerability_Report_Issue_Category_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Category_On_Conflict>;
 };
 
 
@@ -17589,6 +17631,26 @@ export type Mutation_RootUpdate_Vulnerability_Report_Issue_By_PkArgs = {
   _prepend?: InputMaybe<Vulnerability_Report_Issue_Prepend_Input>;
   _set?: InputMaybe<Vulnerability_Report_Issue_Set_Input>;
   pk_columns: Vulnerability_Report_Issue_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_CategoryArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Category_Set_Input>;
+  where: Vulnerability_Report_Issue_Category_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Category_By_PkArgs = {
+  _set?: InputMaybe<Vulnerability_Report_Issue_Category_Set_Input>;
+  pk_columns: Vulnerability_Report_Issue_Category_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Category_ManyArgs = {
+  updates: Array<Vulnerability_Report_Issue_Category_Updates>;
 };
 
 
@@ -23125,6 +23187,12 @@ export type Query_Root = {
   vulnerability_report_issue_aggregate: Vulnerability_Report_Issue_Aggregate;
   /** fetch data from the table: "vulnerability_report_issue" using primary key columns */
   vulnerability_report_issue_by_pk?: Maybe<Vulnerability_Report_Issue>;
+  /** fetch data from the table: "vulnerability_report_issue_category" */
+  vulnerability_report_issue_category: Array<Vulnerability_Report_Issue_Category>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_category" */
+  vulnerability_report_issue_category_aggregate: Vulnerability_Report_Issue_Category_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_category" using primary key columns */
+  vulnerability_report_issue_category_by_pk?: Maybe<Vulnerability_Report_Issue_Category>;
   /** fetch data from the table: "vulnerability_report_issue_code_node" */
   vulnerability_report_issue_code_node: Array<Vulnerability_Report_Issue_Code_Node>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_code_node" */
@@ -25138,6 +25206,29 @@ export type Query_RootVulnerability_Report_Issue_AggregateArgs = {
 
 export type Query_RootVulnerability_Report_Issue_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootVulnerability_Report_Issue_CategoryArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Category_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Category_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -28309,6 +28400,14 @@ export type Subscription_Root = {
   vulnerability_report_issue_aggregate: Vulnerability_Report_Issue_Aggregate;
   /** fetch data from the table: "vulnerability_report_issue" using primary key columns */
   vulnerability_report_issue_by_pk?: Maybe<Vulnerability_Report_Issue>;
+  /** fetch data from the table: "vulnerability_report_issue_category" */
+  vulnerability_report_issue_category: Array<Vulnerability_Report_Issue_Category>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_category" */
+  vulnerability_report_issue_category_aggregate: Vulnerability_Report_Issue_Category_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_category" using primary key columns */
+  vulnerability_report_issue_category_by_pk?: Maybe<Vulnerability_Report_Issue_Category>;
+  /** fetch data from the table in a streaming manner: "vulnerability_report_issue_category" */
+  vulnerability_report_issue_category_stream: Array<Vulnerability_Report_Issue_Category>;
   /** fetch data from the table: "vulnerability_report_issue_code_node" */
   vulnerability_report_issue_code_node: Array<Vulnerability_Report_Issue_Code_Node>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_code_node" */
@@ -30724,6 +30823,36 @@ export type Subscription_RootVulnerability_Report_Issue_AggregateArgs = {
 
 export type Subscription_RootVulnerability_Report_Issue_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_CategoryArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Category_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Category_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Category_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Report_Issue_Category_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
 };
 
 
@@ -33460,6 +33589,7 @@ export type Vulnerability_Report_Issue = {
   __typename?: 'vulnerability_report_issue';
   /** A computed field, executes function "get_issue_category" */
   category?: Maybe<Scalars['String']['output']>;
+  category_static?: Maybe<Vulnerability_Report_Issue_Category_Enum>;
   /** An array relationship */
   codeNodes: Array<Vulnerability_Report_Issue_Code_Node>;
   /** An aggregate relationship */
@@ -33644,6 +33774,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   _not?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
   category?: InputMaybe<String_Comparison_Exp>;
+  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum_Comparison_Exp>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -33677,6 +33808,166 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   vulnerabilityReportIssueNodeDiffFileId?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerabilityReportIssueTags?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
   vulnerabilityReportIssueTags_aggregate?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Aggregate_Bool_Exp>;
+};
+
+/** columns and relationships of "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category = {
+  __typename?: 'vulnerability_report_issue_category';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Aggregate = {
+  __typename?: 'vulnerability_report_issue_category_aggregate';
+  aggregate?: Maybe<Vulnerability_Report_Issue_Category_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Report_Issue_Category>;
+};
+
+/** aggregate fields of "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Aggregate_Fields = {
+  __typename?: 'vulnerability_report_issue_category_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Report_Issue_Category_Max_Fields>;
+  min?: Maybe<Vulnerability_Report_Issue_Category_Min_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_report_issue_category". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Report_Issue_Category_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_report_issue_category" */
+export enum Vulnerability_Report_Issue_Category_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  VulnerabilityReportIssueCategoryPkey = 'vulnerability_report_issue_category_pkey'
+}
+
+export enum Vulnerability_Report_Issue_Category_Enum {
+  /** Issues that have been identified as false positives (fp_id is not null) */
+  FalsePositive = 'FalsePositive',
+  /** Issues that have been filtered out during processing */
+  Filtered = 'Filtered',
+  /** Issues that can be fixed - default category for issues that don't fall into other categories */
+  Fixable = 'Fixable',
+  /** Issues marked as irrelevant - includes suppressed tags, FilteredAiQuota state, or issues with tags */
+  Irrelevant = 'Irrelevant',
+  /** Issues that cannot be fixed - includes Unfixable state, hardcoded secrets without fp_id, Error state, or missing fix_id */
+  NoFix = 'NoFix',
+  /** Issues that are in Pending or Digested state, waiting to be processed */
+  Pending = 'Pending',
+  /** Issues in Unsupported state that cannot be processed by the system */
+  Unsupported = 'Unsupported'
+}
+
+/** Boolean expression to compare columns of type "vulnerability_report_issue_category_enum". All fields are combined with logical 'AND'. */
+export type Vulnerability_Report_Issue_Category_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  _in?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  _nin?: InputMaybe<Array<Vulnerability_Report_Issue_Category_Enum>>;
+};
+
+/** input type for inserting data into table "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Report_Issue_Category_Max_Fields = {
+  __typename?: 'vulnerability_report_issue_category_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Report_Issue_Category_Min_Fields = {
+  __typename?: 'vulnerability_report_issue_category_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Mutation_Response = {
+  __typename?: 'vulnerability_report_issue_category_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Report_Issue_Category>;
+};
+
+/** on_conflict condition type for table "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_On_Conflict = {
+  constraint: Vulnerability_Report_Issue_Category_Constraint;
+  update_columns?: Array<Vulnerability_Report_Issue_Category_Update_Column>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Category_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_report_issue_category". */
+export type Vulnerability_Report_Issue_Category_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_report_issue_category */
+export type Vulnerability_Report_Issue_Category_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "vulnerability_report_issue_category" */
+export enum Vulnerability_Report_Issue_Category_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "vulnerability_report_issue_category" */
+export type Vulnerability_Report_Issue_Category_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Report_Issue_Category_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Report_Issue_Category_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "vulnerability_report_issue_category" */
+export enum Vulnerability_Report_Issue_Category_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Vulnerability_Report_Issue_Category_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Report_Issue_Category_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Report_Issue_Category_Bool_Exp;
 };
 
 /** columns and relationships of "vulnerability_report_issue_code_node" */
@@ -34224,6 +34515,7 @@ export type Vulnerability_Report_Issue_Delete_Key_Input = {
 
 /** input type for inserting data into table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Insert_Input = {
+  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
@@ -34379,6 +34671,7 @@ export type Vulnerability_Report_Issue_On_Conflict = {
 /** Ordering options when selecting data from "vulnerability_report_issue". */
 export type Vulnerability_Report_Issue_Order_By = {
   category?: InputMaybe<Order_By>;
+  category_static?: InputMaybe<Order_By>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
@@ -34424,6 +34717,8 @@ export type Vulnerability_Report_Issue_Prepend_Input = {
 
 /** select columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Select_Column {
+  /** column name */
+  CategoryStatic = 'category_static',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -34480,6 +34775,7 @@ export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_
 
 /** input type for updating data in table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Set_Input = {
+  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -34950,6 +35246,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
+  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -35329,6 +35626,8 @@ export type Vulnerability_Report_Issue_Types_Vulnerability_Report_Args = {
 
 /** update columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Update_Column {
+  /** column name */
+  CategoryStatic = 'category_static',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */

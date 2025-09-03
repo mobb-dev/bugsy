@@ -12347,6 +12347,8 @@ export enum IssueType_Enum {
   NonFinalPublicStaticField = 'NON_FINAL_PUBLIC_STATIC_FIELD',
   /** Fields that are only assigned in the constructor should be readonly */
   NonReadonlyField = 'NON_READONLY_FIELD',
+  /** NO_ASSERT */
+  NoAssert = 'NO_ASSERT',
   /** No equals method */
   NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
   /** Missing rate limiting */

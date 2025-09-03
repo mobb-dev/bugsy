@@ -37,8 +37,8 @@ type TestNames = (typeof testNames)[keyof typeof testNames]
 
 const testInputs: Record<TestNames, TestInput> = {
   accessTokenTest: {
-    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
-    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_PAT: env.CLI_ADO_CLOUD_PAT,
+    PAT_ORG: env.CLI_ADO_CLOUD_SCM_ORG,
     ADO_URL: 'https://dev.azure.com/citestjob3/citestjob3/_git/webgoat',
     NON_EXISTING_ADO_URL:
       'https://dev.azure.com/citestjob3/_git/webgoat_non_existing',
@@ -64,8 +64,8 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: '4acf4a349fbc4c86603e7fff27aaf46ae869cdff',
   },
   publicRepoWithPat: {
-    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
-    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_PAT: env.CLI_ADO_CLOUD_PAT,
+    PAT_ORG: env.CLI_ADO_CLOUD_SCM_ORG,
     ADO_URL:
       'https://dev.azure.com/aidainnovazione0090/DeviceManager/_git/app-functions-sdk-go',
     NON_EXISTING_ADO_URL:
@@ -78,8 +78,8 @@ const testInputs: Record<TestNames, TestInput> = {
     EXISTING_TAG_SHA: 'b28f7f7e4352f4c06fb2e306005bbf60a37afcd7',
   },
   repoWithSpacesTest: {
-    ADO_PAT: env.PLAYWRIGHT_ADO_CLOUD_PAT,
-    PAT_ORG: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    ADO_PAT: env.CLI_ADO_CLOUD_PAT,
+    PAT_ORG: env.CLI_ADO_CLOUD_SCM_ORG,
     ADO_URL:
       'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
     NON_EXISTING_ADO_URL:
@@ -265,9 +265,9 @@ describe.each(Object.entries(testInputs))(
 
 const scmTestParams = {
   accessTokenConfig: {
-    url: env.PLAYWRIGHT_ADO_CLOUD_REPO_URL,
-    accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
-    scmOrg: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+    url: env.CLI_ADO_CLOUD_REPO_URL,
+    accessToken: env.CLI_ADO_CLOUD_PAT,
+    scmOrg: env.CLI_ADO_CLOUD_SCM_ORG,
   },
   // todo: add when we set an environment for on-prem add this test params back
 }
@@ -372,7 +372,7 @@ describe('Ado scm general checks', () => {
     const scmLib = await createScmLib({
       url: undefined,
       scmType: ScmLibScmType.ADO,
-      accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+      accessToken: env.CLI_ADO_CLOUD_PAT,
       scmOrg: testInputs.accessTokenTest.PAT_ORG,
     })
 
@@ -385,7 +385,7 @@ describe('Ado scm general checks', () => {
           repoIsPublic: true,
           repoLanguages: [],
           repoName: 'test-project',
-          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoOwner: env.CLI_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Mon Jun 30 2025',
           repoUrl:
             'https://dev.azure.com/citestjob3/test-project/_git/test-project',
@@ -394,7 +394,7 @@ describe('Ado scm general checks', () => {
           repoIsPublic: false,
           repoLanguages: [],
           repoName: 'webgoat',
-          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoOwner: env.CLI_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Tue Oct 29 2024',
           repoUrl: 'https://dev.azure.com/citestjob3/citestjob3/_git/webgoat',
         }),
@@ -402,7 +402,7 @@ describe('Ado scm general checks', () => {
           repoIsPublic: true,
           repoLanguages: [],
           repoName: 'webgoat.mobbci.testjob',
-          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoOwner: env.CLI_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Mon Feb 24 2025',
           repoUrl:
             'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob',
@@ -411,7 +411,7 @@ describe('Ado scm general checks', () => {
           repoIsPublic: true,
           repoLanguages: [],
           repoName: 'webgoat.mobbci.testjob.mobbci.testjob test with spaces',
-          repoOwner: env.PLAYWRIGHT_ADO_CLOUD_SCM_ORG,
+          repoOwner: env.CLI_ADO_CLOUD_SCM_ORG,
           repoUpdatedAt: 'Mon Feb 24 2025',
           repoUrl:
             'https://dev.azure.com/citestjob3/test-project/_git/webgoat.mobbci.testjob.mobbci.testjob%20test%20with%20spaces',
@@ -423,7 +423,7 @@ describe('Ado scm general checks', () => {
     await expect(
       createScmLib({
         url: 'https://dev.azure.com/bogusssss/test/_git/bogus.non-existing',
-        accessToken: env.PLAYWRIGHT_ADO_CLOUD_PAT,
+        accessToken: env.CLI_ADO_CLOUD_PAT,
         scmType: ScmLibScmType.ADO,
         scmOrg: testInputs.accessTokenTest.PAT_ORG,
       })

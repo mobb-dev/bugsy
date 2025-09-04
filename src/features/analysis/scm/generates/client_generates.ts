@@ -236,10 +236,45 @@ export enum FixQuestionInputType {
   Text = 'TEXT'
 }
 
+export type FixReportItem = {
+  __typename?: 'FixReportItem';
+  createdByUser?: Maybe<FixReportUser>;
+  createdOn: Scalars['String']['output'];
+  expirationOn?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  repo?: Maybe<FixReportRepo>;
+  vulnerabilityReport: FixReportVulnerabilityReport;
+};
+
+export type FixReportRepo = {
+  __typename?: 'FixReportRepo';
+  name?: Maybe<Scalars['String']['output']>;
+  originalUrl: Scalars['String']['output'];
+  reference: Scalars['String']['output'];
+};
+
 export type FixReportSubmitReport = {
   __typename?: 'FixReportSubmitReport';
   expirationOn: Scalars['String']['output'];
   repo?: Maybe<RepoSubmitReport>;
+};
+
+export type FixReportUser = {
+  __typename?: 'FixReportUser';
+  email: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+};
+
+export type FixReportVulnerabilityReport = {
+  __typename?: 'FixReportVulnerabilityReport';
+  project: FixReportVulnerabilityReportProject;
+  vendor?: Maybe<Scalars['String']['output']>;
+};
+
+export type FixReportVulnerabilityReportProject = {
+  __typename?: 'FixReportVulnerabilityReportProject';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export enum FixerStatus {
@@ -316,6 +351,19 @@ export type GetLinearIntegrationDataSuccess = {
   __typename?: 'GetLinearIntegrationDataSuccess';
   id: Scalars['String']['output'];
   teamId?: Maybe<Scalars['String']['output']>;
+};
+
+export type GetReportsResponseError = {
+  __typename?: 'GetReportsResponseError';
+  error: Scalars['String']['output'];
+};
+
+export type GetReportsV2Response = GetReportsResponseError | GetReportsV2ResponseSuccess;
+
+export type GetReportsV2ResponseSuccess = {
+  __typename?: 'GetReportsV2ResponseSuccess';
+  fixReport: Array<FixReportItem>;
+  hasNextPage: Scalars['Boolean']['output'];
 };
 
 export type GetReposSuccess = {
@@ -10931,6 +10979,14 @@ export type GeneratedFixAndVulUnique_Organization_Args = {
 export type GeneratedFixAndVulUnique_Project_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type Get_Fix_Reports_For_User_Args = {
+  created_after_id?: InputMaybe<Scalars['uuid']['input']>;
+  created_after_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  end_interval_days?: InputMaybe<Scalars['Int']['input']>;
+  limit_count?: InputMaybe<Scalars['Int']['input']>;
+  user_email?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Get_Vulnerability_Report_Issues_For_User_Args = {
@@ -22914,9 +22970,14 @@ export type Query_Root = {
   getIssuesApiV4: GetIssuesV4Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
+  getReportsApiV2: GetReportsV2Response;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
+  /** execute function "get_fix_reports_for_user" which returns "fix_report" */
+  get_fix_reports_for_user: Array<FixReport>;
+  /** execute function "get_fix_reports_for_user" and query aggregates on result of table type "fix_report" */
+  get_fix_reports_for_user_aggregate: FixReport_Aggregate;
   /** execute function "get_vulnerability_report_issues_for_user" which returns "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
@@ -24112,6 +24173,11 @@ export type Query_RootGetLinearTeamsArgs = {
 };
 
 
+export type Query_RootGetReportsApiV2Args = {
+  reportId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type Query_RootGetScmReposArgs = {
   url: Scalars['String']['input'];
 };
@@ -24127,6 +24193,26 @@ export type Query_RootGetSplitFixArgs = {
   fixId: Scalars['uuid']['input'];
   loadAnswers: Scalars['Boolean']['input'];
   userInput?: InputMaybe<Array<QuestionAnswer>>;
+};
+
+
+export type Query_RootGet_Fix_Reports_For_UserArgs = {
+  args: Get_Fix_Reports_For_User_Args;
+  distinct_on?: InputMaybe<Array<FixReport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<FixReport_Order_By>>;
+  where?: InputMaybe<FixReport_Bool_Exp>;
+};
+
+
+export type Query_RootGet_Fix_Reports_For_User_AggregateArgs = {
+  args: Get_Fix_Reports_For_User_Args;
+  distinct_on?: InputMaybe<Array<FixReport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<FixReport_Order_By>>;
+  where?: InputMaybe<FixReport_Bool_Exp>;
 };
 
 
@@ -28066,6 +28152,10 @@ export type Subscription_Root = {
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   /** fetch data from the table in a streaming manner: "fix_to_submit_fix_request" */
   fix_to_submit_fix_request_stream: Array<Fix_To_Submit_Fix_Request>;
+  /** execute function "get_fix_reports_for_user" which returns "fix_report" */
+  get_fix_reports_for_user: Array<FixReport>;
+  /** execute function "get_fix_reports_for_user" and query aggregates on result of table type "fix_report" */
+  get_fix_reports_for_user_aggregate: FixReport_Aggregate;
   /** execute function "get_vulnerability_report_issues_for_user" which returns "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
@@ -29538,6 +29628,26 @@ export type Subscription_RootFix_To_Submit_Fix_Request_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Fix_To_Submit_Fix_Request_Stream_Cursor_Input>>;
   where?: InputMaybe<Fix_To_Submit_Fix_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootGet_Fix_Reports_For_UserArgs = {
+  args: Get_Fix_Reports_For_User_Args;
+  distinct_on?: InputMaybe<Array<FixReport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<FixReport_Order_By>>;
+  where?: InputMaybe<FixReport_Bool_Exp>;
+};
+
+
+export type Subscription_RootGet_Fix_Reports_For_User_AggregateArgs = {
+  args: Get_Fix_Reports_For_User_Args;
+  distinct_on?: InputMaybe<Array<FixReport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<FixReport_Order_By>>;
+  where?: InputMaybe<FixReport_Bool_Exp>;
 };
 
 

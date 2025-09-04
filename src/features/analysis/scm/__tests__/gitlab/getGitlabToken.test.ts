@@ -8,6 +8,7 @@ import * as scmUtils from '../../utils'
 
 vi.mock('undici', () => ({
   ProxyAgent: vi.fn(),
+  Agent: vi.fn(),
   fetch: vi.fn(),
 }))
 

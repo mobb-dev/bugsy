@@ -14,6 +14,7 @@ import {
 } from '@gitbeaker/rest'
 import Debug from 'debug'
 import {
+  Agent,
   fetch as undiciFetch,
   ProxyAgent,
   Response as UndiciResponse,
@@ -511,18 +512,26 @@ export async function getGitlabToken({
     url: scmFinalUrl,
     brokerHosts,
   })
-  let dispatcher = undefined
-  if (isBrokerUrl(effectiveUrl)) {
-    dispatcher = new ProxyAgent({
-      uri: GIT_PROXY_HOST,
-      requestTls: {
-        rejectUnauthorized: false,
-      },
-    })
-  }
+  const tokenUrl = `${effectiveUrl}/oauth/token`
+
+  const dispatcher =
+    isBrokerUrl(effectiveUrl) && GIT_PROXY_HOST
+      ? new ProxyAgent({
+          uri: GIT_PROXY_HOST,
+          requestTls: {
+            rejectUnauthorized: false,
+          },
+          bodyTimeout: 5000,
+          headersTimeout: 5000,
+          connectTimeout: 5000,
+        })
+      : new Agent({
+          bodyTimeout: 5000,
+          headersTimeout: 5000,
+          connectTimeout: 5000,
+        })
 
   try {
-    const tokenUrl = `${effectiveUrl}/oauth/token`
     contextLogger.info('Making token request to GitLab', {
       tokenUrl,
       tokenType,

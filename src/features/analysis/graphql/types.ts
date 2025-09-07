@@ -1,5 +1,7 @@
-import { ValidCategoriesZ } from '@mobb/bugsy/features/analysis/scm'
-import { Vulnerability_Report_Issue_Tag_Enum } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
+import {
+  Vulnerability_Report_Issue_Category_Enum,
+  Vulnerability_Report_Issue_Tag_Enum,
+} from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import { z } from 'zod'
 
 type LineFilter =
@@ -47,7 +49,7 @@ const VulnerabilityReportIssueCodeNodeZ = z.object({
   startLine: z.number(),
   vulnerabilityReportIssue: z.object({
     fixId: z.string(),
-    category: ValidCategoriesZ,
+    category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
     safeIssueType: z.string(),
     vulnerabilityReportIssueTags: z.array(
       z.object({
@@ -62,7 +64,7 @@ const VulnerabilityReportIssueNoFixCodeNodeZ = z.object({
     z.object({
       id: z.string(),
       fixId: z.string().nullable(),
-      category: ValidCategoriesZ,
+      category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
       safeIssueType: z.string(),
       fpId: z.string().uuid().nullable(),
       codeNodes: z.array(

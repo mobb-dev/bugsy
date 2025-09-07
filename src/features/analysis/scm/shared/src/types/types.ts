@@ -6,6 +6,7 @@ import {
   Fix_State_Enum,
   IssueLanguage_Enum,
   Project_Role_Type_Enum,
+  Vulnerability_Report_Issue_Category_Enum,
   Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
@@ -132,7 +133,7 @@ export const ReportQueryResultZ = z.object({
             id: z.string().uuid(),
             issueType: z.string(),
             issueLanguage: z.string(),
-            category: z.string(),
+            category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
             sharedState: IssueSharedStateZ,
           })
         ),

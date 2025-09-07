@@ -407,4 +407,6 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.UselessIfBody]: undefined,
   [IssueType_Enum.MissingTemplateStringIndicator]: undefined,
   [IssueType_Enum.NoAssert]: undefined,
+  [IssueType_Enum.FunctionCallWithoutParentheses]: undefined,
+  [IssueType_Enum.SpringDefaultPermit]: undefined,
 }

@@ -155,6 +155,9 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.UseTimeout]: 'Use Timeout',
   [IssueType_Enum.UselessIfBody]: 'Useless If Body',
   [IssueType_Enum.NoAssert]: 'No Assert',
+  [IssueType_Enum.FunctionCallWithoutParentheses]:
+    'Function Call Without Parentheses',
+  [IssueType_Enum.SpringDefaultPermit]: 'Spring Default Permit',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

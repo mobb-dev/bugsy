@@ -1,30 +1,14 @@
 import { z } from 'zod'
 
-import { Vulnerability_Report_Issue_Tag_Enum } from '../../../generates/client_generates'
+import {
+  Vulnerability_Report_Issue_Category_Enum,
+  Vulnerability_Report_Issue_Tag_Enum,
+} from '../../../generates/client_generates'
 import { FixPageFixReportZ } from './analysis'
 import { FixPartsForFixScreenZ } from './fix'
 import { ParsedSeverityZ } from './shared'
 
 export const MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES = 100_000 // 100kB
-
-export const CATEGORY = {
-  NoFix: 'NoFix',
-  Unsupported: 'Unsupported',
-  Irrelevant: 'Irrelevant',
-  FalsePositive: 'FalsePositive',
-  Fixable: 'Fixable',
-  Filtered: 'Filtered',
-  Pending: 'Pending',
-} as const
-export const ValidCategoriesZ = z.union([
-  z.literal(CATEGORY.NoFix),
-  z.literal(CATEGORY.Unsupported),
-  z.literal(CATEGORY.Irrelevant),
-  z.literal(CATEGORY.FalsePositive),
-  z.literal(CATEGORY.Fixable),
-  z.literal(CATEGORY.Filtered),
-  z.literal(CATEGORY.Pending),
-])
 
 export const VulnerabilityReportIssueSharedStateZ = z
   .object({
@@ -45,7 +29,7 @@ export const BaseIssuePartsZ = z.object({
   safeIssueLanguage: z.string(),
   createdAt: z.string(),
   parsedSeverity: ParsedSeverityZ,
-  category: ValidCategoriesZ,
+  category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
   extraData: z.object({
     missing_files: z.string().array().nullish(),
     error_files: z.string().array().nullish(),
@@ -119,14 +103,14 @@ export type FalsePositiveParts = z.infer<typeof FalsePositivePartsZ>
 
 const IssuePartsWithFixZ = BaseIssuePartsZ.merge(
   z.object({
-    category: z.literal(CATEGORY.Irrelevant),
+    category: z.literal(Vulnerability_Report_Issue_Category_Enum.Irrelevant),
     fix: FixPartsForFixScreenZ.nullish(),
   })
 )
 
 export const IssuePartsFpZ = BaseIssuePartsZ.merge(
   z.object({
-    category: z.literal(CATEGORY.FalsePositive),
+    category: z.literal(Vulnerability_Report_Issue_Category_Enum.FalsePositive),
     fpId: z.string().uuid(),
     getFalsePositive: FalsePositivePartsZ,
   })
@@ -135,11 +119,11 @@ export const IssuePartsFpZ = BaseIssuePartsZ.merge(
 const GeneralIssueZ = BaseIssuePartsZ.merge(
   z.object({
     category: z.union([
-      z.literal(CATEGORY.NoFix),
-      z.literal(CATEGORY.Unsupported),
-      z.literal(CATEGORY.Fixable),
-      z.literal(CATEGORY.Filtered),
-      z.literal(CATEGORY.Pending),
+      z.literal(Vulnerability_Report_Issue_Category_Enum.NoFix),
+      z.literal(Vulnerability_Report_Issue_Category_Enum.Unsupported),
+      z.literal(Vulnerability_Report_Issue_Category_Enum.Fixable),
+      z.literal(Vulnerability_Report_Issue_Category_Enum.Filtered),
+      z.literal(Vulnerability_Report_Issue_Category_Enum.Pending),
     ]),
   })
 )
@@ -180,7 +164,10 @@ export type GetIssueScreenData = z.infer<typeof GetIssueScreenDataZ>
 export type IssueCategory =
   GetIssueScreenData['vulnerability_report_issue_by_pk']['category']
 
-export const mapCategoryToBucket: Record<IssueCategory, IssueBucket> = {
+export const mapCategoryToBucket: Record<
+  Vulnerability_Report_Issue_Category_Enum,
+  IssueBucket
+> = {
   FalsePositive: 'irrelevant',
   Irrelevant: 'irrelevant',
   NoFix: 'remaining',
@@ -190,8 +177,19 @@ export const mapCategoryToBucket: Record<IssueCategory, IssueBucket> = {
   Pending: 'remaining',
 }
 
-export const mapBucketTypeToCategory: Record<IssueBucket, IssueCategory[]> = {
-  irrelevant: ['FalsePositive', 'Irrelevant', 'Filtered'],
-  remaining: ['NoFix', 'Unsupported', 'Pending'],
-  fixable: ['Fixable'],
+export const mapBucketTypeToCategory: Record<
+  IssueBucket,
+  Vulnerability_Report_Issue_Category_Enum[]
+> = {
+  irrelevant: [
+    Vulnerability_Report_Issue_Category_Enum.FalsePositive,
+    Vulnerability_Report_Issue_Category_Enum.Irrelevant,
+    Vulnerability_Report_Issue_Category_Enum.Filtered,
+  ],
+  remaining: [
+    Vulnerability_Report_Issue_Category_Enum.NoFix,
+    Vulnerability_Report_Issue_Category_Enum.Unsupported,
+    Vulnerability_Report_Issue_Category_Enum.Pending,
+  ],
+  fixable: [Vulnerability_Report_Issue_Category_Enum.Fixable],
 }

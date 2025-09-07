@@ -12315,6 +12315,8 @@ export enum IssueType_Enum {
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
   /** frameable_login_page */
   FrameableLoginPage = 'FRAMEABLE_LOGIN_PAGE',
+  /** FUNCTION_CALL_WITHOUT_PARENTHESES */
+  FunctionCallWithoutParentheses = 'FUNCTION_CALL_WITHOUT_PARENTHESES',
   /** GH_ACTIONS_SHELL_INJECTION */
   GhActionsShellInjection = 'GH_ACTIONS_SHELL_INJECTION',
   /** GraphQl Depth Limit */
@@ -12453,6 +12455,8 @@ export enum IssueType_Enum {
   RequestParametersBoundViaInput = 'REQUEST_PARAMETERS_BOUND_VIA_INPUT',
   /** RETURN_SHOULD_NOT_BE_INVARIANT */
   ReturnShouldNotBeInvariant = 'RETURN_SHOULD_NOT_BE_INVARIANT',
+  /** SPRING_DEFAULT_PERMIT */
+  SpringDefaultPermit = 'SPRING_DEFAULT_PERMIT',
   /** SQL Injection */
   SqlInjection = 'SQL_Injection',
   /** Server Side Request Forgery */
@@ -33699,9 +33703,7 @@ export type Vulnerability_Report_Insert_Input = {
 /** columns and relationships of "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue = {
   __typename?: 'vulnerability_report_issue';
-  /** A computed field, executes function "get_issue_category" */
-  category?: Maybe<Scalars['String']['output']>;
-  category_static?: Maybe<Vulnerability_Report_Issue_Category_Enum>;
+  category?: Maybe<Vulnerability_Report_Issue_Category_Enum>;
   /** An array relationship */
   codeNodes: Array<Vulnerability_Report_Issue_Code_Node>;
   /** An aggregate relationship */
@@ -33885,8 +33887,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   _and?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
   _not?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
-  category?: InputMaybe<String_Comparison_Exp>;
-  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum_Comparison_Exp>;
+  category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum_Comparison_Exp>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -34627,7 +34628,7 @@ export type Vulnerability_Report_Issue_Delete_Key_Input = {
 
 /** input type for inserting data into table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Insert_Input = {
-  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
@@ -34666,8 +34667,6 @@ export type Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args = {
 /** aggregate max on columns */
 export type Vulnerability_Report_Issue_Max_Fields = {
   __typename?: 'vulnerability_report_issue_max_fields';
-  /** A computed field, executes function "get_issue_category" */
-  category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
@@ -34713,8 +34712,6 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
 /** aggregate min on columns */
 export type Vulnerability_Report_Issue_Min_Fields = {
   __typename?: 'vulnerability_report_issue_min_fields';
-  /** A computed field, executes function "get_issue_category" */
-  category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
@@ -34783,7 +34780,6 @@ export type Vulnerability_Report_Issue_On_Conflict = {
 /** Ordering options when selecting data from "vulnerability_report_issue". */
 export type Vulnerability_Report_Issue_Order_By = {
   category?: InputMaybe<Order_By>;
-  category_static?: InputMaybe<Order_By>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
@@ -34830,7 +34826,7 @@ export type Vulnerability_Report_Issue_Prepend_Input = {
 /** select columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
-  CategoryStatic = 'category_static',
+  Category = 'category',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -34887,7 +34883,7 @@ export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_
 
 /** input type for updating data in table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Set_Input = {
-  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -35358,7 +35354,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
-  category_static?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -35739,7 +35735,7 @@ export type Vulnerability_Report_Issue_Types_Vulnerability_Report_Args = {
 /** update columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
-  CategoryStatic = 'category_static',
+  Category = 'category',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -36691,7 +36687,7 @@ export type GetVulByNodesMetadataQueryVariables = Exact<{
 }>;
 
 
-export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', safeIssueType?: string | null, fixId?: any | null, category?: string | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, safeIssueType?: string | null, fixId?: any | null, category?: string | null, fpId?: any | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
+export type GetVulByNodesMetadataQuery = { __typename?: 'query_root', vulnerabilityReportIssueCodeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', vulnerabilityReportIssueId: any, path: string, startLine: number, vulnerabilityReportIssue: { __typename?: 'vulnerability_report_issue', safeIssueType?: string | null, fixId?: any | null, category?: Vulnerability_Report_Issue_Category_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }> } }>, fixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, nonFixablePrVuls: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, totalScanVulnerabilities: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, irrelevantVulnerabilityReportIssue: Array<{ __typename?: 'vulnerability_report', vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', id: any, safeIssueType?: string | null, fixId?: any | null, category?: Vulnerability_Report_Issue_Category_Enum | null, fpId?: any | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', tag: Vulnerability_Report_Issue_Tag_Enum }>, codeNodes: Array<{ __typename?: 'vulnerability_report_issue_code_node', path: string, startLine: number }> }> }> };
 
 export type GetFalsePositiveQueryVariables = Exact<{
   fpId: Scalars['uuid']['input'];
@@ -36885,35 +36881,35 @@ export const FixReportSummaryFieldsFragmentDoc = `
   }
   issueTypes
   CRITICAL: fixes_aggregate(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "critical"}}]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, {severityText: {_eq: "critical"}}]}
   ) {
     aggregate {
       count
     }
   }
   HIGH: fixes_aggregate(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "high"}}]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, {severityText: {_eq: "high"}}]}
   ) {
     aggregate {
       count
     }
   }
   MEDIUM: fixes_aggregate(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "medium"}}]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, {severityText: {_eq: "medium"}}]}
   ) {
     aggregate {
       count
     }
   }
   LOW: fixes_aggregate(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {severityText: {_eq: "low"}}]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, {severityText: {_eq: "low"}}]}
   ) {
     aggregate {
       count
     }
   }
   fixes(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, {_or: [{gitBlameLogin: {_is_null: true}}, {_not: {gitBlameLogin: {_ilike: $currentUserEmail}}}]}, $filters]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, {_or: [{gitBlameLogin: {_is_null: true}}, {_not: {gitBlameLogin: {_ilike: $currentUserEmail}}}]}, $filters]}
     order_by: {severityValue: desc}
     limit: $limit
     offset: $offset
@@ -36921,7 +36917,7 @@ export const FixReportSummaryFieldsFragmentDoc = `
     ...FixDetails
   }
   userFixes: fixes(
-    where: {_and: [{gitBlameLogin: {_ilike: $currentUserEmail}}, {vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, $filters]}
+    where: {_and: [{gitBlameLogin: {_ilike: $currentUserEmail}}, {vulnerabilityReportIssues: {category: {_eq: Fixable}}}, $filters]}
     order_by: {severityValue: desc}
     limit: $limit
     offset: $offset
@@ -36929,7 +36925,7 @@ export const FixReportSummaryFieldsFragmentDoc = `
     ...FixDetails
   }
   filteredFixesCount: fixes_aggregate(
-    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: "Fixable"}}}, $filters]}
+    where: {_and: [{vulnerabilityReportIssues: {category: {_eq: Fixable}}}, $filters]}
   ) {
     aggregate {
       count
@@ -36949,7 +36945,7 @@ export const FixReportSummaryFieldsFragmentDoc = `
       }
     }
     notFixableVulnerabilityReportIssuesCount: vulnerabilityReportIssues_aggregate(
-      where: {category: {_neq: "Fixable"}}
+      where: {category: {_neq: Fixable}}
     ) {
       aggregate {
         count
@@ -37158,7 +37154,7 @@ export const GetVulByNodesMetadataDocument = `
     where: {id: {_eq: $vulnerabilityReportId}}
   ) {
     vulnerabilityReportIssues(
-      where: {fixId: {_is_null: true}, _or: [{category: {_eq: "Irrelevant"}}, {category: {_eq: "FalsePositive"}}, {category: {_eq: "Filtered"}}]}
+      where: {fixId: {_is_null: true}, category: {_in: [Irrelevant, FalsePositive, Filtered]}}
     ) {
       id
       safeIssueType

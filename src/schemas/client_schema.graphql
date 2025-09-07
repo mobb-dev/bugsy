@@ -208,11 +208,7 @@ query getVulByNodesMetadata(
     vulnerabilityReportIssues(
       where: {
         fixId: { _is_null: true }
-        _or: [
-          { category: { _eq: "Irrelevant" } }
-          { category: { _eq: "FalsePositive" } }
-          { category: { _eq: "Filtered" } }
-        ]
+        category: { _in: [Irrelevant, FalsePositive, Filtered] }
       }
     ) {
       id
@@ -510,7 +506,7 @@ fragment FixReportSummaryFields on fixReport {
   CRITICAL: fixes_aggregate(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         { severityText: { _eq: "critical" } }
       ]
     }
@@ -522,7 +518,7 @@ fragment FixReportSummaryFields on fixReport {
   HIGH: fixes_aggregate(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         { severityText: { _eq: "high" } }
       ]
     }
@@ -534,7 +530,7 @@ fragment FixReportSummaryFields on fixReport {
   MEDIUM: fixes_aggregate(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         { severityText: { _eq: "medium" } }
       ]
     }
@@ -546,7 +542,7 @@ fragment FixReportSummaryFields on fixReport {
   LOW: fixes_aggregate(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         { severityText: { _eq: "low" } }
       ]
     }
@@ -558,7 +554,7 @@ fragment FixReportSummaryFields on fixReport {
   fixes(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         {
           _or: [
             { gitBlameLogin: { _is_null: true } }
@@ -578,7 +574,7 @@ fragment FixReportSummaryFields on fixReport {
     where: {
       _and: [
         { gitBlameLogin: { _ilike: $currentUserEmail } }
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         $filters
       ]
     }
@@ -592,7 +588,7 @@ fragment FixReportSummaryFields on fixReport {
   filteredFixesCount: fixes_aggregate(
     where: {
       _and: [
-        { vulnerabilityReportIssues: { category: { _eq: "Fixable" } } }
+        { vulnerabilityReportIssues: { category: { _eq: Fixable } } }
         $filters
       ]
     }
@@ -615,7 +611,7 @@ fragment FixReportSummaryFields on fixReport {
       }
     }
     notFixableVulnerabilityReportIssuesCount: vulnerabilityReportIssues_aggregate(
-      where: { category: { _neq: "Fixable" } }
+      where: { category: { _neq: Fixable } }
     ) {
       aggregate {
         count

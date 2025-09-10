@@ -340,6 +340,7 @@ export class GitService {
       // Track files we've already seen and the order they were found
       const fileSet = new Set<string>()
       let commitsProcessed = 0
+      const consideredFiles: string[] = []
 
       // Add current changed files first
       for (const file of currentChanges.files) {
@@ -427,7 +428,8 @@ export class GitService {
               )
             }
 
-            this.log(`[GitService] Considering file: ${adjustedPath}`, 'debug')
+            // Collect the file for logging
+            consideredFiles.push(adjustedPath)
 
             // Only add if we haven't seen this file before and it passes our filters
             if (
@@ -453,6 +455,15 @@ export class GitService {
       }
 
       const files = Array.from(fileSet)
+
+      // Log all considered files in a single statement
+      if (consideredFiles.length > 0) {
+        this.log(
+          `[GitService] Considered ${consideredFiles.length} files during recent file search`,
+          'debug',
+          { consideredFiles }
+        )
+      }
 
       this.log('[GitService] Recently changed files retrieved', 'info', {
         fileCount: files.length,

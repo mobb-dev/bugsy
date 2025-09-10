@@ -16,6 +16,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   JSON: { input: any; output: any; }
   Void: { input: any; output: any; }
+  _text: { input: any; output: any; }
   bigint: { input: any; output: any; }
   date: { input: any; output: any; }
   json: { input: any; output: any; }
@@ -6429,6 +6430,181 @@ export type Date_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['date']['input']>>;
 };
 
+export type Delete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_Limit_Args = {
+  row_limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** columns and relationships of "deletion_result" */
+export type Deletion_Result = {
+  __typename?: 'deletion_result';
+  deleted_count?: Maybe<Scalars['Int']['output']>;
+  deleted_node_ids?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "deletion_result" */
+export type Deletion_Result_Aggregate = {
+  __typename?: 'deletion_result_aggregate';
+  aggregate?: Maybe<Deletion_Result_Aggregate_Fields>;
+  nodes: Array<Deletion_Result>;
+};
+
+/** aggregate fields of "deletion_result" */
+export type Deletion_Result_Aggregate_Fields = {
+  __typename?: 'deletion_result_aggregate_fields';
+  avg?: Maybe<Deletion_Result_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Deletion_Result_Max_Fields>;
+  min?: Maybe<Deletion_Result_Min_Fields>;
+  stddev?: Maybe<Deletion_Result_Stddev_Fields>;
+  stddev_pop?: Maybe<Deletion_Result_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Deletion_Result_Stddev_Samp_Fields>;
+  sum?: Maybe<Deletion_Result_Sum_Fields>;
+  var_pop?: Maybe<Deletion_Result_Var_Pop_Fields>;
+  var_samp?: Maybe<Deletion_Result_Var_Samp_Fields>;
+  variance?: Maybe<Deletion_Result_Variance_Fields>;
+};
+
+
+/** aggregate fields of "deletion_result" */
+export type Deletion_Result_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Deletion_Result_Avg_Fields = {
+  __typename?: 'deletion_result_avg_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "deletion_result". All fields are combined with a logical 'AND'. */
+export type Deletion_Result_Bool_Exp = {
+  _and?: InputMaybe<Array<Deletion_Result_Bool_Exp>>;
+  _not?: InputMaybe<Deletion_Result_Bool_Exp>;
+  _or?: InputMaybe<Array<Deletion_Result_Bool_Exp>>;
+  deleted_count?: InputMaybe<Int_Comparison_Exp>;
+  deleted_node_ids?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** input type for incrementing numeric columns in table "deletion_result" */
+export type Deletion_Result_Inc_Input = {
+  deleted_count?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "deletion_result" */
+export type Deletion_Result_Insert_Input = {
+  deleted_count?: InputMaybe<Scalars['Int']['input']>;
+  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Deletion_Result_Max_Fields = {
+  __typename?: 'deletion_result_max_fields';
+  deleted_count?: Maybe<Scalars['Int']['output']>;
+  deleted_node_ids?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Deletion_Result_Min_Fields = {
+  __typename?: 'deletion_result_min_fields';
+  deleted_count?: Maybe<Scalars['Int']['output']>;
+  deleted_node_ids?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "deletion_result" */
+export type Deletion_Result_Mutation_Response = {
+  __typename?: 'deletion_result_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Deletion_Result>;
+};
+
+/** Ordering options when selecting data from "deletion_result". */
+export type Deletion_Result_Order_By = {
+  deleted_count?: InputMaybe<Order_By>;
+  deleted_node_ids?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "deletion_result" */
+export enum Deletion_Result_Select_Column {
+  /** column name */
+  DeletedCount = 'deleted_count',
+  /** column name */
+  DeletedNodeIds = 'deleted_node_ids'
+}
+
+/** input type for updating data in table "deletion_result" */
+export type Deletion_Result_Set_Input = {
+  deleted_count?: InputMaybe<Scalars['Int']['input']>;
+  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Deletion_Result_Stddev_Fields = {
+  __typename?: 'deletion_result_stddev_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Deletion_Result_Stddev_Pop_Fields = {
+  __typename?: 'deletion_result_stddev_pop_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Deletion_Result_Stddev_Samp_Fields = {
+  __typename?: 'deletion_result_stddev_samp_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "deletion_result" */
+export type Deletion_Result_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Deletion_Result_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Deletion_Result_Stream_Cursor_Value_Input = {
+  deleted_count?: InputMaybe<Scalars['Int']['input']>;
+  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Deletion_Result_Sum_Fields = {
+  __typename?: 'deletion_result_sum_fields';
+  deleted_count?: Maybe<Scalars['Int']['output']>;
+};
+
+export type Deletion_Result_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Deletion_Result_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Deletion_Result_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Deletion_Result_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Deletion_Result_Var_Pop_Fields = {
+  __typename?: 'deletion_result_var_pop_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Deletion_Result_Var_Samp_Fields = {
+  __typename?: 'deletion_result_var_samp_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Deletion_Result_Variance_Fields = {
+  __typename?: 'deletion_result_variance_fields';
+  deleted_count?: Maybe<Scalars['Float']['output']>;
+};
+
 export type DeployedFixesCount_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -12632,6 +12808,10 @@ export type IssueType_Updates = {
   where: IssueType_Bool_Exp;
 };
 
+export type IssuesByCategories_Organization_Args = {
+  categories?: InputMaybe<Scalars['_text']['input']>;
+};
+
 /** Boolean expression to compare columns of type "json". All fields are combined with logical 'AND'. */
 export type Json_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['json']['input']>;
@@ -12757,10 +12937,14 @@ export type Mutation_Root = {
   delete_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** delete single row from the table: "cli_login" */
   delete_cli_login_by_pk?: Maybe<Cli_Login>;
+  /** delete data from the table: "deletion_result" */
+  delete_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
   /** delete data from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** delete single row from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
+  /** execute VOLATILE function "delete_expired_vulnerability_report_issue_code_nodes_with_limit" which returns "deletion_result" */
+  delete_expired_vulnerability_report_issue_code_nodes_with_limit: Array<Deletion_Result>;
   /** delete data from the table: "false_positive" */
   delete_false_positive?: Maybe<False_Positive_Mutation_Response>;
   /** delete single row from the table: "false_positive" */
@@ -13078,6 +13262,10 @@ export type Mutation_Root = {
   insert_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** insert a single row into the table: "cli_login" */
   insert_cli_login_one?: Maybe<Cli_Login>;
+  /** insert data into the table: "deletion_result" */
+  insert_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
+  /** insert a single row into the table: "deletion_result" */
+  insert_deletion_result_one?: Maybe<Deletion_Result>;
   /** insert data into the table: "effort_to_apply_fix" */
   insert_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** insert a single row into the table: "effort_to_apply_fix" */
@@ -13451,6 +13639,10 @@ export type Mutation_Root = {
   update_cli_login_by_pk?: Maybe<Cli_Login>;
   /** update multiples rows of table: "cli_login" */
   update_cli_login_many?: Maybe<Array<Maybe<Cli_Login_Mutation_Response>>>;
+  /** update data of the table: "deletion_result" */
+  update_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
+  /** update multiples rows of table: "deletion_result" */
+  update_deletion_result_many?: Maybe<Array<Maybe<Deletion_Result_Mutation_Response>>>;
   /** update data of the table: "effort_to_apply_fix" */
   update_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** update single row of the table: "effort_to_apply_fix" */
@@ -14161,6 +14353,12 @@ export type Mutation_RootDelete_Cli_Login_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Deletion_ResultArgs = {
+  where: Deletion_Result_Bool_Exp;
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Effort_To_Apply_FixArgs = {
   where: Effort_To_Apply_Fix_Bool_Exp;
 };
@@ -14169,6 +14367,17 @@ export type Mutation_RootDelete_Effort_To_Apply_FixArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Effort_To_Apply_Fix_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_LimitArgs = {
+  args?: InputMaybe<Delete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_Limit_Args>;
+  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 
@@ -15171,6 +15380,18 @@ export type Mutation_RootInsert_Cli_LoginArgs = {
 export type Mutation_RootInsert_Cli_Login_OneArgs = {
   object: Cli_Login_Insert_Input;
   on_conflict?: InputMaybe<Cli_Login_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Deletion_ResultArgs = {
+  objects: Array<Deletion_Result_Insert_Input>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Deletion_Result_OneArgs = {
+  object: Deletion_Result_Insert_Input;
 };
 
 
@@ -16571,6 +16792,20 @@ export type Mutation_RootUpdate_Cli_Login_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Cli_Login_ManyArgs = {
   updates: Array<Cli_Login_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Deletion_ResultArgs = {
+  _inc?: InputMaybe<Deletion_Result_Inc_Input>;
+  _set?: InputMaybe<Deletion_Result_Set_Input>;
+  where: Deletion_Result_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Deletion_Result_ManyArgs = {
+  updates: Array<Deletion_Result_Updates>;
 };
 
 
@@ -18188,6 +18423,8 @@ export type Organization = {
   issueTypeSettings: Array<Organization_Issue_Type_Settings>;
   /** An aggregate relationship */
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
+  /** A computed field, executes function "organization_count_vulnerability_issues_by_categories" */
+  issuesByCategories?: Maybe<Array<View_Types_Aggregated_Categories>>;
   name: Scalars['String']['output'];
   /** An array relationship */
   onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
@@ -18334,6 +18571,17 @@ export type OrganizationIssueTypeSettings_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Organization_Issue_Type_Settings_Order_By>>;
   where?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationIssuesByCategoriesArgs = {
+  args?: InputMaybe<IssuesByCategories_Organization_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
 };
 
 
@@ -22865,6 +23113,10 @@ export type Query_Root = {
   cli_login_aggregate: Cli_Login_Aggregate;
   /** fetch data from the table: "cli_login" using primary key columns */
   cli_login_by_pk?: Maybe<Cli_Login>;
+  /** fetch data from the table: "deletion_result" */
+  deletion_result: Array<Deletion_Result>;
+  /** fetch aggregated fields from the table: "deletion_result" */
+  deletion_result_aggregate: Deletion_Result_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -23242,6 +23494,10 @@ export type Query_Root = {
   view_total_unique_unresolved_vulnerabilities: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
   /** fetch aggregated fields from the table: "view_total_unique_unresolved_vulnerabilities" */
   view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table: "view_types.aggregated_categories" */
+  view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
+  /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
+  view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -23740,6 +23996,24 @@ export type Query_RootCli_Login_AggregateArgs = {
 
 export type Query_RootCli_Login_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootDeletion_ResultArgs = {
+  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
+};
+
+
+export type Query_RootDeletion_Result_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 
@@ -25252,6 +25526,24 @@ export type Query_RootView_Total_Unique_Unresolved_Vulnerabilities_AggregateArgs
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>>;
   where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Aggregated_CategoriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Aggregated_Categories_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
 };
 
 
@@ -28022,6 +28314,12 @@ export type Subscription_Root = {
   cli_login_by_pk?: Maybe<Cli_Login>;
   /** fetch data from the table in a streaming manner: "cli_login" */
   cli_login_stream: Array<Cli_Login>;
+  /** fetch data from the table: "deletion_result" */
+  deletion_result: Array<Deletion_Result>;
+  /** fetch aggregated fields from the table: "deletion_result" */
+  deletion_result_aggregate: Deletion_Result_Aggregate;
+  /** fetch data from the table in a streaming manner: "deletion_result" */
+  deletion_result_stream: Array<Deletion_Result>;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -28484,6 +28782,12 @@ export type Subscription_Root = {
   view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
   /** fetch data from the table in a streaming manner: "view_total_unique_unresolved_vulnerabilities" */
   view_total_unique_unresolved_vulnerabilities_stream: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
+  /** fetch data from the table: "view_types.aggregated_categories" */
+  view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
+  /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
+  view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.aggregated_categories" */
+  view_types_aggregated_categories_stream: Array<View_Types_Aggregated_Categories>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -29127,6 +29431,31 @@ export type Subscription_RootCli_Login_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Cli_Login_Stream_Cursor_Input>>;
   where?: InputMaybe<Cli_Login_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeletion_ResultArgs = {
+  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeletion_Result_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeletion_Result_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Deletion_Result_Stream_Cursor_Input>>;
+  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 
@@ -30893,6 +31222,31 @@ export type Subscription_RootView_Total_Unique_Unresolved_Vulnerabilities_Stream
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Aggregated_CategoriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Aggregated_Categories_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Aggregated_Categories_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Aggregated_Categories_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
 };
 
 
@@ -33444,6 +33798,142 @@ export type View_Total_Unique_Unresolved_Vulnerabilities_Variance_Fields = {
   total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.aggregated_categories" */
+export type View_Types_Aggregated_Categories = {
+  __typename?: 'view_types_aggregated_categories';
+  category?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.aggregated_categories" */
+export type View_Types_Aggregated_Categories_Aggregate = {
+  __typename?: 'view_types_aggregated_categories_aggregate';
+  aggregate?: Maybe<View_Types_Aggregated_Categories_Aggregate_Fields>;
+  nodes: Array<View_Types_Aggregated_Categories>;
+};
+
+/** aggregate fields of "view_types.aggregated_categories" */
+export type View_Types_Aggregated_Categories_Aggregate_Fields = {
+  __typename?: 'view_types_aggregated_categories_aggregate_fields';
+  avg?: Maybe<View_Types_Aggregated_Categories_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Aggregated_Categories_Max_Fields>;
+  min?: Maybe<View_Types_Aggregated_Categories_Min_Fields>;
+  stddev?: Maybe<View_Types_Aggregated_Categories_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Aggregated_Categories_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Aggregated_Categories_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Aggregated_Categories_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Aggregated_Categories_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Aggregated_Categories_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Aggregated_Categories_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.aggregated_categories" */
+export type View_Types_Aggregated_Categories_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Aggregated_Categories_Avg_Fields = {
+  __typename?: 'view_types_aggregated_categories_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.aggregated_categories". All fields are combined with a logical 'AND'. */
+export type View_Types_Aggregated_Categories_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Aggregated_Categories_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Aggregated_Categories_Bool_Exp>>;
+  category?: InputMaybe<String_Comparison_Exp>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Aggregated_Categories_Max_Fields = {
+  __typename?: 'view_types_aggregated_categories_max_fields';
+  category?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Aggregated_Categories_Min_Fields = {
+  __typename?: 'view_types_aggregated_categories_min_fields';
+  category?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.aggregated_categories". */
+export type View_Types_Aggregated_Categories_Order_By = {
+  category?: InputMaybe<Order_By>;
+  count?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.aggregated_categories" */
+export enum View_Types_Aggregated_Categories_Select_Column {
+  /** column name */
+  Category = 'category',
+  /** column name */
+  Count = 'count'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Aggregated_Categories_Stddev_Fields = {
+  __typename?: 'view_types_aggregated_categories_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Aggregated_Categories_Stddev_Pop_Fields = {
+  __typename?: 'view_types_aggregated_categories_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Aggregated_Categories_Stddev_Samp_Fields = {
+  __typename?: 'view_types_aggregated_categories_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_aggregated_categories" */
+export type View_Types_Aggregated_Categories_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Aggregated_Categories_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Aggregated_Categories_Stream_Cursor_Value_Input = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  count?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Aggregated_Categories_Sum_Fields = {
+  __typename?: 'view_types_aggregated_categories_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Aggregated_Categories_Var_Pop_Fields = {
+  __typename?: 'view_types_aggregated_categories_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Aggregated_Categories_Var_Samp_Fields = {
+  __typename?: 'view_types_aggregated_categories_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Aggregated_Categories_Variance_Fields = {
+  __typename?: 'view_types_aggregated_categories_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_Report = {
   __typename?: 'vulnerability_report';
@@ -33704,6 +34194,7 @@ export type Vulnerability_Report_Insert_Input = {
 export type Vulnerability_Report_Issue = {
   __typename?: 'vulnerability_report_issue';
   category?: Maybe<Vulnerability_Report_Issue_Category_Enum>;
+  codeFilePath?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   codeNodes: Array<Vulnerability_Report_Issue_Code_Node>;
   /** An aggregate relationship */
@@ -33888,6 +34379,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   _not?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Bool_Exp>>;
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum_Comparison_Exp>;
+  codeFilePath?: InputMaybe<String_Comparison_Exp>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -34629,6 +35121,7 @@ export type Vulnerability_Report_Issue_Delete_Key_Input = {
 /** input type for inserting data into table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Insert_Input = {
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  codeFilePath?: InputMaybe<Scalars['String']['input']>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
@@ -34667,6 +35160,7 @@ export type Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args = {
 /** aggregate max on columns */
 export type Vulnerability_Report_Issue_Max_Fields = {
   __typename?: 'vulnerability_report_issue_max_fields';
+  codeFilePath?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
@@ -34692,6 +35186,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
 
 /** order by max() on columns of table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Max_Order_By = {
+  codeFilePath?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
@@ -34712,6 +35207,7 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
 /** aggregate min on columns */
 export type Vulnerability_Report_Issue_Min_Fields = {
   __typename?: 'vulnerability_report_issue_min_fields';
+  codeFilePath?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
@@ -34737,6 +35233,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
 
 /** order by min() on columns of table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Min_Order_By = {
+  codeFilePath?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
@@ -34780,6 +35277,7 @@ export type Vulnerability_Report_Issue_On_Conflict = {
 /** Ordering options when selecting data from "vulnerability_report_issue". */
 export type Vulnerability_Report_Issue_Order_By = {
   category?: InputMaybe<Order_By>;
+  codeFilePath?: InputMaybe<Order_By>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
@@ -34827,6 +35325,8 @@ export type Vulnerability_Report_Issue_Prepend_Input = {
 export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   Category = 'category',
+  /** column name */
+  CodeFilePath = 'codeFilePath',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -34884,6 +35384,7 @@ export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_
 /** input type for updating data in table "vulnerability_report_issue" */
 export type Vulnerability_Report_Issue_Set_Input = {
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  codeFilePath?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -35355,6 +35856,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
+  codeFilePath?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -35736,6 +36238,8 @@ export type Vulnerability_Report_Issue_Types_Vulnerability_Report_Args = {
 export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
   Category = 'category',
+  /** column name */
+  CodeFilePath = 'codeFilePath',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */

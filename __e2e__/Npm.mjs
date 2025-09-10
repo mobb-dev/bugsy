@@ -68,6 +68,12 @@ export class Npm {
     )
     this.#packageVersion = packageJson.version
 
+    // Ensure the package is built before publishing
+    await run(`npm run build`, {
+      ...this.#npmRunParams,
+      cwd: CLI_DIR_PATH,
+    })
+
     await run(`npm publish --registry ${registryUrl} --ignore-scripts`, {
       ...this.#npmRunParams,
       cwd: CLI_DIR_PATH,

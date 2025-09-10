@@ -16,6 +16,9 @@
     "expect": "29.7.0",
     "jest-snapshot": "29.7.0"
   },
+  "overrides": {
+    "minimatch": "9.0.5"
+  },
   "author": "",
   "license": "ISC"
 }

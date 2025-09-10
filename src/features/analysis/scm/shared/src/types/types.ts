@@ -247,8 +247,8 @@ export const ReportFixesQueryFixZ = z.object({
     .min(1),
 })
 
-// todo: merge with the issue parts on './issue'
-export const VulnerabilityReportIssueZ = z.object({
+// Base schema with common fields for vulnerability report issues
+export const BaseVulnerabilityReportIssueZ = z.object({
   id: z.string().uuid(),
   createdAt: z.string(),
   state: z.nativeEnum(Vulnerability_Report_Issue_State_Enum),
@@ -269,7 +269,6 @@ export const VulnerabilityReportIssueZ = z.object({
   severity: z.string(),
   severityValue: z.number(),
   category: z.string(),
-  codeNodes: z.array(z.object({ path: z.string() })),
   vulnerabilityReportIssueTags: z.array(
     z.object({
       vulnerability_report_issue_tag_value: z.string(),
@@ -277,7 +276,27 @@ export const VulnerabilityReportIssueZ = z.object({
   ),
   sharedState: VulnerabilityReportIssueSharedStateZ,
 })
+
+// schema with codeNodes (for existing functionality, issue page)
+export const VulnerabilityReportIssueZ = BaseVulnerabilityReportIssueZ.merge(
+  z.object({
+    codeNodes: z.array(z.object({ path: z.string() })),
+  })
+)
 export type VulnerabilityReportIssue = z.infer<typeof VulnerabilityReportIssueZ>
+
+// New schema with codeFilePath (for GetReportIssuesQuery)
+export const VulnerabilityReportIssueWithCodeFilePathZ =
+  BaseVulnerabilityReportIssueZ.merge(
+    z.object({
+      codeFilePath: z.string().nullable(),
+      //TODO: REMOVE THIS once we flush out all the reports that don't have codeFilePath
+      codeNodes: z.array(z.object({ path: z.string() })),
+    })
+  )
+export type VulnerabilityReportIssueWithCodeFilePath = z.infer<
+  typeof VulnerabilityReportIssueWithCodeFilePathZ
+>
 
 export const GetReportIssuesQueryZ = z
   .object({
@@ -289,7 +308,9 @@ export const GetReportIssuesQueryZ = z
           vulnerabilityReportIssues_aggregate: z.object({
             aggregate: z.object({ count: z.number() }),
           }),
-          vulnerabilityReportIssues: z.array(VulnerabilityReportIssueZ),
+          vulnerabilityReportIssues: z.array(
+            VulnerabilityReportIssueWithCodeFilePathZ
+          ),
         }),
       })
       .array(),

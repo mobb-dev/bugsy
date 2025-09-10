@@ -7,12 +7,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    testTimeout: 30000, // Reduced timeout to 30 seconds to fail faster
-    hookTimeout: 30000, // Match test timeout
-    teardownTimeout: 15000, // Reduced teardown timeout
+    testTimeout: 20000, // Further reduced timeout for faster feedback
+    hookTimeout: 20000, // Match test timeout
+    teardownTimeout: 10000, // Reduced teardown timeout
     poolOptions: {
       threads: {
-        singleThread: true, // Force single thread to avoid concurrency issues
+        // Enable parallel execution for better performance
+        maxThreads: 4,
+        minThreads: 1,
       },
       forks: {
         // Add fork options to better handle process cleanup

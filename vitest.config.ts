@@ -8,8 +8,19 @@ export default defineConfig({
     reporters: ['html', 'default'],
     exclude: ['node_modules', './build', './__e2e__'],
     setupFiles: ['./__tests__/setupTests.ts'],
-    testTimeout: 60000,
-    hookTimeout: 60000,
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    // Enable parallel execution for faster test runs
+    poolOptions: {
+      threads: {
+        maxThreads: 6, // Use more threads on 8-core runner
+        minThreads: 2,
+      },
+      forks: {
+        isolate: true,
+        execArgv: ['--max-old-space-size=4096'],
+      },
+    },
     coverage: {
       exclude: ['node_modules', './build'],
       provider: 'istanbul',

@@ -23238,6 +23238,26 @@ export type Query_Root = {
   view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
   /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
   view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
+  /** fetch data from the table: "view_types.issue_type_count" */
+  view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
+  /** fetch aggregated fields from the table: "view_types.issue_type_count" */
+  view_types_issue_type_count_aggregate: View_Types_Issue_Type_Count_Aggregate;
+  /** fetch data from the table: "view_types.language_count" */
+  view_types_language_count: Array<View_Types_Language_Count>;
+  /** fetch aggregated fields from the table: "view_types.language_count" */
+  view_types_language_count_aggregate: View_Types_Language_Count_Aggregate;
+  /** fetch data from the table: "view_types.severity_count" */
+  view_types_severity_count: Array<View_Types_Severity_Count>;
+  /** fetch aggregated fields from the table: "view_types.severity_count" */
+  view_types_severity_count_aggregate: View_Types_Severity_Count_Aggregate;
+  /** fetch data from the table: "view_types.state_count" */
+  view_types_state_count: Array<View_Types_State_Count>;
+  /** fetch aggregated fields from the table: "view_types.state_count" */
+  view_types_state_count_aggregate: View_Types_State_Count_Aggregate;
+  /** fetch data from the table: "view_types.tag_count" */
+  view_types_tag_count: Array<View_Types_Tag_Count>;
+  /** fetch aggregated fields from the table: "view_types.tag_count" */
+  view_types_tag_count_aggregate: View_Types_Tag_Count_Aggregate;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -25286,6 +25306,96 @@ export type Query_RootView_Types_Aggregated_Categories_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
   where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Issue_Type_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Issue_Type_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Issue_Type_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Issue_Type_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Language_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Language_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Severity_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Severity_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Severity_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Severity_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_State_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_State_Count_Order_By>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_State_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_State_Count_Order_By>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Tag_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Tag_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
 };
 
 
@@ -28528,6 +28638,36 @@ export type Subscription_Root = {
   view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.aggregated_categories" */
   view_types_aggregated_categories_stream: Array<View_Types_Aggregated_Categories>;
+  /** fetch data from the table: "view_types.issue_type_count" */
+  view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
+  /** fetch aggregated fields from the table: "view_types.issue_type_count" */
+  view_types_issue_type_count_aggregate: View_Types_Issue_Type_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.issue_type_count" */
+  view_types_issue_type_count_stream: Array<View_Types_Issue_Type_Count>;
+  /** fetch data from the table: "view_types.language_count" */
+  view_types_language_count: Array<View_Types_Language_Count>;
+  /** fetch aggregated fields from the table: "view_types.language_count" */
+  view_types_language_count_aggregate: View_Types_Language_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.language_count" */
+  view_types_language_count_stream: Array<View_Types_Language_Count>;
+  /** fetch data from the table: "view_types.severity_count" */
+  view_types_severity_count: Array<View_Types_Severity_Count>;
+  /** fetch aggregated fields from the table: "view_types.severity_count" */
+  view_types_severity_count_aggregate: View_Types_Severity_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.severity_count" */
+  view_types_severity_count_stream: Array<View_Types_Severity_Count>;
+  /** fetch data from the table: "view_types.state_count" */
+  view_types_state_count: Array<View_Types_State_Count>;
+  /** fetch aggregated fields from the table: "view_types.state_count" */
+  view_types_state_count_aggregate: View_Types_State_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.state_count" */
+  view_types_state_count_stream: Array<View_Types_State_Count>;
+  /** fetch data from the table: "view_types.tag_count" */
+  view_types_tag_count: Array<View_Types_Tag_Count>;
+  /** fetch aggregated fields from the table: "view_types.tag_count" */
+  view_types_tag_count_aggregate: View_Types_Tag_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.tag_count" */
+  view_types_tag_count_stream: Array<View_Types_Tag_Count>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -30982,6 +31122,131 @@ export type Subscription_RootView_Types_Aggregated_Categories_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Aggregated_Categories_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Issue_Type_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Issue_Type_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Issue_Type_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Issue_Type_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Issue_Type_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Issue_Type_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Language_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Language_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Language_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Language_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Severity_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Severity_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Severity_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Severity_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Severity_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Severity_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_State_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_State_Count_Order_By>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_State_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_State_Count_Order_By>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_State_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_State_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Tag_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Tag_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Tag_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Tag_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
 };
 
 
@@ -33659,6 +33924,686 @@ export type View_Types_Aggregated_Categories_Variance_Fields = {
   count?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.issue_type_count" */
+export type View_Types_Issue_Type_Count = {
+  __typename?: 'view_types_issue_type_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.issue_type_count" */
+export type View_Types_Issue_Type_Count_Aggregate = {
+  __typename?: 'view_types_issue_type_count_aggregate';
+  aggregate?: Maybe<View_Types_Issue_Type_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Issue_Type_Count>;
+};
+
+/** aggregate fields of "view_types.issue_type_count" */
+export type View_Types_Issue_Type_Count_Aggregate_Fields = {
+  __typename?: 'view_types_issue_type_count_aggregate_fields';
+  avg?: Maybe<View_Types_Issue_Type_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Issue_Type_Count_Max_Fields>;
+  min?: Maybe<View_Types_Issue_Type_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Issue_Type_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Issue_Type_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Issue_Type_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Issue_Type_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Issue_Type_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Issue_Type_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Issue_Type_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.issue_type_count" */
+export type View_Types_Issue_Type_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Issue_Type_Count_Avg_Fields = {
+  __typename?: 'view_types_issue_type_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.issue_type_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Issue_Type_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Issue_Type_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Issue_Type_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  issueType?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Issue_Type_Count_Max_Fields = {
+  __typename?: 'view_types_issue_type_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Issue_Type_Count_Min_Fields = {
+  __typename?: 'view_types_issue_type_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.issue_type_count". */
+export type View_Types_Issue_Type_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.issue_type_count" */
+export enum View_Types_Issue_Type_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  IssueType = 'issueType'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Issue_Type_Count_Stddev_Fields = {
+  __typename?: 'view_types_issue_type_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Issue_Type_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_issue_type_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Issue_Type_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_issue_type_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_issue_type_count" */
+export type View_Types_Issue_Type_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Issue_Type_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Issue_Type_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Issue_Type_Count_Sum_Fields = {
+  __typename?: 'view_types_issue_type_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Issue_Type_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_issue_type_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Issue_Type_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_issue_type_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Issue_Type_Count_Variance_Fields = {
+  __typename?: 'view_types_issue_type_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.language_count" */
+export type View_Types_Language_Count = {
+  __typename?: 'view_types_language_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.language_count" */
+export type View_Types_Language_Count_Aggregate = {
+  __typename?: 'view_types_language_count_aggregate';
+  aggregate?: Maybe<View_Types_Language_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Language_Count>;
+};
+
+/** aggregate fields of "view_types.language_count" */
+export type View_Types_Language_Count_Aggregate_Fields = {
+  __typename?: 'view_types_language_count_aggregate_fields';
+  avg?: Maybe<View_Types_Language_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Language_Count_Max_Fields>;
+  min?: Maybe<View_Types_Language_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Language_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Language_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Language_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Language_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Language_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Language_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Language_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.language_count" */
+export type View_Types_Language_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Language_Count_Avg_Fields = {
+  __typename?: 'view_types_language_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.language_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Language_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Language_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Language_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  language?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Language_Count_Max_Fields = {
+  __typename?: 'view_types_language_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Language_Count_Min_Fields = {
+  __typename?: 'view_types_language_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.language_count". */
+export type View_Types_Language_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  language?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.language_count" */
+export enum View_Types_Language_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Language = 'language'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Language_Count_Stddev_Fields = {
+  __typename?: 'view_types_language_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Language_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_language_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Language_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_language_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_language_count" */
+export type View_Types_Language_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Language_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Language_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  language?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Language_Count_Sum_Fields = {
+  __typename?: 'view_types_language_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Language_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_language_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Language_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_language_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Language_Count_Variance_Fields = {
+  __typename?: 'view_types_language_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.severity_count" */
+export type View_Types_Severity_Count = {
+  __typename?: 'view_types_severity_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.severity_count" */
+export type View_Types_Severity_Count_Aggregate = {
+  __typename?: 'view_types_severity_count_aggregate';
+  aggregate?: Maybe<View_Types_Severity_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Severity_Count>;
+};
+
+/** aggregate fields of "view_types.severity_count" */
+export type View_Types_Severity_Count_Aggregate_Fields = {
+  __typename?: 'view_types_severity_count_aggregate_fields';
+  avg?: Maybe<View_Types_Severity_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Severity_Count_Max_Fields>;
+  min?: Maybe<View_Types_Severity_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Severity_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Severity_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Severity_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Severity_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Severity_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Severity_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Severity_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.severity_count" */
+export type View_Types_Severity_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Severity_Count_Avg_Fields = {
+  __typename?: 'view_types_severity_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.severity_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Severity_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Severity_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Severity_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  severity?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Severity_Count_Max_Fields = {
+  __typename?: 'view_types_severity_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Severity_Count_Min_Fields = {
+  __typename?: 'view_types_severity_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.severity_count". */
+export type View_Types_Severity_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  severity?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.severity_count" */
+export enum View_Types_Severity_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Severity = 'severity'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Severity_Count_Stddev_Fields = {
+  __typename?: 'view_types_severity_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Severity_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_severity_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Severity_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_severity_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_severity_count" */
+export type View_Types_Severity_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Severity_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Severity_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Severity_Count_Sum_Fields = {
+  __typename?: 'view_types_severity_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Severity_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_severity_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Severity_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_severity_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Severity_Count_Variance_Fields = {
+  __typename?: 'view_types_severity_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.state_count" */
+export type View_Types_State_Count = {
+  __typename?: 'view_types_state_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.state_count" */
+export type View_Types_State_Count_Aggregate = {
+  __typename?: 'view_types_state_count_aggregate';
+  aggregate?: Maybe<View_Types_State_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_State_Count>;
+};
+
+/** aggregate fields of "view_types.state_count" */
+export type View_Types_State_Count_Aggregate_Fields = {
+  __typename?: 'view_types_state_count_aggregate_fields';
+  avg?: Maybe<View_Types_State_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_State_Count_Max_Fields>;
+  min?: Maybe<View_Types_State_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_State_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_State_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_State_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_State_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_State_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_State_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_State_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.state_count" */
+export type View_Types_State_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_State_Count_Avg_Fields = {
+  __typename?: 'view_types_state_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.state_count". All fields are combined with a logical 'AND'. */
+export type View_Types_State_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_State_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_State_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_State_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  state?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_State_Count_Max_Fields = {
+  __typename?: 'view_types_state_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_State_Count_Min_Fields = {
+  __typename?: 'view_types_state_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.state_count". */
+export type View_Types_State_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.state_count" */
+export enum View_Types_State_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  State = 'state'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_State_Count_Stddev_Fields = {
+  __typename?: 'view_types_state_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_State_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_state_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_State_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_state_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_state_count" */
+export type View_Types_State_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_State_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_State_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_State_Count_Sum_Fields = {
+  __typename?: 'view_types_state_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_State_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_state_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_State_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_state_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_State_Count_Variance_Fields = {
+  __typename?: 'view_types_state_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.tag_count" */
+export type View_Types_Tag_Count = {
+  __typename?: 'view_types_tag_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.tag_count" */
+export type View_Types_Tag_Count_Aggregate = {
+  __typename?: 'view_types_tag_count_aggregate';
+  aggregate?: Maybe<View_Types_Tag_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Tag_Count>;
+};
+
+/** aggregate fields of "view_types.tag_count" */
+export type View_Types_Tag_Count_Aggregate_Fields = {
+  __typename?: 'view_types_tag_count_aggregate_fields';
+  avg?: Maybe<View_Types_Tag_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Tag_Count_Max_Fields>;
+  min?: Maybe<View_Types_Tag_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Tag_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Tag_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Tag_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Tag_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Tag_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Tag_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Tag_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.tag_count" */
+export type View_Types_Tag_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Tag_Count_Avg_Fields = {
+  __typename?: 'view_types_tag_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.tag_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Tag_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Tag_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Tag_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  tag?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Tag_Count_Max_Fields = {
+  __typename?: 'view_types_tag_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Tag_Count_Min_Fields = {
+  __typename?: 'view_types_tag_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.tag_count". */
+export type View_Types_Tag_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  tag?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.tag_count" */
+export enum View_Types_Tag_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Tag = 'tag'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Tag_Count_Stddev_Fields = {
+  __typename?: 'view_types_tag_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Tag_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_tag_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Tag_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_tag_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_tag_count" */
+export type View_Types_Tag_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Tag_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Tag_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  tag?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Tag_Count_Sum_Fields = {
+  __typename?: 'view_types_tag_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Tag_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_tag_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Tag_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_tag_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Tag_Count_Variance_Fields = {
+  __typename?: 'view_types_tag_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_Report = {
   __typename?: 'vulnerability_report';
@@ -33687,17 +34632,17 @@ export type Vulnerability_Report = {
   /** An aggregate relationship */
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
   /** A computed field, executes function "get_vulnerability_report_issue_categories" */
-  vulnerability_report_categories?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_categories?: Maybe<Array<View_Types_Aggregated_Categories>>;
   /** A computed field, executes function "get_vulnerability_report_issue_languages" */
-  vulnerability_report_issue_languages?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_issue_languages?: Maybe<Array<View_Types_Language_Count>>;
   /** A computed field, executes function "get_vulnerability_report_issue_types" */
-  vulnerability_report_issue_types?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_issue_types?: Maybe<Array<View_Types_Issue_Type_Count>>;
   /** A computed field, executes function "get_vulnerability_report_severities" */
-  vulnerability_report_severities?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_severities?: Maybe<Array<View_Types_Severity_Count>>;
   /** A computed field, executes function "get_vulnerability_report_states" */
-  vulnerability_report_states?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_states?: Maybe<Array<View_Types_State_Count>>;
   /** A computed field, executes function "get_vulnerability_report_issue_tags" */
-  vulnerability_report_tags?: Maybe<Scalars['json']['output']>;
+  vulnerability_report_tags?: Maybe<Array<View_Types_Tag_Count>>;
 };
 
 
@@ -33723,43 +34668,67 @@ export type Vulnerability_ReportVulnerabilityReportIssues_AggregateArgs = {
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_CategoriesArgs = {
-  args: Vulnerability_Report_Categories_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_Categories_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
+  where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
 };
 
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_Issue_LanguagesArgs = {
-  args: Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_Issue_Languages_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Language_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
 };
 
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_Issue_TypesArgs = {
-  args: Vulnerability_Report_Issue_Types_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_Issue_Types_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Issue_Type_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Issue_Type_Count_Bool_Exp>;
 };
 
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_SeveritiesArgs = {
-  args: Vulnerability_Report_Severities_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_Severities_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Severity_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Severity_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Severity_Count_Bool_Exp>;
 };
 
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_StatesArgs = {
-  args: Vulnerability_Report_States_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_States_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_State_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_State_Count_Order_By>>;
+  where?: InputMaybe<View_Types_State_Count_Bool_Exp>;
 };
 
 
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_ReportVulnerability_Report_TagsArgs = {
-  args: Vulnerability_Report_Tags_Vulnerability_Report_Args;
-  path?: InputMaybe<Scalars['String']['input']>;
+  args?: InputMaybe<Vulnerability_Report_Tags_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Tag_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
 };
 
 /** aggregated selection of "vulnerability_report" */

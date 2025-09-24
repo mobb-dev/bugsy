@@ -471,6 +471,7 @@ fragment FixDetails on fix {
   gitBlameLogin
   severityValue
   vulnerabilityReportIssues {
+    category
     parsedIssueType
     parsedSeverity
     vulnerabilityReportIssueTags {
@@ -479,6 +480,9 @@ fragment FixDetails on fix {
   }
   sharedState {
     id
+    downloadedBy {
+      downloadSource
+    }
   }
   patchAndQuestions {
     __typename
@@ -605,6 +609,10 @@ fragment FixReportSummaryFields on fixReport {
   vulnerabilityReport {
     scanDate
     vendor
+    projectId
+    project {
+      organizationId
+    }
     totalVulnerabilityReportIssuesCount: vulnerabilityReportIssues_aggregate {
       aggregate {
         count
@@ -697,5 +705,13 @@ mutation updateDownloadedFixData(
 ) {
   updateDownloadedFixData(fixIds: $fixIds, source: $source) {
     status
+  }
+}
+
+query GetUserMvsAutoFix($userEmail: String!) {
+  user_email_notification_settings(
+    where: { user: { email: { _eq: $userEmail } } }
+  ) {
+    mvs_auto_fix
   }
 }

@@ -11,6 +11,8 @@ import type {
   GetLatestReportByRepoUrlQueryVariables,
   GetReportFixesQuery,
   GetReportFixesQueryVariables,
+  GetUserMvsAutoFixQuery,
+  GetUserMvsAutoFixQueryVariables,
   MeQuery,
   MeQueryVariables,
   SubmitVulnerabilityReportMutation,
@@ -31,6 +33,10 @@ import {
   mockGetReportFixes,
   mockGetReportFixesEmpty,
   mockGetReportFixesError,
+  mockGetUserMvsAutoFixDisabled,
+  mockGetUserMvsAutoFixEnabled,
+  mockGetUserMvsAutoFixError,
+  mockGetUserMvsAutoFixNoSettings,
   mockMe,
   mockMeConnectionError,
   mockMeError,
@@ -67,6 +73,7 @@ type MockState = {
   updateDownloadedFixData: 'success'
   getEncryptedApiToken: 'success' | 'error'
   createCommunityUser: 'success' | 'error' | 'badApiKey'
+  getUserMvsAutoFix: 'enabled' | 'disabled' | 'noSettings' | 'error'
   errorMessages: Record<string, string>
   getReportFixes: 'success' | 'empty' | 'error'
 }
@@ -83,6 +90,7 @@ const mockState: MockState = {
   updateDownloadedFixData: 'success',
   getEncryptedApiToken: 'success',
   createCommunityUser: 'success',
+  getUserMvsAutoFix: 'enabled',
   errorMessages: {},
   getReportFixes: 'success',
 }
@@ -106,6 +114,22 @@ export const graphqlHandlers = [
     }
     return HttpResponse.json(mockMe)
   }),
+
+  graphql.query<GetUserMvsAutoFixQuery, GetUserMvsAutoFixQueryVariables>(
+    'GetUserMvsAutoFix',
+    () => {
+      if (mockState.getUserMvsAutoFix === 'error') {
+        return HttpResponse.json(mockGetUserMvsAutoFixError, { status: 500 })
+      }
+      if (mockState.getUserMvsAutoFix === 'disabled') {
+        return HttpResponse.json(mockGetUserMvsAutoFixDisabled)
+      }
+      if (mockState.getUserMvsAutoFix === 'noSettings') {
+        return HttpResponse.json(mockGetUserMvsAutoFixNoSettings)
+      }
+      return HttpResponse.json(mockGetUserMvsAutoFixEnabled)
+    }
+  ),
 
   graphql.mutation<
     UploadS3BucketInfoMutation,
@@ -436,6 +460,27 @@ export const mockGraphQL = (
       },
       returnsEmptyFixes() {
         mockState.getReportFixes = 'empty'
+        return this
+      },
+    }
+  },
+  getUserMvsAutoFix: () => {
+    return {
+      isEnabled() {
+        mockState.getUserMvsAutoFix = 'enabled'
+        return this
+      },
+      isDisabled() {
+        mockState.getUserMvsAutoFix = 'disabled'
+        return this
+      },
+      hasNoSettings() {
+        mockState.getUserMvsAutoFix = 'noSettings'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getUserMvsAutoFix = 'error'
+        mockState.errorMessages['getUserMvsAutoFix'] = message
         return this
       },
     }

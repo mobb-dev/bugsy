@@ -26,15 +26,21 @@ export class FileOperations {
    * @param maxFileSize Maximum size allowed for individual files
    * @returns ZIP archive as a Buffer with metadata
    */
-  public async createSourceCodeArchive(
-    fileList: string[],
-    repositoryPath: string,
+  public async createSourceCodeArchive({
+    fileList,
+    repositoryPath,
+    maxFileSize,
+  }: {
+    fileList: string[]
+    repositoryPath: string
     maxFileSize: number
-  ): Promise<PackingResult> {
+  }): Promise<PackingResult> {
     logDebug('[FileOperations] Packing files')
 
     const zip = new AdmZip()
     let packedFilesCount = 0
+    const packedFiles: string[] = []
+    const excludedFiles: { file: string; reason: string }[] = []
 
     // Resolve the repository path to get the canonical absolute path
     const resolvedRepoPath = path.resolve(repositoryPath)
@@ -44,24 +50,31 @@ export class FileOperations {
       // Security check: Validate the file path doesn't escape the repository directory
       const resolvedFilePath = path.resolve(absoluteFilepath)
       if (!resolvedFilePath.startsWith(resolvedRepoPath)) {
-        logDebug(
-          `[FileOperations] Skipping ${filepath} due to potential path traversal security risk`
-        )
+        const reason = 'potential path traversal security risk'
+        logDebug(`[FileOperations] Skipping ${filepath} due to ${reason}`)
+        excludedFiles.push({ file: filepath, reason })
         continue
       }
 
       // Use FileUtils to check if file should be packed
       if (!FileUtils.shouldPackFile(absoluteFilepath, maxFileSize)) {
-        logDebug(
-          `[FileOperations] Excluding ${filepath} - file is too large, binary, or matches exclusion rules`
-        )
+        const reason = 'file is too large, binary, or matches exclusion rules'
+        logDebug(`[FileOperations] Excluding ${filepath} - ${reason}`)
+        excludedFiles.push({ file: filepath, reason })
         continue
       }
 
-      const fileContent = await this.readSourceFile(absoluteFilepath, filepath)
+      const fileContent = await this.readSourceFile({
+        absoluteFilepath,
+        relativeFilepath: filepath,
+      })
       if (fileContent) {
         zip.addFile(filepath, fileContent)
         packedFilesCount++
+        packedFiles.push(filepath)
+      } else {
+        const reason = 'failed to read file content'
+        excludedFiles.push({ file: filepath, reason })
       }
     }
 
@@ -71,7 +84,6 @@ export class FileOperations {
       packedFilesCount,
       totalSize: archiveBuffer.length,
     }
-
     logInfo(
       `[FileOperations] Files packed successfully ${packedFilesCount} files, ${result.totalSize} bytes`
     )
@@ -84,10 +96,13 @@ export class FileOperations {
    * @param repositoryPath Base path for validation
    * @returns Array of validated file paths
    */
-  public async validateFilePaths(
-    fileList: string[],
+  public async validateFilePaths({
+    fileList,
+    repositoryPath,
+  }: {
+    fileList: string[]
     repositoryPath: string
-  ): Promise<string[]> {
+  }): Promise<string[]> {
     const resolvedRepoPath = path.resolve(repositoryPath)
     const validatedPaths: string[] = []
 
@@ -151,10 +166,13 @@ export class FileOperations {
    * @param relativeFilepath Relative path for logging purposes
    * @returns File content as Buffer or null if failed
    */
-  private async readSourceFile(
-    absoluteFilepath: string,
+  private async readSourceFile({
+    absoluteFilepath,
+    relativeFilepath,
+  }: {
+    absoluteFilepath: string
     relativeFilepath: string
-  ): Promise<Buffer | null> {
+  }): Promise<Buffer | null> {
     try {
       return await fs.promises.readFile(absoluteFilepath)
     } catch (fsError) {

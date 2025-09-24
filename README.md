@@ -113,12 +113,18 @@ Add Mobb MCP to your Cursor MCP client configuration:
       "args": ["mobbdev", "mcp"],
       "env": {
         "API_KEY": "your_mobb_api_key_here",
-        "API_URL": "optional__your_mobb_api_url_here"
+        "API_URL": "optional__your_mobb_api_url_here",
+        "MVS_AUTO_FIX": "true"
       }
     }
   }
 }
 ```
+
+**Environment Variables:**
+- `API_KEY`: Your Mobb API key (required)
+- `API_URL`: Custom Mobb API URL (optional, defaults to https://app.mobb.ai)
+- `MVS_AUTO_FIX`: Override auto-fix setting - set to `"true"` or `"false"` to force enable/disable automatic fix application regardless of user's database setting (optional)
 
 #### Usage
 

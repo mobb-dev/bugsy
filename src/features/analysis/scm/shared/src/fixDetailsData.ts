@@ -410,4 +410,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.FunctionCallWithoutParentheses]: undefined,
   [IssueType_Enum.SpringDefaultPermit]: undefined,
   [IssueType_Enum.ReturnInInit]: undefined,
+  [IssueType_Enum.ActionNotPinnedToCommitSha]: undefined,
 }

@@ -16,6 +16,12 @@ export {
   mockGetReportFixesError,
 } from './getReportFixes'
 export {
+  mockGetUserMvsAutoFixDisabled,
+  mockGetUserMvsAutoFixEnabled,
+  mockGetUserMvsAutoFixError,
+  mockGetUserMvsAutoFixNoSettings,
+} from './getUserMvsAutoFix'
+export {
   mockMe,
   mockMeConnectionError,
   mockMeError,

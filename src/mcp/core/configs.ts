@@ -35,3 +35,10 @@ export const MCP_DEFAULT_LIMIT = 3
 
 // Whether to automatically scan for new available fixes (defaults to true)
 export const isAutoScan = process.env['AUTO_SCAN'] !== 'false'
+
+// Environment variable to override user's mvs_auto_fix setting (set to 'true' or 'false')
+// When set, takes precedence over the database setting
+export const MVS_AUTO_FIX_OVERRIDE = process.env['MVS_AUTO_FIX']
+
+// Debug mode for auto-fix functionality - saves patched files with suffix instead of overwriting
+export const MCP_AUTO_FIX_DEBUG_MODE = true

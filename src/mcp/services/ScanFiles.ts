@@ -42,20 +42,20 @@ export const scanFiles = async ({
   const fixReportId = repoUploadInfo!.fixReportId
 
   const fileOperations = new FileOperations()
-  const packingResult = await fileOperations.createSourceCodeArchive(
+  const packingResult = await fileOperations.createSourceCodeArchive({
     fileList,
     repositoryPath,
-    MCP_MAX_FILE_SIZE
-  )
+    maxFileSize: MCP_MAX_FILE_SIZE,
+  })
   logDebug(
     `[${scanContext}] Files ${packingResult.packedFilesCount} packed successfully, ${packingResult.totalSize} bytes`
   )
 
-  await uploadSourceCodeArchive(
-    packingResult.archive,
+  await uploadSourceCodeArchive({
+    archiveBuffer: packingResult.archive,
     repoUploadInfo,
-    scanContext
-  )
+    scanContext,
+  })
 
   const projectId = await getProjectId(gqlClient, scanContext)
   const gitService = new GitService(repositoryPath)
@@ -122,11 +122,15 @@ const initializeSecurityReport = async (
   }
 }
 
-const uploadSourceCodeArchive = async (
-  archiveBuffer: Buffer,
-  repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo'],
+const uploadSourceCodeArchive = async ({
+  archiveBuffer,
+  repoUploadInfo,
+  scanContext,
+}: {
+  archiveBuffer: Buffer
+  repoUploadInfo: UploadS3BucketInfoMutation['uploadS3BucketInfo']['repoUploadInfo']
   scanContext: ScanContext
-): Promise<void> => {
+}): Promise<void> => {
   if (!repoUploadInfo) {
     throw new FileUploadError('Upload info is required for source code archive')
   }
@@ -190,6 +194,7 @@ const executeSecurityScan = async ({
     throw new GqlClientError()
   }
 
+  const scanStartTime = Date.now()
   logInfo(`[${scanContext}] Starting scan`)
 
   const submitVulnerabilityReportVariables: SubmitVulnerabilityReportMutationVariables =
@@ -306,8 +311,11 @@ const executeSecurityScan = async ({
     )
   }
 
+  const scanDuration = Date.now() - scanStartTime
   logDebug(`[${scanContext}] Security scan completed successfully`, {
     fixReportId,
     projectId,
+    filesScanned: fileCount,
+    scanDurationMs: scanDuration,
   })
 }

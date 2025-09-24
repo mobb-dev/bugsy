@@ -110,11 +110,11 @@ export class ScanAndFixVulnerabilitiesService {
       const effectiveLimit: number = limit ?? MCP_DEFAULT_LIMIT
       logDebug('effectiveOffset', { effectiveOffset })
 
-      const fixes = await this.getReportFixes(
+      const fixes = await this.getReportFixes({
         fixReportId,
-        effectiveOffset,
-        effectiveLimit
-      )
+        offset: effectiveOffset,
+        limit: effectiveLimit,
+      })
 
       // Only store fixReportId if fixes were found
       logInfo(`Found ${fixes.totalCount} fixes`)
@@ -177,11 +177,15 @@ export class ScanAndFixVulnerabilitiesService {
     return gqlClient
   }
 
-  private async getReportFixes(
-    fixReportId: string,
-    offset?: number,
+  private async getReportFixes({
+    fixReportId,
+    offset,
+    limit,
+  }: {
+    fixReportId: string
+    offset?: number
     limit?: number
-  ): Promise<{
+  }): Promise<{
     fixes: McpFix[]
     totalCount: number
   }> {

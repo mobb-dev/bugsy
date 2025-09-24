@@ -1,22 +1,31 @@
 import { ScanContext } from '@mobb/bugsy/types'
 
 import {
+  Fix_Download_Source_Enum,
+  Vulnerability_Report_Issue_Category_Enum,
+} from '../../../features/analysis/scm/generates/client_generates'
+import {
   MCP_DEFAULT_LIMIT,
   MCP_PERIODIC_CHECK_INTERVAL,
 } from '../../core/configs'
 import { ApiConnectionError } from '../../core/Errors'
 import {
+  appliedFixesSummaryPrompt,
+  authenticationRequiredPrompt,
   freshFixesPrompt,
   initialScanInProgressPrompt,
   noFreshFixesPrompt,
+  noVulnerabilitiesAutoFixPrompt,
 } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
 import { configStore } from '../../services/ConfigStoreService'
 import { getLocalFiles, LocalFile } from '../../services/GetLocalFiles'
+import { LocalMobbFolderService } from '../../services/LocalMobbFolderService'
 import {
   createAuthenticatedMcpGQLClient,
   McpGQLClient,
 } from '../../services/McpGQLClient'
+import { PatchApplicationService } from '../../services/PatchApplicationService'
 import { scanFiles } from '../../services/ScanFiles'
 import { McpFix } from '../../types'
 
@@ -43,6 +52,7 @@ export class CheckForNewAvailableFixesService {
   private reportedFixes: McpFix[] = []
   private intervalId: NodeJS.Timeout | null = null
   private isInitialScanComplete: boolean = false
+  private hasAuthenticationFailed: boolean = false
   private gqlClient: McpGQLClient | null = null
   private fullScanPathsScanned: string[] = []
 
@@ -66,6 +76,7 @@ export class CheckForNewAvailableFixesService {
     this.filesLastScanned = {}
     this.freshFixes = []
     this.reportedFixes = []
+    this.hasAuthenticationFailed = false
     this.fullScanPathsScanned = configStore.get('fullScanPathsScanned') || []
     if (this.intervalId) {
       clearInterval(this.intervalId)
@@ -88,11 +99,13 @@ export class CheckForNewAvailableFixesService {
     isAllFilesScan?: boolean
     scanContext: ScanContext
   }): Promise<void> {
+    this.hasAuthenticationFailed = false
     logDebug(`[${scanContext}] Scanning for new security vulnerabilities`, {
       path,
     })
     if (!this.gqlClient) {
       logInfo(`[${scanContext}] No GQL client found, skipping scan`)
+      this.hasAuthenticationFailed = true
       throw new Error('No GQL client found')
     }
 
@@ -100,6 +113,7 @@ export class CheckForNewAvailableFixesService {
       const isConnected = await this.gqlClient.verifyApiConnection()
       if (!isConnected) {
         logError(`[${scanContext}] Failed to connect to the API, scan aborted`)
+        this.hasAuthenticationFailed = true
         throw new ApiConnectionError()
       }
 
@@ -113,6 +127,10 @@ export class CheckForNewAvailableFixesService {
         scanContext,
       })
 
+      const scanStartTime = Date.now()
+      logDebug(
+        `[${scanContext}] setting scan start time to ${new Date(scanStartTime).toISOString()}`
+      )
       logDebug(`[${scanContext}] Active files`, { files })
       const filesToScan = files.filter((file) => {
         const lastScannedEditTime = this.filesLastScanned[file.fullPath]
@@ -162,7 +180,50 @@ export class CheckForNewAvailableFixesService {
         }`
       )
 
-      this.updateFreshFixesCache(newFixes || [], filesToScan, scanContext)
+      // Check mvs_auto_fix setting and handle fixes accordingly
+      if (newFixes && newFixes.length > 0) {
+        try {
+          const isMvsAutoFixEnabled =
+            await this.gqlClient.getMvsAutoFixSettings()
+          logDebug(
+            `[${scanContext}] mvs_auto_fix setting: ${isMvsAutoFixEnabled}`
+          )
+
+          if (isMvsAutoFixEnabled) {
+            // Filter fixes for MVS_AUTO_FIX flow: only include fixes with category 'Fixable' and downloadSource 'AUTO_MVS'
+            const mvsAutoFixFilteredFixes = this.filterFixesForMvsAutoFix(
+              newFixes,
+              scanContext
+            )
+
+            await this.applyFixes({
+              newFixes: mvsAutoFixFilteredFixes,
+              scanContext,
+              scanStartTime,
+            })
+          } else {
+            this.updateAvailableFixes({
+              newFixes,
+              scannedFiles: filesToScan,
+              scanContext,
+            })
+          }
+        } catch (error) {
+          logError(
+            `[${scanContext}] Failed to check mvs_auto_fix setting, falling back to cache`,
+            {
+              error: error instanceof Error ? error.message : String(error),
+            }
+          )
+          // Fallback to caching if we can't check the setting
+          this.updateAvailableFixes({
+            newFixes,
+            scannedFiles: filesToScan,
+            scanContext,
+          })
+        }
+      }
+
       this.updateFilesScanTimestamps(filesToScan)
       this.isInitialScanComplete = true
     } catch (error) {
@@ -180,6 +241,7 @@ export class CheckForNewAvailableFixesService {
             error: errorMessage,
           }
         )
+        this.hasAuthenticationFailed = true
         return
       }
 
@@ -203,13 +265,168 @@ export class CheckForNewAvailableFixesService {
     }
   }
 
-  private updateFreshFixesCache(
-    newFixes: McpFix[],
-    filesToScan: LocalFile[],
+  /**
+   * Applies fixes directly to the repository when mvs_auto_fix is enabled
+   */
+  private async applyFixes({
+    newFixes,
+    scanContext,
+    scanStartTime,
+  }: {
+    newFixes: McpFix[]
     scanContext: ScanContext
-  ): void {
+    scanStartTime: number
+  }): Promise<void> {
+    if (newFixes.length === 0) {
+      logInfo(`[${scanContext}] No new fixes to apply (all already reported)`)
+      return
+    }
+
+    logInfo(`[${scanContext}] Auto-applying ${newFixes.length} new fixes`)
+
+    // Use the actual repository path
+    const repositoryPath = this.path
+
+    logDebug(`[${scanContext}] Repository path for patch application`, {
+      repositoryPath,
+    })
+
+    const applicationResult = await PatchApplicationService.applyFixes({
+      fixes: newFixes,
+      repositoryPath,
+      scanStartTime,
+      gqlClient: this.gqlClient || undefined,
+      scanContext,
+    })
+
+    if (applicationResult.appliedFixes.length > 0) {
+      logInfo(
+        `[${scanContext}] Successfully auto-applied ${applicationResult.appliedFixes.length} fixes`
+      )
+
+      // Track applied fixes in reportedFixes to prevent duplicate applications
+      this.reportedFixes.push(...applicationResult.appliedFixes)
+
+      // Save patches and log fix details using LocalMobbFolderService
+      await this.saveAndLogAppliedFixes({
+        appliedFixes: applicationResult.appliedFixes,
+        repositoryPath,
+        scanContext,
+      })
+    }
+
+    if (applicationResult.failedFixes.length > 0) {
+      logError(
+        `[${scanContext}] Failed to auto-apply ${applicationResult.failedFixes.length} fixes`,
+        {
+          failedFixes: applicationResult.failedFixes.map((f) => ({
+            fixId: f.fix.id,
+            error: f.error,
+          })),
+        }
+      )
+    }
+  }
+
+  /**
+   * Saves patch files and logs fix details for successfully applied fixes
+   */
+  private async saveAndLogAppliedFixes({
+    appliedFixes,
+    repositoryPath,
+    scanContext,
+  }: {
+    appliedFixes: McpFix[]
+    repositoryPath: string
+    scanContext: ScanContext
+  }): Promise<void> {
+    try {
+      const localMobbService = new LocalMobbFolderService(repositoryPath)
+
+      logDebug(
+        `[${scanContext}] Saving and logging ${appliedFixes.length} applied fixes`,
+        {
+          repositoryPath,
+          fixIds: appliedFixes.map((f) => f.id),
+        }
+      )
+
+      for (const fix of appliedFixes) {
+        try {
+          // Save the patch file (LocalMobbFolderService handles validation internally)
+          const saveResult = await localMobbService.savePatch(fix)
+
+          if (saveResult.success) {
+            logDebug(
+              `[${scanContext}] Patch saved successfully for fix ${fix.id}`,
+              {
+                filePath: saveResult.filePath,
+                fileName: saveResult.fileName,
+              }
+            )
+          } else {
+            logDebug(
+              `[${scanContext}] Failed to save patch for fix ${fix.id}`,
+              {
+                error: saveResult.error,
+              }
+            )
+          }
+
+          // Always log the fix details (works for both patches and no-fix cases)
+          const logResult = await localMobbService.logPatch(
+            fix,
+            saveResult.fileName
+          )
+
+          if (logResult.success) {
+            logDebug(
+              `[${scanContext}] Fix details logged successfully for fix ${fix.id}`,
+              {
+                filePath: logResult.filePath,
+              }
+            )
+          } else {
+            logError(
+              `[${scanContext}] Failed to log fix details for fix ${fix.id}`,
+              {
+                error: logResult.error,
+              }
+            )
+          }
+        } catch (error) {
+          logError(`[${scanContext}] Error processing applied fix ${fix.id}`, {
+            error: String(error),
+            fix,
+          })
+        }
+      }
+
+      logInfo(`[${scanContext}] Finished saving and logging applied fixes`, {
+        processedCount: appliedFixes.length,
+      })
+    } catch (error) {
+      logError(`[${scanContext}] Error in saveAndLogAppliedFixes`, {
+        error: String(error),
+        repositoryPath,
+        appliedFixCount: appliedFixes.length,
+      })
+    }
+  }
+
+  private updateAvailableFixes({
+    newFixes,
+    scannedFiles,
+    scanContext,
+  }: {
+    newFixes: McpFix[]
+    scannedFiles: LocalFile[]
+    scanContext: ScanContext
+  }): void {
     this.freshFixes = this.freshFixes
-      .filter((fix) => !this.isFixFromOldScan(fix, filesToScan, scanContext))
+      .filter(
+        (fix) => !this.isFixFromOldScan({ fix, scannedFiles, scanContext })
+      )
       .concat(newFixes)
       .sort((a: McpFix, b: McpFix) => {
         return (b.severityValue ?? 0) - (a.severityValue ?? 0)
@@ -228,15 +445,94 @@ export class CheckForNewAvailableFixesService {
 
   private isFixAlreadyReported(fix: McpFix): boolean {
     return this.reportedFixes.some(
-      (reportedFix) => reportedFix.sharedState?.id === fix.sharedState?.id
+      (reportedFix) =>
+        reportedFix.sharedState?.id === fix.sharedState?.id ||
+        reportedFix.id === fix.id
     )
   }
 
-  private isFixFromOldScan(
-    fix: McpFix,
-    filesToScan: LocalFile[],
+  /**
+   * Filters fixes for MVS_AUTO_FIX flow to only include fixes with:
+   * - category 'Fixable' (or no category field - backward compatibility)
+   * - do NOT have downloadSource 'AUTO_MVS'
+   */
+  private filterFixesForMvsAutoFix(
+    fixes: McpFix[],
     scanContext: ScanContext
-  ): boolean {
+  ): McpFix[] {
+    const filteredFixes = fixes.filter((fix) => {
+      // Check if fix has vulnerability report issues with category 'Fixable'
+      // If category field is missing, assume it's fixable for backward compatibility
+      const hasFixableCategory =
+        fix.vulnerabilityReportIssues?.some(
+          (issue) =>
+            !issue.category || // Handle missing field gracefully
+            issue.category === Vulnerability_Report_Issue_Category_Enum.Fixable
+        ) ?? true // If no vulnerabilityReportIssues, assume fixable
+
+      // Check if fix does NOT have any downloadSource 'AUTO_MVS'
+      // If downloadedBy field is missing, assume it's not AUTO_MVS
+      const hasAutoMvsDownloadSource =
+        fix.sharedState?.downloadedBy?.some(
+          (d) => d.downloadSource === Fix_Download_Source_Enum.AutoMvs
+        ) ?? false
+      const doesNotHaveAutoMvsDownloadSource = !hasAutoMvsDownloadSource
+
+      const shouldInclude =
+        hasFixableCategory && doesNotHaveAutoMvsDownloadSource
+
+      // Only log for fixes that are being filtered out
+      if (!shouldInclude) {
+        const filteringReasons: string[] = []
+
+        if (!hasFixableCategory) {
+          filteringReasons.push('not fixable category')
+        }
+
+        if (!doesNotHaveAutoMvsDownloadSource) {
+          filteringReasons.push('has AUTO_MVS download source')
+        }
+
+        const reasonText = filteringReasons.join(' and ')
+
+        logDebug(
+          `[${scanContext}] Fix ${fix.id} filtered out - ${reasonText}`,
+          {
+            fixId: fix.id,
+            hasFixableCategory,
+            doesNotHaveAutoMvsDownloadSource,
+            filteringReasons,
+            categories: fix.vulnerabilityReportIssues?.map(
+              (issue) => issue.category
+            ),
+            downloadSources: fix.sharedState?.downloadedBy?.map(
+              (d) => d.downloadSource
+            ),
+          }
+        )
+      }
+
+      return shouldInclude
+    })
+
+    logInfo(`[${scanContext}] MVS_AUTO_FIX filtering completed`, {
+      originalCount: fixes.length,
+      filteredCount: filteredFixes.length,
+      removedCount: fixes.length - filteredFixes.length,
+    })
+
+    return filteredFixes
+  }
+
+  private isFixFromOldScan({
+    fix,
+    scannedFiles,
+    scanContext,
+  }: {
+    fix: McpFix
+    scannedFiles: LocalFile[]
+    scanContext: ScanContext
+  }): boolean {
     const patch =
       fix.patchAndQuestions?.__typename === 'FixData'
         ? fix.patchAndQuestions.patch
@@ -249,11 +545,11 @@ export class CheckForNewAvailableFixesService {
 
     logDebug(`[${scanContext}] Checking if fix is from old scan`, {
       fixFile,
-      filesToScan,
-      isFromOldScan: filesToScan.some((file) => file.relativePath === fixFile),
+      scannedFiles,
+      isFromOldScan: scannedFiles.some((file) => file.relativePath === fixFile),
     })
 
-    return filesToScan.some((file) => file.relativePath === fixFile)
+    return scannedFiles.some((file) => file.relativePath === fixFile)
   }
 
   public async getFreshFixes({ path }: { path: string }): Promise<string> {
@@ -264,16 +560,68 @@ export class CheckForNewAvailableFixesService {
       this.reset()
       logInfo(`[${scanContext}] Reset service state for new path`, { path })
     }
-    this.gqlClient = await createAuthenticatedMcpGQLClient()
+    try {
+      this.gqlClient = await createAuthenticatedMcpGQLClient()
+    } catch (error) {
+      const errorMessage = (error as Error).message
+      if (
+        errorMessage.includes('Authentication failed') ||
+        errorMessage.includes('access-denied') ||
+        errorMessage.includes('Authentication hook unauthorized')
+      ) {
+        logError(
+          `[${scanContext}] Failed to create authenticated client due to authentication failure`,
+          {
+            error: errorMessage,
+          }
+        )
+        this.hasAuthenticationFailed = true
+        return authenticationRequiredPrompt
+      }
+      // Re-throw non-authentication errors
+      throw error
+    }
 
     this.triggerScan({ path, gqlClient: this.gqlClient })
 
-    if (this.freshFixes.length > 0) {
-      return this.generateFreshFixesResponse(scanContext)
+    // Check if auto-fix is enabled
+    let isMvsAutoFixEnabled: boolean | null = null
+    try {
+      isMvsAutoFixEnabled = await this.gqlClient.getMvsAutoFixSettings()
+      logDebug(`[${scanContext}] mvs_auto_fix setting: ${isMvsAutoFixEnabled}`)
+
+      if (isMvsAutoFixEnabled) {
+        // When auto-fix is enabled, return applied fixes from reportedFixes
+        if (this.reportedFixes.length > 0) {
+          return this.generateAppliedFixesResponse(scanContext)
+        }
+      } else {
+        // When auto-fix is disabled, return fresh fixes as before
+        if (this.freshFixes.length > 0) {
+          return this.generateFreshFixesResponse(scanContext)
+        }
+      }
+    } catch (error) {
+      logError(`[${scanContext}] Failed to check mvs_auto_fix setting`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
+      // Fallback to original behavior
+      if (this.freshFixes.length > 0) {
+        return this.generateFreshFixesResponse(scanContext)
+      }
+    }
+
+    if (this.hasAuthenticationFailed) {
+      return authenticationRequiredPrompt
     }
 
     if (!this.isInitialScanComplete) {
       return initialScanInProgressPrompt
+    }
+
+    // Return appropriate prompt based on auto-fix setting
+    if (isMvsAutoFixEnabled === true) {
+      return noVulnerabilitiesAutoFixPrompt
     }
 
     return noFreshFixesPrompt
@@ -286,6 +634,13 @@ export class CheckForNewAvailableFixesService {
     path: string
     gqlClient: McpGQLClient
   }): void {
+    // Set this.path when triggerScan is called
+    if (this.path !== path) {
+      this.path = path
+      this.reset()
+      logInfo(`Reset service state for new path in triggerScan`, { path })
+    }
+
     this.gqlClient = gqlClient
     if (!this.intervalId) {
       this.startPeriodicScanning(path)
@@ -384,6 +739,26 @@ export class CheckForNewAvailableFixesService {
       })
     }
     logInfo(`[${scanContext}] No fresh fixes to report`)
+
+    return noFreshFixesPrompt
+  }
+
+  private generateAppliedFixesResponse(
+    scanContext: ScanContext = ScanContext.USER_REQUEST
+  ): string {
+    // Show all applied fixes from reportedFixes (no limit since this is a summary)
+    const appliedFixesToShow = this.reportedFixes
+
+    if (appliedFixesToShow.length > 0) {
+      logInfo(
+        `[${scanContext}] Reporting ${appliedFixesToShow.length} applied fixes to user`
+      )
+      return appliedFixesSummaryPrompt({
+        fixes: appliedFixesToShow,
+        gqlClient: this.gqlClient!,
+      })
+    }
+    logInfo(`[${scanContext}] No applied fixes to report`)
 
     return noFreshFixesPrompt
   }

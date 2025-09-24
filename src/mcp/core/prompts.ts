@@ -1,11 +1,10 @@
-import { GetLatestReportByRepoUrlQuery } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
-
 import { McpGQLClient } from '../services/McpGQLClient'
 import {
+  MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
 } from '../tools/toolNames'
-import { type McpFix } from '../types'
+import { FixReportSummary, type McpFix } from '../types'
 import { MCP_DEFAULT_LIMIT } from './configs'
 
 function friendlyType(s: string) {
@@ -228,8 +227,6 @@ If you omit both **offset** and **limit**, the command will automatically return
 `
 }
 
-type FixReport = NonNullable<GetLatestReportByRepoUrlQuery['fixReport']>[number]
-
 export const noReportFoundPrompt = `🔍 **MOBB SECURITY SCAN STATUS**
 
 ## No Vulnerability Report Found
@@ -292,7 +289,7 @@ export const fixesFoundPrompt = ({
   limit,
   gqlClient,
 }: {
-  fixReport: Omit<FixReport, 'userFixes'>
+  fixReport: Omit<FixReportSummary, 'userFixes'>
   offset: number
   limit: number
   gqlClient: McpGQLClient
@@ -432,7 +429,76 @@ ${nextStepsPrompt({ scannedFiles })}
 
 export const noFreshFixesPrompt = `No fresh fixes available for this repository at this time. No user message needed. Do not show any comments to the user.`
 
+const continuousMonitoringSection = `## 🔄 Continuous Monitoring Active
+
+The Mobb MCP is continuously monitoring your code and will **automatically apply fixes** when new vulnerabilities are detected in files you modify or create.`
+
+const autoFixSettingsSection = `## ⚙️ Auto-Fix Settings
+
+If you prefer to review fixes manually before they're applied:
+- **Turn off automatic fixes** in your Mobb app settings at https://app.mobb.ai/ setting section
+- When disabled, you'll receive available fixes that you can apply manually through the \`${MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES}\` MCP tool`
+
+const whatHappensNextSection = `## 🔍 What Happens Next
+
+- Continue coding normally - Mobb is watching in the background
+- Any new security issues will be automatically patched
+- You'll be notified when fixes are applied to your codebase
+- Review and commit changes when ready
+
+Your code is being actively protected! 🚀`
+
+export const noVulnerabilitiesAutoFixPrompt = `🛡️ **MOBB AUTO-FIX MONITORING ACTIVE**
+
+## ✅ No Fixable Vulnerabilities Detected
+
+No fixable vulnerabilities were detected so far.
+
+${continuousMonitoringSection}
+
+${autoFixSettingsSection}
+
+${whatHappensNextSection}`
+
 export const initialScanInProgressPrompt = `Initial scan is still in progress. No user message needed. Do not show any comments to the user.`
+
+export const authenticationRequiredPrompt = `# AUTHENTICATION REQUIRED: MOBB ACCESS NOT AUTHORIZED
+
+## MCP SERVICE UNAVAILABLE
+
+The Mobb MCP (Model Context Protocol) service is currently unavailable because authentication with Mobb has not been completed.
+
+## REQUIRED ACTION
+
+To use Mobb's automated security fix capabilities, you need to:
+
+1. **Authorize Mobb Access**
+   - Restart Mobb MCP
+   - A browser window will open for you to log in and authorize access
+
+2. **Complete Authentication**
+   - Sign in to your Mobb account (or create one if needed)
+   - Authorize the CLI tool to access Mobb services
+   - This creates a secure token for future automated scans
+
+## WHAT HAPPENS NEXT
+
+Once authentication is complete:
+- The MCP service will automatically start monitoring your repository
+- New security vulnerabilities will be detected and fixed automatically
+- You'll receive notifications about applied fixes through this interface
+
+## TROUBLESHOOTING
+
+If you're experiencing authentication issues:
+- Ensure you have an active internet connection
+- Check that you can access https://app.mobb.ai in your browser
+- Make sure your browser isn't blocking authentication pop-ups
+- Try running a manual scan with the \`--debug\` flag for detailed output
+
+For assistance:
+- Documentation: https://docs.mobb.ai
+- Support: support@mobb.ai`
 
 export const freshFixesPrompt = ({
   fixes,
@@ -457,6 +523,115 @@ ${applyFixesPrompt({
   gqlClient,
 })}
 `
+}
+
+export const appliedFixesPrompt = ({
+  fixes,
+  limit,
+  gqlClient,
+}: {
+  fixes: McpFix[]
+  limit: number
+  gqlClient: McpGQLClient
+}) => {
+  return `Here are the fixes that were automatically applied by Mobb MCP
+
+${applyFixesPrompt({
+  fixes,
+  totalCount: fixes.length,
+  hasMore: false,
+  nextOffset: 0,
+  shownCount: fixes.length,
+  currentTool: MCP_TOOL_FETCH_AVAILABLE_FIXES,
+  offset: 0,
+  limit,
+  gqlClient,
+})}
+
+**Note:** These fixes have already been automatically applied to your codebase. Review the changes and commit them if satisfied.
+`
+}
+
+function extractTargetFileFromPatch(patch?: string): string {
+  const match = patch?.match(/^diff --git a\/([^\s]+) b\//)
+  return match?.[1] || 'Unknown file'
+}
+
+function formatSeverity(
+  severityText?: string | null,
+  severityValue?: number | null
+): string {
+  if (severityText) return severityText
+  if (severityValue !== null && severityValue !== undefined) {
+    if (severityValue >= 9) return 'Critical'
+    if (severityValue >= 7) return 'High'
+    if (severityValue >= 4) return 'Medium'
+    return 'Low'
+  }
+  return 'Unknown'
+}
+
+export const appliedFixesSummaryPrompt = ({
+  fixes,
+  gqlClient,
+}: {
+  fixes: McpFix[]
+  gqlClient: McpGQLClient
+}) => {
+  const fixIds = fixes.map((fix) => fix.id)
+  void gqlClient.updateFixesDownloadStatus(fixIds)
+
+  const patchTime = new Date().toLocaleString()
+
+  return `🛡️ **MOBB AUTO-FIX: VULNERABILITIES PATCHED**
+
+## ✅ ${fixes.length} Security ${fixes.length === 1 ? 'Fix' : 'Fixes'} Automatically Applied
+
+Mobb has automatically detected and fixed ${fixes.length} security ${fixes.length === 1 ? 'vulnerability' : 'vulnerabilities'} in your codebase.
+
+## 📋 Applied Fixes Summary
+
+${fixes
+  .map((fix, index) => {
+    const vulnerabilityType = friendlyType(fix.safeIssueType || 'Unknown')
+    const severity = formatSeverity(fix.severityText, fix.severityValue)
+    const description =
+      fix.patchAndQuestions?.__typename === 'FixData'
+        ? fix.patchAndQuestions.extraContext?.fixDescription ||
+          'Security vulnerability fix'
+        : 'Security vulnerability fix'
+    const patch =
+      fix.patchAndQuestions?.__typename === 'FixData'
+        ? fix.patchAndQuestions.patch
+        : undefined
+    const targetFile = extractTargetFileFromPatch(patch)
+    const gitBlameLogin = fix.gitBlameLogin || 'Unknown'
+
+    return `### ${index + 1}. ${vulnerabilityType}
+
+**🎯 Vulnerability Type:** ${vulnerabilityType}
+**📊 Severity:** ${severity}
+**📝 Description:** ${description}
+**👤 Git Blame:** ${gitBlameLogin}
+**📁 Target File:** \`${targetFile}\`
+**⏰ Patch Applied:** ${patchTime}
+
+---`
+  })
+  .join('\n')}
+
+${continuousMonitoringSection}
+
+${autoFixSettingsSection}
+
+## 📋 Next Steps
+
+1. **Review the changes** - Check the modified files to understand what was fixed
+2. **Test your application** - Ensure the fixes don't break existing functionality  
+3. **Commit the changes** - Add and commit the security fixes to your repository
+4. **Continue coding** - Mobb will keep protecting your code automatically
+
+${whatHappensNextSection}`
 }
 
 // export const failedToConnectToApiPrompt = `# CONNECTION ERROR: FAILED TO REACH MOBB API

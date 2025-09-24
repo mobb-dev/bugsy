@@ -25,6 +25,8 @@ export class McpServer {
   private server: Server
   private toolRegistry: ToolRegistry
   private isEventHandlersSetup = false
+  private eventHandlers: Map<string, (error?: Error | number) => void> =
+    new Map()
 
   constructor(config: McpServerConfig) {
     this.server = new Server(
@@ -46,15 +48,18 @@ export class McpServer {
     logDebug('MCP server instance config', { config })
   }
 
-  private handleProcessSignal(
+  private handleProcessSignal({
+    signal,
+    error,
+  }: {
     signal:
       | NodeJS.Signals
       | 'exit'
       | 'uncaughtException'
       | 'unhandledRejection'
-      | 'warning',
+      | 'warning'
     error?: Error | number
-  ): void {
+  }): void {
     const messages: Record<string, string> = {
       SIGINT: 'MCP server interrupted',
       SIGTERM: 'MCP server terminated',
@@ -125,9 +130,11 @@ export class McpServer {
     ]
 
     signals.forEach((signal) => {
-      process.on(signal, (error?: Error | number) => {
-        this.handleProcessSignal(signal, error)
-      })
+      const handler = (error?: Error | number) => {
+        this.handleProcessSignal({ signal, error })
+      }
+      this.eventHandlers.set(signal, handler)
+      process.on(signal, handler)
     })
 
     this.isEventHandlersSetup = true
@@ -325,6 +332,14 @@ export class McpServer {
 
   public async stop(): Promise<void> {
     logDebug('MCP server shutting down')
-    // Add any cleanup logic here if needed
+
+    // Remove all event handlers that were registered
+    this.eventHandlers.forEach((handler, signal) => {
+      process.removeListener(signal, handler)
+    })
+    this.eventHandlers.clear()
+    this.isEventHandlersSetup = false
+
+    logDebug('Process event handlers cleaned up')
   }
 }

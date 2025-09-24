@@ -255,8 +255,10 @@ How to invoke:
   – path (string): absolute path to the repository root.
 
 Behaviour:
-• If no new fixes are available, it returns a concise message indicating so.
-• If fixes are found, it returns a human-readable summary including total count and severity breakdown.
+• If auto-fix is enabled: Returns a list of fixes that were automatically applied to your codebase.
+• If auto-fix is disabled: Returns a list of fresh fixes available for manual review and application.
+• If no fixes are available, it returns a concise message indicating so.
+• Results include a human-readable summary with total count and severity breakdown.
 
 Example payload:
 {

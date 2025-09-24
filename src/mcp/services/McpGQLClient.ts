@@ -25,7 +25,7 @@ import {
 } from '../core/configs'
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
-import { FixReportSummary, McpFix } from '../types'
+import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
 import { configStore } from './ConfigStoreService'
 import { McpAuthService } from './McpAuthService'
 
@@ -322,12 +322,74 @@ export class McpGQLClient {
         organizationId: organization.id,
         projectName,
       })
-      const createdProject = await this.clientSdk.CreateProject({
-        organizationId: organization.id,
-        projectName: projectName,
-      })
-      logDebug('[GraphQL] CreateProject successful', { result: createdProject })
-      return createdProject.createProject.projectId
+
+      try {
+        const createdProject = await this.clientSdk.CreateProject({
+          organizationId: organization.id,
+          projectName: projectName,
+        })
+        logDebug('[GraphQL] CreateProject successful', {
+          result: createdProject,
+        })
+        return createdProject.createProject.projectId
+      } catch (createError: unknown) {
+        // Check if the error is a uniqueness constraint violation
+        const errorMessage =
+          createError instanceof Error
+            ? createError.message
+            : String(createError)
+        const isConstraintViolation =
+          errorMessage.includes(
+            'duplicate key value violates unique constraint'
+          ) && errorMessage.includes('project_name_organization_id_key')
+
+        if (isConstraintViolation) {
+          logDebug(
+            '[GraphQL] Project creation failed due to constraint violation, retrying fetch',
+            {
+              organizationId: organization.id,
+              projectName,
+              error: errorMessage,
+            }
+          )
+
+          // Retry fetching the project that was created by another process
+          const retryOrgAndProjectRes =
+            await this.clientSdk.getLastOrgAndNamedProject({
+              email: userEmail,
+              projectName,
+            })
+
+          const retryProjectId =
+            retryOrgAndProjectRes.user?.[0]
+              ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization
+              ?.projects?.[0]?.id
+
+          if (retryProjectId) {
+            logDebug(
+              '[GraphQL] Successfully found existing project after constraint violation',
+              {
+                projectId: retryProjectId,
+                projectName,
+              }
+            )
+            return retryProjectId
+          }
+
+          // If we still can't find the project after retry, throw the original error
+          logError(
+            '[GraphQL] Failed to find project even after constraint violation retry',
+            {
+              organizationId: organization.id,
+              projectName,
+              retryResult: retryOrgAndProjectRes,
+            }
+          )
+        }
+
+        // Re-throw the original error if it's not a constraint violation or retry failed
+        throw createError
+      }
     } catch (e) {
       logError('[GraphQL] getProjectId failed', {
         error: e,
@@ -397,11 +459,41 @@ export class McpGQLClient {
     }
   }
 
-  private mergeUserAndSystemFixes(
-    reportData: { userFixes?: McpFix[]; fixes?: McpFix[] } | undefined,
+  private generateFixUrl({
+    fixId,
+    organizationId,
+    projectId,
+    reportId,
+  }: {
+    fixId: string
+    organizationId?: string
+    projectId?: string
+    reportId?: string
+  }): string | undefined {
+    if (!organizationId || !projectId || !reportId) {
+      return undefined
+    }
+
+    const appBaseUrl = this.apiUrl
+      .replace('/v1/graphql', '')
+      .replace('api.', '')
+    return `${appBaseUrl}/organization/${organizationId}/project/${projectId}/report/${reportId}/fix/${fixId}`
+  }
+
+  private mergeUserAndSystemFixes({
+    reportData,
+    limit,
+  }: {
+    reportData: FixReportSummary | undefined
     limit: number
-  ): McpFix[] {
+  }): McpFix[] {
     if (!reportData) return []
+
+    const reportMetadata = {
+      id: reportData.id,
+      organizationId: reportData.vulnerabilityReport?.project?.organizationId,
+      projectId: reportData.vulnerabilityReport?.project?.id,
+    }
 
     const { userFixes = [], fixes = [] } = reportData
 
@@ -411,14 +503,32 @@ export class McpGQLClient {
     // Prioritize user fixes
     for (const fix of userFixes) {
       if (fix.id) {
-        fixMap.set(fix.id, fix)
+        const fixWithUrl = {
+          ...fix,
+          fixUrl: this.generateFixUrl({
+            fixId: fix.id,
+            organizationId: reportMetadata?.organizationId,
+            projectId: reportMetadata?.projectId,
+            reportId: reportMetadata?.id,
+          }),
+        }
+        fixMap.set(fix.id, fixWithUrl)
       }
     }
 
     // Add system fixes that aren't duplicates
     for (const fix of fixes) {
       if (fix.id && !fixMap.has(fix.id)) {
-        fixMap.set(fix.id, fix)
+        const fixWithUrl = {
+          ...fix,
+          fixUrl: this.generateFixUrl({
+            fixId: fix.id,
+            organizationId: reportMetadata?.organizationId,
+            projectId: reportMetadata?.projectId,
+            reportId: reportMetadata?.id,
+          }),
+        }
+        fixMap.set(fix.id, fixWithUrl)
       }
     }
 
@@ -438,6 +548,61 @@ export class McpGQLClient {
       })
     } else {
       logDebug('[GraphQL] No fixes found to update download status')
+    }
+  }
+
+  async updateAutoAppliedFixesStatus(fixIds: string[]) {
+    if (fixIds.length > 0) {
+      const resUpdate = await this.clientSdk.updateDownloadedFixData({
+        fixIds,
+        source: FixDownloadSource.AutoMvs,
+      })
+      logDebug('[GraphQL] updateAutoAppliedFixesStatus successful', {
+        result: resUpdate,
+        fixIds,
+        note: 'Auto-applied via MVS automation',
+      })
+    } else {
+      logDebug('[GraphQL] No auto-applied fixes to update status')
+    }
+  }
+
+  async getMvsAutoFixSettings(): Promise<boolean> {
+    try {
+      // Check for environment variable override first
+      const envOverride = process.env['MVS_AUTO_FIX']
+      if (envOverride !== undefined) {
+        const overrideValue = envOverride.toLowerCase() === 'true'
+        logDebug('[Environment] Using MVS_AUTO_FIX override', {
+          envValue: envOverride,
+          resolvedValue: overrideValue,
+        })
+        return overrideValue
+      }
+
+      const userInfo = await this.getUserInfo()
+      if (!userInfo?.email) {
+        throw new Error('User email not found')
+      }
+
+      logDebug('[GraphQL] Calling GetUserMvsAutoFix query', {
+        userEmail: userInfo.email,
+      })
+
+      const result = await this.clientSdk.GetUserMvsAutoFix({
+        userEmail: userInfo.email,
+      })
+
+      logDebug('[GraphQL] GetUserMvsAutoFix successful', { result })
+
+      // Return the mvs_auto_fix value from the first settings record, default to true if no settings found
+      return result.user_email_notification_settings?.[0]?.mvs_auto_fix ?? true
+    } catch (e) {
+      logError('[GraphQL] GetUserMvsAutoFix failed', {
+        error: e,
+        ...this.getErrorContext(),
+      })
+      throw e
     }
   }
 
@@ -474,27 +639,33 @@ export class McpGQLClient {
         })
       }
 
-      const res = await this.clientSdk.GetLatestReportByRepoUrl({
+      const resp = await this.clientSdk.GetLatestReportByRepoUrl({
         repoUrl,
         limit,
         offset,
         currentUserEmail,
       })
+
       logDebug('[GraphQL] GetLatestReportByRepoUrl successful', {
-        result: res,
-        reportCount: res.fixReport?.length || 0,
+        result: resp,
+        reportCount: resp.fixReport?.length || 0,
+      })
+      const latestReport =
+        resp.fixReport?.[0] && FixReportSummarySchema.parse(resp.fixReport?.[0])
+
+      const fixes = this.mergeUserAndSystemFixes({
+        reportData: latestReport,
+        limit,
       })
 
-      const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
-
       return {
-        fixReport: res.fixReport?.[0]
+        fixReport: latestReport
           ? {
-              ...res.fixReport?.[0],
+              ...latestReport,
               fixes,
             }
           : null,
-        expiredReport: res.expiredReport?.[0] || null,
+        expiredReport: resp.expiredReport?.[0] || null,
       }
     } catch (e) {
       logError('[GraphQL] GetLatestReportByRepoUrl failed', {
@@ -522,6 +693,11 @@ export class McpGQLClient {
     fixes: McpFix[]
     totalCount: number
     expiredReport: { id: string; expirationOn?: string } | null
+    fixReport?: {
+      id: string
+      organizationId?: string
+      projectId?: string
+    }
   } | null> {
     // Build filters object based on issueType and severity
     const filters: Record<string, unknown> = {}
@@ -577,13 +753,26 @@ export class McpGQLClient {
         return null
       }
 
-      const fixes = this.mergeUserAndSystemFixes(res.fixReport?.[0], limit)
+      const latestReport = FixReportSummarySchema.parse(res.fixReport?.[0])
+
+      const fixes = this.mergeUserAndSystemFixes({
+        reportData: latestReport,
+        limit,
+      })
 
       return {
         fixes,
         totalCount:
           res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
         expiredReport: res.expiredReport?.[0] || null,
+        fixReport: res.fixReport?.[0]
+          ? {
+              id: res.fixReport[0].id,
+              organizationId:
+                res.fixReport[0].vulnerabilityReport?.project?.organizationId,
+              projectId: res.fixReport[0].vulnerabilityReport?.projectId,
+            }
+          : undefined,
       }
     } catch (e) {
       logError('[GraphQL] GetReportFixes failed', {

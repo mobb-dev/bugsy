@@ -119,6 +119,11 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
           __typename: 'vulnerability_report' as const,
           scanDate: '2024-01-01T01:00:00Z',
           vendor: Vulnerability_Report_Vendor_Enum.Snyk,
+          projectId: 'test-project-id',
+          project: {
+            __typename: 'project' as const,
+            organizationId: 'test-org-id',
+          },
           totalVulnerabilityReportIssuesCount: {
             __typename: 'vulnerability_report_issue_aggregate' as const,
             aggregate: {

@@ -159,6 +159,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'Function Call Without Parentheses',
   [IssueType_Enum.SpringDefaultPermit]: 'Spring Default Permit',
   [IssueType_Enum.ReturnInInit]: 'Return in Init',
+  [IssueType_Enum.ActionNotPinnedToCommitSha]:
+    'Action Not Pinned to Commit Sha',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

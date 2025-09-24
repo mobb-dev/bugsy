@@ -30,4 +30,8 @@ export class InlineMCPClient {
       },
     })
   }
+
+  async cleanup(): Promise<void> {
+    await this.mcpServer.stop()
+  }
 }

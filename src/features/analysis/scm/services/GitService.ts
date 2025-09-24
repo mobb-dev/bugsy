@@ -55,6 +55,29 @@ export class GitService {
   }
 
   /**
+   * Checks if the current path is within a git repository
+   * @returns Promise<boolean> True if it's a git repository, false otherwise
+   */
+  public async isGitRepository(): Promise<boolean> {
+    try {
+      const isRepo = await this.git.checkIsRepo()
+      if (!isRepo) {
+        this.log('[GitService] Not a git repository', 'debug')
+        return false
+      }
+
+      // Additional check to ensure we can access git root
+      await this.git.revparse(['--show-toplevel'])
+      return true
+    } catch (error) {
+      this.log('[GitService] Not a git repository', 'debug', {
+        error: String(error),
+      })
+      return false
+    }
+  }
+
+  /**
    * Validates that the path is a valid git repository
    */
   public async validateRepository(): Promise<GitValidationResult> {
@@ -119,9 +142,14 @@ export class GitService {
           }
 
           // If the file is outside our working directory, use relative path from working dir
+          const safeInput = path.basename(
+            String(gitRelativePath || '')
+              .replace('\0', '')
+              .replace(/^(\.\.(\/|\\$))+/, '')
+          )
           return path.relative(
             this.repositoryPath,
-            path.join(gitRoot, gitRelativePath)
+            path.join(gitRoot, safeInput)
           )
         })
 
@@ -655,5 +683,97 @@ export class GitService {
     const content = await this.getGitignoreContent()
     if (!content) return null
     return ignore().add(content)
+  }
+
+  /**
+   * Gets the git repository root directory path
+   * @returns Absolute path to the git repository root
+   */
+  public async getGitRoot(): Promise<string> {
+    this.log('[GitService] Getting git repository root', 'debug')
+
+    try {
+      const gitRoot = await this.git.revparse(['--show-toplevel'])
+      this.log('[GitService] Git root retrieved', 'debug', { gitRoot })
+      return gitRoot
+    } catch (error) {
+      const errorMessage = `Failed to get git repository root: ${(error as Error).message}`
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
+      throw new Error(errorMessage)
+    }
+  }
+
+  /**
+   * Ensures that a specific entry exists in the .gitignore file
+   * Creates .gitignore if it doesn't exist, adds the entry if not present
+   * @param entry The entry to add to .gitignore (e.g., '.mobb', 'node_modules')
+   * @returns True if entry was added, false if it already existed
+   */
+  public async ensureGitignoreEntry(entry: string): Promise<boolean> {
+    this.log('[GitService] Ensuring .gitignore entry', 'debug', { entry })
+
+    try {
+      const gitRoot = await this.getGitRoot()
+      const gitignorePath = path.join(gitRoot, '.gitignore')
+
+      // Read existing content or create empty content
+      let gitignoreContent = ''
+      if (fs.existsSync(gitignorePath)) {
+        gitignoreContent = fs.readFileSync(gitignorePath, 'utf8')
+        this.log('[GitService] .gitignore file exists', 'debug')
+      } else {
+        this.log('[GitService] Creating .gitignore file', 'info', {
+          gitignorePath,
+        })
+      }
+
+      // Check if entry already exists
+      if (gitignoreContent.includes(entry)) {
+        this.log('[GitService] Entry already exists in .gitignore', 'debug', {
+          entry,
+        })
+        return false
+      }
+
+      // Add the entry
+      this.log('[GitService] Adding entry to .gitignore', 'info', { entry })
+      const newLine =
+        gitignoreContent.endsWith('\n') || gitignoreContent === '' ? '' : '\n'
+      const updatedContent = `${gitignoreContent}${newLine}${entry}\n`
+
+      fs.writeFileSync(gitignorePath, updatedContent, 'utf8')
+      this.log('[GitService] .gitignore updated successfully', 'debug', {
+        entry,
+      })
+
+      return true
+    } catch (error) {
+      const errorMessage = `Failed to ensure .gitignore entry: ${(error as Error).message}`
+      this.log(`[GitService] ${errorMessage}`, 'error', { error, entry })
+      throw new Error(errorMessage)
+    }
+  }
+
+  /**
+   * Checks if the .gitignore file exists in the repository root
+   * @returns True if .gitignore exists, false otherwise
+   */
+  public async gitignoreExists(): Promise<boolean> {
+    this.log('[GitService] Checking if .gitignore exists', 'debug')
+
+    try {
+      const gitRoot = await this.getGitRoot()
+      const gitignorePath = path.join(gitRoot, '.gitignore')
+      const exists = fs.existsSync(gitignorePath)
+
+      this.log('[GitService] .gitignore existence check complete', 'debug', {
+        exists,
+      })
+      return exists
+    } catch (error) {
+      const errorMessage = `Failed to check .gitignore existence: ${(error as Error).message}`
+      this.log(`[GitService] ${errorMessage}`, 'error', { error })
+      throw new Error(errorMessage)
+    }
   }
 }

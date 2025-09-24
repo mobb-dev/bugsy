@@ -1014,11 +1014,11 @@ vendor/
       vi.mocked(isBinary).mockReturnValue(false)
 
       // Create the archive
-      const result = await fileOperations.createSourceCodeArchive(
-        testFiles.map((f) => f.path),
-        repoPath,
-        1024 * 1024 // 1MB max file size
-      )
+      const result = await fileOperations.createSourceCodeArchive({
+        fileList: testFiles.map((f) => f.path),
+        repositoryPath: repoPath,
+        maxFileSize: 1024 * 1024, // 1MB max file size
+      })
 
       // Verify the archive was created
       expect(result.packedFilesCount).toBe(testFiles.length)
@@ -1091,11 +1091,11 @@ vendor/
       vi.spyOn(FileUtils, 'shouldPackFile').mockReturnValue(true)
       vi.mocked(isBinary).mockReturnValue(false)
 
-      const result = await fileOperations.createSourceCodeArchive(
-        deepFiles.map((f) => f.path),
-        repoPath,
-        1024 * 1024
-      )
+      const result = await fileOperations.createSourceCodeArchive({
+        fileList: deepFiles.map((f) => f.path),
+        repositoryPath: repoPath,
+        maxFileSize: 1024 * 1024,
+      })
 
       // Extract and verify the ZIP content
       const extractedZip = new AdmZip(result.archive)
@@ -1170,11 +1170,11 @@ vendor/
       vi.spyOn(FileUtils, 'shouldPackFile').mockReturnValue(true)
       vi.mocked(isBinary).mockReturnValue(false)
 
-      const result = await fileOperations.createSourceCodeArchive(
-        mixedFiles.map((f) => f.path),
-        repoPath,
-        1024 * 1024
-      )
+      const result = await fileOperations.createSourceCodeArchive({
+        fileList: mixedFiles.map((f) => f.path),
+        repositoryPath: repoPath,
+        maxFileSize: 1024 * 1024,
+      })
 
       // Extract and verify
       const extractedZip = new AdmZip(result.archive)
@@ -1236,11 +1236,11 @@ vendor/
       // Don't mock shouldPackFile - let it use the real logic
       vi.mocked(isBinary).mockReturnValue(false)
 
-      const result = await fileOperations.createSourceCodeArchive(
-        importantFiles.map((f) => f.path),
-        repoPath,
-        1024 * 1024
-      )
+      const result = await fileOperations.createSourceCodeArchive({
+        fileList: importantFiles.map((f) => f.path),
+        repositoryPath: repoPath,
+        maxFileSize: 1024 * 1024,
+      })
 
       // Extract and verify
       const extractedZip = new AdmZip(result.archive)

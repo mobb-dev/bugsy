@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.173",
+  "version": "1.0.176",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.mjs",
@@ -13,14 +13,19 @@
     "build:dev": "tsup-node --env.NODE_ENV development",
     "increment-version": "./src/scripts/increment-version.sh",
     "test:unit:mcp": "vitest run __tests__/mcp/",
+    "test:unit:mcp:ci": "vitest run --bail=1 __tests__/mcp/",
     "test:mcp:watch": "vitest watch __tests__/mcp/",
     "test:mcp:verbose": "pnpm run build && NODE_ENV=test VERBOSE=true vitest run __tests__/mcp/",
     "test:mcp:all": "pnpm run test:unit:mcp && pnpm run test:integration:mcp && pnpm run test:e2e:mcp",
     "test:unit": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --exclude='**/__tests__/integration.test.ts' --exclude='**/__tests__/integration.mcp.test.ts' --exclude='**/__tests__/mcp/**'",
+    "test:unit:ci": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --bail=1 --exclude='**/__tests__/integration.test.ts' --exclude='**/__tests__/integration.mcp.test.ts' --exclude='**/__tests__/mcp/**'",
     "test:integration": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --sequence.concurrent=false false __tests__/integration.test.ts",
+    "test:integration:ci": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --bail=1 --sequence.concurrent=false false __tests__/integration.test.ts",
     "test:integration:mcp": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --sequence.concurrent=false false __tests__/integration.mcp.test.ts",
+    "test:integration:mcp:ci": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run --bail=1 --sequence.concurrent=false false __tests__/integration.mcp.test.ts",
     "test:integration:watch": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest watch run __tests__/integration.test.ts",
     "test": "pnpm run test:unit && pnpm run test:integration",
+    "test:ci": "pnpm run test:unit:ci && pnpm run test:integration:ci",
     "test:ado": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run ado.test",
     "test:github": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run github.test",
     "test:gitlab": "GIT_PROXY_HOST=http://tinyproxy:8888 TOKEN=$(../../scripts/login_auth0.sh) vitest run gitlab.test",
@@ -37,7 +42,8 @@
     "debug:mcp": "pnpm run build && node dist/index.mjs mcp --debug",
     "generate": "pnpm run env -- graphql-codegen -r dotenv/config --config client_codegen.ts",
     "test:e2e": "cd ./__e2e__ && npm i && npm run test",
-    "test:e2e:mcp": "pnpm run build && cd ./__e2e__ && npm i && npm run test:mcp"
+    "test:e2e:mcp": "pnpm run build && cd ./__e2e__ && npm i && npm run test:mcp",
+    "test:e2e:mcp:ci": "pnpm run build && cd ./__e2e__ && npm i && npm run test:mcp"
   },
   "bin": {
     "mobbdev": "bin/cli.mjs"

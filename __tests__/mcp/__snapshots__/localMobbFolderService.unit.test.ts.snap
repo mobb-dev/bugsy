@@ -1,0 +1,132 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LocalMobbFolderService > error handling scenarios > should handle large patches with >10 lines in markdown generation > logPatch-handles-large-patch-truncation 1`] = `
+"# Fix large-patch-test
+
+**Logged:** 2024-01-15T10:30:00.000Z
+
+**Patched File:** /tmp/test-repo/test.java
+
+**Severity:** HIGH (8)
+
+**Confidence:** 0.9
+
+**Issue Type:** large-vulnerability
+
+
+## Vulnerability Details
+
+## Fix Description
+
+Large patch test
+
+## Patch Preview
+
+\`\`\`diff
+diff --git a/test.java b/test.java
+index 1234567..abcdefg 100644
+--- a/test.java
++++ b/test.java
+@@ -1,3 +1,25 @@
+-// Old code
++Line 1 of the patch
++Line 2 of the patch
++Line 3 of the patch
++Line 4 of the patch
+... (21 more lines)
+\`\`\`
+
+"
+`;
+
+exports[`LocalMobbFolderService > error handling scenarios > should handle markdown generation with empty vulnerability tags > logPatch-handles-empty-vulnerability-tags 1`] = `
+"# Fix empty-tags-test
+
+**Logged:** 2024-01-15T10:30:00.000Z
+
+**Severity:** LOW (3)
+
+**Confidence:** 0.7
+
+**Issue Type:** test-vulnerability
+
+
+## Vulnerability Details
+
+## Fix Description
+
+Empty tags test
+
+## Patch Preview
+
+\`\`\`diff
+small patch
+\`\`\`
+
+"
+`;
+
+exports[`LocalMobbFolderService > logPatch > should create patchInfo.md with fix details > logPatch-creates-correct-markdown-structure 1`] = `
+"# Fix test-fix-123
+
+**Logged:** 2024-01-15T10:30:00.000Z
+
+**Patched File:** /tmp/test-repo/test.java
+
+**Fix URL:** [View Fix](https://app.mobb.ai/fixes/test-fix-123)
+
+**Severity:** HIGH (8)
+
+**Confidence:** 0.85
+
+**Issue Type:** sql-injection
+
+
+## Vulnerability Details
+
+**Tags:** OWASP_TOP_10
+
+## Fix Description
+
+Replace string concatenation with parameterized query to prevent SQL injection
+
+## Additional Context
+
+**affectedLines:** "12-15"
+
+## Patch Preview
+
+\`\`\`diff
+diff --git a/test.java b/test.java
+index 1234567..abcdefg 100644
+--- a/test.java
++++ b/test.java
+@@ -1,3 +1,3 @@
+- String query = "SELECT * FROM users WHERE id = " + userId;
++ PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
++ stmt.setInt(1, userId);
+\`\`\`
+
+"
+`;
+
+exports[`LocalMobbFolderService > logPatch > should handle fix with no patch available > logPatch-handles-no-fix-available 1`] = `
+"# Fix no-fix-123
+
+**Logged:** 2024-01-15T10:30:00.000Z
+
+**Severity:** CRITICAL (10)
+
+**Confidence:** 0
+
+**Issue Type:** complex-vulnerability
+
+
+## Vulnerability Details
+
+## Fix Status
+
+⚠️ **No fix available** - This vulnerability could not be automatically fixed.
+
+"
+`;

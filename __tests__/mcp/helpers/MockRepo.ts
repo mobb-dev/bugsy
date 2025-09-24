@@ -1,10 +1,13 @@
-import { execSync } from 'child_process'
+import * as path2 from 'node:path'
+
+import { execFileSync, execSync } from 'child_process'
 import fs, {
   existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
+  utimesSync,
   writeFileSync,
 } from 'fs'
 import { tmpdir } from 'os'
@@ -79,6 +82,32 @@ export class MockRepo {
     const content = fileContent !== undefined ? fileContent : benignFileContent
     writeFileSync(filePath, content)
     log(`Created file ${fileName} in repo`)
+    const now = Date.now()
+    utimesSync(filePath, now / 1000, now / 1000)
+
+    return filePath
+  }
+
+  /**
+   * Updates an existing file in the repository
+   * @param fileName Path to the file relative to the repo root, supports nested directories
+   * @param fileContent Content to write to the file
+   * @returns Full path to the updated file
+   * @throws Error if the file does not exist
+   */
+  updateFile(fileName: string, fileContent: string): string {
+    const filePath = join(this.repoPath, fileName)
+
+    // Verify the file exists
+    if (!existsSync(filePath)) {
+      throw new Error(`File ${fileName} does not exist in repository`)
+    }
+
+    // Overwrite the file content
+    writeFileSync(filePath, fileContent)
+    log(`Updated file ${fileName} in repo`)
+    const now = Date.now()
+    utimesSync(filePath, now / 1000, now / 1000)
 
     return filePath
   }
@@ -232,7 +261,7 @@ export class MockRepo {
    */
   protected createEmptyCommit(message: string = 'Initial commit'): boolean {
     try {
-      execSync(`git commit --allow-empty -m "${message}"`, {
+      execFileSync('git', ['commit', '--allow-empty', '-m', message], {
         cwd: this.repoPath,
         stdio: 'ignore',
       })
@@ -269,7 +298,7 @@ export class MockRepo {
    */
   protected commitStagedFiles(message: string = 'Add sample files'): boolean {
     try {
-      execSync(`git commit -m "${message}"`, {
+      execFileSync('git', ['commit', '-m', message], {
         cwd: this.repoPath,
         stdio: 'ignore',
       })
@@ -290,7 +319,7 @@ export class MockRepo {
     url: string = 'https://github.com/test-org/test-repo.git'
   ): boolean {
     try {
-      execSync(`git remote add origin ${url}`, {
+      execFileSync('git', ['remote', 'add', 'origin', url], {
         cwd: this.repoPath,
         stdio: 'ignore',
       })
@@ -408,7 +437,12 @@ export class MockRepo {
 
     const relativeFilePath = this.files[fileIndex] as string
     try {
-      const filePath = join(this.repoPath, relativeFilePath)
+      const safeInput = path2.basename(
+        String(relativeFilePath || '')
+          .replace('\0', '')
+          .replace(/^(\.\.(\/|\\$))+/, '')
+      )
+      const filePath = join(this.repoPath, safeInput)
       const dirPath = dirname(filePath)
       mkdirSync(dirPath, { recursive: true })
       writeFileSync(filePath, content)
@@ -457,13 +491,29 @@ export class EmptyGitRepo extends MockRepo {
  * ActiveGitRepo creates a git repository with committed files that are modified,
  * resulting in uncommitted changes in the working directory.
  */
+/**
+ * Helper function to generate unique repository URLs for test isolation
+ * @param prefix - The prefix to use in the repo name (e.g., 'multi-comment-styles')
+ * @returns A unique repository URL
+ */
+function generateUniqueRepoUrl(prefix: string = 'test-repo'): string {
+  return `https://github.com/test-org/${prefix}-${Math.random()
+    .toString(36)
+    .substring(2, 15)}.git`
+}
+
 export class ActiveGitRepo extends MockRepo {
   /**
    * Creates a new ActiveGitRepo instance with committed files that are modified
    * @param files Optional list of files to create in the repository (defaults to sampleFiles)
    * @param options Additional options for repository creation
    */
-  constructor(files?: string[], options: { repoUrl?: string } = {}) {
+  constructor(
+    files?: string[],
+    options: {
+      repoUrl?: string
+    } = {}
+  ) {
     super(files)
     this.initializeActiveGitRepo(options)
   }
@@ -486,9 +536,8 @@ export class ActiveGitRepo extends MockRepo {
       this.stageAllFiles()
       this.commitStagedFiles()
 
-      // add remote origin
-      const remoteUrl =
-        options.repoUrl || 'https://github.com/test-org/test-repo.git'
+      // add remote origin - use provided repoUrl or generate unique one by default
+      const remoteUrl = options.repoUrl || generateUniqueRepoUrl('test-repo')
       this.addRemoteOrigin(remoteUrl)
 
       // modify files to create changes

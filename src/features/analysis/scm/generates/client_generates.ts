@@ -41,6 +41,29 @@ export type AddUsersToProjectSuccess = {
   status: Status;
 };
 
+export type AiToolDailyUsage = {
+  __typename?: 'AiToolDailyUsage';
+  date: Scalars['String']['output'];
+  totalInteractions: Scalars['Int']['output'];
+  totalTokens: Scalars['Int']['output'];
+};
+
+export type AiToolToken = {
+  __typename?: 'AiToolToken';
+  aiToolType: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+};
+
+export type AiToolTypeUsage = {
+  __typename?: 'AiToolTypeUsage';
+  aiToolType: Scalars['String']['output'];
+  dailyUsage: Array<AiToolDailyUsage>;
+  ide?: Maybe<Scalars['String']['output']>;
+  lastSeenDate?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  rawModel?: Maybe<Scalars['String']['output']>;
+};
+
 export type AutoPrError = ScmBaseError & {
   __typename?: 'AutoPrError';
   error: Scalars['String']['output'];
@@ -155,6 +178,19 @@ export type CreateTokenResponse = {
   createdAt: Scalars['String']['output'];
   name: Scalars['String']['output'];
   token: Scalars['String']['output'];
+};
+
+export type DeleteAiToolGeneralError = {
+  __typename?: 'DeleteAiToolGeneralError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type DeleteAiToolTokenResponse = DeleteAiToolGeneralError | DeleteAiToolTokenSuccess;
+
+export type DeleteAiToolTokenSuccess = {
+  __typename?: 'DeleteAiToolTokenSuccess';
+  status: Status;
 };
 
 export type DeleteIntegrationResponse = DeleteIntegrationResponseError | DeleteIntegrationResponseSuccess;
@@ -290,6 +326,34 @@ export type ForkRepoSuccess = {
   __typename?: 'ForkRepoSuccess';
   status: Status;
   url: Scalars['String']['output'];
+};
+
+export type GetAiToolGeneralError = {
+  __typename?: 'GetAiToolGeneralError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetAiToolTokensResponse = GetAiToolGeneralError | GetAiToolTokensSuccess;
+
+export type GetAiToolTokensSuccess = {
+  __typename?: 'GetAiToolTokensSuccess';
+  status: Status;
+  tokens: Array<AiToolToken>;
+};
+
+export type GetAiToolUsageStatisticsError = {
+  __typename?: 'GetAiToolUsageStatisticsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetAiToolUsageStatisticsResponse = GetAiToolUsageStatisticsError | GetAiToolUsageStatisticsSuccess;
+
+export type GetAiToolUsageStatisticsSuccess = {
+  __typename?: 'GetAiToolUsageStatisticsSuccess';
+  statistics: Array<UserAiToolUsage>;
+  status: Status;
 };
 
 export type GetCheckmarxIntegrationDataError = {
@@ -916,6 +980,21 @@ export type UnstructuredFixExtraContext = {
   value: Scalars['JSON']['output'];
 };
 
+export type UpdateAiToolGeneralError = {
+  __typename?: 'UpdateAiToolGeneralError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type UpdateAiToolTokenResponse = UpdateAiToolGeneralError | UpdateAiToolTokenSuccess;
+
+export type UpdateAiToolTokenSuccess = {
+  __typename?: 'UpdateAiToolTokenSuccess';
+  id: Scalars['String']['output'];
+  status: Status;
+  token: Scalars['String']['output'];
+};
+
 export type UpdateFixesAcrhiveStateResponse = {
   __typename?: 'UpdateFixesAcrhiveStateResponse';
   status: Status;
@@ -960,6 +1039,12 @@ export type UploadResult = {
   uploadFieldsJSON: Scalars['String']['output'];
   uploadKey: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type UserAiToolUsage = {
+  __typename?: 'UserAiToolUsage';
+  aiToolUsage: Array<AiToolTypeUsage>;
+  userId: Scalars['String']['output'];
 };
 
 export type UserAlreadyInProjectError = {
@@ -1540,6 +1625,1425 @@ export type Aggregated_Severities_Var_Samp_Fields = {
 export type Aggregated_Severities_Variance_Fields = {
   __typename?: 'aggregated_severities_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "ai_ide" */
+export type Ai_Ide = {
+  __typename?: 'ai_ide';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "ai_ide" */
+export type Ai_Ide_Aggregate = {
+  __typename?: 'ai_ide_aggregate';
+  aggregate?: Maybe<Ai_Ide_Aggregate_Fields>;
+  nodes: Array<Ai_Ide>;
+};
+
+/** aggregate fields of "ai_ide" */
+export type Ai_Ide_Aggregate_Fields = {
+  __typename?: 'ai_ide_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Ide_Max_Fields>;
+  min?: Maybe<Ai_Ide_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_ide" */
+export type Ai_Ide_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Ide_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_ide". All fields are combined with a logical 'AND'. */
+export type Ai_Ide_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Ide_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Ide_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Ide_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_ide" */
+export enum Ai_Ide_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  AiIdePkey = 'ai_ide_pkey'
+}
+
+export enum Ai_Ide_Enum {
+  /** Cursor */
+  Cursor = 'CURSOR'
+}
+
+/** Boolean expression to compare columns of type "ai_ide_enum". All fields are combined with logical 'AND'. */
+export type Ai_Ide_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Ai_Ide_Enum>;
+  _in?: InputMaybe<Array<Ai_Ide_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Ai_Ide_Enum>;
+  _nin?: InputMaybe<Array<Ai_Ide_Enum>>;
+};
+
+/** input type for inserting data into table "ai_ide" */
+export type Ai_Ide_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Ide_Max_Fields = {
+  __typename?: 'ai_ide_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Ide_Min_Fields = {
+  __typename?: 'ai_ide_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_ide" */
+export type Ai_Ide_Mutation_Response = {
+  __typename?: 'ai_ide_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Ide>;
+};
+
+/** input type for inserting object relation for remote table "ai_ide" */
+export type Ai_Ide_Obj_Rel_Insert_Input = {
+  data: Ai_Ide_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Ide_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_ide" */
+export type Ai_Ide_On_Conflict = {
+  constraint: Ai_Ide_Constraint;
+  update_columns?: Array<Ai_Ide_Update_Column>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_ide". */
+export type Ai_Ide_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_ide */
+export type Ai_Ide_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "ai_ide" */
+export enum Ai_Ide_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "ai_ide" */
+export type Ai_Ide_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_ide" */
+export type Ai_Ide_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Ide_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Ide_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_ide" */
+export enum Ai_Ide_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Ai_Ide_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Ide_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Ide_Bool_Exp;
+};
+
+/** columns and relationships of "ai_model" */
+export type Ai_Model = {
+  __typename?: 'ai_model';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "ai_model" */
+export type Ai_Model_Aggregate = {
+  __typename?: 'ai_model_aggregate';
+  aggregate?: Maybe<Ai_Model_Aggregate_Fields>;
+  nodes: Array<Ai_Model>;
+};
+
+/** aggregate fields of "ai_model" */
+export type Ai_Model_Aggregate_Fields = {
+  __typename?: 'ai_model_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Model_Max_Fields>;
+  min?: Maybe<Ai_Model_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_model" */
+export type Ai_Model_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Model_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_model". All fields are combined with a logical 'AND'. */
+export type Ai_Model_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Model_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Model_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Model_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_model" */
+export enum Ai_Model_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  AiModelPkey = 'ai_model_pkey'
+}
+
+export enum Ai_Model_Enum {
+  /** CLAUDE4SONNET */
+  Claude4Sonnet = 'CLAUDE4SONNET',
+  /** CLAUDE4SONNETTHINKING */
+  Claude4Sonnetthinking = 'CLAUDE4SONNETTHINKING',
+  /** CLAUDE41OPUSTHINKING */
+  Claude41Opusthinking = 'CLAUDE41OPUSTHINKING',
+  /** code-supernova */
+  Codesupernova = 'CODESUPERNOVA',
+  /** cursor-small */
+  Cursorsmall = 'CURSORSMALL',
+  /** deepseek-r1 */
+  Deepseekr1 = 'DEEPSEEKR1',
+  /** deepseek-v3.1 */
+  Deepseekv31 = 'DEEPSEEKV31',
+  /** DEFAULT */
+  Default = 'DEFAULT',
+  /** GEMINI25PRO */
+  Gemini25Pro = 'GEMINI25PRO',
+  /** GPT4O */
+  Gpt4O = 'GPT4O',
+  /** GPT5 */
+  Gpt5 = 'GPT5',
+  /** GPT5CODEX */
+  Gpt5Codex = 'GPT5CODEX',
+  /** GPT5HIGH */
+  Gpt5High = 'GPT5HIGH',
+  /** GPT41 */
+  Gpt41 = 'GPT41',
+  /** grok-4-0709 */
+  Grok40709 = 'GROK40709',
+  /** o4-mini */
+  O4Mini = 'O4MINI',
+  /** UNKNOWN */
+  Unknown = 'UNKNOWN'
+}
+
+/** Boolean expression to compare columns of type "ai_model_enum". All fields are combined with logical 'AND'. */
+export type Ai_Model_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Ai_Model_Enum>;
+  _in?: InputMaybe<Array<Ai_Model_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Ai_Model_Enum>;
+  _nin?: InputMaybe<Array<Ai_Model_Enum>>;
+};
+
+/** input type for inserting data into table "ai_model" */
+export type Ai_Model_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Model_Max_Fields = {
+  __typename?: 'ai_model_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Model_Min_Fields = {
+  __typename?: 'ai_model_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_model" */
+export type Ai_Model_Mutation_Response = {
+  __typename?: 'ai_model_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Model>;
+};
+
+/** input type for inserting object relation for remote table "ai_model" */
+export type Ai_Model_Obj_Rel_Insert_Input = {
+  data: Ai_Model_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Model_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_model" */
+export type Ai_Model_On_Conflict = {
+  constraint: Ai_Model_Constraint;
+  update_columns?: Array<Ai_Model_Update_Column>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_model". */
+export type Ai_Model_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_model */
+export type Ai_Model_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "ai_model" */
+export enum Ai_Model_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "ai_model" */
+export type Ai_Model_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_model" */
+export type Ai_Model_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Model_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Model_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_model" */
+export enum Ai_Model_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Ai_Model_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Model_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Model_Bool_Exp;
+};
+
+/** columns and relationships of "ai_source_type" */
+export type Ai_Source_Type = {
+  __typename?: 'ai_source_type';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "ai_source_type" */
+export type Ai_Source_Type_Aggregate = {
+  __typename?: 'ai_source_type_aggregate';
+  aggregate?: Maybe<Ai_Source_Type_Aggregate_Fields>;
+  nodes: Array<Ai_Source_Type>;
+};
+
+/** aggregate fields of "ai_source_type" */
+export type Ai_Source_Type_Aggregate_Fields = {
+  __typename?: 'ai_source_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Source_Type_Max_Fields>;
+  min?: Maybe<Ai_Source_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_source_type" */
+export type Ai_Source_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Source_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_source_type". All fields are combined with a logical 'AND'. */
+export type Ai_Source_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Source_Type_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Source_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_source_type" */
+export enum Ai_Source_Type_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  AiSourceTypePkey = 'ai_source_type_pkey'
+}
+
+export enum Ai_Source_Type_Enum {
+  /** Cloud AI providers API */
+  Api = 'API',
+  /** Ide installed plugin */
+  IdeExtension = 'IDE_EXTENSION'
+}
+
+/** Boolean expression to compare columns of type "ai_source_type_enum". All fields are combined with logical 'AND'. */
+export type Ai_Source_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Ai_Source_Type_Enum>;
+  _in?: InputMaybe<Array<Ai_Source_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Ai_Source_Type_Enum>;
+  _nin?: InputMaybe<Array<Ai_Source_Type_Enum>>;
+};
+
+/** input type for inserting data into table "ai_source_type" */
+export type Ai_Source_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Source_Type_Max_Fields = {
+  __typename?: 'ai_source_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Source_Type_Min_Fields = {
+  __typename?: 'ai_source_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_source_type" */
+export type Ai_Source_Type_Mutation_Response = {
+  __typename?: 'ai_source_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Source_Type>;
+};
+
+/** input type for inserting object relation for remote table "ai_source_type" */
+export type Ai_Source_Type_Obj_Rel_Insert_Input = {
+  data: Ai_Source_Type_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Source_Type_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_source_type" */
+export type Ai_Source_Type_On_Conflict = {
+  constraint: Ai_Source_Type_Constraint;
+  update_columns?: Array<Ai_Source_Type_Update_Column>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_source_type". */
+export type Ai_Source_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_source_type */
+export type Ai_Source_Type_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "ai_source_type" */
+export enum Ai_Source_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "ai_source_type" */
+export type Ai_Source_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_source_type" */
+export type Ai_Source_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Source_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Source_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_source_type" */
+export enum Ai_Source_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Ai_Source_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Source_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Source_Type_Bool_Exp;
+};
+
+/** columns and relationships of "ai_tool_token" */
+export type Ai_Tool_Token = {
+  __typename?: 'ai_tool_token';
+  /** An object relationship */
+  aiTool: Ai_Tool_Type;
+  aiToolType: Ai_Tool_Type_Enum;
+  /** An array relationship */
+  aiToolUserDayUsages: Array<Ai_Tool_User_Day_Usage>;
+  /** An aggregate relationship */
+  aiToolUserDayUsages_aggregate: Ai_Tool_User_Day_Usage_Aggregate;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organizationId: Scalars['uuid']['output'];
+  token: Scalars['String']['output'];
+  tokenLastUpdate: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "ai_tool_token" */
+export type Ai_Tool_TokenAiToolUserDayUsagesArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+
+/** columns and relationships of "ai_tool_token" */
+export type Ai_Tool_TokenAiToolUserDayUsages_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+/** aggregated selection of "ai_tool_token" */
+export type Ai_Tool_Token_Aggregate = {
+  __typename?: 'ai_tool_token_aggregate';
+  aggregate?: Maybe<Ai_Tool_Token_Aggregate_Fields>;
+  nodes: Array<Ai_Tool_Token>;
+};
+
+export type Ai_Tool_Token_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ai_Tool_Token_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ai_Tool_Token_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "ai_tool_token" */
+export type Ai_Tool_Token_Aggregate_Fields = {
+  __typename?: 'ai_tool_token_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Tool_Token_Max_Fields>;
+  min?: Maybe<Ai_Tool_Token_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_tool_token" */
+export type Ai_Tool_Token_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "ai_tool_token" */
+export type Ai_Tool_Token_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ai_Tool_Token_Max_Order_By>;
+  min?: InputMaybe<Ai_Tool_Token_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "ai_tool_token" */
+export type Ai_Tool_Token_Arr_Rel_Insert_Input = {
+  data: Array<Ai_Tool_Token_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Tool_Token_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "ai_tool_token". All fields are combined with a logical 'AND'. */
+export type Ai_Tool_Token_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Tool_Token_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Tool_Token_Bool_Exp>>;
+  aiTool?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum_Comparison_Exp>;
+  aiToolUserDayUsages?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+  aiToolUserDayUsages_aggregate?: InputMaybe<Ai_Tool_User_Day_Usage_Aggregate_Bool_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  token?: InputMaybe<String_Comparison_Exp>;
+  tokenLastUpdate?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_tool_token" */
+export enum Ai_Tool_Token_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiToolTokenPkey = 'ai_tool_token_pkey'
+}
+
+/** input type for inserting data into table "ai_tool_token" */
+export type Ai_Tool_Token_Insert_Input = {
+  aiTool?: InputMaybe<Ai_Tool_Type_Obj_Rel_Insert_Input>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  aiToolUserDayUsages?: InputMaybe<Ai_Tool_User_Day_Usage_Arr_Rel_Insert_Input>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Tool_Token_Max_Fields = {
+  __typename?: 'ai_tool_token_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by max() on columns of table "ai_tool_token" */
+export type Ai_Tool_Token_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  token?: InputMaybe<Order_By>;
+  tokenLastUpdate?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Ai_Tool_Token_Min_Fields = {
+  __typename?: 'ai_tool_token_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by min() on columns of table "ai_tool_token" */
+export type Ai_Tool_Token_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  token?: InputMaybe<Order_By>;
+  tokenLastUpdate?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "ai_tool_token" */
+export type Ai_Tool_Token_Mutation_Response = {
+  __typename?: 'ai_tool_token_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Tool_Token>;
+};
+
+/** input type for inserting object relation for remote table "ai_tool_token" */
+export type Ai_Tool_Token_Obj_Rel_Insert_Input = {
+  data: Ai_Tool_Token_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Tool_Token_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_tool_token" */
+export type Ai_Tool_Token_On_Conflict = {
+  constraint: Ai_Tool_Token_Constraint;
+  update_columns?: Array<Ai_Tool_Token_Update_Column>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_tool_token". */
+export type Ai_Tool_Token_Order_By = {
+  aiTool?: InputMaybe<Ai_Tool_Type_Order_By>;
+  aiToolType?: InputMaybe<Order_By>;
+  aiToolUserDayUsages_aggregate?: InputMaybe<Ai_Tool_User_Day_Usage_Aggregate_Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  token?: InputMaybe<Order_By>;
+  tokenLastUpdate?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_tool_token */
+export type Ai_Tool_Token_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_tool_token" */
+export enum Ai_Tool_Token_Select_Column {
+  /** column name */
+  AiToolType = 'aiToolType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  Token = 'token',
+  /** column name */
+  TokenLastUpdate = 'tokenLastUpdate'
+}
+
+/** input type for updating data in table "ai_tool_token" */
+export type Ai_Tool_Token_Set_Input = {
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** Streaming cursor of the table "ai_tool_token" */
+export type Ai_Tool_Token_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Tool_Token_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Tool_Token_Stream_Cursor_Value_Input = {
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  token?: InputMaybe<Scalars['String']['input']>;
+  tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** update columns of table "ai_tool_token" */
+export enum Ai_Tool_Token_Update_Column {
+  /** column name */
+  AiToolType = 'aiToolType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  Token = 'token',
+  /** column name */
+  TokenLastUpdate = 'tokenLastUpdate'
+}
+
+export type Ai_Tool_Token_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Tool_Token_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Tool_Token_Bool_Exp;
+};
+
+/** columns and relationships of "ai_tool_type" */
+export type Ai_Tool_Type = {
+  __typename?: 'ai_tool_type';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "ai_tool_type" */
+export type Ai_Tool_Type_Aggregate = {
+  __typename?: 'ai_tool_type_aggregate';
+  aggregate?: Maybe<Ai_Tool_Type_Aggregate_Fields>;
+  nodes: Array<Ai_Tool_Type>;
+};
+
+/** aggregate fields of "ai_tool_type" */
+export type Ai_Tool_Type_Aggregate_Fields = {
+  __typename?: 'ai_tool_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Tool_Type_Max_Fields>;
+  min?: Maybe<Ai_Tool_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_tool_type" */
+export type Ai_Tool_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Tool_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_tool_type". All fields are combined with a logical 'AND'. */
+export type Ai_Tool_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Tool_Type_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Tool_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_tool_type" */
+export enum Ai_Tool_Type_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  AiToolTypePkey = 'ai_tool_type_pkey'
+}
+
+export enum Ai_Tool_Type_Enum {
+  /** Cursor */
+  Cursor = 'CURSOR',
+  /** Github Copilot */
+  GithubCopilot = 'GITHUB_COPILOT'
+}
+
+/** Boolean expression to compare columns of type "ai_tool_type_enum". All fields are combined with logical 'AND'. */
+export type Ai_Tool_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Ai_Tool_Type_Enum>;
+  _in?: InputMaybe<Array<Ai_Tool_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Ai_Tool_Type_Enum>;
+  _nin?: InputMaybe<Array<Ai_Tool_Type_Enum>>;
+};
+
+/** input type for inserting data into table "ai_tool_type" */
+export type Ai_Tool_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Tool_Type_Max_Fields = {
+  __typename?: 'ai_tool_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Tool_Type_Min_Fields = {
+  __typename?: 'ai_tool_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_tool_type" */
+export type Ai_Tool_Type_Mutation_Response = {
+  __typename?: 'ai_tool_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Tool_Type>;
+};
+
+/** input type for inserting object relation for remote table "ai_tool_type" */
+export type Ai_Tool_Type_Obj_Rel_Insert_Input = {
+  data: Ai_Tool_Type_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Tool_Type_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_tool_type" */
+export type Ai_Tool_Type_On_Conflict = {
+  constraint: Ai_Tool_Type_Constraint;
+  update_columns?: Array<Ai_Tool_Type_Update_Column>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_tool_type". */
+export type Ai_Tool_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_tool_type */
+export type Ai_Tool_Type_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "ai_tool_type" */
+export enum Ai_Tool_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "ai_tool_type" */
+export type Ai_Tool_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_tool_type" */
+export type Ai_Tool_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Tool_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Tool_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_tool_type" */
+export enum Ai_Tool_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Ai_Tool_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Tool_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Tool_Type_Bool_Exp;
+};
+
+/** columns and relationships of "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage = {
+  __typename?: 'ai_tool_user_day_usage';
+  aiHandle?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  aiIde?: Maybe<Ai_Ide>;
+  aiInteractionCount?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  aiModel?: Maybe<Ai_Model>;
+  /** An object relationship */
+  aiSource: Ai_Source_Type;
+  /** An object relationship */
+  aiTool: Ai_Tool_Type;
+  /** An object relationship */
+  aiToolToken?: Maybe<Ai_Tool_Token>;
+  aiToolTokenId?: Maybe<Scalars['uuid']['output']>;
+  aiToolType: Ai_Tool_Type_Enum;
+  aiToolUserId: Scalars['String']['output'];
+  date: Scalars['timestamptz']['output'];
+  email?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  ide?: Maybe<Ai_Ide_Enum>;
+  lastSeenDate?: Maybe<Scalars['timestamptz']['output']>;
+  model?: Maybe<Ai_Model_Enum>;
+  name?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  rawModel?: Maybe<Scalars['String']['output']>;
+  source: Ai_Source_Type_Enum;
+  tokenCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregated selection of "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Aggregate = {
+  __typename?: 'ai_tool_user_day_usage_aggregate';
+  aggregate?: Maybe<Ai_Tool_User_Day_Usage_Aggregate_Fields>;
+  nodes: Array<Ai_Tool_User_Day_Usage>;
+};
+
+export type Ai_Tool_User_Day_Usage_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ai_Tool_User_Day_Usage_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ai_Tool_User_Day_Usage_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Aggregate_Fields = {
+  __typename?: 'ai_tool_user_day_usage_aggregate_fields';
+  avg?: Maybe<Ai_Tool_User_Day_Usage_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Tool_User_Day_Usage_Max_Fields>;
+  min?: Maybe<Ai_Tool_User_Day_Usage_Min_Fields>;
+  stddev?: Maybe<Ai_Tool_User_Day_Usage_Stddev_Fields>;
+  stddev_pop?: Maybe<Ai_Tool_User_Day_Usage_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Ai_Tool_User_Day_Usage_Stddev_Samp_Fields>;
+  sum?: Maybe<Ai_Tool_User_Day_Usage_Sum_Fields>;
+  var_pop?: Maybe<Ai_Tool_User_Day_Usage_Var_Pop_Fields>;
+  var_samp?: Maybe<Ai_Tool_User_Day_Usage_Var_Samp_Fields>;
+  variance?: Maybe<Ai_Tool_User_Day_Usage_Variance_Fields>;
+};
+
+
+/** aggregate fields of "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Aggregate_Order_By = {
+  avg?: InputMaybe<Ai_Tool_User_Day_Usage_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ai_Tool_User_Day_Usage_Max_Order_By>;
+  min?: InputMaybe<Ai_Tool_User_Day_Usage_Min_Order_By>;
+  stddev?: InputMaybe<Ai_Tool_User_Day_Usage_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Ai_Tool_User_Day_Usage_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Ai_Tool_User_Day_Usage_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Ai_Tool_User_Day_Usage_Sum_Order_By>;
+  var_pop?: InputMaybe<Ai_Tool_User_Day_Usage_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Ai_Tool_User_Day_Usage_Var_Samp_Order_By>;
+  variance?: InputMaybe<Ai_Tool_User_Day_Usage_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Arr_Rel_Insert_Input = {
+  data: Array<Ai_Tool_User_Day_Usage_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Tool_User_Day_Usage_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Ai_Tool_User_Day_Usage_Avg_Fields = {
+  __typename?: 'ai_tool_user_day_usage_avg_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Avg_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "ai_tool_user_day_usage". All fields are combined with a logical 'AND'. */
+export type Ai_Tool_User_Day_Usage_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Bool_Exp>>;
+  aiHandle?: InputMaybe<String_Comparison_Exp>;
+  aiIde?: InputMaybe<Ai_Ide_Bool_Exp>;
+  aiInteractionCount?: InputMaybe<Int_Comparison_Exp>;
+  aiModel?: InputMaybe<Ai_Model_Bool_Exp>;
+  aiSource?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+  aiTool?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+  aiToolToken?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+  aiToolTokenId?: InputMaybe<Uuid_Comparison_Exp>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum_Comparison_Exp>;
+  aiToolUserId?: InputMaybe<String_Comparison_Exp>;
+  date?: InputMaybe<Timestamptz_Comparison_Exp>;
+  email?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  ide?: InputMaybe<Ai_Ide_Enum_Comparison_Exp>;
+  lastSeenDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  model?: InputMaybe<Ai_Model_Enum_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  rawModel?: InputMaybe<String_Comparison_Exp>;
+  source?: InputMaybe<Ai_Source_Type_Enum_Comparison_Exp>;
+  tokenCount?: InputMaybe<Int_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_tool_user_day_usage" */
+export enum Ai_Tool_User_Day_Usage_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiToolUserDayUsagePkey = 'ai_tool_user_day_usage_pkey'
+}
+
+/** input type for incrementing numeric columns in table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Inc_Input = {
+  aiInteractionCount?: InputMaybe<Scalars['Int']['input']>;
+  tokenCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Insert_Input = {
+  aiHandle?: InputMaybe<Scalars['String']['input']>;
+  aiIde?: InputMaybe<Ai_Ide_Obj_Rel_Insert_Input>;
+  aiInteractionCount?: InputMaybe<Scalars['Int']['input']>;
+  aiModel?: InputMaybe<Ai_Model_Obj_Rel_Insert_Input>;
+  aiSource?: InputMaybe<Ai_Source_Type_Obj_Rel_Insert_Input>;
+  aiTool?: InputMaybe<Ai_Tool_Type_Obj_Rel_Insert_Input>;
+  aiToolToken?: InputMaybe<Ai_Tool_Token_Obj_Rel_Insert_Input>;
+  aiToolTokenId?: InputMaybe<Scalars['uuid']['input']>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  aiToolUserId?: InputMaybe<Scalars['String']['input']>;
+  date?: InputMaybe<Scalars['timestamptz']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ide?: InputMaybe<Ai_Ide_Enum>;
+  lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  model?: InputMaybe<Ai_Model_Enum>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawModel?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Ai_Source_Type_Enum>;
+  tokenCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Tool_User_Day_Usage_Max_Fields = {
+  __typename?: 'ai_tool_user_day_usage_max_fields';
+  aiHandle?: Maybe<Scalars['String']['output']>;
+  aiInteractionCount?: Maybe<Scalars['Int']['output']>;
+  aiToolTokenId?: Maybe<Scalars['uuid']['output']>;
+  aiToolUserId?: Maybe<Scalars['String']['output']>;
+  date?: Maybe<Scalars['timestamptz']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastSeenDate?: Maybe<Scalars['timestamptz']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  rawModel?: Maybe<Scalars['String']['output']>;
+  tokenCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by max() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Max_Order_By = {
+  aiHandle?: InputMaybe<Order_By>;
+  aiInteractionCount?: InputMaybe<Order_By>;
+  aiToolTokenId?: InputMaybe<Order_By>;
+  aiToolUserId?: InputMaybe<Order_By>;
+  date?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lastSeenDate?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawModel?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Ai_Tool_User_Day_Usage_Min_Fields = {
+  __typename?: 'ai_tool_user_day_usage_min_fields';
+  aiHandle?: Maybe<Scalars['String']['output']>;
+  aiInteractionCount?: Maybe<Scalars['Int']['output']>;
+  aiToolTokenId?: Maybe<Scalars['uuid']['output']>;
+  aiToolUserId?: Maybe<Scalars['String']['output']>;
+  date?: Maybe<Scalars['timestamptz']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastSeenDate?: Maybe<Scalars['timestamptz']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  rawModel?: Maybe<Scalars['String']['output']>;
+  tokenCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by min() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Min_Order_By = {
+  aiHandle?: InputMaybe<Order_By>;
+  aiInteractionCount?: InputMaybe<Order_By>;
+  aiToolTokenId?: InputMaybe<Order_By>;
+  aiToolUserId?: InputMaybe<Order_By>;
+  date?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lastSeenDate?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawModel?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Mutation_Response = {
+  __typename?: 'ai_tool_user_day_usage_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Tool_User_Day_Usage>;
+};
+
+/** on_conflict condition type for table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_On_Conflict = {
+  constraint: Ai_Tool_User_Day_Usage_Constraint;
+  update_columns?: Array<Ai_Tool_User_Day_Usage_Update_Column>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_tool_user_day_usage". */
+export type Ai_Tool_User_Day_Usage_Order_By = {
+  aiHandle?: InputMaybe<Order_By>;
+  aiIde?: InputMaybe<Ai_Ide_Order_By>;
+  aiInteractionCount?: InputMaybe<Order_By>;
+  aiModel?: InputMaybe<Ai_Model_Order_By>;
+  aiSource?: InputMaybe<Ai_Source_Type_Order_By>;
+  aiTool?: InputMaybe<Ai_Tool_Type_Order_By>;
+  aiToolToken?: InputMaybe<Ai_Tool_Token_Order_By>;
+  aiToolTokenId?: InputMaybe<Order_By>;
+  aiToolType?: InputMaybe<Order_By>;
+  aiToolUserId?: InputMaybe<Order_By>;
+  date?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  ide?: InputMaybe<Order_By>;
+  lastSeenDate?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  rawModel?: InputMaybe<Order_By>;
+  source?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_tool_user_day_usage */
+export type Ai_Tool_User_Day_Usage_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_tool_user_day_usage" */
+export enum Ai_Tool_User_Day_Usage_Select_Column {
+  /** column name */
+  AiHandle = 'aiHandle',
+  /** column name */
+  AiInteractionCount = 'aiInteractionCount',
+  /** column name */
+  AiToolTokenId = 'aiToolTokenId',
+  /** column name */
+  AiToolType = 'aiToolType',
+  /** column name */
+  AiToolUserId = 'aiToolUserId',
+  /** column name */
+  Date = 'date',
+  /** column name */
+  Email = 'email',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Ide = 'ide',
+  /** column name */
+  LastSeenDate = 'lastSeenDate',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RawModel = 'rawModel',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  TokenCount = 'tokenCount'
+}
+
+/** input type for updating data in table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Set_Input = {
+  aiHandle?: InputMaybe<Scalars['String']['input']>;
+  aiInteractionCount?: InputMaybe<Scalars['Int']['input']>;
+  aiToolTokenId?: InputMaybe<Scalars['uuid']['input']>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  aiToolUserId?: InputMaybe<Scalars['String']['input']>;
+  date?: InputMaybe<Scalars['timestamptz']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ide?: InputMaybe<Ai_Ide_Enum>;
+  lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  model?: InputMaybe<Ai_Model_Enum>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawModel?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Ai_Source_Type_Enum>;
+  tokenCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Ai_Tool_User_Day_Usage_Stddev_Fields = {
+  __typename?: 'ai_tool_user_day_usage_stddev_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Stddev_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Ai_Tool_User_Day_Usage_Stddev_Pop_Fields = {
+  __typename?: 'ai_tool_user_day_usage_stddev_pop_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Stddev_Pop_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Ai_Tool_User_Day_Usage_Stddev_Samp_Fields = {
+  __typename?: 'ai_tool_user_day_usage_stddev_samp_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Stddev_Samp_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Tool_User_Day_Usage_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Tool_User_Day_Usage_Stream_Cursor_Value_Input = {
+  aiHandle?: InputMaybe<Scalars['String']['input']>;
+  aiInteractionCount?: InputMaybe<Scalars['Int']['input']>;
+  aiToolTokenId?: InputMaybe<Scalars['uuid']['input']>;
+  aiToolType?: InputMaybe<Ai_Tool_Type_Enum>;
+  aiToolUserId?: InputMaybe<Scalars['String']['input']>;
+  date?: InputMaybe<Scalars['timestamptz']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ide?: InputMaybe<Ai_Ide_Enum>;
+  lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  model?: InputMaybe<Ai_Model_Enum>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  rawModel?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Ai_Source_Type_Enum>;
+  tokenCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Ai_Tool_User_Day_Usage_Sum_Fields = {
+  __typename?: 'ai_tool_user_day_usage_sum_fields';
+  aiInteractionCount?: Maybe<Scalars['Int']['output']>;
+  tokenCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Sum_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "ai_tool_user_day_usage" */
+export enum Ai_Tool_User_Day_Usage_Update_Column {
+  /** column name */
+  AiHandle = 'aiHandle',
+  /** column name */
+  AiInteractionCount = 'aiInteractionCount',
+  /** column name */
+  AiToolTokenId = 'aiToolTokenId',
+  /** column name */
+  AiToolType = 'aiToolType',
+  /** column name */
+  AiToolUserId = 'aiToolUserId',
+  /** column name */
+  Date = 'date',
+  /** column name */
+  Email = 'email',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Ide = 'ide',
+  /** column name */
+  LastSeenDate = 'lastSeenDate',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RawModel = 'rawModel',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  TokenCount = 'tokenCount'
+}
+
+export type Ai_Tool_User_Day_Usage_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Tool_User_Day_Usage_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Ai_Tool_User_Day_Usage_Var_Pop_Fields = {
+  __typename?: 'ai_tool_user_day_usage_var_pop_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Var_Pop_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Ai_Tool_User_Day_Usage_Var_Samp_Fields = {
+  __typename?: 'ai_tool_user_day_usage_var_samp_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Var_Samp_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Ai_Tool_User_Day_Usage_Variance_Fields = {
+  __typename?: 'ai_tool_user_day_usage_variance_fields';
+  aiInteractionCount?: Maybe<Scalars['Float']['output']>;
+  tokenCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_Usage_Variance_Order_By = {
+  aiInteractionCount?: InputMaybe<Order_By>;
+  tokenCount?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "analytics.active_repositories_analysis_runs_trends" */
@@ -12817,9 +14321,34 @@ export type Mutation_Root = {
   createPr?: Maybe<CreatePrResponse>;
   createProject: CreateProjectResponse;
   createToken?: Maybe<CreateTokenResponse>;
+  deleteAiToolToken?: Maybe<DeleteAiToolTokenResponse>;
   deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
+  /** delete data from the table: "ai_ide" */
+  delete_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
+  /** delete single row from the table: "ai_ide" */
+  delete_ai_ide_by_pk?: Maybe<Ai_Ide>;
+  /** delete data from the table: "ai_model" */
+  delete_ai_model?: Maybe<Ai_Model_Mutation_Response>;
+  /** delete single row from the table: "ai_model" */
+  delete_ai_model_by_pk?: Maybe<Ai_Model>;
+  /** delete data from the table: "ai_source_type" */
+  delete_ai_source_type?: Maybe<Ai_Source_Type_Mutation_Response>;
+  /** delete single row from the table: "ai_source_type" */
+  delete_ai_source_type_by_pk?: Maybe<Ai_Source_Type>;
+  /** delete data from the table: "ai_tool_token" */
+  delete_ai_tool_token?: Maybe<Ai_Tool_Token_Mutation_Response>;
+  /** delete single row from the table: "ai_tool_token" */
+  delete_ai_tool_token_by_pk?: Maybe<Ai_Tool_Token>;
+  /** delete data from the table: "ai_tool_type" */
+  delete_ai_tool_type?: Maybe<Ai_Tool_Type_Mutation_Response>;
+  /** delete single row from the table: "ai_tool_type" */
+  delete_ai_tool_type_by_pk?: Maybe<Ai_Tool_Type>;
+  /** delete data from the table: "ai_tool_user_day_usage" */
+  delete_ai_tool_user_day_usage?: Maybe<Ai_Tool_User_Day_Usage_Mutation_Response>;
+  /** delete single row from the table: "ai_tool_user_day_usage" */
+  delete_ai_tool_user_day_usage_by_pk?: Maybe<Ai_Tool_User_Day_Usage>;
   /** delete data from the table: "analytics.active_repositories_analysis_runs_trends" */
   delete_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
   /** delete single row from the table: "analytics.active_repositories_analysis_runs_trends" */
@@ -13145,6 +14674,30 @@ export type Mutation_Root = {
   generateDiffsFile?: Maybe<FileDiffsResponse>;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
+  /** insert data into the table: "ai_ide" */
+  insert_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
+  /** insert a single row into the table: "ai_ide" */
+  insert_ai_ide_one?: Maybe<Ai_Ide>;
+  /** insert data into the table: "ai_model" */
+  insert_ai_model?: Maybe<Ai_Model_Mutation_Response>;
+  /** insert a single row into the table: "ai_model" */
+  insert_ai_model_one?: Maybe<Ai_Model>;
+  /** insert data into the table: "ai_source_type" */
+  insert_ai_source_type?: Maybe<Ai_Source_Type_Mutation_Response>;
+  /** insert a single row into the table: "ai_source_type" */
+  insert_ai_source_type_one?: Maybe<Ai_Source_Type>;
+  /** insert data into the table: "ai_tool_token" */
+  insert_ai_tool_token?: Maybe<Ai_Tool_Token_Mutation_Response>;
+  /** insert a single row into the table: "ai_tool_token" */
+  insert_ai_tool_token_one?: Maybe<Ai_Tool_Token>;
+  /** insert data into the table: "ai_tool_type" */
+  insert_ai_tool_type?: Maybe<Ai_Tool_Type_Mutation_Response>;
+  /** insert a single row into the table: "ai_tool_type" */
+  insert_ai_tool_type_one?: Maybe<Ai_Tool_Type>;
+  /** insert data into the table: "ai_tool_user_day_usage" */
+  insert_ai_tool_user_day_usage?: Maybe<Ai_Tool_User_Day_Usage_Mutation_Response>;
+  /** insert a single row into the table: "ai_tool_user_day_usage" */
+  insert_ai_tool_user_day_usage_one?: Maybe<Ai_Tool_User_Day_Usage>;
   /** insert data into the table: "analytics.active_repositories_analysis_runs_trends" */
   insert_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
   /** insert a single row into the table: "analytics.active_repositories_analysis_runs_trends" */
@@ -13480,6 +15033,7 @@ export type Mutation_Root = {
   submitVulnerabilityReport: VulnerabilityReportResponse;
   tryNow: VulnerabilityReportResponse;
   updateAdoToken: ScmAccessToken;
+  updateAiToolToken?: Maybe<UpdateAiToolTokenResponse>;
   updateBitbucketToken: ScmAccessToken;
   updateBitbucketTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateDownloadedFixData?: Maybe<StatusQueryResponse>;
@@ -13490,6 +15044,42 @@ export type Mutation_Root = {
   updateLinearConfiguration: UpdateLinearConfigurationResponse;
   updateLinearToken: TicketAccessToken;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
+  /** update data of the table: "ai_ide" */
+  update_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
+  /** update single row of the table: "ai_ide" */
+  update_ai_ide_by_pk?: Maybe<Ai_Ide>;
+  /** update multiples rows of table: "ai_ide" */
+  update_ai_ide_many?: Maybe<Array<Maybe<Ai_Ide_Mutation_Response>>>;
+  /** update data of the table: "ai_model" */
+  update_ai_model?: Maybe<Ai_Model_Mutation_Response>;
+  /** update single row of the table: "ai_model" */
+  update_ai_model_by_pk?: Maybe<Ai_Model>;
+  /** update multiples rows of table: "ai_model" */
+  update_ai_model_many?: Maybe<Array<Maybe<Ai_Model_Mutation_Response>>>;
+  /** update data of the table: "ai_source_type" */
+  update_ai_source_type?: Maybe<Ai_Source_Type_Mutation_Response>;
+  /** update single row of the table: "ai_source_type" */
+  update_ai_source_type_by_pk?: Maybe<Ai_Source_Type>;
+  /** update multiples rows of table: "ai_source_type" */
+  update_ai_source_type_many?: Maybe<Array<Maybe<Ai_Source_Type_Mutation_Response>>>;
+  /** update data of the table: "ai_tool_token" */
+  update_ai_tool_token?: Maybe<Ai_Tool_Token_Mutation_Response>;
+  /** update single row of the table: "ai_tool_token" */
+  update_ai_tool_token_by_pk?: Maybe<Ai_Tool_Token>;
+  /** update multiples rows of table: "ai_tool_token" */
+  update_ai_tool_token_many?: Maybe<Array<Maybe<Ai_Tool_Token_Mutation_Response>>>;
+  /** update data of the table: "ai_tool_type" */
+  update_ai_tool_type?: Maybe<Ai_Tool_Type_Mutation_Response>;
+  /** update single row of the table: "ai_tool_type" */
+  update_ai_tool_type_by_pk?: Maybe<Ai_Tool_Type>;
+  /** update multiples rows of table: "ai_tool_type" */
+  update_ai_tool_type_many?: Maybe<Array<Maybe<Ai_Tool_Type_Mutation_Response>>>;
+  /** update data of the table: "ai_tool_user_day_usage" */
+  update_ai_tool_user_day_usage?: Maybe<Ai_Tool_User_Day_Usage_Mutation_Response>;
+  /** update single row of the table: "ai_tool_user_day_usage" */
+  update_ai_tool_user_day_usage_by_pk?: Maybe<Ai_Tool_User_Day_Usage>;
+  /** update multiples rows of table: "ai_tool_user_day_usage" */
+  update_ai_tool_user_day_usage_many?: Maybe<Array<Maybe<Ai_Tool_User_Day_Usage_Mutation_Response>>>;
   /** update data of the table: "analytics.active_repositories_analysis_runs_trends" */
   update_analytics_active_repositories_analysis_runs_trends?: Maybe<Analytics_Active_Repositories_Analysis_Runs_Trends_Mutation_Response>;
   /** update single row of the table: "analytics.active_repositories_analysis_runs_trends" */
@@ -14089,6 +15679,12 @@ export type Mutation_RootCreateTokenArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDeleteAiToolTokenArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDeleteIntegrationArgs = {
   organizationId: Scalars['String']['input'];
 };
@@ -14104,6 +15700,78 @@ export type Mutation_RootDeleteProjectArgs = {
 export type Mutation_RootDeleteUserFromOrganizationArgs = {
   organizationId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_IdeArgs = {
+  where: Ai_Ide_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Ide_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_ModelArgs = {
+  where: Ai_Model_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Model_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Source_TypeArgs = {
+  where: Ai_Source_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Source_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_TokenArgs = {
+  where: Ai_Tool_Token_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_Token_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_TypeArgs = {
+  where: Ai_Tool_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_User_Day_UsageArgs = {
+  where: Ai_Tool_User_Day_Usage_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Tool_User_Day_Usage_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -15103,6 +16771,90 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 export type Mutation_RootInitOrganizationAndProjectAdminArgs = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   userEmail: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_IdeArgs = {
+  objects: Array<Ai_Ide_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Ide_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Ide_OneArgs = {
+  object: Ai_Ide_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Ide_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_ModelArgs = {
+  objects: Array<Ai_Model_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Model_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Model_OneArgs = {
+  object: Ai_Model_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Model_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Source_TypeArgs = {
+  objects: Array<Ai_Source_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Source_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Source_Type_OneArgs = {
+  object: Ai_Source_Type_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Source_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_TokenArgs = {
+  objects: Array<Ai_Tool_Token_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Tool_Token_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_Token_OneArgs = {
+  object: Ai_Tool_Token_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Tool_Token_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_TypeArgs = {
+  objects: Array<Ai_Tool_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Tool_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_Type_OneArgs = {
+  object: Ai_Tool_Type_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Tool_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_User_Day_UsageArgs = {
+  objects: Array<Ai_Tool_User_Day_Usage_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Tool_User_Day_Usage_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Tool_User_Day_Usage_OneArgs = {
+  object: Ai_Tool_User_Day_Usage_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Tool_User_Day_Usage_On_Conflict>;
 };
 
 
@@ -16348,6 +18100,15 @@ export type Mutation_RootUpdateAdoTokenArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdateAiToolTokenArgs = {
+  aiToolType: Scalars['String']['input'];
+  isWaitForScraper: Scalars['Boolean']['input'];
+  organizationId: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdateBitbucketTokenArgs = {
   code: Scalars['String']['input'];
   oauthConfId?: InputMaybe<Scalars['String']['input']>;
@@ -16403,6 +18164,128 @@ export type Mutation_RootUpdateScmTokenArgs = {
   scmType: Scalars['String']['input'];
   token: Scalars['String']['input'];
   url: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_IdeArgs = {
+  _set?: InputMaybe<Ai_Ide_Set_Input>;
+  where: Ai_Ide_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Ide_By_PkArgs = {
+  _set?: InputMaybe<Ai_Ide_Set_Input>;
+  pk_columns: Ai_Ide_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Ide_ManyArgs = {
+  updates: Array<Ai_Ide_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_ModelArgs = {
+  _set?: InputMaybe<Ai_Model_Set_Input>;
+  where: Ai_Model_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Model_By_PkArgs = {
+  _set?: InputMaybe<Ai_Model_Set_Input>;
+  pk_columns: Ai_Model_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Model_ManyArgs = {
+  updates: Array<Ai_Model_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Source_TypeArgs = {
+  _set?: InputMaybe<Ai_Source_Type_Set_Input>;
+  where: Ai_Source_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Source_Type_By_PkArgs = {
+  _set?: InputMaybe<Ai_Source_Type_Set_Input>;
+  pk_columns: Ai_Source_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Source_Type_ManyArgs = {
+  updates: Array<Ai_Source_Type_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_TokenArgs = {
+  _set?: InputMaybe<Ai_Tool_Token_Set_Input>;
+  where: Ai_Tool_Token_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_Token_By_PkArgs = {
+  _set?: InputMaybe<Ai_Tool_Token_Set_Input>;
+  pk_columns: Ai_Tool_Token_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_Token_ManyArgs = {
+  updates: Array<Ai_Tool_Token_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_TypeArgs = {
+  _set?: InputMaybe<Ai_Tool_Type_Set_Input>;
+  where: Ai_Tool_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_Type_By_PkArgs = {
+  _set?: InputMaybe<Ai_Tool_Type_Set_Input>;
+  pk_columns: Ai_Tool_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_Type_ManyArgs = {
+  updates: Array<Ai_Tool_Type_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_User_Day_UsageArgs = {
+  _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
+  where: Ai_Tool_User_Day_Usage_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_User_Day_Usage_By_PkArgs = {
+  _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
+  pk_columns: Ai_Tool_User_Day_Usage_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Tool_User_Day_Usage_ManyArgs = {
+  updates: Array<Ai_Tool_User_Day_Usage_Updates>;
 };
 
 
@@ -18339,6 +20222,10 @@ export type Organization = {
   aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
   aggregatedVulnerabilitiesState?: Maybe<Array<Aggregated_Fix_State>>;
+  /** An array relationship */
+  aiToolToken: Array<Ai_Tool_Token>;
+  /** An aggregate relationship */
+  aiToolToken_aggregate: Ai_Tool_Token_Aggregate;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: Maybe<Scalars['jsonb']['output']>;
   /** A computed field, executes function "top_available_fixes" */
@@ -18430,6 +20317,26 @@ export type OrganizationAggregatedVulnerabilitiesStateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Fix_State_Order_By>>;
   where?: InputMaybe<Aggregated_Fix_State_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationAiToolTokenArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationAiToolToken_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
 };
 
 
@@ -18753,6 +20660,8 @@ export type Organization_Bool_Exp = {
   _and?: InputMaybe<Array<Organization_Bool_Exp>>;
   _not?: InputMaybe<Organization_Bool_Exp>;
   _or?: InputMaybe<Array<Organization_Bool_Exp>>;
+  aiToolToken?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+  aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Bool_Exp>;
   allowedIssueTypes?: InputMaybe<Jsonb_Comparison_Exp>;
   availableUniqueFixes?: InputMaybe<Fix_Bool_Exp>;
   brokerHosts?: InputMaybe<Broker_Host_Bool_Exp>;
@@ -19056,6 +20965,7 @@ export type Organization_Inc_Input = {
 
 /** input type for inserting data into table "organization" */
 export type Organization_Insert_Input = {
+  aiToolToken?: InputMaybe<Ai_Tool_Token_Arr_Rel_Insert_Input>;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
   brokerHosts?: InputMaybe<Broker_Host_Arr_Rel_Insert_Input>;
@@ -19411,6 +21321,7 @@ export type Organization_On_Conflict = {
 
 /** Ordering options when selecting data from "organization". */
 export type Organization_Order_By = {
+  aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Order_By>;
   allowedIssueTypes?: InputMaybe<Order_By>;
   availableUniqueFixes_aggregate?: InputMaybe<Fix_Aggregate_Order_By>;
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Order_By>;
@@ -22777,6 +24688,42 @@ export type Query_Root = {
   aggregated_severities: Array<Aggregated_Severities>;
   /** fetch aggregated fields from the table: "aggregated_severities" */
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
+  /** fetch data from the table: "ai_ide" */
+  ai_ide: Array<Ai_Ide>;
+  /** fetch aggregated fields from the table: "ai_ide" */
+  ai_ide_aggregate: Ai_Ide_Aggregate;
+  /** fetch data from the table: "ai_ide" using primary key columns */
+  ai_ide_by_pk?: Maybe<Ai_Ide>;
+  /** fetch data from the table: "ai_model" */
+  ai_model: Array<Ai_Model>;
+  /** fetch aggregated fields from the table: "ai_model" */
+  ai_model_aggregate: Ai_Model_Aggregate;
+  /** fetch data from the table: "ai_model" using primary key columns */
+  ai_model_by_pk?: Maybe<Ai_Model>;
+  /** fetch data from the table: "ai_source_type" */
+  ai_source_type: Array<Ai_Source_Type>;
+  /** fetch aggregated fields from the table: "ai_source_type" */
+  ai_source_type_aggregate: Ai_Source_Type_Aggregate;
+  /** fetch data from the table: "ai_source_type" using primary key columns */
+  ai_source_type_by_pk?: Maybe<Ai_Source_Type>;
+  /** fetch data from the table: "ai_tool_token" */
+  ai_tool_token: Array<Ai_Tool_Token>;
+  /** fetch aggregated fields from the table: "ai_tool_token" */
+  ai_tool_token_aggregate: Ai_Tool_Token_Aggregate;
+  /** fetch data from the table: "ai_tool_token" using primary key columns */
+  ai_tool_token_by_pk?: Maybe<Ai_Tool_Token>;
+  /** fetch data from the table: "ai_tool_type" */
+  ai_tool_type: Array<Ai_Tool_Type>;
+  /** fetch aggregated fields from the table: "ai_tool_type" */
+  ai_tool_type_aggregate: Ai_Tool_Type_Aggregate;
+  /** fetch data from the table: "ai_tool_type" using primary key columns */
+  ai_tool_type_by_pk?: Maybe<Ai_Tool_Type>;
+  /** fetch data from the table: "ai_tool_user_day_usage" */
+  ai_tool_user_day_usage: Array<Ai_Tool_User_Day_Usage>;
+  /** fetch aggregated fields from the table: "ai_tool_user_day_usage" */
+  ai_tool_user_day_usage_aggregate: Ai_Tool_User_Day_Usage_Aggregate;
+  /** fetch data from the table: "ai_tool_user_day_usage" using primary key columns */
+  ai_tool_user_day_usage_by_pk?: Maybe<Ai_Tool_User_Day_Usage>;
   /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" */
   analytics_active_repositories_analysis_runs_trends: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
   /** fetch aggregated fields from the table: "analytics.active_repositories_analysis_runs_trends" */
@@ -22975,6 +24922,8 @@ export type Query_Root = {
   fix_to_submit_fix_request_aggregate: Fix_To_Submit_Fix_Request_Aggregate;
   /** fetch data from the table: "fix_to_submit_fix_request" using primary key columns */
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
+  getAiToolTokens?: Maybe<GetAiToolTokensResponse>;
+  getAiToolUsageStatistics?: Maybe<GetAiToolUsageStatisticsResponse>;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
   getCheckmarxProjects?: Maybe<GetCheckmarxProjectsResponse>;
   getFalsePositive: GetFalsePositiveResponseUnion;
@@ -23400,6 +25349,144 @@ export type Query_RootAggregated_Severities_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootAi_IdeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Ide_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Ide_Order_By>>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Ide_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Ide_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Ide_Order_By>>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Ide_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAi_ModelArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Model_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Model_Order_By>>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Model_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Model_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Model_Order_By>>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Model_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAi_Source_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Source_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Source_Type_Order_By>>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Source_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Source_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Source_Type_Order_By>>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Source_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAi_Tool_TokenArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_Token_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_Token_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAi_Tool_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Type_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Type_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAi_Tool_User_Day_UsageArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_User_Day_Usage_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Tool_User_Day_Usage_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -24164,6 +26251,17 @@ export type Query_RootFix_To_Submit_Fix_Request_AggregateArgs = {
 
 export type Query_RootFix_To_Submit_Fix_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootGetAiToolTokensArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetAiToolUsageStatisticsArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -28060,6 +30158,54 @@ export type Subscription_Root = {
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
   /** fetch data from the table in a streaming manner: "aggregated_severities" */
   aggregated_severities_stream: Array<Aggregated_Severities>;
+  /** fetch data from the table: "ai_ide" */
+  ai_ide: Array<Ai_Ide>;
+  /** fetch aggregated fields from the table: "ai_ide" */
+  ai_ide_aggregate: Ai_Ide_Aggregate;
+  /** fetch data from the table: "ai_ide" using primary key columns */
+  ai_ide_by_pk?: Maybe<Ai_Ide>;
+  /** fetch data from the table in a streaming manner: "ai_ide" */
+  ai_ide_stream: Array<Ai_Ide>;
+  /** fetch data from the table: "ai_model" */
+  ai_model: Array<Ai_Model>;
+  /** fetch aggregated fields from the table: "ai_model" */
+  ai_model_aggregate: Ai_Model_Aggregate;
+  /** fetch data from the table: "ai_model" using primary key columns */
+  ai_model_by_pk?: Maybe<Ai_Model>;
+  /** fetch data from the table in a streaming manner: "ai_model" */
+  ai_model_stream: Array<Ai_Model>;
+  /** fetch data from the table: "ai_source_type" */
+  ai_source_type: Array<Ai_Source_Type>;
+  /** fetch aggregated fields from the table: "ai_source_type" */
+  ai_source_type_aggregate: Ai_Source_Type_Aggregate;
+  /** fetch data from the table: "ai_source_type" using primary key columns */
+  ai_source_type_by_pk?: Maybe<Ai_Source_Type>;
+  /** fetch data from the table in a streaming manner: "ai_source_type" */
+  ai_source_type_stream: Array<Ai_Source_Type>;
+  /** fetch data from the table: "ai_tool_token" */
+  ai_tool_token: Array<Ai_Tool_Token>;
+  /** fetch aggregated fields from the table: "ai_tool_token" */
+  ai_tool_token_aggregate: Ai_Tool_Token_Aggregate;
+  /** fetch data from the table: "ai_tool_token" using primary key columns */
+  ai_tool_token_by_pk?: Maybe<Ai_Tool_Token>;
+  /** fetch data from the table in a streaming manner: "ai_tool_token" */
+  ai_tool_token_stream: Array<Ai_Tool_Token>;
+  /** fetch data from the table: "ai_tool_type" */
+  ai_tool_type: Array<Ai_Tool_Type>;
+  /** fetch aggregated fields from the table: "ai_tool_type" */
+  ai_tool_type_aggregate: Ai_Tool_Type_Aggregate;
+  /** fetch data from the table: "ai_tool_type" using primary key columns */
+  ai_tool_type_by_pk?: Maybe<Ai_Tool_Type>;
+  /** fetch data from the table in a streaming manner: "ai_tool_type" */
+  ai_tool_type_stream: Array<Ai_Tool_Type>;
+  /** fetch data from the table: "ai_tool_user_day_usage" */
+  ai_tool_user_day_usage: Array<Ai_Tool_User_Day_Usage>;
+  /** fetch aggregated fields from the table: "ai_tool_user_day_usage" */
+  ai_tool_user_day_usage_aggregate: Ai_Tool_User_Day_Usage_Aggregate;
+  /** fetch data from the table: "ai_tool_user_day_usage" using primary key columns */
+  ai_tool_user_day_usage_by_pk?: Maybe<Ai_Tool_User_Day_Usage>;
+  /** fetch data from the table in a streaming manner: "ai_tool_user_day_usage" */
+  ai_tool_user_day_usage_stream: Array<Ai_Tool_User_Day_Usage>;
   /** fetch data from the table: "analytics.active_repositories_analysis_runs_trends" */
   analytics_active_repositories_analysis_runs_trends: Array<Analytics_Active_Repositories_Analysis_Runs_Trends>;
   /** fetch aggregated fields from the table: "analytics.active_repositories_analysis_runs_trends" */
@@ -28853,6 +30999,186 @@ export type Subscription_RootAggregated_Severities_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Aggregated_Severities_Stream_Cursor_Input>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_IdeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Ide_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Ide_Order_By>>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Ide_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Ide_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Ide_Order_By>>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Ide_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAi_Ide_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Ide_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Ide_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_ModelArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Model_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Model_Order_By>>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Model_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Model_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Model_Order_By>>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Model_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAi_Model_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Model_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Model_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Source_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Source_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Source_Type_Order_By>>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Source_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Source_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Source_Type_Order_By>>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Source_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAi_Source_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Source_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Source_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_TokenArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_Token_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Token_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Token_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_Token_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Tool_Token_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Tool_Token_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Type_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_Type_Order_By>>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAi_Tool_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Tool_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Tool_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_User_Day_UsageArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_User_Day_Usage_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Tool_User_Day_Usage_Order_By>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Tool_User_Day_Usage_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Tool_User_Day_Usage_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Tool_User_Day_Usage_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Tool_User_Day_Usage_Bool_Exp>;
 };
 
 

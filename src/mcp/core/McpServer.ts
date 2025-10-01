@@ -9,7 +9,9 @@ import {
 } from '@modelcontextprotocol/sdk/types.js'
 
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
+import { configStore } from '../services/ConfigStoreService'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
+import { mcpUsageService } from '../services/McpUsageService'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'
@@ -48,7 +50,27 @@ export class McpServer {
     logDebug('MCP server instance config', { config })
   }
 
-  private handleProcessSignal({
+  private async trackServerUsage(
+    action: 'start' | 'stop',
+    signalOrError?: string | Error | number
+  ): Promise<void> {
+    try {
+      if (action === 'start') {
+        await mcpUsageService.trackServerStart()
+      }
+      if (action === 'stop') {
+        await mcpUsageService.trackServerStop()
+        mcpUsageService.reset()
+      }
+    } catch (usageError) {
+      logWarn(`Failed to track MCP server ${action}`, {
+        error: usageError,
+        signalOrError,
+      })
+    }
+  }
+
+  private async handleProcessSignal({
     signal,
     error,
   }: {
@@ -59,7 +81,7 @@ export class McpServer {
       | 'unhandledRejection'
       | 'warning'
     error?: Error | number
-  }): void {
+  }): Promise<void> {
     const messages: Record<string, string> = {
       SIGINT: 'MCP server interrupted',
       SIGTERM: 'MCP server terminated',
@@ -100,10 +122,12 @@ export class McpServer {
     }
 
     if (signal === 'SIGINT' || signal === 'SIGTERM') {
+      await this.trackServerUsage('stop', signal)
       process.exit(0)
     }
 
     if (signal === 'uncaughtException') {
+      await this.trackServerUsage('stop', signal)
       process.exit(1)
     }
   }
@@ -130,8 +154,8 @@ export class McpServer {
     ]
 
     signals.forEach((signal) => {
-      const handler = (error?: Error | number) => {
-        this.handleProcessSignal({ signal, error })
+      const handler = async (error?: Error | number) => {
+        await this.handleProcessSignal({ signal, error })
       }
       this.eventHandlers.set(signal, handler)
       process.on(signal, handler)
@@ -206,6 +230,14 @@ export class McpServer {
   public async handleListToolsRequest(
     request: ListToolsRequest
   ): Promise<ListToolsResult> {
+    // tracking only
+    const govOrgId = configStore.get('GOV-ORG-ID') || ''
+    if (govOrgId) {
+      return {
+        tools: [],
+      }
+    }
+
     logInfo('Received list_tools request')
     logDebug('list_tools request', {
       request: JSON.parse(JSON.stringify(request)),
@@ -316,6 +348,8 @@ export class McpServer {
       await this.server.connect(transport)
       logDebug('MCP server is running on stdin/stdout')
 
+      await this.trackServerUsage('start')
+
       // Keep process running until interrupted
       process.stdin.resume()
 
@@ -332,6 +366,8 @@ export class McpServer {
 
   public async stop(): Promise<void> {
     logDebug('MCP server shutting down')
+
+    await this.trackServerUsage('stop')
 
     // Remove all event handlers that were registered
     this.eventHandlers.forEach((handler, signal) => {

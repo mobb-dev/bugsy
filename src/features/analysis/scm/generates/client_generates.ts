@@ -701,6 +701,11 @@ export type SaveCheckmarxIntegrationSuccess = {
   status: Status;
 };
 
+export type SaveUsageMcpResponse = {
+  __typename?: 'SaveUsageMcpResponse';
+  status: Status;
+};
+
 export type ScmAccessTokenUpdateResponse = BadScmCredentials | InvalidScmTypeError | RepoUnreachableError | ScmAccessTokenUpdateSuccess;
 
 export type ScmAccessTokenUpdateSuccess = {
@@ -1044,6 +1049,7 @@ export type UploadResult = {
 export type UserAiToolUsage = {
   __typename?: 'UserAiToolUsage';
   aiToolUsage: Array<AiToolTypeUsage>;
+  mcp?: Maybe<Scalars['String']['output']>;
   userId: Scalars['String']['output'];
 };
 
@@ -2560,6 +2566,7 @@ export type Ai_Tool_User_Day_Usage = {
   id: Scalars['uuid']['output'];
   ide?: Maybe<Ai_Ide_Enum>;
   lastSeenDate?: Maybe<Scalars['timestamptz']['output']>;
+  mcp?: Maybe<Scalars['jsonb']['output']>;
   model?: Maybe<Ai_Model_Enum>;
   name?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
@@ -2568,6 +2575,12 @@ export type Ai_Tool_User_Day_Usage = {
   rawModel?: Maybe<Scalars['String']['output']>;
   source: Ai_Source_Type_Enum;
   tokenCount?: Maybe<Scalars['Int']['output']>;
+};
+
+
+/** columns and relationships of "ai_tool_user_day_usage" */
+export type Ai_Tool_User_Day_UsageMcpArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregated selection of "ai_tool_user_day_usage" */
@@ -2626,6 +2639,11 @@ export type Ai_Tool_User_Day_Usage_Aggregate_Order_By = {
   variance?: InputMaybe<Ai_Tool_User_Day_Usage_Variance_Order_By>;
 };
 
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Ai_Tool_User_Day_Usage_Append_Input = {
+  mcp?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** input type for inserting array relation for remote table "ai_tool_user_day_usage" */
 export type Ai_Tool_User_Day_Usage_Arr_Rel_Insert_Input = {
   data: Array<Ai_Tool_User_Day_Usage_Insert_Input>;
@@ -2666,6 +2684,7 @@ export type Ai_Tool_User_Day_Usage_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   ide?: InputMaybe<Ai_Ide_Enum_Comparison_Exp>;
   lastSeenDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  mcp?: InputMaybe<Jsonb_Comparison_Exp>;
   model?: InputMaybe<Ai_Model_Enum_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
@@ -2680,6 +2699,21 @@ export enum Ai_Tool_User_Day_Usage_Constraint {
   /** unique or primary key constraint on columns "id" */
   AiToolUserDayUsagePkey = 'ai_tool_user_day_usage_pkey'
 }
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Ai_Tool_User_Day_Usage_Delete_At_Path_Input = {
+  mcp?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Ai_Tool_User_Day_Usage_Delete_Elem_Input = {
+  mcp?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Ai_Tool_User_Day_Usage_Delete_Key_Input = {
+  mcp?: InputMaybe<Scalars['String']['input']>;
+};
 
 /** input type for incrementing numeric columns in table "ai_tool_user_day_usage" */
 export type Ai_Tool_User_Day_Usage_Inc_Input = {
@@ -2704,6 +2738,7 @@ export type Ai_Tool_User_Day_Usage_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   ide?: InputMaybe<Ai_Ide_Enum>;
   lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcp?: InputMaybe<Scalars['jsonb']['input']>;
   model?: InputMaybe<Ai_Model_Enum>;
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
@@ -2812,6 +2847,7 @@ export type Ai_Tool_User_Day_Usage_Order_By = {
   id?: InputMaybe<Order_By>;
   ide?: InputMaybe<Order_By>;
   lastSeenDate?: InputMaybe<Order_By>;
+  mcp?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
@@ -2824,6 +2860,11 @@ export type Ai_Tool_User_Day_Usage_Order_By = {
 /** primary key columns input for table: ai_tool_user_day_usage */
 export type Ai_Tool_User_Day_Usage_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Ai_Tool_User_Day_Usage_Prepend_Input = {
+  mcp?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** select columns of table "ai_tool_user_day_usage" */
@@ -2848,6 +2889,8 @@ export enum Ai_Tool_User_Day_Usage_Select_Column {
   Ide = 'ide',
   /** column name */
   LastSeenDate = 'lastSeenDate',
+  /** column name */
+  Mcp = 'mcp',
   /** column name */
   Model = 'model',
   /** column name */
@@ -2874,6 +2917,7 @@ export type Ai_Tool_User_Day_Usage_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   ide?: InputMaybe<Ai_Ide_Enum>;
   lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcp?: InputMaybe<Scalars['jsonb']['input']>;
   model?: InputMaybe<Ai_Model_Enum>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -2941,6 +2985,7 @@ export type Ai_Tool_User_Day_Usage_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   ide?: InputMaybe<Ai_Ide_Enum>;
   lastSeenDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcp?: InputMaybe<Scalars['jsonb']['input']>;
   model?: InputMaybe<Ai_Model_Enum>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -2985,6 +3030,8 @@ export enum Ai_Tool_User_Day_Usage_Update_Column {
   /** column name */
   LastSeenDate = 'lastSeenDate',
   /** column name */
+  Mcp = 'mcp',
+  /** column name */
   Model = 'model',
   /** column name */
   Name = 'name',
@@ -2999,8 +3046,18 @@ export enum Ai_Tool_User_Day_Usage_Update_Column {
 }
 
 export type Ai_Tool_User_Day_Usage_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Ai_Tool_User_Day_Usage_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Key_Input>;
   /** increments the numeric columns with given value of the filtered values */
   _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Ai_Tool_User_Day_Usage_Prepend_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
   /** filter the rows which have to be updated */
@@ -15026,6 +15083,7 @@ export type Mutation_Root = {
   resendInvitation?: Maybe<ResendInvitationResponse>;
   resetAnswers?: Maybe<Scalars['Void']['output']>;
   saveCheckmarxIntegration?: Maybe<SaveCheckmarxIntegrationResponse>;
+  saveUsageMcp?: Maybe<SaveUsageMcpResponse>;
   sendInvitation?: Maybe<SendInvitationResponse>;
   setAnswers: SetAnswersResponse;
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
@@ -18035,6 +18093,17 @@ export type Mutation_RootSaveCheckmarxIntegrationArgs = {
 
 
 /** mutation root */
+export type Mutation_RootSaveUsageMcpArgs = {
+  mcps: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+  osName?: InputMaybe<Scalars['String']['input']>;
+  status: Scalars['String']['input'];
+  userEmail?: InputMaybe<Scalars['String']['input']>;
+  userFullName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
 export type Mutation_RootSendInvitationArgs = {
   organizationId: Scalars['String']['input'];
   projectIds?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -18269,7 +18338,12 @@ export type Mutation_RootUpdate_Ai_Tool_Type_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Tool_User_Day_UsageArgs = {
+  _append?: InputMaybe<Ai_Tool_User_Day_Usage_Append_Input>;
+  _delete_at_path?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Key_Input>;
   _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  _prepend?: InputMaybe<Ai_Tool_User_Day_Usage_Prepend_Input>;
   _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
   where: Ai_Tool_User_Day_Usage_Bool_Exp;
 };
@@ -18277,7 +18351,12 @@ export type Mutation_RootUpdate_Ai_Tool_User_Day_UsageArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Tool_User_Day_Usage_By_PkArgs = {
+  _append?: InputMaybe<Ai_Tool_User_Day_Usage_Append_Input>;
+  _delete_at_path?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Ai_Tool_User_Day_Usage_Delete_Key_Input>;
   _inc?: InputMaybe<Ai_Tool_User_Day_Usage_Inc_Input>;
+  _prepend?: InputMaybe<Ai_Tool_User_Day_Usage_Prepend_Input>;
   _set?: InputMaybe<Ai_Tool_User_Day_Usage_Set_Input>;
   pk_columns: Ai_Tool_User_Day_Usage_Pk_Columns_Input;
 };

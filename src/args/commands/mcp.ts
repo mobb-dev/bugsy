@@ -1,10 +1,13 @@
+import { validateOrganizationId } from '@mobb/bugsy/args/validation'
 import { Argv } from 'yargs'
 
+import { organizationIdOptions } from '../../args/options'
 import { startMcpServer } from '../../mcp/index'
 
 export const mcpBuilder = (yargs: Argv) => {
   return yargs
     .example('$0 mcp', 'Launch the MCP server')
+    .option('gov-org-id', organizationIdOptions)
     .option('debug', {
       alias: 'd',
       type: 'boolean',
@@ -17,9 +20,13 @@ export const mcpBuilder = (yargs: Argv) => {
 /**
  * Handler for the MCP command - starts the MCP server directly
  */
-export const mcpHandler = async (_args: { debug?: boolean }) => {
+export const mcpHandler = async (_args: {
+  debug?: boolean
+  govOrgId?: string
+}) => {
   try {
-    await startMcpServer()
+    validateOrganizationId(_args.govOrgId)
+    await startMcpServer({ govOrgId: _args.govOrgId })
   } catch (error) {
     console.error('Failed to start MCP server:', error)
     process.exit(1)

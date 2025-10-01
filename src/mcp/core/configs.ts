@@ -42,3 +42,9 @@ export const MVS_AUTO_FIX_OVERRIDE = process.env['MVS_AUTO_FIX']
 
 // Debug mode for auto-fix functionality - saves patched files with suffix instead of overwriting
 export const MCP_AUTO_FIX_DEBUG_MODE = true
+
+// Interval (ms) for periodic background tracking that look for MCPs
+export const MCP_PERIODIC_TRACK_INTERVAL = 60 * 60 * 1000 // 60 * 60 * 1000 // 1 hour
+
+// Base REST endpoint for MCP operations
+export const MCP_DEFAULT_REST_API_URL = 'https://api.mobb.ai/api/rest/mcp/track'

@@ -2,6 +2,7 @@
 import { packageJson } from '../utils'
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
+import { configStore } from './services/ConfigStoreService'
 import { BaseTool } from './tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from './tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
@@ -58,10 +59,14 @@ export function createMcpServer(): McpServer {
 /**
  * Main MCP server function that can be called directly
  */
-export async function startMcpServer(): Promise<void> {
+export async function startMcpServer({
+  govOrgId = '',
+}: {
+  govOrgId?: string
+}): Promise<void> {
   try {
     logDebug('Initializing MCP server')
-
+    configStore.set('GOV-ORG-ID', govOrgId)
     // Create and configure the server
     const server = createMcpServer()
 

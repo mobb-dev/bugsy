@@ -5,6 +5,7 @@ import { SCMLib } from '../scm'
 import { scmCloudUrl } from '../shared/src'
 import { CreateSubmitRequestParams, GetRefererenceResult } from '../types'
 import {
+  GetCommitDiffResult,
   GetGitBlameReponse,
   ScmLibScmType,
   ScmRepoInfo,
@@ -249,5 +250,9 @@ export class AdoSCMLib extends SCMLib {
       prNumber: Number(scmSubmitRequestId),
       markdownComment: comment,
     })
+  }
+
+  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
+    throw new Error('getCommitDiff not implemented for ADO')
   }
 }

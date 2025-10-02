@@ -11,7 +11,7 @@ import {
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { configStore } from '../services/ConfigStoreService'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
-import { mcpUsageService } from '../services/McpUsageService'
+import { mcpUsageService } from '../services/McpUsageService/McpUsageService'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'

@@ -11,6 +11,10 @@ import { mcpBuilder, mcpHandler } from './commands/mcp'
 import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
 import { addScmTokenBuilder, addScmTokenHandler } from './commands/token'
+import {
+  uploadAiBlameBuilder,
+  uploadAiBlameHandler,
+} from './commands/upload_ai_blame'
 
 export const parseArgs = async (args: readonly string[]) => {
   const yargsInstance = yargs(args)
@@ -74,6 +78,14 @@ export const parseArgs = async (args: readonly string[]) => {
       chalk.bold('Launch the MCP (Model Context Protocol) server.'),
       mcpBuilder,
       mcpHandler
+    )
+    .command(
+      mobbCliCommand.uploadAiBlame,
+      chalk.bold(
+        'Upload AI Blame inference artifacts (prompt + inference) and finalize them.'
+      ),
+      uploadAiBlameBuilder,
+      uploadAiBlameHandler
     )
     .example(
       'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',

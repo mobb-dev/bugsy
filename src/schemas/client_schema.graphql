@@ -290,6 +290,48 @@ mutation uploadS3BucketInfo($fileName: String!) {
   }
 }
 
+# AI Blame uploads (remote schema: aiBlameApi via Hasura)
+
+scalar Timestamp
+
+input AIBlameInferenceInitInput {
+  promptFileName: String!
+  inferenceFileName: String!
+  aiResponseAt: Timestamp!
+  model: String
+  toolName: String
+  metadataJSON: String
+}
+
+input AIBlameInferenceFinalizeInput {
+  aiBlameInferenceId: String!
+  promptKey: String!
+  inferenceKey: String!
+  aiResponseAt: Timestamp!
+  model: String
+  toolName: String
+  metadataJSON: String
+}
+
+mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
+  uploadAIBlameInferencesInit(sessions: $sessions) {
+    status
+    error
+    uploadSessions {
+      aiBlameInferenceId
+      prompt { url artifactId fileName uploadFieldsJSON uploadKey }
+      inference { url artifactId fileName uploadFieldsJSON uploadKey }
+    }
+  }
+}
+
+mutation FinalizeAIBlameInferencesUpload($sessions: [AIBlameInferenceFinalizeInput!]!) {
+  finalizeAIBlameInferencesUpload(sessions: $sessions) {
+    status
+    error
+  }
+}
+
 mutation DigestVulnerabilityReport(
   $vulnerabilityReportFileName: String
   $fixReportId: String!

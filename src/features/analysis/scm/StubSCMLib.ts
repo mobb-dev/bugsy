@@ -1,6 +1,7 @@
 import { SCMLib } from './scm'
 import {
   CreateSubmitRequestParams,
+  GetCommitDiffResult,
   GetGitBlameReponse,
   GetRefererenceResult,
   ReferenceType,
@@ -133,5 +134,17 @@ export class StubSCMLib extends SCMLib {
     _comment: string
   ): Promise<void> {
     console.warn('addCommentToSubmitRequest() no-op')
+  }
+
+  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
+    console.warn('getCommitDiff() returning stub diff')
+    return {
+      diff: '',
+      commitTimestamp: new Date(),
+      commitSha: _commitSha,
+      authorName: undefined,
+      authorEmail: undefined,
+      message: undefined,
+    }
   }
 }

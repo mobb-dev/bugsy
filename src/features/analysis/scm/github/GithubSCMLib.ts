@@ -5,6 +5,7 @@ import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
 import {
   CreateSubmitRequestParams,
+  GetCommitDiffResult,
   GetGitBlameReponse,
   GetRefererenceResult,
   PostPRReviewCommentParams,
@@ -350,5 +351,30 @@ export class GithubSCMLib extends SCMLib {
       repo,
       comment_id: commentId,
     })
+  }
+
+  async getCommitDiff(commitSha: string): Promise<GetCommitDiffResult> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+
+    const { commit, diff } = await this.githubSdk.getCommitWithDiff({
+      owner,
+      repo,
+      commitSha,
+    })
+
+    // Parse the commit timestamp
+    const commitTimestamp = commit.commit.committer?.date
+      ? new Date(commit.commit.committer.date)
+      : new Date(commit.commit.author?.date || Date.now())
+
+    return {
+      diff,
+      commitTimestamp,
+      commitSha: commit.sha,
+      authorName: commit.commit.author?.name,
+      authorEmail: commit.commit.author?.email,
+      message: commit.commit.message,
+    }
   }
 }

@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { subscribe } from '../../features/analysis/graphql/subscribe'
 import {
   CreateCliLoginMutationVariables,
+  FinalizeAiBlameInferencesUploadMutation,
+  FinalizeAiBlameInferencesUploadMutationVariables,
   Fix_Report_State_Enum,
   FixDownloadSource,
   GetAnalysisQuery,
@@ -16,6 +18,8 @@ import {
   MeQuery,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
+  UploadAiBlameInferencesInitMutation,
+  UploadAiBlameInferencesInitMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import {
@@ -87,6 +91,18 @@ export class McpGQLClient {
         'x-hasura-request-id': '[DYNAMIC]',
       },
     }
+  }
+
+  async uploadAIBlameInferencesInitRaw(
+    variables: UploadAiBlameInferencesInitMutationVariables
+  ): Promise<UploadAiBlameInferencesInitMutation> {
+    return await this.clientSdk.UploadAIBlameInferencesInit(variables)
+  }
+
+  async finalizeAIBlameInferencesUploadRaw(
+    variables: FinalizeAiBlameInferencesUploadMutationVariables
+  ): Promise<FinalizeAiBlameInferencesUploadMutation> {
+    return await this.clientSdk.FinalizeAIBlameInferencesUpload(variables)
   }
 
   async isApiEndpointReachable(): Promise<boolean> {

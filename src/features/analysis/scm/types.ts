@@ -27,6 +27,15 @@ export type GetGitBlameReponse = {
   email: string
 }[]
 
+export type GetCommitDiffResult = {
+  diff: string
+  commitTimestamp: Date
+  commitSha: string
+  authorName?: string
+  authorEmail?: string
+  message?: string
+}
+
 export const scmSubmitRequestStatus = {
   MERGED: 'merged',
   OPEN: 'open',

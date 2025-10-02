@@ -8,6 +8,7 @@ import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
 import { CreateSubmitRequestParams, GetRefererenceResult } from '../types'
 import {
+  GetCommitDiffResult,
   GetGitBlameReponse,
   ScmLibScmType,
   ScmRepoInfo,
@@ -298,5 +299,9 @@ export class BitbucketSCMLib extends SCMLib {
       url: this.url,
       markdownComment: comment,
     })
+  }
+
+  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
+    throw new Error('getCommitDiff not implemented for Bitbucket')
   }
 }

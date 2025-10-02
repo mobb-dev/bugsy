@@ -15,6 +15,7 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   JSON: { input: any; output: any; }
+  Timestamp: { input: any; output: any; }
   Void: { input: any; output: any; }
   _text: { input: any; output: any; }
   bigint: { input: any; output: any; }
@@ -27,6 +28,47 @@ export type Scalars = {
   timestamp: { input: any; output: any; }
   timestamptz: { input: any; output: any; }
   uuid: { input: any; output: any; }
+};
+
+export type AiBlameInferenceFinalizeInput = {
+  aiBlameInferenceId: Scalars['String']['input'];
+  aiResponseAt: Scalars['Timestamp']['input'];
+  inferenceKey: Scalars['String']['input'];
+  metadataJSON?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptKey: Scalars['String']['input'];
+  toolName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AiBlameInferenceInitInput = {
+  aiResponseAt: Scalars['Timestamp']['input'];
+  inferenceFileName: Scalars['String']['input'];
+  metadataJSON?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptFileName: Scalars['String']['input'];
+  toolName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AiBlameInferenceUpload = {
+  __typename?: 'AIBlameInferenceUpload';
+  aiBlameInferenceId: Scalars['String']['output'];
+  inference: AiBlameUploadResult;
+  prompt: AiBlameUploadResult;
+};
+
+export type AiBlameUploadResult = {
+  __typename?: 'AIBlameUploadResult';
+  artifactId: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  uploadFieldsJSON: Scalars['String']['output'];
+  uploadKey: Scalars['String']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type AiBlameValidationResponse = {
+  __typename?: 'AIBlameValidationResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
 };
 
 export type AddUserToOrganizationResponse = {
@@ -554,6 +596,15 @@ export enum ManifestAction {
   Upgrade = 'upgrade'
 }
 
+export type McpInfo = {
+  __typename?: 'McpInfo';
+  ideName?: Maybe<Scalars['String']['output']>;
+  ideVersion?: Maybe<Scalars['String']['output']>;
+  isRunning?: Maybe<Scalars['Boolean']['output']>;
+  mcpConfiguration?: Maybe<Scalars['String']['output']>;
+  mcpName?: Maybe<Scalars['String']['output']>;
+};
+
 export type MeContextResponse = {
   __typename?: 'MeContextResponse';
   email: Scalars['String']['output'];
@@ -609,6 +660,13 @@ export type PackageInfoResponse = {
   envName?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   version: Scalars['String']['output'];
+};
+
+export type ProcessAiBlameResult = {
+  __typename?: 'ProcessAIBlameResult';
+  attributionsCreated: Scalars['Int']['output'];
+  commitDiff?: Maybe<Scalars['String']['output']>;
+  inferencesProcessed: Scalars['Int']['output'];
 };
 
 export type ProjectIssueStats = {
@@ -1000,8 +1058,8 @@ export type UpdateAiToolTokenSuccess = {
   token: Scalars['String']['output'];
 };
 
-export type UpdateFixesAcrhiveStateResponse = {
-  __typename?: 'UpdateFixesAcrhiveStateResponse';
+export type UpdateFixesArchiveStateResponse = {
+  __typename?: 'UpdateFixesArchiveStateResponse';
   status: Status;
 };
 
@@ -1021,6 +1079,13 @@ export type UpdateLinearConfigurationResponseError = {
 export type UpdateLinearConfigurationResponseSuccess = {
   __typename?: 'UpdateLinearConfigurationResponseSuccess';
   status: Status;
+};
+
+export type UploadAiBlameInferencesResponse = {
+  __typename?: 'UploadAIBlameInferencesResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+  uploadSessions: Array<AiBlameInferenceUpload>;
 };
 
 export type UploadReportS3Error = BaseError & {
@@ -1049,7 +1114,7 @@ export type UploadResult = {
 export type UserAiToolUsage = {
   __typename?: 'UserAiToolUsage';
   aiToolUsage: Array<AiToolTypeUsage>;
-  mcp?: Maybe<Scalars['String']['output']>;
+  mcp?: Maybe<Array<McpInfo>>;
   userId: Scalars['String']['output'];
 };
 
@@ -1631,6 +1696,826 @@ export type Aggregated_Severities_Var_Samp_Fields = {
 export type Aggregated_Severities_Variance_Fields = {
   __typename?: 'aggregated_severities_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "ai_blame_attribution" */
+export type Ai_Blame_Attribution = {
+  __typename?: 'ai_blame_attribution';
+  /** An object relationship */
+  aiBlameCommit: Ai_Blame_Commit;
+  aiBlameCommitId: Scalars['uuid']['output'];
+  /** An object relationship */
+  aiBlameInference?: Maybe<Ai_Blame_Inference>;
+  aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  createdAt: Scalars['timestamp']['output'];
+  filePath: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+  lineNumber: Scalars['Int']['output'];
+  model?: Maybe<Scalars['String']['output']>;
+  promptSummary?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Aggregate = {
+  __typename?: 'ai_blame_attribution_aggregate';
+  aggregate?: Maybe<Ai_Blame_Attribution_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Attribution>;
+};
+
+export type Ai_Blame_Attribution_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ai_Blame_Attribution_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ai_Blame_Attribution_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Aggregate_Fields = {
+  __typename?: 'ai_blame_attribution_aggregate_fields';
+  avg?: Maybe<Ai_Blame_Attribution_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Attribution_Max_Fields>;
+  min?: Maybe<Ai_Blame_Attribution_Min_Fields>;
+  stddev?: Maybe<Ai_Blame_Attribution_Stddev_Fields>;
+  stddev_pop?: Maybe<Ai_Blame_Attribution_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Ai_Blame_Attribution_Stddev_Samp_Fields>;
+  sum?: Maybe<Ai_Blame_Attribution_Sum_Fields>;
+  var_pop?: Maybe<Ai_Blame_Attribution_Var_Pop_Fields>;
+  var_samp?: Maybe<Ai_Blame_Attribution_Var_Samp_Fields>;
+  variance?: Maybe<Ai_Blame_Attribution_Variance_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Aggregate_Order_By = {
+  avg?: InputMaybe<Ai_Blame_Attribution_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ai_Blame_Attribution_Max_Order_By>;
+  min?: InputMaybe<Ai_Blame_Attribution_Min_Order_By>;
+  stddev?: InputMaybe<Ai_Blame_Attribution_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Ai_Blame_Attribution_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Ai_Blame_Attribution_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Ai_Blame_Attribution_Sum_Order_By>;
+  var_pop?: InputMaybe<Ai_Blame_Attribution_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Ai_Blame_Attribution_Var_Samp_Order_By>;
+  variance?: InputMaybe<Ai_Blame_Attribution_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Arr_Rel_Insert_Input = {
+  data: Array<Ai_Blame_Attribution_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Attribution_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Ai_Blame_Attribution_Avg_Fields = {
+  __typename?: 'ai_blame_attribution_avg_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Avg_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_attribution". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Attribution_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Attribution_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Attribution_Bool_Exp>>;
+  aiBlameCommit?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  aiBlameCommitId?: InputMaybe<Uuid_Comparison_Exp>;
+  aiBlameInference?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+  aiBlameInferenceId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  filePath?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  lineNumber?: InputMaybe<Int_Comparison_Exp>;
+  model?: InputMaybe<String_Comparison_Exp>;
+  promptSummary?: InputMaybe<String_Comparison_Exp>;
+  toolName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_blame_attribution" */
+export enum Ai_Blame_Attribution_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiBlameAttributionPkey1 = 'ai_blame_attribution_pkey1'
+}
+
+/** input type for incrementing numeric columns in table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Inc_Input = {
+  lineNumber?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Insert_Input = {
+  aiBlameCommit?: InputMaybe<Ai_Blame_Commit_Obj_Rel_Insert_Input>;
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlameInference?: InputMaybe<Ai_Blame_Inference_Obj_Rel_Insert_Input>;
+  aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lineNumber?: InputMaybe<Scalars['Int']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptSummary?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Attribution_Max_Fields = {
+  __typename?: 'ai_blame_attribution_max_fields';
+  aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
+  aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lineNumber?: Maybe<Scalars['Int']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  promptSummary?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Max_Order_By = {
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  aiBlameInferenceId?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  filePath?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lineNumber?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  promptSummary?: InputMaybe<Order_By>;
+  toolName?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Attribution_Min_Fields = {
+  __typename?: 'ai_blame_attribution_min_fields';
+  aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
+  aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lineNumber?: Maybe<Scalars['Int']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  promptSummary?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Min_Order_By = {
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  aiBlameInferenceId?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  filePath?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lineNumber?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  promptSummary?: InputMaybe<Order_By>;
+  toolName?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Mutation_Response = {
+  __typename?: 'ai_blame_attribution_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Blame_Attribution>;
+};
+
+/** on_conflict condition type for table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_On_Conflict = {
+  constraint: Ai_Blame_Attribution_Constraint;
+  update_columns?: Array<Ai_Blame_Attribution_Update_Column>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_blame_attribution". */
+export type Ai_Blame_Attribution_Order_By = {
+  aiBlameCommit?: InputMaybe<Ai_Blame_Commit_Order_By>;
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  aiBlameInference?: InputMaybe<Ai_Blame_Inference_Order_By>;
+  aiBlameInferenceId?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  filePath?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lineNumber?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  promptSummary?: InputMaybe<Order_By>;
+  toolName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_blame_attribution */
+export type Ai_Blame_Attribution_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_blame_attribution" */
+export enum Ai_Blame_Attribution_Select_Column {
+  /** column name */
+  AiBlameCommitId = 'aiBlameCommitId',
+  /** column name */
+  AiBlameInferenceId = 'aiBlameInferenceId',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  FilePath = 'filePath',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LineNumber = 'lineNumber',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  PromptSummary = 'promptSummary',
+  /** column name */
+  ToolName = 'toolName'
+}
+
+/** input type for updating data in table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Set_Input = {
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lineNumber?: InputMaybe<Scalars['Int']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptSummary?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Ai_Blame_Attribution_Stddev_Fields = {
+  __typename?: 'ai_blame_attribution_stddev_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Stddev_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Ai_Blame_Attribution_Stddev_Pop_Fields = {
+  __typename?: 'ai_blame_attribution_stddev_pop_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Stddev_Pop_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Ai_Blame_Attribution_Stddev_Samp_Fields = {
+  __typename?: 'ai_blame_attribution_stddev_samp_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Stddev_Samp_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Attribution_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lineNumber?: InputMaybe<Scalars['Int']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptSummary?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Ai_Blame_Attribution_Sum_Fields = {
+  __typename?: 'ai_blame_attribution_sum_fields';
+  lineNumber?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Sum_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "ai_blame_attribution" */
+export enum Ai_Blame_Attribution_Update_Column {
+  /** column name */
+  AiBlameCommitId = 'aiBlameCommitId',
+  /** column name */
+  AiBlameInferenceId = 'aiBlameInferenceId',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  FilePath = 'filePath',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LineNumber = 'lineNumber',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  PromptSummary = 'promptSummary',
+  /** column name */
+  ToolName = 'toolName'
+}
+
+export type Ai_Blame_Attribution_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Ai_Blame_Attribution_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Blame_Attribution_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Blame_Attribution_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Ai_Blame_Attribution_Var_Pop_Fields = {
+  __typename?: 'ai_blame_attribution_var_pop_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Var_Pop_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Ai_Blame_Attribution_Var_Samp_Fields = {
+  __typename?: 'ai_blame_attribution_var_samp_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Var_Samp_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Ai_Blame_Attribution_Variance_Fields = {
+  __typename?: 'ai_blame_attribution_variance_fields';
+  lineNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Variance_Order_By = {
+  lineNumber?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_Commit = {
+  __typename?: 'ai_blame_commit';
+  /** An array relationship */
+  aiBlameAttributions: Array<Ai_Blame_Attribution>;
+  /** An aggregate relationship */
+  aiBlameAttributions_aggregate: Ai_Blame_Attribution_Aggregate;
+  commitSha: Scalars['String']['output'];
+  createdAt: Scalars['timestamp']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  repositoryUrl: Scalars['String']['output'];
+};
+
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitAiBlameAttributionsArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitAiBlameAttributions_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+/** aggregated selection of "ai_blame_commit" */
+export type Ai_Blame_Commit_Aggregate = {
+  __typename?: 'ai_blame_commit_aggregate';
+  aggregate?: Maybe<Ai_Blame_Commit_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Commit>;
+};
+
+/** aggregate fields of "ai_blame_commit" */
+export type Ai_Blame_Commit_Aggregate_Fields = {
+  __typename?: 'ai_blame_commit_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Commit_Max_Fields>;
+  min?: Maybe<Ai_Blame_Commit_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_commit" */
+export type Ai_Blame_Commit_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_commit". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Commit_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
+  aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+  aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Bool_Exp>;
+  commitSha?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_blame_commit" */
+export enum Ai_Blame_Commit_Constraint {
+  /** unique or primary key constraint on columns "commit_sha", "repository_url", "organization_id" */
+  AiBlameCommitOrganizationIdRepositoryUrlCommitShaKey = 'ai_blame_commit_organization_id_repository_url_commit_sha_key',
+  /** unique or primary key constraint on columns "id" */
+  AiBlameCommitPkey = 'ai_blame_commit_pkey'
+}
+
+/** input type for inserting data into table "ai_blame_commit" */
+export type Ai_Blame_Commit_Insert_Input = {
+  aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Arr_Rel_Insert_Input>;
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Commit_Max_Fields = {
+  __typename?: 'ai_blame_commit_max_fields';
+  commitSha?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Commit_Min_Fields = {
+  __typename?: 'ai_blame_commit_min_fields';
+  commitSha?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_blame_commit" */
+export type Ai_Blame_Commit_Mutation_Response = {
+  __typename?: 'ai_blame_commit_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Blame_Commit>;
+};
+
+/** input type for inserting object relation for remote table "ai_blame_commit" */
+export type Ai_Blame_Commit_Obj_Rel_Insert_Input = {
+  data: Ai_Blame_Commit_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_blame_commit" */
+export type Ai_Blame_Commit_On_Conflict = {
+  constraint: Ai_Blame_Commit_Constraint;
+  update_columns?: Array<Ai_Blame_Commit_Update_Column>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_blame_commit". */
+export type Ai_Blame_Commit_Order_By = {
+  aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Order_By>;
+  commitSha?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_blame_commit */
+export type Ai_Blame_Commit_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_blame_commit" */
+export enum Ai_Blame_Commit_Select_Column {
+  /** column name */
+  CommitSha = 'commitSha',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl'
+}
+
+/** input type for updating data in table "ai_blame_commit" */
+export type Ai_Blame_Commit_Set_Input = {
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_blame_commit" */
+export type Ai_Blame_Commit_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Commit_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_blame_commit" */
+export enum Ai_Blame_Commit_Update_Column {
+  /** column name */
+  CommitSha = 'commitSha',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl'
+}
+
+export type Ai_Blame_Commit_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Blame_Commit_Bool_Exp;
+};
+
+/** columns and relationships of "ai_blame_inference" */
+export type Ai_Blame_Inference = {
+  __typename?: 'ai_blame_inference';
+  aiResponseAt: Scalars['timestamp']['output'];
+  createdAt: Scalars['timestamp']['output'];
+  id: Scalars['uuid']['output'];
+  inferencesS3Path: Scalars['String']['output'];
+  model?: Maybe<Scalars['String']['output']>;
+  promptS3Path: Scalars['String']['output'];
+  toolName?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "ai_blame_inference" */
+export type Ai_Blame_Inference_Aggregate = {
+  __typename?: 'ai_blame_inference_aggregate';
+  aggregate?: Maybe<Ai_Blame_Inference_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Inference>;
+};
+
+/** aggregate fields of "ai_blame_inference" */
+export type Ai_Blame_Inference_Aggregate_Fields = {
+  __typename?: 'ai_blame_inference_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Inference_Max_Fields>;
+  min?: Maybe<Ai_Blame_Inference_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_inference" */
+export type Ai_Blame_Inference_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Inference_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_inference". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Inference_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Inference_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Inference_Bool_Exp>>;
+  aiResponseAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
+  model?: InputMaybe<String_Comparison_Exp>;
+  promptS3Path?: InputMaybe<String_Comparison_Exp>;
+  toolName?: InputMaybe<String_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_blame_inference" */
+export enum Ai_Blame_Inference_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiBlameInferencePkey = 'ai_blame_inference_pkey'
+}
+
+/** input type for inserting data into table "ai_blame_inference" */
+export type Ai_Blame_Inference_Insert_Input = {
+  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Inference_Max_Fields = {
+  __typename?: 'ai_blame_inference_max_fields';
+  aiResponseAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  inferencesS3Path?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  promptS3Path?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Inference_Min_Fields = {
+  __typename?: 'ai_blame_inference_min_fields';
+  aiResponseAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  inferencesS3Path?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  promptS3Path?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "ai_blame_inference" */
+export type Ai_Blame_Inference_Mutation_Response = {
+  __typename?: 'ai_blame_inference_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Blame_Inference>;
+};
+
+/** input type for inserting object relation for remote table "ai_blame_inference" */
+export type Ai_Blame_Inference_Obj_Rel_Insert_Input = {
+  data: Ai_Blame_Inference_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Inference_On_Conflict>;
+};
+
+/** on_conflict condition type for table "ai_blame_inference" */
+export type Ai_Blame_Inference_On_Conflict = {
+  constraint: Ai_Blame_Inference_Constraint;
+  update_columns?: Array<Ai_Blame_Inference_Update_Column>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_blame_inference". */
+export type Ai_Blame_Inference_Order_By = {
+  aiResponseAt?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  inferencesS3Path?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  promptS3Path?: InputMaybe<Order_By>;
+  toolName?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_blame_inference */
+export type Ai_Blame_Inference_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_blame_inference" */
+export enum Ai_Blame_Inference_Select_Column {
+  /** column name */
+  AiResponseAt = 'aiResponseAt',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InferencesS3Path = 'inferencesS3Path',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  PromptS3Path = 'promptS3Path',
+  /** column name */
+  ToolName = 'toolName',
+  /** column name */
+  UserId = 'userId'
+}
+
+/** input type for updating data in table "ai_blame_inference" */
+export type Ai_Blame_Inference_Set_Input = {
+  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "ai_blame_inference" */
+export type Ai_Blame_Inference_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Inference_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
+  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  toolName?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "ai_blame_inference" */
+export enum Ai_Blame_Inference_Update_Column {
+  /** column name */
+  AiResponseAt = 'aiResponseAt',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InferencesS3Path = 'inferencesS3Path',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  PromptS3Path = 'promptS3Path',
+  /** column name */
+  ToolName = 'toolName',
+  /** column name */
+  UserId = 'userId'
+}
+
+export type Ai_Blame_Inference_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Blame_Inference_Bool_Exp;
 };
 
 /** columns and relationships of "ai_ide" */
@@ -14366,6 +15251,11 @@ export type Mutation_Root = {
   __typename?: 'mutation_root';
   addUserToOrganization?: Maybe<AddUserToOrganizationResponse>;
   addUsersToProject?: Maybe<AddUsersToProjectResponse>;
+  /**
+   * Process a git commit by fetching its diff from the SCM provider and analyzing it
+   * for AI-generated code. User must have access to both the repository and organization.
+   */
+  analyzeCommitForAIBlame: ProcessAiBlameResult;
   applySimilarAnswers?: Maybe<Scalars['Void']['output']>;
   autoPrAnalysis?: Maybe<AutoPrResponse>;
   changeUserOrgRole?: Maybe<StatusQueryResponse>;
@@ -14382,6 +15272,18 @@ export type Mutation_Root = {
   deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
+  /** delete data from the table: "ai_blame_attribution" */
+  delete_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
+  /** delete single row from the table: "ai_blame_attribution" */
+  delete_ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
+  /** delete data from the table: "ai_blame_commit" */
+  delete_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** delete single row from the table: "ai_blame_commit" */
+  delete_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** delete data from the table: "ai_blame_inference" */
+  delete_ai_blame_inference?: Maybe<Ai_Blame_Inference_Mutation_Response>;
+  /** delete single row from the table: "ai_blame_inference" */
+  delete_ai_blame_inference_by_pk?: Maybe<Ai_Blame_Inference>;
   /** delete data from the table: "ai_ide" */
   delete_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
   /** delete single row from the table: "ai_ide" */
@@ -14727,10 +15629,27 @@ export type Mutation_Root = {
   /** delete single row from the table: "vulnerability_severity" */
   delete_vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
   digestVulnerabilityReport: VulnerabilityReportResponse;
+  /**
+   * Finalize uploads by verifying uploaded objects exist and inserting rows
+   * into ai_blame_inference with S3 paths and metadata.
+   */
+  finalizeAIBlameInferencesUpload: AiBlameValidationResponse;
   forkRepo?: Maybe<ForkRepoResponse>;
   generateDiffsFile?: Maybe<FileDiffsResponse>;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
+  /** insert data into the table: "ai_blame_attribution" */
+  insert_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
+  /** insert a single row into the table: "ai_blame_attribution" */
+  insert_ai_blame_attribution_one?: Maybe<Ai_Blame_Attribution>;
+  /** insert data into the table: "ai_blame_commit" */
+  insert_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** insert a single row into the table: "ai_blame_commit" */
+  insert_ai_blame_commit_one?: Maybe<Ai_Blame_Commit>;
+  /** insert data into the table: "ai_blame_inference" */
+  insert_ai_blame_inference?: Maybe<Ai_Blame_Inference_Mutation_Response>;
+  /** insert a single row into the table: "ai_blame_inference" */
+  insert_ai_blame_inference_one?: Maybe<Ai_Blame_Inference>;
   /** insert data into the table: "ai_ide" */
   insert_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
   /** insert a single row into the table: "ai_ide" */
@@ -15077,6 +15996,11 @@ export type Mutation_Root = {
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
   openFixTicket?: Maybe<OpenFixTicketResponse>;
   performCliLogin?: Maybe<StatusQueryResponse>;
+  /**
+   * Process a git commit to identify AI-generated code by analyzing the commit diff
+   * against AI inference records from organization users. Admin only.
+   */
+  processAIBlameForCommit: ProcessAiBlameResult;
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
   rerunAnalysis: VulnerabilityReportResponse;
@@ -15095,13 +16019,31 @@ export type Mutation_Root = {
   updateBitbucketToken: ScmAccessToken;
   updateBitbucketTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateDownloadedFixData?: Maybe<StatusQueryResponse>;
-  updateFixesAcrhiveState?: Maybe<UpdateFixesAcrhiveStateResponse>;
+  updateFixesArchiveState?: Maybe<UpdateFixesArchiveStateResponse>;
   updateGithubToken: ScmAccessToken;
   updateGithubTokenFromAuth0: UpdateGithubTokenFromAuth0;
   updateGitlabToken: ScmAccessToken;
   updateLinearConfiguration: UpdateLinearConfigurationResponse;
   updateLinearToken: TicketAccessToken;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
+  /** update data of the table: "ai_blame_attribution" */
+  update_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
+  /** update single row of the table: "ai_blame_attribution" */
+  update_ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
+  /** update multiples rows of table: "ai_blame_attribution" */
+  update_ai_blame_attribution_many?: Maybe<Array<Maybe<Ai_Blame_Attribution_Mutation_Response>>>;
+  /** update data of the table: "ai_blame_commit" */
+  update_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** update single row of the table: "ai_blame_commit" */
+  update_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** update multiples rows of table: "ai_blame_commit" */
+  update_ai_blame_commit_many?: Maybe<Array<Maybe<Ai_Blame_Commit_Mutation_Response>>>;
+  /** update data of the table: "ai_blame_inference" */
+  update_ai_blame_inference?: Maybe<Ai_Blame_Inference_Mutation_Response>;
+  /** update single row of the table: "ai_blame_inference" */
+  update_ai_blame_inference_by_pk?: Maybe<Ai_Blame_Inference>;
+  /** update multiples rows of table: "ai_blame_inference" */
+  update_ai_blame_inference_many?: Maybe<Array<Maybe<Ai_Blame_Inference_Mutation_Response>>>;
   /** update data of the table: "ai_ide" */
   update_ai_ide?: Maybe<Ai_Ide_Mutation_Response>;
   /** update single row of the table: "ai_ide" */
@@ -15616,6 +16558,11 @@ export type Mutation_Root = {
   update_vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
   /** update multiples rows of table: "vulnerability_severity" */
   update_vulnerability_severity_many?: Maybe<Array<Maybe<Vulnerability_Severity_Mutation_Response>>>;
+  /**
+   * Initialize upload sessions for AI Blame inferences (prompt + inference).
+   * Returns presigned S3 POST info for each session. No DB writes are performed.
+   */
+  uploadAIBlameInferencesInit: UploadAiBlameInferencesResponse;
   uploadS3BucketInfo: UploadResponse;
   userSignedUp?: Maybe<StatusQueryResponse>;
   voteOnFix?: Maybe<VoteOnFixResponse>;
@@ -15636,6 +16583,14 @@ export type Mutation_RootAddUsersToProjectArgs = {
   projectId: Scalars['String']['input'];
   role: Scalars['String']['input'];
   userEmails: Array<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
+  commitSha: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryURL: Scalars['String']['input'];
 };
 
 
@@ -15758,6 +16713,42 @@ export type Mutation_RootDeleteProjectArgs = {
 export type Mutation_RootDeleteUserFromOrganizationArgs = {
   organizationId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_AttributionArgs = {
+  where: Ai_Blame_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Attribution_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_CommitArgs = {
+  where: Ai_Blame_Commit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Commit_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_InferenceArgs = {
+  where: Ai_Blame_Inference_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Inference_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -16813,6 +17804,12 @@ export type Mutation_RootDigestVulnerabilityReportArgs = {
 
 
 /** mutation root */
+export type Mutation_RootFinalizeAiBlameInferencesUploadArgs = {
+  sessions: Array<AiBlameInferenceFinalizeInput>;
+};
+
+
+/** mutation root */
 export type Mutation_RootForkRepoArgs = {
   repoUrl: Scalars['String']['input'];
 };
@@ -16829,6 +17826,48 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 export type Mutation_RootInitOrganizationAndProjectAdminArgs = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   userEmail: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_AttributionArgs = {
+  objects: Array<Ai_Blame_Attribution_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Blame_Attribution_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Attribution_OneArgs = {
+  object: Ai_Blame_Attribution_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Blame_Attribution_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_CommitArgs = {
+  objects: Array<Ai_Blame_Commit_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Commit_OneArgs = {
+  object: Ai_Blame_Commit_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_InferenceArgs = {
+  objects: Array<Ai_Blame_Inference_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Blame_Inference_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Inference_OneArgs = {
+  object: Ai_Blame_Inference_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Blame_Inference_On_Conflict>;
 };
 
 
@@ -18051,6 +19090,16 @@ export type Mutation_RootPerformCliLoginArgs = {
 
 
 /** mutation root */
+export type Mutation_RootProcessAiBlameForCommitArgs = {
+  commitDiff: Scalars['String']['input'];
+  commitSha: Scalars['String']['input'];
+  commitTimestampMs: Scalars['Float']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryURL: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootRemoveTokenArgs = {
   token: Scalars['String']['input'];
 };
@@ -18192,7 +19241,7 @@ export type Mutation_RootUpdateDownloadedFixDataArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUpdateFixesAcrhiveStateArgs = {
+export type Mutation_RootUpdateFixesArchiveStateArgs = {
   fixIds: Array<Scalars['String']['input']>;
   isArchived: Scalars['Boolean']['input'];
 };
@@ -18233,6 +19282,68 @@ export type Mutation_RootUpdateScmTokenArgs = {
   scmType: Scalars['String']['input'];
   token: Scalars['String']['input'];
   url: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_AttributionArgs = {
+  _inc?: InputMaybe<Ai_Blame_Attribution_Inc_Input>;
+  _set?: InputMaybe<Ai_Blame_Attribution_Set_Input>;
+  where: Ai_Blame_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Attribution_By_PkArgs = {
+  _inc?: InputMaybe<Ai_Blame_Attribution_Inc_Input>;
+  _set?: InputMaybe<Ai_Blame_Attribution_Set_Input>;
+  pk_columns: Ai_Blame_Attribution_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Attribution_ManyArgs = {
+  updates: Array<Ai_Blame_Attribution_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_CommitArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
+  where: Ai_Blame_Commit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_By_PkArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
+  pk_columns: Ai_Blame_Commit_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_ManyArgs = {
+  updates: Array<Ai_Blame_Commit_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_InferenceArgs = {
+  _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
+  where: Ai_Blame_Inference_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Inference_By_PkArgs = {
+  _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
+  pk_columns: Ai_Blame_Inference_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Inference_ManyArgs = {
+  updates: Array<Ai_Blame_Inference_Updates>;
 };
 
 
@@ -20031,6 +21142,12 @@ export type Mutation_RootUpdate_Vulnerability_Severity_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Vulnerability_Severity_ManyArgs = {
   updates: Array<Vulnerability_Severity_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUploadAiBlameInferencesInitArgs = {
+  sessions: Array<AiBlameInferenceInitInput>;
 };
 
 
@@ -24755,6 +25872,8 @@ export type Project_Variance_FieldsDeployedVulnerabilityIssuesCountArgs = {
 
 export type Query_Root = {
   __typename?: 'query_root';
+  /** Placeholder query - GraphQL requires at least one query */
+  _empty?: Maybe<Scalars['String']['output']>;
   /** fetch data from the table: "aggregated_fix_state" */
   aggregated_fix_state: Array<Aggregated_Fix_State>;
   /** fetch aggregated fields from the table: "aggregated_fix_state" */
@@ -24767,6 +25886,24 @@ export type Query_Root = {
   aggregated_severities: Array<Aggregated_Severities>;
   /** fetch aggregated fields from the table: "aggregated_severities" */
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
+  /** fetch data from the table: "ai_blame_attribution" */
+  ai_blame_attribution: Array<Ai_Blame_Attribution>;
+  /** fetch aggregated fields from the table: "ai_blame_attribution" */
+  ai_blame_attribution_aggregate: Ai_Blame_Attribution_Aggregate;
+  /** fetch data from the table: "ai_blame_attribution" using primary key columns */
+  ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
+  /** fetch data from the table: "ai_blame_commit" */
+  ai_blame_commit: Array<Ai_Blame_Commit>;
+  /** fetch aggregated fields from the table: "ai_blame_commit" */
+  ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
+  /** fetch data from the table: "ai_blame_commit" using primary key columns */
+  ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** fetch data from the table: "ai_blame_inference" */
+  ai_blame_inference: Array<Ai_Blame_Inference>;
+  /** fetch aggregated fields from the table: "ai_blame_inference" */
+  ai_blame_inference_aggregate: Ai_Blame_Inference_Aggregate;
+  /** fetch data from the table: "ai_blame_inference" using primary key columns */
+  ai_blame_inference_by_pk?: Maybe<Ai_Blame_Inference>;
   /** fetch data from the table: "ai_ide" */
   ai_ide: Array<Ai_Ide>;
   /** fetch aggregated fields from the table: "ai_ide" */
@@ -25428,6 +26565,75 @@ export type Query_RootAggregated_Severities_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Attribution_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAi_Blame_CommitArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAi_Blame_InferenceArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Inference_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Inference_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -30237,6 +31443,30 @@ export type Subscription_Root = {
   aggregated_severities_aggregate: Aggregated_Severities_Aggregate;
   /** fetch data from the table in a streaming manner: "aggregated_severities" */
   aggregated_severities_stream: Array<Aggregated_Severities>;
+  /** fetch data from the table: "ai_blame_attribution" */
+  ai_blame_attribution: Array<Ai_Blame_Attribution>;
+  /** fetch aggregated fields from the table: "ai_blame_attribution" */
+  ai_blame_attribution_aggregate: Ai_Blame_Attribution_Aggregate;
+  /** fetch data from the table: "ai_blame_attribution" using primary key columns */
+  ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
+  /** fetch data from the table in a streaming manner: "ai_blame_attribution" */
+  ai_blame_attribution_stream: Array<Ai_Blame_Attribution>;
+  /** fetch data from the table: "ai_blame_commit" */
+  ai_blame_commit: Array<Ai_Blame_Commit>;
+  /** fetch aggregated fields from the table: "ai_blame_commit" */
+  ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
+  /** fetch data from the table: "ai_blame_commit" using primary key columns */
+  ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** fetch data from the table in a streaming manner: "ai_blame_commit" */
+  ai_blame_commit_stream: Array<Ai_Blame_Commit>;
+  /** fetch data from the table: "ai_blame_inference" */
+  ai_blame_inference: Array<Ai_Blame_Inference>;
+  /** fetch aggregated fields from the table: "ai_blame_inference" */
+  ai_blame_inference_aggregate: Ai_Blame_Inference_Aggregate;
+  /** fetch data from the table: "ai_blame_inference" using primary key columns */
+  ai_blame_inference_by_pk?: Maybe<Ai_Blame_Inference>;
+  /** fetch data from the table in a streaming manner: "ai_blame_inference" */
+  ai_blame_inference_stream: Array<Ai_Blame_Inference>;
   /** fetch data from the table: "ai_ide" */
   ai_ide: Array<Ai_Ide>;
   /** fetch aggregated fields from the table: "ai_ide" */
@@ -31078,6 +32308,96 @@ export type Subscription_RootAggregated_Severities_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Aggregated_Severities_Stream_Cursor_Input>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Attribution_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_CommitArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Commit_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Commit_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_InferenceArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Inference_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Inference_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Inference_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Inference_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
 };
 
 
@@ -40349,6 +41669,20 @@ export type UploadS3BucketInfoMutationVariables = Exact<{
 
 export type UploadS3BucketInfoMutation = { __typename?: 'mutation_root', uploadS3BucketInfo: { __typename?: 'UploadResponse', status: Status, error?: string | null, reportUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null, repoUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null } };
 
+export type UploadAiBlameInferencesInitMutationVariables = Exact<{
+  sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
+}>;
+
+
+export type UploadAiBlameInferencesInitMutation = { __typename?: 'mutation_root', uploadAIBlameInferencesInit: { __typename?: 'UploadAIBlameInferencesResponse', status: Status, error?: string | null, uploadSessions: Array<{ __typename?: 'AIBlameInferenceUpload', aiBlameInferenceId: string, prompt: { __typename?: 'AIBlameUploadResult', url: string, artifactId: string, fileName: string, uploadFieldsJSON: string, uploadKey: string }, inference: { __typename?: 'AIBlameUploadResult', url: string, artifactId: string, fileName: string, uploadFieldsJSON: string, uploadKey: string } }> } };
+
+export type FinalizeAiBlameInferencesUploadMutationVariables = Exact<{
+  sessions: Array<AiBlameInferenceFinalizeInput> | AiBlameInferenceFinalizeInput;
+}>;
+
+
+export type FinalizeAiBlameInferencesUploadMutation = { __typename?: 'mutation_root', finalizeAIBlameInferencesUpload: { __typename?: 'AIBlameValidationResponse', status: Status, error?: string | null } };
+
 export type DigestVulnerabilityReportMutationVariables = Exact<{
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
@@ -40882,6 +42216,39 @@ export const UploadS3BucketInfoDocument = `
   }
 }
     `;
+export const UploadAiBlameInferencesInitDocument = `
+    mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
+  uploadAIBlameInferencesInit(sessions: $sessions) {
+    status
+    error
+    uploadSessions {
+      aiBlameInferenceId
+      prompt {
+        url
+        artifactId
+        fileName
+        uploadFieldsJSON
+        uploadKey
+      }
+      inference {
+        url
+        artifactId
+        fileName
+        uploadFieldsJSON
+        uploadKey
+      }
+    }
+  }
+}
+    `;
+export const FinalizeAiBlameInferencesUploadDocument = `
+    mutation FinalizeAIBlameInferencesUpload($sessions: [AIBlameInferenceFinalizeInput!]!) {
+  finalizeAIBlameInferencesUpload(sessions: $sessions) {
+    status
+    error
+  }
+}
+    `;
 export const DigestVulnerabilityReportDocument = `
     mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String) {
   digestVulnerabilityReport(
@@ -41143,6 +42510,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     uploadS3BucketInfo(variables: UploadS3BucketInfoMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadS3BucketInfoMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadS3BucketInfoMutation>({ document: UploadS3BucketInfoDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'uploadS3BucketInfo', 'mutation', variables);
+    },
+    UploadAIBlameInferencesInit(variables: UploadAiBlameInferencesInitMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadAiBlameInferencesInitMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UploadAiBlameInferencesInitMutation>({ document: UploadAiBlameInferencesInitDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UploadAIBlameInferencesInit', 'mutation', variables);
+    },
+    FinalizeAIBlameInferencesUpload(variables: FinalizeAiBlameInferencesUploadMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<FinalizeAiBlameInferencesUploadMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<FinalizeAiBlameInferencesUploadMutation>({ document: FinalizeAiBlameInferencesUploadDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'FinalizeAIBlameInferencesUpload', 'mutation', variables);
     },
     DigestVulnerabilityReport(variables: DigestVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DigestVulnerabilityReportMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DigestVulnerabilityReportMutation>({ document: DigestVulnerabilityReportDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DigestVulnerabilityReport', 'mutation', variables);

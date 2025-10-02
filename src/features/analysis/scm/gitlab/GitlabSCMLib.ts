@@ -1,6 +1,7 @@
 import { SCMLib } from '../scm'
 import {
   CreateSubmitRequestParams,
+  GetCommitDiffResult,
   GetGitBlameReponse,
   GetRefererenceResult,
   ScmLibScmType,
@@ -235,5 +236,9 @@ export class GitlabSCMLib extends SCMLib {
   async getBranchCommitsUrl(branchName: string): Promise<string> {
     this._validateAccessTokenAndUrl()
     return `${this.url}/-/commits/${branchName}`
+  }
+
+  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
+    throw new Error('getCommitDiff not implemented for GitLab')
   }
 }

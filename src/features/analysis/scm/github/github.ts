@@ -290,6 +290,39 @@ export function getGithubSdk(params: OctokitOptions = {}) {
         commit_sha: commitSha,
       })
     },
+    async getCommitWithDiff({
+      commitSha,
+      owner,
+      repo,
+    }: {
+      commitSha: string
+      owner: string
+      repo: string
+    }) {
+      // Get commit details including diff
+      const [commitData, diffData] = await Promise.all([
+        // Get commit metadata
+        octokit.rest.repos.getCommit({
+          repo,
+          owner,
+          ref: commitSha,
+        }),
+        // Get commit diff
+        octokit.request('GET /repos/{owner}/{repo}/commits/{ref}', {
+          owner,
+          repo,
+          ref: commitSha,
+          headers: {
+            Accept: 'application/vnd.github.v3.diff',
+          },
+        }),
+      ])
+
+      return {
+        commit: commitData.data,
+        diff: diffData.data as unknown as string,
+      }
+    },
     async getTagDate({
       tag,
       owner,

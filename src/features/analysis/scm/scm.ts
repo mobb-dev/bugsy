@@ -2,6 +2,7 @@ import { InvalidRepoUrlError } from './errors'
 import { isValidBranchName } from './scmSubmit'
 import {
   CreateSubmitRequestParams,
+  GetCommitDiffResult,
   GetGitBlameReponse,
   GetRefererenceResult,
   ScmLibScmType,
@@ -101,6 +102,7 @@ export abstract class SCMLib {
   abstract getCommitUrl(commitId: string): Promise<string>
   abstract getBranchCommitsUrl(branchName: string): Promise<string>
   abstract getRepoDefaultBranch(): Promise<string>
+  abstract getCommitDiff(commitSha: string): Promise<GetCommitDiffResult>
 
   public getAccessToken(): string {
     return this.accessToken || ''

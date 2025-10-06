@@ -29,8 +29,12 @@ export class McpServer {
   private isEventHandlersSetup = false
   private eventHandlers: Map<string, (error?: Error | number) => void> =
     new Map()
+  private parentProcessCheckInterval?: NodeJS.Timeout
+  private readonly parentPid: number
 
   constructor(config: McpServerConfig) {
+    this.parentPid = process.ppid
+
     this.server = new Server(
       {
         name: config.name,
@@ -46,8 +50,12 @@ export class McpServer {
     this.toolRegistry = new ToolRegistry()
     this.setupHandlers()
     this.setupProcessEventHandlers()
+    this.setupParentProcessMonitoring()
     logInfo('MCP server instance created')
-    logDebug('MCP server instance config', { config })
+    logDebug('MCP server instance config', {
+      config,
+      parentPid: this.parentPid,
+    })
   }
 
   private async trackServerUsage(
@@ -85,6 +93,12 @@ export class McpServer {
     const messages: Record<string, string> = {
       SIGINT: 'MCP server interrupted',
       SIGTERM: 'MCP server terminated',
+      SIGHUP: 'MCP server hangup signal received',
+      SIGQUIT: 'MCP server quit signal received',
+      SIGABRT: 'MCP server abort signal received',
+      SIGPIPE: 'MCP server broken pipe signal received',
+      SIGCHLD: 'MCP server child process signal received',
+      SIGTSTP: 'MCP server terminal stop signal received',
       exit: 'MCP server exiting',
       uncaughtException: 'Uncaught exception in MCP server',
       unhandledRejection: 'Unhandled promise rejection in MCP server',
@@ -121,7 +135,19 @@ export class McpServer {
       logDebug(message, { signal })
     }
 
-    if (signal === 'SIGINT' || signal === 'SIGTERM') {
+    if (signal === 'SIGCHLD') {
+      return
+    }
+
+    if (
+      signal === 'SIGINT' ||
+      signal === 'SIGTERM' ||
+      signal === 'SIGHUP' ||
+      signal === 'SIGQUIT' ||
+      signal === 'SIGABRT' ||
+      signal === 'SIGPIPE' ||
+      signal === 'SIGTSTP'
+    ) {
       await this.trackServerUsage('stop', signal)
       process.exit(0)
     }
@@ -130,6 +156,84 @@ export class McpServer {
       await this.trackServerUsage('stop', signal)
       process.exit(1)
     }
+  }
+
+  private isParentProcessAlive(): boolean {
+    try {
+      // Signal 0 doesn't kill the process, just checks if it exists
+      process.kill(this.parentPid, 0)
+      return true
+    } catch (error) {
+      // ESRCH error means process doesn't exist
+      return false
+    }
+  }
+
+  private async handleParentProcessDeath(source: string): Promise<void> {
+    logInfo(`Parent process death detected via ${source}`, {
+      parentPid: this.parentPid,
+    })
+    await this.trackServerUsage('stop', `parent-death-${source}`)
+    process.exit(0)
+  }
+
+  private setupParentProcessMonitoring(): void {
+    logInfo('Setting up parent process monitoring', {
+      parentPid: this.parentPid,
+    })
+
+    // Monitor stdin/stdout streams
+    process.stdin.on('close', async () => {
+      logDebug('stdin closed - parent likely terminated')
+      await this.handleParentProcessDeath('stdin-close')
+    })
+
+    process.stdin.on('end', async () => {
+      logDebug('stdin ended - parent likely terminated')
+      await this.handleParentProcessDeath('stdin-end')
+    })
+
+    process.stdout.on('error', async (error) => {
+      logWarn('stdout error - parent may have terminated', { error })
+      // Only exit if it's a pipe error (parent closed)
+      if (
+        error.message.includes('EPIPE') ||
+        error.message.includes('ECONNRESET')
+      ) {
+        await this.handleParentProcessDeath('stdout-error')
+      }
+    })
+
+    process.stderr.on('error', async (error) => {
+      logWarn('stderr error - parent may have terminated', { error })
+      // Only exit if it's a pipe error (parent closed)
+      if (
+        error.message.includes('EPIPE') ||
+        error.message.includes('ECONNRESET')
+      ) {
+        await this.handleParentProcessDeath('stderr-error')
+      }
+    })
+
+    if (process.send) {
+      process.on('disconnect', async () => {
+        logDebug('IPC disconnected - parent terminated')
+        await this.handleParentProcessDeath('ipc-disconnect')
+      })
+      logDebug('IPC monitoring enabled')
+    } else {
+      logDebug('IPC not available - skipping IPC monitoring')
+    }
+
+    //  Periodic parent process checking (every 10 seconds)
+    this.parentProcessCheckInterval = setInterval(async () => {
+      if (!this.isParentProcessAlive()) {
+        logDebug('Parent process not alive during periodic check')
+        await this.handleParentProcessDeath('periodic-check')
+      }
+    }, 10000)
+
+    logInfo('Parent process monitoring setup complete')
   }
 
   private setupProcessEventHandlers(): void {
@@ -147,6 +251,12 @@ export class McpServer {
     )[] = [
       'SIGINT',
       'SIGTERM',
+      'SIGHUP',
+      'SIGQUIT',
+      'SIGABRT',
+      'SIGPIPE',
+      'SIGCHLD',
+      'SIGTSTP',
       'exit',
       'uncaughtException',
       'unhandledRejection',
@@ -174,6 +284,11 @@ export class McpServer {
 
       process.once('SIGINT', cleanup)
       process.once('SIGTERM', cleanup)
+      process.once('SIGHUP', cleanup)
+      process.once('SIGQUIT', cleanup)
+      process.once('SIGABRT', cleanup)
+      process.once('SIGPIPE', cleanup)
+      process.once('SIGTSTP', cleanup)
     })
   }
 
@@ -181,7 +296,7 @@ export class McpServer {
     try {
       // Try to create authenticated client for background use
       const gqlClient = await createAuthenticatedMcpGQLClient({
-        isBackgoundCall: true,
+        isBackgroundCall: true,
       })
 
       const isConnected = await gqlClient.verifyApiConnection()
@@ -341,6 +456,14 @@ export class McpServer {
     logInfo(`Tool registered: ${tool.name}`)
   }
 
+  public getParentProcessId(): number {
+    return this.parentPid
+  }
+
+  public checkParentProcessAlive(): boolean {
+    return this.isParentProcessAlive()
+  }
+
   public async start(): Promise<void> {
     try {
       logInfo('Starting MCP server')
@@ -368,6 +491,13 @@ export class McpServer {
     logDebug('MCP server shutting down')
 
     await this.trackServerUsage('stop')
+
+    // Clean up parent process monitoring
+    if (this.parentProcessCheckInterval) {
+      clearInterval(this.parentProcessCheckInterval)
+      this.parentProcessCheckInterval = undefined
+      logDebug('Parent process check interval cleared')
+    }
 
     // Remove all event handlers that were registered
     this.eventHandlers.forEach((handler, signal) => {

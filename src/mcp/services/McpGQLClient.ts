@@ -802,9 +802,9 @@ export class McpGQLClient {
 }
 
 export async function createAuthenticatedMcpGQLClient({
-  isBackgoundCall = false,
+  isBackgroundCall = false,
 }: {
-  isBackgoundCall?: boolean
+  isBackgroundCall?: boolean
 } = {}): Promise<McpGQLClient> {
   logDebug('[GraphQL] Getting config', {
     apiToken: configStore.get('apiToken'),
@@ -832,7 +832,7 @@ export async function createAuthenticatedMcpGQLClient({
 
   // Token verification failed, authenticate using the auth service
   const authService = new McpAuthService(initialClient)
-  const newApiToken = await authService.authenticate(isBackgoundCall)
+  const newApiToken = await authService.authenticate(isBackgroundCall)
 
   // Store the new token for future use
   configStore.set('apiToken', newApiToken)

@@ -40,6 +40,13 @@ class McpUsageService {
   }
 
   private startPeriodicTracking(): void {
+    if (!this.hasOrganizationId()) {
+      logDebug(
+        `[UsageService] Not starting periodic tracking - organization ID not available`
+      )
+      return
+    }
+
     logDebug(`[UsageService] Starting periodic tracking for mcps`, {})
 
     this.intervalId = setInterval(async () => {
@@ -82,6 +89,11 @@ class McpUsageService {
     }
 
     return ''
+  }
+
+  public hasOrganizationId(): boolean {
+    const organizationId = configStore.get('GOV-ORG-ID') || ''
+    return !!organizationId
   }
 
   private createUsageData(

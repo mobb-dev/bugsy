@@ -413,7 +413,7 @@ describe('mcp tests', () => {
       })
     })
   })
-  describe(`${MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES} tool`, () => {
+  describe.only(`${MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES} tool`, () => {
     // --------------------- Shared helper utilities --------------------- //
     /**
      * Assert that the first call returns the "initial scan in progress" prompt
@@ -446,13 +446,19 @@ describe('mcp tests', () => {
      */
     const waitForScanCompletion = async (
       client: InlineMCPClient,
-      repoPath: string
+      repoPath: string,
+      timeoutMs: number = 180000 // 3 minutes timeout
     ) => {
       let response = await expectInitialScanPrompt(client, repoPath)
 
       const start = Date.now()
       console.log('waiting for initial scan to complete')
       while (response!.content![0]!.text === initialScanInProgressPrompt) {
+        // Check for timeout
+        if (Date.now() - start > timeoutMs) {
+          throw new Error(`Scan completion timeout after ${timeoutMs}ms`)
+        }
+
         // Log polling status for debugging during tests
         await sleep(1000)
         response = await client.callTool<CallToolResult>(

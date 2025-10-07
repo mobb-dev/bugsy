@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { logDebug, logError } from '../Logger'
+import { WorkspaceService } from './WorkspaceService'
 
 export type PathValidationResult = {
   isValid: boolean
@@ -24,14 +25,22 @@ export async function validatePath(
   }
 
   if (inputPath === '.' || inputPath === './') {
-    if (process.env['WORKSPACE_FOLDER_PATHS']) {
+    const workspaceFolderPath = WorkspaceService.getWorkspaceFolderPath()
+    if (workspaceFolderPath) {
       logDebug('Fallback to workspace folder path', {
         inputPath,
-        workspaceFolderPaths: process.env['WORKSPACE_FOLDER_PATHS'],
+        workspaceFolderPaths: [workspaceFolderPath],
       })
+
+      // Ensure the workspace folder path is stored as known path
+      WorkspaceService.setKnownWorkspacePath(workspaceFolderPath)
+      logDebug('Stored workspace folder path as known path', {
+        workspaceFolderPath,
+      })
+
       return {
         isValid: true,
-        path: process.env['WORKSPACE_FOLDER_PATHS'],
+        path: workspaceFolderPath,
       }
     } else {
       const error = `"." is not a valid path, please provide a full localpath to the repository`
@@ -86,6 +95,11 @@ export async function validatePath(
   try {
     await fs.promises.access(inputPath)
     logDebug('Path exists and is accessible', { inputPath })
+
+    // Store the validated path in WorkspaceService for future use
+    WorkspaceService.setKnownWorkspacePath(inputPath)
+    logDebug('Stored validated path in WorkspaceService', { inputPath })
+
     return { isValid: true, path: inputPath }
   } catch (error) {
     const errorMessage = `Path does not exist or is not accessible: ${inputPath}`

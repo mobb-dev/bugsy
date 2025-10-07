@@ -319,13 +319,27 @@ mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
     error
     uploadSessions {
       aiBlameInferenceId
-      prompt { url artifactId fileName uploadFieldsJSON uploadKey }
-      inference { url artifactId fileName uploadFieldsJSON uploadKey }
+      prompt {
+        url
+        artifactId
+        fileName
+        uploadFieldsJSON
+        uploadKey
+      }
+      inference {
+        url
+        artifactId
+        fileName
+        uploadFieldsJSON
+        uploadKey
+      }
     }
   }
 }
 
-mutation FinalizeAIBlameInferencesUpload($sessions: [AIBlameInferenceFinalizeInput!]!) {
+mutation FinalizeAIBlameInferencesUpload(
+  $sessions: [AIBlameInferenceFinalizeInput!]!
+) {
   finalizeAIBlameInferencesUpload(sessions: $sessions) {
     status
     error

@@ -62,7 +62,15 @@ To retrieve the available fixes, use one of these approaches:
 
 **📋 Valid offset range:** 0 to ${Math.max(0, totalCount - 1)}
 
-To fetch the fixes, run the \`${currentTool}\` tool again with the corrected parameters.
+### ⚠️ CRITICAL INSTRUCTION FOR AI AGENTS ⚠️
+
+**DO NOT AUTOMATICALLY FETCH FIXES WITHOUT EXPLICIT USER REQUEST**
+
+- **DO NOT** run the \`${currentTool}\` tool again on your own
+- **ONLY** fetch fixes if the user explicitly asks for them
+- **WAIT** for the user to specifically request fixes before proceeding
+
+If the user wants to fetch the fixes, they should explicitly ask you to run the \`${currentTool}\` tool again with the corrected parameters.
 `
 
 export const applyFixesPrompt = ({
@@ -215,12 +223,23 @@ ${
 
 You have viewed ${shownCount} out of ${totalCount} available fixes.
 
-To fetch additional fixes, run the \`${currentTool}\` tool again with the following parameters:
+### ⚠️ CRITICAL INSTRUCTION FOR AI AGENTS ⚠️
+
+**DO NOT AUTOMATICALLY FETCH ADDITIONAL FIXES WITHOUT EXPLICIT USER REQUEST**
+
+- **DO NOT** run the \`${currentTool}\` tool again on your own
+- **DO NOT** automatically retrieve more fixes
+- **ONLY** fetch additional fixes if the user explicitly asks for them
+- **WAIT** for the user to specifically request more fixes before proceeding
+
+### How Users Can Request Additional Fixes
+
+If the user wants to see more fixes, they should explicitly ask you to run the \`${currentTool}\` tool again with the following parameters:
 
 - **offset**: ${nextOffset}  _(start index for the next batch)_
 - **limit**:  <number_of_fixes_to_return>  _(optional – default is ${MCP_DEFAULT_LIMIT})_
 
-If you omit both **offset** and **limit**, the command will automatically return the next ${MCP_DEFAULT_LIMIT} fixes.
+If they omit both **offset** and **limit**, the command will automatically return the next ${MCP_DEFAULT_LIMIT} fixes.
 `
     : ''
 }
@@ -267,7 +286,7 @@ export const expiredReportPrompt = ({
 Your most recent vulnerability report for this repository **expired on ${lastReportDate}** and is no longer available for fetching automated fixes.
 
 ### 📋 Why Did This Happen?
-- Reports are automatically purged after a retention period for security and storage optimisation.
+- Reports are automatically purged after a retention period for security and storage optimization.
 - No new scans have been run since the last report expired.
 
 ### 🎯 Recommended Actions
@@ -366,13 +385,21 @@ This will scan up to the specified number of recently changed files.
 
 ### 🔄 Running a Fresh Scan
 
-To perform a **rescan** of your repository (fetching a brand-new vulnerability report and updated fixes), include the additional parameter:
+### ⚠️ CRITICAL INSTRUCTION FOR AI AGENTS ⚠️
+
+**DO NOT AUTOMATICALLY RUN RESCANS WITHOUT EXPLICIT USER REQUEST**
+
+- **DO NOT** run rescans on your own
+- **ONLY** perform rescans if the user explicitly asks for them
+- **WAIT** for the user to specifically request a rescan before proceeding
+
+If the user wants to perform a **rescan** of their repository (fetching a brand-new vulnerability report and updated fixes), they should explicitly ask you to include the additional parameter:
 
 - **rescan**: true
 
 This will start a new analysis, discard any cached results.
 
-⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because your repository is re-uploaded and re-analyzed from scratch.
+⚠️ *Note:* A full rescan may take longer to complete than simply fetching additional fixes because the repository is re-uploaded and re-analyzed from scratch.
 `
 
 export const noFixesFoundPrompt = ({

@@ -25,6 +25,12 @@
       }
     },
     {
+      "files": ["__tests__/**/*.{ts,tsx,mts,cts}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
       "files": ["__e2e__/**/*.mjs", "__e2e__/**/*.ts"],
       "parserOptions": {
         "project": "./__e2e__/tsconfig.json"

@@ -188,8 +188,11 @@ export class GQLClient {
     }
     const organization = orgAndProjectRes.user
       ?.at(0)
-      ?.userOrganizationsAndUserOrganizationRoles.map((org) => org.organization)
-      .filter((org) =>
+      ?.userOrganizationsAndUserOrganizationRoles.map(
+        (org: { organization: { id: string; projects?: { id: string }[] } }) =>
+          org.organization
+      )
+      .filter((org: { id: string }) =>
         userDefinedOrganizationId ? org.id === userDefinedOrganizationId : true
       )
       ?.at(0)

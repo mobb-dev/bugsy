@@ -12,6 +12,7 @@ import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { configStore } from '../services/ConfigStoreService'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
 import { mcpUsageService } from '../services/McpUsageService/McpUsageService'
+import { WorkspaceService } from '../services/WorkspaceService'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'
@@ -63,6 +64,13 @@ export class McpServer {
     signalOrError?: string | Error | number
   ): Promise<void> {
     try {
+      if (!mcpUsageService.hasOrganizationId()) {
+        logDebug(
+          `[McpServer] Skipping ${action} usage tracking - organization ID not available`
+        )
+        return
+      }
+
       if (action === 'start') {
         await mcpUsageService.trackServerStart()
       }
@@ -305,17 +313,15 @@ export class McpServer {
         return
       }
 
-      if (process.env['WORKSPACE_FOLDER_PATHS']) {
-        logDebug('WORKSPACE_FOLDER_PATHS is set', {
-          WORKSPACE_FOLDER_PATHS: process.env['WORKSPACE_FOLDER_PATHS'],
-        })
+      const workspacePath = WorkspaceService.getWorkspaceFolderPath()
+      if (workspacePath) {
         try {
           const checkForNewAvailableFixesTool = this.toolRegistry.getTool(
             MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES
           ) as CheckForNewAvailableFixesTool
           logInfo('Triggering periodic scan for new available fixes')
           checkForNewAvailableFixesTool.triggerScan({
-            path: process.env['WORKSPACE_FOLDER_PATHS'],
+            path: workspacePath,
             gqlClient,
           })
         } catch (error) {

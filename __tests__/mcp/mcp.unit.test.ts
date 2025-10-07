@@ -455,10 +455,47 @@ describe('MCP Server', () => {
         const tool = new FixVulnerabilitiesTool()
         const dotPaths = ['.', './']
 
-        for (const dotPath of dotPaths) {
-          await expect(tool.execute({ path: dotPath })).rejects.toThrow(
-            'Invalid path: potential security risk detected in path: "." is not a valid path, please provide a full localpath to the repository'
-          )
+        // Clear workspace environment variables and known workspace path to ensure dot paths are rejected
+        const originalPwd = process.env['PWD']
+        const originalWorkspaceFolderPaths =
+          process.env['WORKSPACE_FOLDER_PATHS']
+        const originalWorkspaceRoot = process.env['WORKSPACE_ROOT']
+        const originalProjectRoot = process.env['PROJECT_ROOT']
+
+        delete process.env['PWD']
+        delete process.env['WORKSPACE_FOLDER_PATHS']
+        delete process.env['WORKSPACE_ROOT']
+        delete process.env['PROJECT_ROOT']
+
+        // Also clear the known workspace path from WorkspaceService
+        const { WorkspaceService } = await import(
+          '../../src/mcp/services/WorkspaceService'
+        )
+        const originalKnownPath = (
+          WorkspaceService as unknown as { knownWorkspacePath?: string }
+        ).knownWorkspacePath
+        ;(
+          WorkspaceService as unknown as { knownWorkspacePath?: string }
+        ).knownWorkspacePath = undefined
+
+        try {
+          for (const dotPath of dotPaths) {
+            await expect(tool.execute({ path: dotPath })).rejects.toThrow(
+              'Invalid path: potential security risk detected in path: "." is not a valid path, please provide a full localpath to the repository'
+            )
+          }
+        } finally {
+          // Restore original environment variables and known workspace path
+          if (originalPwd) process.env['PWD'] = originalPwd
+          if (originalWorkspaceFolderPaths)
+            process.env['WORKSPACE_FOLDER_PATHS'] = originalWorkspaceFolderPaths
+          if (originalWorkspaceRoot)
+            process.env['WORKSPACE_ROOT'] = originalWorkspaceRoot
+          if (originalProjectRoot)
+            process.env['PROJECT_ROOT'] = originalProjectRoot
+          ;(
+            WorkspaceService as unknown as { knownWorkspacePath?: string }
+          ).knownWorkspacePath = originalKnownPath
         }
       })
     })

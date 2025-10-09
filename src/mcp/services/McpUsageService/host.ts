@@ -18,6 +18,13 @@ type MCPConfig = {
   servers?: {
     [name: string]: MCPServerConfig
   }
+  projects?: {
+    [projectPath: string]: {
+      mcpServers?: {
+        [name: string]: MCPServerConfig
+      }
+    }
+  }
 }
 
 type MCPServerInfo = {
@@ -43,60 +50,139 @@ const gitInfo = {
   email: runCommand('git config user.email'),
 }
 
-const getMCPConfigPath = (hostName: string): string => {
+const getClaudeWorkspacePaths = (): string[] => {
   const home = os.homedir()
+  const claudeIdePath = path.join(home, '.claude', 'ide')
+  const workspacePaths: string[] = []
+
+  if (!fs.existsSync(claudeIdePath)) {
+    return workspacePaths
+  }
+
+  try {
+    const lockFiles = fs
+      .readdirSync(claudeIdePath)
+      .filter((file) => file.endsWith('.lock'))
+
+    for (const lockFile of lockFiles) {
+      const lockFilePath = path.join(claudeIdePath, lockFile)
+      try {
+        const lockContent = JSON.parse(fs.readFileSync(lockFilePath, 'utf8'))
+        if (
+          lockContent.workspaceFolders &&
+          Array.isArray(lockContent.workspaceFolders)
+        ) {
+          workspacePaths.push(...lockContent.workspaceFolders)
+        }
+      } catch (error) {
+        logWarn(
+          `[UsageService] Failed to read Claude lock file: ${lockFilePath}`
+        )
+      }
+    }
+  } catch (error) {
+    logWarn(
+      `[UsageService] Failed to read Claude IDE directory: ${claudeIdePath}`
+    )
+  }
+
+  return workspacePaths
+}
+
+const getMCPConfigPaths = (hostName: string): string[] => {
+  const home = os.homedir()
+  const currentDir =
+    process.env['WORKSPACE_FOLDER_PATHS'] || process.env['PWD'] || process.cwd()
+
   switch (hostName.toLowerCase()) {
     case 'cursor':
-      return path.join(home, '.cursor', 'mcp.json')
+      return [
+        path.join(currentDir, '.cursor', 'mcp.json'), // local first
+        path.join(home, '.cursor', 'mcp.json'),
+      ]
     case 'windsurf':
-      return path.join(home, '.codeium', 'windsurf', 'mcp_config.json')
+      return [
+        path.join(currentDir, '.codeium', 'mcp_config.json'), // local first
+        path.join(home, '.codeium', 'windsurf', 'mcp_config.json'),
+      ]
     case 'webstorm':
-      return ''
+      return []
     case 'visualstudiocode':
     case 'vscode':
-      return process.platform === 'win32'
-        ? path.join(home, 'AppData', 'Roaming', 'Code', 'User', 'mcp.json')
-        : path.join(
-            home,
-            'Library',
-            'Application Support',
-            'Code',
-            'User',
-            'mcp.json'
-          )
-    case 'claude':
-      return path.join(home, '.claude.json')
+      return [
+        path.join(currentDir, '.vscode', 'mcp.json'), // local first
+        process.platform === 'win32'
+          ? path.join(home, 'AppData', 'Roaming', 'Code', 'User', 'mcp.json')
+          : path.join(
+              home,
+              'Library',
+              'Application Support',
+              'Code',
+              'User',
+              'mcp.json'
+            ),
+      ]
+    case 'claude': {
+      const claudePaths = [
+        path.join(currentDir, '.claude.json'), // local first
+        path.join(home, '.claude.json'),
+      ]
+
+      const workspacePaths = getClaudeWorkspacePaths()
+      for (const workspacePath of workspacePaths) {
+        claudePaths.push(path.join(workspacePath, '.mcp.json'))
+      }
+
+      return claudePaths
+    }
     default:
       throw new Error(`Unknown hostName: ${hostName}`)
   }
 }
 
-const readMCPConfig = (hostName: string): MCPConfig | null => {
-  const filePath = getMCPConfigPath(hostName)
+const readConfigFile = (filePath: string): MCPConfig | null => {
   if (!fs.existsSync(filePath)) return null
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  } catch (error) {
+    logWarn(`[UsageService] Failed to read MCP config: ${filePath}`)
+    return null
+  }
+}
 
-  const config = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+const readMCPConfig = (hostName: string): MCPConfig | null => {
+  const configPaths = getMCPConfigPaths(hostName)
 
-  if (hostName === 'claude' && config.projects) {
-    const allMcpServers: { [name: string]: MCPServerConfig } = {}
+  // Read all configs and merge them (later paths override earlier ones)
+  const mergedConfig: MCPConfig = {}
 
-    for (const projectPath in config.projects) {
-      const project = config.projects[projectPath]
-      if (project?.mcpServers) {
-        for (const [serverName, serverConfig] of Object.entries(
-          project.mcpServers
-        )) {
-          allMcpServers[serverName] = serverConfig as MCPServerConfig
+  for (const configPath of configPaths) {
+    const config = readConfigFile(configPath)
+    // Handle Claude's special project structure
+    if (hostName === 'claude' && config?.projects) {
+      const allMcpServers: { [name: string]: MCPServerConfig } = {}
+      for (const projectPath in config.projects) {
+        const project = config.projects[projectPath]
+        if (project?.mcpServers) {
+          Object.assign(allMcpServers, project.mcpServers)
         }
       }
+      mergedConfig.mcpServers = { ...mergedConfig.mcpServers, ...allMcpServers }
+      continue
     }
 
-    return {
-      mcpServers: allMcpServers,
+    if (config?.mcpServers) {
+      mergedConfig.mcpServers = {
+        ...mergedConfig.mcpServers,
+        ...config.mcpServers,
+      }
+    }
+    if (config?.servers) {
+      mergedConfig.servers = { ...mergedConfig.servers, ...config.servers }
     }
   }
 
-  return config
+  return Object.keys(mergedConfig).length > 0 ? mergedConfig : null
 }
 
 const getRunningProcesses = (): string => {

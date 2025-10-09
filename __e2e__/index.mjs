@@ -245,7 +245,8 @@ test('Bugsy E2E tests', async (t) => {
     }
   )
 
-  await t.test('scan: API key, Checkmarx, public GitHub repo', async () => {
+  // Skip test due to instability in Checkmarx servers.
+  await t.skip('scan: API key, Checkmarx, public GitHub repo', async () => {
     // Arrange
     await cleanupCheckmarxCliConfig()
     const apiKey = await mobbApi.createApiToken()

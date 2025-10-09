@@ -29,8 +29,10 @@ class McpUsageService {
   private readonly configKey = 'mcpUsage'
   private intervalId: NodeJS.Timeout | null = null
   private REST_API_URL: string = MCP_DEFAULT_REST_API_URL
+  private govOrgId: string
 
-  public constructor() {
+  public constructor(govOrgId: string) {
+    this.govOrgId = govOrgId
     this.startPeriodicTracking()
     if (process.env['API_URL']) {
       const url = new URL(process.env['API_URL'])
@@ -53,7 +55,7 @@ class McpUsageService {
       logDebug(`[UsageService] Triggering periodic usage service`, {
         MCP_PERIODIC_TRACK_INTERVAL,
       })
-      await mcpUsageService.trackServerStart()
+      await this.trackServerStart()
     }, 10000)
   }
 
@@ -80,20 +82,18 @@ class McpUsageService {
   }
 
   private getOrganizationId(): string {
-    const organizationId = configStore.get('GOV-ORG-ID') || ''
-    if (organizationId) {
-      logDebug('[UsageService] Using stored organization ID', {
-        organizationId: organizationId,
+    if (this.govOrgId) {
+      logDebug('[UsageService] Using provided organization ID', {
+        organizationId: this.govOrgId,
       })
-      return organizationId
+      return this.govOrgId
     }
 
     return ''
   }
 
   public hasOrganizationId(): boolean {
-    const organizationId = configStore.get('GOV-ORG-ID') || ''
-    return !!organizationId
+    return !!this.govOrgId
   }
 
   private createUsageData(
@@ -199,4 +199,4 @@ class McpUsageService {
   }
 }
 
-export const mcpUsageService = new McpUsageService()
+export { McpUsageService }

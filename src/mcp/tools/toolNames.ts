@@ -5,3 +5,5 @@ export const MCP_TOOL_FETCH_AVAILABLE_FIXES = 'fetch_available_fixes'
 
 export const MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES =
   'scan_and_fix_vulnerabilities'
+
+export const MCP_TOOL_CHECKER = 'mcp_checker'

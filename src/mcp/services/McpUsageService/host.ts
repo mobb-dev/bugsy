@@ -4,15 +4,19 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 
+type MCPServerConfig = {
+  command?: string
+  url?: string
+  args?: string[]
+  [key: string]: unknown
+}
+
 type MCPConfig = {
-  mcpServers?: { [name: string]: { command: string; args?: string[] } }
+  mcpServers?: {
+    [name: string]: MCPServerConfig
+  }
   servers?: {
-    [name: string]: {
-      command: string
-      args?: string[]
-      type?: string
-      version?: string
-    }
+    [name: string]: MCPServerConfig
   }
 }
 
@@ -24,7 +28,7 @@ type MCPServerInfo = {
   isRunning: boolean
 }
 
-const IDEs = ['cursor', 'windsurf', 'webstorm', 'vscode']
+const IDEs = ['cursor', 'windsurf', 'webstorm', 'vscode', 'claude']
 
 const runCommand = (cmd: string): string => {
   try {
@@ -60,6 +64,8 @@ const getMCPConfigPath = (hostName: string): string => {
             'User',
             'mcp.json'
           )
+    case 'claude':
+      return path.join(home, '.claude.json')
     default:
       throw new Error(`Unknown hostName: ${hostName}`)
   }
@@ -68,7 +74,29 @@ const getMCPConfigPath = (hostName: string): string => {
 const readMCPConfig = (hostName: string): MCPConfig | null => {
   const filePath = getMCPConfigPath(hostName)
   if (!fs.existsSync(filePath)) return null
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+
+  const config = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+
+  if (hostName === 'claude' && config.projects) {
+    const allMcpServers: { [name: string]: MCPServerConfig } = {}
+
+    for (const projectPath in config.projects) {
+      const project = config.projects[projectPath]
+      if (project?.mcpServers) {
+        for (const [serverName, serverConfig] of Object.entries(
+          project.mcpServers
+        )) {
+          allMcpServers[serverName] = serverConfig as MCPServerConfig
+        }
+      }
+    }
+
+    return {
+      mcpServers: allMcpServers,
+    }
+  }
+
+  return config
 }
 
 const getRunningProcesses = (): string => {
@@ -81,11 +109,34 @@ const getRunningProcesses = (): string => {
   }
 }
 
+const checkUrlAccessibility = (url: string): boolean => {
+  try {
+    // Use curl to check if the URL is accessible
+    // For SSE endpoints, we need to handle timeout as success since the server is responding
+    execSync(`curl -s --connect-timeout 5 --max-time 3 "${url}"`, {
+      encoding: 'utf8',
+      stdio: 'ignore',
+    })
+    return true
+  } catch (error) {
+    // Check if it's a timeout error (exit code 28) which means the server responded
+    if (error && typeof error === 'object' && 'status' in error) {
+      const exitCode = (error as { status: number }).status
+      // Exit code 28 is timeout, which for SSE means the server is responding
+      if (exitCode === 28) {
+        return true
+      }
+    }
+    return false
+  }
+}
+
 const knownHosts: Record<string, string> = {
   webstorm: 'WebStorm',
   cursor: 'Cursor',
   windsurf: 'Windsurf',
   code: 'Vscode',
+  claude: 'Claude',
 }
 
 const versionCommands: Record<string, Partial<Record<string, string[]>>> = {
@@ -120,6 +171,16 @@ const versionCommands: Record<string, Partial<Record<string, string[]>>> = {
     ],
     win32: [
       `(Get-Item "$env:LOCALAPPDATA\\Programs\\Microsoft VS Code\\Code.exe").VersionInfo.ProductVersion`,
+    ],
+  },
+  Claude: {
+    darwin: [
+      'claude --version',
+      "grep -A1 CFBundleVersion \"/Applications/Claude.app/Contents/Info.plist\" | grep '<string>' | sed -E 's/.*<string>(.*)<\\/string>.*/\\1/'",
+    ],
+    win32: [
+      'claude --version',
+      `(Get-Item "$env:LOCALAPPDATA\\Programs\\Claude\\Claude.exe").VersionInfo.ProductVersion`,
     ],
   },
 }
@@ -187,18 +248,22 @@ export const getHostInfo = (): {
     name: string
     command: string
     isRunning: boolean
+    url?: string
   }[] = []
   for (const [ide, cfg] of Object.entries(allConfigs)) {
     for (const [name, server] of Object.entries(
       cfg.mcpServers || cfg.servers || {}
     )) {
-      // if (server.command)
-      servers.push({
-        ide,
-        name,
-        command: server.command || '',
-        isRunning: false,
-      })
+      // Only process command-based servers, skip URL-based servers
+      if (server.command || server.url) {
+        servers.push({
+          ide,
+          name,
+          command: `${server.command} ${server.args ? server.args?.join(' ') : ''}`,
+          isRunning: false,
+          ...(server.url && { url: server.url }),
+        })
+      }
     }
   }
 
@@ -207,50 +272,60 @@ export const getHostInfo = (): {
   for (const line of runningLines) {
     if (line.includes('mcp')) {
       const cmdLower = line.toLowerCase()
+
+      // First, detect the IDE from the process tree
+      let ideName: string = 'Unknown'
+
+      // Try to get PID from the process line
+      const pidMatch = line.trim().split(/\s+/)[1] // ps aux: PID is usually 2nd column
+      const pid = parseInt(String(pidMatch), 10)
+
+      if (!isNaN(pid)) {
+        let currentPid = pid
+        while (currentPid && currentPid !== 0) {
+          const proc = getProcessInfo(currentPid)
+          if (!proc) break
+
+          const cmdProc = proc.cmd.toLowerCase()
+          const found = Object.keys(knownHosts).find((key) =>
+            cmdProc.includes(key)
+          )
+          if (found) {
+            ideName = knownHosts[found] || 'Unknown'
+            break
+          }
+          currentPid = parseInt(proc.ppid, 10)
+        }
+      }
+
+      // Now find the server that matches both the command AND the IDE
       const existingServer = servers.find(
-        (s) => s.command && cmdLower.includes(s.command.toLowerCase())
+        (s) =>
+          s.command &&
+          cmdLower.includes(s.command.toLowerCase()) &&
+          s.ide.toLowerCase() === ideName.toLowerCase()
       )
+
       if (existingServer) {
         existingServer.isRunning = true
       } else {
-        // fallback IDE detection
-        let ideName: string = 'Unknown'
-
-        // first try knownHosts detection from command line
-        const foundHostKey = Object.keys(knownHosts).find((key) =>
-          cmdLower.includes(key)
-        )
-        if (foundHostKey) {
-          ideName = knownHosts[foundHostKey] || 'Unknown'
-        } else {
-          // fallback: walk process tree using getProcessInfo
-          const pidMatch = line.trim().split(/\s+/)[1] // ps aux: PID is usually 2nd column
-          const pid = parseInt(String(pidMatch), 10)
-          if (!isNaN(pid)) {
-            let currentPid = pid
-            while (currentPid && currentPid !== 0) {
-              const proc = getProcessInfo(currentPid)
-              if (!proc) break
-
-              const cmdProc = proc.cmd.toLowerCase()
-              const found = Object.keys(knownHosts).find((key) =>
-                cmdProc.includes(key)
-              )
-              if (found) {
-                ideName = knownHosts[found] || 'Unknown'
-                break
-              }
-              currentPid = parseInt(proc.ppid, 10)
-            }
-          }
-        }
-
+        // If no exact match found, add as unknown server with detected IDE
         servers.push({
           ide: ideName.toLowerCase(),
           name: 'unknown',
           command: line.trim(),
           isRunning: true,
         })
+      }
+    }
+  }
+
+  // Check URL-based servers for accessibility
+  for (const server of servers) {
+    if (server.url && !server.isRunning) {
+      const isUrlAccessible = checkUrlAccessibility(server.url)
+      if (isUrlAccessible) {
+        server.isRunning = true
       }
     }
   }

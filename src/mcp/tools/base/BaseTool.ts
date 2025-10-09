@@ -26,6 +26,7 @@ export abstract class BaseTool {
     properties: Record<string, unknown>
     required: string[]
   }
+  public abstract readonly hasAuthentication: boolean
 
   public getDefinition(): ToolDefinition {
     return {
@@ -37,10 +38,12 @@ export abstract class BaseTool {
   }
 
   public async execute(args: unknown): Promise<ToolResponse> {
-    logDebug(`Authenticating tool: ${this.name}`, { args })
-    const mcpGqlClient = await createAuthenticatedMcpGQLClient()
-    const userInfo = await mcpGqlClient.getUserInfo()
-    logDebug('User authenticated successfully', { userInfo })
+    if (this.hasAuthentication) {
+      logDebug(`Authenticating tool: ${this.name}`, { args })
+      const mcpGqlClient = await createAuthenticatedMcpGQLClient()
+      const userInfo = await mcpGqlClient.getUserInfo()
+      logDebug('User authenticated successfully', { userInfo })
+    }
 
     // Validate input arguments - let validation errors bubble up as MCP errors
     const validatedArgs = this.validateInput(args)

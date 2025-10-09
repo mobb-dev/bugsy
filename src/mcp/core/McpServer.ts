@@ -9,13 +9,15 @@ import {
 } from '@modelcontextprotocol/sdk/types.js'
 
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
-import { configStore } from '../services/ConfigStoreService'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
-import { mcpUsageService } from '../services/McpUsageService/McpUsageService'
+import { McpUsageService } from '../services/McpUsageService'
 import { WorkspaceService } from '../services/WorkspaceService'
 import { BaseTool, ToolDefinition } from '../tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from '../tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
-import { MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES } from '../tools/toolNames'
+import {
+  MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
+  MCP_TOOL_CHECKER,
+} from '../tools/toolNames'
 import { isAutoScan } from './configs'
 import { ToolRegistry } from './ToolRegistry'
 
@@ -32,9 +34,11 @@ export class McpServer {
     new Map()
   private parentProcessCheckInterval?: NodeJS.Timeout
   private readonly parentPid: number
+  private mcpUsageService: McpUsageService | null
 
-  constructor(config: McpServerConfig) {
+  constructor(config: McpServerConfig, govOrgId: string = '') {
     this.parentPid = process.ppid
+    this.mcpUsageService = govOrgId ? new McpUsageService(govOrgId) : null
 
     this.server = new Server(
       {
@@ -64,7 +68,7 @@ export class McpServer {
     signalOrError?: string | Error | number
   ): Promise<void> {
     try {
-      if (!mcpUsageService.hasOrganizationId()) {
+      if (!this.mcpUsageService?.hasOrganizationId()) {
         logDebug(
           `[McpServer] Skipping ${action} usage tracking - organization ID not available`
         )
@@ -72,11 +76,11 @@ export class McpServer {
       }
 
       if (action === 'start') {
-        await mcpUsageService.trackServerStart()
+        await this.mcpUsageService?.trackServerStart()
       }
       if (action === 'stop') {
-        await mcpUsageService.trackServerStop()
-        mcpUsageService.reset()
+        await this.mcpUsageService?.trackServerStop()
+        this.mcpUsageService?.reset()
       }
     } catch (usageError) {
       logWarn(`Failed to track MCP server ${action}`, {
@@ -351,11 +355,28 @@ export class McpServer {
   public async handleListToolsRequest(
     request: ListToolsRequest
   ): Promise<ListToolsResult> {
-    // tracking only
-    const govOrgId = configStore.get('GOV-ORG-ID') || ''
-    if (govOrgId) {
+    const mcpCheckerTool = this.toolRegistry.getToolDefinition(MCP_TOOL_CHECKER)
+    if (mcpCheckerTool) {
       return {
-        tools: [],
+        tools: [
+          {
+            name: mcpCheckerTool.name,
+            display_name: mcpCheckerTool.display_name || mcpCheckerTool.name,
+            description: mcpCheckerTool.description,
+            inputSchema: {
+              type: 'object' as const,
+              properties:
+                (
+                  mcpCheckerTool.inputSchema as {
+                    properties?: Record<string, unknown>
+                  }
+                ).properties || {},
+              required:
+                (mcpCheckerTool.inputSchema as { required?: string[] })
+                  .required || [],
+            },
+          },
+        ],
       }
     }
 

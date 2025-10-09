@@ -22,6 +22,10 @@ export class ToolRegistry {
     return this.tools.get(name)
   }
 
+  public getToolDefinition(name: string): ToolDefinition | undefined {
+    return this.tools.get(name)?.getDefinition()
+  }
+
   public getAllTools(): ToolDefinition[] {
     return Array.from(this.tools.values()).map((tool) => tool.getDefinition())
   }

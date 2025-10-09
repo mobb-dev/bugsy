@@ -2,23 +2,26 @@
 import { packageJson } from '../utils'
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
-import { configStore } from './services/ConfigStoreService'
 import { BaseTool } from './tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from './tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
+import { McpCheckerTool } from './tools/mcpChecker/mcpCheckerTool'
 import { ScanAndFixVulnerabilitiesTool } from './tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'
 
 /**
  * Creates and configures the MCP server with all tools and services
  */
-export function createMcpServer(): McpServer {
+export function createMcpServer(govOrgId?: string): McpServer {
   logDebug('Creating MCP server')
 
   // Create the server
-  const server = new McpServer({
-    name: 'mobb-mcp',
-    version: packageJson.version,
-  })
+  const server = new McpServer(
+    {
+      name: 'mobb-mcp',
+      version: packageJson.version,
+    },
+    govOrgId
+  )
 
   // Determine which tools should be enabled based on the TOOLS_ENABLED env variable.
   // If TOOLS_ENABLED is not provided, all tools will be registered (existing behaviour).
@@ -52,6 +55,11 @@ export function createMcpServer(): McpServer {
   registerIfEnabled(fetchAvailableFixesTool)
   registerIfEnabled(checkForNewAvailableFixesTool)
 
+  if (govOrgId) {
+    const mcpCheckerTool = new McpCheckerTool(govOrgId)
+    registerIfEnabled(mcpCheckerTool)
+  }
+
   logInfo('MCP server created and configured')
   return server
 }
@@ -66,9 +74,7 @@ export async function startMcpServer({
 }): Promise<void> {
   try {
     logDebug('Initializing MCP server')
-    configStore.set('GOV-ORG-ID', govOrgId)
-    // Create and configure the server
-    const server = createMcpServer()
+    const server = createMcpServer(govOrgId)
 
     // Start the server (now handles its own lifecycle)
     await server.start()

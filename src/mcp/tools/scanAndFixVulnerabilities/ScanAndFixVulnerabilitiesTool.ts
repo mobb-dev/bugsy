@@ -53,6 +53,8 @@ Example payload:
   "rescan": false
 }`
 
+  hasAuthentication = true
+
   inputValidationSchema = z.object({
     path: z
       .string()
@@ -114,7 +116,7 @@ Example payload:
   }
 
   async executeInternal(args: z.infer<typeof this.inputValidationSchema>) {
-    logDebug(`Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`, {
+    logDebug(`Executing tool: ${this.name}`, {
       path: args.path,
     })
 

@@ -33,6 +33,8 @@ The tool will:
 
 Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only need a fixes summary and do NOT want to perform scanning or code modifications.`
 
+  hasAuthentication = true
+
   inputSchema = {
     type: 'object' as const,
     properties: {

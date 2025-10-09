@@ -33,6 +33,8 @@ Example payload:
   "path": "/home/user/my-project"
 }`
 
+  hasAuthentication = true
+
   inputSchema = {
     type: 'object' as const,
     properties: {

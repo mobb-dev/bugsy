@@ -42,7 +42,7 @@ import {
 import { expectLoggerMessage } from './mcp/helpers/testHelpers'
 
 // Filter for debug logs to show on test failure
-const FAIL_DEBUG_LOG_FILTER = ['[BACKGROUND_INITIAL]', '[BACKGROUND_PERIODIC]']
+const FAIL_DEBUG_LOG_FILTER = ['[FULL_SCAN]', '[BACKGROUND_INITIAL]']
 
 vi.useFakeTimers({
   shouldAdvanceTime: true,
@@ -78,7 +78,6 @@ describe('mcp tests', () => {
   let nonExistentPath: string
   let emptyRepoPath: string
   let activeRepoPath: string
-  let activeSecondRepoPath: string
   let activeNoChangesRepoPath: string
   let activeNonGitRepoPath: string
   let nonRepoEmptyPath: string
@@ -94,7 +93,15 @@ describe('mcp tests', () => {
   const replaceMcpClient = async (newClient: InlineMCPClient) => {
     if (mcpClient) {
       try {
-        await mcpClient.cleanup()
+        // Add timeout to cleanup to prevent hanging
+        const cleanupPromise = mcpClient.cleanup()
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Cleanup timeout')), 5000)
+        )
+        await Promise.race([cleanupPromise, timeoutPromise])
+
+        // Wait a bit to ensure event listeners are properly removed
+        await sleep(100)
       } catch (error) {
         console.log('Error during MCP client cleanup:', error)
       }
@@ -118,7 +125,6 @@ describe('mcp tests', () => {
 
     emptyRepoPath = emptyRepo.getRepoPath()
     activeRepoPath = activeRepo.getRepoPath()
-    activeSecondRepoPath = activeSecondRepo.getRepoPath()
     activeNoChangesRepoPath = activeNoChangesRepo.getRepoPath()
     activeNonGitRepoPath = nonGitRepo.getRepoPath()
 
@@ -126,7 +132,29 @@ describe('mcp tests', () => {
     mcpClient = new InlineMCPClient(server)
   })
 
-  beforeEach(() => {
+  // Helper function to create fresh, isolated repository for each test
+  const createFreshRepo = (
+    type: 'git' | 'non-git' | 'no-changes' | 'empty' = 'git'
+  ) => {
+    const repoUrl = `https://github.com/test-org/test-repo-${Math.random()
+      .toString(36)
+      .substring(2, 15)}`
+
+    switch (type) {
+      case 'git':
+        return new ActiveGitRepo(undefined, { repoUrl })
+      case 'non-git':
+        return new NonGitRepo()
+      case 'no-changes':
+        return new NoChangesGitRepo()
+      case 'empty':
+        return new EmptyGitRepo()
+      default:
+        return new ActiveGitRepo(undefined, { repoUrl })
+    }
+  }
+
+  beforeEach(async () => {
     logs = []
     vi.spyOn(LoggerModule, 'logDebug').mockImplementation((message, data) => {
       logs.push({ message, data })
@@ -143,13 +171,31 @@ describe('mcp tests', () => {
     vi.spyOn(LoggerModule, 'log').mockImplementation((message, data) => {
       logs.push({ message, data })
     })
+
+    // Clear any existing repository without creating a new one
+    // Let each test create its own repository as needed
+    try {
+      if (activeSecondRepo) {
+        activeSecondRepo.cleanupAll()
+      }
+    } catch (error) {
+      console.log(
+        'Warning: Could not cleanup activeSecondRepo in beforeEach:',
+        error
+      )
+    }
   })
 
   afterEach(async (context) => {
     // Cleanup MCP client if it exists
     if (mcpClient) {
       try {
-        await mcpClient.cleanup()
+        // Add timeout to cleanup to prevent hanging
+        const cleanupPromise = mcpClient.cleanup()
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Cleanup timeout')), 5000)
+        )
+        await Promise.race([cleanupPromise, timeoutPromise])
       } catch (error) {
         console.log('Error during MCP client cleanup:', error)
       }
@@ -179,6 +225,19 @@ describe('mcp tests', () => {
   })
 
   afterAll(async () => {
+    // Clean up the final MCP client
+    if (mcpClient) {
+      try {
+        const cleanupPromise = mcpClient.cleanup()
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Cleanup timeout')), 5000)
+        )
+        await Promise.race([cleanupPromise, timeoutPromise])
+      } catch (error) {
+        console.log('Error during final MCP client cleanup:', error)
+      }
+    }
+
     // Clean up repositories created for the tests
     const repoHelpers: MockRepo[] = [
       emptyRepo,
@@ -295,8 +354,7 @@ describe('mcp tests', () => {
       })
     })
 
-    //TODO: Lior - enable these tests on CI after fixing the issues there
-    it.skip(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+    it(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       // Verify the directory still exists before running the test
       expect(existsSync(activeNonGitRepoPath)).toBe(true)
       expect(existsSync(join(activeNonGitRepoPath, 'sample1.py'))).toBe(true)
@@ -317,8 +375,8 @@ describe('mcp tests', () => {
         ],
       })
     })
-    //TODO: Lior - enable these tests on CI after fixing the issues there
-    it.skip(`should handle active git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+
+    it(`should handle active git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
         mcpClient.callTool<CallToolResult>(
           MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -335,8 +393,7 @@ describe('mcp tests', () => {
         ],
       })
     })
-    //TODO: Lior - enable these tests on CI after fixing the issues there
-    it.skip(`should handle active (no changes) git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+    it(`should handle active (no changes) git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
         mcpClient.callTool<CallToolResult>(
           MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -413,6 +470,7 @@ describe('mcp tests', () => {
       })
     })
   })
+
   describe(`${MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES} tool`, () => {
     // --------------------- Shared helper utilities --------------------- //
     /**
@@ -515,25 +573,28 @@ describe('mcp tests', () => {
         : new Error(`expectSingleFix: condition not met within ${timeout}ms`)
     }
 
-    //TODO: Lior - enable these tests on CI after fixing the issues there
-    it.skip('should run the initial full scan', async () => {
+    it('should run the initial full scan', async () => {
+      const testRepo = createFreshRepo('git')
+      const testRepoPath = testRepo.getRepoPath()
+      const testRepoUrl = testRepo.getRepoUrl()
+
       const gqlClient = new GQLClient({
         token,
         type: 'token',
       })
       process.env['MVS_AUTO_FIX'] = 'false'
-      process.env['WORKSPACE_FOLDER_PATHS'] = activeSecondRepoPath
+      process.env['WORKSPACE_FOLDER_PATHS'] = testRepoPath
       await replaceMcpClient(new InlineMCPClient(createMcpServer()))
       await mcpClient.listTools()
 
       await expectLoggerMessage(logs, 'Triggering initial full security scan')
       await expectLoggerMessage(logs, 'Security fixes retrieved')
       await expectLoggerMessage(logs, 'Full scan completed', {
-        path: activeSecondRepoPath,
+        path: testRepoPath,
       })
 
       const reports = await gqlClient.getFixReportsByRepoUrl({
-        repoUrl: randomRepoUrl,
+        repoUrl: testRepoUrl,
       })
       expect(reports.fixReport.length).toBe(2)
       expect(reports.fixReport[0]?.state).toBe('Finished')
@@ -541,13 +602,16 @@ describe('mcp tests', () => {
       await mcpClient.listTools()
       await sleep(5000)
       const reports2 = await gqlClient.getFixReportsByRepoUrl({
-        repoUrl: randomRepoUrl,
+        repoUrl: testRepoUrl,
       })
       expect(reports2.fixReport.length).toBe(2)
       expect(reports2.fixReport[0]?.state).toBe('Finished')
       expect(reports2.fixReport[1]?.state).toBe('Finished')
       delete process.env['WORKSPACE_FOLDER_PATHS']
-    }, 200000)
+
+      // Cleanup test repository
+      testRepo.cleanupAll()
+    }, 120000)
 
     it('should handle missing path parameter', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
@@ -571,8 +635,7 @@ describe('mcp tests', () => {
       )
     })
 
-    //TODO: Lior - enable these tests on CI after fixing the issues there
-    it.skip('no initial fixes', async () => {
+    it('no initial fixes', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
       activeRepo.updateFileContent(0, benignFileContent)
       activeRepo.updateFileContent(1, benignFileContent)
@@ -734,7 +797,7 @@ describe('mcp tests', () => {
         testRepo.addFile('vulnerable.py', pyVulnerableFileContent)
         testRepo.addFile('vulnerable.html', htmlVulnerableFileContent)
 
-        /// uncomment after server fix of irrelvant detection
+        /// uncomment after server fix of irrelevant detection
         testRepo.addFile('__tests__/vulnerable.js', jsVulnerableFileContent)
 
         try {
@@ -747,23 +810,17 @@ describe('mcp tests', () => {
           )
           const firstContent = scanResult.content[0]
 
-          console.log('Assertion: scan result content is defined and not empty')
           expect(firstContent).toBeDefined()
           expect((firstContent?.text as string).length).toBeGreaterThan(0)
 
-          console.log('Assertion: Successfully auto-applied logs exist')
           await expectLoggerMessage(logs, 'Successfully auto-applied')
 
-          console.log('Assertion: MVS_AUTO_FIX override logs exist')
           await expectLoggerMessage(logs, 'MVS_AUTO_FIX override')
 
-          console.log('Assertion: mvs_auto_fix setting true logs exist')
           await expectLoggerMessage(logs, 'mvs_auto_fix setting: true')
-          /// uncomment after server fix of irrelvant detection
-          // console.log('Assertion: MVS_AUTO_FIX filtering completed logs exist')
+          /// uncomment after server fix of irrelevant detection
           // await expectLoggerMessage(logs, 'MVS_AUTO_FIX filtering completed')
 
-          // console.log('Assertion: Fix filtered out logs exist for test file')
           // await expectLoggerMessage(logs, 'Fix.*filtered out')
 
           const autoApplicationLogs = logs.filter(
@@ -772,7 +829,6 @@ describe('mcp tests', () => {
               (log.message.includes('Successfully auto-applied') ||
                 log.message.includes('Auto-applying fix'))
           )
-          console.log('Assertion: auto-application logs exist')
           expect(autoApplicationLogs.length).toBeGreaterThan(0)
 
           const commentLogs = logs.filter(
@@ -780,7 +836,6 @@ describe('mcp tests', () => {
               typeof log.message === 'string' &&
               log.message.includes('Debug mode: Adding fix comment')
           )
-          console.log('Assertion: fix comment logs exist')
           expect(commentLogs.length).toBeGreaterThan(0)
 
           const jsFilePath = join(testRepoPath, 'vulnerable.js')
@@ -795,58 +850,39 @@ describe('mcp tests', () => {
             '// Mobb security fix applied'
           )
           const hasPyComment = pyContent.includes('# Mobb security fix applied')
-          const hasHtmlComment = htmlContent.includes(
-            'Mobb security fix applied'
-          )
 
           const jsAndPyPatched = hasJsComment && hasPyComment
-          console.log(
-            'Assertion: JS and Python files are patched:',
-            jsAndPyPatched
-          )
           expect(jsAndPyPatched).toBe(true)
 
-          console.log(
-            'Assertion: HTML file contains fix comment:',
-            hasHtmlComment
-          )
           expect(htmlContent).toContain('Mobb security fix applied')
 
-          console.log('Assertion: JS file has fix comment:', hasJsComment)
           expect(hasJsComment).toBe(true)
 
-          console.log('Assertion: Python file has fix comment:', hasPyComment)
           expect(hasPyComment).toBe(true)
 
-          /// uncomment after server fix of irrelvant detection
+          /// uncomment after server fix of irrelevant detection
           // const testFilePath = join(testRepoPath, '__tests__/vulnerable.js')
           // const testFileContent = readFileSync(testFilePath, 'utf8')
           // console.log(
-          //   'Assertion: Test file should NOT have fix comment (filtered out)'
           // )
           // const hasTestFileComment = testFileContent.includes(
           //   '# Mobb security fix applied'
           // )
           // expect(hasTestFileComment).toBe(false)
 
-          // console.log('Assertion: Test file content should be unchanged')
           // expect(testFileContent).toBe(pyVulnerableFileContent)
 
           // console.log(
-          //   'Assertion: Check that exactly 3 files were patched (not 4)'
           // )
           // const patchApplicationLogs = logs.filter(
           //   (log) =>
           //     typeof log.message === 'string' &&
           //     log.message.includes('Successfully applied fix')
           // )
-          // console.log('Assertion: Should have exactly 3 patch applications')
           // expect(patchApplicationLogs.length).toBe(3)
 
-          console.log('Assertion: scan result contains "fix"')
           expect(firstContent?.text).toContain('fix')
 
-          console.log('Assertion: scan result contains "vulnerability"')
           expect(firstContent?.text).toContain('vulnerability')
         } finally {
           delete process.env['WORKSPACE_FOLDER_PATHS']
@@ -881,7 +917,6 @@ describe('mcp tests', () => {
           )
 
           const secondTestContent = scanResult.content[0]
-          console.log('Assertion: scan result content is defined')
           expect(secondTestContent).toBeDefined()
 
           const discardedFixesLogs = logs.filter(
@@ -890,10 +925,6 @@ describe('mcp tests', () => {
               log.message.includes('Discarded') &&
               log.message.includes('fixes due to file modifications after scan')
           )
-          console.log(
-            'Assertion: discarded fixes logs exist:',
-            discardedFixesLogs.length
-          )
           expect(discardedFixesLogs.length).toBeGreaterThan(0)
 
           const appliedFixLogs = logs.filter(
@@ -901,29 +932,11 @@ describe('mcp tests', () => {
               typeof log.message === 'string' &&
               log.message.includes('Successfully applied fix')
           )
-          console.log(
-            'Assertion: no fixes were applied:',
-            appliedFixLogs.length === 0
-          )
           expect(appliedFixLogs.length).toBe(0)
 
           const finalContent = readFileSync(jsFilePath, 'utf8')
-          const hasFixComment = finalContent.includes(
-            'Mobb security fix applied'
-          )
-          console.log(
-            'Assertion: file was not modified with fix comment:',
-            !hasFixComment
-          )
           expect(finalContent).not.toContain('Mobb security fix applied')
 
-          const hasMonitoringMessage = (
-            secondTestContent?.text as string
-          )?.includes('MOBB AUTO-FIX MONITORING ACTIVE')
-          console.log(
-            'Assertion: scan result contains monitoring message:',
-            hasMonitoringMessage
-          )
           expect(secondTestContent?.text).toContain(
             'MOBB AUTO-FIX MONITORING ACTIVE'
           )
@@ -952,17 +965,13 @@ describe('mcp tests', () => {
           )
           const firstContent = scanResult.content[0]
 
-          console.log('Assertion: scan result content is defined and not empty')
           expect(firstContent).toBeDefined()
           expect((firstContent?.text as string).length).toBeGreaterThan(0)
 
-          console.log('Assertion: Successfully auto-applied logs exist')
           await expectLoggerMessage(logs, 'Successfully auto-applied')
 
-          console.log('Assertion: MVS_AUTO_FIX override logs exist')
           await expectLoggerMessage(logs, 'MVS_AUTO_FIX override')
 
-          console.log('Assertion: mvs_auto_fix setting true logs exist')
           await expectLoggerMessage(logs, 'mvs_auto_fix setting: true')
 
           const autoApplicationLogs = logs.filter(
@@ -971,7 +980,6 @@ describe('mcp tests', () => {
               (log.message.includes('Successfully auto-applied') ||
                 log.message.includes('Auto-applying fix'))
           )
-          console.log('Assertion: auto-application logs exist')
           expect(autoApplicationLogs.length).toBeGreaterThan(0)
 
           const commentLogs = logs.filter(
@@ -979,7 +987,6 @@ describe('mcp tests', () => {
               typeof log.message === 'string' &&
               log.message.includes('Debug mode: Adding fix comment')
           )
-          console.log('Assertion: fix comment logs exist')
           expect(commentLogs.length).toBeGreaterThan(0)
 
           const jsFilePath = join(testRepoPath, 'vulnerable.js')
@@ -990,7 +997,6 @@ describe('mcp tests', () => {
             '// Mobb security fix applied'
           )
 
-          console.log('Assertion: JS file has fix comment:', hasJsComment)
           expect(hasJsComment).toBe(true)
 
           testRepo.updateFile('vulnerable.js', jsVulnerableFileContent)
@@ -1006,7 +1012,6 @@ describe('mcp tests', () => {
             'utf8'
           )
 
-          console.log('Assertion: File was NOT patched the second time')
           expect(jsContentAfterSecondScan).toBe(jsVulnerableFileContent)
           expect(jsContentAfterSecondScan).not.toContain(
             '// Mobb security fix applied'
@@ -1021,9 +1026,6 @@ describe('mcp tests', () => {
               )
           )
 
-          console.log(
-            'Assertion: Filter logs exist showing fixes were filtered out due to AUTO_MVS download source'
-          )
           expect(filterLogs.length).toBeGreaterThan(0)
 
           // Also check for the completion log
@@ -1033,7 +1035,6 @@ describe('mcp tests', () => {
               log.message.includes('MVS_AUTO_FIX filtering completed')
           )
 
-          console.log('Assertion: MVS_AUTO_FIX filtering completion logs exist')
           expect(completionLogs.length).toBeGreaterThan(0)
         } finally {
           // Restore the original setInterval
@@ -1063,30 +1064,23 @@ describe('mcp tests', () => {
           )
           const thirdTestContent = scanResult.content[0]
 
-          console.log('Assertion: scan result content is defined and valid')
           expect(thirdTestContent).toBeDefined()
           expect(typeof thirdTestContent?.text).toBe('string')
           expect((thirdTestContent?.text as string).length).toBeGreaterThan(0)
 
-          console.log('Assertion: check_for_new_available_fixes tool executed')
           await expectLoggerMessage(
             logs,
             'Executing tool: check_for_new_available_fixes'
           )
 
-          console.log('Assertion: patch application started')
           await expectLoggerMessage(logs, 'Starting patch application')
 
-          console.log('Assertion: fixes were grouped')
           await expectLoggerMessage(logs, 'Grouped fixes')
 
-          console.log('Assertion: fix attempt occurred')
           await expectLoggerMessage(logs, 'Attempting fix')
 
-          console.log('Assertion: fix was applied successfully')
           await expectLoggerMessage(logs, 'Successfully applied fix')
 
-          console.log('Assertion: second check_for_new_available_fixes call')
           await expectLoggerMessage(logs, 'check_for_new_available_fixes')
 
           const appliedFixesLogs = logs.filter(
@@ -1105,25 +1099,12 @@ describe('mcp tests', () => {
               log.message.includes('Grouped fixes')
           )
 
-          console.log(
-            'Assertion: fix grouping occurred:',
-            groupedFixesLogs.length > 0
-          )
           expect(groupedFixesLogs.length).toBeGreaterThan(0)
 
-          console.log(
-            'Assertion: fix attempts occurred:',
-            attemptingFixLogs.length > 0
-          )
           expect(attemptingFixLogs.length).toBeGreaterThan(0)
 
-          console.log(
-            'Assertion: fixes were applied:',
-            appliedFixesLogs.length > 0
-          )
           expect(appliedFixesLogs.length).toBeGreaterThan(0)
 
-          console.log('Assertion: some fixes were skipped')
           await expectLoggerMessage(
             logs,
             'fixes skipped because other fixes were successfully applied'
@@ -1133,10 +1114,6 @@ describe('mcp tests', () => {
           const fixComments = (
             finalContent.match(/# Mobb security fix applied/g) || []
           ).length
-          console.log(
-            'Assertion: at most one fix comment applied:',
-            fixComments <= 1
-          )
           expect(fixComments).toBeLessThanOrEqual(1)
 
           const originalContent = multiVulnerableFileContent
@@ -1161,23 +1138,13 @@ describe('mcp tests', () => {
             sqlInjectionFixed ||
             cmdInjection1Fixed ||
             cmdInjection2Fixed
-          console.log('Assertion: some vulnerability was fixed:', hasVulnFix)
           expect(hasVulnFix).toBe(true)
 
-          console.log('Assertion: scan result contains "fix"')
           expect(thirdTestContent?.text).toContain('fix')
 
-          console.log('Assertion: scan result contains "vulnerability"')
           expect(thirdTestContent?.text).toContain('vulnerability')
 
           const successPattern = /success|applied|fixed|complete/
-          const hasSuccessPattern = (thirdTestContent?.text as string)
-            ?.toLowerCase()
-            .match(successPattern)
-          console.log(
-            'Assertion: scan result indicates success:',
-            !!hasSuccessPattern
-          )
           expect((thirdTestContent?.text as string).toLowerCase()).toMatch(
             successPattern
           )

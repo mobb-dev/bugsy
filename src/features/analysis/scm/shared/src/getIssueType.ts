@@ -161,6 +161,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.ReturnInInit]: 'Return in Init',
   [IssueType_Enum.ActionNotPinnedToCommitSha]:
     'Action Not Pinned to Commit Sha',
+  [IssueType_Enum.DjangoBlankFieldNeedsNullOrDefault]:
+    'Django Blank Field Needs Null or Default',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

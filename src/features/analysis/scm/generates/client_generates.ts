@@ -14868,6 +14868,8 @@ export enum IssueType_Enum {
   DefaultRightsInObjDefinition = 'DEFAULT_RIGHTS_IN_OBJ_DEFINITION',
   /** Deprecated Function */
   DeprecatedFunction = 'DEPRECATED_FUNCTION',
+  /** DJANGO_BLANK_FIELD_NEEDS_NULL_OR_DEFAULT */
+  DjangoBlankFieldNeedsNullOrDefault = 'DJANGO_BLANK_FIELD_NEEDS_NULL_OR_DEFAULT',
   /** A denial of service by exploiting string builder */
   DosStringBuilder = 'DOS_STRING_BUILDER',
   /** DO_NOT_RAISE_EXCEPTION */

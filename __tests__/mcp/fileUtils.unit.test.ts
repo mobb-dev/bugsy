@@ -599,47 +599,47 @@ describe('FileUtils', () => {
         {
           fileName: 'src/index.js',
           fileContent: 'console.log("Hello");',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'src/components/Button.jsx',
           fileContent: 'export const Button = () => {};',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'src/utils.ts',
           fileContent: 'export function add(a, b) { return a + b; }',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'test/utils.test.js',
           fileContent: 'test("add", () => {});',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'config.json',
           fileContent: '{"name": "test"}',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'README.md',
           fileContent: '# Test Project',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'node_modules/lib/index.js',
           fileContent: 'module.exports = {};',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'dist/bundle.min.js',
           fileContent: 'console.log("minified");',
-          isCommited: true,
+          isCommitted: true,
         },
         {
           fileName: 'vendor/library.js',
           fileContent: 'third-party code',
-          isCommited: true,
+          isCommitted: true,
         },
       ]
 
@@ -818,72 +818,72 @@ vendor/
         // Matches "filename   " (trailing spaces trimmed to 'filename')
         {
           fileName: 'filename/dummy.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "\\!important!.py"
         {
           fileName: '!important!.py/dummy.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "/root_level_only.py"
         {
           fileName: 'root_level_only.py/dummy.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "docs/generated/"
         {
           fileName: 'docs/generated/index.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "logs/"
         {
           fileName: 'logs/log.txt',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "dist" (root-level dir)
         {
           fileName: 'dist/file.txt',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "TODO.js"
         {
           fileName: 'TODO.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "*.java"
         {
           fileName: 'Example.java',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "file?.js"
         {
           fileName: 'file1.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "[a-z]est.js"
         {
           fileName: 'test.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "**/node_modules"
         {
           fileName: 'src/node_modules/module.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "generated/**"
         {
           fileName: 'generated/script.js',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "doc/**/temp"
         {
           fileName: 'doc/inner/temp/file.txt',
-          isCommited: false,
+          isCommitted: false,
         },
         // Matches "dist/**/node_modules/*." – create a file ending with a dot
         {
           fileName: 'dist/foo/node_modules/bar.',
-          isCommited: false,
+          isCommitted: false,
         },
       ]
 
@@ -921,12 +921,12 @@ vendor/
         {
           fileName: 'node_modules/pkg/index.js',
           fileContent: 'console.log(0)',
-          isCommited: false,
+          isCommitted: false,
         },
         {
           fileName: 'src/app.js',
           fileContent: 'console.log(1)',
-          isCommited: false,
+          isCommitted: false,
         },
       ])
 
@@ -952,12 +952,12 @@ vendor/
         {
           fileName: 'dist/output.js',
           fileContent: 'console.log(2)',
-          isCommited: false,
+          isCommitted: false,
         },
         {
           fileName: 'src/index.js',
           fileContent: 'console.log(3)',
-          isCommited: false,
+          isCommitted: false,
         },
       ])
 

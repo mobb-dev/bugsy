@@ -9,7 +9,7 @@ import fs from 'fs/promises'
 import parseDiff from 'parse-diff'
 import path from 'path'
 
-import { MCP_AUTO_FIX_DEBUG_MODE, MCP_DEFAULT_API_URL } from '../core/configs'
+import { MCP_AUTO_FIX_DEBUG_MODE } from '../core/configs'
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { McpFix } from '../types'
 import { McpGQLClient } from './McpGQLClient'
@@ -201,17 +201,6 @@ export class PatchApplicationService {
       // Add Mobb security fix comment at the bottom
       const fixType = fix.safeIssueType || 'Security Issue'
 
-      // Use the fixUrl from the fix object if available, otherwise construct it
-      let fixLink: string
-      if (fix.fixUrl) {
-        fixLink = fix.fixUrl
-      } else {
-        // Fallback to simple URL format (for backward compatibility)
-        const apiUrl = process.env['API_URL'] || MCP_DEFAULT_API_URL
-        const appBaseUrl = apiUrl.replace('/v1/graphql', '').replace('api.', '')
-        fixLink = `${appBaseUrl}/fixes/${fix.id}`
-      }
-
       const commentPrefix = this.getCommentSyntax(filePath)
 
       // Check if the last line is already a Mobb fix comment
@@ -222,19 +211,20 @@ export class PatchApplicationService {
       // Determine spacing: add empty line unless the last line is already a fix comment
       const spacing = isMobbComment ? '\n' : '\n\n'
 
+      const fixComment = `Mobb security fix applied: ${fixType} ${fix.fixUrl || ''}`
       let comment: string
       if (commentPrefix === '<!--') {
         // HTML/XML style comment
-        comment = `${spacing}<!-- Mobb security fix applied: ${fixType} ${fixLink} -->`
+        comment = `${spacing}<!-- ${fixComment} -->`
       } else if (commentPrefix === '/*') {
         // CSS style comment
-        comment = `${spacing}/* Mobb security fix applied: ${fixType} ${fixLink} */`
+        comment = `${spacing}/* ${fixComment} */`
       } else if (commentPrefix === '(*') {
         // OCaml style comment
-        comment = `${spacing}(* Mobb security fix applied: ${fixType} ${fixLink} *)`
+        comment = `${spacing}(* ${fixComment} *)`
       } else {
         // Single line comment style
-        comment = `${spacing}${commentPrefix} Mobb security fix applied: ${fixType} ${fixLink}`
+        comment = `${spacing}${commentPrefix} ${fixComment}`
       }
 
       finalContent = content + comment
@@ -243,7 +233,7 @@ export class PatchApplicationService {
         {
           fixId: fix.id,
           fixType,
-          fixLink,
+          fixLink: fix.fixUrl,
           commentSyntax: commentPrefix,
           spacing: isMobbComment ? 'single line' : 'empty line above',
         }

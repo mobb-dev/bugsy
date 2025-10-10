@@ -25,6 +25,9 @@ export class MockRepo {
   /** Holds the path of the temporary repository managed by this instance */
   protected readonly repoPath: string
 
+  /** Holds the remote URL of the repository (if it's a git repo) */
+  protected repoUrl: string = ''
+
   /** Default set of sample files used by multiple helpers */
   protected readonly sampleFiles: string[] = [
     'sample1.py',
@@ -63,6 +66,14 @@ export class MockRepo {
    */
   getRepoPath(): string {
     return this.repoPath
+  }
+
+  /**
+   * Returns the remote URL of the repository
+   * @returns Remote URL of the repository
+   */
+  getRepoUrl(): string {
+    return this.repoUrl
   }
 
   /**
@@ -114,14 +125,14 @@ export class MockRepo {
 
   /**
    * Adds multiple files to the repository
-   * @param files Array of file objects with fileName, fileContent and isCommited properties
+   * @param files Array of file objects with fileName, fileContent and isCommitted properties
    * @returns Array of paths to the created files
    */
   addFiles(
     files: {
       fileName: string
       fileContent?: string
-      isCommited: boolean
+      isCommitted: boolean
     }[]
   ): string[] {
     const filesToCommit: string[] = []
@@ -132,7 +143,7 @@ export class MockRepo {
       const path = this.addFile(file.fileName, file.fileContent)
       filePaths.push(path)
 
-      if (file.isCommited) {
+      if (file.isCommitted) {
         filesToCommit.push(file.fileName)
       }
     })
@@ -354,7 +365,7 @@ export class MockRepo {
         {
           fileName: '.gitignore',
           fileContent: gitignoreContent,
-          isCommited: false,
+          isCommitted: false,
         },
       ])
       log('Created .gitignore file in repository')
@@ -538,6 +549,7 @@ export class ActiveGitRepo extends MockRepo {
 
       // add remote origin - use provided repoUrl or generate unique one by default
       const remoteUrl = options.repoUrl || generateUniqueRepoUrl('test-repo')
+      this.repoUrl = remoteUrl
       this.addRemoteOrigin(remoteUrl)
 
       // modify files to create changes
@@ -586,6 +598,7 @@ export class NoChangesGitRepo extends MockRepo {
       // add remote origin
       const remoteUrl =
         options.repoUrl || 'https://github.com/test-org/test-repo.git'
+      this.repoUrl = remoteUrl
       this.addRemoteOrigin(remoteUrl)
     } catch (e) {
       log('Synchronous NO_CHANGES repo setup failed:', e)

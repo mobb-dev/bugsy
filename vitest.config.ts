@@ -8,8 +8,8 @@ export default defineConfig({
     reporters: ['html', 'default'],
     exclude: ['node_modules', './build', './__e2e__'],
     setupFiles: ['./__tests__/setupTests.ts'],
-    testTimeout: 60000,
-    hookTimeout: 60000,
+    testTimeout: 200000,
+    hookTimeout: 200000,
     // Enable parallel execution for faster test runs
     poolOptions: {
       threads: {

@@ -29,6 +29,13 @@ export class WorkspaceService {
   }
 
   /**
+   * Clears the known workspace path cache
+   */
+  public static clearKnownWorkspacePath(): void {
+    this.knownWorkspacePath = undefined
+  }
+
+  /**
    * Gets the workspace folder path from known path or environment variables
    * @returns The workspace folder path or undefined if none found
    */

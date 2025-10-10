@@ -34,6 +34,12 @@ export class McpServer {
     new Map()
   private parentProcessCheckInterval?: NodeJS.Timeout
   private readonly parentPid: number
+
+  private socketEventHandlers: Map<
+    string,
+    (...args: unknown[]) => Promise<void> | void
+  > = new Map()
+
   private mcpUsageService: McpUsageService | null
 
   constructor(config: McpServerConfig, govOrgId: string = '') {
@@ -195,17 +201,16 @@ export class McpServer {
     })
 
     // Monitor stdin/stdout streams
-    process.stdin.on('close', async () => {
+    const stdinCloseHandler = async () => {
       logDebug('stdin closed - parent likely terminated')
       await this.handleParentProcessDeath('stdin-close')
-    })
-
-    process.stdin.on('end', async () => {
+    }
+    const stdinEndHandler = async () => {
       logDebug('stdin ended - parent likely terminated')
       await this.handleParentProcessDeath('stdin-end')
-    })
-
-    process.stdout.on('error', async (error) => {
+    }
+    const stdoutErrorHandler = async (...args: unknown[]) => {
+      const error = args[0] as Error
       logWarn('stdout error - parent may have terminated', { error })
       // Only exit if it's a pipe error (parent closed)
       if (
@@ -214,9 +219,9 @@ export class McpServer {
       ) {
         await this.handleParentProcessDeath('stdout-error')
       }
-    })
-
-    process.stderr.on('error', async (error) => {
+    }
+    const stderrErrorHandler = async (...args: unknown[]) => {
+      const error = args[0] as Error
       logWarn('stderr error - parent may have terminated', { error })
       // Only exit if it's a pipe error (parent closed)
       if (
@@ -225,13 +230,27 @@ export class McpServer {
       ) {
         await this.handleParentProcessDeath('stderr-error')
       }
-    })
+    }
+    const disconnectHandler = async () => {
+      logDebug('IPC disconnected - parent terminated')
+      await this.handleParentProcessDeath('ipc-disconnect')
+    }
+
+    // Store handlers for cleanup
+    this.socketEventHandlers.set('stdin-close', stdinCloseHandler)
+    this.socketEventHandlers.set('stdin-end', stdinEndHandler)
+    this.socketEventHandlers.set('stdout-error', stdoutErrorHandler)
+    this.socketEventHandlers.set('stderr-error', stderrErrorHandler)
+    this.socketEventHandlers.set('disconnect', disconnectHandler)
+
+    // Add listeners
+    process.stdin.on('close', stdinCloseHandler)
+    process.stdin.on('end', stdinEndHandler)
+    process.stdout.on('error', stdoutErrorHandler)
+    process.stderr.on('error', stderrErrorHandler)
 
     if (process.send) {
-      process.on('disconnect', async () => {
-        logDebug('IPC disconnected - parent terminated')
-        await this.handleParentProcessDeath('ipc-disconnect')
-      })
+      process.on('disconnect', disconnectHandler)
       logDebug('IPC monitoring enabled')
     } else {
       logDebug('IPC not available - skipping IPC monitoring')
@@ -316,7 +335,7 @@ export class McpServer {
         logError('Failed to connect to the API, skipping background scan')
         return
       }
-
+      WorkspaceService.clearKnownWorkspacePath()
       const workspacePath = WorkspaceService.getWorkspaceFolderPath()
       if (workspacePath) {
         try {
@@ -525,6 +544,33 @@ export class McpServer {
       this.parentProcessCheckInterval = undefined
       logDebug('Parent process check interval cleared')
     }
+
+    // Remove all socket event handlers that were registered
+    this.socketEventHandlers.forEach((handler, eventType) => {
+      try {
+        switch (eventType) {
+          case 'stdin-close':
+            process.stdin.removeListener('close', handler)
+            break
+          case 'stdin-end':
+            process.stdin.removeListener('end', handler)
+            break
+          case 'stdout-error':
+            process.stdout.removeListener('error', handler)
+            break
+          case 'stderr-error':
+            process.stderr.removeListener('error', handler)
+            break
+          case 'disconnect':
+            process.removeListener('disconnect', handler)
+            break
+        }
+      } catch (error) {
+        logWarn(`Failed to remove ${eventType} listener`, { error })
+      }
+    })
+    this.socketEventHandlers.clear()
+    logDebug('Socket event handlers cleaned up')
 
     // Remove all event handlers that were registered
     this.eventHandlers.forEach((handler, signal) => {

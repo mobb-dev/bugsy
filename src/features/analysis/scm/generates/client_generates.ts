@@ -8877,181 +8877,6 @@ export type Date_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['date']['input']>>;
 };
 
-export type Delete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_Limit_Args = {
-  row_limit?: InputMaybe<Scalars['Int']['input']>;
-};
-
-/** columns and relationships of "deletion_result" */
-export type Deletion_Result = {
-  __typename?: 'deletion_result';
-  deleted_count?: Maybe<Scalars['Int']['output']>;
-  deleted_node_ids?: Maybe<Scalars['String']['output']>;
-};
-
-/** aggregated selection of "deletion_result" */
-export type Deletion_Result_Aggregate = {
-  __typename?: 'deletion_result_aggregate';
-  aggregate?: Maybe<Deletion_Result_Aggregate_Fields>;
-  nodes: Array<Deletion_Result>;
-};
-
-/** aggregate fields of "deletion_result" */
-export type Deletion_Result_Aggregate_Fields = {
-  __typename?: 'deletion_result_aggregate_fields';
-  avg?: Maybe<Deletion_Result_Avg_Fields>;
-  count: Scalars['Int']['output'];
-  max?: Maybe<Deletion_Result_Max_Fields>;
-  min?: Maybe<Deletion_Result_Min_Fields>;
-  stddev?: Maybe<Deletion_Result_Stddev_Fields>;
-  stddev_pop?: Maybe<Deletion_Result_Stddev_Pop_Fields>;
-  stddev_samp?: Maybe<Deletion_Result_Stddev_Samp_Fields>;
-  sum?: Maybe<Deletion_Result_Sum_Fields>;
-  var_pop?: Maybe<Deletion_Result_Var_Pop_Fields>;
-  var_samp?: Maybe<Deletion_Result_Var_Samp_Fields>;
-  variance?: Maybe<Deletion_Result_Variance_Fields>;
-};
-
-
-/** aggregate fields of "deletion_result" */
-export type Deletion_Result_Aggregate_FieldsCountArgs = {
-  columns?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  distinct?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-/** aggregate avg on columns */
-export type Deletion_Result_Avg_Fields = {
-  __typename?: 'deletion_result_avg_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** Boolean expression to filter rows from the table "deletion_result". All fields are combined with a logical 'AND'. */
-export type Deletion_Result_Bool_Exp = {
-  _and?: InputMaybe<Array<Deletion_Result_Bool_Exp>>;
-  _not?: InputMaybe<Deletion_Result_Bool_Exp>;
-  _or?: InputMaybe<Array<Deletion_Result_Bool_Exp>>;
-  deleted_count?: InputMaybe<Int_Comparison_Exp>;
-  deleted_node_ids?: InputMaybe<String_Comparison_Exp>;
-};
-
-/** input type for incrementing numeric columns in table "deletion_result" */
-export type Deletion_Result_Inc_Input = {
-  deleted_count?: InputMaybe<Scalars['Int']['input']>;
-};
-
-/** input type for inserting data into table "deletion_result" */
-export type Deletion_Result_Insert_Input = {
-  deleted_count?: InputMaybe<Scalars['Int']['input']>;
-  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** aggregate max on columns */
-export type Deletion_Result_Max_Fields = {
-  __typename?: 'deletion_result_max_fields';
-  deleted_count?: Maybe<Scalars['Int']['output']>;
-  deleted_node_ids?: Maybe<Scalars['String']['output']>;
-};
-
-/** aggregate min on columns */
-export type Deletion_Result_Min_Fields = {
-  __typename?: 'deletion_result_min_fields';
-  deleted_count?: Maybe<Scalars['Int']['output']>;
-  deleted_node_ids?: Maybe<Scalars['String']['output']>;
-};
-
-/** response of any mutation on the table "deletion_result" */
-export type Deletion_Result_Mutation_Response = {
-  __typename?: 'deletion_result_mutation_response';
-  /** number of rows affected by the mutation */
-  affected_rows: Scalars['Int']['output'];
-  /** data from the rows affected by the mutation */
-  returning: Array<Deletion_Result>;
-};
-
-/** Ordering options when selecting data from "deletion_result". */
-export type Deletion_Result_Order_By = {
-  deleted_count?: InputMaybe<Order_By>;
-  deleted_node_ids?: InputMaybe<Order_By>;
-};
-
-/** select columns of table "deletion_result" */
-export enum Deletion_Result_Select_Column {
-  /** column name */
-  DeletedCount = 'deleted_count',
-  /** column name */
-  DeletedNodeIds = 'deleted_node_ids'
-}
-
-/** input type for updating data in table "deletion_result" */
-export type Deletion_Result_Set_Input = {
-  deleted_count?: InputMaybe<Scalars['Int']['input']>;
-  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** aggregate stddev on columns */
-export type Deletion_Result_Stddev_Fields = {
-  __typename?: 'deletion_result_stddev_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** aggregate stddev_pop on columns */
-export type Deletion_Result_Stddev_Pop_Fields = {
-  __typename?: 'deletion_result_stddev_pop_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** aggregate stddev_samp on columns */
-export type Deletion_Result_Stddev_Samp_Fields = {
-  __typename?: 'deletion_result_stddev_samp_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** Streaming cursor of the table "deletion_result" */
-export type Deletion_Result_Stream_Cursor_Input = {
-  /** Stream column input with initial value */
-  initial_value: Deletion_Result_Stream_Cursor_Value_Input;
-  /** cursor ordering */
-  ordering?: InputMaybe<Cursor_Ordering>;
-};
-
-/** Initial value of the column from where the streaming should start */
-export type Deletion_Result_Stream_Cursor_Value_Input = {
-  deleted_count?: InputMaybe<Scalars['Int']['input']>;
-  deleted_node_ids?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** aggregate sum on columns */
-export type Deletion_Result_Sum_Fields = {
-  __typename?: 'deletion_result_sum_fields';
-  deleted_count?: Maybe<Scalars['Int']['output']>;
-};
-
-export type Deletion_Result_Updates = {
-  /** increments the numeric columns with given value of the filtered values */
-  _inc?: InputMaybe<Deletion_Result_Inc_Input>;
-  /** sets the columns of the filtered rows to the given values */
-  _set?: InputMaybe<Deletion_Result_Set_Input>;
-  /** filter the rows which have to be updated */
-  where: Deletion_Result_Bool_Exp;
-};
-
-/** aggregate var_pop on columns */
-export type Deletion_Result_Var_Pop_Fields = {
-  __typename?: 'deletion_result_var_pop_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** aggregate var_samp on columns */
-export type Deletion_Result_Var_Samp_Fields = {
-  __typename?: 'deletion_result_var_samp_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
-/** aggregate variance on columns */
-export type Deletion_Result_Variance_Fields = {
-  __typename?: 'deletion_result_variance_fields';
-  deleted_count?: Maybe<Scalars['Float']['output']>;
-};
-
 export type DeployedFixesCount_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -15016,6 +14841,8 @@ export enum IssueType_Enum {
   RaceConditionFormatFlaw = 'RACE_CONDITION_FORMAT_FLAW',
   /** REDOS */
   Redos = 'REDOS',
+  /** REDUNDANT_NIL_ERROR_CHECK */
+  RedundantNilErrorCheck = 'REDUNDANT_NIL_ERROR_CHECK',
   /** Regular Expression Injection */
   RegexInjection = 'REGEX_INJECTION',
   /** REGEX_MISSING_TIMEOUT */
@@ -15374,14 +15201,10 @@ export type Mutation_Root = {
   delete_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** delete single row from the table: "cli_login" */
   delete_cli_login_by_pk?: Maybe<Cli_Login>;
-  /** delete data from the table: "deletion_result" */
-  delete_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
   /** delete data from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** delete single row from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
-  /** execute VOLATILE function "delete_expired_vulnerability_report_issue_code_nodes_with_limit" which returns "deletion_result" */
-  delete_expired_vulnerability_report_issue_code_nodes_with_limit: Array<Deletion_Result>;
   /** delete data from the table: "false_positive" */
   delete_false_positive?: Maybe<False_Positive_Mutation_Response>;
   /** delete single row from the table: "false_positive" */
@@ -15740,10 +15563,6 @@ export type Mutation_Root = {
   insert_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** insert a single row into the table: "cli_login" */
   insert_cli_login_one?: Maybe<Cli_Login>;
-  /** insert data into the table: "deletion_result" */
-  insert_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
-  /** insert a single row into the table: "deletion_result" */
-  insert_deletion_result_one?: Maybe<Deletion_Result>;
   /** insert data into the table: "effort_to_apply_fix" */
   insert_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** insert a single row into the table: "effort_to_apply_fix" */
@@ -16178,10 +15997,6 @@ export type Mutation_Root = {
   update_cli_login_by_pk?: Maybe<Cli_Login>;
   /** update multiples rows of table: "cli_login" */
   update_cli_login_many?: Maybe<Array<Maybe<Cli_Login_Mutation_Response>>>;
-  /** update data of the table: "deletion_result" */
-  update_deletion_result?: Maybe<Deletion_Result_Mutation_Response>;
-  /** update multiples rows of table: "deletion_result" */
-  update_deletion_result_many?: Maybe<Array<Maybe<Deletion_Result_Mutation_Response>>>;
   /** update data of the table: "effort_to_apply_fix" */
   update_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** update single row of the table: "effort_to_apply_fix" */
@@ -17019,12 +16834,6 @@ export type Mutation_RootDelete_Cli_Login_By_PkArgs = {
 
 
 /** mutation root */
-export type Mutation_RootDelete_Deletion_ResultArgs = {
-  where: Deletion_Result_Bool_Exp;
-};
-
-
-/** mutation root */
 export type Mutation_RootDelete_Effort_To_Apply_FixArgs = {
   where: Effort_To_Apply_Fix_Bool_Exp;
 };
@@ -17033,17 +16842,6 @@ export type Mutation_RootDelete_Effort_To_Apply_FixArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Effort_To_Apply_Fix_By_PkArgs = {
   value: Scalars['String']['input'];
-};
-
-
-/** mutation root */
-export type Mutation_RootDelete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_LimitArgs = {
-  args?: InputMaybe<Delete_Expired_Vulnerability_Report_Issue_Code_Nodes_With_Limit_Args>;
-  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 
@@ -18178,18 +17976,6 @@ export type Mutation_RootInsert_Cli_LoginArgs = {
 export type Mutation_RootInsert_Cli_Login_OneArgs = {
   object: Cli_Login_Insert_Input;
   on_conflict?: InputMaybe<Cli_Login_On_Conflict>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_Deletion_ResultArgs = {
-  objects: Array<Deletion_Result_Insert_Input>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_Deletion_Result_OneArgs = {
-  object: Deletion_Result_Insert_Input;
 };
 
 
@@ -19814,20 +19600,6 @@ export type Mutation_RootUpdate_Cli_Login_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Cli_Login_ManyArgs = {
   updates: Array<Cli_Login_Updates>;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_Deletion_ResultArgs = {
-  _inc?: InputMaybe<Deletion_Result_Inc_Input>;
-  _set?: InputMaybe<Deletion_Result_Set_Input>;
-  where: Deletion_Result_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_Deletion_Result_ManyArgs = {
-  updates: Array<Deletion_Result_Updates>;
 };
 
 
@@ -26040,10 +25812,6 @@ export type Query_Root = {
   cli_login_aggregate: Cli_Login_Aggregate;
   /** fetch data from the table: "cli_login" using primary key columns */
   cli_login_by_pk?: Maybe<Cli_Login>;
-  /** fetch data from the table: "deletion_result" */
-  deletion_result: Array<Deletion_Result>;
-  /** fetch aggregated fields from the table: "deletion_result" */
-  deletion_result_aggregate: Deletion_Result_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -27152,24 +26920,6 @@ export type Query_RootCli_Login_AggregateArgs = {
 
 export type Query_RootCli_Login_By_PkArgs = {
   id: Scalars['uuid']['input'];
-};
-
-
-export type Query_RootDeletion_ResultArgs = {
-  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
-};
-
-
-export type Query_RootDeletion_Result_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 
@@ -31645,12 +31395,6 @@ export type Subscription_Root = {
   cli_login_by_pk?: Maybe<Cli_Login>;
   /** fetch data from the table in a streaming manner: "cli_login" */
   cli_login_stream: Array<Cli_Login>;
-  /** fetch data from the table: "deletion_result" */
-  deletion_result: Array<Deletion_Result>;
-  /** fetch aggregated fields from the table: "deletion_result" */
-  deletion_result_aggregate: Deletion_Result_Aggregate;
-  /** fetch data from the table in a streaming manner: "deletion_result" */
-  deletion_result_stream: Array<Deletion_Result>;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -33060,31 +32804,6 @@ export type Subscription_RootCli_Login_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Cli_Login_Stream_Cursor_Input>>;
   where?: InputMaybe<Cli_Login_Bool_Exp>;
-};
-
-
-export type Subscription_RootDeletion_ResultArgs = {
-  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
-};
-
-
-export type Subscription_RootDeletion_Result_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Deletion_Result_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Deletion_Result_Order_By>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
-};
-
-
-export type Subscription_RootDeletion_Result_StreamArgs = {
-  batch_size: Scalars['Int']['input'];
-  cursor: Array<InputMaybe<Deletion_Result_Stream_Cursor_Input>>;
-  where?: InputMaybe<Deletion_Result_Bool_Exp>;
 };
 
 

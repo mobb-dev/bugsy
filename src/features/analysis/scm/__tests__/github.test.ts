@@ -70,6 +70,7 @@ describe.each(Object.entries(reposConfig))(
         getGithubSdk({
           auth: repoConfig.accessToken,
           url: repoConfig.url.valid,
+          isEnableRetries: true,
         }).getGithubRepoDefaultBranch(repoConfig.url.nonExisting)
       ).rejects.toThrow('Not Found')
     })
@@ -78,6 +79,7 @@ describe.each(Object.entries(reposConfig))(
         await getGithubSdk({
           auth: repoConfig.accessToken,
           url: repoConfig.url.valid,
+          isEnableRetries: true,
         }).getGithubRepoDefaultBranch(repoConfig.url.valid)
       ).toEqual('main')
     })
@@ -86,6 +88,7 @@ describe.each(Object.entries(reposConfig))(
         getGithubSdk({
           auth: repoConfig.accessToken,
           url: repoConfig.url.valid,
+          isEnableRetries: true,
         }).getGithubBranchList(repoConfig.url.nonExisting)
       ).rejects.toThrow('Not Found')
     })
@@ -93,6 +96,7 @@ describe.each(Object.entries(reposConfig))(
       const response = await getGithubSdk({
         auth: repoConfig.accessToken,
         url: repoConfig.url.valid,
+        isEnableRetries: true,
       }).getGithubBranchList(repoConfig.url.valid)
       expect(response.data.length).toEqual(100)
     })
@@ -101,6 +105,7 @@ describe.each(Object.entries(reposConfig))(
       const response = await getGithubSdk({
         auth: repoConfig.accessToken,
         url: repoConfig.url.valid,
+        isEnableRetries: true,
       }).getGithubReferenceData({
         gitHubUrl: repoConfig.url.valid,
         ref: repoConfig.commit.sha,
@@ -115,6 +120,7 @@ describe.each(Object.entries(reposConfig))(
       const response = await getGithubSdk({
         auth: repoConfig.accessToken,
         url: repoConfig.url.valid,
+        isEnableRetries: true,
       }).getGithubReferenceData({
         gitHubUrl: repoConfig.url.valid,
         ref: repoConfig.branch.name,
@@ -129,6 +135,7 @@ describe.each(Object.entries(reposConfig))(
       const response = await getGithubSdk({
         auth: repoConfig.accessToken,
         url: repoConfig.url.valid,
+        isEnableRetries: true,
       }).getGithubReferenceData({
         gitHubUrl: repoConfig.url.valid,
         ref: repoConfig.tag.name,
@@ -144,6 +151,7 @@ describe.each(Object.entries(reposConfig))(
         getGithubSdk({
           auth: repoConfig.accessToken,
           url: repoConfig.url.valid,
+          isEnableRetries: true,
         }).getGithubReferenceData({
           gitHubUrl: repoConfig.url.valid,
           ref: 'I_DO_NOT_EXIST',

@@ -1,4 +1,5 @@
 import { OctokitOptions } from '@octokit/core'
+import type { EndpointDefaults } from '@octokit/types'
 import { Octokit } from 'octokit'
 import { fetch, ProxyAgent, RequestInfo, RequestInit } from 'undici'
 
@@ -71,7 +72,7 @@ function getRandomGithubCloudAnonToken() {
 }
 
 export function getOctoKit(
-  options?: OctokitOptions & { url?: string }
+  options?: OctokitOptions & { url?: string; isEnableRetries?: boolean }
 ): Octokit {
   // Note: We're using GITHUB_API_TOKEN to increase
   // the rate limit instead of anonymous requests
@@ -95,13 +96,52 @@ export function getOctoKit(
     log: GITHUB_API_TOKEN ? console : undefined,
     request: {
       fetch: getFetch(baseUrl),
+      timeout: 10000, // 10 second timeout
     },
-    retry: {
-      enabled: false,
-    },
-    throttle: {
-      enabled: false,
-    },
+    retry: options?.isEnableRetries
+      ? {
+          doNotRetry: [400, 401, 403, 404, 422], // Don't retry on these status codes
+          retries: 3, // Retry up to 3 times
+        }
+      : { enabled: false },
+    throttle: options?.isEnableRetries
+      ? {
+          onRateLimit: (
+            retryAfter: number,
+            options: Required<EndpointDefaults>,
+            octokit: Octokit,
+            retryCount: number
+          ) => {
+            octokit.log.warn(
+              `Request quota exhausted for request ${options.method} ${options.url}`
+            )
+
+            // Retry once after hitting rate limit
+            if (retryCount === 0) {
+              octokit.log.info(`Retrying after ${retryAfter} seconds!`)
+              return true
+            }
+            return false
+          },
+          onSecondaryRateLimit: (
+            retryAfter: number,
+            options: Required<EndpointDefaults>,
+            octokit: Octokit,
+            retryCount: number
+          ) => {
+            octokit.log.warn(
+              `SecondaryRateLimit detected for request ${options.method} ${options.url}`
+            )
+
+            // Retry once after hitting secondary rate limit
+            if (retryCount === 0) {
+              octokit.log.info(`Retrying after ${retryAfter} seconds!`)
+              return true
+            }
+            return false
+          },
+        }
+      : { enabled: false },
   })
 }
 

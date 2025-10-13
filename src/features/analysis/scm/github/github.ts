@@ -54,7 +54,9 @@ import { getOctoKit, parseGithubOwnerAndRepo } from './utils'
 
 const MAX_GH_PR_BODY_LENGTH = 65536
 
-export function getGithubSdk(params: OctokitOptions = {}) {
+export function getGithubSdk(
+  params: OctokitOptions & { isEnableRetries?: boolean } = {}
+) {
   const octokit = getOctoKit(params)
   return {
     async postPrComment(

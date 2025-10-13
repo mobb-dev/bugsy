@@ -290,8 +290,6 @@ export const VulnerabilityReportIssueWithCodeFilePathZ =
   BaseVulnerabilityReportIssueZ.merge(
     z.object({
       codeFilePath: z.string().nullable(),
-      //TODO: REMOVE THIS once we flush out all the reports that don't have codeFilePath
-      codeNodes: z.array(z.object({ path: z.string() })),
     })
   )
 export type VulnerabilityReportIssueWithCodeFilePath = z.infer<

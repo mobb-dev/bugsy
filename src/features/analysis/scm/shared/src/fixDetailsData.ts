@@ -412,4 +412,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.ReturnInInit]: undefined,
   [IssueType_Enum.ActionNotPinnedToCommitSha]: undefined,
   [IssueType_Enum.DjangoBlankFieldNeedsNullOrDefault]: undefined,
+  [IssueType_Enum.RedundantNilErrorCheck]: undefined,
 }

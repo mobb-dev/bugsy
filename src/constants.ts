@@ -1,5 +1,4 @@
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import chalk from 'chalk'
 import Debug from 'debug'
@@ -8,10 +7,10 @@ import { z } from 'zod'
 
 import { Vulnerability_Report_Vendor_Enum } from './features/analysis/scm/generates/client_generates'
 import { ScmType } from './features/analysis/scm/shared/src/types'
+import { getModuleRootDir } from './utils/dirname'
 
 const debug = Debug('mobbdev:constants')
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.join(__dirname, '../.env') })
+dotenv.config({ path: path.join(getModuleRootDir(), '.env') })
 
 export const scmFriendlyText: Record<ScmType, string> = {
   [ScmType.Ado]: 'Azure DevOps',

@@ -1,7 +1,5 @@
 import { vi } from 'vitest'
 
-vi.mock('@mobb/bugsy/utils/dirname.ts')
-
 vi.mock('configstore', () => {
   const Configstore = vi.fn()
 

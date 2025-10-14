@@ -11,7 +11,8 @@ export default defineConfig(({ env }) => {
     splitting: false,
     watch: !isProd,
     target: 'es2020',
-    entry: ['src/index.ts'],
+    entry: ['src/index.ts', 'src/args/commands/upload_ai_blame.ts'],
     tsconfig: './tsconfig.json',
+    dts: true,
   }
 })

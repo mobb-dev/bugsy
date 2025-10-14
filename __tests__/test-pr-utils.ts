@@ -63,6 +63,29 @@ export async function createTestPR(
       sha: sourceBranchRef.data.object.sha,
     })
 
+    // Push an empty commit with a random message to the new branch
+    const randomCommitMessage = `Empty commit ${Math.random().toString(36).substring(2, 15)}`
+    const currentCommit = await octokit.rest.git.getCommit({
+      owner,
+      repo,
+      commit_sha: sourceBranchRef.data.object.sha,
+    })
+
+    const emptyCommit = await octokit.rest.git.createCommit({
+      owner,
+      repo,
+      message: randomCommitMessage,
+      tree: currentCommit.data.tree.sha,
+      parents: [sourceBranchRef.data.object.sha],
+    })
+
+    await octokit.rest.git.updateRef({
+      owner,
+      repo,
+      ref: `heads/${newBranchName}`,
+      sha: emptyCommit.data.sha,
+    })
+
     // Create PR from the new branch to main
     const response = await octokit.rest.pulls.create({
       owner,

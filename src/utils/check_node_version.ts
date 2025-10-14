@@ -1,18 +1,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { getDirName } from '@mobb/bugsy/utils'
 import semver from 'semver'
 
+import { getModuleRootDir } from './dirname'
+
 function getPackageJson() {
-  let manifestPath = path.join(getDirName(), '../package.json')
-
-  if (!fs.existsSync(manifestPath)) {
-    // In the dev environment the folder structure is a bit different.
-    manifestPath = path.join(getDirName(), '../../package.json')
-  }
-
-  return JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  return JSON.parse(
+    fs.readFileSync(path.join(getModuleRootDir(), 'package.json'), 'utf8')
+  )
 }
 
 const packageJson = getPackageJson()

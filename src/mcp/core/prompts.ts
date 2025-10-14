@@ -5,7 +5,7 @@ import {
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
 } from '../tools/toolNames'
 import { FixReportSummary, type McpFix } from '../types'
-import { MCP_DEFAULT_LIMIT } from './configs'
+import { MCP_DEFAULT_LIMIT, MCP_DEFAULT_MAX_FILES_TO_SCAN } from './configs'
 
 function friendlyType(s: string) {
   // First replace underscores with spaces
@@ -660,6 +660,36 @@ ${autoFixSettingsSection}
 
 ${whatHappensNextSection}`
 }
+
+export const noChangedFilesFoundPrompt = `🔍 **MOBB SECURITY SCAN: NO CHANGED FILES DETECTED**
+
+## 📋 Current Status
+
+No changed files were found in the working directory for security scanning.
+
+## 🤔 What This Means
+
+This situation occurs when:
+• **Clean Working Directory**: All files are committed and there are no uncommitted changes
+• **Fresh Repository**: The repository has been recently cloned or initialized
+• **All Changes Committed**: Recent modifications have already been committed to git
+
+If you wish to scan files that were recently changed in your git history call the tool with the following parameters:
+
+\`\`\`json
+{
+  "path": "/path/to/your/repository",
+  "maxFiles": 50,
+  "rescan": true,
+  "scanRecentlyChangedFiles": true
+}
+\`\`\`
+
+
+• **scanRecentlyChangedFiles**: Set to \`true\` to automatically scan recently modified files from git history
+• **maxFiles**: Specify the maximum number of files to scan (higher = more comprehensive) (default: ${MCP_DEFAULT_MAX_FILES_TO_SCAN})
+• **rescan**: Set to \`true\` to force a complete fresh analysis
+`
 
 // export const failedToConnectToApiPrompt = `# CONNECTION ERROR: FAILED TO REACH MOBB API
 

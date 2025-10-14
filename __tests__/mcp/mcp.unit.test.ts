@@ -1,5 +1,6 @@
 import {
   initialScanInProgressPrompt,
+  noChangedFilesFoundPrompt,
   noReportFoundPrompt,
 } from '@mobb/bugsy/mcp/core/prompts'
 import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFixes/FetchAvailableFixesTool'
@@ -338,7 +339,7 @@ describe('MCP Server', () => {
         content: [
           {
             type: 'text',
-            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: noChangedFilesFoundPrompt,
           },
         ],
       })
@@ -775,7 +776,10 @@ describe('MCP Server', () => {
         mockGraphQL().getReportFixes().succeeds()
 
         const tool = new FixVulnerabilitiesTool()
-        const result = await tool.execute({ path: activeNoChangesRepoPath })
+        const result = await tool.execute({
+          path: activeNoChangesRepoPath,
+          scanRecentlyChangedFiles: true,
+        })
 
         expectLogMessage(
           `Executing tool: ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}`
@@ -1080,6 +1084,129 @@ describe('MCP Server', () => {
 
       // Verify no error logs were generated
       expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+    })
+
+    describe('file filtering parameters', () => {
+      it('should use provided fileFilter parameter', async () => {
+        // Configure GraphQL mock to return report with fixes
+        mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+        const tool = new FetchAvailableFixesTool()
+        const result = await tool.execute({
+          path: activeRepoPath,
+          fileFilter: ['src/index.ts', 'lib/utils.js'],
+        })
+
+        expectValidResult(result)
+        const responseText = result.content[0]?.text ?? ''
+        expect(responseText).toContain('MOBB SECURITY SCAN RESULTS')
+
+        // Verify debug log shows custom file filter was used
+        expectDebugMessage('Using provided file filter', {
+          fileFilter: ['src/index.ts', 'lib/utils.js'],
+        })
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+      })
+
+      it('should fetch all files when fetchFixesFromAnyFile is true', async () => {
+        // Configure GraphQL mock to return report with fixes
+        mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+        const tool = new FetchAvailableFixesTool()
+        const result = await tool.execute({
+          path: activeRepoPath,
+          fetchFixesFromAnyFile: true,
+        })
+
+        expectValidResult(result)
+        const responseText = result.content[0]?.text ?? ''
+        expect(responseText).toContain('MOBB SECURITY SCAN RESULTS')
+
+        // Verify debug log shows no filtering
+        expectDebugMessage('Fetching fixes for all files (no filtering)')
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+      })
+
+      it('should throw error when both fileFilter and fetchFixesFromAnyFile are provided', async () => {
+        const tool = new FetchAvailableFixesTool()
+
+        await expect(
+          tool.execute({
+            path: activeRepoPath,
+            fileFilter: ['src/index.ts'],
+            fetchFixesFromAnyFile: true,
+          })
+        ).rejects.toThrow(
+          'Parameters "fileFilter" and "fetchFixesFromAnyFile" are mutually exclusive'
+        )
+      })
+
+      it('should use git status files by default when neither parameter is provided', async () => {
+        // Configure GraphQL mock to return report with fixes
+        mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+        const tool = new FetchAvailableFixesTool()
+        const result = await tool.execute({
+          path: activeRepoPath,
+        })
+
+        expectValidResult(result)
+        const responseText = result.content[0]?.text ?? ''
+        expect(responseText).toContain('MOBB SECURITY SCAN RESULTS')
+
+        // Verify debug log shows git status files were used
+        expectDebugMessage('Getting files from git status for filtering')
+        expectDebugMessage('Using files from git status as filter')
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+      })
+
+      it('should handle empty git status gracefully', async () => {
+        // Configure GraphQL mock to return report with fixes
+        mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+        const tool = new FetchAvailableFixesTool()
+        const result = await tool.execute({
+          path: activeNoChangesRepoPath,
+        })
+
+        expectValidResult(result)
+        const responseText = result.content[0]?.text ?? ''
+        expect(responseText).toContain('MOBB SECURITY SCAN RESULTS')
+
+        // Verify debug log shows no changed files
+        expectDebugMessage('Getting files from git status for filtering')
+        expectDebugMessage('No changed files found in git status')
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+      })
+
+      it('should ignore fetchFixesFromAnyFile when explicitly set to false', async () => {
+        // Configure GraphQL mock to return report with fixes
+        mockGraphQL().getLatestReportByRepoUrl().succeeds()
+
+        const tool = new FetchAvailableFixesTool()
+        const result = await tool.execute({
+          path: activeRepoPath,
+          fetchFixesFromAnyFile: false,
+        })
+
+        expectValidResult(result)
+        const responseText = result.content[0]?.text ?? ''
+        expect(responseText).toContain('MOBB SECURITY SCAN RESULTS')
+
+        // Verify debug log shows git status files were used (default behavior)
+        expectDebugMessage('Getting files from git status for filtering')
+
+        // Verify no error logs were generated
+        expect(loggerMock.mocks.logError.mock.calls).toHaveLength(0)
+      })
     })
   })
 

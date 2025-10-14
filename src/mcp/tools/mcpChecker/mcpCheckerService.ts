@@ -30,7 +30,7 @@ export class McpCheckerService {
     }
     logInfo('Executing built-in mcp_checker tool')
 
-    const hostInfo = getHostInfo()
+    const hostInfo = getHostInfo([])
     const mcpServersInfo = hostInfo.mcps
       .filter((mcp) => mcp.mcpName !== 'unknown')
       .map(

@@ -186,7 +186,7 @@ describe('getLocalFiles', () => {
         mockStat.mockRestore()
       })
 
-      it('should fallback to recently changed files when no changes found', async () => {
+      it('should fallback to recently changed files when no changes found and scanRecentlyChangedFiles is true', async () => {
         const mockRepo = createMockRepo('active', ['file1.js'])
         const repoPath = mockRepo.getRepoPath()
 
@@ -207,6 +207,7 @@ describe('getLocalFiles', () => {
         const result = await getLocalFiles({
           path: repoPath,
           scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: true,
         })
 
         expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalled()
@@ -217,7 +218,7 @@ describe('getLocalFiles', () => {
     })
 
     describe('no-changesGitRepo', () => {
-      it('should handle git repository with no changes', async () => {
+      it('should handle git repository with no changes when scanRecentlyChangedFiles is true', async () => {
         const mockRepo = createMockRepo('no-changes', ['file1.js'])
         const repoPath = mockRepo.getRepoPath()
 
@@ -238,6 +239,7 @@ describe('getLocalFiles', () => {
         const result = await getLocalFiles({
           path: repoPath,
           scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: true,
         })
 
         expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalled()
@@ -1104,6 +1106,333 @@ describe('getLocalFiles', () => {
       }
 
       realPathSpy.mockRestore()
+    })
+  })
+
+  describe('scanRecentlyChangedFiles parameter', () => {
+    describe('Git repository with no changed files', () => {
+      it('should return empty array when scanRecentlyChangedFiles is false and no changes in git status', async () => {
+        const mockRepo = createMockRepo('no-changes')
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: [],
+            commitCount: 0,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: false,
+        })
+
+        expect(result).toEqual([])
+        expect(mockInstance.getRecentlyChangedFiles).not.toHaveBeenCalled()
+
+        realPathSpy.mockRestore()
+      })
+
+      it('should return empty array when scanRecentlyChangedFiles is undefined and no changes in git status', async () => {
+        const mockRepo = createMockRepo('no-changes')
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: [],
+            commitCount: 0,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: undefined,
+        })
+
+        expect(result).toEqual([])
+        expect(mockInstance.getRecentlyChangedFiles).not.toHaveBeenCalled()
+
+        realPathSpy.mockRestore()
+      })
+
+      it('should scan recently changed files when scanRecentlyChangedFiles is true and no changes in git status', async () => {
+        const mockRepo = createMockRepo('no-changes', ['file1.js', 'file2.js'])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: ['file1.js', 'file2.js'],
+            commitCount: 1,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: true,
+        })
+
+        // Should call getRecentlyChangedFiles when scanRecentlyChangedFiles is true
+        expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalled()
+        expect(result.length).toBeGreaterThan(0)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
+
+      it('should scan recently changed files when maxFiles is specified (existing behavior)', async () => {
+        const mockRepo = createMockRepo('no-changes', ['file1.js', 'file2.js'])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: ['file1.js', 'file2.js'],
+            commitCount: 1,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          maxFiles: 5,
+          scanRecentlyChangedFiles: false, // Even when false, maxFiles takes precedence
+        })
+
+        // Should call getRecentlyChangedFiles when maxFiles is specified
+        expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalledWith({
+          maxFiles: 5,
+        })
+        expect(result.length).toBeGreaterThan(0)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
+    })
+
+    describe('Git repository with changed files', () => {
+      it('should return changed files regardless of scanRecentlyChangedFiles parameter', async () => {
+        const mockRepo = createMockRepo('active', [
+          'file1.js',
+          'file2.js',
+          'file3.js',
+        ])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({
+            files: ['file1.js', 'file2.js', 'file3.js'],
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        const resultWithFalse = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: false,
+        })
+
+        const resultWithTrue = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: true,
+        })
+
+        const resultWithUndefined = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+        })
+
+        // All should return the modified files
+        expect(resultWithFalse.length).toBe(3)
+        expect(resultWithTrue.length).toBe(3)
+        expect(resultWithUndefined.length).toBe(3)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
+    })
+
+    describe('Non-git repository', () => {
+      it('should always scan recently changed files regardless of scanRecentlyChangedFiles parameter (non-git behavior)', async () => {
+        const mockRepo = createMockRepo('non-git', ['file1.py', 'file2.py'])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({
+            isValid: false,
+            error: 'Not a git repository',
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        mockFileUtils.getLastChangedFiles.mockResolvedValue([
+          'file1.py',
+          'file2.py',
+        ])
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        const resultWithFalse = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: false,
+        })
+
+        const resultWithTrue = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          scanRecentlyChangedFiles: true,
+        })
+
+        const resultWithUndefined = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+        })
+
+        // All should return files from FileUtils.getLastChangedFiles since it's not a git repo
+        // For non-git repos, it always scans recently changed files regardless of the parameter
+        expect(resultWithFalse.length).toBeGreaterThan(0)
+        expect(resultWithTrue.length).toBeGreaterThan(0)
+        expect(resultWithUndefined.length).toBeGreaterThan(0)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
+    })
+
+    describe('Parameter precedence', () => {
+      it('should prioritize maxFiles over scanRecentlyChangedFiles', async () => {
+        const mockRepo = createMockRepo('no-changes', [
+          'file1.js',
+          'file2.js',
+          'file3.js',
+        ])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: ['file1.js', 'file2.js'],
+            commitCount: 1,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        // When maxFiles is specified, it should scan recently changed files
+        // even if scanRecentlyChangedFiles is explicitly false
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          maxFiles: 10,
+          scanRecentlyChangedFiles: false,
+        })
+
+        expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalledWith({
+          maxFiles: 10,
+        })
+        expect(result.length).toBeGreaterThan(0)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
+
+      it('should respect maxFiles limit when scanning recently changed files', async () => {
+        const mockRepo = createMockRepo('no-changes', [
+          'file1.js',
+          'file2.js',
+          'file3.js',
+        ])
+        const repoPath = mockRepo.getRepoPath()
+
+        // Mock fs.realpath to return the repo path
+        const realPathSpy = vi.spyOn(fs, 'realpath').mockResolvedValue(repoPath)
+
+        const maxFiles = 2
+        const mockInstance = {
+          validateRepository: vi.fn().mockResolvedValue({ isValid: true }),
+          getChangedFiles: vi.fn().mockResolvedValue({ files: [] }),
+          getRecentlyChangedFiles: vi.fn().mockResolvedValue({
+            files: ['file1.js', 'file2.js'],
+            commitCount: 1,
+          }),
+        }
+        mockGitService.mockReturnValue(mockInstance)
+
+        const mockStat = vi.spyOn(fs, 'stat').mockResolvedValue({
+          mtime: new Date(Date.now()),
+        } as any)
+
+        const result = await getLocalFiles({
+          path: repoPath,
+          scanContext: ScanContext.USER_REQUEST,
+          maxFiles,
+          scanRecentlyChangedFiles: true,
+        })
+
+        expect(mockInstance.getRecentlyChangedFiles).toHaveBeenCalledWith({
+          maxFiles: 2,
+        })
+        // Should not exceed maxFiles
+        expect(result.length).toBeLessThanOrEqual(maxFiles)
+
+        mockStat.mockRestore()
+        realPathSpy.mockRestore()
+      })
     })
   })
 })

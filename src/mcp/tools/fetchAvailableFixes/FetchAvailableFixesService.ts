@@ -41,16 +41,18 @@ export class FetchAvailableFixesService {
     repoUrl,
     limit = MCP_DEFAULT_LIMIT,
     offset,
+    fileFilter,
   }: {
     repoUrl: string
     limit?: number
     offset?: number
+    fileFilter?: string[]
   }): Promise<string> {
     try {
-      logDebug('Checking for available fixes', { repoUrl, limit })
+      logDebug('Checking for available fixes', { repoUrl, limit, fileFilter })
       const gqlClient = await this.initializeGqlClient()
       logDebug('GQL client initialized')
-      logDebug('querying for latest report', { repoUrl, limit })
+      logDebug('querying for latest report', { repoUrl, limit, fileFilter })
 
       // Use the provided offset when it is defined; otherwise fall back to the service\'s currentOffset.
       const effectiveOffset: number = offset ?? (this.currentOffset || 0)
@@ -63,6 +65,7 @@ export class FetchAvailableFixesService {
           repoUrl,
           limit,
           offset: effectiveOffset,
+          fileFilter,
         })
       logDebug('received latest report result', { fixReport, expiredReport })
 

@@ -1,15 +1,16 @@
-import {
-  MCP_DEFAULT_REST_API_URL,
-  MCP_PERIODIC_TRACK_INTERVAL,
-} from '@mobb/bugsy/mcp/core/configs'
 import { packageJson } from '@mobb/bugsy/utils'
 import fetch from 'node-fetch'
 import os from 'os'
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid'
 
+import {
+  MCP_DEFAULT_REST_API_URL,
+  MCP_PERIODIC_TRACK_INTERVAL,
+} from '../../core/configs'
 import { logDebug, logError, logInfo } from '../../Logger'
 import { configStore } from '../ConfigStoreService'
 import { getHostInfo } from './host'
+import { findSystemMCPConfigs } from './system'
 
 export type McpUsageData = {
   mcpHostId: string
@@ -41,6 +42,11 @@ class McpUsageService {
     }
   }
 
+  private async performSystemSearchAndTracking(): Promise<void> {
+    const additionalMcpList = await findSystemMCPConfigs()
+    await this.trackServerStart(additionalMcpList)
+  }
+
   private startPeriodicTracking(): void {
     if (!this.hasOrganizationId()) {
       logDebug(
@@ -51,12 +57,20 @@ class McpUsageService {
 
     logDebug(`[UsageService] Starting periodic tracking for mcps`, {})
 
+    if (this.intervalId) {
+      return
+    }
+
+    // Initial system search and tracking
+    setTimeout(() => this.performSystemSearchAndTracking(), 0)
+
+    // Periodic tracking with system search
     this.intervalId = setInterval(async () => {
       logDebug(`[UsageService] Triggering periodic usage service`, {
         MCP_PERIODIC_TRACK_INTERVAL,
       })
-      await this.trackServerStart()
-    }, 10000)
+      await this.performSystemSearchAndTracking()
+    }, MCP_PERIODIC_TRACK_INTERVAL)
   }
 
   private generateHostId(): string {
@@ -99,9 +113,10 @@ class McpUsageService {
   private createUsageData(
     mcpHostId: string,
     organizationId: string,
-    status: 'ACTIVE' | 'INACTIVE' | 'FAILED'
+    status: 'ACTIVE' | 'INACTIVE' | 'FAILED',
+    additionalMcpList: string[]
   ): McpUsageData {
-    const { user, mcps } = getHostInfo()
+    const { user, mcps } = getHostInfo(additionalMcpList)
     return {
       mcpHostId,
       organizationId,
@@ -115,7 +130,13 @@ class McpUsageService {
     }
   }
 
-  private async trackUsage(status: 'ACTIVE' | 'INACTIVE'): Promise<void> {
+  private async trackUsage({
+    status,
+    additionalMcpList,
+  }: {
+    status: 'ACTIVE' | 'INACTIVE'
+    additionalMcpList: string[]
+  }): Promise<void> {
     try {
       const hostId = this.generateHostId()
       const organizationId = this.getOrganizationId()
@@ -127,7 +148,12 @@ class McpUsageService {
         return
       }
 
-      const usageData = this.createUsageData(hostId, organizationId, status)
+      const usageData = this.createUsageData(
+        hostId,
+        organizationId,
+        status,
+        additionalMcpList
+      )
       const stored = configStore.get(this.configKey) as McpUsageData | undefined
 
       // Check if we need to update usage (different from stored)
@@ -182,12 +208,12 @@ class McpUsageService {
     }
   }
 
-  async trackServerStart(): Promise<void> {
-    await this.trackUsage('ACTIVE')
+  async trackServerStart(additionalMcpList: string[] = []): Promise<void> {
+    await this.trackUsage({ status: 'ACTIVE', additionalMcpList })
   }
 
   async trackServerStop(): Promise<void> {
-    await this.trackUsage('INACTIVE')
+    await this.trackUsage({ status: 'INACTIVE', additionalMcpList: [] })
   }
 
   public reset(): void {

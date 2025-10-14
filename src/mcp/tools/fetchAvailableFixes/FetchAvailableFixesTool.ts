@@ -25,11 +25,20 @@ Required argument:
 Optional arguments:
 • offset – pagination offset (integer).
 • limit  – maximum number of fixes to return (integer).
+• fileFilter – list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile.
+• fetchFixesFromAnyFile – if true, fetches fixes for all files in the repository. If false or not set (default), filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter.
 
 The tool will:
 1. Validate that the provided path is secure and exists.
 2. Verify that the directory is a valid Git repository with an "origin" remote.
-3. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
+3. Apply file filtering based on parameters (see below).
+4. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
+
+File Filtering Behavior:
+• If fetchFixesFromAnyFile is true: Returns fixes for all files (no filtering).
+• If fileFilter is provided: Returns only fixes affecting the specified files.
+• If neither is provided (default): Returns only fixes affecting files with changes in git status.
+• If BOTH are provided: Returns an error (parameters are mutually exclusive).
 
 Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only need a fixes summary and do NOT want to perform scanning or code modifications.`
 
@@ -51,6 +60,19 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
         type: 'number',
         description: '[Optional] maximum number of results to return',
       },
+      fileFilter: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+        description:
+          '[Optional] list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile',
+      },
+      fetchFixesFromAnyFile: {
+        type: 'boolean',
+        description:
+          '[Optional] if true, fetches fixes for all files in the repository. If false or not set, filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter',
+      },
     },
     required: ['path'],
   }
@@ -66,6 +88,18 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
       .number()
       .optional()
       .describe('Optional maximum number of fixes to return'),
+    fileFilter: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Optional list of file paths relative to the path parameter to filter fixes by. INCOMPATIBLE with fetchFixesFromAnyFile'
+      ),
+    fetchFixesFromAnyFile: z
+      .boolean()
+      .optional()
+      .describe(
+        'Optional boolean to fetch fixes for all files. INCOMPATIBLE with fileFilter'
+      ),
   })
   private availableFixesService: FetchAvailableFixesService
 
@@ -105,11 +139,51 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
       throw new Error('No origin URL found for the repository')
     }
 
+    // Validate mutually exclusive parameters
+    if (args.fileFilter && args.fetchFixesFromAnyFile) {
+      throw new Error(
+        'Parameters "fileFilter" and "fetchFixesFromAnyFile" are mutually exclusive. ' +
+          'Please provide only one of these parameters:\n' +
+          '  - Use "fileFilter" to specify a custom list of files to filter by\n' +
+          '  - Use "fetchFixesFromAnyFile: true" to fetch fixes for all files without filtering\n' +
+          '  - Use neither to automatically filter by files with changes in git status (default behavior)'
+      )
+    }
+
+    // Determine which file filter to use
+    let actualFileFilter: string[] | undefined
+
+    if (args.fetchFixesFromAnyFile === true) {
+      // Fetch fixes for all files - no filtering
+      actualFileFilter = undefined
+      logDebug('Fetching fixes for all files (no filtering)')
+    } else if (args.fileFilter && args.fileFilter.length > 0) {
+      // Use the provided file filter
+      actualFileFilter = args.fileFilter
+      logDebug('Using provided file filter', { fileFilter: actualFileFilter })
+    } else {
+      // Default behavior: get files from git status
+      logDebug('Getting files from git status for filtering')
+      const gitStatusResult = await gitService.getChangedFiles()
+
+      if (gitStatusResult.files.length === 0) {
+        logDebug('No changed files found in git status')
+        actualFileFilter = undefined
+      } else {
+        actualFileFilter = gitStatusResult.files
+        logDebug('Using files from git status as filter', {
+          fileCount: actualFileFilter.length,
+          files: actualFileFilter,
+        })
+      }
+    }
+
     // Check for available fixes using the origin URL
     const fixResult = await this.availableFixesService.checkForAvailableFixes({
       repoUrl: originUrl,
       limit: args.limit,
       offset: args.offset,
+      fileFilter: actualFileFilter,
     })
     logDebug('FetchAvailableFixesTool execution completed successfully', {
       fixResult,

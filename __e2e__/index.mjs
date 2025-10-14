@@ -245,8 +245,7 @@ test('Bugsy E2E tests', async (t) => {
     }
   )
 
-  // Skip test due to instability in Checkmarx servers.
-  await t.skip('scan: API key, Checkmarx, public GitHub repo', async () => {
+  await t.test('scan: API key, Checkmarx, public GitHub repo', async () => {
     // Arrange
     await cleanupCheckmarxCliConfig()
     const apiKey = await mobbApi.createApiToken()
@@ -291,8 +290,8 @@ test('Bugsy E2E tests', async (t) => {
     bugsy.communicate(SAST_PROVIDERS_ENV.CX_APIKEY)
     bugsy.sendEnterKey()
 
-    // Checkmarx scan can take some time. Set timeout for 2 minutes to avoid test flakiness.
-    await bugsy.waitForString(/Hit any key to view available fixes/, 200000)
+    // Checkmarx scan can take some time. Set timeout for 15 minutes to avoid test flakiness.
+    await bugsy.waitForString(/Hit any key to view available fixes/, 900000)
     bugsy.sendEnterKey()
     await bugsy.waitForExit()
 

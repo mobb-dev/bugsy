@@ -89,7 +89,10 @@ test('Bugsy MCP E2E tests', async (t) => {
   await t.beforeEach(async () => {
     client = new MCPClient()
     const apiKey = await mobbApi.createApiToken()
-    console.log('apiKey', apiKey.slice(0, 10) + '...')
+    console.log(
+      'apiKey',
+      String(apiKey.slice(0, 10)).replace(/\n|\r/g, '') + '...'
+    )
     serverProcess = await client.connect(
       'node',
       [path.join(process.cwd(), '..', 'dist', 'index.mjs'), 'mcp'],
@@ -194,6 +197,11 @@ Example payload:
                   description:
                     '[Optional] maximum number of files to scan (default: 10). Use higher values for more comprehensive scans or lower values for faster performance.',
                 },
+                scanRecentlyChangedFiles: {
+                  type: 'boolean',
+                  description:
+                    '[Optional] whether to automatically scan recently changed files when no changed files are found in git status. If false, the tool will prompt the user instead.',
+                },
               },
               required: ['path'],
             },
@@ -213,11 +221,20 @@ Required argument:
 Optional arguments:
 • offset – pagination offset (integer).
 • limit  – maximum number of fixes to return (integer).
+• fileFilter – list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile.
+• fetchFixesFromAnyFile – if true, fetches fixes for all files in the repository. If false or not set (default), filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter.
 
 The tool will:
 1. Validate that the provided path is secure and exists.
 2. Verify that the directory is a valid Git repository with an "origin" remote.
-3. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
+3. Apply file filtering based on parameters (see below).
+4. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
+
+File Filtering Behavior:
+• If fetchFixesFromAnyFile is true: Returns fixes for all files (no filtering).
+• If fileFilter is provided: Returns only fixes affecting the specified files.
+• If neither is provided (default): Returns only fixes affecting files with changes in git status.
+• If BOTH are provided: Returns an error (parameters are mutually exclusive).
 
 Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only need a fixes summary and do NOT want to perform scanning or code modifications.`,
             inputSchema: {
@@ -235,6 +252,17 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
                 offset: {
                   type: 'number',
                   description: '[Optional] offset for pagination',
+                },
+                fileFilter: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description:
+                    '[Optional] list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile',
+                },
+                fetchFixesFromAnyFile: {
+                  type: 'boolean',
+                  description:
+                    '[Optional] if true, fetches fixes for all files in the repository. If false or not set, filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter',
                 },
               },
               required: ['path'],

@@ -118,11 +118,11 @@ describe('getLocalFiles - Integration Tests (Real GitService & FileUtils)', () =
       const result = await getLocalFiles({
         path: repoPath,
         scanContext: ScanContext.USER_REQUEST,
+        scanRecentlyChangedFiles: true,
       })
 
       // NoChangesGitRepo has committed files, so GitService will find them in recent history
-      // It won't fall back to FileUtils since there are no working directory changes
-      // but git history will be checked and files will be found
+      // when scanRecentlyChangedFiles is true
       expect(result).toBeDefined()
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)

@@ -150,6 +150,34 @@ const readConfigFile = (filePath: string): MCPConfig | null => {
   }
 }
 
+const mergeConfigIntoResult = (
+  config: MCPConfig,
+  mergedConfig: MCPConfig
+): void => {
+  // Handle Claude's special project structure
+  if (config?.projects) {
+    const allMcpServers: { [name: string]: MCPServerConfig } = {}
+    for (const projectPath in config.projects) {
+      const project = config.projects[projectPath]
+      if (project?.mcpServers) {
+        Object.assign(allMcpServers, project.mcpServers)
+      }
+    }
+    mergedConfig.mcpServers = { ...mergedConfig.mcpServers, ...allMcpServers }
+  }
+
+  // Handle regular mcpServers and servers
+  if (config?.mcpServers) {
+    mergedConfig.mcpServers = {
+      ...mergedConfig.mcpServers,
+      ...config.mcpServers,
+    }
+  }
+  if (config?.servers) {
+    mergedConfig.servers = { ...mergedConfig.servers, ...config.servers }
+  }
+}
+
 const readMCPConfig = (hostName: string): MCPConfig | null => {
   const configPaths = getMCPConfigPaths(hostName)
 
@@ -158,27 +186,8 @@ const readMCPConfig = (hostName: string): MCPConfig | null => {
 
   for (const configPath of configPaths) {
     const config = readConfigFile(configPath)
-    // Handle Claude's special project structure
-    if (hostName === 'claude' && config?.projects) {
-      const allMcpServers: { [name: string]: MCPServerConfig } = {}
-      for (const projectPath in config.projects) {
-        const project = config.projects[projectPath]
-        if (project?.mcpServers) {
-          Object.assign(allMcpServers, project.mcpServers)
-        }
-      }
-      mergedConfig.mcpServers = { ...mergedConfig.mcpServers, ...allMcpServers }
-      continue
-    }
-
-    if (config?.mcpServers) {
-      mergedConfig.mcpServers = {
-        ...mergedConfig.mcpServers,
-        ...config.mcpServers,
-      }
-    }
-    if (config?.servers) {
-      mergedConfig.servers = { ...mergedConfig.servers, ...config.servers }
+    if (config) {
+      mergeConfigIntoResult(config, mergedConfig)
     }
   }
 
@@ -314,7 +323,31 @@ const getProcessInfo = (pid: number): ProcessInfo | null => {
   }
 }
 
-export const getHostInfo = (): {
+export const getCurrentProcessIDE = (): string => {
+  const currentPid = process.pid
+  let currentPidToCheck = currentPid
+
+  // Walk up the process tree to find the IDE
+  while (currentPidToCheck && currentPidToCheck !== 0) {
+    const proc = getProcessInfo(currentPidToCheck)
+    if (!proc) break
+
+    const cmdProc = proc.cmd.toLowerCase()
+    const found = Object.keys(knownHosts).find((key) => cmdProc.includes(key))
+
+    if (found) {
+      return knownHosts[found] || 'Unknown'
+    }
+
+    currentPidToCheck = parseInt(proc.ppid, 10)
+  }
+
+  return 'Unknown'
+}
+
+export const getHostInfo = (
+  additionalMcpList: string[]
+): {
   mcps: MCPServerInfo[]
   user: typeof gitInfo
 } => {
@@ -322,10 +355,35 @@ export const getHostInfo = (): {
   const results: MCPServerInfo[] = []
   const allConfigs: Record<string, MCPConfig> = {}
 
+  // Collect all IDE-specific config paths to avoid duplicates
+  const ideConfigPaths = new Set<string>()
+  for (const ide of IDEs) {
+    const configPaths = getMCPConfigPaths(ide)
+    configPaths.forEach((path) => ideConfigPaths.add(path))
+  }
+
+  // Filter additionalMcpList to only include paths not already handled by IDEs
+  const uniqueAdditionalPaths = additionalMcpList.filter(
+    (path) => !ideConfigPaths.has(path)
+  )
+
   // load all configs once
   for (const ide of IDEs) {
     const cfg = readMCPConfig(ide)
     if (cfg) allConfigs[ide] = cfg
+  }
+
+  // Process only unique additional MCP configs (paths not handled by IDEs)
+  for (const additionalPath of uniqueAdditionalPaths) {
+    const config = readConfigFile(additionalPath)
+    if (!config) continue
+    const mergedConfig: MCPConfig = {}
+
+    mergeConfigIntoResult(config, mergedConfig)
+
+    if (Object.keys(mergedConfig).length > 0) {
+      allConfigs['system'] = mergedConfig
+    }
   }
 
   // gather all servers from configs

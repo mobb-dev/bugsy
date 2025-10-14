@@ -626,10 +626,12 @@ export class McpGQLClient {
     repoUrl,
     limit = MCP_DEFAULT_LIMIT,
     offset = 0,
+    fileFilter,
   }: {
     repoUrl: string
     limit?: number
     offset?: number
+    fileFilter?: string[]
   }): Promise<{
     fixReport: Omit<FixReportSummary, 'userFixes'> | null
     expiredReport: { id: string; expirationOn?: string } | null
@@ -639,6 +641,7 @@ export class McpGQLClient {
         repoUrl,
         limit,
         offset,
+        fileFilter,
       })
 
       // Get the current user info to add email with wildcards
@@ -655,11 +658,20 @@ export class McpGQLClient {
         })
       }
 
+      // Build filters object including file filter if provided
+      const filters: Record<string, unknown> = {}
+      if (fileFilter && fileFilter.length > 0) {
+        filters['vulnerabilityReportIssues'] = {
+          codeNodes: { path: { _in: fileFilter } },
+        }
+      }
+
       const resp = await this.clientSdk.GetLatestReportByRepoUrl({
         repoUrl,
         limit,
         offset,
         currentUserEmail,
+        filters,
       })
 
       logDebug('[GraphQL] GetLatestReportByRepoUrl successful', {
@@ -699,12 +711,14 @@ export class McpGQLClient {
     offset = 0,
     issueType,
     severity,
+    fileFilter,
   }: {
     reportId: string
     limit?: number
     offset?: number
     issueType?: string[]
     severity?: string[]
+    fileFilter?: string[]
   }): Promise<{
     fixes: McpFix[]
     totalCount: number
@@ -715,7 +729,7 @@ export class McpGQLClient {
       projectId?: string
     }
   } | null> {
-    // Build filters object based on issueType and severity
+    // Build filters object based on issueType, severity, and fileFilter
     const filters: Record<string, unknown> = {}
 
     if (issueType && issueType.length > 0) {
@@ -726,6 +740,12 @@ export class McpGQLClient {
       filters['severityText'] = { _in: severity }
     }
 
+    if (fileFilter && fileFilter.length > 0) {
+      filters['vulnerabilityReportIssues'] = {
+        codeNodes: { path: { _in: fileFilter } },
+      }
+    }
+
     try {
       logDebug('[GraphQL] Calling GetReportFixes query', {
         reportId,
@@ -734,6 +754,7 @@ export class McpGQLClient {
         filters,
         issueType,
         severity,
+        fileFilter,
       })
 
       // Get the current user info to add email with wildcards

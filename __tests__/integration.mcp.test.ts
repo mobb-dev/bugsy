@@ -2,9 +2,11 @@ import { GQLClient } from '@mobb/bugsy/features/analysis/graphql'
 import { createMcpServer } from '@mobb/bugsy/mcp'
 import {
   initialScanInProgressPrompt,
+  noChangedFilesFoundPrompt,
   noFreshFixesPrompt,
 } from '@mobb/bugsy/mcp/core/prompts'
 import * as LoggerModule from '@mobb/bugsy/mcp/Logger'
+import { McpGQLClient } from '@mobb/bugsy/mcp/services/McpGQLClient'
 import { sleep } from '@mobb/bugsy/utils'
 import {
   CallToolResult,
@@ -300,7 +302,44 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: noChangedFilesFoundPrompt,
+            type: 'text',
+          },
+        ],
+      })
+    })
+
+    it(`should handle git repository with no changes and no scanRecentlyChangedFiles parameter in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: activeNoChangesRepoPath,
+          }
+        )
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: noChangedFilesFoundPrompt,
+            type: 'text',
+          },
+        ],
+      })
+    })
+
+    it(`should handle git repository with no changes and scanRecentlyChangedFiles=false in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+      await expect(
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: activeNoChangesRepoPath,
+            scanRecentlyChangedFiles: false,
+          }
+        )
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: noChangedFilesFoundPrompt,
             type: 'text',
           },
         ],
@@ -347,7 +386,28 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: noChangedFilesFoundPrompt,
+            type: 'text',
+          },
+        ],
+      })
+    })
+
+    it(`should handle non-git repository with scanRecentlyChangedFiles=false in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+      // For non-git repos, scanRecentlyChangedFiles parameter is ignored and files are always scanned
+      // Empty non-git repo will return "no files" message
+      await expect(
+        mcpClient.callTool<CallToolResult>(
+          MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+          {
+            path: nonRepoEmptyPath,
+            scanRecentlyChangedFiles: false,
+          }
+        )
+      ).resolves.toStrictEqual({
+        content: [
+          {
+            text: noChangedFilesFoundPrompt,
             type: 'text',
           },
         ],
@@ -404,7 +464,7 @@ describe('mcp tests', () => {
       ).resolves.toStrictEqual({
         content: [
           {
-            text: expect.stringContaining('MOBB SECURITY SCAN COMPLETED'),
+            text: noChangedFilesFoundPrompt,
             type: 'text',
           },
         ],
@@ -468,6 +528,126 @@ describe('mcp tests', () => {
           )
         }
       })
+    })
+
+    describe('file filtering parameters', () => {
+      it('should throw error when both fileFilter and fetchFixesFromAnyFile are provided', async () => {
+        await expect(
+          mcpClient.callTool<CallToolResult>(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
+            path: activeRepoPath,
+            fileFilter: ['sample1.py'],
+            fetchFixesFromAnyFile: true,
+          })
+        ).rejects.toThrow(
+          'Parameters "fileFilter" and "fetchFixesFromAnyFile" are mutually exclusive'
+        )
+      })
+
+      it('should filter fixes by fileFilter parameter - verify file filtering works', async () => {
+        // Create test repo with multiple vulnerable files (all uncommitted for simplicity)
+        const testRepo = createFreshRepo('git')
+        const testRepoPath = testRepo.getRepoPath()
+        const testRepoUrl = testRepo.getRepoUrl()
+
+        try {
+          // Add three vulnerable files (all uncommitted so they all get scanned)
+          testRepo.addFile('file1.py', pyVulnerableFileContent)
+          testRepo.addFile('file2.js', jsVulnerableFileContent)
+          testRepo.addFile('file3.html', htmlVulnerableFileContent)
+          await sleep(100)
+
+          // Run scan to generate fixes for all files
+          const scanResult = await mcpClient.callTool<CallToolResult>(
+            MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
+            { path: testRepoPath }
+          )
+          expect(scanResult).toBeDefined()
+
+          // Poll for report to be available in backend (up to 60 seconds)
+          const gqlClient = new GQLClient({
+            token,
+            type: 'token',
+          })
+
+          let reports: Awaited<
+            ReturnType<typeof gqlClient.getFixReportsByRepoUrl>
+          > | null = null
+          const pollStartTime = Date.now()
+          const pollTimeout = 60000 // 60 seconds
+
+          while (Date.now() - pollStartTime < pollTimeout) {
+            reports = await gqlClient.getFixReportsByRepoUrl({
+              repoUrl: testRepoUrl,
+            })
+            if (
+              reports.fixReport.length > 0 &&
+              reports.fixReport[0]?.state === 'Finished'
+            ) {
+              break
+            }
+            await sleep(2000) // Wait 2 seconds between polls
+          }
+
+          expect(reports).toBeDefined()
+          expect(reports!.fixReport.length).toBeGreaterThan(0)
+          expect(reports!.fixReport[0]?.state).toBe('Finished')
+
+          const reportId = reports!.fixReport[0]!.id
+
+          // Test file filtering using McpGQLClient directly (bypasses MCP scan source filter)
+          const mcpGqlClient = new McpGQLClient({
+            token,
+            type: 'token',
+          })
+
+          // 1. Get ALL fixes (no filter) - establish baseline
+          const allFixesResult = await mcpGqlClient.getReportFixesPaginated({
+            reportId,
+            limit: 10,
+            offset: 0,
+          })
+
+          expect(allFixesResult).toBeDefined()
+          expect(allFixesResult!.fixes).toBeDefined()
+          expect(allFixesResult!.fixes.length).toBeGreaterThan(0)
+
+          // 2. Get fixes filtered by specific file only (use relative paths)
+          const file1FixesResult = await mcpGqlClient.getReportFixesPaginated({
+            reportId,
+            fileFilter: ['file1.py'],
+            limit: 10,
+            offset: 0,
+          })
+
+          expect(file1FixesResult).toBeDefined()
+          expect(file1FixesResult!.fixes).toBeDefined()
+          expect(file1FixesResult!.fixes.length).toBeGreaterThan(0)
+
+          // 3. Get fixes filtered by two files
+          const file12FixesResult = await mcpGqlClient.getReportFixesPaginated({
+            reportId,
+            fileFilter: ['file1.py', 'file2.js'],
+            limit: 10,
+            offset: 0,
+          })
+
+          expect(file12FixesResult).toBeDefined()
+          expect(file12FixesResult!.fixes).toBeDefined()
+          expect(file12FixesResult!.fixes.length).toBeGreaterThan(0)
+
+          // Verify that:
+          // - Filtering by 1 file returns fewer or equal fixes than no filter
+          // - Filtering by 2 files returns more or equal fixes than filtering by 1 file
+          expect(file1FixesResult!.fixes.length).toBeLessThanOrEqual(
+            allFixesResult!.fixes.length
+          )
+          expect(file12FixesResult!.fixes.length).toBeGreaterThanOrEqual(
+            file1FixesResult!.fixes.length
+          )
+        } finally {
+          testRepo.cleanupAll()
+        }
+      }, 180000)
     })
   })
 
@@ -1148,6 +1328,79 @@ describe('mcp tests', () => {
           expect((thirdTestContent?.text as string).toLowerCase()).toMatch(
             successPattern
           )
+        } finally {
+          delete process.env['WORKSPACE_FOLDER_PATHS']
+          testRepo.cleanupAll()
+        }
+      }, 200000)
+
+      it('should ONLY auto-apply fixes to uncommitted files (git status filtering)', async () => {
+        process.env['MVS_AUTO_FIX'] = 'true'
+
+        const testRepo = new ActiveGitRepo()
+        const testRepoPath = testRepo.getRepoPath()
+
+        try {
+          // Add and commit two vulnerable files
+          testRepo.addFile('committed1.py', pyVulnerableFileContent)
+          testRepo.addFile('committed2.js', jsVulnerableFileContent)
+          await sleep(100)
+          await testRepo.commitFiles(['committed1.py', 'committed2.js'])
+          await sleep(100)
+
+          // Add uncommitted vulnerable files
+          testRepo.addFile('uncommitted1.html', htmlVulnerableFileContent)
+          testRepo.addFile('uncommitted2.py', pyVulnerableFileContent)
+          await sleep(100)
+
+          process.env['WORKSPACE_FOLDER_PATHS'] = testRepoPath
+          await replaceMcpClient(new InlineMCPClient(createMcpServer()))
+
+          const scanResult = await waitForScanCompletion(
+            mcpClient,
+            testRepoPath
+          )
+
+          expect(scanResult.content[0]).toBeDefined()
+
+          // Check file contents - committed files should NOT be patched
+          const committed1Path = join(testRepoPath, 'committed1.py')
+          const committed2Path = join(testRepoPath, 'committed2.js')
+          const uncommitted1Path = join(testRepoPath, 'uncommitted1.html')
+          const uncommitted2Path = join(testRepoPath, 'uncommitted2.py')
+
+          const committed1Content = readFileSync(committed1Path, 'utf8')
+          const committed2Content = readFileSync(committed2Path, 'utf8')
+          const uncommitted1Content = readFileSync(uncommitted1Path, 'utf8')
+          const uncommitted2Content = readFileSync(uncommitted2Path, 'utf8')
+
+          // Committed files should NOT have security fix comments
+          expect(committed1Content).not.toContain('Mobb security fix applied')
+          expect(committed2Content).not.toContain('Mobb security fix applied')
+
+          // Committed files should still have original vulnerable content
+          expect(committed1Content).toBe(pyVulnerableFileContent)
+          expect(committed2Content).toBe(jsVulnerableFileContent)
+
+          // Uncommitted files SHOULD have security fix comments
+          expect(uncommitted1Content).toContain('Mobb security fix applied')
+          expect(uncommitted2Content).toContain('Mobb security fix applied')
+
+          // Verify uncommitted files were actually modified (not just original content)
+          expect(uncommitted1Content).not.toBe(htmlVulnerableFileContent)
+          expect(uncommitted2Content).not.toBe(pyVulnerableFileContent)
+
+          // Verify logs show auto-fix was applied
+          await expectLoggerMessage(logs, 'Successfully auto-applied')
+
+          // Verify the fix application was selective
+          const appliedFixLogs = logs.filter(
+            (log) =>
+              typeof log.message === 'string' &&
+              (log.message.includes('Successfully auto-applied') ||
+                log.message.includes('Successfully applied fix'))
+          )
+          expect(appliedFixLogs.length).toBeGreaterThan(0)
         } finally {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()

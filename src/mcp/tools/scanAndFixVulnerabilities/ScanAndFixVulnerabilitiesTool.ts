@@ -5,6 +5,7 @@ import {
   MCP_DEFAULT_MAX_FILES_TO_SCAN,
   MCP_MAX_FILE_SIZE,
 } from '../../core/configs'
+import { noChangedFilesFoundPrompt } from '../../core/prompts'
 import { logDebug, logError } from '../../Logger'
 import { getLocalFiles } from '../../services/GetLocalFiles'
 import { validatePath } from '../../services/PathValidation'
@@ -76,6 +77,12 @@ Example payload:
       .boolean()
       .optional()
       .describe('Optional whether to rescan the repository'),
+    scanRecentlyChangedFiles: z
+      .boolean()
+      .optional()
+      .describe(
+        'Optional whether to automatically scan recently changed files when no changed files are found in git status. If false, the tool will prompt the user instead.'
+      ),
   })
 
   inputSchema = {
@@ -101,6 +108,11 @@ Example payload:
       rescan: {
         type: 'boolean',
         description: '[Optional] whether to rescan the repository',
+      },
+      scanRecentlyChangedFiles: {
+        type: 'boolean',
+        description:
+          '[Optional] whether to automatically scan recently changed files when no changed files are found in git status. If false, the tool will prompt the user instead.',
       },
     },
     required: ['path'],
@@ -138,6 +150,7 @@ Example payload:
       maxFileSize: MCP_MAX_FILE_SIZE,
       maxFiles: args.maxFiles,
       scanContext: ScanContext.USER_REQUEST,
+      scanRecentlyChangedFiles: args.scanRecentlyChangedFiles,
     })
 
     logDebug('Files', { files })
@@ -147,7 +160,7 @@ Example payload:
         content: [
           {
             type: 'text',
-            text: 'No changed files found in the repository. The vulnerability scanner analyzes modified, added, or staged files. Make some changes to your code and try again.',
+            text: noChangedFilesFoundPrompt,
           },
         ],
       }

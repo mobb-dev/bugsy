@@ -48,3 +48,6 @@ export const MCP_PERIODIC_TRACK_INTERVAL = 60 * 60 * 1000 // 60 * 60 * 1000 // 1
 
 // Base REST endpoint for MCP operations
 export const MCP_DEFAULT_REST_API_URL = 'https://api.mobb.ai/api/rest/mcp/track'
+
+// Timeout in ms for locating all MCP config files on the system
+export const MCP_SYSTEM_FIND_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes

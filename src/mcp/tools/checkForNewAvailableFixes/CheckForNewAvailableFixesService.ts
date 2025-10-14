@@ -121,10 +121,17 @@ export class CheckForNewAvailableFixesService {
         `[${scanContext}] Connected to the API, assembling list of files to scan`,
         { path }
       )
+
+      // Background scans should only use active files (git status), not fall back to recent files
+      const isBackgroundScan =
+        scanContext === ScanContext.BACKGROUND_INITIAL ||
+        scanContext === ScanContext.BACKGROUND_PERIODIC
+
       const files = await getLocalFiles({
         path,
         isAllFilesScan,
         scanContext,
+        scanRecentlyChangedFiles: !isBackgroundScan,
       })
 
       const scanStartTime = Date.now()

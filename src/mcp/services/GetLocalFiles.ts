@@ -20,18 +20,21 @@ export const getLocalFiles = async ({
   maxFiles,
   isAllFilesScan,
   scanContext,
+  scanRecentlyChangedFiles,
 }: {
   path: string
   maxFileSize?: number
   maxFiles?: number
   isAllFilesScan?: boolean
   scanContext: ScanContext
+  scanRecentlyChangedFiles?: boolean
 }): Promise<LocalFile[]> => {
   logDebug(`[${scanContext}] Starting getLocalFiles`, {
     path,
     maxFileSize,
     maxFiles,
     isAllFilesScan,
+    scanRecentlyChangedFiles,
   })
 
   try {
@@ -54,6 +57,7 @@ export const getLocalFiles = async ({
 
     let files: string[] = []
     if (!gitValidation.isValid || isAllFilesScan) {
+      // For non-git repos, always scan recently changed files (treat as if scanRecentlyChangedFiles is true)
       try {
         files = await FileUtils.getLastChangedFiles({
           dir: path,
@@ -76,10 +80,16 @@ export const getLocalFiles = async ({
         const gitResult = await gitService.getChangedFiles()
         files = gitResult.files
 
-        if (files.length === 0 || maxFiles) {
+        // Only fallback to recently changed files if:
+        // 1. scanRecentlyChangedFiles is explicitly true, OR
+        // 2. maxFiles is specified (existing behavior for comprehensive scans)
+        if (
+          (files.length === 0 || maxFiles) &&
+          (scanRecentlyChangedFiles || maxFiles)
+        ) {
           logDebug(
             `[${scanContext}] No changes found or maxFiles specified, getting recently changed files`,
-            { maxFiles }
+            { maxFiles, scanRecentlyChangedFiles }
           )
 
           const recentResult = await gitService.getRecentlyChangedFiles({

@@ -225,10 +225,12 @@ You have viewed ${shownCount} out of ${totalCount} available fixes.
 
 ### ⚠️ CRITICAL INSTRUCTION FOR AI AGENTS ⚠️
 
-**DO NOT AUTOMATICALLY FETCH ADDITIONAL FIXES WITHOUT EXPLICIT USER REQUEST**
+**YOU MUST INFORM THE USER, BUT DO NOT AUTOMATICALLY FETCH ADDITIONAL FIXES**
 
+- **YOU MUST** tell the user that there are ${totalCount - nextOffset} additional fixes available
+- **YOU MUST** inform the user they can request more fixes if they want to see them
 - **DO NOT** run the \`${currentTool}\` tool again on your own
-- **DO NOT** automatically retrieve more fixes
+- **DO NOT** automatically retrieve more fixes without explicit user request
 - **ONLY** fetch additional fixes if the user explicitly asks for them
 - **WAIT** for the user to specifically request more fixes before proceeding
 

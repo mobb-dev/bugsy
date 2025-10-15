@@ -115,7 +115,6 @@ export class McpServer {
       SIGQUIT: 'MCP server quit signal received',
       SIGABRT: 'MCP server abort signal received',
       SIGPIPE: 'MCP server broken pipe signal received',
-      SIGCHLD: 'MCP server child process signal received',
       SIGTSTP: 'MCP server terminal stop signal received',
       exit: 'MCP server exiting',
       uncaughtException: 'Uncaught exception in MCP server',
@@ -151,10 +150,6 @@ export class McpServer {
       logError(`${message}`, { error, signal })
     } else {
       logDebug(message, { signal })
-    }
-
-    if (signal === 'SIGCHLD') {
-      return
     }
 
     if (
@@ -286,7 +281,6 @@ export class McpServer {
       'SIGQUIT',
       'SIGABRT',
       'SIGPIPE',
-      'SIGCHLD',
       'SIGTSTP',
       'exit',
       'uncaughtException',

@@ -41,7 +41,10 @@ export async function addFixCommentsForPr({
   const {
     vulnerabilityReport: {
       projectId,
-      project: { organizationId },
+      project: {
+        organizationId,
+        organization: { ghFixerNoFixComments },
+      },
     },
   } = getAnalysisRes
   if (!getAnalysisRes.repo?.commitSha || !getAnalysisRes.repo.pullRequest) {
@@ -74,74 +77,77 @@ export async function addFixCommentsForPr({
     ...deleteAllPreviousComments({ comments, scm }),
     ...deleteAllPreviousGeneralPrComments({ generalPrComments, scm }),
   ])
-  await Promise.all([
-    ...prVulenrabilities.vulnerabilityReportIssueCodeNodes.map(
-      (vulnerabilityReportIssueCodeNode) => {
-        return postFixComment({
-          vulnerabilityReportIssueCodeNode,
-          projectId,
-          analysisId,
-          organizationId,
-          fixesById,
-          scm,
+  await Promise.all(
+    [
+      ...prVulenrabilities.vulnerabilityReportIssueCodeNodes.map(
+        (vulnerabilityReportIssueCodeNode) => {
+          return postFixComment({
+            vulnerabilityReportIssueCodeNode,
+            projectId,
+            analysisId,
+            organizationId,
+            fixesById,
+            scm,
+            pullRequest,
+            scanner,
+            commitSha,
+          })
+        }
+      ),
+      ...irrelevantVulnerabilityReportIssues.map(
+        async (vulnerabilityReportIssue) => {
+          let fpDescription: string | null = null
+          if (vulnerabilityReportIssue.fpId) {
+            const fpRes = await gqlClient.getFalsePositive({
+              fpId: vulnerabilityReportIssue.fpId,
+            })
+            const parsedFpRes = await FalsePositivePartsZ.parseAsync(
+              fpRes?.getFalsePositive
+            )
+            const { description, contextString } =
+              getParsedFalsePositiveMessage(parsedFpRes)
+            fpDescription = contextString
+              ? `${description}\n\n${contextString}`
+              : description
+          }
+          return await Promise.all(
+            vulnerabilityReportIssue.codeNodes.map(
+              async (vulnerabilityReportIssueCodeNode) => {
+                return await postIssueComment({
+                  vulnerabilityReportIssueCodeNode: {
+                    path: vulnerabilityReportIssueCodeNode.path,
+                    startLine: vulnerabilityReportIssueCodeNode.startLine,
+                    vulnerabilityReportIssue: {
+                      fixId: '',
+                      safeIssueType: vulnerabilityReportIssue.safeIssueType,
+                      vulnerabilityReportIssueTags:
+                        vulnerabilityReportIssue.vulnerabilityReportIssueTags,
+                      category: vulnerabilityReportIssue.category,
+                    },
+                    vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
+                  },
+                  projectId,
+                  analysisId,
+                  organizationId,
+                  fixesById,
+                  scm,
+                  pullRequest,
+                  scanner,
+                  commitSha,
+                  fpDescription,
+                })
+              }
+            )
+          )
+        }
+      ),
+      !ghFixerNoFixComments &&
+        postAnalysisInsightComment({
+          prVulenrabilities,
           pullRequest,
           scanner,
-          commitSha,
-        })
-      }
-    ),
-    ...irrelevantVulnerabilityReportIssues.map(
-      async (vulnerabilityReportIssue) => {
-        let fpDescription: string | null = null
-        if (vulnerabilityReportIssue.fpId) {
-          const fpRes = await gqlClient.getFalsePositive({
-            fpId: vulnerabilityReportIssue.fpId,
-          })
-          const parsedFpRes = await FalsePositivePartsZ.parseAsync(
-            fpRes?.getFalsePositive
-          )
-          const { description, contextString } =
-            getParsedFalsePositiveMessage(parsedFpRes)
-          fpDescription = contextString
-            ? `${description}\n\n${contextString}`
-            : description
-        }
-        return await Promise.all(
-          vulnerabilityReportIssue.codeNodes.map(
-            async (vulnerabilityReportIssueCodeNode) => {
-              return await postIssueComment({
-                vulnerabilityReportIssueCodeNode: {
-                  path: vulnerabilityReportIssueCodeNode.path,
-                  startLine: vulnerabilityReportIssueCodeNode.startLine,
-                  vulnerabilityReportIssue: {
-                    fixId: '',
-                    safeIssueType: vulnerabilityReportIssue.safeIssueType,
-                    vulnerabilityReportIssueTags:
-                      vulnerabilityReportIssue.vulnerabilityReportIssueTags,
-                    category: vulnerabilityReportIssue.category,
-                  },
-                  vulnerabilityReportIssueId: vulnerabilityReportIssue.id,
-                },
-                projectId,
-                analysisId,
-                organizationId,
-                fixesById,
-                scm,
-                pullRequest,
-                scanner,
-                commitSha,
-                fpDescription,
-              })
-            }
-          )
-        )
-      }
-    ),
-    postAnalysisInsightComment({
-      prVulenrabilities,
-      pullRequest,
-      scanner,
-      scm,
-    }),
-  ])
+          scm,
+        }),
+    ].filter(Boolean)
+  )
 }

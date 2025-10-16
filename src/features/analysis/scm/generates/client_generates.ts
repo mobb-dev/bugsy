@@ -21304,6 +21304,8 @@ export type Organization = {
   enableIssueFilter: Scalars['Boolean']['output'];
   /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
   generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
+  /** If true, the GH Fixer won't add comments when no fixes are available */
+  ghFixerNoFixComments: Scalars['Boolean']['output'];
   id: Scalars['uuid']['output'];
   includeSuppressed: Scalars['Boolean']['output'];
   isAiEnabled: Scalars['Boolean']['output'];
@@ -21729,6 +21731,7 @@ export type Organization_Bool_Exp = {
   brokerTokenExpiryInDays?: InputMaybe<Int_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
+  ghFixerNoFixComments?: InputMaybe<Boolean_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   includeSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
@@ -22033,6 +22036,8 @@ export type Organization_Insert_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  /** If true, the GH Fixer won't add comments when no fixes are available */
+  ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -22388,6 +22393,7 @@ export type Organization_Order_By = {
   brokerTokenExpiryInDays?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
+  ghFixerNoFixComments?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   includeSuppressed?: InputMaybe<Order_By>;
   isAiEnabled?: InputMaybe<Order_By>;
@@ -22994,6 +23000,8 @@ export enum Organization_Select_Column {
   /** column name */
   EnableIssueFilter = 'enableIssueFilter',
   /** column name */
+  GhFixerNoFixComments = 'ghFixerNoFixComments',
+  /** column name */
   Id = 'id',
   /** column name */
   IncludeSuppressed = 'includeSuppressed',
@@ -23029,6 +23037,8 @@ export type Organization_Set_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  /** If true, the GH Fixer won't add comments when no fixes are available */
+  ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -23141,6 +23151,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  /** If true, the GH Fixer won't add comments when no fixes are available */
+  ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -23655,6 +23667,8 @@ export enum Organization_Update_Column {
   CreatedOn = 'createdOn',
   /** column name */
   EnableIssueFilter = 'enableIssueFilter',
+  /** column name */
+  GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
   Id = 'id',
   /** column name */
@@ -41451,7 +41465,7 @@ export type GetAnalysisQueryVariables = Exact<{
 }>;
 
 
-export type GetAnalysisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, failReason?: string | null, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
+export type GetAnalysisQuery = { __typename?: 'query_root', analysis?: { __typename?: 'fixReport', id: any, state: Fix_Report_State_Enum, failReason?: string | null, vulnerabilityReportId: any, repo?: { __typename?: 'repo', commitSha: string, pullRequest?: number | null } | null, vulnerabilityReport: { __typename?: 'vulnerability_report', projectId: any, project: { __typename?: 'project', organizationId: any, organization: { __typename?: 'organization', ghFixerNoFixComments: boolean } }, file?: { __typename?: 'file', signedFile?: { __typename?: 'FilePayload', url: string } | null } | null } } | null };
 
 export type GetFixesQueryVariables = Exact<{
   filters: Fix_Bool_Exp;
@@ -41855,6 +41869,9 @@ export const GetAnalysisDocument = `
       projectId
       project {
         organizationId
+        organization {
+          ghFixerNoFixComments
+        }
       }
       file {
         signedFile {

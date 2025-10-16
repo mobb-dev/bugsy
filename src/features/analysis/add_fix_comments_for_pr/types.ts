@@ -34,13 +34,6 @@ export type PostIssueCommentParams = {
   fpDescription: string | null
 }
 
-export type PostAnalysisSummaryParams = {
-  prVulenrabilities: PrVulenrabilities
-  fixesById: FixesById
-  pullRequest: number
-  scm: GithubSCMLib
-}
-
 export type PostAnalysisInsightCommentParams = {
   prVulenrabilities: PrVulenrabilities
   pullRequest: number

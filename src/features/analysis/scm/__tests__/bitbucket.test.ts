@@ -23,7 +23,6 @@ import { env } from './env'
 const EXPIRED_TOKEN =
   'XMT7WlQLoZpzpcExU-iwaBbKmsmDuejjY9m1_hppLlU4JN6tJBUlMiucmUaf4PgF6GBXoAChSA2QLEnf2VC6SAg9YLq6j85qWAUQlTnMWw4HfWqIHWB4Q_uZjE_PP8B7Wf1pXqGS1mgFke-8DDkFV6OO23iX'
 
-const WORKSPACE_SLUG = 'mobb-dev'
 const PUBLIC_URL = 'https://bitbucket.org/jwalton/opup'
 const REPO = {
   URL: 'https://bitbucket.org/mobbcitest/webgoat',
@@ -50,39 +49,6 @@ describe('bitbucket sdk function', async () => {
     })
     const res = await bitbucketSdk.getUser()
     expect(res.username).toMatchInlineSnapshot(`"mobbcitest-admin"`)
-  })
-  it('should get all the repos of specific workspace', async () => {
-    const bitbucketSdk = getBitbucketSdk({
-      authType: 'basic',
-      password: authPassword,
-      username: authUsername,
-    })
-    const res = await bitbucketSdk.getRepos({ workspaceSlug: WORKSPACE_SLUG })
-    expect(res[0]?.repoName).toMatchInlineSnapshot(`undefined`)
-  })
-  it('should get all the repos all the users workspaces', async () => {
-    const bitbucketSdk = getBitbucketSdk({
-      authType: 'basic',
-      password: authPassword,
-      username: authUsername,
-    })
-    const res = await bitbucketSdk.getRepos()
-
-    expect(
-      res.map((repo) => ({
-        repoIsPublic: repo.repoIsPublic,
-        repoName: repo.repoName,
-        repoUrl: repo.repoUrl,
-      }))
-    ).toMatchInlineSnapshot(`
-      [
-        {
-          "repoIsPublic": false,
-          "repoName": "webgoat",
-          "repoUrl": "https://bitbucket.org/mobbcitest/webgoat",
-        },
-      ]
-    `)
   })
   it('should get ref by BRANCH', async () => {
     const bitbucketSdk = getBitbucketSdk({

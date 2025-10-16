@@ -125,6 +125,7 @@ const ProjectSchema = z.object({
 const VulnerabilityReportSchema = z.object({
   scanDate: z.any().nullable(), // GraphQL uses `any` type for timestamp
   vendor: z.string(), // GraphQL generates as string, not enum
+  projectId: z.any().optional(), // GraphQL uses `any` type for UUID
   project: ProjectSchema,
   totalVulnerabilityReportIssuesCount: VulnerabilityReportIssueAggregateSchema,
   notFixableVulnerabilityReportIssuesCount:

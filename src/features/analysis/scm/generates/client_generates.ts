@@ -30,6 +30,17 @@ export type Scalars = {
   uuid: { input: any; output: any; }
 };
 
+export type AiBlameAttribution = {
+  __typename?: 'AIBlameAttribution';
+  aiBlameCommitId: Scalars['String']['output'];
+  aiBlameInferenceId: Scalars['String']['output'];
+  commitSha: Scalars['String']['output'];
+  filePath: Scalars['String']['output'];
+  lineNumber: Scalars['Int']['output'];
+  model?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+};
+
 export type AiBlameInferenceFinalizeInput = {
   aiBlameInferenceId: Scalars['String']['input'];
   aiResponseAt: Scalars['Timestamp']['input'];
@@ -160,6 +171,12 @@ export type BrokerHostsType = {
   __typename?: 'BrokerHostsType';
   realDomain: Scalars['String']['output'];
   virtualDomain: Scalars['String']['output'];
+};
+
+export type ChangedLines = {
+  __typename?: 'ChangedLines';
+  added: Scalars['Int']['output'];
+  removed: Scalars['Int']['output'];
 };
 
 export type CheckmarxProject = {
@@ -448,6 +465,14 @@ export type GetIssuesV4ResponseSuccess = {
   vulnerability_report_issue: Array<VulnerabilityReportIssue>;
 };
 
+export type GetIssuesV5Response = GetIssuesResponseError | GetIssuesV5ResponseSuccess;
+
+export type GetIssuesV5ResponseSuccess = {
+  __typename?: 'GetIssuesV5ResponseSuccess';
+  hasNextPage: Scalars['Boolean']['output'];
+  vulnerability_report_issue: Array<VulnerabilityReportIssueV5>;
+};
+
 export type GetLinearIntegrationData = GetLinearIntegrationDataError | GetLinearIntegrationDataSuccess;
 
 export type GetLinearIntegrationDataError = {
@@ -664,9 +689,11 @@ export type PackageInfoResponse = {
 
 export type ProcessAiBlameResult = {
   __typename?: 'ProcessAIBlameResult';
+  attributions: Array<AiBlameAttribution>;
   attributionsCreated: Scalars['Int']['output'];
   commitDiff?: Maybe<Scalars['String']['output']>;
   inferencesProcessed: Scalars['Int']['output'];
+  prTitle?: Maybe<Scalars['String']['output']>;
 };
 
 export type ProjectIssueStats = {
@@ -1024,12 +1051,46 @@ export type SubmitCheckmarxVulnerabilityReportSuccess = {
   reportId: Scalars['String']['output'];
 };
 
+export type SubmitRequestInfo = {
+  __typename?: 'SubmitRequestInfo';
+  authorEmail?: Maybe<Scalars['String']['output']>;
+  authorName?: Maybe<Scalars['String']['output']>;
+  changedLines: ChangedLines;
+  createdAt: Scalars['Timestamp']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  sourceBranch: Scalars['String']['output'];
+  status: SubmitRequestStatus;
+  submitRequestId: Scalars['String']['output'];
+  submitRequestNumber: Scalars['Int']['output'];
+  targetBranch: Scalars['String']['output'];
+  tickets: Array<Ticket>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['Timestamp']['output'];
+};
+
+export enum SubmitRequestStatus {
+  Closed = 'CLOSED',
+  Draft = 'DRAFT',
+  Error = 'ERROR',
+  Merged = 'MERGED',
+  NoAccess = 'NO_ACCESS',
+  Open = 'OPEN',
+  Skipped = 'SKIPPED'
+}
+
 export type SubmitToScmResponse = ScmAdminError | ScmCommitHashError | ScmError | ScmInvalidSubmitBranchNameError | ScmInvalidTargetBranchNameError | ScmNoFixesPermissionsError | ScmNoProjectPermissionsError | ScmNoScmTokenError | ScmRepoNoTokenAccessError | ScmSubmitBranchAlreadyExistsError | ScmTargetBranchMissingError | ScmUnsupportedScmTypeError | SubmitToScmSuccess;
 
 export type SubmitToScmSuccess = {
   __typename?: 'SubmitToScmSuccess';
   status: Status;
   submitFixRequestIds: Array<Scalars['String']['output']>;
+};
+
+export type Ticket = {
+  __typename?: 'Ticket';
+  name: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  url: Scalars['String']['output'];
 };
 
 export type TicketAccessToken = {
@@ -1260,6 +1321,22 @@ export type VulnerabilityReportIssue = {
 export type VulnerabilityReportIssueTag = {
   __typename?: 'VulnerabilityReportIssueTag';
   vulnerability_report_issue_tag_value: Scalars['String']['output'];
+};
+
+export type VulnerabilityReportIssueV5 = {
+  __typename?: 'VulnerabilityReportIssueV5';
+  createdAt: Scalars['String']['output'];
+  fingerprintHash?: Maybe<Scalars['String']['output']>;
+  fix?: Maybe<VulnReportFix>;
+  fpDescription?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  issueLanguage: Scalars['String']['output'];
+  issueType: Scalars['String']['output'];
+  severity?: Maybe<Scalars['String']['output']>;
+  state: Scalars['String']['output'];
+  vendorInstanceId?: Maybe<Scalars['String']['output']>;
+  vendorIssueId: Scalars['String']['output'];
+  vulnerabilityReportIssueTags: Array<VulnerabilityReportIssueTag>;
 };
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
@@ -15085,6 +15162,11 @@ export type Mutation_Root = {
    * for AI-generated code. User must have access to both the repository and organization.
    */
   analyzeCommitForAIBlame: ProcessAiBlameResult;
+  /**
+   * Process a pull request by fetching its diff from the SCM provider and analyzing it
+   * for AI-generated code. User must have access to both the repository and organization.
+   */
+  analyzePRForAIBlame: ProcessAiBlameResult;
   applySimilarAnswers?: Maybe<Scalars['Void']['output']>;
   autoPrAnalysis?: Maybe<AutoPrResponse>;
   changeUserOrgRole?: Maybe<StatusQueryResponse>;
@@ -16407,6 +16489,14 @@ export type Mutation_RootAddUsersToProjectArgs = {
 export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
   commitSha: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
+  repositoryURL: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootAnalyzePrForAiBlameArgs = {
+  organizationId: Scalars['String']['input'];
+  prNumber: Scalars['Int']['input'];
   repositoryURL: Scalars['String']['input'];
 };
 
@@ -25917,12 +26007,15 @@ export type Query_Root = {
   getFix: RegisterUserResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
   getIssuesApiV4: GetIssuesV4Response;
+  getIssuesApiV5: GetIssuesV5Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   getReportsApiV2: GetReportsV2Response;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
+  /** Get submit requests (PRs/MRs) for a specific repository */
+  getSubmitRequests: Array<SubmitRequestInfo>;
   /** execute function "get_expiring_fix_reports" which returns "fix_report" */
   get_expiring_fix_reports: Array<FixReport>;
   /** execute function "get_expiring_fix_reports" and query aggregates on result of table type "fix_report" */
@@ -27340,6 +27433,11 @@ export type Query_RootGetIssuesApiV4Args = {
 };
 
 
+export type Query_RootGetIssuesApiV5Args = {
+  issueId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type Query_RootGetLinearIntegrationDataArgs = {
   organizationId: Scalars['String']['input'];
 };
@@ -27370,6 +27468,11 @@ export type Query_RootGetSplitFixArgs = {
   fixId: Scalars['uuid']['input'];
   loadAnswers: Scalars['Boolean']['input'];
   userInput?: InputMaybe<Array<QuestionAnswer>>;
+};
+
+
+export type Query_RootGetSubmitRequestsArgs = {
+  repoUrl: Scalars['String']['input'];
 };
 
 

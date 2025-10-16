@@ -2,8 +2,10 @@ import { SCMLib } from './scm'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameReponse,
-  GetRefererenceResult,
+  GetGitBlameResponse,
+  GetReferenceResult,
+  GetSubmitRequestDiffResult,
+  GetSubmitRequestInfo,
   ReferenceType,
   ScmLibScmType,
   ScmRepoInfo,
@@ -85,12 +87,12 @@ export class StubSCMLib extends SCMLib {
   async getRepoBlameRanges(
     _ref: string,
     _path: string
-  ): Promise<GetGitBlameReponse> {
+  ): Promise<GetGitBlameResponse> {
     console.warn('getRepoBlameRanges() returning empty array')
     return []
   }
 
-  async getReferenceData(_ref: string): Promise<GetRefererenceResult> {
+  async getReferenceData(_ref: string): Promise<GetReferenceResult> {
     console.warn('getReferenceData() returning null/empty defaults')
     return {
       type: ReferenceType.BRANCH,
@@ -146,5 +148,31 @@ export class StubSCMLib extends SCMLib {
       authorEmail: undefined,
       message: undefined,
     }
+  }
+
+  async getSubmitRequestDiff(
+    _submitRequestId: string
+  ): Promise<GetSubmitRequestDiffResult> {
+    console.warn('getSubmitRequestDiff() returning stub diff')
+    return {
+      diff: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      submitRequestId: _submitRequestId,
+      submitRequestNumber: parseInt(_submitRequestId) || 0,
+      sourceBranch: '',
+      targetBranch: '',
+      authorName: undefined,
+      authorEmail: undefined,
+      title: undefined,
+      description: undefined,
+      commits: [],
+      diffLines: [],
+    }
+  }
+
+  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
+    console.warn('getSubmitRequests() returning empty array')
+    return []
   }
 }

@@ -12,8 +12,8 @@ import {
 } from '../errors'
 import { parseScmURL, ScmType } from '../shared/src'
 import {
-  GetRefererenceResult,
-  GetRefererenceResultZ,
+  GetReferenceResult,
+  GetReferenceResultZ,
   ReferenceType,
   ScmRepoInfo,
 } from '../types'
@@ -135,19 +135,19 @@ type GetBitbucketSdkParams =
   | { authType: 'token'; token: string }
   | { authType: 'basic'; username: string; password: string }
 
-function getBitbucketIntance(params: GetBitbucketSdkParams) {
+function getBitbucketInstance(params: GetBitbucketSdkParams) {
   // we have an issue importing the bitbucket package both in bugsy and node - https://linear.app/mobb/issue/MOBB-2190
-  const BitbucketContstructor =
+  const BitbucketConstructor =
     bitbucketPkg && 'Bitbucket' in bitbucketPkg
       ? bitbucketPkg.Bitbucket
       : bitbucketPkgNode.Bitbucket
   switch (params.authType) {
     case 'public':
-      return new BitbucketContstructor()
+      return new BitbucketConstructor()
     case 'token':
-      return new BitbucketContstructor({ auth: { token: params.token } })
+      return new BitbucketConstructor({ auth: { token: params.token } })
     case 'basic':
-      return new BitbucketContstructor({
+      return new BitbucketConstructor({
         auth: {
           password: params.password,
           username: params.username,
@@ -157,7 +157,7 @@ function getBitbucketIntance(params: GetBitbucketSdkParams) {
 }
 type BitbucketSdk = ReturnType<typeof getBitbucketSdk>
 export function getBitbucketSdk(params: GetBitbucketSdkParams) {
-  const bitbucketClient = getBitbucketIntance(params)
+  const bitbucketClient = getBitbucketInstance(params)
 
   return {
     getAuthType() {
@@ -168,16 +168,15 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
         ? await getRepositoriesByWorkspace(bitbucketClient, {
             workspaceSlug: params.workspaceSlug,
           })
-        : await getllUsersrepositories(bitbucketClient)
+        : await getAllUsersRepositories(bitbucketClient)
 
       // for some reason the bitbucket client returns a list of repos with a null value
-      // even though the api docments the values are not nullable
+      // even though the api docents the values are not nullable
       // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-get
       return repoRes.map((repo) => ({
         repoIsPublic: !repo.is_private,
         repoName: repo.name || 'unknown repo name',
         repoOwner: repo.owner?.username || 'unknown owner',
-        // language can be empty string
         repoLanguages: repo.language ? [repo.language] : [],
         repoUpdatedAt: repo.updated_on
           ? repo.updated_on
@@ -207,8 +206,8 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       const { repo_slug, workspace } =
         parseBitbucketOrganizationAndRepo(repoUrl)
       const fullRepoName = `${workspace}/${repo_slug}`
-      // note: initially I thought about ussing this endpoint - https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-users-get
-      // which is more percision but it requires the user to have admin access to the repo
+      // note: initially I thought about using this endpoint - https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-users-get
+      // which is more precision but it requires the user to have admin access to the repo
 
       // note we're using ~ for case insensitive search
       const res = await bitbucketClient.user.listPermissionsForRepos({
@@ -247,7 +246,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       })
       return res.data
     },
-    async getDownloadlink(params: { repoUrl: string }) {
+    async getDownloadLink(params: { repoUrl: string }) {
       const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(
         params.repoUrl
       )
@@ -299,15 +298,15 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     }: {
       ref: string
       url: string
-    }): Promise<GetRefererenceResult> {
+    }): Promise<GetReferenceResult> {
       return Promise.allSettled([
         this.getTagRef({ repoUrl: url, tagName: ref }),
         this.getBranchRef({ repoUrl: url, branchName: ref }),
         this.getCommitRef({ repoUrl: url, commitSha: ref }),
       ]).then((promisesResult) => {
-        // note: tag is being retrevied by getCommitRef as well, so we take the first one which is getTagRef
+        // note: tag is being retrieved by getCommitRef as well, so we take the first one which is getTagRef
         const [refPromise] = promisesResult.filter(
-          (promise): promise is PromiseFulfilledResult<GetRefererenceResult> =>
+          (promise): promise is PromiseFulfilledResult<GetReferenceResult> =>
             promise.status === 'fulfilled'
         )
         if (!refPromise) {
@@ -325,7 +324,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
         workspace,
         name: tagName,
       })
-      return GetRefererenceResultZ.parse({
+      return GetReferenceResultZ.parse({
         sha: tagRes.data.target?.hash,
         type: ReferenceType.TAG,
         date: new Date(z.string().parse(tagRes.data.target?.date)),
@@ -333,7 +332,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     },
     async getBranchRef(params: GetBranchParams) {
       const getBranchRes = await this.getBranch(params)
-      return GetRefererenceResultZ.parse({
+      return GetReferenceResultZ.parse({
         sha: getBranchRes.target?.hash,
         type: ReferenceType.BRANCH,
         date: new Date(z.string().parse(getBranchRes.target?.date)),
@@ -341,7 +340,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     },
     async getCommitRef(params: GetCommitParams) {
       const getCommitRes = await this.getCommit(params)
-      return GetRefererenceResultZ.parse({
+      return GetReferenceResultZ.parse({
         sha: getCommitRes.hash,
         type: ReferenceType.COMMIT,
         date: new Date(z.string().parse(getCommitRes.date)),
@@ -376,7 +375,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     }) {
       const { repo_slug, workspace } = parseBitbucketOrganizationAndRepo(url)
       const res = await bitbucketClient.pullrequests.createComment({
-        //@ts-expect-error tyep requires _body.type, but it its uses api fails
+        //@ts-expect-error type requires _body.type, but it its uses api fails
         _body: {
           content: {
             raw: markdownComment,
@@ -423,18 +422,18 @@ export async function validateBitbucketParams(params: {
   }
 }
 
-async function getUsersworkspacesSlugs(bitbucketClient: APIClient) {
+async function getUsersWorkspacesSlugs(bitbucketClient: APIClient) {
   const res = await bitbucketClient.workspaces.getWorkspaces({})
   return res.data.values?.map((v) => z.string().parse(v.slug))
 }
 
-async function getllUsersrepositories(bitbucketClient: APIClient) {
-  const userWorspacesSlugs = await getUsersworkspacesSlugs(bitbucketClient)
-  if (!userWorspacesSlugs) {
+async function getAllUsersRepositories(bitbucketClient: APIClient) {
+  const userWorkspacesSlugs = await getUsersWorkspacesSlugs(bitbucketClient)
+  if (!userWorkspacesSlugs) {
     return []
   }
   const allWorkspaceRepos: Schema.Repository[] = []
-  for (const workspaceSlug of userWorspacesSlugs) {
+  for (const workspaceSlug of userWorkspacesSlugs) {
     const repos = await bitbucketClient.repositories.list({
       workspace: workspaceSlug,
     })

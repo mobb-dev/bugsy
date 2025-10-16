@@ -6,10 +6,12 @@ import { buildAuthorizedRepoUrl } from '../'
 import { InvalidRepoUrlError } from '../errors'
 import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
-import { CreateSubmitRequestParams, GetRefererenceResult } from '../types'
+import { CreateSubmitRequestParams, GetReferenceResult } from '../types'
 import {
   GetCommitDiffResult,
-  GetGitBlameReponse,
+  GetGitBlameResponse,
+  GetSubmitRequestDiffResult,
+  GetSubmitRequestInfo,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -247,12 +249,12 @@ export class BitbucketSCMLib extends SCMLib {
   async getRepoBlameRanges(
     _ref: string,
     _path: string
-  ): Promise<GetGitBlameReponse> {
+  ): Promise<GetGitBlameResponse> {
     // note: bitbucket does not have blame ranges support
     return []
   }
 
-  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+  async getReferenceData(ref: string): Promise<GetReferenceResult> {
     this._validateUrl()
     return this.bitbucketSdk.getReferenceData({ url: this.url, ref })
   }
@@ -303,5 +305,15 @@ export class BitbucketSCMLib extends SCMLib {
 
   async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
     throw new Error('getCommitDiff not implemented for Bitbucket')
+  }
+
+  async getSubmitRequestDiff(
+    _submitRequestId: string
+  ): Promise<GetSubmitRequestDiffResult> {
+    throw new Error('getSubmitRequestDiff not implemented for Bitbucket')
+  }
+
+  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
+    throw new Error('getSubmitRequests not implemented for Bitbucket')
   }
 }

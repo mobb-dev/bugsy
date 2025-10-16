@@ -3,8 +3,10 @@ import { isValidBranchName } from './scmSubmit'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameReponse,
-  GetRefererenceResult,
+  GetGitBlameResponse,
+  GetReferenceResult,
+  GetSubmitRequestDiffResult,
+  GetSubmitRequestInfo,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -94,15 +96,20 @@ export abstract class SCMLib {
   abstract getRepoBlameRanges(
     ref: string,
     path: string
-  ): Promise<GetGitBlameReponse>
+  ): Promise<GetGitBlameResponse>
 
-  abstract getReferenceData(ref: string): Promise<GetRefererenceResult>
+  abstract getReferenceData(ref: string): Promise<GetReferenceResult>
   abstract getSubmitRequestUrl(submitRequestIdNumber: number): Promise<string>
   abstract getSubmitRequestId(submitRequestIdUrl: string): Promise<string>
   abstract getCommitUrl(commitId: string): Promise<string>
   abstract getBranchCommitsUrl(branchName: string): Promise<string>
   abstract getRepoDefaultBranch(): Promise<string>
   abstract getCommitDiff(commitSha: string): Promise<GetCommitDiffResult>
+  abstract getSubmitRequestDiff(
+    submitRequestId: string
+  ): Promise<GetSubmitRequestDiffResult>
+
+  abstract getSubmitRequests(repoUrl: string): Promise<GetSubmitRequestInfo[]>
 
   public getAccessToken(): string {
     return this.accessToken || ''

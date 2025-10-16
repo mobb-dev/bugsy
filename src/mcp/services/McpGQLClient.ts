@@ -508,7 +508,7 @@ export class McpGQLClient {
     const reportMetadata = {
       id: reportData.id,
       organizationId: reportData.vulnerabilityReport?.project?.organizationId,
-      projectId: reportData.vulnerabilityReport?.project?.id,
+      projectId: reportData.vulnerabilityReport?.projectId,
     }
 
     const { userFixes = [], fixes = [] } = reportData
@@ -796,6 +796,8 @@ export class McpGQLClient {
         reportData: latestReport,
         limit,
       })
+
+      logDebug('[GraphQL] GetReportFixes response parsed', { fixes: fixes })
 
       return {
         fixes,

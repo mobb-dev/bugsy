@@ -2,8 +2,10 @@ import { SCMLib } from '../scm'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameReponse,
-  GetRefererenceResult,
+  GetGitBlameResponse,
+  GetReferenceResult,
+  GetSubmitRequestDiffResult,
+  GetSubmitRequestInfo,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -178,7 +180,7 @@ export class GitlabSCMLib extends SCMLib {
   async getRepoBlameRanges(
     ref: string,
     path: string
-  ): Promise<GetGitBlameReponse> {
+  ): Promise<GetGitBlameResponse> {
     this._validateUrl()
     return await getGitlabBlameRanges(
       { ref, path, gitlabUrl: this.url },
@@ -189,7 +191,7 @@ export class GitlabSCMLib extends SCMLib {
     )
   }
 
-  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+  async getReferenceData(ref: string): Promise<GetReferenceResult> {
     this._validateUrl()
     return await getGitlabReferenceData(
       { ref, gitlabUrl: this.url },
@@ -240,5 +242,15 @@ export class GitlabSCMLib extends SCMLib {
 
   async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
     throw new Error('getCommitDiff not implemented for GitLab')
+  }
+
+  async getSubmitRequestDiff(
+    _submitRequestId: string
+  ): Promise<GetSubmitRequestDiffResult> {
+    throw new Error('getSubmitRequestDiff not implemented for GitLab')
+  }
+
+  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
+    throw new Error('getSubmitRequests not implemented for GitLab')
   }
 }

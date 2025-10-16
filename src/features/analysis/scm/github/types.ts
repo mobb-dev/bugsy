@@ -17,13 +17,12 @@ import {
   UPDATE_COMMENT_PATH,
 } from './consts'
 
-export type GetCommentReponse = Endpoints[typeof GET_COMMENT_PATH]['response']
+export type GetCommentResponse = Endpoints[typeof GET_COMMENT_PATH]['response']
 
 export type PostCommentParams =
   Endpoints[typeof POST_COMMENT_PATH]['parameters']
 
-export type PostCommentReposnse =
-  Endpoints[typeof POST_COMMENT_PATH]['response']
+export type PostCommentReposes = Endpoints[typeof POST_COMMENT_PATH]['response']
 
 export type UpdateCommentParams =
   Endpoints[typeof UPDATE_COMMENT_PATH]['parameters']

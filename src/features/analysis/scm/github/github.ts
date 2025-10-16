@@ -42,7 +42,7 @@ import {
   GetUserResponse,
   GithubBlameResponse,
   PostCommentParams,
-  PostCommentReposnse,
+  PostCommentReposes,
   PostGeneralPrCommentParams,
   PostGeneralPrCommentResponse,
   ReplyToCodeReviewCommentPathParams,
@@ -61,7 +61,7 @@ export function getGithubSdk(
   return {
     async postPrComment(
       params: PostCommentParams
-    ): Promise<PostCommentReposnse> {
+    ): Promise<PostCommentReposes> {
       return octokit.request(POST_COMMENT_PATH, params)
     },
     async updatePrComment(
@@ -558,6 +558,35 @@ export function getGithubSdk(
     },
     async getUserInfo(): Promise<GetUserResponse> {
       return octokit.request(GET_USER)
+    },
+    async getPrCommits(params: {
+      owner: string
+      repo: string
+      pull_number: number
+    }) {
+      return octokit.rest.pulls.listCommits({
+        owner: params.owner,
+        repo: params.repo,
+        pull_number: params.pull_number,
+      })
+    },
+    async getUserRepos() {
+      return octokit.rest.repos.listForAuthenticatedUser({
+        visibility: 'all',
+        affiliation: 'owner,collaborator,organization_member',
+        sort: 'updated',
+        per_page: 100,
+      })
+    },
+    async getRepoPullRequests(params: { owner: string; repo: string }) {
+      return octokit.rest.pulls.list({
+        owner: params.owner,
+        repo: params.repo,
+        state: 'all',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 100,
+      })
     },
   }
 }

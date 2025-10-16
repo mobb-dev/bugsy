@@ -19,7 +19,7 @@ export type GetReferenceDataResponse = {
   date: Date | undefined
 }
 
-export type GetGitBlameReponse = {
+export type GetGitBlameResponse = {
   startingLine: number
   endingLine: number
   name: string
@@ -34,6 +34,44 @@ export type GetCommitDiffResult = {
   authorName?: string
   authorEmail?: string
   message?: string
+}
+
+export type DiffLineAttribution = {
+  file: string
+  line: number
+  commitSha: string
+}
+
+export type GetSubmitRequestDiffResult = {
+  diff: string
+  createdAt: Date
+  updatedAt: Date
+  submitRequestId: string
+  submitRequestNumber: number
+  sourceBranch: string
+  targetBranch: string
+  authorName?: string
+  authorEmail?: string
+  title?: string
+  description?: string
+  commits: GetCommitDiffResult[]
+  diffLines: DiffLineAttribution[]
+}
+
+export type GetSubmitRequestInfo = {
+  submitRequestId: string
+  submitRequestNumber: number
+  title: string
+  status: ScmSubmitRequestStatus
+  sourceBranch: string
+  targetBranch: string
+  authorName?: string
+  authorEmail?: string
+  createdAt: Date
+  updatedAt: Date
+  description?: string
+  tickets: { name: string; title: string; url: string }[]
+  changedLines: { added: number; removed: number }
 }
 
 export const scmSubmitRequestStatus = {
@@ -93,13 +131,13 @@ export type CreateSubmitRequestParams = {
   body: string
 }
 
-export const GetRefererenceResultZ = z.object({
+export const GetReferenceResultZ = z.object({
   date: z.date().optional(),
   sha: z.string(),
   type: z.nativeEnum(ReferenceType),
 })
 
-export type GetRefererenceResult = z.infer<typeof GetRefererenceResultZ>
+export type GetReferenceResult = z.infer<typeof GetReferenceResultZ>
 
 export type PostPRReviewCommentParams = {
   prNumber: number

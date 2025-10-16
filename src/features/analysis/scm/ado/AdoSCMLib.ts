@@ -3,10 +3,12 @@ import { setTimeout } from 'node:timers/promises'
 import { InvalidAccessTokenError } from '../errors'
 import { SCMLib } from '../scm'
 import { scmCloudUrl } from '../shared/src'
-import { CreateSubmitRequestParams, GetRefererenceResult } from '../types'
+import { CreateSubmitRequestParams, GetReferenceResult } from '../types'
 import {
   GetCommitDiffResult,
-  GetGitBlameReponse,
+  GetGitBlameResponse,
+  GetSubmitRequestDiffResult,
+  GetSubmitRequestInfo,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -72,7 +74,7 @@ export class AdoSCMLib extends SCMLib {
         return String(pullRequestId)
       } catch (e) {
         console.warn(
-          `error creating pull request for ADO. Try number ${i + 1}`,
+          `error creating pull request for ADO. Try number ${String(i + 1).replace(/\n|\r/g, '')}`,
           e
         )
         await setTimeout(1000)
@@ -189,12 +191,12 @@ export class AdoSCMLib extends SCMLib {
   async getRepoBlameRanges(
     _ref: string,
     _path: string
-  ): Promise<GetGitBlameReponse> {
+  ): Promise<GetGitBlameResponse> {
     const adoSdk = await this.getAdoSdk()
     return await adoSdk.getAdoBlameRanges()
   }
 
-  async getReferenceData(ref: string): Promise<GetRefererenceResult> {
+  async getReferenceData(ref: string): Promise<GetReferenceResult> {
     this._validateUrl()
     const adoSdk = await this.getAdoSdk()
     return await adoSdk.getAdoReferenceData({
@@ -255,4 +257,16 @@ export class AdoSCMLib extends SCMLib {
   async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
     throw new Error('getCommitDiff not implemented for ADO')
   }
+
+  async getSubmitRequestDiff(
+    _submitRequestId: string
+  ): Promise<GetSubmitRequestDiffResult> {
+    throw new Error('getSubmitRequestDiff not implemented for ADO')
+  }
+
+  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
+    throw new Error('getSubmitRequests not implemented for ADO')
+  }
 }
+
+// Mobb security fix applied: LOG_FORGING

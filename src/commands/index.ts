@@ -119,7 +119,7 @@ export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
   const { apiKey, token, organization, scmType, url, refreshToken, ci } =
     addScmTokenOptions
   let gqlClient = new GQLClient({
-    apiKey: apiKey || config.get('apiToken'),
+    apiKey: apiKey ?? config.get('apiToken') ?? '',
     type: 'apiKey',
   })
 

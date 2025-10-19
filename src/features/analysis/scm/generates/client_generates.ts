@@ -1292,6 +1292,8 @@ export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
   fixReport: FixReportSubmitReport;
   fixReportId: Scalars['String']['output'];
+  organizationId: Scalars['String']['output'];
+  projectId: Scalars['String']['output'];
   status: Status;
   vendor?: Maybe<Scalars['String']['output']>;
   vulnerabilityReportId: Scalars['String']['output'];

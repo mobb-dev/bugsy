@@ -7,6 +7,13 @@ type LogData = unknown
 
 const MAX_LOGS_SIZE = 1000
 
+type LogEntry = {
+  timestamp: string
+  level: string
+  message: string
+  data?: LogData
+}
+
 class Logger {
   private mobbConfigStore: Configstore
   private host: string
@@ -35,8 +42,9 @@ class Logger {
    * Migrates logs from unknown path to known workspace path
    */
   private migrateLogs(fromPath: string, toPath: string): void {
-    const existingLogs = this.mobbConfigStore.get(fromPath) || []
-    const targetLogs = this.mobbConfigStore.get(toPath) || []
+    const existingLogs =
+      (this.mobbConfigStore.get(fromPath) as LogEntry[]) ?? []
+    const targetLogs = (this.mobbConfigStore.get(toPath) as LogEntry[]) ?? []
 
     if (existingLogs.length > 0) {
       // Merge logs, keeping the total under MAX_LOGS_SIZE
@@ -74,14 +82,14 @@ class Logger {
       this.lastKnownPath = workspacePath
     }
 
-    const logMessage = {
+    const logMessage: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       message,
       data,
     }
 
-    const logs = this.mobbConfigStore.get(currentPath) || []
+    const logs = (this.mobbConfigStore.get(currentPath) as LogEntry[]) ?? []
     if (logs.length >= MAX_LOGS_SIZE) {
       logs.shift()
     }

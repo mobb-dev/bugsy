@@ -362,7 +362,7 @@ export async function _scan(
   const { createSpinner } = Spinner({ ci })
   skipPrompts = skipPrompts || ci
   let gqlClient = new GQLClient({
-    apiKey: apiKey || config.get('apiToken'),
+    apiKey: apiKey ?? config.get('apiToken') ?? '',
     type: 'apiKey',
   })
 

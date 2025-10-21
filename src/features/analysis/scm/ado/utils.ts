@@ -33,6 +33,17 @@ import {
 
 const debug = Debug('mobbdev:scm:ado')
 
+// transform legacy URLs before creating the connection
+function transformVisualStudioUrl(url: string): string {
+  // e.g. "https://ORG.visualstudio.com" → "https://dev.azure.com/ORG"
+  const match = url.match(/^https:\/\/([^.]+)\.visualstudio\.com/i)
+  if (match) {
+    const orgName = match[1]
+    return `https://dev.azure.com/${orgName}`
+  }
+  return url
+}
+
 function _getPublicAdoClient({
   orgName,
   origin,
@@ -170,7 +181,7 @@ export async function getAdoApiClient(params: GetAdoApiClientParams) {
       )
     }
     const connection = new api.WebApi(
-      orgUrl,
+      transformVisualStudioUrl(orgUrl),
       api.getBearerHandler(params.accessToken),
       {}
     )
@@ -181,7 +192,7 @@ export async function getAdoApiClient(params: GetAdoApiClientParams) {
   const authHandler = api.getPersonalAccessTokenHandler(params.accessToken)
   const isBroker = isBrokerUrl(orgUrl)
   const connection = new api.WebApi(
-    orgUrl,
+    transformVisualStudioUrl(orgUrl),
     authHandler,
     isBroker
       ? {

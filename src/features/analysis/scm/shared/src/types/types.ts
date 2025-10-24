@@ -154,6 +154,7 @@ export const ReportQueryResultZ = z.object({
     vulnerabilityReport: z.object({
       id: z.string().uuid(),
       reportSummaryUrl: z.string().url().nullish(),
+      computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
       vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
       issuesWithKnownLanguage: z.number().nullable(),
       scanDate: z.string().nullable(),
@@ -394,6 +395,7 @@ const ProjectVulnerabilityReport = z.object({
   id: z.string().uuid(),
   name: z.string().nullable(),
   vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
+  computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
   fixReport: z.object({
     id: z.string().uuid(),
     createdOn: z.string(),

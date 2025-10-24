@@ -18,6 +18,7 @@ export const FixPageFixReportZ = z.object({
   vulnerabilityReport: z.object({
     id: z.string().uuid(),
     vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),
+    computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),
     projectId: z.string().uuid(),
     project: z.object({
       organizationId: z.string().uuid(),

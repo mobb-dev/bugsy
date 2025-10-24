@@ -19072,6 +19072,7 @@ export type Mutation_RootSubmitVulnerabilityReportArgs = {
   fileCount?: InputMaybe<Scalars['Int']['input']>;
   fixReportId: Scalars['String']['input'];
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
+  isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
   reference: Scalars['String']['input'];
@@ -38207,6 +38208,8 @@ export type View_Types_Tag_Count_Variance_Fields = {
 export type Vulnerability_Report = {
   __typename?: 'vulnerability_report';
   commonPathPrefix?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_computed_vendor" */
+  computedVendor?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
   file?: Maybe<File>;
   fileId?: Maybe<Scalars['uuid']['output']>;
@@ -38214,6 +38217,8 @@ export type Vulnerability_Report = {
   fixReport?: Maybe<FixReport>;
   id: Scalars['uuid']['output'];
   isDeleted: Scalars['Boolean']['output'];
+  /** This flag indicates if the vulnerability report us created by us or received from an external source */
+  isInternal: Scalars['Boolean']['output'];
   issuesWithKnownLanguage?: Maybe<Scalars['Int']['output']>;
   lastIssueUpdatedAt: Scalars['timestamptz']['output'];
   name?: Maybe<Scalars['String']['output']>;
@@ -38426,11 +38431,13 @@ export type Vulnerability_Report_Bool_Exp = {
   _not?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Bool_Exp>>;
   commonPathPrefix?: InputMaybe<String_Comparison_Exp>;
+  computedVendor?: InputMaybe<String_Comparison_Exp>;
   file?: InputMaybe<File_Bool_Exp>;
   fileId?: InputMaybe<Uuid_Comparison_Exp>;
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isDeleted?: InputMaybe<Boolean_Comparison_Exp>;
+  isInternal?: InputMaybe<Boolean_Comparison_Exp>;
   issuesWithKnownLanguage?: InputMaybe<Int_Comparison_Exp>;
   lastIssueUpdatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
@@ -38469,6 +38476,8 @@ export type Vulnerability_Report_Insert_Input = {
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This flag indicates if the vulnerability report us created by us or received from an external source */
+  isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
   lastIssueUpdatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -40617,6 +40626,8 @@ export type Vulnerability_Report_Issue_Variance_Fields = {
 export type Vulnerability_Report_Max_Fields = {
   __typename?: 'vulnerability_report_max_fields';
   commonPathPrefix?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_computed_vendor" */
+  computedVendor?: Maybe<Scalars['String']['output']>;
   fileId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issuesWithKnownLanguage?: Maybe<Scalars['Int']['output']>;
@@ -40648,6 +40659,8 @@ export type Vulnerability_Report_Max_Order_By = {
 export type Vulnerability_Report_Min_Fields = {
   __typename?: 'vulnerability_report_min_fields';
   commonPathPrefix?: Maybe<Scalars['String']['output']>;
+  /** A computed field, executes function "get_computed_vendor" */
+  computedVendor?: Maybe<Scalars['String']['output']>;
   fileId?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issuesWithKnownLanguage?: Maybe<Scalars['Int']['output']>;
@@ -40701,11 +40714,13 @@ export type Vulnerability_Report_On_Conflict = {
 /** Ordering options when selecting data from "vulnerability_report". */
 export type Vulnerability_Report_Order_By = {
   commonPathPrefix?: InputMaybe<Order_By>;
+  computedVendor?: InputMaybe<Order_By>;
   file?: InputMaybe<File_Order_By>;
   fileId?: InputMaybe<Order_By>;
   fixReport?: InputMaybe<FixReport_Order_By>;
   id?: InputMaybe<Order_By>;
   isDeleted?: InputMaybe<Order_By>;
+  isInternal?: InputMaybe<Order_By>;
   issuesWithKnownLanguage?: InputMaybe<Order_By>;
   lastIssueUpdatedAt?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
@@ -40889,6 +40904,8 @@ export enum Vulnerability_Report_Select_Column {
   /** column name */
   IsDeleted = 'isDeleted',
   /** column name */
+  IsInternal = 'isInternal',
+  /** column name */
   IssuesWithKnownLanguage = 'issuesWithKnownLanguage',
   /** column name */
   LastIssueUpdatedAt = 'lastIssueUpdatedAt',
@@ -40913,13 +40930,17 @@ export enum Vulnerability_Report_Select_Column {
 /** select "vulnerability_report_aggregate_bool_exp_bool_and_arguments_columns" columns of table "vulnerability_report" */
 export enum Vulnerability_Report_Select_Column_Vulnerability_Report_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
   /** column name */
-  IsDeleted = 'isDeleted'
+  IsDeleted = 'isDeleted',
+  /** column name */
+  IsInternal = 'isInternal'
 }
 
 /** select "vulnerability_report_aggregate_bool_exp_bool_or_arguments_columns" columns of table "vulnerability_report" */
 export enum Vulnerability_Report_Select_Column_Vulnerability_Report_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
   /** column name */
-  IsDeleted = 'isDeleted'
+  IsDeleted = 'isDeleted',
+  /** column name */
+  IsInternal = 'isInternal'
 }
 
 /** input type for updating data in table "vulnerability_report" */
@@ -40928,6 +40949,8 @@ export type Vulnerability_Report_Set_Input = {
   fileId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This flag indicates if the vulnerability report us created by us or received from an external source */
+  isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
   lastIssueUpdatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -40995,6 +41018,8 @@ export type Vulnerability_Report_Stream_Cursor_Value_Input = {
   fileId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** This flag indicates if the vulnerability report us created by us or received from an external source */
+  isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
   lastIssueUpdatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -41032,6 +41057,8 @@ export enum Vulnerability_Report_Update_Column {
   Id = 'id',
   /** column name */
   IsDeleted = 'isDeleted',
+  /** column name */
+  IsInternal = 'isInternal',
   /** column name */
   IssuesWithKnownLanguage = 'issuesWithKnownLanguage',
   /** column name */
@@ -41153,6 +41180,8 @@ export enum Vulnerability_Report_Vendor_Enum {
   Fortify = 'fortify',
   /** fortifyMobbSarif */
   FortifyMobbSarif = 'fortifyMobbSarif',
+  /** We use our own internal SAST instead of receiving the report from user, currently we use opengrep  */
+  MobbSast = 'mobbSast',
   /** opengrep */
   Opengrep = 'opengrep',
   /** semgrep */

@@ -6,6 +6,7 @@ import {
 import { FetchAvailableFixesTool } from '@mobb/bugsy/mcp/tools/fetchAvailableFixes/FetchAvailableFixesTool'
 import { tmpdir } from 'os'
 import { join } from 'path'
+import { describe, expect, it, vi } from 'vitest'
 
 import { CheckForNewAvailableFixesTool } from '../../src/mcp/tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { ScanAndFixVulnerabilitiesTool as FixVulnerabilitiesTool } from '../../src/mcp/tools/scanAndFixVulnerabilities/ScanAndFixVulnerabilitiesTool'

@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.0.200",
+  "version": "1.0.201",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.mjs",
@@ -71,6 +71,7 @@
     "graphql": "16.11.0",
     "graphql-request": "6.1.0",
     "graphql-ws": "5.16.2",
+    "hash-wasm": "4.12.0",
     "http-proxy-agent": "7.0.2",
     "https-proxy-agent": "7.0.6",
     "ignore": "7.0.5",

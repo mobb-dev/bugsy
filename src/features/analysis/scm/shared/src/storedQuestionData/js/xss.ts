@@ -16,4 +16,11 @@ export const xss = {
       'You are using unsafe string substitution in the template. This means that if the expression can contain maliciously crafted data, it may lead to XSS injection. To apply the fix, you have to make sure the expression is not sanitized on the backend already, and it does not represent an HTML code block.',
     guidance: () => '',
   },
+  isServerSideCode: {
+    content: () =>
+      'Is this code running on the server side (a NodeJS application)',
+    description: () =>
+      'The fix to this vulnerability is different is the code runs in the client (browser) or the server side (NodeJs)',
+    guidance: () => '',
+  },
 }

@@ -10268,6 +10268,7 @@ export type FixReport = {
   fixes_aggregate: Fix_Aggregate;
   /** A computed field, executes function "get_fresh_fixes" */
   freshFixes?: Maybe<Array<Fix>>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes: Scalars['Int']['output'];
   id: Scalars['uuid']['output'];
   isAiEnabled?: Maybe<Scalars['Boolean']['output']>;
@@ -10437,6 +10438,7 @@ export type FixReport_Avg_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10488,6 +10490,7 @@ export enum FixReport_Constraint {
 
 /** input type for incrementing numeric columns in table "fix_report" */
 export type FixReport_Inc_Input = {
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -10501,6 +10504,7 @@ export type FixReport_Insert_Input = {
   failReason?: InputMaybe<Scalars['String']['input']>;
   falsePositives?: InputMaybe<False_Positive_Arr_Rel_Insert_Input>;
   fixes?: InputMaybe<Fix_Arr_Rel_Insert_Input>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10529,6 +10533,7 @@ export type FixReport_Max_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
@@ -10552,6 +10557,7 @@ export type FixReport_Min_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
@@ -10655,6 +10661,7 @@ export type FixReport_Set_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
   failReason?: InputMaybe<Scalars['String']['input']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10674,6 +10681,7 @@ export type FixReport_Stddev_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10687,6 +10695,7 @@ export type FixReport_Stddev_Pop_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10700,6 +10709,7 @@ export type FixReport_Stddev_Samp_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10718,6 +10728,7 @@ export type FixReport_Stream_Cursor_Value_Input = {
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
   failReason?: InputMaybe<Scalars['String']['input']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -10737,6 +10748,7 @@ export type FixReport_Sum_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
 };
@@ -10787,6 +10799,7 @@ export type FixReport_Var_Pop_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10800,6 +10813,7 @@ export type FixReport_Var_Samp_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };
@@ -10813,6 +10827,7 @@ export type FixReport_Variance_Fields = {
   fixesInprogressCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "count_fix_isready" */
   fixesReadyCount?: Maybe<Scalars['Int']['output']>;
+  /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
   hybridFixes?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
 };

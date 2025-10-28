@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import {
   IssueType_Enum,
+  Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
 } from '../../generates/client_generates'
 import { IssuePartsFp } from './types/issue'
@@ -175,6 +176,32 @@ export const getIssueTypeFriendlyString = (
     return issueType ? issueType.replaceAll('_', ' ') : 'Other'
   }
   return issueTypeMap[issueTypeZParseRes.data]
+}
+
+export const statusMap: Record<Vulnerability_Report_Issue_State_Enum, string> =
+  {
+    [Vulnerability_Report_Issue_State_Enum.Digested]: 'Digested',
+    [Vulnerability_Report_Issue_State_Enum.Error]: 'Error',
+    [Vulnerability_Report_Issue_State_Enum.FalsePositive]: 'False Positive',
+    [Vulnerability_Report_Issue_State_Enum.Filtered]: 'Filtered',
+    [Vulnerability_Report_Issue_State_Enum.FilteredAiQuota]:
+      'Filtered AI Quota',
+    [Vulnerability_Report_Issue_State_Enum.Fixed]: 'Fixable',
+    [Vulnerability_Report_Issue_State_Enum.NoFix]: 'No Fix',
+    [Vulnerability_Report_Issue_State_Enum.Pending]: 'Pending',
+    [Vulnerability_Report_Issue_State_Enum.Unfixable]: 'Unfixable',
+    [Vulnerability_Report_Issue_State_Enum.Unsupported]: 'Unsupported',
+  } as const
+
+const statusZ = z.nativeEnum(Vulnerability_Report_Issue_State_Enum)
+export const getStatusFriendlyString = (
+  status: string | null | undefined
+): string => {
+  const statusZParseRes = statusZ.safeParse(status)
+  if (!statusZParseRes.success) {
+    return status ? status.replaceAll('_', ' ') : 'Unknown'
+  }
+  return statusMap[statusZParseRes.data]
 }
 
 export function prettyName(val: string) {

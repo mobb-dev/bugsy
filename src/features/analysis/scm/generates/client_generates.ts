@@ -265,6 +265,13 @@ export type DeleteIntegrationResponseSuccess = {
   status: Status;
 };
 
+export type ExportUserInferencesResponse = {
+  __typename?: 'ExportUserInferencesResponse';
+  downloadUrl?: Maybe<Scalars['String']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
 export type FalsePositiveData = {
   __typename?: 'FalsePositiveData';
   extraContext: Array<UnstructuredFixExtraContext>;
@@ -15540,6 +15547,12 @@ export type Mutation_Root = {
   delete_vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
   digestVulnerabilityReport: VulnerabilityReportResponse;
   /**
+   * Export all AI Blame inferences for a specific user as a zip file.
+   * Admin only. Creates a zip file containing all inference and prompt files,
+   * uploads it to S3, and returns a signed download URL.
+   */
+  exportUserInferences: ExportUserInferencesResponse;
+  /**
    * Finalize uploads by verifying uploaded objects exist and inserting rows
    * into ai_blame_inference with S3 paths and metadata.
    */
@@ -17693,6 +17706,12 @@ export type Mutation_RootDigestVulnerabilityReportArgs = {
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootExportUserInferencesArgs = {
+  userEmail: Scalars['String']['input'];
 };
 
 

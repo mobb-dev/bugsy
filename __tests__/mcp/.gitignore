@@ -1,10 +1,8 @@
 # Coverage reports
 coverage/
-coverage
 *.lcov
 .nyc_output/
 .vitest/
-htmlcov/
 
 # Build outputs
 build/
@@ -13,23 +11,23 @@ dist/
 
 # Dependencies
 node_modules/
-package-lock.json
-snyk
 
 # IDE / Editor
-.eslintcache
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # Environment files (SECURITY)
-.env*
-!.env.project
-!.env.vault
-.flaskenv*
+.env
+.env.local
+.env.*.local
 
 # Temporary files
 *.tmp
 *.temp
 *.log
-html
 
 # OS Files
 .DS_Store

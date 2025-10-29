@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import path from 'path'
+import * as path from 'path'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
@@ -22,9 +22,10 @@ export default defineConfig({
       },
     },
     coverage: {
-      exclude: ['node_modules', './build'],
-      provider: 'istanbul',
-      reportsDirectory: 'html/coverage',
+      exclude: ['node_modules', './build', 'vitest.config.ts'],
+      provider: 'v8',
+      reporter: ['html', 'text', 'lcov', 'json', 'lcovonly'],
+      reportsDirectory: 'coverage',
     },
   },
   resolve: {

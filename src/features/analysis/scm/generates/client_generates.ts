@@ -154,6 +154,12 @@ export type BaseResponse = {
   status: Status;
 };
 
+export enum BlameStatus {
+  Error = 'Error',
+  Ok = 'OK',
+  Requested = 'Requested'
+}
+
 /** Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'. */
 export type Boolean_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['Boolean']['input']>;
@@ -694,14 +700,29 @@ export type PackageInfoResponse = {
   version: Scalars['String']['output'];
 };
 
-export type ProcessAiBlameResult = {
-  __typename?: 'ProcessAIBlameResult';
+export type ProcessAiBlameErrorResult = {
+  __typename?: 'ProcessAIBlameErrorResult';
+  error: Scalars['String']['output'];
+  status: BlameStatus;
+};
+
+export type ProcessAiBlameFinalResult = {
+  __typename?: 'ProcessAIBlameFinalResult';
   attributions: Array<AiBlameAttribution>;
   attributionsCreated: Scalars['Int']['output'];
-  commitDiff?: Maybe<Scalars['String']['output']>;
+  diff: Scalars['String']['output'];
   inferencesProcessed: Scalars['Int']['output'];
   prTitle?: Maybe<Scalars['String']['output']>;
+  status: BlameStatus;
 };
+
+export type ProcessAiBlameRequestedResult = {
+  __typename?: 'ProcessAIBlameRequestedResult';
+  requestIds: Array<Scalars['String']['output']>;
+  status: BlameStatus;
+};
+
+export type ProcessAiBlameResult = ProcessAiBlameErrorResult | ProcessAiBlameFinalResult | ProcessAiBlameRequestedResult;
 
 export type ProjectIssueStats = {
   __typename?: 'ProjectIssueStats';
@@ -2181,9 +2202,14 @@ export type Ai_Blame_Commit = {
   aiBlameAttributions: Array<Ai_Blame_Attribution>;
   /** An aggregate relationship */
   aiBlameAttributions_aggregate: Ai_Blame_Attribution_Aggregate;
+  /** An array relationship */
+  blameAiAnalysisRequests: Array<Blame_Ai_Analysis_Request>;
+  /** An aggregate relationship */
+  blameAiAnalysisRequests_aggregate: Blame_Ai_Analysis_Request_Aggregate;
   commitSha: Scalars['String']['output'];
   createdAt: Scalars['timestamp']['output'];
   id: Scalars['uuid']['output'];
+  inferenceCount: Scalars['Int']['output'];
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
@@ -2210,6 +2236,26 @@ export type Ai_Blame_CommitAiBlameAttributions_AggregateArgs = {
   where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
 };
 
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitBlameAiAnalysisRequestsArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitBlameAiAnalysisRequests_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
 /** aggregated selection of "ai_blame_commit" */
 export type Ai_Blame_Commit_Aggregate = {
   __typename?: 'ai_blame_commit_aggregate';
@@ -2220,9 +2266,17 @@ export type Ai_Blame_Commit_Aggregate = {
 /** aggregate fields of "ai_blame_commit" */
 export type Ai_Blame_Commit_Aggregate_Fields = {
   __typename?: 'ai_blame_commit_aggregate_fields';
+  avg?: Maybe<Ai_Blame_Commit_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Ai_Blame_Commit_Max_Fields>;
   min?: Maybe<Ai_Blame_Commit_Min_Fields>;
+  stddev?: Maybe<Ai_Blame_Commit_Stddev_Fields>;
+  stddev_pop?: Maybe<Ai_Blame_Commit_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Ai_Blame_Commit_Stddev_Samp_Fields>;
+  sum?: Maybe<Ai_Blame_Commit_Sum_Fields>;
+  var_pop?: Maybe<Ai_Blame_Commit_Var_Pop_Fields>;
+  var_samp?: Maybe<Ai_Blame_Commit_Var_Samp_Fields>;
+  variance?: Maybe<Ai_Blame_Commit_Variance_Fields>;
 };
 
 
@@ -2232,6 +2286,12 @@ export type Ai_Blame_Commit_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** aggregate avg on columns */
+export type Ai_Blame_Commit_Avg_Fields = {
+  __typename?: 'ai_blame_commit_avg_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
 /** Boolean expression to filter rows from the table "ai_blame_commit". All fields are combined with a logical 'AND'. */
 export type Ai_Blame_Commit_Bool_Exp = {
   _and?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
@@ -2239,9 +2299,12 @@ export type Ai_Blame_Commit_Bool_Exp = {
   _or?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Bool_Exp>;
+  blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+  blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Bool_Exp>;
   commitSha?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  inferenceCount?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
@@ -2255,12 +2318,19 @@ export enum Ai_Blame_Commit_Constraint {
   AiBlameCommitPkey = 'ai_blame_commit_pkey'
 }
 
+/** input type for incrementing numeric columns in table "ai_blame_commit" */
+export type Ai_Blame_Commit_Inc_Input = {
+  inferenceCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "ai_blame_commit" */
 export type Ai_Blame_Commit_Insert_Input = {
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Arr_Rel_Insert_Input>;
+  blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
@@ -2272,6 +2342,7 @@ export type Ai_Blame_Commit_Max_Fields = {
   commitSha?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceCount?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
 };
@@ -2282,6 +2353,7 @@ export type Ai_Blame_Commit_Min_Fields = {
   commitSha?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceCount?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
 };
@@ -2312,9 +2384,11 @@ export type Ai_Blame_Commit_On_Conflict = {
 /** Ordering options when selecting data from "ai_blame_commit". */
 export type Ai_Blame_Commit_Order_By = {
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Order_By>;
+  blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Order_By>;
   commitSha?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceCount?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
@@ -2334,6 +2408,8 @@ export enum Ai_Blame_Commit_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceCount = 'inferenceCount',
+  /** column name */
   OrganizationId = 'organizationId',
   /** column name */
   RepositoryUrl = 'repositoryUrl'
@@ -2344,8 +2420,27 @@ export type Ai_Blame_Commit_Set_Input = {
   commitSha?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Ai_Blame_Commit_Stddev_Fields = {
+  __typename?: 'ai_blame_commit_stddev_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Ai_Blame_Commit_Stddev_Pop_Fields = {
+  __typename?: 'ai_blame_commit_stddev_pop_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Ai_Blame_Commit_Stddev_Samp_Fields = {
+  __typename?: 'ai_blame_commit_stddev_samp_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "ai_blame_commit" */
@@ -2361,8 +2456,15 @@ export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
   commitSha?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Ai_Blame_Commit_Sum_Fields = {
+  __typename?: 'ai_blame_commit_sum_fields';
+  inferenceCount?: Maybe<Scalars['Int']['output']>;
 };
 
 /** update columns of table "ai_blame_commit" */
@@ -2374,16 +2476,38 @@ export enum Ai_Blame_Commit_Update_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceCount = 'inferenceCount',
+  /** column name */
   OrganizationId = 'organizationId',
   /** column name */
   RepositoryUrl = 'repositoryUrl'
 }
 
 export type Ai_Blame_Commit_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Ai_Blame_Commit_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
   /** filter the rows which have to be updated */
   where: Ai_Blame_Commit_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Ai_Blame_Commit_Var_Pop_Fields = {
+  __typename?: 'ai_blame_commit_var_pop_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Ai_Blame_Commit_Var_Samp_Fields = {
+  __typename?: 'ai_blame_commit_var_samp_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Ai_Blame_Commit_Variance_Fields = {
+  __typename?: 'ai_blame_commit_variance_fields';
+  inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "ai_blame_inference" */
@@ -8307,6 +8431,410 @@ export type Bigint_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['bigint']['input']>;
   _neq?: InputMaybe<Scalars['bigint']['input']>;
   _nin?: InputMaybe<Array<Scalars['bigint']['input']>>;
+};
+
+/** columns and relationships of "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request = {
+  __typename?: 'blame_ai_analysis_request';
+  /** An object relationship */
+  commit?: Maybe<Ai_Blame_Commit>;
+  commitId?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  createdByUser: User;
+  createdByUserId: Scalars['uuid']['output'];
+  createdOn: Scalars['timestamptz']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  state: Blame_Ai_Analysis_Request_State_Enum;
+};
+
+/** aggregated selection of "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Aggregate = {
+  __typename?: 'blame_ai_analysis_request_aggregate';
+  aggregate?: Maybe<Blame_Ai_Analysis_Request_Aggregate_Fields>;
+  nodes: Array<Blame_Ai_Analysis_Request>;
+};
+
+export type Blame_Ai_Analysis_Request_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Bool_Exp_Count>;
+};
+
+export type Blame_Ai_Analysis_Request_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Aggregate_Fields = {
+  __typename?: 'blame_ai_analysis_request_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Blame_Ai_Analysis_Request_Max_Fields>;
+  min?: Maybe<Blame_Ai_Analysis_Request_Min_Fields>;
+};
+
+
+/** aggregate fields of "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Blame_Ai_Analysis_Request_Max_Order_By>;
+  min?: InputMaybe<Blame_Ai_Analysis_Request_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input = {
+  data: Array<Blame_Ai_Analysis_Request_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "blame_ai_analysis_request". All fields are combined with a logical 'AND'. */
+export type Blame_Ai_Analysis_Request_Bool_Exp = {
+  _and?: InputMaybe<Array<Blame_Ai_Analysis_Request_Bool_Exp>>;
+  _not?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+  _or?: InputMaybe<Array<Blame_Ai_Analysis_Request_Bool_Exp>>;
+  commit?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  commitId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdByUser?: InputMaybe<User_Bool_Exp>;
+  createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  error?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "blame_ai_analysis_request" */
+export enum Blame_Ai_Analysis_Request_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  BlameAiAnalysisRequestPkey = 'blame_ai_analysis_request_pkey'
+}
+
+/** input type for inserting data into table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Insert_Input = {
+  commit?: InputMaybe<Ai_Blame_Commit_Obj_Rel_Insert_Input>;
+  commitId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** aggregate max on columns */
+export type Blame_Ai_Analysis_Request_Max_Fields = {
+  __typename?: 'blame_ai_analysis_request_max_fields';
+  commitId?: Maybe<Scalars['uuid']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Max_Order_By = {
+  commitId?: InputMaybe<Order_By>;
+  createdByUserId?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Blame_Ai_Analysis_Request_Min_Fields = {
+  __typename?: 'blame_ai_analysis_request_min_fields';
+  commitId?: Maybe<Scalars['uuid']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Min_Order_By = {
+  commitId?: InputMaybe<Order_By>;
+  createdByUserId?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Mutation_Response = {
+  __typename?: 'blame_ai_analysis_request_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Blame_Ai_Analysis_Request>;
+};
+
+/** on_conflict condition type for table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_On_Conflict = {
+  constraint: Blame_Ai_Analysis_Request_Constraint;
+  update_columns?: Array<Blame_Ai_Analysis_Request_Update_Column>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "blame_ai_analysis_request". */
+export type Blame_Ai_Analysis_Request_Order_By = {
+  commit?: InputMaybe<Ai_Blame_Commit_Order_By>;
+  commitId?: InputMaybe<Order_By>;
+  createdByUser?: InputMaybe<User_Order_By>;
+  createdByUserId?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: blame_ai_analysis_request */
+export type Blame_Ai_Analysis_Request_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "blame_ai_analysis_request" */
+export enum Blame_Ai_Analysis_Request_Select_Column {
+  /** column name */
+  CommitId = 'commitId',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  State = 'state'
+}
+
+/** input type for updating data in table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Set_Input = {
+  commitId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** columns and relationships of "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State = {
+  __typename?: 'blame_ai_analysis_request_state';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Aggregate = {
+  __typename?: 'blame_ai_analysis_request_state_aggregate';
+  aggregate?: Maybe<Blame_Ai_Analysis_Request_State_Aggregate_Fields>;
+  nodes: Array<Blame_Ai_Analysis_Request_State>;
+};
+
+/** aggregate fields of "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Aggregate_Fields = {
+  __typename?: 'blame_ai_analysis_request_state_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Blame_Ai_Analysis_Request_State_Max_Fields>;
+  min?: Maybe<Blame_Ai_Analysis_Request_State_Min_Fields>;
+};
+
+
+/** aggregate fields of "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "blame_ai_analysis_request_state". All fields are combined with a logical 'AND'. */
+export type Blame_Ai_Analysis_Request_State_Bool_Exp = {
+  _and?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Bool_Exp>>;
+  _not?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+  _or?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "blame_ai_analysis_request_state" */
+export enum Blame_Ai_Analysis_Request_State_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  BlameAiAnalysisRequestStatePkey = 'blame_ai_analysis_request_state_pkey'
+}
+
+export enum Blame_Ai_Analysis_Request_State_Enum {
+  /** The blame ai analysis request was sent to the blame ai agent and the blame ai agent returned an error */
+  Error = 'Error',
+  /** The blame AI analysis request was created and sent to the blame ai agent */
+  Requested = 'Requested',
+  /** The blame ai analysis request was completed successfully */
+  Succeeded = 'Succeeded'
+}
+
+/** Boolean expression to compare columns of type "blame_ai_analysis_request_state_enum". All fields are combined with logical 'AND'. */
+export type Blame_Ai_Analysis_Request_State_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+  _in?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+  _nin?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Enum>>;
+};
+
+/** input type for inserting data into table "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Blame_Ai_Analysis_Request_State_Max_Fields = {
+  __typename?: 'blame_ai_analysis_request_state_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Blame_Ai_Analysis_Request_State_Min_Fields = {
+  __typename?: 'blame_ai_analysis_request_state_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Mutation_Response = {
+  __typename?: 'blame_ai_analysis_request_state_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Blame_Ai_Analysis_Request_State>;
+};
+
+/** on_conflict condition type for table "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_On_Conflict = {
+  constraint: Blame_Ai_Analysis_Request_State_Constraint;
+  update_columns?: Array<Blame_Ai_Analysis_Request_State_Update_Column>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "blame_ai_analysis_request_state". */
+export type Blame_Ai_Analysis_Request_State_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: blame_ai_analysis_request_state */
+export type Blame_Ai_Analysis_Request_State_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "blame_ai_analysis_request_state" */
+export enum Blame_Ai_Analysis_Request_State_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "blame_ai_analysis_request_state" */
+export type Blame_Ai_Analysis_Request_State_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Blame_Ai_Analysis_Request_State_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Blame_Ai_Analysis_Request_State_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "blame_ai_analysis_request_state" */
+export enum Blame_Ai_Analysis_Request_State_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Blame_Ai_Analysis_Request_State_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_State_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Blame_Ai_Analysis_Request_State_Bool_Exp;
+};
+
+/** Streaming cursor of the table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input = {
+  commitId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** update columns of table "blame_ai_analysis_request" */
+export enum Blame_Ai_Analysis_Request_Update_Column {
+  /** column name */
+  CommitId = 'commitId',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  State = 'state'
+}
+
+export type Blame_Ai_Analysis_Request_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Blame_Ai_Analysis_Request_Bool_Exp;
 };
 
 /** columns and relationships of "broker_host" */
@@ -15296,6 +15824,14 @@ export type Mutation_Root = {
   delete_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** delete single row from the table: "api_token" */
   delete_api_token_by_pk?: Maybe<Api_Token>;
+  /** delete data from the table: "blame_ai_analysis_request" */
+  delete_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
+  /** delete single row from the table: "blame_ai_analysis_request" */
+  delete_blame_ai_analysis_request_by_pk?: Maybe<Blame_Ai_Analysis_Request>;
+  /** delete data from the table: "blame_ai_analysis_request_state" */
+  delete_blame_ai_analysis_request_state?: Maybe<Blame_Ai_Analysis_Request_State_Mutation_Response>;
+  /** delete single row from the table: "blame_ai_analysis_request_state" */
+  delete_blame_ai_analysis_request_state_by_pk?: Maybe<Blame_Ai_Analysis_Request_State>;
   /** delete data from the table: "broker_host" */
   delete_broker_host?: Maybe<Broker_Host_Mutation_Response>;
   /** delete single row from the table: "broker_host" */
@@ -15664,6 +16200,14 @@ export type Mutation_Root = {
   insert_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** insert a single row into the table: "api_token" */
   insert_api_token_one?: Maybe<Api_Token>;
+  /** insert data into the table: "blame_ai_analysis_request" */
+  insert_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
+  /** insert a single row into the table: "blame_ai_analysis_request" */
+  insert_blame_ai_analysis_request_one?: Maybe<Blame_Ai_Analysis_Request>;
+  /** insert data into the table: "blame_ai_analysis_request_state" */
+  insert_blame_ai_analysis_request_state?: Maybe<Blame_Ai_Analysis_Request_State_Mutation_Response>;
+  /** insert a single row into the table: "blame_ai_analysis_request_state" */
+  insert_blame_ai_analysis_request_state_one?: Maybe<Blame_Ai_Analysis_Request_State>;
   /** insert data into the table: "broker_host" */
   insert_broker_host?: Maybe<Broker_Host_Mutation_Response>;
   /** insert a single row into the table: "broker_host" */
@@ -15930,11 +16474,6 @@ export type Mutation_Root = {
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
   openFixTicket?: Maybe<OpenFixTicketResponse>;
   performCliLogin?: Maybe<StatusQueryResponse>;
-  /**
-   * Process a git commit to identify AI-generated code by analyzing the commit diff
-   * against AI inference records from organization users. Admin only.
-   */
-  processAIBlameForCommit: ProcessAiBlameResult;
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
   rerunAnalysis: VulnerabilityReportResponse;
@@ -16092,6 +16631,18 @@ export type Mutation_Root = {
   update_api_token_by_pk?: Maybe<Api_Token>;
   /** update multiples rows of table: "api_token" */
   update_api_token_many?: Maybe<Array<Maybe<Api_Token_Mutation_Response>>>;
+  /** update data of the table: "blame_ai_analysis_request" */
+  update_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
+  /** update single row of the table: "blame_ai_analysis_request" */
+  update_blame_ai_analysis_request_by_pk?: Maybe<Blame_Ai_Analysis_Request>;
+  /** update multiples rows of table: "blame_ai_analysis_request" */
+  update_blame_ai_analysis_request_many?: Maybe<Array<Maybe<Blame_Ai_Analysis_Request_Mutation_Response>>>;
+  /** update data of the table: "blame_ai_analysis_request_state" */
+  update_blame_ai_analysis_request_state?: Maybe<Blame_Ai_Analysis_Request_State_Mutation_Response>;
+  /** update single row of the table: "blame_ai_analysis_request_state" */
+  update_blame_ai_analysis_request_state_by_pk?: Maybe<Blame_Ai_Analysis_Request_State>;
+  /** update multiples rows of table: "blame_ai_analysis_request_state" */
+  update_blame_ai_analysis_request_state_many?: Maybe<Array<Maybe<Blame_Ai_Analysis_Request_State_Mutation_Response>>>;
   /** update data of the table: "broker_host" */
   update_broker_host?: Maybe<Broker_Host_Mutation_Response>;
   /** update single row of the table: "broker_host" */
@@ -16915,6 +17466,30 @@ export type Mutation_RootDelete_Api_TokenArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Api_Token_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Blame_Ai_Analysis_RequestArgs = {
+  where: Blame_Ai_Analysis_Request_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Blame_Ai_Analysis_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Blame_Ai_Analysis_Request_StateArgs = {
+  where: Blame_Ai_Analysis_Request_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Blame_Ai_Analysis_Request_State_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -18065,6 +18640,34 @@ export type Mutation_RootInsert_Api_Token_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Blame_Ai_Analysis_RequestArgs = {
+  objects: Array<Blame_Ai_Analysis_Request_Insert_Input>;
+  on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Blame_Ai_Analysis_Request_OneArgs = {
+  object: Blame_Ai_Analysis_Request_Insert_Input;
+  on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Blame_Ai_Analysis_Request_StateArgs = {
+  objects: Array<Blame_Ai_Analysis_Request_State_Insert_Input>;
+  on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Blame_Ai_Analysis_Request_State_OneArgs = {
+  object: Blame_Ai_Analysis_Request_State_Insert_Input;
+  on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_State_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Broker_HostArgs = {
   objects: Array<Broker_Host_Insert_Input>;
   on_conflict?: InputMaybe<Broker_Host_On_Conflict>;
@@ -19005,16 +19608,6 @@ export type Mutation_RootPerformCliLoginArgs = {
 
 
 /** mutation root */
-export type Mutation_RootProcessAiBlameForCommitArgs = {
-  commitDiff: Scalars['String']['input'];
-  commitSha: Scalars['String']['input'];
-  commitTimestampMs: Scalars['Float']['input'];
-  organizationId: Scalars['String']['input'];
-  repositoryURL: Scalars['String']['input'];
-};
-
-
-/** mutation root */
 export type Mutation_RootRemoveTokenArgs = {
   token: Scalars['String']['input'];
 };
@@ -19225,6 +19818,7 @@ export type Mutation_RootUpdate_Ai_Blame_Attribution_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Blame_CommitArgs = {
+  _inc?: InputMaybe<Ai_Blame_Commit_Inc_Input>;
   _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
   where: Ai_Blame_Commit_Bool_Exp;
 };
@@ -19232,6 +19826,7 @@ export type Mutation_RootUpdate_Ai_Blame_CommitArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Blame_Commit_By_PkArgs = {
+  _inc?: InputMaybe<Ai_Blame_Commit_Inc_Input>;
   _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
   pk_columns: Ai_Blame_Commit_Pk_Columns_Input;
 };
@@ -19668,6 +20263,46 @@ export type Mutation_RootUpdate_Api_Token_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Api_Token_ManyArgs = {
   updates: Array<Api_Token_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
+  where: Blame_Ai_Analysis_Request_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_By_PkArgs = {
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
+  pk_columns: Blame_Ai_Analysis_Request_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_ManyArgs = {
+  updates: Array<Blame_Ai_Analysis_Request_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_StateArgs = {
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_State_Set_Input>;
+  where: Blame_Ai_Analysis_Request_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_State_By_PkArgs = {
+  _set?: InputMaybe<Blame_Ai_Analysis_Request_State_Set_Input>;
+  pk_columns: Blame_Ai_Analysis_Request_State_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_State_ManyArgs = {
+  updates: Array<Blame_Ai_Analysis_Request_State_Updates>;
 };
 
 
@@ -25934,6 +26569,18 @@ export type Query_Root = {
   api_token_aggregate: Api_Token_Aggregate;
   /** fetch data from the table: "api_token" using primary key columns */
   api_token_by_pk?: Maybe<Api_Token>;
+  /** fetch data from the table: "blame_ai_analysis_request" */
+  blame_ai_analysis_request: Array<Blame_Ai_Analysis_Request>;
+  /** fetch aggregated fields from the table: "blame_ai_analysis_request" */
+  blame_ai_analysis_request_aggregate: Blame_Ai_Analysis_Request_Aggregate;
+  /** fetch data from the table: "blame_ai_analysis_request" using primary key columns */
+  blame_ai_analysis_request_by_pk?: Maybe<Blame_Ai_Analysis_Request>;
+  /** fetch data from the table: "blame_ai_analysis_request_state" */
+  blame_ai_analysis_request_state: Array<Blame_Ai_Analysis_Request_State>;
+  /** fetch aggregated fields from the table: "blame_ai_analysis_request_state" */
+  blame_ai_analysis_request_state_aggregate: Blame_Ai_Analysis_Request_State_Aggregate;
+  /** fetch data from the table: "blame_ai_analysis_request_state" using primary key columns */
+  blame_ai_analysis_request_state_by_pk?: Maybe<Blame_Ai_Analysis_Request_State>;
   /** fetch data from the table: "broker_host" */
   broker_host: Array<Broker_Host>;
   /** fetch aggregated fields from the table: "broker_host" */
@@ -26986,6 +27633,52 @@ export type Query_RootApi_Token_AggregateArgs = {
 
 export type Query_RootApi_Token_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootBlame_Ai_Analysis_RequestArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+
+export type Query_RootBlame_Ai_Analysis_Request_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+
+export type Query_RootBlame_Ai_Analysis_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootBlame_Ai_Analysis_Request_StateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+
+export type Query_RootBlame_Ai_Analysis_Request_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+
+export type Query_RootBlame_Ai_Analysis_Request_State_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -31527,6 +32220,22 @@ export type Subscription_Root = {
   api_token_by_pk?: Maybe<Api_Token>;
   /** fetch data from the table in a streaming manner: "api_token" */
   api_token_stream: Array<Api_Token>;
+  /** fetch data from the table: "blame_ai_analysis_request" */
+  blame_ai_analysis_request: Array<Blame_Ai_Analysis_Request>;
+  /** fetch aggregated fields from the table: "blame_ai_analysis_request" */
+  blame_ai_analysis_request_aggregate: Blame_Ai_Analysis_Request_Aggregate;
+  /** fetch data from the table: "blame_ai_analysis_request" using primary key columns */
+  blame_ai_analysis_request_by_pk?: Maybe<Blame_Ai_Analysis_Request>;
+  /** fetch data from the table: "blame_ai_analysis_request_state" */
+  blame_ai_analysis_request_state: Array<Blame_Ai_Analysis_Request_State>;
+  /** fetch aggregated fields from the table: "blame_ai_analysis_request_state" */
+  blame_ai_analysis_request_state_aggregate: Blame_Ai_Analysis_Request_State_Aggregate;
+  /** fetch data from the table: "blame_ai_analysis_request_state" using primary key columns */
+  blame_ai_analysis_request_state_by_pk?: Maybe<Blame_Ai_Analysis_Request_State>;
+  /** fetch data from the table in a streaming manner: "blame_ai_analysis_request_state" */
+  blame_ai_analysis_request_state_stream: Array<Blame_Ai_Analysis_Request_State>;
+  /** fetch data from the table in a streaming manner: "blame_ai_analysis_request" */
+  blame_ai_analysis_request_stream: Array<Blame_Ai_Analysis_Request>;
   /** fetch data from the table: "broker_host" */
   broker_host: Array<Broker_Host>;
   /** fetch aggregated fields from the table: "broker_host" */
@@ -32870,6 +33579,66 @@ export type Subscription_RootApi_Token_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Api_Token_Stream_Cursor_Input>>;
   where?: InputMaybe<Api_Token_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_RequestArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_StateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Blame_Ai_Analysis_Request_State_Order_By>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_State_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_State_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Blame_Ai_Analysis_Request_State_Stream_Cursor_Input>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootBlame_Ai_Analysis_Request_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Blame_Ai_Analysis_Request_Stream_Cursor_Input>>;
+  where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
 };
 
 

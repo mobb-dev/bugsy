@@ -1,6 +1,6 @@
-import { Scanner } from '@mobb/bugsy/constants'
 import Debug from 'debug'
 
+import { Scanner } from '../../../constants'
 import { GQLClient } from '../graphql'
 import {
   FalsePositivePartsZ,

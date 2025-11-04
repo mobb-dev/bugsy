@@ -4,24 +4,6 @@ import path from 'node:path'
 import { env } from 'node:process'
 import { pipeline } from 'node:stream/promises'
 
-import {
-  type CommandOptions,
-  handleMobbLogin,
-  LOGIN_CHECK_DELAY,
-  LOGIN_MAX_WAIT,
-} from '@mobb/bugsy/commands'
-import {
-  progressMassages,
-  Scanner,
-  SCANNERS,
-  SupportedScanners,
-  SupportedScannersZ,
-  VUL_REPORT_DIGEST_TIMEOUT_MS,
-  WEB_APP_URL,
-} from '@mobb/bugsy/constants'
-import { MobbCliCommand, ScanContext } from '@mobb/bugsy/types'
-import * as utils from '@mobb/bugsy/utils'
-import { getTopLevelDirName, packageJson, sleep } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import Configstore from 'configstore'
 import Debug from 'debug'
@@ -32,7 +14,25 @@ import open from 'open'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import {
+  type CommandOptions,
+  handleMobbLogin,
+  LOGIN_CHECK_DELAY,
+  LOGIN_MAX_WAIT,
+} from '../../commands'
+import {
+  progressMassages,
+  Scanner,
+  SCANNERS,
+  SupportedScanners,
+  SupportedScannersZ,
+  VUL_REPORT_DIGEST_TIMEOUT_MS,
+  WEB_APP_URL,
+} from '../../constants'
 import { ReportDigestError } from '../../mcp/core/Errors'
+import { MobbCliCommand, ScanContext } from '../../types'
+import * as utils from '../../utils'
+import { getTopLevelDirName, packageJson, sleep } from '../../utils'
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { handleAutoPr } from './auto_pr_handler'
 import { getGitInfo, GetGitInfoResult } from './git'

@@ -1,5 +1,3 @@
-import { ScanContext } from '@mobb/bugsy/types'
-import { sleep } from '@mobb/bugsy/utils'
 import fetchOrig from 'cross-fetch'
 import Debug from 'debug'
 import { GraphQLClient } from 'graphql-request'
@@ -9,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
 import { ReportDigestError } from '../../../mcp/core/Errors'
+import { ScanContext } from '../../../types'
+import { sleep } from '../../../utils'
 import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   CreateCliLoginMutationVariables,

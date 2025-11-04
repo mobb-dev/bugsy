@@ -1,6 +1,6 @@
-import { packageJson } from '@mobb/bugsy/utils'
 import Configstore from 'configstore'
 
+import { packageJson } from '../../utils'
 import { MCP_DEFAULT_API_URL } from '../core/configs'
 
 /**

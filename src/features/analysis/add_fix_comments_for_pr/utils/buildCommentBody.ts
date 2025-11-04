@@ -1,12 +1,11 @@
+import Debug from 'debug'
+import { z } from 'zod'
+
 import {
   Scanner,
   scannerToVulnerabilityReportVendorEnum,
   WEB_APP_URL,
-} from '@mobb/bugsy/constants'
-import { Vulnerability_Report_Issue_Tag_Enum } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
-import Debug from 'debug'
-import { z } from 'zod'
-
+} from '../../../../constants'
 import {
   getCommitDescription,
   getCommitIssueDescription,
@@ -19,6 +18,7 @@ import {
   PatchAndQuestionsZ,
   toQuestion,
 } from '../../scm'
+import { Vulnerability_Report_Issue_Tag_Enum } from '../../scm/generates/client_generates'
 import {
   IssueLanguage_Enum,
   IssueType_Enum,

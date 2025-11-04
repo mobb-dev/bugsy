@@ -1,8 +1,9 @@
+import { z } from 'zod'
+
 import {
   Vulnerability_Report_Issue_Category_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
-} from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
-import { z } from 'zod'
+} from '../scm/generates/client_generates'
 
 type LineFilter =
   | {

@@ -1,7 +1,7 @@
-import { validateOrganizationId } from '@mobb/bugsy/args/validation'
 import { Argv } from 'yargs'
 
 import { organizationIdOptions } from '../../args/options'
+import { validateOrganizationId } from '../../args/validation'
 import { startMcpServer } from '../../mcp/index'
 
 export const mcpBuilder = (yargs: Argv) => {

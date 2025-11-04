@@ -1,11 +1,11 @@
-import {
-  convertToSarifBuilder,
-  convertToSarifHandler,
-} from '@mobb/bugsy/args/commands/convert_to_sarif'
-import { mobbCliCommand } from '@mobb/bugsy/types'
 import chalk from 'chalk'
 import yargs from 'yargs/yargs'
 
+import {
+  convertToSarifBuilder,
+  convertToSarifHandler,
+} from '../args/commands/convert_to_sarif'
+import { mobbCliCommand } from '../types'
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
 import { mcpBuilder, mcpHandler } from './commands/mcp'
 import { reviewBuilder, reviewHandler } from './commands/review'

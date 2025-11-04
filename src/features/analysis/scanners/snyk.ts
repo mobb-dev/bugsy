@@ -1,17 +1,40 @@
 import { createRequire } from 'node:module'
 
-import { keypress } from '@mobb/bugsy/utils'
-import { createFork } from '@mobb/bugsy/utils/child_process'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { createSpinner } from 'nanospinner'
 import open from 'open'
 
+import { keypress } from '../../../utils'
+import { createFork } from '../../../utils/child_process'
 import { snykArticlePrompt } from '../prompts'
 
 const debug = Debug('mobbdev:snyk')
-const require = createRequire(import.meta.url)
-const SNYK_PATH = require.resolve('snyk/bin/snyk')
+// Handle both ESM and CommonJS environments
+let moduleUrl: string
+if (typeof __filename !== 'undefined') {
+  // CommonJS environment
+  moduleUrl = __filename
+} else {
+  // ESM environment - use Function constructor to avoid parser seeing import.meta
+  try {
+    // eslint-disable-next-line no-new-func
+    const getImportMetaUrl = new Function('return import.meta.url')
+    moduleUrl = getImportMetaUrl()
+  } catch {
+    // If that fails, try using error stack to get current file URL
+    const err = new Error()
+    const stack = err.stack || ''
+    const match = stack.match(/file:\/\/[^\s)]+/)
+    if (match) {
+      moduleUrl = match[0]
+    } else {
+      throw new Error('Unable to determine module URL in this environment')
+    }
+  }
+}
+const costumeRequire = createRequire(moduleUrl)
+const SNYK_PATH = costumeRequire.resolve('snyk/bin/snyk')
 
 const SNYK_ARTICLE_URL =
   'https://docs.snyk.io/scan-using-snyk/snyk-code/configure-snyk-code#enable-snyk-code'

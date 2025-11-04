@@ -1,5 +1,4 @@
-import { Scanner } from '@mobb/bugsy/constants'
-
+import { Scanner } from '../../../constants'
 import { GithubSCMLib } from '../scm/github'
 import { getFixesData, getRelevantVulenrabilitiesFromDiff } from './utils'
 

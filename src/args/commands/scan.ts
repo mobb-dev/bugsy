@@ -1,9 +1,9 @@
-import { scan } from '@mobb/bugsy/commands'
-import { errorMessages, SCANNERS } from '@mobb/bugsy/constants'
-import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
-import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
 
+import { scan } from '../../commands'
+import { errorMessages, SCANNERS } from '../../constants'
+import { validateCheckmarxInstallation } from '../../features/analysis/scanners/checkmarx'
+import { CliError } from '../../utils'
 import {
   apiKeyOption,
   autoPrOption,

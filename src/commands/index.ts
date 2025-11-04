@@ -1,35 +1,24 @@
 import crypto from 'node:crypto'
 import os from 'node:os'
 
-import {
-  AddScmTokenOptions,
-  AnalyzeOptions,
-  ReviewOptions,
-  ScanOptions,
-} from '@mobb/bugsy/args'
-import {
-  errorMessages,
-  mobbAscii,
-  SCANNERS,
-  WEB_APP_URL,
-} from '@mobb/bugsy/constants'
-import { runAnalysis } from '@mobb/bugsy/features/analysis'
-import { choseScanner } from '@mobb/bugsy/features/analysis/prompts'
-import { validateCheckmarxInstallation } from '@mobb/bugsy/features/analysis/scanners/checkmarx'
-import {
-  CliError,
-  keypress,
-  packageJson,
-  sleep,
-  Spinner,
-} from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import chalkAnimation from 'chalk-animation'
 import Configstore from 'configstore'
 import Debug from 'debug'
 import open from 'open'
 
+import {
+  AddScmTokenOptions,
+  AnalyzeOptions,
+  ReviewOptions,
+  ScanOptions,
+} from '../args'
+import { errorMessages, mobbAscii, SCANNERS, WEB_APP_URL } from '../constants'
+import { runAnalysis } from '../features/analysis'
 import { GQLClient } from '../features/analysis/graphql'
+import { choseScanner } from '../features/analysis/prompts'
+import { validateCheckmarxInstallation } from '../features/analysis/scanners/checkmarx'
+import { CliError, keypress, packageJson, sleep, Spinner } from '../utils'
 
 const debug = Debug('mobbdev:commands')
 

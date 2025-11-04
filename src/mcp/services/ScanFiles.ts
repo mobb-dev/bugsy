@@ -1,11 +1,10 @@
-import { GitService } from '@mobb/bugsy/features/analysis/scm/services/GitService'
-
 import {
   Fix_Report_State_Enum,
   Scan_Source_Enum,
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
+import { GitService } from '../../features/analysis/scm/services/GitService'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { ScanContext } from '../../types'
 import {

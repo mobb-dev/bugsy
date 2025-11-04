@@ -10,7 +10,7 @@
   "dependencies": {
     "adm-zip": "0.5.16",
     "dotenv": "16.6.1",
-    "node-pty": "1.0.0",
+    "node-pty": "1.1.0-beta38",
     "npm": "10.9.0",
     "verdaccio": "6.1.6",
     "expect": "29.7.0",

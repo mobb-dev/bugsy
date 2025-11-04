@@ -1,10 +1,10 @@
 import fs from 'node:fs'
 
-import { review } from '@mobb/bugsy/commands'
-import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import type * as Yargs from 'yargs'
 
+import { review } from '../../commands'
+import { CliError } from '../../utils'
 import {
   apiKeyOption,
   commitHashOption,

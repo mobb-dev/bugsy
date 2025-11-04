@@ -1,10 +1,10 @@
 import crypto from 'node:crypto'
 import os from 'node:os'
 
-import { WEB_APP_URL } from '@mobb/bugsy/constants'
-import { sleep } from '@mobb/bugsy/utils'
 import open from 'open'
 
+import { WEB_APP_URL } from '../../constants'
+import { sleep } from '../../utils'
 import {
   MCP_LOGIN_CHECK_DELAY,
   MCP_LOGIN_MAX_WAIT,

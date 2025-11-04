@@ -1,7 +1,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { ConvertToSarifOptions } from '@mobb/bugsy/args'
+import multimatch from 'multimatch'
+import StreamZip from 'node-stream-zip'
+import tmp from 'tmp'
+
+import { ConvertToSarifOptions } from '../args'
+import { ConvertToSarifInputFileFormat } from '../features/analysis/scm'
+import { CliError } from '../utils'
 import {
   AuditMetadataParser,
   initSaxParser,
@@ -11,12 +17,7 @@ import {
   UnifiedNodePoolParser,
   Vulnerability,
   VulnerabilityParser,
-} from '@mobb/bugsy/commands/fpr_stream_parser'
-import { ConvertToSarifInputFileFormat } from '@mobb/bugsy/features/analysis/scm'
-import { CliError } from '@mobb/bugsy/utils'
-import multimatch from 'multimatch'
-import StreamZip from 'node-stream-zip'
-import tmp from 'tmp'
+} from './fpr_stream_parser'
 
 type Message = {
   text: string

@@ -47,7 +47,11 @@ function createWSClient(options: WsOptions) {
   // Create a custom WebSocket that uses the proxy agent
   const CustomWebSocket = class extends WebSocket {
     constructor(address: string, protocols?: string | string[]) {
-      super(address, protocols, proxy ? { agent: proxy as Agent } : undefined)
+      super(
+        address,
+        protocols,
+        proxy ? { agent: proxy as unknown as Agent } : undefined
+      )
     }
   }
 

@@ -1,9 +1,8 @@
-import { ScanContext } from '@mobb/bugsy/types'
-
 import {
   Fix_Download_Source_Enum,
   Vulnerability_Report_Issue_Category_Enum,
 } from '../../../features/analysis/scm/generates/client_generates'
+import { ScanContext } from '../../../types'
 import {
   MCP_DEFAULT_LIMIT,
   MCP_PERIODIC_CHECK_INTERVAL,

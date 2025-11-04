@@ -1,3 +1,5 @@
+import { Agent } from 'node:http'
+
 import Debug from 'debug'
 import fetch, { File, fileFrom, FormData } from 'node-fetch'
 
@@ -54,7 +56,7 @@ export async function uploadFile({
   const response = await fetch(url, {
     method: 'POST',
     body: form,
-    agent,
+    agent: agent as unknown as Agent,
   })
 
   if (!response.ok) {

@@ -1,9 +1,9 @@
-import { addScmToken } from '@mobb/bugsy/commands'
-import { scmFriendlyText } from '@mobb/bugsy/constants'
-import { ScmType } from '@mobb/bugsy/features/analysis/scm'
-import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
 
+import { addScmToken } from '../../commands'
+import { scmFriendlyText } from '../../constants'
+import { ScmType } from '../../features/analysis/scm'
+import { CliError } from '../../utils'
 import {
   apiKeyOption,
   ciOption,

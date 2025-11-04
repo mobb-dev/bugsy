@@ -1,5 +1,4 @@
-import { ScanContext } from '@mobb/bugsy/types'
-
+import { ScanContext } from '../../../types'
 import {
   MCP_DEFAULT_LIMIT,
   MCP_REPORT_ID_EXPIRATION_MS,

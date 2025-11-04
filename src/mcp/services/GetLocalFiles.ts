@@ -1,9 +1,9 @@
-import { ScanContext } from '@mobb/bugsy/types'
 import fs from 'fs/promises'
 import nodePath from 'path'
 
 import { FileUtils } from '../../features/analysis/scm/services/FileUtils'
 import { GitService } from '../../features/analysis/scm/services/GitService'
+import { ScanContext } from '../../types'
 import { MCP_MAX_FILE_SIZE } from '../core/configs'
 import { log, logDebug, logError } from '../Logger'
 

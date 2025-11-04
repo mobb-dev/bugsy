@@ -1,6 +1,6 @@
-import { ScanContext } from '@mobb/bugsy/types'
 import z from 'zod'
 
+import { ScanContext } from '../../../types'
 import {
   MCP_DEFAULT_MAX_FILES_TO_SCAN,
   MCP_MAX_FILE_SIZE,

@@ -1,12 +1,5 @@
 import { createRequire } from 'node:module'
 
-import {
-  startCheckmarxConfigationPrompt,
-  tryCheckmarxConfiguarationAgain,
-} from '@mobb/bugsy/features/analysis/prompts'
-import { cxOperatingSystemSupportMessage } from '@mobb/bugsy/post_install/constants.mjs'
-import { CliError } from '@mobb/bugsy/utils'
-import { createSpawn } from '@mobb/bugsy/utils/child_process'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { existsSync } from 'fs'
@@ -14,13 +7,46 @@ import { createSpinner } from 'nanospinner'
 import { type } from 'os'
 import path from 'path'
 
+import {
+  startCheckmarxConfigationPrompt,
+  tryCheckmarxConfiguarationAgain,
+} from '../../../features/analysis/prompts'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - module resolution for .mjs file
+import { cxOperatingSystemSupportMessage } from '../../../post_install/constants.mjs'
+import { CliError } from '../../../utils'
+import { createSpawn } from '../../../utils/child_process'
+
 const debug = Debug('mobbdev:checkmarx')
-const require = createRequire(import.meta.url)
+// Handle both ESM and CommonJS environments
+let moduleUrl: string
+if (typeof __filename !== 'undefined') {
+  // CommonJS environment
+  moduleUrl = __filename
+} else {
+  // ESM environment - use Function constructor to avoid parser seeing import.meta
+  try {
+    // eslint-disable-next-line no-new-func
+    const getImportMetaUrl = new Function('return import.meta.url')
+    moduleUrl = getImportMetaUrl()
+  } catch {
+    // If that fails, try using error stack to get current file URL
+    const err = new Error()
+    const stack = err.stack || ''
+    const match = stack.match(/file:\/\/[^\s)]+/)
+    if (match) {
+      moduleUrl = match[0]
+    } else {
+      throw new Error('Unable to determine module URL in this environment')
+    }
+  }
+}
+const costumeRequire = createRequire(moduleUrl)
 const getCheckmarxPath = () => {
   const os = type()
   const cxFileName = os === 'Windows_NT' ? 'cx.exe' : 'cx'
   try {
-    return require.resolve(`.bin/${cxFileName}`)
+    return costumeRequire.resolve(`.bin/${cxFileName}`)
   } catch (e) {
     throw new CliError(cxOperatingSystemSupportMessage)
   }

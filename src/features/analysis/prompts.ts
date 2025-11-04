@@ -1,7 +1,8 @@
-import { SCANNERS } from '@mobb/bugsy/constants'
-import { keypress } from '@mobb/bugsy/utils'
 import inquirer from 'inquirer'
 import { createSpinner } from 'nanospinner'
+
+import { SCANNERS } from '../../constants'
+import { keypress } from '../../utils'
 
 type ScannersType = typeof SCANNERS
 type ScannerValue = ScannersType[keyof ScannersType]

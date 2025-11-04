@@ -1,10 +1,10 @@
-import { CliError } from '@mobb/bugsy/utils'
 import chalk from 'chalk'
 import path from 'path'
 import type * as Yargs from 'yargs'
 import { z } from 'zod'
 
 import { ScmType } from '../features/analysis/scm'
+import { CliError } from '../utils'
 
 type ThrowRepoUrlErrorMessageArgs = {
   error: z.ZodError<string>

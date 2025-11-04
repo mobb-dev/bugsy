@@ -1,8 +1,8 @@
-import { packageJson } from '@mobb/bugsy/utils'
 import fetch from 'node-fetch'
 import os from 'os'
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid'
 
+import { packageJson } from '../../../utils'
 import {
   MCP_DEFAULT_REST_API_URL,
   MCP_PERIODIC_TRACK_INTERVAL,

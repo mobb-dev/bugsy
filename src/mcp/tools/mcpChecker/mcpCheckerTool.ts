@@ -1,6 +1,6 @@
-import { logDebug, logError } from '@mobb/bugsy/mcp/Logger'
 import z from 'zod'
 
+import { logDebug, logError } from '../../../mcp/Logger'
 import { BaseTool } from '../base/BaseTool'
 import { MCP_TOOL_CHECKER } from '../toolNames'
 import { McpCheckerService } from './mcpCheckerService'

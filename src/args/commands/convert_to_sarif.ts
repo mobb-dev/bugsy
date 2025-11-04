@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 
-import { convertToSarif } from '@mobb/bugsy/commands/convert_to_sarif'
-import { CliError } from '@mobb/bugsy/utils'
 import type * as Yargs from 'yargs'
 
+import { convertToSarif } from '../../commands/convert_to_sarif'
+import { CliError } from '../../utils'
 import {
   convertToSarifCodePathPatternsOption,
   convertToSarifInputFileFormatOption,

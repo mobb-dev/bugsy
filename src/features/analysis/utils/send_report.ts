@@ -1,10 +1,10 @@
-import {
-  progressMassages,
-  VUL_REPORT_DIGEST_TIMEOUT_MS,
-} from '@mobb/bugsy/constants'
 import Debug from 'debug'
 import { createSpinner } from 'nanospinner'
 
+import {
+  progressMassages,
+  VUL_REPORT_DIGEST_TIMEOUT_MS,
+} from '../../../constants'
 import { GQLClient } from '../graphql'
 import {
   Fix_Report_State_Enum,

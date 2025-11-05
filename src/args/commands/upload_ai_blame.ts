@@ -1,8 +1,10 @@
-import fs from 'node:fs/promises'
+import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 
 import chalk from 'chalk'
+import { withFile } from 'tmp-promise'
 import type * as Yargs from 'yargs'
+import z from 'zod'
 
 import type {
   FinalizeAiBlameInferencesUploadMutationVariables,
@@ -10,6 +12,41 @@ import type {
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { createAuthenticatedMcpGQLClient } from '../../mcp/services/McpGQLClient'
+
+const PromptItemZ = z.object({
+  type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION']),
+  attachedFiles: z
+    .array(
+      z.object({
+        relativePath: z.string(),
+        startLine: z.number().optional(),
+      })
+    )
+    .optional(),
+  tokens: z
+    .object({
+      inputCount: z.number(),
+      outputCount: z.number(),
+    })
+    .optional(),
+  text: z.string().optional(),
+  date: z.date().optional(),
+  tool: z
+    .object({
+      name: z.string(),
+      parameters: z.string(),
+      result: z.string(),
+      rawArguments: z.string().optional(),
+      accepted: z.boolean().optional(),
+    })
+    .optional(),
+})
+
+export type PromptItem = z.infer<typeof PromptItemZ>
+
+const PromptItemArrayZ = z.array(PromptItemZ)
+
+export type PromptItemArray = z.infer<typeof PromptItemArrayZ>
 
 type SessionInput = {
   promptFileName: string
@@ -68,7 +105,44 @@ export function uploadAiBlameBuilder(
     .strict()
 }
 
-export async function uploadAiBlameHandler(args: UploadAiBlameOptions) {
+export async function uploadAiBlameHandlerFromExtension(args: {
+  prompts: PromptItemArray
+  inference: string
+  model: string
+  tool: string
+  responseTime: string
+}) {
+  const uploadArgs: UploadAiBlameOptions = {
+    prompt: [],
+    inference: [],
+    model: [],
+    toolName: [],
+    aiResponseAt: [],
+  }
+
+  await withFile(async (promptFile) => {
+    await fsPromises.writeFile(
+      promptFile.path,
+      JSON.stringify(args.prompts, null, 2),
+      'utf-8'
+    )
+    uploadArgs.prompt!.push(promptFile.path)
+    await withFile(async (inferenceFile) => {
+      await fsPromises.writeFile(inferenceFile.path, args.inference, 'utf-8')
+      uploadArgs.inference!.push(inferenceFile.path)
+      uploadArgs.model!.push(args.model)
+      uploadArgs.toolName!.push(args.tool)
+      uploadArgs.aiResponseAt!.push(args.responseTime)
+
+      await uploadAiBlameHandler(uploadArgs, false)
+    })
+  })
+}
+
+export async function uploadAiBlameHandler(
+  args: UploadAiBlameOptions,
+  exitOnError = true
+) {
   const prompts = (args.prompt || []) as string[]
   const inferences = (args.inference || []) as string[]
   const models = (args.model || []) as string[]
@@ -80,10 +154,13 @@ export async function uploadAiBlameHandler(args: UploadAiBlameOptions) {
     []) as string[]
 
   if (prompts.length !== inferences.length) {
-    console.error(
-      chalk.red('prompt and inference must have the same number of entries')
-    )
-    process.exit(1)
+    const errorMsg = 'prompt and inference must have the same number of entries'
+    console.error(chalk.red(errorMsg))
+
+    if (exitOnError) {
+      process.exit(1)
+    }
+    throw new Error(errorMsg)
   }
 
   const nowIso = new Date().toISOString()
@@ -92,10 +169,17 @@ export async function uploadAiBlameHandler(args: UploadAiBlameOptions) {
     const promptPath = String(prompts[i])
     const inferencePath = String(inferences[i])
     try {
-      await Promise.all([fs.access(promptPath), fs.access(inferencePath)])
+      await Promise.all([
+        fsPromises.access(promptPath),
+        fsPromises.access(inferencePath),
+      ])
     } catch {
-      console.error(chalk.red(`File not found for session ${i + 1}`))
-      process.exit(1)
+      const errorMsg = `File not found for session ${i + 1}`
+      console.error(chalk.red(errorMsg))
+      if (exitOnError) {
+        process.exit(1)
+      }
+      throw new Error(errorMsg)
     }
     sessions.push({
       promptFileName: path.basename(promptPath),
@@ -115,10 +199,12 @@ export async function uploadAiBlameHandler(args: UploadAiBlameOptions) {
   >['uploadSessions'] =
     initRes.uploadAIBlameInferencesInit?.uploadSessions ?? []
   if (uploadSessions.length !== sessions.length) {
-    console.error(
-      chalk.red('Init failed to return expected number of sessions')
-    )
-    process.exit(1)
+    const errorMsg = 'Init failed to return expected number of sessions'
+    console.error(chalk.red(errorMsg))
+    if (exitOnError) {
+      process.exit(1)
+    }
+    throw new Error(errorMsg)
   }
 
   // Upload files
@@ -161,12 +247,13 @@ export async function uploadAiBlameHandler(args: UploadAiBlameOptions) {
   })
   const status = finRes?.finalizeAIBlameInferencesUpload?.status
   if (status !== 'OK') {
-    console.error(
-      chalk.red(
-        `Finalize failed: ${finRes?.finalizeAIBlameInferencesUpload?.error || 'unknown error'}`
-      )
-    )
-    process.exit(1)
+    const errorMsg =
+      finRes?.finalizeAIBlameInferencesUpload?.error || 'unknown error'
+    console.error(chalk.red(errorMsg))
+    if (exitOnError) {
+      process.exit(1)
+    }
+    throw new Error(errorMsg)
   }
   console.log(chalk.green('AI Blame uploads finalized successfully'))
 }

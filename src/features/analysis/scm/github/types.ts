@@ -98,6 +98,7 @@ export type GithubBlameResponse = {
           endingLine: number
           startingLine: number
           commit: {
+            oid: string
             author: {
               user: {
                 email: string

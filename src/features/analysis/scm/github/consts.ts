@@ -55,6 +55,7 @@ export const GET_BLAME_DOCUMENT = `
               blame(path: $path) {
                 ranges {
                   commit {
+                    oid
                     author {
                       user {
                         name
@@ -69,7 +70,7 @@ export const GET_BLAME_DOCUMENT = `
                 }
               }
             }
-            
+
           }
         }
       }

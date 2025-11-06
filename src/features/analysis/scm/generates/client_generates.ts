@@ -25,6 +25,7 @@ export type Scalars = {
   organization_scalar: { input: any; output: any; }
   project_scalar: { input: any; output: any; }
   smallint: { input: any; output: any; }
+  time: { input: any; output: any; }
   timestamp: { input: any; output: any; }
   timestamptz: { input: any; output: any; }
   uuid: { input: any; output: any; }
@@ -151,6 +152,12 @@ export type BaseError = {
 
 export type BaseResponse = {
   __typename?: 'BaseResponse';
+  status: Status;
+};
+
+export type BaseResponseWithMessage = {
+  __typename?: 'BaseResponseWithMessage';
+  message: Scalars['String']['output'];
   status: Status;
 };
 
@@ -530,6 +537,25 @@ export type GitReferenceData = {
 };
 
 export type GitReferenceResponse = GitReferenceData | ReferenceNotFoundError | RepoUnreachableError;
+
+export type GithubWebhookBaseError = {
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GithubWebhookError = GithubWebhookBaseError & {
+  __typename?: 'GithubWebhookError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GithubWebhookResponse = GithubWebhookError | GithubWebhookSuccess;
+
+export type GithubWebhookSuccess = {
+  __typename?: 'GithubWebhookSuccess';
+  message?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
 
 export type InitOrganizationAndProjectGoodResponse = {
   __typename?: 'InitOrganizationAndProjectGoodResponse';
@@ -14017,6 +14043,314 @@ export type Get_Vulnerability_Report_Issues_For_User_Args = {
   user_email?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** This table represent the meta for each installation associated to our app  */
+export type Github_App = {
+  __typename?: 'github_app';
+  created_on?: Maybe<Scalars['time']['output']>;
+  id: Scalars['uuid']['output'];
+  installationId: Scalars['Int']['output'];
+  organizationId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "github_app" */
+export type Github_App_Aggregate = {
+  __typename?: 'github_app_aggregate';
+  aggregate?: Maybe<Github_App_Aggregate_Fields>;
+  nodes: Array<Github_App>;
+};
+
+export type Github_App_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Github_App_Aggregate_Bool_Exp_Count>;
+};
+
+export type Github_App_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Github_App_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Github_App_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "github_app" */
+export type Github_App_Aggregate_Fields = {
+  __typename?: 'github_app_aggregate_fields';
+  avg?: Maybe<Github_App_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Github_App_Max_Fields>;
+  min?: Maybe<Github_App_Min_Fields>;
+  stddev?: Maybe<Github_App_Stddev_Fields>;
+  stddev_pop?: Maybe<Github_App_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Github_App_Stddev_Samp_Fields>;
+  sum?: Maybe<Github_App_Sum_Fields>;
+  var_pop?: Maybe<Github_App_Var_Pop_Fields>;
+  var_samp?: Maybe<Github_App_Var_Samp_Fields>;
+  variance?: Maybe<Github_App_Variance_Fields>;
+};
+
+
+/** aggregate fields of "github_app" */
+export type Github_App_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Github_App_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "github_app" */
+export type Github_App_Aggregate_Order_By = {
+  avg?: InputMaybe<Github_App_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Github_App_Max_Order_By>;
+  min?: InputMaybe<Github_App_Min_Order_By>;
+  stddev?: InputMaybe<Github_App_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Github_App_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Github_App_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Github_App_Sum_Order_By>;
+  var_pop?: InputMaybe<Github_App_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Github_App_Var_Samp_Order_By>;
+  variance?: InputMaybe<Github_App_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "github_app" */
+export type Github_App_Arr_Rel_Insert_Input = {
+  data: Array<Github_App_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Github_App_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Github_App_Avg_Fields = {
+  __typename?: 'github_app_avg_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "github_app" */
+export type Github_App_Avg_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "github_app". All fields are combined with a logical 'AND'. */
+export type Github_App_Bool_Exp = {
+  _and?: InputMaybe<Array<Github_App_Bool_Exp>>;
+  _not?: InputMaybe<Github_App_Bool_Exp>;
+  _or?: InputMaybe<Array<Github_App_Bool_Exp>>;
+  created_on?: InputMaybe<Time_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  installationId?: InputMaybe<Int_Comparison_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "github_app" */
+export enum Github_App_Constraint {
+  /** unique or primary key constraint on columns "installation_id" */
+  GithubAppInstallationIdKey = 'github_app_installation_id_key',
+  /** unique or primary key constraint on columns "id" */
+  GithubAppPkey = 'github_app_pkey'
+}
+
+/** input type for incrementing numeric columns in table "github_app" */
+export type Github_App_Inc_Input = {
+  installationId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "github_app" */
+export type Github_App_Insert_Input = {
+  created_on?: InputMaybe<Scalars['time']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  installationId?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Github_App_Max_Fields = {
+  __typename?: 'github_app_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  installationId?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "github_app" */
+export type Github_App_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  installationId?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Github_App_Min_Fields = {
+  __typename?: 'github_app_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  installationId?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "github_app" */
+export type Github_App_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  installationId?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "github_app" */
+export type Github_App_Mutation_Response = {
+  __typename?: 'github_app_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Github_App>;
+};
+
+/** on_conflict condition type for table "github_app" */
+export type Github_App_On_Conflict = {
+  constraint: Github_App_Constraint;
+  update_columns?: Array<Github_App_Update_Column>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "github_app". */
+export type Github_App_Order_By = {
+  created_on?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  installationId?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: github_app */
+export type Github_App_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "github_app" */
+export enum Github_App_Select_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InstallationId = 'installationId',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+/** input type for updating data in table "github_app" */
+export type Github_App_Set_Input = {
+  created_on?: InputMaybe<Scalars['time']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  installationId?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Github_App_Stddev_Fields = {
+  __typename?: 'github_app_stddev_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "github_app" */
+export type Github_App_Stddev_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Github_App_Stddev_Pop_Fields = {
+  __typename?: 'github_app_stddev_pop_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "github_app" */
+export type Github_App_Stddev_Pop_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Github_App_Stddev_Samp_Fields = {
+  __typename?: 'github_app_stddev_samp_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "github_app" */
+export type Github_App_Stddev_Samp_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "github_app" */
+export type Github_App_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Github_App_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Github_App_Stream_Cursor_Value_Input = {
+  created_on?: InputMaybe<Scalars['time']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  installationId?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Github_App_Sum_Fields = {
+  __typename?: 'github_app_sum_fields';
+  installationId?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "github_app" */
+export type Github_App_Sum_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "github_app" */
+export enum Github_App_Update_Column {
+  /** column name */
+  CreatedOn = 'created_on',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InstallationId = 'installationId',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+export type Github_App_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Github_App_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Github_App_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Github_App_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Github_App_Var_Pop_Fields = {
+  __typename?: 'github_app_var_pop_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "github_app" */
+export type Github_App_Var_Pop_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Github_App_Var_Samp_Fields = {
+  __typename?: 'github_app_var_samp_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "github_app" */
+export type Github_App_Var_Samp_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Github_App_Variance_Fields = {
+  __typename?: 'github_app_variance_fields';
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "github_app" */
+export type Github_App_Variance_Order_By = {
+  installationId?: InputMaybe<Order_By>;
+};
+
 /** columns and relationships of "integration" */
 export type Integration = {
   __typename?: 'integration';
@@ -15908,6 +16242,10 @@ export type Mutation_Root = {
   delete_fix_to_submit_fix_request?: Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>;
   /** delete single row from the table: "fix_to_submit_fix_request" */
   delete_fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
+  /** delete data from the table: "github_app" */
+  delete_github_app?: Maybe<Github_App_Mutation_Response>;
+  /** delete single row from the table: "github_app" */
+  delete_github_app_by_pk?: Maybe<Github_App>;
   /** delete data from the table: "integration" */
   delete_integration?: Maybe<Integration_Mutation_Response>;
   /** delete single row from the table: "integration" */
@@ -16110,6 +16448,8 @@ export type Mutation_Root = {
   finalizeAIBlameInferencesUpload: AiBlameValidationResponse;
   forkRepo?: Maybe<ForkRepoResponse>;
   generateDiffsFile?: Maybe<FileDiffsResponse>;
+  handleGithubAppCallback: BaseResponseWithMessage;
+  handleGithubWebhook: GithubWebhookResponse;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
   /** insert data into the table: "ai_blame_attribution" */
@@ -16284,6 +16624,10 @@ export type Mutation_Root = {
   insert_fix_to_submit_fix_request?: Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>;
   /** insert a single row into the table: "fix_to_submit_fix_request" */
   insert_fix_to_submit_fix_request_one?: Maybe<Fix_To_Submit_Fix_Request>;
+  /** insert data into the table: "github_app" */
+  insert_github_app?: Maybe<Github_App_Mutation_Response>;
+  /** insert a single row into the table: "github_app" */
+  insert_github_app_one?: Maybe<Github_App>;
   /** insert data into the table: "integration" */
   insert_integration?: Maybe<Integration_Mutation_Response>;
   /** insert a single row into the table: "integration" */
@@ -16757,6 +17101,12 @@ export type Mutation_Root = {
   update_fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   /** update multiples rows of table: "fix_to_submit_fix_request" */
   update_fix_to_submit_fix_request_many?: Maybe<Array<Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>>>;
+  /** update data of the table: "github_app" */
+  update_github_app?: Maybe<Github_App_Mutation_Response>;
+  /** update single row of the table: "github_app" */
+  update_github_app_by_pk?: Maybe<Github_App>;
+  /** update multiples rows of table: "github_app" */
+  update_github_app_many?: Maybe<Array<Maybe<Github_App_Mutation_Response>>>;
   /** update data of the table: "integration" */
   update_integration?: Maybe<Integration_Mutation_Response>;
   /** update single row of the table: "integration" */
@@ -17722,6 +18072,18 @@ export type Mutation_RootDelete_Fix_To_Submit_Fix_Request_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Github_AppArgs = {
+  where: Github_App_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Github_App_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_IntegrationArgs = {
   where: Integration_Bool_Exp;
 };
@@ -18321,6 +18683,19 @@ export type Mutation_RootForkRepoArgs = {
 export type Mutation_RootGenerateDiffsFileArgs = {
   fixIds: Array<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootHandleGithubAppCallbackArgs = {
+  code: Scalars['String']['input'];
+  installationId: Scalars['Int']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootHandleGithubWebhookArgs = {
+  stringifiedPayload: Scalars['String']['input'];
 };
 
 
@@ -18930,6 +19305,20 @@ export type Mutation_RootInsert_Fix_To_Submit_Fix_RequestArgs = {
 export type Mutation_RootInsert_Fix_To_Submit_Fix_Request_OneArgs = {
   object: Fix_To_Submit_Fix_Request_Insert_Input;
   on_conflict?: InputMaybe<Fix_To_Submit_Fix_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Github_AppArgs = {
+  objects: Array<Github_App_Insert_Input>;
+  on_conflict?: InputMaybe<Github_App_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Github_App_OneArgs = {
+  object: Github_App_Insert_Input;
+  on_conflict?: InputMaybe<Github_App_On_Conflict>;
 };
 
 
@@ -20693,6 +21082,28 @@ export type Mutation_RootUpdate_Fix_To_Submit_Fix_Request_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Github_AppArgs = {
+  _inc?: InputMaybe<Github_App_Inc_Input>;
+  _set?: InputMaybe<Github_App_Set_Input>;
+  where: Github_App_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Github_App_By_PkArgs = {
+  _inc?: InputMaybe<Github_App_Inc_Input>;
+  _set?: InputMaybe<Github_App_Set_Input>;
+  pk_columns: Github_App_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Github_App_ManyArgs = {
+  updates: Array<Github_App_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_IntegrationArgs = {
   _append?: InputMaybe<Integration_Append_Input>;
   _delete_at_path?: InputMaybe<Integration_Delete_At_Path_Input>;
@@ -21240,6 +21651,7 @@ export type Mutation_RootUpdate_Scan_Source_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Scm_ConfigArgs = {
+  _inc?: InputMaybe<Scm_Config_Inc_Input>;
   _set?: InputMaybe<Scm_Config_Set_Input>;
   where: Scm_Config_Bool_Exp;
 };
@@ -21247,6 +21659,7 @@ export type Mutation_RootUpdate_Scm_ConfigArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Scm_Config_By_PkArgs = {
+  _inc?: InputMaybe<Scm_Config_Inc_Input>;
   _set?: InputMaybe<Scm_Config_Set_Input>;
   pk_columns: Scm_Config_Pk_Columns_Input;
 };
@@ -21979,6 +22392,11 @@ export type Organization = {
   generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments: Scalars['Boolean']['output'];
+  /** An array relationship */
+  githubApps: Array<Github_App>;
+  /** An aggregate relationship */
+  githubApps_aggregate: Github_App_Aggregate;
+  github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
   includeSuppressed: Scalars['Boolean']['output'];
   isAiEnabled: Scalars['Boolean']['output'];
@@ -22127,6 +22545,26 @@ export type OrganizationDeployedVulnerabilityIssuesCountArgs = {
 export type OrganizationGeneratedFixAndVulUniqueArgs = {
   args: GeneratedFixAndVulUnique_Organization_Args;
   path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationGithubAppsArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationGithubApps_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
 };
 
 
@@ -22371,6 +22809,7 @@ export type Organization_Avg_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -22405,6 +22844,9 @@ export type Organization_Bool_Exp = {
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
   ghFixerNoFixComments?: InputMaybe<Boolean_Comparison_Exp>;
+  githubApps?: InputMaybe<Github_App_Bool_Exp>;
+  githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Bool_Exp>;
+  github_app_installation_id?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   includeSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
@@ -22692,6 +23134,7 @@ export type Organization_Files_Matching_Settings_Updates = {
 /** input type for incrementing numeric columns in table "organization" */
 export type Organization_Inc_Input = {
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
+  github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -22711,6 +23154,8 @@ export type Organization_Insert_Input = {
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
+  githubApps?: InputMaybe<Github_App_Arr_Rel_Insert_Input>;
+  github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -22983,6 +23428,7 @@ export type Organization_Max_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
@@ -23013,6 +23459,7 @@ export type Organization_Min_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
@@ -23067,6 +23514,8 @@ export type Organization_Order_By = {
   createdOn?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
   ghFixerNoFixComments?: InputMaybe<Order_By>;
+  githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Order_By>;
+  github_app_installation_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   includeSuppressed?: InputMaybe<Order_By>;
   isAiEnabled?: InputMaybe<Order_By>;
@@ -23675,6 +24124,8 @@ export enum Organization_Select_Column {
   /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
+  GithubAppInstallationId = 'github_app_installation_id',
+  /** column name */
   Id = 'id',
   /** column name */
   IncludeSuppressed = 'includeSuppressed',
@@ -23712,6 +24163,7 @@ export type Organization_Set_Input = {
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
+  github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -23735,6 +24187,7 @@ export type Organization_Stddev_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -23762,6 +24215,7 @@ export type Organization_Stddev_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -23789,6 +24243,7 @@ export type Organization_Stddev_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -23826,6 +24281,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
+  github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   includeSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -23849,6 +24305,7 @@ export type Organization_Sum_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -24343,6 +24800,8 @@ export enum Organization_Update_Column {
   /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
+  GithubAppInstallationId = 'github_app_installation_id',
+  /** column name */
   Id = 'id',
   /** column name */
   IncludeSuppressed = 'includeSuppressed',
@@ -24397,6 +24856,7 @@ export type Organization_Var_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -24424,6 +24884,7 @@ export type Organization_Var_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -24451,6 +24912,7 @@ export type Organization_Variance_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  github_app_installation_id?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -26728,6 +27190,13 @@ export type Query_Root = {
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
   gitReference?: Maybe<GitReferenceResponse>;
+  githubWebhookHealth: Scalars['String']['output'];
+  /** fetch data from the table: "github_app" */
+  github_app: Array<Github_App>;
+  /** fetch aggregated fields from the table: "github_app" */
+  github_app_aggregate: Github_App_Aggregate;
+  /** fetch data from the table: "github_app" using primary key columns */
+  github_app_by_pk?: Maybe<Github_App>;
   /** fetch data from the table: "integration" */
   integration: Array<Integration>;
   /** fetch aggregated fields from the table: "integration" */
@@ -28285,6 +28754,29 @@ export type Query_RootGet_Vulnerability_Report_Issues_For_User_AggregateArgs = {
 export type Query_RootGitReferenceArgs = {
   reference: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootGithub_AppArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+
+export type Query_RootGithub_App_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+
+export type Query_RootGithub_App_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -30573,6 +31065,8 @@ export type Scan_Variance_Order_By = {
 export type Scm_Config = {
   __typename?: 'scm_config';
   id: Scalars['uuid']['output'];
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Int']['output']>;
   isTokenOauth: Scalars['Boolean']['output'];
   orgId?: Maybe<Scalars['uuid']['output']>;
   refreshToken?: Maybe<Scalars['String']['output']>;
@@ -30624,9 +31118,17 @@ export type Scm_Config_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "scm_config" */
 export type Scm_Config_Aggregate_Fields = {
   __typename?: 'scm_config_aggregate_fields';
+  avg?: Maybe<Scm_Config_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Scm_Config_Max_Fields>;
   min?: Maybe<Scm_Config_Min_Fields>;
+  stddev?: Maybe<Scm_Config_Stddev_Fields>;
+  stddev_pop?: Maybe<Scm_Config_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Scm_Config_Stddev_Samp_Fields>;
+  sum?: Maybe<Scm_Config_Sum_Fields>;
+  var_pop?: Maybe<Scm_Config_Var_Pop_Fields>;
+  var_samp?: Maybe<Scm_Config_Var_Samp_Fields>;
+  variance?: Maybe<Scm_Config_Variance_Fields>;
 };
 
 
@@ -30638,9 +31140,17 @@ export type Scm_Config_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "scm_config" */
 export type Scm_Config_Aggregate_Order_By = {
+  avg?: InputMaybe<Scm_Config_Avg_Order_By>;
   count?: InputMaybe<Order_By>;
   max?: InputMaybe<Scm_Config_Max_Order_By>;
   min?: InputMaybe<Scm_Config_Min_Order_By>;
+  stddev?: InputMaybe<Scm_Config_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Scm_Config_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Scm_Config_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Scm_Config_Sum_Order_By>;
+  var_pop?: InputMaybe<Scm_Config_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Scm_Config_Var_Samp_Order_By>;
+  variance?: InputMaybe<Scm_Config_Variance_Order_By>;
 };
 
 /** input type for inserting array relation for remote table "scm_config" */
@@ -30650,12 +31160,26 @@ export type Scm_Config_Arr_Rel_Insert_Input = {
   on_conflict?: InputMaybe<Scm_Config_On_Conflict>;
 };
 
+/** aggregate avg on columns */
+export type Scm_Config_Avg_Fields = {
+  __typename?: 'scm_config_avg_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "scm_config" */
+export type Scm_Config_Avg_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
 /** Boolean expression to filter rows from the table "scm_config". All fields are combined with a logical 'AND'. */
 export type Scm_Config_Bool_Exp = {
   _and?: InputMaybe<Array<Scm_Config_Bool_Exp>>;
   _not?: InputMaybe<Scm_Config_Bool_Exp>;
   _or?: InputMaybe<Array<Scm_Config_Bool_Exp>>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  installationId?: InputMaybe<Int_Comparison_Exp>;
   isTokenOauth?: InputMaybe<Boolean_Comparison_Exp>;
   orgId?: InputMaybe<Uuid_Comparison_Exp>;
   refreshToken?: InputMaybe<String_Comparison_Exp>;
@@ -30675,9 +31199,17 @@ export enum Scm_Config_Constraint {
   ScmConfigPkey = 'scm_config_pkey'
 }
 
+/** input type for incrementing numeric columns in table "scm_config" */
+export type Scm_Config_Inc_Input = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "scm_config" */
 export type Scm_Config_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Scalars['Int']['input']>;
   isTokenOauth?: InputMaybe<Scalars['Boolean']['input']>;
   orgId?: InputMaybe<Scalars['uuid']['input']>;
   refreshToken?: InputMaybe<Scalars['String']['input']>;
@@ -30695,6 +31227,8 @@ export type Scm_Config_Insert_Input = {
 export type Scm_Config_Max_Fields = {
   __typename?: 'scm_config_max_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Int']['output']>;
   orgId?: Maybe<Scalars['uuid']['output']>;
   refreshToken?: Maybe<Scalars['String']['output']>;
   scmOrg?: Maybe<Scalars['String']['output']>;
@@ -30708,6 +31242,8 @@ export type Scm_Config_Max_Fields = {
 /** order by max() on columns of table "scm_config" */
 export type Scm_Config_Max_Order_By = {
   id?: InputMaybe<Order_By>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
   orgId?: InputMaybe<Order_By>;
   refreshToken?: InputMaybe<Order_By>;
   scmOrg?: InputMaybe<Order_By>;
@@ -30722,6 +31258,8 @@ export type Scm_Config_Max_Order_By = {
 export type Scm_Config_Min_Fields = {
   __typename?: 'scm_config_min_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Int']['output']>;
   orgId?: Maybe<Scalars['uuid']['output']>;
   refreshToken?: Maybe<Scalars['String']['output']>;
   scmOrg?: Maybe<Scalars['String']['output']>;
@@ -30735,6 +31273,8 @@ export type Scm_Config_Min_Fields = {
 /** order by min() on columns of table "scm_config" */
 export type Scm_Config_Min_Order_By = {
   id?: InputMaybe<Order_By>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
   orgId?: InputMaybe<Order_By>;
   refreshToken?: InputMaybe<Order_By>;
   scmOrg?: InputMaybe<Order_By>;
@@ -30764,6 +31304,7 @@ export type Scm_Config_On_Conflict = {
 /** Ordering options when selecting data from "scm_config". */
 export type Scm_Config_Order_By = {
   id?: InputMaybe<Order_By>;
+  installationId?: InputMaybe<Order_By>;
   isTokenOauth?: InputMaybe<Order_By>;
   orgId?: InputMaybe<Order_By>;
   refreshToken?: InputMaybe<Order_By>;
@@ -30786,6 +31327,8 @@ export type Scm_Config_Pk_Columns_Input = {
 export enum Scm_Config_Select_Column {
   /** column name */
   Id = 'id',
+  /** column name */
+  InstallationId = 'installationId',
   /** column name */
   IsTokenOauth = 'isTokenOauth',
   /** column name */
@@ -30823,6 +31366,8 @@ export enum Scm_Config_Select_Column_Scm_Config_Aggregate_Bool_Exp_Bool_Or_Argum
 /** input type for updating data in table "scm_config" */
 export type Scm_Config_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Scalars['Int']['input']>;
   isTokenOauth?: InputMaybe<Scalars['Boolean']['input']>;
   orgId?: InputMaybe<Scalars['uuid']['input']>;
   refreshToken?: InputMaybe<Scalars['String']['input']>;
@@ -30833,6 +31378,45 @@ export type Scm_Config_Set_Input = {
   token?: InputMaybe<Scalars['String']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Scm_Config_Stddev_Fields = {
+  __typename?: 'scm_config_stddev_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "scm_config" */
+export type Scm_Config_Stddev_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Scm_Config_Stddev_Pop_Fields = {
+  __typename?: 'scm_config_stddev_pop_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "scm_config" */
+export type Scm_Config_Stddev_Pop_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Scm_Config_Stddev_Samp_Fields = {
+  __typename?: 'scm_config_stddev_samp_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "scm_config" */
+export type Scm_Config_Stddev_Samp_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "scm_config" */
@@ -30846,6 +31430,8 @@ export type Scm_Config_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Scm_Config_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Scalars['Int']['input']>;
   isTokenOauth?: InputMaybe<Scalars['Boolean']['input']>;
   orgId?: InputMaybe<Scalars['uuid']['input']>;
   refreshToken?: InputMaybe<Scalars['String']['input']>;
@@ -30858,10 +31444,25 @@ export type Scm_Config_Stream_Cursor_Value_Input = {
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
+/** aggregate sum on columns */
+export type Scm_Config_Sum_Fields = {
+  __typename?: 'scm_config_sum_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "scm_config" */
+export type Scm_Config_Sum_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
 /** update columns of table "scm_config" */
 export enum Scm_Config_Update_Column {
   /** column name */
   Id = 'id',
+  /** column name */
+  InstallationId = 'installationId',
   /** column name */
   IsTokenOauth = 'isTokenOauth',
   /** column name */
@@ -30885,10 +31486,51 @@ export enum Scm_Config_Update_Column {
 }
 
 export type Scm_Config_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Scm_Config_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Scm_Config_Set_Input>;
   /** filter the rows which have to be updated */
   where: Scm_Config_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Scm_Config_Var_Pop_Fields = {
+  __typename?: 'scm_config_var_pop_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "scm_config" */
+export type Scm_Config_Var_Pop_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Scm_Config_Var_Samp_Fields = {
+  __typename?: 'scm_config_var_samp_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "scm_config" */
+export type Scm_Config_Var_Samp_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Scm_Config_Variance_Fields = {
+  __typename?: 'scm_config_variance_fields';
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "scm_config" */
+export type Scm_Config_Variance_Order_By = {
+  /** Use for token created by github app, we need this inforamation when we want clean up revoked tokens */
+  installationId?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "scm_submit_fix_request" */
@@ -32400,6 +33042,14 @@ export type Subscription_Root = {
   get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
+  /** fetch data from the table: "github_app" */
+  github_app: Array<Github_App>;
+  /** fetch aggregated fields from the table: "github_app" */
+  github_app_aggregate: Github_App_Aggregate;
+  /** fetch data from the table: "github_app" using primary key columns */
+  github_app_by_pk?: Maybe<Github_App>;
+  /** fetch data from the table in a streaming manner: "github_app" */
+  github_app_stream: Array<Github_App>;
   /** fetch data from the table: "integration" */
   integration: Array<Integration>;
   /** fetch aggregated fields from the table: "integration" */
@@ -34269,6 +34919,36 @@ export type Subscription_RootGet_Vulnerability_Report_Issues_For_User_AggregateA
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+export type Subscription_RootGithub_AppArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+
+export type Subscription_RootGithub_App_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Github_App_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Github_App_Order_By>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
+};
+
+
+export type Subscription_RootGithub_App_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootGithub_App_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Github_App_Stream_Cursor_Input>>;
+  where?: InputMaybe<Github_App_Bool_Exp>;
 };
 
 
@@ -36337,6 +37017,19 @@ export type Ticket_Integration_Updates = {
   _set?: InputMaybe<Ticket_Integration_Set_Input>;
   /** filter the rows which have to be updated */
   where: Ticket_Integration_Bool_Exp;
+};
+
+/** Boolean expression to compare columns of type "time". All fields are combined with logical 'AND'. */
+export type Time_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['time']['input']>;
+  _gt?: InputMaybe<Scalars['time']['input']>;
+  _gte?: InputMaybe<Scalars['time']['input']>;
+  _in?: InputMaybe<Array<Scalars['time']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['time']['input']>;
+  _lte?: InputMaybe<Scalars['time']['input']>;
+  _neq?: InputMaybe<Scalars['time']['input']>;
+  _nin?: InputMaybe<Array<Scalars['time']['input']>>;
 };
 
 /** Boolean expression to compare columns of type "timestamp". All fields are combined with logical 'AND'. */

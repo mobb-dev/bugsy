@@ -14,7 +14,7 @@ import { uploadFile } from '../../features/analysis/upload-file'
 import { createAuthenticatedMcpGQLClient } from '../../mcp/services/McpGQLClient'
 
 const PromptItemZ = z.object({
-  type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION']),
+  type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
   attachedFiles: z
     .array(
       z.object({

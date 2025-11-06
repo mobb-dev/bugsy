@@ -22,6 +22,7 @@ export type GetReferenceDataResponse = {
 export type GetGitBlameResponse = {
   startingLine: number
   endingLine: number
+  commitSha: string
   name: string
   login: string
   email: string

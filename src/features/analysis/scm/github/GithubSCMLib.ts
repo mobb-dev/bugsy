@@ -387,34 +387,29 @@ export class GithubSCMLib extends SCMLib {
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const prNumber = Number(submitRequestId)
 
-    // Get PR details
-    const prRes = await this.githubSdk.getPr({
-      owner,
-      repo,
-      pull_number: prNumber,
-    })
-
-    // Get PR diff
-    const prDiff = await this.getPrDiff({ pull_number: prNumber })
-
-    // Get all commits in the PR
-    const commitsRes = await this.githubSdk.getPrCommits({
-      owner,
-      repo,
-      pull_number: prNumber,
-    })
-
-    // Get detailed commit data with diffs for each commit
-    const commits: GetCommitDiffResult[] = []
-    for (const commit of commitsRes.data) {
-      const commitDiff = await this.getCommitDiff(commit.sha)
-      commits.push(commitDiff)
-    }
+    // Fetch PR details, commits, and changed files in parallel for optimization
+    const [prRes, commitsRes, filesRes] = await Promise.all([
+      this.githubSdk.getPr({ owner, repo, pull_number: prNumber }),
+      this.githubSdk.getPrCommits({ owner, repo, pull_number: prNumber }),
+      this.githubSdk.listPRFiles({ owner, repo, pull_number: prNumber }),
+    ])
 
     const pr = prRes.data
 
-    // Calculate diff line attributions
-    const diffLines = this._calculateDiffLineAttributions(prDiff, commits)
+    // Get PR diff (needed for backward compatibility)
+    const prDiff = await this.getPrDiff({ pull_number: prNumber })
+
+    // Get detailed commit data with diffs for each commit in parallel
+    const commits: GetCommitDiffResult[] = await Promise.all(
+      commitsRes.data.map((commit) => this.getCommitDiff(commit.sha))
+    )
+
+    // Use optimized blame-based attribution
+    const diffLines = await this._attributeLinesViaBlame(
+      pr.head.ref,
+      filesRes.data,
+      commits
+    )
 
     return {
       diff: prDiff,
@@ -595,27 +590,17 @@ export class GithubSCMLib extends SCMLib {
     }
   }
 
-  private _calculateDiffLineAttributions(
-    prDiff: string,
-    commits: GetCommitDiffResult[]
-  ): { file: string; line: number; commitSha: string }[] {
-    const attributions: { file: string; line: number; commitSha: string }[] = []
-
-    // Parse PR diff to extract added lines with their locations
-    const prDiffLines = prDiff.split('\n')
-    let currentFile = ''
+  /**
+   * Optimized helper to parse added line numbers from a unified diff patch
+   * Single-pass parsing for minimal CPU usage
+   */
+  private _parseAddedLinesFromPatch(patch: string): number[] {
+    const addedLines: number[] = []
+    const lines = patch.split('\n')
     let currentLineNumber = 0
 
-    for (const line of prDiffLines) {
-      // Track which file we're in
-      if (line.startsWith('+++')) {
-        const match = line.match(/^\+\+\+ b\/(.+)$/)
-        currentFile = match?.[1] || ''
-        currentLineNumber = 0
-        continue
-      }
-
-      // Parse hunk header to get starting line number
+    for (const line of lines) {
+      // Parse hunk header to get starting line number for new file
       if (line.startsWith('@@')) {
         const match = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/)
         if (match?.[1]) {
@@ -624,198 +609,99 @@ export class GithubSCMLib extends SCMLib {
         continue
       }
 
-      // Track line numbers for added/unchanged lines
+      // Track added lines (exclude file headers)
       if (line.startsWith('+') && !line.startsWith('+++')) {
-        // This is an added line in the PR diff
-        // Find which commit introduced it by checking commits in order
-        const commitSha = this._findCommitForLine(
-          currentFile,
-          currentLineNumber,
-          line.substring(1), // Remove the '+' prefix
-          commits
-        )
-
-        if (commitSha && currentFile) {
-          attributions.push({
-            file: currentFile,
-            line: currentLineNumber,
-            commitSha,
-          })
-        }
-
+        addedLines.push(currentLineNumber)
         currentLineNumber++
       } else if (!line.startsWith('-')) {
-        // Unchanged line or context line
+        // Context or unchanged line
         currentLineNumber++
-      }
-    }
-
-    return attributions
-  }
-
-  private _findCommitForLine(
-    file: string,
-    lineNumber: number,
-    lineContent: string,
-    commits: GetCommitDiffResult[]
-  ): string | null {
-    const normalizedContent = lineContent.trim()
-
-    // Go through commits in reverse order (most recent first)
-    // The most recent commit that added this line content is the one we want
-    for (let i = commits.length - 1; i >= 0; i--) {
-      const commit = commits[i]
-      if (!commit) {
-        continue
-      }
-
-      const commitLines = commit.diff.split('\n')
-      let commitCurrentFile = ''
-
-      for (const commitLine of commitLines) {
-        // Track which file we're in
-        if (commitLine.startsWith('+++')) {
-          const match = commitLine.match(/^\+\+\+ b\/(.+)$/)
-          commitCurrentFile = match?.[1] || ''
-          continue
-        }
-
-        // Skip hunk headers
-        if (commitLine.startsWith('@@')) {
-          continue
-        }
-
-        // Check if this commit added the line by matching content
-        if (
-          commitCurrentFile === file &&
-          commitLine.startsWith('+') &&
-          !commitLine.startsWith('+++')
-        ) {
-          const commitLineContent = commitLine.substring(1).trim()
-
-          // Match based on content only - line numbers can shift between commits
-          if (commitLineContent === normalizedContent) {
-            return commit.commitSha
-          }
-        }
-      }
-    }
-
-    // If no exact content match found, try a fallback approach:
-    // Look for the commit that added a line in the same file near the target line number
-    // This helps when whitespace or formatting differs slightly
-    for (let i = commits.length - 1; i >= 0; i--) {
-      const commit = commits[i]
-      if (!commit) {
-        continue
-      }
-
-      const addedLinesInFile = this._getAddedLinesFromCommit(commit, file)
-
-      // Check if this commit added any line near the target line number
-      // and with similar content (allowing for minor whitespace differences)
-      for (const { lineNum, content } of addedLinesInFile) {
-        // Check if line numbers are close (within 10 lines)
-        // and content similarity is high
-        if (
-          Math.abs(lineNum - lineNumber) <= 10 &&
-          this._contentSimilarity(content, normalizedContent) > 0.9
-        ) {
-          return commit.commitSha
-        }
-      }
-    }
-
-    // If still no commit found, attribute to the last commit
-    const lastCommit = commits[commits.length - 1]
-    return lastCommit ? lastCommit.commitSha : null
-  }
-
-  private _getAddedLinesFromCommit(
-    commit: GetCommitDiffResult,
-    targetFile: string
-  ): { lineNum: number; content: string }[] {
-    const addedLines: { lineNum: number; content: string }[] = []
-    const commitLines = commit.diff.split('\n')
-    let currentFile = ''
-    let currentLineNumber = 0
-
-    for (const line of commitLines) {
-      // Track which file we're in
-      if (line.startsWith('+++')) {
-        const match = line.match(/^\+\+\+ b\/(.+)$/)
-        currentFile = match?.[1] || ''
-        currentLineNumber = 0
-        continue
-      }
-
-      // Parse hunk header to get starting line number
-      if (line.startsWith('@@')) {
-        const match = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/)
-        if (match?.[1]) {
-          currentLineNumber = parseInt(match[1], 10)
-        }
-        continue
-      }
-
-      // Track added lines in the target file
-      if (
-        currentFile === targetFile &&
-        line.startsWith('+') &&
-        !line.startsWith('+++')
-      ) {
-        addedLines.push({
-          lineNum: currentLineNumber,
-          content: line.substring(1).trim(),
-        })
-        currentLineNumber++
-      } else if (!line.startsWith('-')) {
-        // Unchanged line or context line
-        if (currentFile === targetFile) {
-          currentLineNumber++
-        }
       }
     }
 
     return addedLines
   }
 
-  private _contentSimilarity(content1: string, content2: string): number {
-    // Simple similarity metric based on character overlap
-    // Returns a value between 0 and 1
-    if (content1 === content2) {
-      return 1.0
+  /**
+   * Attribute lines in a single file to their commits using blame
+   */
+  private async _attributeFileLines(
+    file: { filename: string; patch?: string },
+    headRef: string,
+    prCommitShas: Set<string>
+  ): Promise<{ file: string; line: number; commitSha: string }[]> {
+    try {
+      // Get blame for this file at PR head
+      const blame = await this.getRepoBlameRanges(headRef, file.filename)
+
+      // Parse patch to find added line numbers
+      const addedLines = this._parseAddedLinesFromPatch(file.patch!)
+
+      // Convert to Set for O(1) lookup
+      const addedLinesSet = new Set(addedLines)
+
+      // Map added lines to blame ranges - optimized by inverting the loop
+      const fileAttributions: {
+        file: string
+        line: number
+        commitSha: string
+      }[] = []
+
+      // Iterate through blame ranges (typically fewer and larger than individual lines)
+      for (const blameRange of blame) {
+        // Skip if commit not in this PR
+        if (!prCommitShas.has(blameRange.commitSha)) {
+          continue
+        }
+
+        // Check each line in the blame range against added lines
+        for (
+          let lineNum = blameRange.startingLine;
+          lineNum <= blameRange.endingLine;
+          lineNum++
+        ) {
+          if (addedLinesSet.has(lineNum)) {
+            fileAttributions.push({
+              file: file.filename,
+              line: lineNum,
+              commitSha: blameRange.commitSha,
+            })
+          }
+        }
+      }
+
+      return fileAttributions
+    } catch (error) {
+      // If blame fails for a file, skip it (file might be deleted or binary)
+      return []
     }
+  }
 
-    // Normalize whitespace
-    const normalized1 = content1.replace(/\s+/g, ' ')
-    const normalized2 = content2.replace(/\s+/g, ' ')
+  /**
+   * Optimized helper to attribute PR lines to commits using blame API
+   * Parallel blame queries for minimal API call time
+   */
+  private async _attributeLinesViaBlame(
+    headRef: string,
+    changedFiles: { filename: string; patch?: string }[],
+    prCommits: GetCommitDiffResult[]
+  ): Promise<{ file: string; line: number; commitSha: string }[]> {
+    // Create set of PR commit SHAs for O(1) lookup
+    const prCommitShas = new Set(prCommits.map((c) => c.commitSha))
 
-    if (normalized1 === normalized2) {
-      return 0.95
-    }
+    // Filter to only files with patches (additions)
+    const filesWithAdditions = changedFiles.filter((file) =>
+      file.patch?.includes('\n+')
+    )
 
-    // Calculate Levenshtein-like similarity
-    const longer =
-      normalized1.length > normalized2.length ? normalized1 : normalized2
-    const shorter =
-      normalized1.length > normalized2.length ? normalized2 : normalized1
+    // Query blame for all files in parallel
+    const attributions = await Promise.all(
+      filesWithAdditions.map((file) =>
+        this._attributeFileLines(file, headRef, prCommitShas)
+      )
+    )
 
-    if (longer.length === 0) {
-      return 1.0
-    }
-
-    // Simple substring matching
-    if (longer.includes(shorter)) {
-      return shorter.length / longer.length
-    }
-
-    // Calculate common characters
-    const set1 = new Set(normalized1.split(''))
-    const set2 = new Set(normalized2.split(''))
-    const intersection = new Set([...set1].filter((x) => set2.has(x)))
-
-    return intersection.size / Math.max(set1.size, set2.size)
+    return attributions.flat()
   }
 }
 

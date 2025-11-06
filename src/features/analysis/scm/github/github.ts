@@ -386,6 +386,7 @@ export function getGithubSdk(
         ) => ({
           startingLine: range.startingLine,
           endingLine: range.endingLine,
+          commitSha: range.commit.oid,
           email: range.commit.author.user?.email || '',
           name: range.commit.author.user?.name || '',
           login: range.commit.author.user?.login || '',
@@ -585,6 +586,18 @@ export function getGithubSdk(
         state: 'all',
         sort: 'updated',
         direction: 'desc',
+        per_page: 100,
+      })
+    },
+    async listPRFiles(params: {
+      owner: string
+      repo: string
+      pull_number: number
+    }) {
+      return octokit.rest.pulls.listFiles({
+        owner: params.owner,
+        repo: params.repo,
+        pull_number: params.pull_number,
         per_page: 100,
       })
     },

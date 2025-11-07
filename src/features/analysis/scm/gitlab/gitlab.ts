@@ -522,14 +522,14 @@ export async function getGitlabToken({
           requestTls: {
             rejectUnauthorized: false,
           },
-          bodyTimeout: 5000,
-          headersTimeout: 5000,
-          connectTimeout: 5000,
+          bodyTimeout: 10000,
+          headersTimeout: 10000,
+          connectTimeout: 10000,
         })
       : new Agent({
-          bodyTimeout: 5000,
-          headersTimeout: 5000,
-          connectTimeout: 5000,
+          bodyTimeout: 10000,
+          headersTimeout: 10000,
+          connectTimeout: 10000,
         })
 
   try {

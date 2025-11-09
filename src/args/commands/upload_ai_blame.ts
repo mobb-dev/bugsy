@@ -2,16 +2,19 @@ import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 
 import chalk from 'chalk'
+import Configstore from 'configstore'
 import { withFile } from 'tmp-promise'
 import type * as Yargs from 'yargs'
 import z from 'zod'
 
+import { handleMobbLogin } from '../../commands/handleMobbLogin'
+import { GQLClient } from '../../features/analysis/graphql'
 import type {
   FinalizeAiBlameInferencesUploadMutationVariables,
   UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
-import { createAuthenticatedMcpGQLClient } from '../../mcp/services/McpGQLClient'
+import { packageJson } from '../../utils'
 
 const PromptItemZ = z.object({
   type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
@@ -139,6 +142,29 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   })
 }
 
+const config = new Configstore(packageJson.name, { apiToken: '' })
+
+/**
+ * Initializes and authenticates a GQL client for AI Blame upload operations.
+ * This function can be called separately to reuse an authenticated client
+ * across multiple upload operations.
+ *
+ * @returns Promise<GQLClient> An authenticated GQL client ready for use
+ */
+export async function getAuthenticatedGQLClientForIdeExtension(): Promise<GQLClient> {
+  let gqlClient = new GQLClient({
+    apiKey: config.get('apiToken') ?? '',
+    type: 'apiKey',
+  })
+
+  gqlClient = await handleMobbLogin({
+    inGqlClient: gqlClient,
+    skipPrompts: true,
+  })
+
+  return gqlClient
+}
+
 export async function uploadAiBlameHandler(
   args: UploadAiBlameOptions,
   exitOnError = true
@@ -190,10 +216,13 @@ export async function uploadAiBlameHandler(
     })
   }
 
-  const gqlClient = await createAuthenticatedMcpGQLClient()
+  // Use provided client or authenticate a new one
+  const authenticatedClient = await getAuthenticatedGQLClientForIdeExtension()
 
   // Init: presign
-  const initRes = await gqlClient.uploadAIBlameInferencesInitRaw({ sessions })
+  const initRes = await authenticatedClient.uploadAIBlameInferencesInitRaw({
+    sessions,
+  })
   const uploadSessions: NonNullable<
     UploadAiBlameInferencesInitMutation['uploadAIBlameInferencesInit']
   >['uploadSessions'] =
@@ -242,7 +271,7 @@ export async function uploadAiBlameHandler(
       }
     })
 
-  const finRes = await gqlClient.finalizeAIBlameInferencesUploadRaw({
+  const finRes = await authenticatedClient.finalizeAIBlameInferencesUploadRaw({
     sessions: finalizeSessions,
   })
   const status = finRes?.finalizeAIBlameInferencesUpload?.status

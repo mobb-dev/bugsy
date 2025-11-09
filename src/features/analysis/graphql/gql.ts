@@ -12,6 +12,8 @@ import { sleep } from '../../../utils'
 import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   CreateCliLoginMutationVariables,
+  FinalizeAiBlameInferencesUploadMutation,
+  FinalizeAiBlameInferencesUploadMutationVariables,
   Fix_Report_State_Enum,
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
@@ -23,6 +25,8 @@ import {
   PrStrategy,
   Sdk,
   SubmitVulnerabilityReportMutationVariables,
+  UploadAiBlameInferencesInitMutation,
+  UploadAiBlameInferencesInitMutationVariables,
   ValidateRepoUrlQueryVariables,
 } from '../scm/generates/client_generates'
 import { subscribe } from './subscribe'
@@ -521,5 +525,17 @@ export class GQLClient {
   }
   async getFalsePositive(args: GetFalsePositiveQueryVariables) {
     return this._clientSdk.getFalsePositive(args)
+  }
+
+  async uploadAIBlameInferencesInitRaw(
+    variables: UploadAiBlameInferencesInitMutationVariables
+  ): Promise<UploadAiBlameInferencesInitMutation> {
+    return await this._clientSdk.UploadAIBlameInferencesInit(variables)
+  }
+
+  async finalizeAIBlameInferencesUploadRaw(
+    variables: FinalizeAiBlameInferencesUploadMutationVariables
+  ): Promise<FinalizeAiBlameInferencesUploadMutation> {
+    return await this._clientSdk.FinalizeAIBlameInferencesUpload(variables)
   }
 }

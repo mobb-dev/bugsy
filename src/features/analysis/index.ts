@@ -14,12 +14,12 @@ import open from 'open'
 import tmp from 'tmp'
 import { z } from 'zod'
 
+import { type CommandOptions } from '../../commands'
 import {
-  type CommandOptions,
   handleMobbLogin,
   LOGIN_CHECK_DELAY,
   LOGIN_MAX_WAIT,
-} from '../../commands'
+} from '../../commands/handleMobbLogin'
 import {
   progressMassages,
   Scanner,

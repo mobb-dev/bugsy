@@ -37,6 +37,7 @@ export type AiBlameAttribution = {
   aiBlameInferenceId: Scalars['String']['output'];
   commitSha: Scalars['String']['output'];
   filePath: Scalars['String']['output'];
+  id: Scalars['String']['output'];
   lineNumber: Scalars['Int']['output'];
   model?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
@@ -405,6 +406,13 @@ export type ForkRepoSuccess = {
   __typename?: 'ForkRepoSuccess';
   status: Status;
   url: Scalars['String']['output'];
+};
+
+export type GetAiBlameInferencePromptResponse = {
+  __typename?: 'GetAIBlameInferencePromptResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  promptUrl?: Maybe<Scalars['String']['output']>;
+  status: Status;
 };
 
 export type GetAiToolGeneralError = {
@@ -27159,6 +27167,12 @@ export type Query_Root = {
   fix_to_submit_fix_request_aggregate: Fix_To_Submit_Fix_Request_Aggregate;
   /** fetch data from the table: "fix_to_submit_fix_request" using primary key columns */
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
+  /**
+   * Get signed S3 URL for an AI Blame inference prompt file.
+   * Returns a presigned URL to download the prompt file.
+   * Takes an AI Blame attribution ID and checks user access via organization.
+   */
+  getAIBlameInferenceData: GetAiBlameInferencePromptResponse;
   getAiToolTokens?: Maybe<GetAiToolTokensResponse>;
   getAiToolUsageStatistics?: Maybe<GetAiToolUsageStatisticsResponse>;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
@@ -28595,6 +28609,11 @@ export type Query_RootFix_To_Submit_Fix_Request_AggregateArgs = {
 
 export type Query_RootFix_To_Submit_Fix_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootGetAiBlameInferenceDataArgs = {
+  aiBlameAttributionId: Scalars['String']['input'];
 };
 
 

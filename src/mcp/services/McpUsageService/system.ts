@@ -1,96 +1,94 @@
-import { spawn } from 'child_process'
+import fs from 'fs'
 import os from 'os'
+import path from 'path'
 
 import { MCP_SYSTEM_FIND_TIMEOUT_MS } from '../../core/configs'
 import { logWarn } from '../../Logger'
 
+const MAX_DEPTH = 2
+const patterns = ['mcp', 'claude']
+
+const isFileMatch = (fileName: string) => {
+  const lowerName = fileName.toLowerCase()
+  return (
+    lowerName.endsWith('.json') &&
+    patterns.some((p) => lowerName.includes(p.toLowerCase()))
+  )
+}
+
+const safeAccess = async (filePath: string): Promise<boolean> => {
+  try {
+    await fs.promises.access(filePath, fs.constants.R_OK)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Limited recursion search for config files
+ */
+const searchDir = async (dir: string, depth = 0): Promise<string[]> => {
+  const results: string[] = []
+
+  if (depth > MAX_DEPTH) return results
+
+  const entries = await fs.promises
+    .readdir(dir, { withFileTypes: true })
+    .catch(() => [])
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name)
+
+    if (entry.isFile() && isFileMatch(entry.name)) {
+      results.push(fullPath)
+    } else if (entry.isDirectory()) {
+      if (await safeAccess(fullPath)) {
+        const subResults = await searchDir(fullPath, depth + 1)
+        results.push(...subResults)
+      }
+    }
+  }
+
+  return results
+}
+
 export const findSystemMCPConfigs = async (): Promise<string[]> => {
   try {
+    const home = os.homedir()
     const platform = os.platform()
-    let command: string
-    let args: string[]
 
-    if (platform === 'win32') {
-      // 🪟 Windows — PowerShell search
-      command = 'powershell'
-      args = [
-        '-NoProfile',
-        '-Command',
-        'Get-ChildItem -Path $env:USERPROFILE -Recurse -Include *mcp*.json,*claude*.json -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }',
-      ]
-    } else {
-      // 🐧 All other OS — use `find`
-      const home = os.homedir()
-      command = 'find'
-      args = [
-        home,
-        '-type',
-        'f',
-        '(',
-        '-iname',
-        '*mcp*.json',
-        '-o',
-        '-iname',
-        '*claude*.json',
-        ')',
-      ]
-    }
+    // Known paths per platform
+    const knownDirs =
+      platform === 'win32'
+        ? [
+            path.join(home, '.cursor'),
+            path.join(home, 'Documents'),
+            path.join(home, 'Downloads'),
+          ]
+        : [
+            path.join(home, '.cursor'),
+            process.env['XDG_CONFIG_HOME'] || path.join(home, '.config'),
+            path.join(home, 'Documents'),
+            path.join(home, 'Downloads'),
+          ]
 
-    return await new Promise<string[]>((resolve) => {
-      const child = spawn(command, args, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        shell: platform === 'win32', // needed for PowerShell
-      })
-
-      let output = ''
-      let errorOutput = ''
-
-      const timer = setTimeout(() => {
-        child.kill('SIGTERM')
+    const timeoutPromise = new Promise<string[]>((resolve) =>
+      setTimeout(() => {
         logWarn(
           `MCP config search timed out after ${MCP_SYSTEM_FIND_TIMEOUT_MS / 1000}s`
         )
-        resolve([]) // timeout should not crash anything
-      }, MCP_SYSTEM_FIND_TIMEOUT_MS)
-
-      child.stdout.on('data', (data) => {
-        output += data.toString()
-      })
-
-      child.stderr.on('data', (data) => {
-        const msg = data.toString()
-        // Ignore common permission errors
-        if (
-          !msg.includes('Operation not permitted') &&
-          !msg.includes('Permission denied') &&
-          !msg.includes('Access is denied')
-        ) {
-          errorOutput += msg
-        }
-      })
-
-      child.on('error', (err) => {
-        clearTimeout(timer)
-        logWarn('MCP config search failed to start', { err })
         resolve([])
-      })
+      }, MCP_SYSTEM_FIND_TIMEOUT_MS)
+    )
 
-      child.on('close', (code) => {
-        clearTimeout(timer)
-        if (code === 0 || output.trim().length > 0) {
-          const files = output
-            .split(/\r?\n/)
-            .map((f) => f.trim())
-            .filter(Boolean)
-          resolve(files)
-        } else {
-          if (errorOutput.trim().length > 0) {
-            logWarn('MCP config search finished with warnings', { errorOutput })
-          }
-          resolve([])
-        }
-      })
-    })
+    const searchPromise = Promise.all(
+      knownDirs.map((dir) =>
+        fs.existsSync(dir) ? searchDir(dir) : Promise.resolve([])
+      )
+    ).then((results) => results.flat())
+
+    return await Promise.race([timeoutPromise, searchPromise])
   } catch (err) {
     logWarn('MCP config search unexpected error', { err })
     return []

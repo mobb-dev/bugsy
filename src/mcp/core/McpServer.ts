@@ -490,6 +490,13 @@ export class McpServer {
   public async handleListPromptsRequest(
     request: ListPromptsRequest
   ): Promise<ListPromptsResult> {
+    const mcpCheckerTool = this.toolRegistry.getToolDefinition(MCP_TOOL_CHECKER)
+    if (mcpCheckerTool) {
+      return {
+        prompts: [],
+      }
+    }
+
     logInfo('Received list_prompts request')
     logDebug('list_prompts request', {
       request: JSON.parse(JSON.stringify(request)),

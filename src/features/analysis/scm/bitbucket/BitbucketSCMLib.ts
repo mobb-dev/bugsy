@@ -196,10 +196,10 @@ export class BitbucketSCMLib extends SCMLib {
   async _getUsernameForAuthUrl(): Promise<string> {
     this._validateAccessTokenAndUrl()
     const user = await this.bitbucketSdk.getUser()
-    if (!user.username) {
+    if (!user['username']) {
       throw new Error('no username found')
     }
-    return user.username
+    return user['username'] as string
   }
 
   async getIsRemoteBranch(branch: string): Promise<boolean> {
@@ -223,7 +223,7 @@ export class BitbucketSCMLib extends SCMLib {
   async getUsername(): Promise<string> {
     this._validateAccessToken()
     const res = await this.bitbucketSdk.getUser()
-    return z.string().parse(res.username)
+    return z.string().parse(res['username'])
   }
 
   async getSubmitRequestStatus(

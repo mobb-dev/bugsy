@@ -1,6 +1,242 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-check-for-new-vulnerabilities 1`] = `
+exports[`Prompt Snapshots > CheckForNewVulnerabilitiesPrompt > should match snapshots > with-path 1`] = `
+{
+  "description": "Guide for enabling continuous security monitoring to detect new vulnerabilities",
+  "messages": [
+    {
+      "content": {
+        "text": "# Continuous Security Monitoring Setup
+
+This workflow sets up ongoing security monitoring to detect new vulnerabilities as code changes.
+
+## Purpose
+
+The \`check_for_new_available_fixes\` tool provides:
+- Lightweight background security monitoring
+- Detection of newly introduced vulnerabilities
+- Periodic checks without heavy scanning overhead
+- Notifications when new fixes become available
+
+## When to Use
+
+Call this tool:
+✓ At the end of a coding session
+✓ After completing a series of edits
+✓ After applying security fixes (to verify no new issues)
+✓ Before committing code changes
+✓ As part of a continuous security workflow
+✓ When setting up a project for security monitoring
+
+## Workflow Steps
+
+### Step 1: Determine Repository Path
+✓ Repository path provided: \`/test/repo\`
+
+### Step 2: Call check_for_new_available_fixes
+
+Use the tool with minimal parameters:
+
+\`\`\`json
+{
+  "path": "/test/repo"
+}
+\`\`\`
+
+This tool is designed to be lightweight and non-intrusive.
+
+### Step 3: Interpret Results
+
+The tool will return one of several possible outcomes:
+
+#### New Vulnerabilities Detected
+
+If new security issues are found:
+
+1. **Alert the user promptly:**
+   "⚠️ New security vulnerabilities detected!"
+
+2. **Provide summary:**
+   - Number of new vulnerabilities
+   - Severity breakdown
+   - Files affected
+
+3. **Recommend immediate action:**
+   - For Critical/High: "I recommend reviewing these immediately"
+   - For Medium/Low: "These should be addressed when convenient"
+
+4. **Offer next steps:**
+   - "Would you like to scan and see the details?"
+   - "Should I fetch the available fixes?"
+   - Suggest calling \`scan_and_fix_vulnerabilities\` or \`fetch_available_fixes\`
+
+#### No New Vulnerabilities
+
+"✓ Monitoring active. No new security vulnerabilities detected."
+
+Optional follow-up:
+- Confirm monitoring is now enabled
+- Mention that checks will continue periodically
+- Reassure the user their code remains secure
+
+#### Monitoring Enabled
+
+"✓ Continuous security monitoring has been enabled for this repository."
+
+Explain what this means:
+- Periodic background checks will run
+- User will be notified of new vulnerabilities
+- No action required from user right now
+
+### Step 4: Handle User Response
+
+**If new vulnerabilities were found:**
+
+Guide the user to take appropriate action:
+
+1. **Immediate threats (Critical/High):**
+   - Strongly recommend scanning now
+   - Offer to fetch and display fixes
+   - Suggest not committing until fixed
+
+2. **Medium priority:**
+   - Add to todo list or backlog
+   - Schedule time to address
+   - Can proceed with current work
+
+3. **Low priority:**
+   - Track for future maintenance
+   - Can be addressed in next refactoring
+   - No immediate action required
+
+**If no issues found:**
+
+- Congratulate the user on maintaining security
+- Remind them monitoring will continue
+- Suggest they can continue their work confidently
+
+### Step 5: Integration into Workflow
+
+This tool should be called **automatically** in certain scenarios:
+
+1. **End-of-session cleanup:**
+   After a user completes a significant amount of work
+
+2. **Post-fix verification:**
+   After applying security fixes to ensure no new issues
+
+3. **Pre-commit hook simulation:**
+   Before suggesting the user commit their changes
+
+4. **Periodic checks:**
+   During long-running IDE sessions (every 15-30 minutes)
+
+## Best Practices
+
+### DO:
+✓ Call this tool frequently and automatically
+✓ Make it part of your regular workflow
+✓ Alert users immediately when issues are found
+✓ Provide clear severity context
+✓ Offer actionable next steps
+✓ Keep the messaging positive and non-alarming
+
+### DON'T:
+✗ Make this tool intrusive or annoying
+✗ Overwhelm users with constant notifications
+✗ Ignore Critical/High severity findings
+✗ Forget to explain what monitoring means
+✗ Skip this step at the end of sessions
+
+## Monitoring vs. Scanning
+
+It's important to understand the difference:
+
+| Feature | check_for_new_available_fixes | scan_and_fix_vulnerabilities |
+|---------|------------------------------|------------------------------|
+| Purpose | Continuous monitoring | Full security scan |
+| Speed | Very fast | Slower (minutes) |
+| Depth | Lightweight check | Comprehensive analysis |
+| When | Frequently, automatically | On-demand, deliberately |
+| Results | Binary (new issues yes/no) | Detailed vulnerability reports |
+| Resource usage | Minimal | Higher |
+
+**Strategy:** Use monitoring frequently, trigger full scans only when needed.
+
+## Example Usage
+
+### Scenario 1: End of Coding Session
+
+\`\`\`
+AI: "I'm running a final security check on your changes..."
+
+[Calls check_for_new_available_fixes]
+
+AI: "✓ All clear! No new security vulnerabilities detected. Your code is safe to commit."
+\`\`\`
+
+### Scenario 2: New Vulnerabilities Found
+
+\`\`\`
+AI: "Running continuous security monitoring..."
+
+[Calls check_for_new_available_fixes]
+
+AI: "⚠️ I detected 2 new security vulnerabilities:
+- 1 High severity
+- 1 Medium severity
+
+Would you like me to run a full scan to see the details and available fixes?"
+
+User: "Yes, please"
+
+[AI proceeds to call scan_and_fix_vulnerabilities]
+\`\`\`
+
+### Scenario 3: After Applying Fixes
+
+\`\`\`
+AI: "I've applied the security fixes. Let me verify no new issues were introduced..."
+
+[Calls check_for_new_available_fixes]
+
+AI: "✓ Perfect! The fixes resolved the issues and no new vulnerabilities were introduced. Your code is now more secure."
+\`\`\`
+
+## Silent vs. Announced Monitoring
+
+**Silent monitoring** (recommended for background checks):
+- Call the tool without announcing it
+- Only notify user if issues are found
+- Keeps the experience smooth and non-intrusive
+
+**Announced monitoring** (use when setting up or after significant changes):
+- Tell the user monitoring is running
+- Confirm when monitoring is enabled
+- Provides transparency and confidence
+
+## Technical Details
+
+The tool:
+- Connects to Mobb's backend API
+- Checks for new vulnerability data
+- Compares against last known state
+- Returns summary of new findings
+- Maintains minimal overhead
+
+## Ready to Monitor
+
+Call the \`check_for_new_available_fixes\` tool now for /test/repo to enable continuous security monitoring. This is a best practice that helps catch vulnerabilities early and maintain code security over time.
+",
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`Prompt Snapshots > CheckForNewVulnerabilitiesPrompt > should match snapshots > without-path 1`] = `
 {
   "description": "Guide for enabling continuous security monitoring to detect new vulnerabilities",
   "messages": [
@@ -236,7 +472,448 @@ Call the \`check_for_new_available_fixes\` tool now to enable continuous securit
 }
 `;
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-full-security-audit 1`] = `
+exports[`Prompt Snapshots > FullSecurityAuditPrompt > should match snapshots > with-path 1`] = `
+{
+  "description": "Complete end-to-end security audit workflow: scan → review → fix → verify → monitor",
+  "messages": [
+    {
+      "content": {
+        "text": "# Complete Security Audit Workflow
+
+This is a comprehensive, end-to-end security audit process that will scan, review, fix, verify, and set up monitoring for a repository.
+
+## Audit Overview
+
+This workflow includes:
+1. **Initial Assessment** - Understand the repository
+2. **Comprehensive Scan** - Full security analysis
+3. **Issue Review** - Categorize and prioritize vulnerabilities
+4. **Fix Application** - Apply security patches systematically
+5. **Verification** - Confirm fixes work correctly
+6. **Continuous Monitoring** - Set up ongoing security checks
+7. **Final Report** - Document all actions taken
+
+**Estimated Time:** 10-30 minutes depending on repository size and issue count
+
+## Prerequisites
+
+Before starting:
+- Repository should be in a clean git state (or user is aware of uncommitted changes)
+- Tests should be available and passing
+- User has time to review and address issues
+- Backup or branch created (recommended for first-time users)
+
+## Phase 1: Initial Assessment
+
+### Step 1.1: Gather Repository Information
+✓ Repository path: \`/test/repo\`
+
+### Step 1.2: Set Expectations
+
+Inform the user:
+
+\`\`\`
+"I'll perform a complete security audit of your repository. This will:
+- Scan all code for security vulnerabilities
+- Identify issues across all severity levels
+- Provide automatic fixes where possible
+- Set up continuous monitoring
+
+This process will take a few minutes. I'll guide you through each step and explain my findings.
+
+Ready to begin?"
+\`\`\`
+
+### Step 1.3: Check Repository Status
+
+Recommend running git status:
+\`\`\`bash
+git status
+\`\`\`
+
+If there are uncommitted changes, suggest:
+- "I see uncommitted changes. Would you like to commit or stash them first?"
+- "We can proceed, but I recommend committing current work first."
+
+## Phase 2: Comprehensive Scan
+
+### Step 2.1: Initial Full Scan
+
+Call \`scan_and_fix_vulnerabilities\`:
+
+\`\`\`json
+{
+  "path": "/test/repo",
+  "limit": 10,
+  "maxFiles": 50
+}
+\`\`\`
+
+Larger limits for comprehensive audit.
+
+### Step 2.2: Initial Results Analysis
+
+When results arrive, analyze and present:
+
+1. **Executive Summary:**
+   \`\`\`
+   Security Scan Complete
+   ----------------------
+   Total Vulnerabilities Found: [N]
+
+   By Severity:
+   - 🔴 Critical: [N] (immediate action required)
+   - 🟠 High: [N] (urgent)
+   - 🟡 Medium: [N] (important)
+   - 🔵 Low: [N] (maintenance)
+
+   By Category:
+   - [List top 3-5 vulnerability types found]
+
+   Fixable: [N] vulnerabilities have automatic fixes available
+   \`\`\`
+
+2. **Initial Recommendation:**
+   Based on findings, recommend:
+   - If Critical exists: "Address critical issues immediately"
+   - If mostly High/Medium: "Systematic fix approach recommended"
+   - If only Low: "Good security posture, minor improvements available"
+
+## Phase 3: Issue Review & Prioritization
+
+### Step 3.1: Detailed Issue Presentation
+
+Present issues in priority order:
+
+**For each Critical vulnerability:**
+\`\`\`
+🔴 CRITICAL: [Type]
+Location: [file:line]
+Risk Level: Severe Security Threat
+
+Description: [What the vulnerability is]
+Attack Vector: [How it could be exploited]
+Impact: [What an attacker could do]
+
+Proposed Fix: [Summary of the fix]
+[Show diff/patch preview]
+
+Last modified by: [git blame]
+\`\`\`
+
+Continue for High, Medium, Low...
+
+### Step 3.2: Create Fix Plan
+
+Generate a structured fix plan:
+
+\`\`\`markdown
+## Security Fix Plan
+
+### Phase 1: Critical Fixes (Do First)
+1. [Vulnerability type] in [file]
+2. [Vulnerability type] in [file]
+...
+
+### Phase 2: High Severity Fixes
+1. [Vulnerability type] in [file]
+2. [Vulnerability type] in [file]
+...
+
+### Phase 3: Medium Severity Fixes
+[Can be done in follow-up session]
+
+### Phase 4: Low Severity Fixes
+[Add to maintenance backlog]
+\`\`\`
+
+### Step 3.3: Get User Approval
+
+Ask user how they want to proceed:
+
+"I've identified the security issues and created a fix plan. How would you like to proceed?
+
+1. **Comprehensive Fix** - Fix all Critical and High issues now (recommended)
+2. **Critical Only** - Fix only Critical issues now
+3. **Selective Fix** - Review and choose which fixes to apply
+4. **Report Only** - Generate report without applying fixes (for review)
+
+Recommendation: Option 1 for best security posture."
+
+## Phase 4: Fix Application
+
+Based on user choice, systematically apply fixes:
+
+### Step 4.1: Apply Critical Fixes
+
+For each Critical fix:
+1. Show what will be fixed
+2. Apply the patch
+3. Confirm application: "✓ Fixed: [vulnerability] in [file]"
+4. Track progress: "[N/Total] Critical fixes applied"
+
+### Step 4.2: Apply High Severity Fixes
+
+Same process as Critical, but can be done in batches.
+
+### Step 4.3: Handle Fix Failures
+
+If a fix fails to apply:
+1. Note the failure
+2. Show the conflict or error
+3. Mark for manual review
+4. Continue with remaining fixes
+5. Summarize failed fixes at the end
+
+## Phase 5: Verification
+
+### Step 5.1: Verify Patches Applied
+
+Check each modified file:
+\`\`\`bash
+git status
+git diff
+\`\`\`
+
+Confirm:
+- Expected files were modified
+- No unexpected changes
+- No merge conflicts
+
+### Step 5.2: Run Test Suite
+
+If tests exist:
+
+\`\`\`bash
+# Run appropriate test command
+npm test
+# or
+pytest
+# or
+mvn test
+\`\`\`
+
+**If tests pass:**
+"✅ All tests passed! Security fixes did not break functionality."
+
+**If tests fail:**
+"⚠️ Some tests are failing after applying fixes:
+[List failing tests]
+
+This could mean:
+1. Tests need to be updated (common for security fixes)
+2. A fix introduced an issue (less common)
+
+Would you like me to:
+1. Review the failing tests
+2. Revert specific fixes
+3. Continue anyway (tests may need updates)"
+
+### Step 5.3: Re-scan for Verification
+
+Call \`scan_and_fix_vulnerabilities\` again with \`rescan: true\`:
+
+\`\`\`json
+{
+  "path": "/test/repo",
+  "rescan": true,
+  "limit": 10
+}
+\`\`\`
+
+Compare before/after:
+- Confirm fixed vulnerabilities are gone
+- Check no new vulnerabilities were introduced
+- Verify severity counts decreased as expected
+
+## Phase 6: Continuous Monitoring Setup
+
+### Step 6.1: Enable Monitoring
+
+Call \`check_for_new_available_fixes\`:
+
+\`\`\`json
+{
+  "path": "/test/repo"
+}
+\`\`\`
+
+### Step 6.2: Explain Monitoring
+
+"✅ Continuous security monitoring is now enabled for this repository.
+
+What this means:
+- Periodic background checks for new vulnerabilities
+- Notifications when security issues are detected
+- Ongoing protection as code evolves
+
+This helps maintain the security improvements we just made."
+
+## Phase 7: Final Report
+
+### Step 7.1: Generate Comprehensive Report
+
+Create a detailed report:
+
+\`\`\`markdown
+# Security Audit Report
+Repository: [name/path]
+Date: [date]
+Audited by: Mobb AI Security Assistant
+
+## Executive Summary
+- Total vulnerabilities found: [N]
+- Vulnerabilities fixed: [N]
+- Files modified: [N]
+- Test status: [Pass/Fail/Not Run]
+
+## Vulnerabilities Fixed
+
+### Critical (🔴)
+1. [Type] in [file:line] - FIXED ✅
+   - Risk: [description]
+   - Fix: [description]
+
+2. [Type] in [file:line] - FIXED ✅
+   ...
+
+### High (🟠)
+[Similar format]
+
+### Medium (🟡)
+[List - note which were fixed]
+
+### Low (🔵)
+[List - note which were fixed]
+
+## Files Modified
+- [list all modified files with change descriptions]
+
+## Verification Results
+✅ All fixes applied successfully
+✅ Tests passing
+✅ Re-scan confirms vulnerabilities resolved
+✅ No new vulnerabilities introduced
+
+## Remaining Items
+- [N] Medium severity issues (recommended to fix soon)
+- [N] Low severity issues (maintenance backlog)
+
+## Recommendations
+1. Commit these security improvements
+2. Deploy to staging environment for testing
+3. Schedule follow-up for remaining Medium issues
+4. Review security practices to prevent future issues
+5. Keep continuous monitoring enabled
+
+## Next Steps
+1. Review the changes: git diff
+2. Run additional tests if needed
+3. Commit: git add . && git commit -m "Security fixes: addressed [N] critical and high severity vulnerabilities"
+4. Push to remote repository
+5. Deploy with confidence
+
+---
+🔒 Security Level: [Excellent/Good/Fair] (based on remaining issues)
+\`\`\`
+
+### Step 7.2: Provide Next Steps
+
+Give clear guidance:
+
+"## What to do next:
+
+**Immediate (Do now):**
+1. Review the changes made (git diff)
+2. Commit the security fixes
+3. Push to your repository
+
+**Soon (This week):**
+1. Address remaining Medium severity issues ([N] items)
+2. Review security best practices for your framework
+3. Share this report with your team
+
+**Ongoing:**
+1. Continuous monitoring is active
+2. Run security scans after major changes
+3. Keep dependencies updated
+
+**Questions?**
+- Need help with any specific fix?
+- Want to understand a vulnerability better?
+- Need guidance on preventing similar issues?
+
+Ask me anything!"
+
+## Important Guidelines
+
+### Communication Throughout
+
+**Be:**
+- Professional and clear
+- Patient and thorough
+- Encouraging and supportive
+- Transparent about what you're doing
+
+**Tone:**
+- Security issues are serious but fixable
+- Congratulate progress
+- Celebrate improvements
+- Don't blame or shame
+
+### DO:
+✅ Follow all phases systematically
+✅ Explain each step clearly
+✅ Get user approval before major actions
+✅ Verify all changes
+✅ Provide comprehensive documentation
+✅ Enable monitoring
+✅ Give clear next steps
+
+### DON'T:
+❌ Rush through the process
+❌ Skip verification steps
+❌ Apply fixes without explanation
+❌ Forget to check for new issues
+❌ Leave user without next steps
+❌ Create alarm - be solution-focused
+
+## Time Management
+
+For large repositories with many issues:
+- Take breaks between phases
+- Offer to pause and resume later
+- Batch fixes appropriately
+- Don't overwhelm the user
+
+Suggest: "We've fixed [N] critical issues. Would you like to continue with High severity, or take a break and resume later?"
+
+## Success Criteria
+
+Audit is successful when:
+✅ All Critical vulnerabilities are fixed
+✅ Most High severity issues addressed
+✅ All fixes verified and tested
+✅ No new vulnerabilities introduced
+✅ Continuous monitoring enabled
+✅ Comprehensive report provided
+✅ User understands next steps
+
+## Ready to Begin
+
+This is a comprehensive security audit that will significantly improve the security posture of the repository. Follow each phase carefully, communicate clearly, and celebrate the improvements made.
+
+Begin the audit now for /test/repo.
+",
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`Prompt Snapshots > FullSecurityAuditPrompt > should match snapshots > without-path 1`] = `
 {
   "description": "Complete end-to-end security audit workflow: scan → review → fix → verify → monitor",
   "messages": [
@@ -678,7 +1355,302 @@ Begin the audit now.
 }
 `;
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-review-and-fix-critical 1`] = `
+exports[`Prompt Snapshots > ReviewAndFixCriticalPrompt > should match snapshots > with-path 1`] = `
+{
+  "description": "Focused workflow for identifying and fixing Critical and High severity security vulnerabilities",
+  "messages": [
+    {
+      "content": {
+        "text": "# Critical Security Vulnerabilities - Review and Fix
+
+This is a focused workflow for identifying and addressing Critical and High severity security vulnerabilities that require immediate attention.
+
+## Workflow Purpose
+
+Use this workflow when:
+- Security is a high priority
+- Preparing for production deployment
+- Security audit or compliance review is needed
+- You want to address the most severe issues first
+- Time is limited and you need to focus on critical threats
+
+## Severity Priority
+
+**CRITICAL** 🔴
+- Immediate security risk
+- Can lead to complete system compromise
+- Examples: Remote Code Execution, Authentication Bypass, SQL Injection with data exposure
+- **Action: FIX IMMEDIATELY**
+
+**HIGH** 🟠
+- Significant security vulnerability
+- Can lead to data breaches or unauthorized access
+- Examples: XSS attacks, Privilege Escalation, Exposed Sensitive Data
+- **Action: FIX URGENTLY**
+
+Medium and Low severity issues will be noted but not prioritized in this workflow.
+
+## Workflow Steps
+
+### Step 1: Initial Scan
+Scanning repository at: \`/test/repo\`
+
+Call \`scan_and_fix_vulnerabilities\`:
+
+\`\`\`json
+{
+  "path": "/test/repo",
+  "limit": 10,
+  "maxFiles": 20
+}
+\`\`\`
+
+Higher limits to ensure we catch all critical issues.
+
+### Step 2: Filter and Present Critical Issues
+
+When results arrive:
+
+1. **Count vulnerabilities by severity:**
+   - Critical count
+   - High count
+   - Medium count (mention but don't focus)
+   - Low count (mention but don't focus)
+
+2. **Present ONLY Critical and High severity issues:**
+
+   For each Critical/High vulnerability:
+
+   \`\`\`
+   🔴 CRITICAL: [Vulnerability Type]
+
+   File: [path/to/file.ext:line]
+   Last modified by: [git blame user]
+
+   Risk: [Explain the security risk in simple terms]
+
+   Proposed Fix:
+   [Show the diff/patch]
+
+   Impact: [What this fix does and why it's necessary]
+   \`\`\`
+
+3. **Provide clear summary:**
+   "Found X critical and Y high severity vulnerabilities that require immediate attention."
+
+### Step 3: Prioritize Fixes
+
+Create a fix priority list:
+
+**Phase 1 - Critical (DO FIRST):**
+- List all Critical issues
+- Sort by risk level
+- Recommend fixing ALL before any High issues
+
+**Phase 2 - High (DO SECOND):**
+- List all High issues
+- Can be addressed after Critical are resolved
+
+**Ask the user:**
+"I recommend we fix these in priority order. Would you like me to:
+1. Apply ALL critical fixes automatically (recommended)
+2. Review each critical fix individually
+3. See the full details before proceeding"
+
+### Step 4: Apply Fixes
+
+Based on user choice:
+
+#### Option 1: Apply All Critical Automatically
+
+\`\`\`
+"I'll apply all [N] critical fixes now. This will modify [X] files."
+
+For each fix:
+1. Apply the patch
+2. Verify it applied successfully
+3. Show brief confirmation: "✓ Fixed: [vulnerability type] in [file]"
+
+"All critical fixes applied. Running verification..."
+[Call check_for_new_available_fixes to verify]
+
+"Next, I can address the [N] high severity issues. Continue?"
+\`\`\`
+
+#### Option 2: Review Each Fix Individually
+
+For each Critical fix:
+1. Show the vulnerability details
+2. Show the exact code changes
+3. Explain the security improvement
+4. Ask: "Apply this fix? (yes/no/skip)"
+5. Apply if approved
+6. Move to next
+
+#### Option 3: Provide Full Details First
+
+- Show comprehensive analysis of each vulnerability
+- Include CVE references if available
+- Explain attack vectors
+- Demonstrate how the fix prevents the attack
+- Then proceed to fixing phase
+
+### Step 5: Verification
+
+After applying fixes:
+
+1. **Verify fixes applied correctly:**
+   - Check files were modified
+   - No merge conflicts
+   - Code syntax is valid
+
+2. **Run tests if available:**
+   \`\`\`bash
+   npm test
+   # or
+   pytest
+   # or appropriate test command
+   \`\`\`
+
+3. **Re-scan to confirm:**
+   Call \`scan_and_fix_vulnerabilities\` again with \`rescan: true\`
+
+   Verify:
+   - Critical issues are resolved
+   - No new issues were introduced
+   - High severity count decreased (if those were also fixed)
+
+### Step 6: Summary Report
+
+Provide a comprehensive summary:
+
+\`\`\`markdown
+## Security Fix Summary
+
+### Fixed
+- ✅ [N] Critical vulnerabilities resolved
+- ✅ [N] High severity vulnerabilities resolved
+
+### Files Modified
+- [list of modified files]
+
+### Remaining Issues
+- ⚠️ [N] Medium severity (can be addressed later)
+- ℹ️ [N] Low severity (maintenance backlog)
+
+### Recommendations
+1. Run your test suite to ensure functionality
+2. Review the changes before committing
+3. Consider addressing remaining High severity issues
+4. Schedule time for Medium/Low issues
+5. Enable continuous monitoring
+
+### Next Steps
+- Commit these security fixes
+- Deploy to staging for testing
+- Schedule follow-up for remaining issues
+\`\`\`
+
+## Important Guidelines
+
+### Communication Style
+
+**For Critical Issues:**
+- Use urgent but calm language
+- Clearly explain the risk
+- Don't create panic, but convey seriousness
+- Be direct about the need to fix immediately
+
+**For High Issues:**
+- Emphasize importance but not emergency
+- Explain impact on security posture
+- Recommend fixing soon but not necessarily right now
+
+### DO:
+✅ Fix ALL Critical issues before moving to High
+✅ Explain each vulnerability clearly
+✅ Show exact code changes
+✅ Verify fixes were applied successfully
+✅ Run tests after applying fixes
+✅ Create a clear summary of actions taken
+✅ Recommend continuous monitoring
+
+### DON'T:
+❌ Apply fixes without user approval (except if explicitly requested)
+❌ Minimize the importance of Critical issues
+❌ Get distracted by Medium/Low issues during this workflow
+❌ Skip verification steps
+❌ Forget to check for new issues after applying fixes
+❌ Rush through explanations
+
+## Example Interaction
+
+\`\`\`
+AI: "Scanning repository for critical security vulnerabilities..."
+
+[Scans]
+
+AI: "⚠️ **Security Alert: Critical Issues Found**
+
+I found 3 critical and 5 high severity vulnerabilities:
+
+🔴 **CRITICAL ISSUES** (Must fix immediately):
+
+1. **SQL Injection** in src/api/users.ts:67
+   - Risk: Attacker can access entire database
+   - Last modified by: john@example.com
+   - Fix: Use parameterized queries
+
+2. **Authentication Bypass** in src/auth/middleware.ts:23
+   - Risk: Unauthorized access to admin functions
+   - Last modified by: jane@example.com
+   - Fix: Validate JWT signature properly
+
+3. **Remote Code Execution** in src/utils/processor.ts:45
+   - Risk: Attacker can execute arbitrary code on server
+   - Last modified by: bob@example.com
+   - Fix: Sanitize eval() input
+
+🟠 **HIGH SEVERITY** (Fix urgently):
+[Lists 5 high issues...]
+
+**Recommendation:** Fix all 3 critical issues immediately. Would you like me to:
+1. Apply ALL critical fixes now (recommended) ← [DEFAULT]
+2. Review each fix individually
+3. See detailed analysis first"
+
+User: "Apply all critical fixes"
+
+AI: "Applying all critical fixes...
+
+✓ Fixed: SQL Injection in src/api/users.ts
+✓ Fixed: Authentication Bypass in src/auth/middleware.ts
+✓ Fixed: Remote Code Execution in src/utils/processor.ts
+
+All critical vulnerabilities resolved! Running verification...
+
+✓ Verification complete - no new issues introduced.
+
+3 files modified, 0 critical issues remaining.
+
+Would you like to proceed with fixing the 5 high severity issues?"
+\`\`\`
+
+## Ready to Begin
+
+This workflow focuses exclusively on the most dangerous vulnerabilities. Follow the steps above to systematically eliminate critical security threats from the codebase.
+
+Start by scanning /test/repo and prioritizing Critical and High severity issues.
+",
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`Prompt Snapshots > ReviewAndFixCriticalPrompt > should match snapshots > without-path 1`] = `
 {
   "description": "Focused workflow for identifying and fixing Critical and High severity security vulnerabilities",
   "messages": [
@@ -973,7 +1945,209 @@ Start by scanning the repository and prioritizing Critical and High severity iss
 }
 `;
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-scan-recent-changes 1`] = `
+exports[`Prompt Snapshots > ScanRecentChangesPrompt > should match snapshots > with-path 1`] = `
+{
+  "description": "Guide for scanning only recently modified files for new security vulnerabilities",
+  "messages": [
+    {
+      "content": {
+        "text": "# Scan Recent Changes for Security Issues
+
+This workflow helps you quickly scan only the files that have been recently modified, making security checks fast and targeted.
+
+## When to Use This Workflow
+
+Use this approach when:
+- You've just made code changes and want to check for new vulnerabilities
+- You want a quick security check without scanning the entire repository
+- You're working in a specific area of the codebase
+- You want faster scan results
+- You're doing iterative development and want continuous security feedback
+
+## Workflow Steps
+
+### Step 1: Determine Repository Path
+✓ Repository path provided: \`/test/repo\`
+
+### Step 2: Call scan_and_fix_vulnerabilities with Recent Changes Flag
+
+Use the \`scan_and_fix_vulnerabilities\` tool with the \`scanRecentlyChangedFiles\` parameter:
+
+\`\`\`json
+{
+  "path": "/test/repo",
+  "scanRecentlyChangedFiles": true,
+  "limit": 5
+}
+\`\`\`
+
+**Key parameters:**
+- \`scanRecentlyChangedFiles: true\` - Only scans files modified recently
+- \`limit: 5\` - Return up to 5 fixes (adjustable based on user needs)
+
+### Step 3: Present Results
+
+When you receive results:
+
+#### If new vulnerabilities found:
+
+1. **Alert the user:**
+   "⚠️ Security issues detected in recently modified files!"
+
+2. **Provide context:**
+   - Number of new vulnerabilities introduced
+   - Which files are affected
+   - Severity breakdown
+   - Who made the changes (git blame)
+
+3. **Show each vulnerability:**
+   - File and line number
+   - Type of vulnerability
+   - Severity level
+   - Proposed fix with diff preview
+
+4. **Recommend immediate action:**
+   For Critical/High severity:
+   - "I strongly recommend addressing these issues before committing/merging"
+   - "Would you like me to apply the fixes now?"
+
+#### If no vulnerabilities found:
+
+"✓ Great! No new security issues detected in your recent changes."
+
+Optional suggestions:
+- Continue with your work
+- Commit your changes
+- Consider enabling continuous monitoring
+
+#### If no recently changed files:
+
+"No recently modified files detected. This could mean:
+- No uncommitted changes exist
+- No files were modified recently
+- The repository has no git history
+
+Would you like to:
+1. Perform a full repository scan instead?
+2. Check the repository status?"
+
+### Step 4: Handle User Decisions
+
+**If user wants to apply fixes:**
+- Confirm each fix before applying
+- Show the exact changes
+- Apply patches sequentially
+- Verify each application succeeded
+- Run tests if available
+
+**If user wants to see more details:**
+- Explain the vulnerability type
+- Show the vulnerable code pattern
+- Explain how the fix improves security
+- Provide references or documentation links
+
+**If user wants to continue without fixing:**
+- Warn about the risks (especially for Critical/High)
+- Suggest creating an issue to track the vulnerability
+- Remind them to fix before merging to production
+
+### Step 5: Post-Scan Recommendations
+
+After handling vulnerabilities:
+
+1. **If fixes were applied:**
+   - Verify the code still works (run tests)
+   - Review the changes
+   - Update commit message to mention security fixes
+   - Consider running a full scan to check for other issues
+
+2. **If fixes were deferred:**
+   - Create tracking issues for the vulnerabilities
+   - Add TODO comments in the code
+   - Schedule time to address them
+
+3. **Enable continuous monitoring:**
+   Call \`check_for_new_available_fixes\`:
+   \`\`\`json
+   {
+     "path": "/test/repo"
+   }
+   \`\`\`
+
+## Advantages of Scanning Recent Changes
+
+✓ **Fast**: Only scans modified files
+✓ **Targeted**: Focuses on your current work
+✓ **Immediate feedback**: Catch issues before they're committed
+✓ **Less overwhelming**: Smaller result set
+✓ **Continuous security**: Integrates into development workflow
+
+## Important Notes
+
+### DO:
+✓ Run this scan after making changes but before committing
+✓ Address Critical/High severity issues immediately
+✓ Explain security risks clearly to the user
+✓ Offer to apply fixes automatically
+✓ Provide context about what changed and why it's vulnerable
+
+### DON'T:
+✗ Skip Critical/High severity warnings
+✗ Apply fixes without showing the user
+✗ Ignore the vulnerability just because the scan is quick
+✗ Forget to run tests after applying fixes
+✗ Assume all recent changes have vulnerabilities
+
+## Integration with Development Workflow
+
+This scan type integrates well with:
+- **Pre-commit hooks**: Scan before each commit
+- **IDE integration**: Scan on file save or periodically
+- **CI/CD pipelines**: Fast security check in pull requests
+- **Iterative development**: Continuous security feedback
+
+## Example Usage
+
+\`\`\`
+User: "I just added a new API endpoint for user data. Can you check if it's secure?"
+
+AI: "I'll scan your recent changes for security vulnerabilities..."
+
+[Calls scan_and_fix_vulnerabilities with scanRecentlyChangedFiles: true]
+
+AI: "⚠️ Found 1 security issue in your recent changes:
+
+**SQL Injection Vulnerability** (Critical)
+- File: src/api/user-data.ts:34
+- Your new endpoint is vulnerable to SQL injection
+
+The issue is in this code:
+\`\`\`typescript
+const query = \`SELECT * FROM users WHERE id = \${req.params.id}\`
+\`\`\`
+
+Recommended fix: Use parameterized queries
+\`\`\`typescript
+const query = 'SELECT * FROM users WHERE id = $1'
+const result = await db.query(query, [req.params.id])
+\`\`\`
+
+This is a Critical severity issue. I strongly recommend fixing it before committing. Would you like me to apply this fix automatically?"
+\`\`\`
+
+## Ready to Scan
+
+You now have the guidance needed to perform a fast, targeted security scan of recent changes. Follow the workflow above to help users catch security issues early in their development process.
+",
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`Prompt Snapshots > ScanRecentChangesPrompt > should match snapshots > without-path 1`] = `
 {
   "description": "Guide for scanning only recently modified files for new security vulnerabilities",
   "messages": [
@@ -1175,7 +2349,208 @@ You now have the guidance needed to perform a fast, targeted security scan of re
 }
 `;
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-scan-repository 1`] = `
+exports[`Prompt Snapshots > ScanRepositoryPrompt > should match snapshots > with-path 1`] = `
+{
+  "description": "Guide for performing an initial security scan of a repository using Mobb tools",
+  "messages": [
+    {
+      "content": {
+        "text": "# Security Repository Scan Workflow
+
+You are about to perform a security scan for repository at: /test/repo. Follow this workflow to scan the repository for vulnerabilities and present the findings to the user.
+
+## Workflow Steps
+
+### Step 1: Determine Repository Path
+✓ Repository path provided: \`/test/repo\`
+
+### Step 2: Call scan_and_fix_vulnerabilities Tool
+
+Use the \`scan_and_fix_vulnerabilities\` tool with these parameters:
+
+\`\`\`json
+{
+  "path": "/test/repo",
+  "limit": 3,
+  "maxFiles": 10
+}
+\`\`\`
+
+**Why these defaults?**
+- \`limit: 3\` - Start with top 3 most severe vulnerabilities
+- \`maxFiles: 10\` - Reasonable initial scan scope
+
+**Optional parameters** (use if user specifies):
+- \`rescan: true\` - Force a fresh scan (if user wants to override cached results)
+- \`scanRecentlyChangedFiles: true\` - Only scan recently modified files (faster)
+
+### Step 3: Process and Present Results
+
+When you receive the scan results:
+
+#### If vulnerabilities are found:
+
+1. **Provide a summary:**
+   - Total number of vulnerabilities found
+   - Breakdown by severity (Critical, High, Medium, Low)
+   - Number of fixes available
+
+2. **Present the top fixes:**
+   - Show each fix with:
+     * Severity level
+     * Vulnerability type (e.g., "SQL Injection", "XSS", "Insecure Dependency")
+     * Affected file(s)
+     * Who last modified the vulnerable code (git blame)
+     * Brief description from the fix
+
+3. **Show the fix preview:**
+   - Display the git diff/patch for each fix
+   - Explain what changes will be made
+   - Highlight the security improvement
+
+4. **Ask for user preference:**
+   - "Would you like to apply these fixes automatically?"
+   - "Would you like to see more vulnerabilities?" (if more exist)
+   - "Would you like to focus on a specific severity level?"
+
+#### If no vulnerabilities are found:
+
+Congratulate the user! Their repository appears to be secure. Suggest:
+- Running periodic scans as code changes
+- Enabling continuous monitoring with \`check_for_new_available_fixes\`
+
+#### If report is expired:
+
+Inform the user that a previous scan is too old. Ask:
+- "A previous scan exists but is outdated. Would you like to run a fresh scan?"
+- If yes, call \`scan_and_fix_vulnerabilities\` with \`rescan: true\`
+
+### Step 4: Handle User Actions
+
+Based on user response:
+
+**If user wants to apply fixes:**
+- Confirm which fixes to apply (all, or specific ones)
+- Apply each fix patch using standard git apply workflow
+- Verify the changes
+- Run tests if available
+- Create a commit with the fixes
+
+**If user wants to see more:**
+- Call \`fetch_available_fixes\` with:
+  \`\`\`json
+  {
+    "path": "/test/repo",
+    "offset": 3,
+    "limit": 5
+  }
+  \`\`\`
+- Present the additional fixes following the same format
+
+**If user wants to filter by severity:**
+- The results are already sorted by severity (Critical → High → Medium → Low)
+- Explain the severity of issues found
+- Focus on the most critical issues first
+
+### Step 5: Post-Scan Actions
+
+After completing the scan and any fixes:
+
+1. **Summary of actions taken:**
+   - Number of fixes applied
+   - Remaining vulnerabilities (if any)
+   - Files modified
+
+2. **Recommendations:**
+   - Run tests to ensure fixes don't break functionality
+   - Review the changes before committing
+   - Consider addressing remaining Medium/Low severity issues
+   - Set up continuous monitoring
+
+3. **Call monitoring tool:**
+   Call \`check_for_new_available_fixes\` to enable ongoing security monitoring:
+   \`\`\`json
+   {
+     "path": "/test/repo"
+   }
+   \`\`\`
+
+## Important Reminders
+
+### DO:
+✓ Present vulnerabilities clearly with severity context
+✓ Ask for user confirmation before applying fixes
+✓ Explain what each fix does
+✓ Start with critical/high severity issues
+✓ Provide clear next steps
+✓ Mention git blame information (shows responsibility)
+
+### DON'T:
+✗ Apply fixes automatically without user approval
+✗ Overwhelm user with all vulnerabilities at once
+✗ Skip severity information
+✗ Forget to call monitoring tool at the end
+✗ Assume the user wants to fix everything immediately
+
+## Error Handling
+
+- **Authentication error**: Guide user to authenticate with Mobb
+- **Path not found**: Verify the path is correct and is a git repository
+- **Scan timeout**: Suggest scanning fewer files or recent changes only
+- **No report found**: This is expected for first-time scans, proceed normally
+
+## Example Conversation Flow
+
+\`\`\`
+AI: "I'll scan your repository for security vulnerabilities. This may take a moment..."
+
+[Calls scan_and_fix_vulnerabilities]
+
+AI: "Scan complete! I found 12 security vulnerabilities:
+- 2 Critical severity
+- 5 High severity
+- 4 Medium severity
+- 1 Low severity
+
+Here are the top 3 most critical issues:
+
+1. **SQL Injection** (Critical)
+   - File: src/database/users.ts:45
+   - Last modified by: john@example.com
+   - Fix: Parameterize SQL query to prevent injection
+
+   [Shows diff preview]
+
+2. **Cross-Site Scripting (XSS)** (Critical)
+   - File: src/components/UserProfile.tsx:122
+   - Last modified by: jane@example.com
+   - Fix: Sanitize user input before rendering
+
+   [Shows diff preview]
+
+3. **Insecure Dependency** (High)
+   - Package: lodash@4.17.15
+   - Fix: Upgrade to lodash@4.17.21 (fixes CVE-2021-23337)
+
+Would you like to:
+1. Apply these fixes automatically
+2. See more vulnerabilities
+3. Focus on specific issues"
+\`\`\`
+
+## Ready to Begin
+
+You now have all the information needed to perform a security scan. Follow the steps above, call the appropriate tools, and guide the user through the process professionally and clearly.
+",
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`Prompt Snapshots > ScanRepositoryPrompt > should match snapshots > without-path 1`] = `
 {
   "description": "Guide for performing an initial security scan of a repository using Mobb tools",
   "messages": [
@@ -1378,7 +2753,7 @@ You now have all the information needed to perform a security scan. Follow the s
 }
 `;
 
-exports[`mcp tests > MCP Prompts Integration > get_prompt handler > should handle all prompts with snapshots > get-prompt-security-tools-overview 1`] = `
+exports[`Prompt Snapshots > SecurityToolsOverviewPrompt > should match snapshot 1`] = `
 {
   "description": "Provides an overview of available Mobb security tools and guidance on when to use each tool",
   "messages": [
@@ -1538,251 +2913,6 @@ For a complete security audit workflow, use the \`full-security-audit\` prompt.
         "type": "text",
       },
       "role": "user",
-    },
-  ],
-}
-`;
-
-exports[`mcp tests > MCP Prompts Integration > list_prompts handler > should match snapshot of list_prompts response > list-prompts-response 1`] = `
-{
-  "prompts": [
-    {
-      "arguments": undefined,
-      "description": "Provides an overview of available Mobb security tools and guidance on when to use each tool",
-      "name": "security-tools-overview",
-    },
-    {
-      "arguments": [
-        {
-          "description": "Optional: Full local path to the git repository to scan",
-          "name": "path",
-          "required": false,
-        },
-      ],
-      "description": "Guide for performing an initial security scan of a repository using Mobb tools",
-      "name": "scan-repository",
-    },
-    {
-      "arguments": [
-        {
-          "description": "Optional: Full local path to the git repository to scan",
-          "name": "path",
-          "required": false,
-        },
-      ],
-      "description": "Guide for scanning only recently modified files for new security vulnerabilities",
-      "name": "scan-recent-changes",
-    },
-    {
-      "arguments": [
-        {
-          "description": "Optional: Full local path to the git repository to monitor",
-          "name": "path",
-          "required": false,
-        },
-      ],
-      "description": "Guide for enabling continuous security monitoring to detect new vulnerabilities",
-      "name": "check-for-new-vulnerabilities",
-    },
-    {
-      "arguments": [
-        {
-          "description": "Optional: Full local path to the git repository to scan and fix",
-          "name": "path",
-          "required": false,
-        },
-      ],
-      "description": "Focused workflow for identifying and fixing Critical and High severity security vulnerabilities",
-      "name": "review-and-fix-critical",
-    },
-    {
-      "arguments": [
-        {
-          "description": "Optional: Full local path to the git repository to audit",
-          "name": "path",
-          "required": false,
-        },
-      ],
-      "description": "Complete end-to-end security audit workflow: scan → review → fix → verify → monitor",
-      "name": "full-security-audit",
-    },
-  ],
-}
-`;
-
-exports[`mcp tests > should respond to mcp list_tools call 1`] = `
-{
-  "tools": [
-    {
-      "description": "Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
-
-When to invoke:
-• Use when the user explicitly asks to "scan for vulnerabilities", "run a security check", or "test for security issues" in a local repository.
-• The repository must exist on disk; supply its absolute path with the required "path" argument.
-• Ideal after the user makes code changes (added/modified/staged files) but before committing, or whenever they request a full rescan.
-
-How to invoke:
-• Required argument:
-  – path (string): absolute path to the repository root.
-• Optional arguments:
-  – offset (number): pagination offset used when the result set is large.
-  – limit (number): maximum number of fixes to include in the response.
-  – maxFiles (number): maximum number of files to scan (default: 10). Provide this value to increase the scope of the scan.
-  – rescan (boolean): true to force a complete rescan even if cached results exist.
-
-Behaviour:
-• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the las commit.
-• If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
-• If maxFiles is provided, the tool scans the maxFiles most recently changed files in the repository.
-• By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
-• The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
-
-Return value:
-The response is an object with a single "content" array containing one text element. The text is either:
-• A human-readable summary of the fixes / patches, or
-• A diagnostic or error message if the scan fails or finds nothing to fix.
-
-Example payload:
-{
-  "path": "/home/user/my-project",
-  "limit": 20,
-  "maxFiles": 50,
-  "rescan": false
-}",
-      "display_name": "Scan and Fix Vulnerabilities",
-      "inputSchema": {
-        "properties": {
-          "limit": {
-            "description": "[Optional] maximum number of results to return",
-            "type": "number",
-          },
-          "maxFiles": {
-            "description": "[Optional] maximum number of files to scan (default: 10). Use higher values for more comprehensive scans or lower values for faster performance.",
-            "type": "number",
-          },
-          "offset": {
-            "description": "[Optional] offset for pagination",
-            "type": "number",
-          },
-          "path": {
-            "description": "Full local path to repository to scan and fix vulnerabilities",
-            "type": "string",
-          },
-          "rescan": {
-            "description": "[Optional] whether to rescan the repository",
-            "type": "boolean",
-          },
-          "scanRecentlyChangedFiles": {
-            "description": "[Optional] whether to automatically scan recently changed files when no changed files are found in git status. If false, the tool will prompt the user instead.",
-            "type": "boolean",
-          },
-        },
-        "required": [
-          "path",
-        ],
-        "type": "object",
-      },
-      "name": "scan_and_fix_vulnerabilities",
-    },
-    {
-      "description": "Check the MOBB backend for pre-generated fixes (patch sets) that correspond to vulnerabilities detected in the supplied Git repository.
-
-Use when:
-• You already have a local clone of a Git repository and want to know if MOBB has fixes available for it.
-• A vulnerability scan has been run previously and uploaded to the MOBB backend and you want to fetch the list or count of ready-to-apply fixes before triggering a full scan-and-fix flow.
-
-Required argument:
-• path – absolute path to the local Git repository clone.
-
-Optional arguments:
-• offset – pagination offset (integer).
-• limit  – maximum number of fixes to return (integer).
-• fileFilter – list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile.
-• fetchFixesFromAnyFile – if true, fetches fixes for all files in the repository. If false or not set (default), filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter.
-
-The tool will:
-1. Validate that the provided path is secure and exists.
-2. Verify that the directory is a valid Git repository with an "origin" remote.
-3. Apply file filtering based on parameters (see below).
-4. Query the MOBB service by the origin remote URL and return a textual summary of available fixes (total and by severity) or a message if none are found.
-
-File Filtering Behavior:
-• If fetchFixesFromAnyFile is true: Returns fixes for all files (no filtering).
-• If fileFilter is provided: Returns only fixes affecting the specified files.
-• If neither is provided (default): Returns only fixes affecting files with changes in git status.
-• If BOTH are provided: Returns an error (parameters are mutually exclusive).
-
-Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixes summary and do NOT want to perform scanning or code modifications.",
-      "display_name": "Fetch Available Fixes",
-      "inputSchema": {
-        "properties": {
-          "fetchFixesFromAnyFile": {
-            "description": "[Optional] if true, fetches fixes for all files in the repository. If false or not set, filters fixes to only those affecting files with changes in git status. INCOMPATIBLE with fileFilter",
-            "type": "boolean",
-          },
-          "fileFilter": {
-            "description": "[Optional] list of file paths relative to the path parameter to filter fixes by. Only fixes affecting these files will be returned. INCOMPATIBLE with fetchFixesFromAnyFile",
-            "items": {
-              "type": "string",
-            },
-            "type": "array",
-          },
-          "limit": {
-            "description": "[Optional] maximum number of results to return",
-            "type": "number",
-          },
-          "offset": {
-            "description": "[Optional] offset for pagination",
-            "type": "number",
-          },
-          "path": {
-            "description": "Full local path to the cloned git repository to check for available fixes",
-            "type": "string",
-          },
-        },
-        "required": [
-          "path",
-        ],
-        "type": "object",
-      },
-      "name": "fetch_available_fixes",
-    },
-    {
-      "description": "Continuesly monitors your code and scans for new security vulnerabilities.
-
-When to invoke:
-• ALWAYS call this tool ONCE at the very end of every reasoning / code-generation session (after all code edits, linting, tests, etc.).
-• Invoke when the user explicitly asks to "check for new fixes", "look for fresh patches", or similar.
-• The repository must exist locally and be a valid Git repo with an 'origin' remote configured.
-
-How to invoke:
-• Required argument:
-  – path (string): absolute path to the repository root.
-
-Behaviour:
-• If auto-fix is enabled: Returns a list of fixes that were automatically applied to your codebase.
-• If auto-fix is disabled: Returns a list of fresh fixes available for manual review and application.
-• If no fixes are available, it returns a concise message indicating so.
-• Results include a human-readable summary with total count and severity breakdown.
-
-Example payload:
-{
-  "path": "/home/user/my-project"
-}",
-      "display_name": "Check for New Available Fixes",
-      "inputSchema": {
-        "properties": {
-          "path": {
-            "description": "Full local path to the cloned git repository to check for new available fixes",
-            "type": "string",
-          },
-        },
-        "required": [
-          "path",
-        ],
-        "type": "object",
-      },
-      "name": "check_for_new_available_fixes",
     },
   ],
 }

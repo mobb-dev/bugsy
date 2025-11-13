@@ -136,13 +136,42 @@ export function getGithubSdk(
       const { username, repoUrl } = params
       try {
         const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
-        const res = await octokit.rest.repos.checkCollaborator({
-          owner,
-          repo,
-          username,
-        })
-        if (res.status === 204) {
-          return true
+
+        // First try to check if user is a direct collaborator
+        try {
+          const res = await octokit.rest.repos.checkCollaborator({
+            owner,
+            repo,
+            username,
+          })
+          if (res.status === 204) {
+            return true
+          }
+        } catch (collaboratorError) {
+          // If not a direct collaborator, check if user has any permission level
+          try {
+            const permissionRes =
+              await octokit.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username,
+              })
+            // If we can get permission level, user has some access
+            // Permission can be: admin, write, read, none
+            if (permissionRes.data.permission !== 'none') {
+              return true
+            }
+          } catch (permissionError) {
+            // If permission check fails, try to get repository to verify token has access
+            try {
+              await octokit.rest.repos.get({ owner, repo })
+              // If we can read the repository, assume the user has access
+              return true
+            } catch (repoError) {
+              // Cannot access repository at all
+              return false
+            }
+          }
         }
       } catch (e) {
         return false
@@ -223,6 +252,9 @@ export function getGithubSdk(
       const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
       const repos = await octokit.rest.repos.get({ repo, owner })
       return repos.data.default_branch
+    },
+    async getRepository({ owner, repo }: { owner: string; repo: string }) {
+      return octokit.rest.repos.get({ repo, owner })
     },
     async getGithubReferenceData({
       ref,
@@ -565,11 +597,13 @@ export function getGithubSdk(
       repo: string
       pull_number: number
     }) {
-      return octokit.rest.pulls.listCommits({
+      // Use paginate to fetch all commits (default per_page is 30)
+      const data = await octokit.paginate(octokit.rest.pulls.listCommits, {
         owner: params.owner,
         repo: params.repo,
         pull_number: params.pull_number,
       })
+      return { data }
     },
     async getUserRepos() {
       return octokit.rest.repos.listForAuthenticatedUser({
@@ -594,12 +628,13 @@ export function getGithubSdk(
       repo: string
       pull_number: number
     }) {
-      return octokit.rest.pulls.listFiles({
+      // Use paginate to fetch all files (handles PRs with >100 files)
+      const data = await octokit.paginate(octokit.rest.pulls.listFiles, {
         owner: params.owner,
         repo: params.repo,
         pull_number: params.pull_number,
-        per_page: 100,
       })
+      return { data }
     },
   }
 }

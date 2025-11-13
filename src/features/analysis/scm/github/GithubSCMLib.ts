@@ -365,10 +365,59 @@ export class GithubSCMLib extends SCMLib {
       commitSha,
     })
 
-    // Parse the commit timestamp
+    // Parse the commit timestamp (always in UTC from GitHub API)
     const commitTimestamp = commit.commit.committer?.date
       ? new Date(commit.commit.committer.date)
       : new Date(commit.commit.author?.date || Date.now())
+
+    // Fetch parent commit timestamps
+    let parentCommits: { sha: string; timestamp: Date }[] | undefined
+    if (commit.parents && commit.parents.length > 0) {
+      try {
+        parentCommits = await Promise.all(
+          commit.parents.map(async (parent) => {
+            const parentCommit = await this.githubSdk.getCommit({
+              owner,
+              repo,
+              commitSha: parent.sha,
+            })
+            const parentTimestamp = parentCommit.data.committer?.date
+              ? new Date(parentCommit.data.committer.date)
+              : new Date(Date.now())
+            return {
+              sha: parent.sha,
+              timestamp: parentTimestamp,
+            }
+          })
+        )
+      } catch (error) {
+        // Log error but don't fail - we'll fall back to default lookback window
+        console.error('Failed to fetch parent commit timestamps', {
+          error,
+          commitSha,
+          owner,
+          repo,
+        })
+        parentCommits = undefined
+      }
+    }
+
+    // Fetch repository creation date for initial commits
+    let repositoryCreatedAt: Date | undefined
+    try {
+      const repoData = await this.githubSdk.getRepository({ owner, repo })
+      repositoryCreatedAt = repoData.data.created_at
+        ? new Date(repoData.data.created_at)
+        : undefined
+    } catch (error) {
+      // Log error but don't fail - we'll fall back to default lookback window
+      console.error('Failed to fetch repository creation date', {
+        error,
+        owner,
+        repo,
+      })
+      repositoryCreatedAt = undefined
+    }
 
     return {
       diff,
@@ -377,6 +426,8 @@ export class GithubSCMLib extends SCMLib {
       authorName: commit.commit.author?.name,
       authorEmail: commit.commit.author?.email,
       message: commit.commit.message,
+      parentCommits,
+      repositoryCreatedAt,
     }
   }
 

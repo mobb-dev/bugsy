@@ -48,7 +48,7 @@ describe('bitbucket sdk function', async () => {
       username: authUsername,
     })
     const res = await bitbucketSdk.getUser()
-    expect(res.username).toMatchInlineSnapshot(`"mobbcitest-admin"`)
+    expect(res['username']).toMatchInlineSnapshot(`"mobbcitest-admin"`)
   })
   it('should get ref by BRANCH', async () => {
     const bitbucketSdk = getBitbucketSdk({

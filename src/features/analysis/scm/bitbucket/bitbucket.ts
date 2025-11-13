@@ -176,7 +176,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return repoRes.map((repo) => ({
         repoIsPublic: !repo.is_private,
         repoName: repo.name || 'unknown repo name',
-        repoOwner: repo.owner?.username || 'unknown owner',
+        repoOwner: (repo.owner?.['username'] || 'unknown owner') as string,
         repoLanguages: repo.language ? [repo.language] : [],
         repoUpdatedAt: repo.updated_on
           ? repo.updated_on

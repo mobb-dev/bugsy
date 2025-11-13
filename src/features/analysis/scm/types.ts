@@ -35,6 +35,11 @@ export type GetCommitDiffResult = {
   authorName?: string
   authorEmail?: string
   message?: string
+  parentCommits?: {
+    sha: string
+    timestamp: Date
+  }[]
+  repositoryCreatedAt?: Date
 }
 
 export type DiffLineAttribution = {

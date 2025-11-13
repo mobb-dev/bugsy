@@ -2,6 +2,12 @@
 import { packageJson } from '../utils'
 import { McpServer } from './core/McpServer'
 import { logDebug, logError, logInfo } from './Logger'
+import { CheckForNewVulnerabilitiesPrompt } from './prompts/CheckForNewVulnerabilitiesPrompt'
+import { FullSecurityAuditPrompt } from './prompts/FullSecurityAuditPrompt'
+import { ReviewAndFixCriticalPrompt } from './prompts/ReviewAndFixCriticalPrompt'
+import { ScanRecentChangesPrompt } from './prompts/ScanRecentChangesPrompt'
+import { ScanRepositoryPrompt } from './prompts/ScanRepositoryPrompt'
+import { SecurityToolsOverviewPrompt } from './prompts/SecurityToolsOverviewPrompt'
 import { BaseTool } from './tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from './tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
@@ -59,6 +65,22 @@ export function createMcpServer(govOrgId?: string): McpServer {
     const mcpCheckerTool = new McpCheckerTool(govOrgId)
     registerIfEnabled(mcpCheckerTool)
   }
+
+  // Register all prompts (prompts are always enabled, no filtering needed)
+  logDebug('Registering MCP prompts')
+  const prompts = [
+    new SecurityToolsOverviewPrompt(),
+    new ScanRepositoryPrompt(),
+    new ScanRecentChangesPrompt(),
+    new CheckForNewVulnerabilitiesPrompt(),
+    new ReviewAndFixCriticalPrompt(),
+    new FullSecurityAuditPrompt(),
+  ]
+
+  prompts.forEach((prompt) => {
+    server.registerPrompt(prompt)
+    logDebug(`Registered prompt: ${prompt.name}`)
+  })
 
   logInfo('MCP server created and configured')
   return server

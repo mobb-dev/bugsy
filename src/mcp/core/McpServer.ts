@@ -3,12 +3,20 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequest,
   CallToolRequestSchema,
+  GetPromptRequest,
+  GetPromptRequestSchema,
+  GetPromptResult,
+  ListPromptsRequest,
+  ListPromptsRequestSchema,
+  ListPromptsResult,
   ListToolsRequest,
   ListToolsRequestSchema,
   ListToolsResult,
+  Prompt,
 } from '@modelcontextprotocol/sdk/types.js'
 
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
+import { BasePrompt } from '../prompts/base/BasePrompt'
 import { createAuthenticatedMcpGQLClient } from '../services/McpGQLClient'
 import { McpUsageService } from '../services/McpUsageService'
 import { WorkspaceService } from '../services/WorkspaceService'
@@ -19,6 +27,7 @@ import {
   MCP_TOOL_CHECKER,
 } from '../tools/toolNames'
 import { isAutoScan } from './configs'
+import { PromptRegistry } from './PromptRegistry'
 import { ToolRegistry } from './ToolRegistry'
 
 export type McpServerConfig = {
@@ -29,6 +38,7 @@ export type McpServerConfig = {
 export class McpServer {
   private server: Server
   private toolRegistry: ToolRegistry
+  private promptRegistry: PromptRegistry
   private isEventHandlersSetup = false
   private eventHandlers: Map<string, (error?: Error | number) => void> =
     new Map()
@@ -54,11 +64,13 @@ export class McpServer {
       {
         capabilities: {
           tools: {},
+          prompts: {},
         },
       }
     )
 
     this.toolRegistry = new ToolRegistry()
+    this.promptRegistry = new PromptRegistry()
     this.setupHandlers()
     this.setupProcessEventHandlers()
     this.setupParentProcessMonitoring()
@@ -475,6 +487,70 @@ export class McpServer {
     }
   }
 
+  public async handleListPromptsRequest(
+    request: ListPromptsRequest
+  ): Promise<ListPromptsResult> {
+    logInfo('Received list_prompts request')
+    logDebug('list_prompts request', {
+      request: JSON.parse(JSON.stringify(request)),
+    })
+
+    const promptDefinitions = this.promptRegistry.getAllPrompts()
+    const response: ListPromptsResult = {
+      prompts: promptDefinitions.map((prompt) => ({
+        name: prompt.name,
+        description: prompt.description,
+        arguments: prompt.arguments,
+      })) as Prompt[],
+    }
+
+    logDebug('Returning list_prompts response', { response })
+    return response
+  }
+
+  public async handleGetPromptRequest(
+    request: GetPromptRequest
+  ): Promise<GetPromptResult> {
+    const { name, arguments: args } = request.params
+    logInfo(`Received get_prompt request for ${name}`)
+
+    logDebug('get_prompt request', {
+      request: JSON.parse(JSON.stringify(request)),
+    })
+
+    try {
+      const prompt = this.promptRegistry.getPrompt(name)
+      if (!prompt) {
+        const errorMsg = `Unknown prompt: ${name}`
+        logWarn(errorMsg, {
+          name,
+          availablePrompts: this.promptRegistry.getPromptNames(),
+        })
+        throw new Error(errorMsg)
+      }
+
+      logInfo(`Generating prompt: ${name}`)
+      const response = await prompt.getPrompt(args)
+
+      logInfo(`Prompt ${name} generated successfully`)
+      logDebug(`Prompt ${name} generated successfully`, {
+        hasMessages: !!response.messages,
+        messageCount: response.messages?.length,
+      })
+
+      return response
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      logError(`Error generating prompt ${name}: ${errorMessage}`, {
+        error,
+        promptName: name,
+        args,
+      })
+      throw error
+    }
+  }
+
   private setupHandlers(): void {
     // List tools handler
     this.server.setRequestHandler(
@@ -488,12 +564,29 @@ export class McpServer {
       (request: CallToolRequest) => this.handleCallToolRequest(request)
     )
 
+    // List prompts handler
+    this.server.setRequestHandler(
+      ListPromptsRequestSchema,
+      (request: ListPromptsRequest) => this.handleListPromptsRequest(request)
+    )
+
+    // Get prompt handler
+    this.server.setRequestHandler(
+      GetPromptRequestSchema,
+      (request: GetPromptRequest) => this.handleGetPromptRequest(request)
+    )
+
     logInfo('MCP server handlers registered')
   }
 
   public registerTool(tool: BaseTool): void {
     this.toolRegistry.registerTool(tool)
     logInfo(`Tool registered: ${tool.name}`)
+  }
+
+  public registerPrompt(prompt: BasePrompt): void {
+    this.promptRegistry.registerPrompt(prompt)
+    logInfo(`Prompt registered: ${prompt.name}`)
   }
 
   public getParentProcessId(): number {

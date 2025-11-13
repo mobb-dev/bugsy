@@ -171,3 +171,16 @@ export type ExpiredReport = z.infer<typeof ExpiredReportSchema>
 export type GetLatestReportByRepoUrlResponse = z.infer<
   typeof GetLatestReportByRepoUrlResponseSchema
 >
+
+// Prompt Resource Types
+export type PromptArgument = {
+  name: string
+  description: string
+  required: boolean
+}
+
+export type PromptDefinition = {
+  name: string
+  description: string
+  arguments?: PromptArgument[]
+}

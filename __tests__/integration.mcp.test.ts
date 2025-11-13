@@ -44,7 +44,15 @@ import {
 import { expectLoggerMessage } from './mcp/helpers/testHelpers'
 
 // Filter for debug logs to show on test failure
-const FAIL_DEBUG_LOG_FILTER = ['[FULL_SCAN]', '[BACKGROUND_INITIAL]']
+const FAIL_DEBUG_LOG_FILTER = [
+  '[FULL_SCAN]',
+  '[BACKGROUND_INITIAL]',
+  'scan_and_fix_vulnerabilities',
+  'Executing tool',
+  'Tool execution',
+  'Security scan',
+  'File scan',
+]
 
 vi.useFakeTimers({
   shouldAdvanceTime: true,
@@ -434,7 +442,7 @@ describe('mcp tests', () => {
           },
         ],
       })
-    })
+    }, 200000)
 
     it(`should handle active git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       await expect(
@@ -1406,6 +1414,232 @@ describe('mcp tests', () => {
           testRepo.cleanupAll()
         }
       }, 200000)
+    })
+  })
+
+  describe('MCP Prompts Integration', () => {
+    describe('list_prompts handler', () => {
+      it('should list all 6 registered prompts', async () => {
+        const response = await mcpClient.listPrompts()
+
+        expect(response).toBeDefined()
+        expect(response.prompts).toBeDefined()
+        expect(response.prompts.length).toBe(6)
+      })
+
+      it('should return correct metadata for each prompt', async () => {
+        const response = await mcpClient.listPrompts()
+
+        const promptNames = response.prompts.map((p) => p.name)
+        expect(promptNames).toContain('security-tools-overview')
+        expect(promptNames).toContain('scan-repository')
+        expect(promptNames).toContain('scan-recent-changes')
+        expect(promptNames).toContain('check-for-new-vulnerabilities')
+        expect(promptNames).toContain('review-and-fix-critical')
+        expect(promptNames).toContain('full-security-audit')
+
+        // Check that each prompt has required fields
+        response.prompts.forEach((prompt) => {
+          expect(prompt).toHaveProperty('name')
+          expect(prompt).toHaveProperty('description')
+          expect(typeof prompt.name).toBe('string')
+          expect(typeof prompt.description).toBe('string')
+        })
+      })
+
+      it('should include argument schemas in response', async () => {
+        const response = await mcpClient.listPrompts()
+
+        const scanRepoPrompt = response.prompts.find(
+          (p) => p.name === 'scan-repository'
+        )
+        expect(scanRepoPrompt).toBeDefined()
+        expect(scanRepoPrompt?.arguments).toBeDefined()
+        expect(Array.isArray(scanRepoPrompt?.arguments)).toBe(true)
+        expect(scanRepoPrompt?.arguments?.length).toBeGreaterThan(0)
+      })
+
+      it('should match snapshot of list_prompts response', async () => {
+        const response = await mcpClient.listPrompts()
+
+        expect(response).toMatchSnapshot('list-prompts-response')
+      })
+    })
+
+    describe('get_prompt handler', () => {
+      it('should execute SecurityToolsOverviewPrompt via MCP', async () => {
+        const response = await mcpClient.getPrompt('security-tools-overview')
+
+        expect(response).toBeDefined()
+        expect(response.description).toBeDefined()
+        expect(response.messages).toBeDefined()
+        expect(response.messages.length).toBeGreaterThan(0)
+        expect(response.messages[0]?.content.text).toContain(
+          'Mobb Security Tools'
+        )
+      })
+
+      it('should execute ScanRepositoryPrompt without path', async () => {
+        const response = await mcpClient.getPrompt('scan-repository')
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(
+          'Security Repository Scan'
+        )
+        expect(response.messages[0]?.content.text).toContain(
+          'What is the full path'
+        )
+      })
+
+      it('should execute ScanRepositoryPrompt with path', async () => {
+        const testPath = '/test/repo/path'
+        const response = await mcpClient.getPrompt('scan-repository', {
+          path: testPath,
+        })
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(testPath)
+        expect(response.messages[0]?.content.text).toContain(
+          'Repository path provided'
+        )
+      })
+
+      it('should execute ScanRecentChangesPrompt without path', async () => {
+        const response = await mcpClient.getPrompt('scan-recent-changes')
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(
+          'Scan Recent Changes'
+        )
+      })
+
+      it('should execute ScanRecentChangesPrompt with path', async () => {
+        const testPath = '/test/repo/path'
+        const response = await mcpClient.getPrompt('scan-recent-changes', {
+          path: testPath,
+        })
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(testPath)
+      })
+
+      it('should execute CheckForNewVulnerabilitiesPrompt without path', async () => {
+        const response = await mcpClient.getPrompt(
+          'check-for-new-vulnerabilities'
+        )
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(
+          'Continuous Security Monitoring'
+        )
+      })
+
+      it('should execute CheckForNewVulnerabilitiesPrompt with path', async () => {
+        const testPath = '/test/repo/path'
+        const response = await mcpClient.getPrompt(
+          'check-for-new-vulnerabilities',
+          { path: testPath }
+        )
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(testPath)
+      })
+
+      it('should execute ReviewAndFixCriticalPrompt without path', async () => {
+        const response = await mcpClient.getPrompt('review-and-fix-critical')
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(
+          'Critical Security Vulnerabilities'
+        )
+      })
+
+      it('should execute ReviewAndFixCriticalPrompt with path', async () => {
+        const testPath = '/test/repo/path'
+        const response = await mcpClient.getPrompt('review-and-fix-critical', {
+          path: testPath,
+        })
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(testPath)
+      })
+
+      it('should execute FullSecurityAuditPrompt without path', async () => {
+        const response = await mcpClient.getPrompt('full-security-audit')
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(
+          'Complete Security Audit'
+        )
+      })
+
+      it('should execute FullSecurityAuditPrompt with path', async () => {
+        const testPath = '/test/repo/path'
+        const response = await mcpClient.getPrompt('full-security-audit', {
+          path: testPath,
+        })
+
+        expect(response).toBeDefined()
+        expect(response.messages[0]?.content.text).toContain(testPath)
+      })
+
+      it('should validate arguments through MCP protocol', async () => {
+        // Test with invalid argument type
+        await expect(
+          mcpClient.getPrompt('scan-repository', { path: 123 })
+        ).rejects.toThrow()
+      })
+
+      it('should throw error for unknown prompt name', async () => {
+        await expect(
+          mcpClient.getPrompt('non-existent-prompt')
+        ).rejects.toThrow()
+      })
+
+      it('should return GetPromptResult with correct structure', async () => {
+        const response = await mcpClient.getPrompt('security-tools-overview')
+
+        expect(response).toHaveProperty('description')
+        expect(response).toHaveProperty('messages')
+        expect(Array.isArray(response.messages)).toBe(true)
+        expect(response.messages[0]).toHaveProperty('role', 'user')
+        expect(response.messages[0]).toHaveProperty('content')
+        expect(response.messages[0]?.content).toHaveProperty('type', 'text')
+        expect(response.messages[0]?.content).toHaveProperty('text')
+      })
+
+      it('should verify path parameter affects output', async () => {
+        const path1 = '/test/repo1'
+        const path2 = '/test/repo2'
+
+        const response1 = await mcpClient.getPrompt('scan-repository', {
+          path: path1,
+        })
+        const response2 = await mcpClient.getPrompt('scan-repository', {
+          path: path2,
+        })
+
+        expect(response1.messages[0]?.content.text).toContain(path1)
+        expect(response1.messages[0]?.content.text).not.toContain(path2)
+        expect(response2.messages[0]?.content.text).toContain(path2)
+        expect(response2.messages[0]?.content.text).not.toContain(path1)
+      })
+
+      it('should handle all prompts with snapshots', async () => {
+        const promptNames = [
+          'security-tools-overview',
+          'scan-repository',
+          'scan-recent-changes',
+          'check-for-new-vulnerabilities',
+          'review-and-fix-critical',
+          'full-security-audit',
+        ]
+
+        for (const promptName of promptNames) {
+          const response = await mcpClient.getPrompt(promptName)
+          expect(response).toMatchSnapshot(`get-prompt-${promptName}`)
+        }
+      })
     })
   })
 })

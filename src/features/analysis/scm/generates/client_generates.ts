@@ -35,6 +35,8 @@ export type AiBlameAttribution = {
   __typename?: 'AIBlameAttribution';
   aiBlameCommitId: Scalars['String']['output'];
   aiBlameInferenceId: Scalars['String']['output'];
+  changeLines: Scalars['Int']['output'];
+  changeMatchedLines: Scalars['Int']['output'];
   commitSha: Scalars['String']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['String']['output'];
@@ -277,6 +279,13 @@ export type DeleteIntegrationResponseError = {
 export type DeleteIntegrationResponseSuccess = {
   __typename?: 'DeleteIntegrationResponseSuccess';
   status: Status;
+};
+
+export type DiffLineAttribution = {
+  __typename?: 'DiffLineAttribution';
+  commitSha: Scalars['String']['output'];
+  file: Scalars['String']['output'];
+  line: Scalars['Int']['output'];
 };
 
 export type ExportUserInferencesResponse = {
@@ -745,6 +754,7 @@ export type ProcessAiBlameFinalResult = {
   attributions: Array<AiBlameAttribution>;
   attributionsCreated: Scalars['Int']['output'];
   diff: Scalars['String']['output'];
+  diffLines: Array<DiffLineAttribution>;
   inferencesProcessed: Scalars['Int']['output'];
   prTitle?: Maybe<Scalars['String']['output']>;
   status: BlameStatus;
@@ -1848,6 +1858,8 @@ export type Ai_Blame_Attribution = {
   /** An object relationship */
   aiBlameInference?: Maybe<Ai_Blame_Inference>;
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  change_lines: Scalars['Int']['output'];
+  change_matched_lines: Scalars['Int']['output'];
   createdAt: Scalars['timestamp']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
@@ -1923,11 +1935,15 @@ export type Ai_Blame_Attribution_Arr_Rel_Insert_Input = {
 /** aggregate avg on columns */
 export type Ai_Blame_Attribution_Avg_Fields = {
   __typename?: 'ai_blame_attribution_avg_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Avg_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -1940,6 +1956,8 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   aiBlameCommitId?: InputMaybe<Uuid_Comparison_Exp>;
   aiBlameInference?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
   aiBlameInferenceId?: InputMaybe<Uuid_Comparison_Exp>;
+  change_lines?: InputMaybe<Int_Comparison_Exp>;
+  change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -1957,6 +1975,8 @@ export enum Ai_Blame_Attribution_Constraint {
 
 /** input type for incrementing numeric columns in table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Inc_Input = {
+  change_lines?: InputMaybe<Scalars['Int']['input']>;
+  change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -1966,6 +1986,8 @@ export type Ai_Blame_Attribution_Insert_Input = {
   aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
   aiBlameInference?: InputMaybe<Ai_Blame_Inference_Obj_Rel_Insert_Input>;
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  change_lines?: InputMaybe<Scalars['Int']['input']>;
+  change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -1980,6 +2002,8 @@ export type Ai_Blame_Attribution_Max_Fields = {
   __typename?: 'ai_blame_attribution_max_fields';
   aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -1993,6 +2017,8 @@ export type Ai_Blame_Attribution_Max_Fields = {
 export type Ai_Blame_Attribution_Max_Order_By = {
   aiBlameCommitId?: InputMaybe<Order_By>;
   aiBlameInferenceId?: InputMaybe<Order_By>;
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2007,6 +2033,8 @@ export type Ai_Blame_Attribution_Min_Fields = {
   __typename?: 'ai_blame_attribution_min_fields';
   aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -2020,6 +2048,8 @@ export type Ai_Blame_Attribution_Min_Fields = {
 export type Ai_Blame_Attribution_Min_Order_By = {
   aiBlameCommitId?: InputMaybe<Order_By>;
   aiBlameInferenceId?: InputMaybe<Order_By>;
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2051,6 +2081,8 @@ export type Ai_Blame_Attribution_Order_By = {
   aiBlameCommitId?: InputMaybe<Order_By>;
   aiBlameInference?: InputMaybe<Ai_Blame_Inference_Order_By>;
   aiBlameInferenceId?: InputMaybe<Order_By>;
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2072,6 +2104,10 @@ export enum Ai_Blame_Attribution_Select_Column {
   /** column name */
   AiBlameInferenceId = 'aiBlameInferenceId',
   /** column name */
+  ChangeLines = 'change_lines',
+  /** column name */
+  ChangeMatchedLines = 'change_matched_lines',
+  /** column name */
   CreatedAt = 'createdAt',
   /** column name */
   FilePath = 'filePath',
@@ -2091,6 +2127,8 @@ export enum Ai_Blame_Attribution_Select_Column {
 export type Ai_Blame_Attribution_Set_Input = {
   aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  change_lines?: InputMaybe<Scalars['Int']['input']>;
+  change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2103,33 +2141,45 @@ export type Ai_Blame_Attribution_Set_Input = {
 /** aggregate stddev on columns */
 export type Ai_Blame_Attribution_Stddev_Fields = {
   __typename?: 'ai_blame_attribution_stddev_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Stddev_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Ai_Blame_Attribution_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_attribution_stddev_pop_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Stddev_Pop_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_samp on columns */
 export type Ai_Blame_Attribution_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_attribution_stddev_samp_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Stddev_Samp_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2145,6 +2195,8 @@ export type Ai_Blame_Attribution_Stream_Cursor_Input = {
 export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
+  change_lines?: InputMaybe<Scalars['Int']['input']>;
+  change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamp']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2157,11 +2209,15 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Ai_Blame_Attribution_Sum_Fields = {
   __typename?: 'ai_blame_attribution_sum_fields';
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by sum() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Sum_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2171,6 +2227,10 @@ export enum Ai_Blame_Attribution_Update_Column {
   AiBlameCommitId = 'aiBlameCommitId',
   /** column name */
   AiBlameInferenceId = 'aiBlameInferenceId',
+  /** column name */
+  ChangeLines = 'change_lines',
+  /** column name */
+  ChangeMatchedLines = 'change_matched_lines',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -2199,33 +2259,45 @@ export type Ai_Blame_Attribution_Updates = {
 /** aggregate var_pop on columns */
 export type Ai_Blame_Attribution_Var_Pop_Fields = {
   __typename?: 'ai_blame_attribution_var_pop_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Var_Pop_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
 export type Ai_Blame_Attribution_Var_Samp_Fields = {
   __typename?: 'ai_blame_attribution_var_samp_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Var_Samp_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
 /** aggregate variance on columns */
 export type Ai_Blame_Attribution_Variance_Fields = {
   __typename?: 'ai_blame_attribution_variance_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_Variance_Order_By = {
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -16290,6 +16362,10 @@ export type Mutation_Root = {
   delete_organization?: Maybe<Organization_Mutation_Response>;
   /** delete single row from the table: "organization" */
   delete_organization_by_pk?: Maybe<Organization>;
+  /** delete data from the table: "organization_domain" */
+  delete_organization_domain?: Maybe<Organization_Domain_Mutation_Response>;
+  /** delete single row from the table: "organization_domain" */
+  delete_organization_domain_by_pk?: Maybe<Organization_Domain>;
   /** delete data from the table: "organization_files_matching_settings" */
   delete_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
   /** delete single row from the table: "organization_files_matching_settings" */
@@ -16670,6 +16746,10 @@ export type Mutation_Root = {
   insert_on_prem_scm_oauth_config_one?: Maybe<On_Prem_Scm_Oauth_Config>;
   /** insert data into the table: "organization" */
   insert_organization?: Maybe<Organization_Mutation_Response>;
+  /** insert data into the table: "organization_domain" */
+  insert_organization_domain?: Maybe<Organization_Domain_Mutation_Response>;
+  /** insert a single row into the table: "organization_domain" */
+  insert_organization_domain_one?: Maybe<Organization_Domain>;
   /** insert data into the table: "organization_files_matching_settings" */
   insert_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
   /** insert a single row into the table: "organization_files_matching_settings" */
@@ -17167,6 +17247,12 @@ export type Mutation_Root = {
   update_organization?: Maybe<Organization_Mutation_Response>;
   /** update single row of the table: "organization" */
   update_organization_by_pk?: Maybe<Organization>;
+  /** update data of the table: "organization_domain" */
+  update_organization_domain?: Maybe<Organization_Domain_Mutation_Response>;
+  /** update single row of the table: "organization_domain" */
+  update_organization_domain_by_pk?: Maybe<Organization_Domain>;
+  /** update multiples rows of table: "organization_domain" */
+  update_organization_domain_many?: Maybe<Array<Maybe<Organization_Domain_Mutation_Response>>>;
   /** update data of the table: "organization_files_matching_settings" */
   update_organization_files_matching_settings?: Maybe<Organization_Files_Matching_Settings_Mutation_Response>;
   /** update single row of the table: "organization_files_matching_settings" */
@@ -18195,6 +18281,18 @@ export type Mutation_RootDelete_OrganizationArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Organization_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Organization_DomainArgs = {
+  where: Organization_Domain_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Organization_Domain_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -19446,6 +19544,20 @@ export type Mutation_RootInsert_On_Prem_Scm_Oauth_Config_OneArgs = {
 export type Mutation_RootInsert_OrganizationArgs = {
   objects: Array<Organization_Insert_Input>;
   on_conflict?: InputMaybe<Organization_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Organization_DomainArgs = {
+  objects: Array<Organization_Domain_Insert_Input>;
+  on_conflict?: InputMaybe<Organization_Domain_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Organization_Domain_OneArgs = {
+  object: Organization_Domain_Insert_Input;
+  on_conflict?: InputMaybe<Organization_Domain_On_Conflict>;
 };
 
 
@@ -21308,6 +21420,26 @@ export type Mutation_RootUpdate_Organization_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Organization_DomainArgs = {
+  _set?: InputMaybe<Organization_Domain_Set_Input>;
+  where: Organization_Domain_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Domain_By_PkArgs = {
+  _set?: InputMaybe<Organization_Domain_Set_Input>;
+  pk_columns: Organization_Domain_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Organization_Domain_ManyArgs = {
+  updates: Array<Organization_Domain_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Organization_Files_Matching_SettingsArgs = {
   _set?: InputMaybe<Organization_Files_Matching_Settings_Set_Input>;
   where: Organization_Files_Matching_Settings_Bool_Exp;
@@ -22423,6 +22555,8 @@ export type Organization = {
   onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
   /** An aggregate relationship */
   onPremScmOauthConfigs_aggregate: On_Prem_Scm_Oauth_Config_Aggregate;
+  orgDomainsAutoAdd: Scalars['Boolean']['output'];
+  orgDomainsAutoAddRole?: Maybe<Organization_Role_Type_Enum>;
   /** An array relationship */
   organizationFilesMatchingSettings: Array<Organization_Files_Matching_Settings>;
   /** An aggregate relationship */
@@ -22867,6 +23001,8 @@ export type Organization_Bool_Exp = {
   name?: InputMaybe<String_Comparison_Exp>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp>;
+  orgDomainsAutoAdd?: InputMaybe<Boolean_Comparison_Exp>;
+  orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum_Comparison_Exp>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Bool_Exp>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Bool_Exp>;
@@ -22908,6 +23044,159 @@ export type Organization_Delete_Elem_Input = {
 export type Organization_Delete_Key_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** columns and relationships of "organization_domain" */
+export type Organization_Domain = {
+  __typename?: 'organization_domain';
+  domainName: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "organization_domain" */
+export type Organization_Domain_Aggregate = {
+  __typename?: 'organization_domain_aggregate';
+  aggregate?: Maybe<Organization_Domain_Aggregate_Fields>;
+  nodes: Array<Organization_Domain>;
+};
+
+/** aggregate fields of "organization_domain" */
+export type Organization_Domain_Aggregate_Fields = {
+  __typename?: 'organization_domain_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Organization_Domain_Max_Fields>;
+  min?: Maybe<Organization_Domain_Min_Fields>;
+};
+
+
+/** aggregate fields of "organization_domain" */
+export type Organization_Domain_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Organization_Domain_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "organization_domain". All fields are combined with a logical 'AND'. */
+export type Organization_Domain_Bool_Exp = {
+  _and?: InputMaybe<Array<Organization_Domain_Bool_Exp>>;
+  _not?: InputMaybe<Organization_Domain_Bool_Exp>;
+  _or?: InputMaybe<Array<Organization_Domain_Bool_Exp>>;
+  domainName?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "organization_domain" */
+export enum Organization_Domain_Constraint {
+  /** unique or primary key constraint on columns "domain_name" */
+  OrganizationDomainDomainNameKey = 'organization_domain_domain_name_key',
+  /** unique or primary key constraint on columns "id" */
+  OrganizationDomainPkey = 'organization_domain_pkey'
+}
+
+/** input type for inserting data into table "organization_domain" */
+export type Organization_Domain_Insert_Input = {
+  domainName?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Organization_Domain_Max_Fields = {
+  __typename?: 'organization_domain_max_fields';
+  domainName?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Organization_Domain_Min_Fields = {
+  __typename?: 'organization_domain_min_fields';
+  domainName?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "organization_domain" */
+export type Organization_Domain_Mutation_Response = {
+  __typename?: 'organization_domain_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Organization_Domain>;
+};
+
+/** on_conflict condition type for table "organization_domain" */
+export type Organization_Domain_On_Conflict = {
+  constraint: Organization_Domain_Constraint;
+  update_columns?: Array<Organization_Domain_Update_Column>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "organization_domain". */
+export type Organization_Domain_Order_By = {
+  domainName?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: organization_domain */
+export type Organization_Domain_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "organization_domain" */
+export enum Organization_Domain_Select_Column {
+  /** column name */
+  DomainName = 'domainName',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+/** input type for updating data in table "organization_domain" */
+export type Organization_Domain_Set_Input = {
+  domainName?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "organization_domain" */
+export type Organization_Domain_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Organization_Domain_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Organization_Domain_Stream_Cursor_Value_Input = {
+  domainName?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "organization_domain" */
+export enum Organization_Domain_Update_Column {
+  /** column name */
+  DomainName = 'domainName',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId'
+}
+
+export type Organization_Domain_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Organization_Domain_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Organization_Domain_Bool_Exp;
 };
 
 /** columns and relationships of "organization_files_matching_settings" */
@@ -23174,6 +23463,8 @@ export type Organization_Insert_Input = {
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
+  orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
+  orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Arr_Rel_Insert_Input>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
@@ -23534,6 +23825,8 @@ export type Organization_Order_By = {
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
+  orgDomainsAutoAdd?: InputMaybe<Order_By>;
+  orgDomainsAutoAddRole?: InputMaybe<Order_By>;
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Order_By>;
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
@@ -24150,6 +24443,10 @@ export enum Organization_Select_Column {
   /** column name */
   Name = 'name',
   /** column name */
+  OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
+  /** column name */
+  OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
+  /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
   RoiDevHourlyRate = 'roiDevHourlyRate',
@@ -24180,6 +24477,8 @@ export type Organization_Set_Input = {
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
+  orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -24298,6 +24597,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
+  orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -24825,6 +25126,10 @@ export enum Organization_Update_Column {
   IsSendInvitationEnabled = 'isSendInvitationEnabled',
   /** column name */
   Name = 'name',
+  /** column name */
+  OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
+  /** column name */
+  OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
@@ -27273,6 +27578,12 @@ export type Query_Root = {
   organization_aggregated_vulnerabilities_aggregate: Aggregated_Fix_State_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
+  /** fetch data from the table: "organization_domain" */
+  organization_domain: Array<Organization_Domain>;
+  /** fetch aggregated fields from the table: "organization_domain" */
+  organization_domain_aggregate: Organization_Domain_Aggregate;
+  /** fetch data from the table: "organization_domain" using primary key columns */
+  organization_domain_by_pk?: Maybe<Organization_Domain>;
   /** fetch data from the table: "organization_files_matching_settings" */
   organization_files_matching_settings: Array<Organization_Files_Matching_Settings>;
   /** fetch aggregated fields from the table: "organization_files_matching_settings" */
@@ -29027,6 +29338,29 @@ export type Query_RootOrganization_Aggregated_Vulnerabilities_AggregateArgs = {
 
 
 export type Query_RootOrganization_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOrganization_DomainArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Domain_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Domain_Order_By>>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Domain_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Domain_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Domain_Order_By>>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
+};
+
+
+export type Query_RootOrganization_Domain_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -33143,6 +33477,14 @@ export type Subscription_Root = {
   organization_aggregated_vulnerabilities_aggregate: Aggregated_Fix_State_Aggregate;
   /** fetch data from the table: "organization" using primary key columns */
   organization_by_pk?: Maybe<Organization>;
+  /** fetch data from the table: "organization_domain" */
+  organization_domain: Array<Organization_Domain>;
+  /** fetch aggregated fields from the table: "organization_domain" */
+  organization_domain_aggregate: Organization_Domain_Aggregate;
+  /** fetch data from the table: "organization_domain" using primary key columns */
+  organization_domain_by_pk?: Maybe<Organization_Domain>;
+  /** fetch data from the table in a streaming manner: "organization_domain" */
+  organization_domain_stream: Array<Organization_Domain>;
   /** fetch data from the table: "organization_files_matching_settings" */
   organization_files_matching_settings: Array<Organization_Files_Matching_Settings>;
   /** fetch aggregated fields from the table: "organization_files_matching_settings" */
@@ -35251,6 +35593,36 @@ export type Subscription_RootOrganization_Aggregated_Vulnerabilities_AggregateAr
 
 export type Subscription_RootOrganization_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOrganization_DomainArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Domain_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Domain_Order_By>>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Domain_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Organization_Domain_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Organization_Domain_Order_By>>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrganization_Domain_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOrganization_Domain_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Organization_Domain_Stream_Cursor_Input>>;
+  where?: InputMaybe<Organization_Domain_Bool_Exp>;
 };
 
 

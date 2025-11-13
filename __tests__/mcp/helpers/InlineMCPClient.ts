@@ -1,6 +1,8 @@
 import { McpServer } from '@mobb/bugsy/mcp/core/McpServer'
 import {
   CallToolResult,
+  GetPromptResult,
+  ListPromptsResult,
   ListToolsResult,
 } from '@modelcontextprotocol/sdk/types'
 
@@ -27,6 +29,26 @@ export class InlineMCPClient {
       params: {
         name,
         arguments: args,
+      },
+    })
+  }
+
+  async listPrompts(): Promise<ListPromptsResult> {
+    return this.mcpServer.handleListPromptsRequest({
+      method: 'prompts/list',
+      params: {},
+    })
+  }
+
+  async getPrompt(
+    name: string,
+    args?: Record<string, unknown>
+  ): Promise<GetPromptResult> {
+    return this.mcpServer.handleGetPromptRequest({
+      method: 'prompts/get',
+      params: {
+        name,
+        arguments: args as { [x: string]: string } | undefined,
       },
     })
   }

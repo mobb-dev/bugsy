@@ -17521,6 +17521,7 @@ export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
 
 /** mutation root */
 export type Mutation_RootAnalyzePrForAiBlameArgs = {
+  installationId?: InputMaybe<Scalars['Int']['input']>;
   organizationId: Scalars['String']['input'];
   prNumber: Scalars['Int']['input'];
   repositoryURL: Scalars['String']['input'];

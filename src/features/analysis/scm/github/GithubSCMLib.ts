@@ -181,6 +181,16 @@ export class GithubSCMLib extends SCMLib {
     return branches.data.map((branch) => branch.name)
   }
 
+  async getRecentCommits(since: string) {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url!)
+    return await this.githubSdk.getRecentCommits({ owner, repo, since })
+  }
+
+  async getRateLimitStatus() {
+    return await this.githubSdk.getRateLimitStatus()
+  }
+
   get scmLibType(): ScmLibScmType {
     return ScmLibScmType.GITHUB
   }

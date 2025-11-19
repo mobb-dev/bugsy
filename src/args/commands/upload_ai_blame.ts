@@ -9,9 +9,10 @@ import z from 'zod'
 
 import { handleMobbLogin } from '../../commands/handleMobbLogin'
 import { GQLClient } from '../../features/analysis/graphql'
-import type {
-  FinalizeAiBlameInferencesUploadMutationVariables,
-  UploadAiBlameInferencesInitMutation,
+import {
+  AiBlameInferenceType,
+  type FinalizeAiBlameInferencesUploadMutationVariables,
+  type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { packageJson } from '../../utils'
@@ -57,6 +58,7 @@ type SessionInput = {
   aiResponseAt: string
   model?: string
   toolName?: string
+  blameType?: AiBlameInferenceType
 }
 
 export type UploadAiBlameOptions = {
@@ -65,9 +67,11 @@ export type UploadAiBlameOptions = {
   aiResponseAt?: string[]
   model?: string[]
   toolName?: string[]
+  blameType?: AiBlameInferenceType[]
   // yargs also exposes kebab-case keys; include them to satisfy typing
   'ai-response-at'?: string[]
   'tool-name'?: string[]
+  'blame-type'?: AiBlameInferenceType[]
 }
 
 export function uploadAiBlameBuilder(
@@ -105,6 +109,14 @@ export function uploadAiBlameBuilder(
       array: true,
       describe: chalk.bold('Tool/IDE name(s) (optional, one per session)'),
     })
+    .option('blame-type', {
+      type: 'string',
+      array: true,
+      choices: Object.values(AiBlameInferenceType),
+      describe: chalk.bold(
+        'Blame type(s) (optional, one per session, defaults to CHAT)'
+      ),
+    })
     .strict()
 }
 
@@ -114,6 +126,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   model: string
   tool: string
   responseTime: string
+  blameType?: AiBlameInferenceType
 }) {
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
@@ -121,6 +134,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
     model: [],
     toolName: [],
     aiResponseAt: [],
+    blameType: [],
   }
 
   await withFile(async (promptFile) => {
@@ -136,6 +150,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
       uploadArgs.model!.push(args.model)
       uploadArgs.toolName!.push(args.tool)
       uploadArgs.aiResponseAt!.push(args.responseTime)
+      uploadArgs.blameType!.push(args.blameType || AiBlameInferenceType.Chat)
 
       await uploadAiBlameHandler(uploadArgs, false)
     })
@@ -178,6 +193,9 @@ export async function uploadAiBlameHandler(
   const responseTimes = (args.aiResponseAt ||
     (args['ai-response-at'] as string[] | undefined) ||
     []) as string[]
+  const blameTypes = (args.blameType ||
+    (args['blame-type'] as AiBlameInferenceType[] | undefined) ||
+    []) as AiBlameInferenceType[]
 
   if (prompts.length !== inferences.length) {
     const errorMsg = 'prompt and inference must have the same number of entries'
@@ -213,6 +231,7 @@ export async function uploadAiBlameHandler(
       aiResponseAt: responseTimes[i] || nowIso,
       model: models[i],
       toolName: tools[i],
+      blameType: blameTypes[i] || AiBlameInferenceType.Chat,
     })
   }
 
@@ -241,20 +260,23 @@ export async function uploadAiBlameHandler(
     const us = uploadSessions[i]!
     const promptPath = String(prompts[i])
     const inferencePath = String(inferences[i])
-    // Prompt
-    await uploadFile({
-      file: promptPath,
-      url: us.prompt.url,
-      uploadFields: JSON.parse(us.prompt.uploadFieldsJSON),
-      uploadKey: us.prompt.uploadKey,
-    })
-    // Inference
-    await uploadFile({
-      file: inferencePath,
-      url: us.inference.url,
-      uploadFields: JSON.parse(us.inference.uploadFieldsJSON),
-      uploadKey: us.inference.uploadKey,
-    })
+
+    await Promise.all([
+      // Prompt
+      uploadFile({
+        file: promptPath,
+        url: us.prompt.url,
+        uploadFields: JSON.parse(us.prompt.uploadFieldsJSON),
+        uploadKey: us.prompt.uploadKey,
+      }),
+      // Inference
+      uploadFile({
+        file: inferencePath,
+        url: us.inference.url,
+        uploadFields: JSON.parse(us.inference.uploadFieldsJSON),
+        uploadKey: us.inference.uploadKey,
+      }),
+    ])
   }
 
   // Finalize
@@ -268,6 +290,7 @@ export async function uploadAiBlameHandler(
         aiResponseAt: s.aiResponseAt,
         model: s.model,
         toolName: s.toolName,
+        blameType: s.blameType,
       }
     })
 

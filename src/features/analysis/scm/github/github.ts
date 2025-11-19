@@ -613,6 +613,27 @@ export function getGithubSdk(
         per_page: 100,
       })
     },
+    async getRecentCommits(params: {
+      owner: string
+      repo: string
+      since: string
+    }) {
+      const commits = await octokit.paginate(octokit.rest.repos.listCommits, {
+        owner: params.owner,
+        repo: params.repo,
+        since: params.since,
+        per_page: 100,
+      })
+      return { data: commits }
+    },
+    async getRateLimitStatus() {
+      const response = await octokit.rest.rateLimit.get()
+      return {
+        remaining: response.data.rate.remaining,
+        reset: new Date(response.data.rate.reset * 1000),
+        limit: response.data.rate.limit,
+      }
+    },
     async getRepoPullRequests(params: { owner: string; repo: string }) {
       return octokit.rest.pulls.list({
         owner: params.owner,

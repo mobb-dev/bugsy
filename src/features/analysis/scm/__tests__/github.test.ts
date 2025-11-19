@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getGithubSdk, parseGithubOwnerAndRepo } from '../github'
+import type { GithubSCMLib } from '../github/GithubSCMLib'
 import { createScmLib } from '../scmFactory'
 import { ScmLibScmType } from '../types'
 import { RepoConfig } from './common'
@@ -200,5 +201,46 @@ describe('parsing github url', () => {
     expect(() => parseGithubOwnerAndRepo(INVALID_URL)).toThrow(
       `invalid github repo Url ${INVALID_URL}`
     )
+  })
+})
+
+describe('GitHub SDK rate limits and recent commits', () => {
+  it('getRateLimitStatus returns remaining and limit', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+    const status = await sdk.getRateLimitStatus()
+    expect(typeof status.remaining).toBe('number')
+    expect(typeof status.limit).toBe('number')
+  })
+
+  it('getRecentCommits returns commits since a given timestamp', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+    const since = new Date('2020-01-01T00:00:00Z').toISOString()
+    const res = await sdk.getRecentCommits({ owner: OWNER, repo: REPO, since })
+    expect(Array.isArray(res.data)).toBe(true)
+  })
+})
+
+describe('GithubSCMLib wrappers for rate limit and recent commits', () => {
+  it('exposes getRateLimitStatus and getRecentCommits', async () => {
+    const scmLib = await createScmLib({
+      url: GITHUB_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      scmOrg: undefined,
+    })
+    // Expect wrappers to work
+    const status = await (scmLib as GithubSCMLib).getRateLimitStatus()
+    expect(typeof status.remaining).toBe('number')
+    const since = new Date('2020-01-01T00:00:00Z').toISOString()
+    const commits = await (scmLib as GithubSCMLib).getRecentCommits(since)
+    expect(Array.isArray(commits.data)).toBe(true)
   })
 })

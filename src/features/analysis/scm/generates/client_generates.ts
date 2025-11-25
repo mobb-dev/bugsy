@@ -16391,8 +16391,15 @@ export type Mutation_Root = {
   /**
    * Process a pull request by fetching its diff from the SCM provider and analyzing it
    * for AI-generated code. User must have access to both the repository and organization.
+   * This is for manual analysis and does not post PR comments.
    */
   analyzePRForAIBlame: ProcessAiBlameResult;
+  /**
+   * Process a pull request from a GitHub webhook by fetching its diff from the SCM provider
+   * and analyzing it for AI-generated code. This will post comments on the PR when analysis completes.
+   * User must have access to both the repository and organization.
+   */
+  analyzePRForAIBlameFromWebhook: ProcessAiBlameResult;
   applySimilarAnswers?: Maybe<Scalars['Void']['output']>;
   autoPrAnalysis?: Maybe<AutoPrResponse>;
   changeUserOrgRole?: Maybe<StatusQueryResponse>;
@@ -17794,7 +17801,15 @@ export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
 
 /** mutation root */
 export type Mutation_RootAnalyzePrForAiBlameArgs = {
-  installationId?: InputMaybe<Scalars['Int']['input']>;
+  organizationId: Scalars['String']['input'];
+  prNumber: Scalars['Int']['input'];
+  repositoryURL: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootAnalyzePrForAiBlameFromWebhookArgs = {
+  installationId: Scalars['Int']['input'];
   organizationId: Scalars['String']['input'];
   prNumber: Scalars['Int']['input'];
   repositoryURL: Scalars['String']['input'];
@@ -43739,6 +43754,13 @@ export type GetLastOrgAndNamedProjectQueryVariables = Exact<{
 
 export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
 
+export type GetLastOrgQueryVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type GetLastOrgQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, name?: string | null, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any } }> }> };
+
 export type GetEncryptedApiTokenQueryVariables = Exact<{
   loginId: Scalars['uuid']['input'];
 }>;
@@ -44124,6 +44146,20 @@ export const GetLastOrgAndNamedProjectDocument = `
           name
           id
         }
+      }
+    }
+  }
+}
+    `;
+export const GetLastOrgDocument = `
+    query getLastOrg($email: String!) {
+  user(where: {email: {_eq: $email}}, limit: 1) {
+    id
+    name
+    userOrganizationsAndUserOrganizationRoles(order_by: {createdOn: desc}) {
+      id
+      organization {
+        id
       }
     }
   }
@@ -44628,6 +44664,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getLastOrgAndNamedProject(variables: GetLastOrgAndNamedProjectQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLastOrgAndNamedProjectQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetLastOrgAndNamedProjectQuery>({ document: GetLastOrgAndNamedProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getLastOrgAndNamedProject', 'query', variables);
+    },
+    getLastOrg(variables: GetLastOrgQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetLastOrgQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetLastOrgQuery>({ document: GetLastOrgDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getLastOrg', 'query', variables);
     },
     GetEncryptedApiToken(variables: GetEncryptedApiTokenQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetEncryptedApiTokenQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetEncryptedApiTokenQuery>({ document: GetEncryptedApiTokenDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetEncryptedApiToken', 'query', variables);

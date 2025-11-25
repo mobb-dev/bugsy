@@ -42,6 +42,19 @@ query getLastOrgAndNamedProject($email: String!, $projectName: String!) {
   }
 }
 
+query getLastOrg($email: String!) {
+  user(where: { email: { _eq: $email } }, limit: 1) {
+    id
+    name
+    userOrganizationsAndUserOrganizationRoles(order_by: { createdOn: desc }) {
+      id
+      organization {
+        id
+      }
+    }
+  }
+}
+
 query GetEncryptedApiToken($loginId: uuid!) {
   cli_login_by_pk(id: $loginId) {
     encryptedApiToken

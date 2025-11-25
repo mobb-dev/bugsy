@@ -129,6 +129,16 @@ export class GQLClient {
     return me
   }
 
+  async getLastOrg(email: string) {
+    const getLastOrgRes = await this._clientSdk.getLastOrg({ email })
+    return {
+      organizationId:
+        getLastOrgRes?.user?.[0]?.userOrganizationsAndUserOrganizationRoles?.[0]
+          ?.organization?.id,
+      userName: getLastOrgRes?.user?.[0]?.name ?? '',
+    }
+  }
+
   async createCliLogin(
     variables: CreateCliLoginMutationVariables
   ): Promise<string> {

@@ -8,6 +8,7 @@ import { ReviewAndFixCriticalPrompt } from './prompts/ReviewAndFixCriticalPrompt
 import { ScanRecentChangesPrompt } from './prompts/ScanRecentChangesPrompt'
 import { ScanRepositoryPrompt } from './prompts/ScanRepositoryPrompt'
 import { SecurityToolsOverviewPrompt } from './prompts/SecurityToolsOverviewPrompt'
+import { detectMCPServersForIDE } from './services/McpDetectionService'
 import { BaseTool } from './tools/base/BaseTool'
 import { CheckForNewAvailableFixesTool } from './tools/checkForNewAvailableFixes/CheckForNewAvailableFixesTool'
 import { FetchAvailableFixesTool } from './tools/fetchAvailableFixes/FetchAvailableFixesTool'
@@ -104,6 +105,20 @@ export async function startMcpServer({
     logError('Failed to start MCP server', { error })
     throw error
   }
+}
+
+/**
+ * Detect MCP servers for a specific IDE
+ * @param params - Object containing ideName, userEmail, userName, and organizationId
+ * @returns Array of workspace results with MCP configurations
+ */
+export function detectMCPServers(params: {
+  ideName: 'cursor' | 'vscode'
+  userEmail: string
+  userName: string
+  organizationId: string
+}) {
+  return detectMCPServersForIDE(params)
 }
 
 // Note: This file is now imported by the CLI and not executed directly

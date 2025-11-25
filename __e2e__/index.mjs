@@ -10,12 +10,7 @@ import { fileURLToPath } from 'url'
 import { mobbApi } from './MobbApi.mjs'
 import { npm } from './Npm.mjs'
 import { registry } from './Registry.mjs'
-import {
-  cleanupCheckmarxCliConfig,
-  CLI_LOCAL_ENV_OVERWRITE,
-  SAST_PROVIDERS_ENV,
-  SVJP_CX_REPORT,
-} from './utils.mjs'
+import { CLI_LOCAL_ENV_OVERWRITE, SVJP_CX_REPORT } from './utils.mjs'
 
 test('Bugsy E2E tests', async (t) => {
   await t.before(async () => {
@@ -245,67 +240,71 @@ test('Bugsy E2E tests', async (t) => {
     }
   )
 
-  await t.test('scan: API key, Checkmarx, public GitHub repo', async () => {
-    // Arrange
-    await cleanupCheckmarxCliConfig()
-    const apiKey = await mobbApi.createApiToken()
-    const bugsy = await npm.npx(
-      [
-        'mobbdev',
-        'scan',
-        '--api-key',
-        apiKey,
-        '--cx-project-name',
-        'kirill-test',
-        '-r',
-        'https://github.com/mobb-dev/simple-vulnerable-java-project',
-      ],
-      CLI_LOCAL_ENV_OVERWRITE
-    )
+  //CX tenant stopped working for us. We are trying to revive it but for now skipping the test
+  //await t.test(
+  //  'scan: API key, Checkmarx, public GitHub repo',
+  //  async () => {
+  //    // Arrange
+  //    await cleanupCheckmarxCliConfig()
+  //    const apiKey = await mobbApi.createApiToken()
+  //    const bugsy = await npm.npx(
+  //      [
+  //        'mobbdev',
+  //        'scan',
+  //        '--api-key',
+  //        apiKey,
+  //        '--cx-project-name',
+  //        'kirill-test',
+  //        '-r',
+  //        'https://github.com/mobb-dev/simple-vulnerable-java-project',
+  //      ],
+  //      CLI_LOCAL_ENV_OVERWRITE
+  //    )
 
-    // Act
-    await bugsy.waitForString(
-      /Choose a scanner you wish to use to scan your code/
-    )
-    bugsy.sendArrowDownKey()
-    bugsy.sendEnterKey()
+  //    // Act
+  //    await bugsy.waitForString(
+  //      /Choose a scanner you wish to use to scan your code/
+  //    )
+  //    bugsy.sendArrowDownKey()
+  //    bugsy.sendEnterKey()
 
-    await bugsy.waitForString(
-      /Checkmarx needs to be configured before we start, press any key to continue/
-    )
-    bugsy.sendEnterKey()
-    await bugsy.waitForString(/AST Base URI/)
-    bugsy.communicate(SAST_PROVIDERS_ENV.CX_BASE_URI)
-    bugsy.sendEnterKey()
-    await bugsy.waitForString(/AST Base Auth URI/)
-    bugsy.communicate(SAST_PROVIDERS_ENV.CX_BASE_AUTH_URI)
-    bugsy.sendEnterKey()
-    await bugsy.waitForString(/AST Tenant/)
-    bugsy.communicate(SAST_PROVIDERS_ENV.CX_TENANT)
-    bugsy.sendEnterKey()
-    await bugsy.waitForString(/Do you want to use API Key authentication/)
-    bugsy.communicate('y')
-    bugsy.sendEnterKey()
-    await bugsy.waitForString(/AST API Key/)
-    bugsy.communicate(SAST_PROVIDERS_ENV.CX_APIKEY)
-    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(
+  //      /Checkmarx needs to be configured before we start, press any key to continue/
+  //    )
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(/AST Base URI/)
+  //    bugsy.communicate(SAST_PROVIDERS_ENV.CX_BASE_URI)
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(/AST Base Auth URI/)
+  //    bugsy.communicate(SAST_PROVIDERS_ENV.CX_BASE_AUTH_URI)
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(/AST Tenant/)
+  //    bugsy.communicate(SAST_PROVIDERS_ENV.CX_TENANT)
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(/Do you want to use API Key authentication/)
+  //    bugsy.communicate('y')
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForString(/AST API Key/)
+  //    bugsy.communicate(SAST_PROVIDERS_ENV.CX_APIKEY)
+  //    bugsy.sendEnterKey()
 
-    // Checkmarx scan can take some time. Set timeout for 15 minutes to avoid test flakiness.
-    await bugsy.waitForString(/Hit any key to view available fixes/, 900000)
-    bugsy.sendEnterKey()
-    await bugsy.waitForExit()
+  //    // Checkmarx scan can take some time. Set timeout for 15 minutes to avoid test flakiness.
+  //    await bugsy.waitForString(/Hit any key to view available fixes/, 900000)
+  //    bugsy.sendEnterKey()
+  //    await bugsy.waitForExit()
 
-    // Assert
-    assert.strictEqual(bugsy.getExitCode(), 0)
-    assert.match(bugsy.getOutput(), /Checkmarx Scan completed/)
-    assert.match(
-      bugsy.getOutput(),
-      /\/organization\/[^/]+\/project\/[^/]+\/report\/[^/]+/,
-      'Bugsy output should contain Mobb report URL.'
-    )
-    assert.match(
-      bugsy.getOutput(),
-      /My work here is done for now, see you soon/
-    )
-  })
+  //    // Assert
+  //    assert.strictEqual(bugsy.getExitCode(), 0)
+  //    assert.match(bugsy.getOutput(), /Checkmarx Scan completed/)
+  //    assert.match(
+  //      bugsy.getOutput(),
+  //      /\/organization\/[^/]+\/project\/[^/]+\/report\/[^/]+/,
+  //      'Bugsy output should contain Mobb report URL.'
+  //    )
+  //    assert.match(
+  //      bugsy.getOutput(),
+  //      /My work here is done for now, see you soon/
+  //    )
+  //  }
+  //)
 })

@@ -11,9 +11,19 @@ const config = new Configstore(packageJson.name, { apiToken: '' })
 
 export const claudeCodeInstallHookBuilder = (yargs: Argv) => {
   return yargs
+    .option('save-env', {
+      type: 'boolean',
+      description:
+        'Save WEB_LOGIN_URL, WEB_APP_URL, and API_URL environment variables to hooks config',
+      default: false,
+    })
     .example(
       '$0 claude-code-install-hook',
       'Install Claude Code hooks for data collection'
+    )
+    .example(
+      '$0 claude-code-install-hook --save-env',
+      'Install hooks and save environment variables to config'
     )
     .strict()
 }
@@ -30,7 +40,9 @@ export const claudeCodeProcessHookBuilder = (yargs: Argv) => {
 /**
  * Handler for the claude-code-install-hook command - installs hooks in Claude Code settings
  */
-export const claudeCodeInstallHookHandler = async () => {
+export const claudeCodeInstallHookHandler = async (argv: {
+  'save-env': boolean
+}) => {
   try {
     // Authenticate user using existing CLI auth flow
     const gqlClient = new GQLClient({
@@ -44,7 +56,7 @@ export const claudeCodeInstallHookHandler = async () => {
     })
 
     // Install the hooks
-    await installMobbHooks()
+    await installMobbHooks({ saveEnv: argv['save-env'] })
 
     process.exit(0)
   } catch (error) {

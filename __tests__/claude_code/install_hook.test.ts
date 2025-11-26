@@ -24,6 +24,37 @@ describe('installMobbHooks', () => {
     })
   })
 
+  it('should successfully install Mobb hooks when settings file exists and no hooks exist with --save-env', async () => {
+    // Arrange
+    const initialSettings = {
+      someOtherSetting: 'value',
+    }
+
+    vi.stubGlobal('process', {
+      env: {
+        WEB_LOGIN_URL: 1,
+        WEB_APP_URL: 2,
+        API_URL: 3,
+      },
+    })
+
+    mockFs.access.mockResolvedValue(undefined) // File exists
+    mockFs.readFile.mockResolvedValue(JSON.stringify(initialSettings))
+    mockFs.writeFile.mockResolvedValue(undefined)
+
+    // Act
+    await installMobbHooks({ saveEnv: true })
+
+    // Assert
+    const writtenContent = mockFs.writeFile.mock.calls[0]![1]
+    const writtenSettings = JSON.parse(writtenContent as string)
+    const cmd = writtenSettings.hooks.PostToolUse[0].hooks[0].command
+
+    expect(cmd).toContain('WEB_LOGIN_URL="1"')
+    expect(cmd).toContain('WEB_APP_URL="2"')
+    expect(cmd).toContain('API_URL="3"')
+  })
+
   it('should successfully install Mobb hooks when settings file exists and no hooks exist', async () => {
     // Arrange
     const initialSettings = {

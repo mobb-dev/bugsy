@@ -52,7 +52,9 @@ export async function writeClaudeSettings(
   )
 }
 
-export async function installMobbHooks(): Promise<void> {
+export async function installMobbHooks(
+  options: { saveEnv?: boolean } = {}
+): Promise<void> {
   console.log(chalk.blue('Installing Mobb hooks in Claude Code settings...'))
 
   if (!(await claudeSettingsExists())) {
@@ -75,12 +77,37 @@ export async function installMobbHooks(): Promise<void> {
     settings.hooks.PostToolUse = []
   }
 
+  // Build command with environment variables if saveEnv is enabled
+  let command = 'npx --yes mobbdev@latest claude-code-process-hook'
+
+  if (options.saveEnv) {
+    const envVars = []
+    if (process.env['WEB_LOGIN_URL']) {
+      envVars.push(`WEB_LOGIN_URL="${process.env['WEB_LOGIN_URL']}"`)
+    }
+    if (process.env['WEB_APP_URL']) {
+      envVars.push(`WEB_APP_URL="${process.env['WEB_APP_URL']}"`)
+    }
+    if (process.env['API_URL']) {
+      envVars.push(`API_URL="${process.env['API_URL']}"`)
+    }
+
+    if (envVars.length > 0) {
+      command = `${envVars.join(' ')} ${command}`
+      console.log(
+        chalk.blue(
+          `Adding environment variables to hook command: ${envVars.join(', ')}`
+        )
+      )
+    }
+  }
+
   const mobbHookConfig: ClaudeCodeHookMatcher = {
     matcher: 'Edit|Write',
     hooks: [
       {
         type: 'command',
-        command: 'npx --yes mobbdev@latest claude-code-process-hook',
+        command,
       },
     ],
   }
@@ -105,7 +132,7 @@ export async function installMobbHooks(): Promise<void> {
 
   console.log(
     chalk.green(
-      `✅ Mobb hooks installed successfully in ${CLAUDE_SETTINGS_PATH}`
+      `✅ Mobb hooks ${options.saveEnv ? 'and environment variables ' : ''}installed successfully in ${CLAUDE_SETTINGS_PATH}`
     )
   )
 }

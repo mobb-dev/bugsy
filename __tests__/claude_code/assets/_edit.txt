@@ -1,0 +1,39 @@
+{
+  "session_id": "dcc484f5-c9f4-4c34-b5c0-791b746026b4",
+  "transcript_path": "/Users/kirill/Mobb/autofixer/clients/cli/__tests__/claude_code/assets/dcc484f5-c9f4-4c34-b5c0-791b746026b4.jsonl",
+  "cwd": "/Users/kirill/Downloads/test3",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "/Users/kirill/Downloads/test3/README.md",
+    "old_string": "**Kirill** - [@kirill89](https://github.com/kirill89)",
+    "new_string": "**Kirill** - [kirill89@gmail.com](mailto:kirill89@gmail.com) - [@kirill89](https://github.com/kirill89)"
+  },
+  "tool_response": {
+    "filePath": "/Users/kirill/Downloads/test3/README.md",
+    "oldString": "**Kirill** - [@kirill89](https://github.com/kirill89)",
+    "newString": "**Kirill** - [kirill89@gmail.com](mailto:kirill89@gmail.com) - [@kirill89](https://github.com/kirill89)",
+    "originalFile": "# test3\n\n## Description\n\nA sample project for testing and development purposes.\n\n## Installation\n\n1. Clone the repository:\n   ```bash\n   git clone <repository-url>\n   cd test3\n   ```\n\n2. Install dependencies (if applicable):\n   ```bash\n   npm install\n   # or\n   pip install -r requirements.txt\n   ```\n\n## Usage\n\nProvide instructions on how to use your project here.\n\n## Features\n\n- Feature 1\n- Feature 2\n- Feature 3\n\n## Contributing\n\n1. Fork the project\n2. Create your feature branch (`git checkout -b feature/AmazingFeature`)\n3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)\n4. Push to the branch (`git push origin feature/AmazingFeature`)\n5. Open a Pull Request\n\n## Author\n\n**Kirill** - [@kirill89](https://github.com/kirill89)\n\n## License\n\nThis project is licensed under the MIT License - see the LICENSE file for details.\n",
+    "structuredPatch": [
+      {
+        "oldStart": 39,
+        "oldLines": 7,
+        "newStart": 39,
+        "newLines": 7,
+        "lines": [
+          " ",
+          " ## Author",
+          " ",
+          "-**Kirill** - [@kirill89](https://github.com/kirill89)",
+          "+**Kirill** - [kirill89@gmail.com](mailto:kirill89@gmail.com) - [@kirill89](https://github.com/kirill89)",
+          " ",
+          " ## License",
+          " "
+        ]
+      }
+    ],
+    "userModified": false,
+    "replaceAll": false
+  }
+}

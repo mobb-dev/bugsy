@@ -7,6 +7,12 @@ import {
 } from '../args/commands/convert_to_sarif'
 import { mobbCliCommand } from '../types'
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
+import {
+  claudeCodeInstallHookBuilder,
+  claudeCodeInstallHookHandler,
+  claudeCodeProcessHookBuilder,
+  claudeCodeProcessHookHandler,
+} from './commands/claude_code'
 import { mcpBuilder, mcpHandler } from './commands/mcp'
 import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
@@ -86,6 +92,18 @@ export const parseArgs = async (args: readonly string[]) => {
       ),
       uploadAiBlameBuilder,
       uploadAiBlameHandler
+    )
+    .command(
+      mobbCliCommand.claudeCodeInstallHook,
+      chalk.bold('Install Claude Code hooks for data collection.'),
+      claudeCodeInstallHookBuilder,
+      claudeCodeInstallHookHandler
+    )
+    .command(
+      mobbCliCommand.claudeCodeProcessHook,
+      chalk.bold('Process Claude Code hook data and upload to backend.'),
+      claudeCodeProcessHookBuilder,
+      claudeCodeProcessHookHandler
     )
     .example(
       'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',

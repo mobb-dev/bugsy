@@ -6,6 +6,8 @@ export const mobbCliCommand = {
   convertToSarif: 'convert-to-sarif',
   mcp: 'mcp',
   uploadAiBlame: 'upload-ai-blame',
+  claudeCodeInstallHook: 'claude-code-install-hook',
+  claudeCodeProcessHook: 'claude-code-process-hook',
 } as const
 
 type MobbCliCommandType = typeof mobbCliCommand

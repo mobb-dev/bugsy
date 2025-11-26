@@ -296,6 +296,13 @@ export type DiffLineAttribution = {
   line: Scalars['Int']['output'];
 };
 
+export type ExplainFixResponse = {
+  __typename?: 'ExplainFixResponse';
+  errorMessage?: Maybe<Scalars['String']['output']>;
+  explanation?: Maybe<Scalars['String']['output']>;
+  status: FixerStatus;
+};
+
 export type ExportUserInferencesResponse = {
   __typename?: 'ExportUserInferencesResponse';
   downloadUrl?: Maybe<Scalars['String']['output']>;
@@ -27723,6 +27730,7 @@ export type Query_Root = {
   effort_to_apply_fix_aggregate: Effort_To_Apply_Fix_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" using primary key columns */
   effort_to_apply_fix_by_pk?: Maybe<Effort_To_Apply_Fix>;
+  explainFix: ExplainFixResponse;
   /** fetch data from the table: "false_positive" */
   false_positive: Array<False_Positive>;
   /** fetch aggregated fields from the table: "false_positive" */
@@ -28939,6 +28947,13 @@ export type Query_RootEffort_To_Apply_Fix_AggregateArgs = {
 
 export type Query_RootEffort_To_Apply_Fix_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootExplainFixArgs = {
+  fixId: Scalars['uuid']['input'];
+  loadAnswers?: Scalars['Boolean']['input'];
+  userInput?: InputMaybe<Array<QuestionAnswer>>;
 };
 
 

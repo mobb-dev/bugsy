@@ -3,12 +3,12 @@ import os from 'os'
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid'
 
 import { packageJson } from '../../../utils'
+import { configStore } from '../../../utils/ConfigStoreService'
 import {
   MCP_DEFAULT_REST_API_URL,
   MCP_PERIODIC_TRACK_INTERVAL,
 } from '../../core/configs'
 import { logDebug, logError, logInfo } from '../../Logger'
-import { configStore } from '../ConfigStoreService'
 import { getHostInfo } from './host'
 import { findSystemMCPConfigs } from './system'
 

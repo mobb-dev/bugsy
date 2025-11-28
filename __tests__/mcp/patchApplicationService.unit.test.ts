@@ -22,7 +22,10 @@ const extractTargetFilesFromPatch = (patch: string): string[] =>
 // Mock the configs
 vi.mock('../../src/mcp/core/configs', () => ({
   MCP_AUTO_FIX_DEBUG_MODE: true,
-  MCP_DEFAULT_API_URL: 'http://localhost:8080',
+}))
+
+vi.mock('../../src/constants', () => ({
+  DEFAULT_API_URL: 'http://localhost:8080',
 }))
 
 // Mock the logger

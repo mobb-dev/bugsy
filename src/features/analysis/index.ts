@@ -5,7 +5,6 @@ import { env } from 'node:process'
 import { pipeline } from 'node:stream/promises'
 
 import chalk from 'chalk'
-import Configstore from 'configstore'
 import Debug from 'debug'
 import extract from 'extract-zip'
 import { createSpinner } from 'nanospinner'
@@ -16,7 +15,7 @@ import { z } from 'zod'
 
 import { type CommandOptions } from '../../commands'
 import {
-  handleMobbLogin,
+  getAuthenticatedGQLClient,
   LOGIN_CHECK_DELAY,
   LOGIN_MAX_WAIT,
 } from '../../commands/handleMobbLogin'
@@ -32,7 +31,7 @@ import {
 import { ReportDigestError } from '../../mcp/core/Errors'
 import { MobbCliCommand, ScanContext } from '../../types'
 import * as utils from '../../utils'
-import { getTopLevelDirName, packageJson, sleep } from '../../utils'
+import { getTopLevelDirName, sleep } from '../../utils'
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { handleAutoPr } from './auto_pr_handler'
 import { getGitInfo, GetGitInfoResult } from './git'
@@ -155,8 +154,6 @@ const getReportUrl = ({
 
 const debug = Debug('mobbdev:index')
 
-const config = new Configstore(packageJson.name, { apiToken: '' })
-debug('config %o', config)
 export type AnalysisParams = {
   scanFile?: string
   repo?: string
@@ -361,15 +358,9 @@ export async function _scan(
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
   skipPrompts = skipPrompts || ci
-  let gqlClient = new GQLClient({
-    apiKey: apiKey ?? config.get('apiToken') ?? '',
-    type: 'apiKey',
-  })
-
-  gqlClient = await handleMobbLogin({
-    inGqlClient: gqlClient,
-    skipPrompts,
-    apiKey,
+  const gqlClient = await getAuthenticatedGQLClient({
+    inputApiKey: apiKey,
+    isSkipPrompts: skipPrompts,
   })
 
   if (!mobbProjectName) {

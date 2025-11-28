@@ -3,6 +3,7 @@ import {
   Vulnerability_Report_Issue_Category_Enum,
 } from '../../../features/analysis/scm/generates/client_generates'
 import { ScanContext } from '../../../types'
+import { configStore } from '../../../utils/ConfigStoreService'
 import {
   MCP_DEFAULT_LIMIT,
   MCP_PERIODIC_CHECK_INTERVAL,
@@ -17,7 +18,6 @@ import {
   noVulnerabilitiesAutoFixPrompt,
 } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
-import { configStore } from '../../services/ConfigStoreService'
 import { getLocalFiles, LocalFile } from '../../services/GetLocalFiles'
 import { LocalMobbFolderService } from '../../services/LocalMobbFolderService'
 import {

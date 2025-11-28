@@ -2,13 +2,13 @@ import crypto from 'node:crypto'
 import os from 'node:os'
 
 import chalk from 'chalk'
-import Configstore from 'configstore'
 import Debug from 'debug'
 import open from 'open'
 
 import { WEB_APP_URL } from '../constants'
 import { GQLClient } from '../features/analysis/graphql'
-import { CliError, keypress, packageJson, sleep, Spinner } from '../utils'
+import { CliError, keypress, sleep, Spinner } from '../utils'
+import { configStore } from '../utils/ConfigStoreService'
 
 const debug = Debug('mobbdev:commands')
 
@@ -21,7 +21,32 @@ const MOBB_LOGIN_REQUIRED_MSG = `🔓 Login to Mobb is Required, you will be red
   'press any key to continue'
 )};`
 
-const config = new Configstore(packageJson.name, { apiToken: '' })
+/**
+ * Initializes and authenticates a GQL client for Bugsy operations.
+ * This function can be called separately to reuse an authenticated client
+ * across multiple operations.
+ *
+ * @returns Promise<GQLClient> An authenticated GQL client ready for use
+ */
+export async function getAuthenticatedGQLClient({
+  inputApiKey = '',
+  isSkipPrompts = true,
+}: {
+  inputApiKey?: string
+  isSkipPrompts?: boolean
+}): Promise<GQLClient> {
+  let gqlClient = new GQLClient({
+    apiKey: inputApiKey || configStore.get('apiToken') || '',
+    type: 'apiKey',
+  })
+
+  gqlClient = await handleMobbLogin({
+    inGqlClient: gqlClient,
+    skipPrompts: isSkipPrompts,
+  })
+
+  return gqlClient
+}
 
 export async function handleMobbLogin({
   inGqlClient,
@@ -122,7 +147,7 @@ export async function handleMobbLogin({
   const loginSuccess = await newGqlClient.validateUserToken()
   if (loginSuccess) {
     debug(`set api token ${newApiToken}`)
-    config.set('apiToken', newApiToken)
+    configStore.set('apiToken', newApiToken)
     loginSpinner.success({
       text: `🔓 Login to Mobb successful! ${typeof loginSpinner === 'string' ? `Logged in as ${loginSuccess}` : ''}`,
     })

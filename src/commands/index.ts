@@ -1,5 +1,4 @@
 import chalkAnimation from 'chalk-animation'
-import Configstore from 'configstore'
 
 import {
   AddScmTokenOptions,
@@ -9,11 +8,10 @@ import {
 } from '../args'
 import { errorMessages, mobbAscii, SCANNERS } from '../constants'
 import { runAnalysis } from '../features/analysis'
-import { GQLClient } from '../features/analysis/graphql'
 import { choseScanner } from '../features/analysis/prompts'
 import { validateCheckmarxInstallation } from '../features/analysis/scanners/checkmarx'
-import { CliError, packageJson, sleep } from '../utils'
-import { handleMobbLogin } from './handleMobbLogin'
+import { CliError, sleep } from '../utils'
+import { getAuthenticatedGQLClient } from './handleMobbLogin'
 
 export async function review(
   params: ReviewOptions,
@@ -95,20 +93,12 @@ export type CommandOptions = {
   skipPrompts?: boolean
 }
 
-const config = new Configstore(packageJson.name, { apiToken: '' })
-
 export async function addScmToken(addScmTokenOptions: AddScmTokenOptions) {
   const { apiKey, token, organization, scmType, url, refreshToken, ci } =
     addScmTokenOptions
-  let gqlClient = new GQLClient({
-    apiKey: apiKey ?? config.get('apiToken') ?? '',
-    type: 'apiKey',
-  })
-
-  gqlClient = await handleMobbLogin({
-    inGqlClient: gqlClient,
-    skipPrompts: ci,
-    apiKey,
+  const gqlClient = await getAuthenticatedGQLClient({
+    inputApiKey: apiKey,
+    isSkipPrompts: ci,
   })
   if (!scmType) {
     throw new CliError(errorMessages.invalidScmType)

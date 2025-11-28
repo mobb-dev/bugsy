@@ -57,6 +57,7 @@ vi.mock('@mobb/bugsy/features/analysis/graphql', () => ({
 // Mock handleMobbLogin
 vi.mock('@mobb/bugsy/commands/handleMobbLogin', () => ({
   handleMobbLogin: vi.fn(async ({ inGqlClient }) => inGqlClient),
+  getAuthenticatedGQLClient: vi.fn(async () => createMockGQLClient()),
 }))
 
 // Mock the GQL client factory to return a fake client with raw methods
@@ -116,40 +117,12 @@ describe('CLI: upload-ai-blame', () => {
     expect(second?.url).toContain('https://s3.example/inference')
   })
 
-  describe('getAuthenticatedGQLClientForIdeExtension', () => {
-    it('should create and authenticate a GQL client', async () => {
-      const { getAuthenticatedGQLClientForIdeExtension } = await import(
-        '@mobb/bugsy/args/commands/upload_ai_blame'
-      )
-      const { GQLClient } = await import(
-        '@mobb/bugsy/features/analysis/graphql'
-      )
-      const { handleMobbLogin } = await import(
-        '@mobb/bugsy/commands/handleMobbLogin'
-      )
-
-      const client = await getAuthenticatedGQLClientForIdeExtension()
-
-      expect(GQLClient).toHaveBeenCalledWith({
-        apiKey: 'test-api-token',
-        type: 'apiKey',
-      })
-      expect(handleMobbLogin).toHaveBeenCalledWith({
-        inGqlClient: expect.any(Object),
-        skipPrompts: true,
-      })
-      expect(client).toBeDefined()
-      expect(client.uploadAIBlameInferencesInitRaw).toBeDefined()
-      expect(client.finalizeAIBlameInferencesUploadRaw).toBeDefined()
-    })
-  })
-
   describe('uploadAiBlameHandler', () => {
     it('should authenticate a client and upload files successfully', async () => {
       const { uploadAiBlameHandler } = await import(
         '@mobb/bugsy/args/commands/upload_ai_blame'
       )
-      const { handleMobbLogin } = await import(
+      const { getAuthenticatedGQLClient } = await import(
         '@mobb/bugsy/commands/handleMobbLogin'
       )
       const uploadMod = await import(
@@ -171,9 +144,8 @@ describe('CLI: upload-ai-blame', () => {
       })
 
       // Should call handleMobbLogin to authenticate
-      expect(handleMobbLogin).toHaveBeenCalledWith({
-        inGqlClient: expect.any(Object),
-        skipPrompts: true,
+      expect(getAuthenticatedGQLClient).toHaveBeenCalledWith({
+        isSkipPrompts: true,
       })
       // Should upload files
       expect(uploadSpy).toHaveBeenCalledTimes(2)
@@ -183,8 +155,8 @@ describe('CLI: upload-ai-blame', () => {
       const { uploadAiBlameHandler } = await import(
         '@mobb/bugsy/args/commands/upload_ai_blame'
       )
-      const { GQLClient } = await import(
-        '@mobb/bugsy/features/analysis/graphql'
+      const { getAuthenticatedGQLClient } = await import(
+        '@mobb/bugsy/commands/handleMobbLogin'
       )
 
       const promptPath = path.join(tmpDir, 'prompt-error.json')
@@ -200,8 +172,10 @@ describe('CLI: upload-ai-blame', () => {
         },
       }))
 
-      // Mock GQLClient constructor to return our failing client
-      vi.mocked(GQLClient).mockImplementationOnce(() => mockClient as any)
+      // Mock to return our failing client
+      vi.mocked(getAuthenticatedGQLClient).mockResolvedValueOnce(
+        mockClient as any
+      )
 
       // Should throw error instead of exiting
       await expect(

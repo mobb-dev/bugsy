@@ -2,20 +2,17 @@ import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 
 import chalk from 'chalk'
-import Configstore from 'configstore'
 import { withFile } from 'tmp-promise'
 import type * as Yargs from 'yargs'
 import z from 'zod'
 
-import { handleMobbLogin } from '../../commands/handleMobbLogin'
-import { GQLClient } from '../../features/analysis/graphql'
+import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import {
   AiBlameInferenceType,
   type FinalizeAiBlameInferencesUploadMutationVariables,
   type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
-import { packageJson } from '../../utils'
 
 const PromptItemZ = z.object({
   type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
@@ -157,29 +154,6 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   })
 }
 
-const config = new Configstore(packageJson.name, { apiToken: '' })
-
-/**
- * Initializes and authenticates a GQL client for AI Blame upload operations.
- * This function can be called separately to reuse an authenticated client
- * across multiple upload operations.
- *
- * @returns Promise<GQLClient> An authenticated GQL client ready for use
- */
-export async function getAuthenticatedGQLClientForIdeExtension(): Promise<GQLClient> {
-  let gqlClient = new GQLClient({
-    apiKey: config.get('apiToken') ?? '',
-    type: 'apiKey',
-  })
-
-  gqlClient = await handleMobbLogin({
-    inGqlClient: gqlClient,
-    skipPrompts: true,
-  })
-
-  return gqlClient
-}
-
 export async function uploadAiBlameHandler(
   args: UploadAiBlameOptions,
   exitOnError = true
@@ -236,7 +210,9 @@ export async function uploadAiBlameHandler(
   }
 
   // Use provided client or authenticate a new one
-  const authenticatedClient = await getAuthenticatedGQLClientForIdeExtension()
+  const authenticatedClient = await getAuthenticatedGQLClient({
+    isSkipPrompts: true,
+  })
 
   // Init: presign
   const initRes = await authenticatedClient.uploadAIBlameInferencesInitRaw({

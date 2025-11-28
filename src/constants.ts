@@ -12,6 +12,9 @@ import { getModuleRootDir } from './utils/dirname'
 const debug = Debug('mobbdev:constants')
 dotenv.config({ path: path.join(getModuleRootDir(), '.env') })
 
+// Base GraphQL endpoint
+export const DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
+
 export const scmFriendlyText: Record<ScmType, string> = {
   [ScmType.Ado]: 'Azure DevOps',
   [ScmType.Bitbucket]: 'Bitbucket',

@@ -1,8 +1,5 @@
 import { MAX_UPLOAD_FILE_SIZE_MB } from '../../features/analysis/scm/env'
 
-// Base GraphQL endpoint for MCP operations
-export const MCP_DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
-
 // HTTP header name used to transmit a user-provided MOBB API key
 export const MCP_API_KEY_HEADER_NAME = 'x-mobb-key'
 

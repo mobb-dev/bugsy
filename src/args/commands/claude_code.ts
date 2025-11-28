@@ -1,13 +1,8 @@
-import Configstore from 'configstore'
 import { Argv } from 'yargs'
 
-import { handleMobbLogin } from '../../commands/handleMobbLogin'
-import { GQLClient } from '../../features/analysis/graphql'
+import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import { processAndUploadHookData } from '../../features/claude_code/data_collector'
 import { installMobbHooks } from '../../features/claude_code/install_hook'
-import { packageJson } from '../../utils'
-
-const config = new Configstore(packageJson.name, { apiToken: '' })
 
 export const claudeCodeInstallHookBuilder = (yargs: Argv) => {
   return yargs
@@ -45,15 +40,7 @@ export const claudeCodeInstallHookHandler = async (argv: {
 }) => {
   try {
     // Authenticate user using existing CLI auth flow
-    const gqlClient = new GQLClient({
-      apiKey: config.get('apiToken') ?? '',
-      type: 'apiKey',
-    })
-
-    await handleMobbLogin({
-      inGqlClient: gqlClient,
-      skipPrompts: false,
-    })
+    await getAuthenticatedGQLClient({ isSkipPrompts: false })
 
     // Install the hooks
     await installMobbHooks({ saveEnv: argv['save-env'] })

@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { GraphQLClient } from 'graphql-request'
 import { v4 as uuidv4 } from 'uuid'
 
+import { DEFAULT_API_URL } from '../../constants'
 import { subscribe } from '../../features/analysis/graphql/subscribe'
 import {
   CreateCliLoginMutationVariables,
@@ -22,15 +23,11 @@ import {
   UploadAiBlameInferencesInitMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
-import {
-  MCP_API_KEY_HEADER_NAME,
-  MCP_DEFAULT_API_URL,
-  MCP_DEFAULT_LIMIT,
-} from '../core/configs'
+import { configStore } from '../../utils/ConfigStoreService'
+import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_LIMIT } from '../core/configs'
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
-import { configStore } from './ConfigStoreService'
 import { McpAuthService } from './McpAuthService'
 
 type GQLClientArgs =
@@ -53,7 +50,7 @@ export class McpGQLClient {
 
   constructor(args: GQLClientArgs) {
     this._auth = args
-    this.apiUrl = process.env['API_URL'] || MCP_DEFAULT_API_URL
+    this.apiUrl = process.env['API_URL'] || DEFAULT_API_URL
 
     logDebug(`[GraphQL] Creating graphql client with api url ${this.apiUrl}`, {
       args,

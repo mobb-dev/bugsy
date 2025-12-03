@@ -186,15 +186,22 @@ export class PatchApplicationService {
    */
   private static writeFileWithFixComment({
     filePath,
+    repositoryPath,
     content,
     fix,
     scanContext,
   }: {
     filePath: string
+    repositoryPath: string
     content: string
     fix: McpFix
     scanContext: string
   }): string {
+    const { normalizedPath: normalizedFilePath } = this.resolvePathWithinRepo({
+      repositoryPath,
+      targetPath: filePath,
+    })
+
     let finalContent = content
 
     if (MCP_AUTO_FIX_DEBUG_MODE) {
@@ -241,11 +248,40 @@ export class PatchApplicationService {
     }
 
     // Ensure parent directories exist before writing the file
-    const dirPath = path.dirname(filePath)
+    const dirPath = path.dirname(normalizedFilePath)
     mkdirSync(dirPath, { recursive: true })
 
-    writeFileSync(filePath, finalContent, 'utf8')
-    return filePath
+    writeFileSync(normalizedFilePath, finalContent, 'utf8')
+    return normalizedFilePath
+  }
+
+  private static resolvePathWithinRepo({
+    repositoryPath,
+    targetPath,
+  }: {
+    repositoryPath: string
+    targetPath: string
+  }): { repoRoot: string; normalizedPath: string; relativePath: string } {
+    const repoRoot = path.resolve(repositoryPath)
+    const normalizedPath = path.resolve(repoRoot, targetPath)
+    const repoRootWithSep = repoRoot.endsWith(path.sep)
+      ? repoRoot
+      : `${repoRoot}${path.sep}`
+
+    if (
+      normalizedPath !== repoRoot &&
+      !normalizedPath.startsWith(repoRootWithSep)
+    ) {
+      throw new Error(
+        `Security violation: target path ${targetPath} resolves outside repository`
+      )
+    }
+
+    return {
+      repoRoot,
+      normalizedPath,
+      relativePath: path.relative(repoRoot, normalizedPath),
+    }
   }
 
   /**
@@ -863,32 +899,18 @@ export class PatchApplicationService {
     repositoryPath: string
     scanContext: string
   }): { absoluteFilePath: string; relativePath: string } {
-    // Sanitize inputs for security
-    const sanitizedRepoPath = String(repositoryPath || '')
-      .replace('\0', '') // Remove null bytes
-      .replace(/^(\.\.(\/|\\))+/, '') // Remove leading ../
-
-    const sanitizedTargetFile = String(targetFile || '')
-      .replace('\0', '') // Remove null bytes
-      .replace(/^(\.\.(\/|\\))+/, '') // Remove leading ../
-
-    // Simple and reliable path resolution
-    const absoluteFilePath = path.resolve(
-      sanitizedRepoPath,
-      sanitizedTargetFile
-    )
-    const relativePath = path.relative(sanitizedRepoPath, absoluteFilePath)
-
-    // Security check: ensure the resolved path is within the repository
-    if (relativePath.startsWith('..')) {
-      throw new Error(
-        `Security violation: target file ${targetFile} resolves outside repository`
-      )
-    }
+    const {
+      repoRoot,
+      normalizedPath: absoluteFilePath,
+      relativePath,
+    } = this.resolvePathWithinRepo({
+      repositoryPath,
+      targetPath: targetFile,
+    })
 
     logDebug(`[${scanContext}] Resolving file path for ${targetFile}`, {
-      repositoryPath: sanitizedRepoPath,
-      targetFile: sanitizedTargetFile,
+      repositoryPath: repoRoot,
+      targetFile,
       absoluteFilePath,
       relativePath,
       exists: existsSync(absoluteFilePath),
@@ -920,6 +942,7 @@ export class PatchApplicationService {
     const newContent = this.applyHunksToEmptyFile(fileDiff.chunks)
     const actualPath = this.writeFileWithFixComment({
       filePath: absoluteFilePath,
+      repositoryPath,
       content: newContent,
       fix,
       scanContext,
@@ -986,6 +1009,7 @@ export class PatchApplicationService {
     if (modifiedContent !== originalContent) {
       const actualPath = this.writeFileWithFixComment({
         filePath: absoluteFilePath,
+        repositoryPath,
         content: modifiedContent,
         fix,
         scanContext,

@@ -9,7 +9,7 @@ export const claudeCodeInstallHookBuilder = (yargs: Argv) => {
     .option('save-env', {
       type: 'boolean',
       description:
-        'Save WEB_LOGIN_URL, WEB_APP_URL, and API_URL environment variables to hooks config',
+        'Save WEB_APP_URL, and API_URL environment variables to hooks config',
       default: false,
     })
     .example(

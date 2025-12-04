@@ -82,12 +82,11 @@ export async function installMobbHooks(
 
   if (options.saveEnv) {
     const envVars = []
-    if (process.env['WEB_LOGIN_URL']) {
-      envVars.push(`WEB_LOGIN_URL="${process.env['WEB_LOGIN_URL']}"`)
-    }
+
     if (process.env['WEB_APP_URL']) {
       envVars.push(`WEB_APP_URL="${process.env['WEB_APP_URL']}"`)
     }
+
     if (process.env['API_URL']) {
       envVars.push(`API_URL="${process.env['API_URL']}"`)
     }

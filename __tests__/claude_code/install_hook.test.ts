@@ -32,7 +32,6 @@ describe('installMobbHooks', () => {
 
     vi.stubGlobal('process', {
       env: {
-        WEB_LOGIN_URL: 1,
         WEB_APP_URL: 2,
         API_URL: 3,
       },
@@ -50,7 +49,6 @@ describe('installMobbHooks', () => {
     const writtenSettings = JSON.parse(writtenContent as string)
     const cmd = writtenSettings.hooks.PostToolUse[0].hooks[0].command
 
-    expect(cmd).toContain('WEB_LOGIN_URL="1"')
     expect(cmd).toContain('WEB_APP_URL="2"')
     expect(cmd).toContain('API_URL="3"')
   })

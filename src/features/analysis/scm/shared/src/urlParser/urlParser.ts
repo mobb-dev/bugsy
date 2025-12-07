@@ -34,15 +34,15 @@ function detectAdoUrl(args: GetRepoInfoArgs): Repo {
   const prefixPath =
     pathname.at(0)?.toLowerCase() === ADO_PREFIX_PATH ? ADO_PREFIX_PATH : ''
   // we have the same parsing logic when there's 'tfs' in the beginning of the path
-  const normilizedPath = prefixPath ? pathname.slice(1) : pathname
+  const normalizedPath = prefixPath ? pathname.slice(1) : pathname
   if (
     hostnameParts.length === 3 &&
     hostnameParts[1] === 'visualstudio' &&
     hostnameParts[2] === 'com'
   ) {
     // the pattern is: https://{org-name}.visualstudio.com/_git/{projectName/repoName}
-    if (normilizedPath.length === 2 && normilizedPath[0] === '_git') {
-      const [_git, projectName] = normilizedPath
+    if (normalizedPath.length === 2 && normalizedPath[0] === '_git') {
+      const [_git, projectName] = normalizedPath
       const [organization] = hostnameParts
       return {
         scmType: ScmType.Ado,
@@ -55,8 +55,8 @@ function detectAdoUrl(args: GetRepoInfoArgs): Repo {
     }
     // project has more than one repo
     // the pattern is: https://{org-name}.visualstudio.com/{projectName}/_git/{repoName}
-    if (normilizedPath.length === 3 && normilizedPath[1] === '_git') {
-      const [projectName, _git, repoName] = normilizedPath
+    if (normalizedPath.length === 3 && normalizedPath[1] === '_git') {
+      const [projectName, _git, repoName] = normalizedPath
 
       const [organization] = hostnameParts
       return {
@@ -71,9 +71,9 @@ function detectAdoUrl(args: GetRepoInfoArgs): Repo {
   // custom domain / dev.azure.com
   if (hostname === adoCloudHostname || scmType === ScmType.Ado) {
     // the pattern is: https://{ado-domain}/(tfs?)/{org-name}/_git/{repoName/projectName}
-    if (normilizedPath[normilizedPath.length - 2] === '_git') {
-      if (normilizedPath.length === 3) {
-        const [organization, _git, repoName] = normilizedPath
+    if (normalizedPath[normalizedPath.length - 2] === '_git') {
+      if (normalizedPath.length === 3) {
+        const [organization, _git, repoName] = normalizedPath
         return {
           scmType: ScmType.Ado,
           organization,
@@ -85,8 +85,8 @@ function detectAdoUrl(args: GetRepoInfoArgs): Repo {
       }
 
       // the pattern is: https://{ado-domain}/(tfs?)/{org-name}{project-name}/_git/{repo-name}
-      if (normilizedPath.length === 4) {
-        const [organization, projectName, _git, repoName] = normilizedPath
+      if (normalizedPath.length === 4) {
+        const [organization, projectName, _git, repoName] = normalizedPath
         return {
           scmType: ScmType.Ado,
           organization,
@@ -171,10 +171,143 @@ function getRepoInfo(args: GetRepoInfoArgs): Repo {
   return null
 }
 
+/**
+ * Parses SSH URL format: git@hostname:path
+ * Returns null if not an SSH URL or parsing fails.
+ * For unknown hosts, returns basic info with scmType: 'Unknown'.
+ *
+ * Supported formats:
+ * - git@github.com:org/repo.git
+ * - git@gitlab.com:group/subgroup/repo.git
+ * - git@bitbucket.org:org/repo.git
+ * - git@ssh.dev.azure.com:v3/org/project/repo
+ * - git@custom-host.com:org/repo.git (returns Unknown type)
+ */
+function parseSshUrl(scmURL: string, scmType?: ScmType): ParseScmURLRes {
+  // Match SSH format: git@hostname:path (with optional .git suffix)
+  const sshMatch = scmURL.match(/^git@([^:]+):(.+?)(?:\.git)?$/)
+  if (!sshMatch) return null
+
+  const hostname = sshMatch[1]
+  const pathPart = sshMatch[2]
+  if (!hostname || !pathPart) return null
+
+  const normalizedHostname = hostname.toLowerCase()
+
+  // Handle ADO SSH format: git@ssh.dev.azure.com:v3/org/project/repo
+  // The "v3" prefix needs to be stripped from the path
+  let projectPath = pathPart
+  if (
+    normalizedHostname === 'ssh.dev.azure.com' &&
+    projectPath.startsWith('v3/')
+  ) {
+    projectPath = projectPath.substring(3) // Remove 'v3/' prefix
+  }
+
+  const pathElements = projectPath.split('/')
+
+  // Handle ADO SSH URLs directly (format after v3/ strip: org/project/repo)
+  // This is separate from detectAdoUrl which handles HTTPS URLs (requiring _git in path)
+  if (normalizedHostname === 'ssh.dev.azure.com') {
+    if (pathElements.length === 3) {
+      const [organization, projectName, repoName] = pathElements
+      if (
+        organization?.match(NAME_REGEX) &&
+        projectName &&
+        repoName?.match(NAME_REGEX)
+      ) {
+        return {
+          scmType: ScmType.Ado,
+          hostname: normalizedHostname,
+          organization,
+          projectName: z.string().parse(projectName),
+          repoName,
+          projectPath,
+          protocol: 'ssh:',
+          pathElements,
+          prefixPath: '',
+        }
+      }
+    }
+    return null // Invalid ADO SSH URL format
+  }
+
+  const repo = getRepoInfo({
+    pathname: pathElements,
+    hostname: normalizedHostname,
+    scmType,
+  })
+
+  // For unknown hosts, derive organization and repoName from path
+  // Require at least 2 path segments for a valid repo URL (org/repo)
+  // Don't return Unknown for known SCM hosts with invalid paths - return null
+  if (!repo) {
+    const knownHosts = [
+      new URL(scmCloudUrl.GitHub).hostname,
+      new URL(scmCloudUrl.GitLab).hostname,
+      new URL(scmCloudUrl.Bitbucket).hostname,
+      new URL(scmCloudUrl.Ado).hostname,
+      'ssh.dev.azure.com', // ADO SSH host
+    ]
+    if (knownHosts.includes(normalizedHostname)) {
+      return null // Known host with invalid path pattern
+    }
+    const filteredPathElements = pathElements.filter(Boolean)
+    if (filteredPathElements.length < 2) {
+      return null
+    }
+    const organization = filteredPathElements[0] || ''
+    const repoName = filteredPathElements[filteredPathElements.length - 1] || ''
+    return {
+      scmType: 'Unknown',
+      hostname: normalizedHostname,
+      organization,
+      projectPath,
+      repoName,
+      protocol: 'ssh:',
+      pathElements: filteredPathElements,
+    }
+  }
+
+  const { organization, repoName } = repo
+
+  if (!organization || !repoName) return null
+  if (!organization.match(NAME_REGEX) || !repoName.match(NAME_REGEX))
+    return null
+
+  const res = {
+    hostname: normalizedHostname,
+    organization,
+    projectPath,
+    repoName,
+    protocol: 'ssh:',
+    pathElements,
+  }
+
+  if (repo.scmType === ScmType.Ado) {
+    return {
+      projectName: repo.projectName,
+      prefixPath: repo.prefixPath,
+      scmType: repo.scmType,
+      ...res,
+    }
+  }
+
+  return {
+    scmType: repo.scmType,
+    ...res,
+  }
+}
+
 export const parseScmURL = (
   scmURL: string,
   scmType?: ScmType
 ): ParseScmURLRes => {
+  // Try SSH format first
+  const sshResult = parseSshUrl(scmURL, scmType)
+  if (sshResult) return sshResult
+
+  // Fall back to HTTPS/HTTP format
   try {
     const url = new URL(scmURL)
     const hostname = url.hostname.toLowerCase()
@@ -186,7 +319,35 @@ export const parseScmURL = (
       scmType,
     })
 
-    if (!repo) return null
+    // For unknown hosts, derive organization and repoName from path
+    // Require at least 2 path segments for a valid repo URL (org/repo)
+    // Don't return Unknown for known SCM hosts with invalid paths - return null
+    if (!repo) {
+      const knownHosts = [
+        new URL(scmCloudUrl.GitHub).hostname,
+        new URL(scmCloudUrl.GitLab).hostname,
+        new URL(scmCloudUrl.Bitbucket).hostname,
+        new URL(scmCloudUrl.Ado).hostname,
+      ]
+      if (knownHosts.includes(hostname)) {
+        return null // Known host with invalid path pattern
+      }
+      const pathElements = projectPath.split('/').filter(Boolean)
+      if (pathElements.length < 2) {
+        return null
+      }
+      const organization = pathElements[0] || ''
+      const repoName = pathElements[pathElements.length - 1] || ''
+      return {
+        scmType: 'Unknown',
+        hostname,
+        organization,
+        projectPath,
+        repoName,
+        protocol: url.protocol,
+        pathElements,
+      }
+    }
 
     const { organization, repoName } = repo
 

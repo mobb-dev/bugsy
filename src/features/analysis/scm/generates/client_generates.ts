@@ -129,6 +129,13 @@ export type AiToolTypeUsage = {
   rawModel?: Maybe<Scalars['String']['output']>;
 };
 
+export type Attribution = {
+  __typename?: 'Attribution';
+  inferenceType?: Maybe<AiBlameInferenceType>;
+  model?: Maybe<Scalars['String']['output']>;
+  toolName?: Maybe<Scalars['String']['output']>;
+};
+
 export type AutoPrError = ScmBaseError & {
   __typename?: 'AutoPrError';
   error: Scalars['String']['output'];
@@ -291,9 +298,11 @@ export type DeleteIntegrationResponseSuccess = {
 
 export type DiffLineAttribution = {
   __typename?: 'DiffLineAttribution';
+  attributions: Array<Attribution>;
   commitSha: Scalars['String']['output'];
   file: Scalars['String']['output'];
   line: Scalars['Int']['output'];
+  originalLine?: Maybe<Scalars['Int']['output']>;
 };
 
 export type ExplainFixResponse = {
@@ -777,6 +786,17 @@ export type ProcessAiBlameFinalResult = {
 
 export type ProcessAiBlameRequestedResult = {
   __typename?: 'ProcessAIBlameRequestedResult';
+  /**
+   * Commit blame request IDs (commit_blame_request table).
+   * Only populated for PR analysis - provides git blame data for PR diff lines.
+   * Empty array for COMMIT analysis (single commits don't need blame orchestration).
+   * Check commitBlameRequestIds.length > 0 to determine if blame orchestration is pending.
+   */
+  commitBlameRequestIds: Array<Scalars['String']['output']>;
+  /**
+   * AI attribution analysis request IDs (blame_ai_analysis_request table).
+   * Contains IDs of requests analyzing AI-generated code in commits.
+   */
   requestIds: Array<Scalars['String']['output']>;
   status: BlameStatus;
 };
@@ -9842,6 +9862,232 @@ export type Cli_Login_Updates = {
   where: Cli_Login_Bool_Exp;
 };
 
+/** columns and relationships of "commit_blame_request" */
+export type Commit_Blame_Request = {
+  __typename?: 'commit_blame_request';
+  commitSha: Scalars['String']['output'];
+  completedOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  createdByUser: User;
+  createdByUserId: Scalars['uuid']['output'];
+  createdOn: Scalars['timestamptz']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  repositoryUrl: Scalars['String']['output'];
+  state: Blame_Ai_Analysis_Request_State_Enum;
+};
+
+/** aggregated selection of "commit_blame_request" */
+export type Commit_Blame_Request_Aggregate = {
+  __typename?: 'commit_blame_request_aggregate';
+  aggregate?: Maybe<Commit_Blame_Request_Aggregate_Fields>;
+  nodes: Array<Commit_Blame_Request>;
+};
+
+/** aggregate fields of "commit_blame_request" */
+export type Commit_Blame_Request_Aggregate_Fields = {
+  __typename?: 'commit_blame_request_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Commit_Blame_Request_Max_Fields>;
+  min?: Maybe<Commit_Blame_Request_Min_Fields>;
+};
+
+
+/** aggregate fields of "commit_blame_request" */
+export type Commit_Blame_Request_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Commit_Blame_Request_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "commit_blame_request". All fields are combined with a logical 'AND'. */
+export type Commit_Blame_Request_Bool_Exp = {
+  _and?: InputMaybe<Array<Commit_Blame_Request_Bool_Exp>>;
+  _not?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+  _or?: InputMaybe<Array<Commit_Blame_Request_Bool_Exp>>;
+  commitSha?: InputMaybe<String_Comparison_Exp>;
+  completedOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  createdByUser?: InputMaybe<User_Bool_Exp>;
+  createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  error?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "commit_blame_request" */
+export enum Commit_Blame_Request_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  CommitBlameRequestPkey = 'commit_blame_request_pkey'
+}
+
+/** input type for inserting data into table "commit_blame_request" */
+export type Commit_Blame_Request_Insert_Input = {
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  completedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** aggregate max on columns */
+export type Commit_Blame_Request_Max_Fields = {
+  __typename?: 'commit_blame_request_max_fields';
+  commitSha?: Maybe<Scalars['String']['output']>;
+  completedOn?: Maybe<Scalars['timestamptz']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Commit_Blame_Request_Min_Fields = {
+  __typename?: 'commit_blame_request_min_fields';
+  commitSha?: Maybe<Scalars['String']['output']>;
+  completedOn?: Maybe<Scalars['timestamptz']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "commit_blame_request" */
+export type Commit_Blame_Request_Mutation_Response = {
+  __typename?: 'commit_blame_request_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Commit_Blame_Request>;
+};
+
+/** on_conflict condition type for table "commit_blame_request" */
+export type Commit_Blame_Request_On_Conflict = {
+  constraint: Commit_Blame_Request_Constraint;
+  update_columns?: Array<Commit_Blame_Request_Update_Column>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "commit_blame_request". */
+export type Commit_Blame_Request_Order_By = {
+  commitSha?: InputMaybe<Order_By>;
+  completedOn?: InputMaybe<Order_By>;
+  createdByUser?: InputMaybe<User_Order_By>;
+  createdByUserId?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: commit_blame_request */
+export type Commit_Blame_Request_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "commit_blame_request" */
+export enum Commit_Blame_Request_Select_Column {
+  /** column name */
+  CommitSha = 'commitSha',
+  /** column name */
+  CompletedOn = 'completedOn',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  State = 'state'
+}
+
+/** input type for updating data in table "commit_blame_request" */
+export type Commit_Blame_Request_Set_Input = {
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  completedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** Streaming cursor of the table "commit_blame_request" */
+export type Commit_Blame_Request_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Commit_Blame_Request_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Commit_Blame_Request_Stream_Cursor_Value_Input = {
+  commitSha?: InputMaybe<Scalars['String']['input']>;
+  completedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
+};
+
+/** update columns of table "commit_blame_request" */
+export enum Commit_Blame_Request_Update_Column {
+  /** column name */
+  CommitSha = 'commitSha',
+  /** column name */
+  CompletedOn = 'completedOn',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  State = 'state'
+}
+
+export type Commit_Blame_Request_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Commit_Blame_Request_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Commit_Blame_Request_Bool_Exp;
+};
+
 /** ordering argument of a cursor */
 export enum Cursor_Ordering {
   /** ascending ordering of the cursor */
@@ -16535,6 +16781,10 @@ export type Mutation_Root = {
   delete_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** delete single row from the table: "cli_login" */
   delete_cli_login_by_pk?: Maybe<Cli_Login>;
+  /** delete data from the table: "commit_blame_request" */
+  delete_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
+  /** delete single row from the table: "commit_blame_request" */
+  delete_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** delete data from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** delete single row from the table: "effort_to_apply_fix" */
@@ -16925,6 +17175,10 @@ export type Mutation_Root = {
   insert_cli_login?: Maybe<Cli_Login_Mutation_Response>;
   /** insert a single row into the table: "cli_login" */
   insert_cli_login_one?: Maybe<Cli_Login>;
+  /** insert data into the table: "commit_blame_request" */
+  insert_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
+  /** insert a single row into the table: "commit_blame_request" */
+  insert_commit_blame_request_one?: Maybe<Commit_Blame_Request>;
   /** insert data into the table: "effort_to_apply_fix" */
   insert_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** insert a single row into the table: "effort_to_apply_fix" */
@@ -17380,6 +17634,12 @@ export type Mutation_Root = {
   update_cli_login_by_pk?: Maybe<Cli_Login>;
   /** update multiples rows of table: "cli_login" */
   update_cli_login_many?: Maybe<Array<Maybe<Cli_Login_Mutation_Response>>>;
+  /** update data of the table: "commit_blame_request" */
+  update_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
+  /** update single row of the table: "commit_blame_request" */
+  update_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** update multiples rows of table: "commit_blame_request" */
+  update_commit_blame_request_many?: Maybe<Array<Maybe<Commit_Blame_Request_Mutation_Response>>>;
   /** update data of the table: "effort_to_apply_fix" */
   update_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** update single row of the table: "effort_to_apply_fix" */
@@ -18277,6 +18537,18 @@ export type Mutation_RootDelete_Cli_LoginArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Cli_Login_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Commit_Blame_RequestArgs = {
+  where: Commit_Blame_Request_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Commit_Blame_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -19509,6 +19781,20 @@ export type Mutation_RootInsert_Cli_LoginArgs = {
 export type Mutation_RootInsert_Cli_Login_OneArgs = {
   object: Cli_Login_Insert_Input;
   on_conflict?: InputMaybe<Cli_Login_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Commit_Blame_RequestArgs = {
+  objects: Array<Commit_Blame_Request_Insert_Input>;
+  on_conflict?: InputMaybe<Commit_Blame_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Commit_Blame_Request_OneArgs = {
+  object: Commit_Blame_Request_Insert_Input;
+  on_conflict?: InputMaybe<Commit_Blame_Request_On_Conflict>;
 };
 
 
@@ -21214,6 +21500,26 @@ export type Mutation_RootUpdate_Cli_Login_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Cli_Login_ManyArgs = {
   updates: Array<Cli_Login_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Commit_Blame_RequestArgs = {
+  _set?: InputMaybe<Commit_Blame_Request_Set_Input>;
+  where: Commit_Blame_Request_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Commit_Blame_Request_By_PkArgs = {
+  _set?: InputMaybe<Commit_Blame_Request_Set_Input>;
+  pk_columns: Commit_Blame_Request_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Commit_Blame_Request_ManyArgs = {
+  updates: Array<Commit_Blame_Request_Updates>;
 };
 
 
@@ -27724,6 +28030,12 @@ export type Query_Root = {
   cli_login_aggregate: Cli_Login_Aggregate;
   /** fetch data from the table: "cli_login" using primary key columns */
   cli_login_by_pk?: Maybe<Cli_Login>;
+  /** fetch data from the table: "commit_blame_request" */
+  commit_blame_request: Array<Commit_Blame_Request>;
+  /** fetch aggregated fields from the table: "commit_blame_request" */
+  commit_blame_request_aggregate: Commit_Blame_Request_Aggregate;
+  /** fetch data from the table: "commit_blame_request" using primary key columns */
+  commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -28923,6 +29235,29 @@ export type Query_RootCli_Login_AggregateArgs = {
 
 
 export type Query_RootCli_Login_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootCommit_Blame_RequestArgs = {
+  distinct_on?: InputMaybe<Array<Commit_Blame_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Commit_Blame_Request_Order_By>>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+
+export type Query_RootCommit_Blame_Request_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Commit_Blame_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Commit_Blame_Request_Order_By>>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+
+export type Query_RootCommit_Blame_Request_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -33642,6 +33977,14 @@ export type Subscription_Root = {
   cli_login_by_pk?: Maybe<Cli_Login>;
   /** fetch data from the table in a streaming manner: "cli_login" */
   cli_login_stream: Array<Cli_Login>;
+  /** fetch data from the table: "commit_blame_request" */
+  commit_blame_request: Array<Commit_Blame_Request>;
+  /** fetch aggregated fields from the table: "commit_blame_request" */
+  commit_blame_request_aggregate: Commit_Blame_Request_Aggregate;
+  /** fetch data from the table: "commit_blame_request" using primary key columns */
+  commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** fetch data from the table in a streaming manner: "commit_blame_request" */
+  commit_blame_request_stream: Array<Commit_Blame_Request>;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -35157,6 +35500,36 @@ export type Subscription_RootCli_Login_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Cli_Login_Stream_Cursor_Input>>;
   where?: InputMaybe<Cli_Login_Bool_Exp>;
+};
+
+
+export type Subscription_RootCommit_Blame_RequestArgs = {
+  distinct_on?: InputMaybe<Array<Commit_Blame_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Commit_Blame_Request_Order_By>>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootCommit_Blame_Request_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Commit_Blame_Request_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Commit_Blame_Request_Order_By>>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootCommit_Blame_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootCommit_Blame_Request_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Commit_Blame_Request_Stream_Cursor_Input>>;
+  where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
 };
 
 

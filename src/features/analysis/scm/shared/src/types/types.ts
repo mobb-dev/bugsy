@@ -531,6 +531,9 @@ export type ParseScmURLRes =
   | ({
       scmType: ScmType.GitHub | ScmType.Bitbucket | ScmType.GitLab
     } & BaseParseScmURLRes)
+  | ({
+      scmType: 'Unknown'
+    } & BaseParseScmURLRes)
   | null
 
 export enum ConvertToSarifInputFileFormat {

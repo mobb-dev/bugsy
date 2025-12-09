@@ -102,9 +102,17 @@ export async function pack(
       continue
     }
 
-    const data = git
-      ? await git.showBuffer([`HEAD:./${filepath}`])
-      : fs.readFileSync(absFilepath)
+    let data: Buffer
+    if (git) {
+      try {
+        data = await git.showBuffer([`HEAD:./${filepath}`])
+      } catch {
+        // File exists on disk but not in HEAD (e.g., new untracked file)
+        data = fs.readFileSync(absFilepath)
+      }
+    } else {
+      data = fs.readFileSync(absFilepath)
+    }
 
     if (isBinary(null, data)) {
       debug('ignoring %s because is seems to be a binary file', filepath)

@@ -8,11 +8,18 @@ import z from 'zod'
 
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import {
+  type AiBlameInferenceFinalizeInput,
+  type AiBlameInferenceInitInput,
   AiBlameInferenceType,
   type FinalizeAiBlameInferencesUploadMutationVariables,
   type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
+import {
+  type SanitizationCounts,
+  sanitizeData,
+  sanitizeDataWithCounts,
+} from '../../utils/sanitize-sensitive-data'
 
 const PromptItemZ = z.object({
   type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
@@ -117,6 +124,13 @@ export function uploadAiBlameBuilder(
     .strict()
 }
 
+export type UploadAiBlameResult = {
+  promptsCounts: SanitizationCounts
+  inferenceCounts: SanitizationCounts
+  promptsUUID?: string
+  inferenceUUID?: string
+}
+
 export async function uploadAiBlameHandlerFromExtension(args: {
   prompts: PromptItemArray
   inference: string
@@ -124,7 +138,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   tool: string
   responseTime: string
   blameType?: AiBlameInferenceType
-}) {
+}): Promise<UploadAiBlameResult> {
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
     inference: [],
@@ -134,15 +148,38 @@ export async function uploadAiBlameHandlerFromExtension(args: {
     blameType: [],
   }
 
+  let promptsCounts: SanitizationCounts
+  let inferenceCounts: SanitizationCounts
+  let promptsUUID: string | undefined
+  let inferenceUUID: string | undefined
+
   await withFile(async (promptFile) => {
+    // Sanitize prompts data and get counts
+    const promptsResult = await sanitizeDataWithCounts(args.prompts)
+    promptsCounts = promptsResult.counts
+    promptsUUID = path.basename(promptFile.path, path.extname(promptFile.path))
+
     await fsPromises.writeFile(
       promptFile.path,
-      JSON.stringify(args.prompts, null, 2),
+      JSON.stringify(promptsResult.sanitizedData, null, 2),
       'utf-8'
     )
     uploadArgs.prompt!.push(promptFile.path)
+
     await withFile(async (inferenceFile) => {
-      await fsPromises.writeFile(inferenceFile.path, args.inference, 'utf-8')
+      // Sanitize inference data and get counts
+      const inferenceResult = await sanitizeDataWithCounts(args.inference)
+      inferenceCounts = inferenceResult.counts
+      inferenceUUID = path.basename(
+        inferenceFile.path,
+        path.extname(inferenceFile.path)
+      )
+
+      await fsPromises.writeFile(
+        inferenceFile.path,
+        inferenceResult.sanitizedData as string,
+        'utf-8'
+      )
       uploadArgs.inference!.push(inferenceFile.path)
       uploadArgs.model!.push(args.model)
       uploadArgs.toolName!.push(args.tool)
@@ -152,6 +189,13 @@ export async function uploadAiBlameHandlerFromExtension(args: {
       await uploadAiBlameHandler(uploadArgs, false)
     })
   })
+
+  return {
+    promptsCounts: promptsCounts!,
+    inferenceCounts: inferenceCounts!,
+    promptsUUID,
+    inferenceUUID,
+  }
 }
 
 export async function uploadAiBlameHandler(
@@ -215,8 +259,12 @@ export async function uploadAiBlameHandler(
   })
 
   // Init: presign
+  // Sanitize sessions data before sending to server
+  const sanitizedSessions = (await sanitizeData(
+    sessions
+  )) as AiBlameInferenceInitInput[]
   const initRes = await authenticatedClient.uploadAIBlameInferencesInitRaw({
-    sessions,
+    sessions: sanitizedSessions,
   })
   const uploadSessions: NonNullable<
     UploadAiBlameInferencesInitMutation['uploadAIBlameInferencesInit']
@@ -270,8 +318,12 @@ export async function uploadAiBlameHandler(
       }
     })
 
+  // Sanitize finalizeSessions data before sending to server
+  const sanitizedFinalizeSessions = (await sanitizeData(
+    finalizeSessions
+  )) as AiBlameInferenceFinalizeInput[]
   const finRes = await authenticatedClient.finalizeAIBlameInferencesUploadRaw({
-    sessions: finalizeSessions,
+    sessions: sanitizedFinalizeSessions,
   })
   const status = finRes?.finalizeAIBlameInferencesUpload?.status
   if (status !== 'OK') {

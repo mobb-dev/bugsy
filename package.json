@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.mjs",
@@ -56,6 +56,7 @@
     "@modelcontextprotocol/sdk": "1.21.1",
     "@octokit/core": "5.2.0",
     "@octokit/request-error": "5.1.1",
+    "@openredaction/openredaction": "1.0.4",
     "adm-zip": "0.5.16",
     "axios": "1.13.2",
     "azure-devops-node-api": "15.1.1",
@@ -67,6 +68,7 @@
     "debug": "4.4.3",
     "dotenv": "16.6.1",
     "extract-zip": "2.0.1",
+    "gitleaks-secret-scanner": "1.2.2",
     "globby": "14.1.0",
     "graphql": "16.12.0",
     "graphql-request": "6.1.0",

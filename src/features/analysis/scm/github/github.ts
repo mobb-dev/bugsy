@@ -818,13 +818,6 @@ export function getGithubSdk(
                   endingLine
                   commit {
                     oid
-                    author {
-                      user {
-                        name
-                        login
-                        email
-                      }
-                    }
                   }
                 }
               }
@@ -837,9 +830,10 @@ export function getGithubSdk(
               startingLine: range.startingLine,
               endingLine: range.endingLine,
               commitSha: range.commit.oid,
-              email: range.commit.author.user?.email || '',
-              name: range.commit.author.user?.name || '',
-              login: range.commit.author.user?.login || '',
+              // This is an urgent fix. We need to later remove these fields from the return type and propagate the change.
+              email: '',
+              name: '',
+              login: '',
             }))
           }
           return undefined

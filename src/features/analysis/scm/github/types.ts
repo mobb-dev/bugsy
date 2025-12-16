@@ -112,3 +112,77 @@ export type GithubBlameResponse = {
     }
   }
 }
+
+// Shared types for batch GraphQL operations
+
+// Shared type for blame range data used across batch operations
+export type BlameRangeData = {
+  startingLine: number
+  endingLine: number
+  commitSha: string
+  email: string
+  name: string
+  login: string
+}
+
+// Shared type for commit timestamp data
+export type CommitTimestampData = {
+  sha: string
+  timestamp: Date
+}
+
+// Shared type for PR comment data
+export type PrCommentData = {
+  author: { login: string; type: string } | null
+  body: string
+}
+
+// Shared type for changed lines data
+export type ChangedLinesData = {
+  additions: number
+  deletions: number
+}
+
+/**
+ * Raw GraphQL response types for batch operations.
+ * These represent the shape of data returned from GitHub's GraphQL API
+ * before transformation to domain types.
+ */
+
+/** Raw response shape for PR additions/deletions query */
+export type PrChangesGraphQLResponse = {
+  additions?: number
+  deletions?: number
+}
+
+/** Raw response shape for PR comments query */
+export type PrCommentsGraphQLResponse = {
+  comments?: {
+    nodes?: {
+      author: { login: string; __typename: string } | null
+      body: string
+    }[]
+  }
+}
+
+/** Raw response shape for blame ranges query */
+export type BlameRangesGraphQLResponse = {
+  blame?: {
+    ranges?: {
+      startingLine: number
+      endingLine: number
+      commit: {
+        oid: string
+        author: {
+          user: { name: string; login: string; email: string } | null
+        }
+      }
+    }[]
+  }
+}
+
+/** Raw response shape for commit timestamp query */
+export type CommitTimestampGraphQLResponse = {
+  oid?: string
+  committedDate?: string
+}

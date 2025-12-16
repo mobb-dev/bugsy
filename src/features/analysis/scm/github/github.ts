@@ -17,12 +17,18 @@ import {
   GET_PR_COMMENTS_PATH,
   GET_USER,
   GET_USER_REPOS,
+  GITHUB_GRAPHQL_FRAGMENTS,
   POST_COMMENT_PATH,
   POST_GENERAL_PR_COMMENT,
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
   UPDATE_COMMENT_PATH,
 } from './consts'
 import {
+  BlameRangeData,
+  BlameRangesGraphQLResponse,
+  ChangedLinesData,
+  CommitTimestampData,
+  CommitTimestampGraphQLResponse,
   CreateOrUpdateRepositorySecretParams,
   CreateOrUpdateRepositorySecretResponse,
   DeleteCommentParams,
@@ -45,6 +51,9 @@ import {
   PostCommentReposes,
   PostGeneralPrCommentParams,
   PostGeneralPrCommentResponse,
+  PrChangesGraphQLResponse,
+  PrCommentData,
+  PrCommentsGraphQLResponse,
   ReplyToCodeReviewCommentPathParams,
   ReplyToCodeReviewCommentPathResponse,
   UpdateCommentParams,
@@ -53,6 +62,72 @@ import {
 import { getOctoKit, parseGithubOwnerAndRepo } from './utils'
 
 const MAX_GH_PR_BODY_LENGTH = 65536
+
+/**
+ * Configuration for a batch GraphQL query
+ */
+type BatchQueryConfig<TKey, TResult> = {
+  items: TKey[]
+  aliasPrefix: string
+  buildFragment: (item: TKey, index: number) => string
+  extractResult: (
+    data: Record<string, unknown>,
+    item: TKey,
+    index: number
+  ) => TResult | undefined
+}
+
+/**
+ * Generic helper to execute batch GraphQL queries
+ * Reduces code duplication across all batch operations
+ */
+async function executeBatchGraphQL<TKey, TResult>(
+  octokit: ReturnType<typeof getOctoKit>,
+  owner: string,
+  repo: string,
+  config: BatchQueryConfig<TKey, TResult>
+): Promise<Map<TKey, TResult>> {
+  const { items, aliasPrefix, buildFragment, extractResult } = config
+
+  if (items.length === 0) {
+    return new Map()
+  }
+
+  // Build query with indexed aliases
+  const fragments = items
+    .map((item, index) => buildFragment(item, index))
+    .join('\n')
+
+  const query = `
+    query Batch${aliasPrefix}($owner: String!, $repo: String!) {
+      repository(owner: $owner, name: $repo) {
+        ${fragments}
+      }
+    }
+  `
+
+  const response = await octokit.graphql<{
+    repository: Record<string, unknown>
+  }>(query, { owner, repo })
+
+  // Map response back to items
+  const result = new Map<TKey, TResult>()
+  items.forEach((item, index) => {
+    const data = response.repository[`${aliasPrefix}${index}`]
+    if (data) {
+      const extracted = extractResult(
+        data as Record<string, unknown>,
+        item,
+        index
+      )
+      if (extracted !== undefined) {
+        result.set(item, extracted)
+      }
+    }
+  })
+
+  return result
+}
 
 export function getGithubSdk(
   params: OctokitOptions & { isEnableRetries?: boolean } = {}
@@ -656,6 +731,151 @@ export function getGithubSdk(
         pull_number: params.pull_number,
       })
       return { data }
+    },
+
+    /**
+     * Batch fetch additions/deletions for multiple PRs via GraphQL.
+     * Uses GITHUB_GRAPHQL_FRAGMENTS.PR_CHANGES for the field selection.
+     */
+    async getPrAdditionsDeletionsBatch(params: {
+      owner: string
+      repo: string
+      prNumbers: number[]
+    }): Promise<Map<number, ChangedLinesData>> {
+      return executeBatchGraphQL(octokit, params.owner, params.repo, {
+        items: params.prNumbers,
+        aliasPrefix: 'pr',
+        buildFragment: (prNumber, index) => `
+          pr${index}: pullRequest(number: ${prNumber}) {
+            ${GITHUB_GRAPHQL_FRAGMENTS.PR_CHANGES}
+          }`,
+        extractResult: (data) => {
+          const prData = data as PrChangesGraphQLResponse
+          if (
+            prData.additions !== undefined &&
+            prData.deletions !== undefined
+          ) {
+            return {
+              additions: prData.additions,
+              deletions: prData.deletions,
+            }
+          }
+          return undefined
+        },
+      })
+    },
+
+    /**
+     * Batch fetch comments for multiple PRs via GraphQL.
+     * Uses GITHUB_GRAPHQL_FRAGMENTS.PR_COMMENTS for the field selection.
+     */
+    async getPrCommentsBatch(params: {
+      owner: string
+      repo: string
+      prNumbers: number[]
+    }): Promise<Map<number, PrCommentData[]>> {
+      return executeBatchGraphQL(octokit, params.owner, params.repo, {
+        items: params.prNumbers,
+        aliasPrefix: 'pr',
+        buildFragment: (prNumber, index) => `
+          pr${index}: pullRequest(number: ${prNumber}) {
+            ${GITHUB_GRAPHQL_FRAGMENTS.PR_COMMENTS}
+          }`,
+        extractResult: (data) => {
+          const prData = data as PrCommentsGraphQLResponse
+          if (prData.comments?.nodes) {
+            return prData.comments.nodes.map((node) => ({
+              author: node.author
+                ? { login: node.author.login, type: node.author.__typename }
+                : null,
+              body: node.body,
+            }))
+          }
+          return undefined
+        },
+      })
+    },
+
+    /**
+     * Batch fetch blame data for multiple files via GraphQL.
+     * Field selection matches GITHUB_GRAPHQL_FRAGMENTS.BLAME_RANGES pattern.
+     */
+    async getBlameBatch(params: {
+      owner: string
+      repo: string
+      ref: string
+      filePaths: string[]
+    }): Promise<Map<string, BlameRangeData[]>> {
+      return executeBatchGraphQL(octokit, params.owner, params.repo, {
+        items: params.filePaths,
+        aliasPrefix: 'file',
+        buildFragment: (path, index) => `
+          file${index}: object(expression: "${params.ref}") {
+            ... on Commit {
+              blame(path: "${path}") {
+                ranges {
+                  startingLine
+                  endingLine
+                  commit {
+                    oid
+                    author {
+                      user {
+                        name
+                        login
+                        email
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }`,
+        extractResult: (data) => {
+          const fileData = data as BlameRangesGraphQLResponse
+          if (fileData.blame?.ranges) {
+            return fileData.blame.ranges.map((range) => ({
+              startingLine: range.startingLine,
+              endingLine: range.endingLine,
+              commitSha: range.commit.oid,
+              email: range.commit.author.user?.email || '',
+              name: range.commit.author.user?.name || '',
+              login: range.commit.author.user?.login || '',
+            }))
+          }
+          return undefined
+        },
+      })
+    },
+
+    /**
+     * Batch fetch commit timestamps for multiple commits via GraphQL.
+     * Uses GITHUB_GRAPHQL_FRAGMENTS.COMMIT_TIMESTAMP for the field selection.
+     */
+    async getCommitsBatch(params: {
+      owner: string
+      repo: string
+      commitShas: string[]
+    }): Promise<Map<string, CommitTimestampData>> {
+      return executeBatchGraphQL(octokit, params.owner, params.repo, {
+        items: params.commitShas,
+        aliasPrefix: 'commit',
+        buildFragment: (sha, index) => `
+          commit${index}: object(oid: "${sha}") {
+            ... on Commit {
+              ${GITHUB_GRAPHQL_FRAGMENTS.COMMIT_TIMESTAMP}
+            }
+          }`,
+        extractResult: (data) => {
+          const commitData = data as CommitTimestampGraphQLResponse
+          if (commitData.oid && commitData.committedDate) {
+            return {
+              sha: commitData.oid,
+              timestamp: new Date(commitData.committedDate),
+            }
+          }
+          return undefined
+        },
+      })
     },
   }
 }

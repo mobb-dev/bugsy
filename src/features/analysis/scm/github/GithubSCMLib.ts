@@ -27,11 +27,14 @@ import {
   parseGithubOwnerAndRepo,
 } from './'
 import {
+  BlameRangeData,
+  CommitTimestampData,
   DeleteCommentParams,
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrParams,
   PostCommentParams,
+  PrCommentData,
   UpdateCommentParams,
   UpdateCommentResponse,
 } from './types'
@@ -365,7 +368,13 @@ export class GithubSCMLib extends SCMLib {
     })
   }
 
-  async getCommitDiff(commitSha: string): Promise<GetCommitDiffResult> {
+  async getCommitDiff(
+    commitSha: string,
+    options?: {
+      repositoryCreatedAt?: Date
+      parentCommitTimestamps?: Map<string, CommitTimestampData>
+    }
+  ): Promise<GetCommitDiffResult> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
 
@@ -380,53 +389,63 @@ export class GithubSCMLib extends SCMLib {
       ? new Date(commit.commit.committer.date)
       : new Date(commit.commit.author?.date || Date.now())
 
-    // Fetch parent commit timestamps
+    // Use provided parent timestamps or fetch them individually (fallback)
     let parentCommits: { sha: string; timestamp: Date }[] | undefined
     if (commit.parents && commit.parents.length > 0) {
-      try {
-        parentCommits = await Promise.all(
-          commit.parents.map(async (parent) => {
-            const parentCommit = await this.githubSdk.getCommit({
-              owner,
-              repo,
-              commitSha: parent.sha,
+      if (options?.parentCommitTimestamps) {
+        // Use pre-fetched parent timestamps
+        parentCommits = commit.parents
+          .map((p) => options.parentCommitTimestamps!.get(p.sha))
+          .filter((p): p is { sha: string; timestamp: Date } => p !== undefined)
+      } else {
+        // Fallback: fetch parent commits individually
+        try {
+          parentCommits = await Promise.all(
+            commit.parents.map(async (parent) => {
+              const parentCommit = await this.githubSdk.getCommit({
+                owner,
+                repo,
+                commitSha: parent.sha,
+              })
+              const parentTimestamp = parentCommit.data.committer?.date
+                ? new Date(parentCommit.data.committer.date)
+                : new Date(Date.now())
+              return {
+                sha: parent.sha,
+                timestamp: parentTimestamp,
+              }
             })
-            const parentTimestamp = parentCommit.data.committer?.date
-              ? new Date(parentCommit.data.committer.date)
-              : new Date(Date.now())
-            return {
-              sha: parent.sha,
-              timestamp: parentTimestamp,
-            }
+          )
+        } catch (error) {
+          // Log error but don't fail - we'll fall back to default lookback window
+          console.error('Failed to fetch parent commit timestamps', {
+            error,
+            commitSha,
+            owner,
+            repo,
           })
-        )
-      } catch (error) {
-        // Log error but don't fail - we'll fall back to default lookback window
-        console.error('Failed to fetch parent commit timestamps', {
-          error,
-          commitSha,
-          owner,
-          repo,
-        })
-        parentCommits = undefined
+          parentCommits = undefined
+        }
       }
     }
 
-    // Fetch repository creation date for initial commits
-    let repositoryCreatedAt: Date | undefined
-    try {
-      const repoData = await this.githubSdk.getRepository({ owner, repo })
-      repositoryCreatedAt = repoData.data.created_at
-        ? new Date(repoData.data.created_at)
-        : undefined
-    } catch (error) {
-      // Log error but don't fail - we'll fall back to default lookback window
-      console.error('Failed to fetch repository creation date', {
-        error,
-        owner,
-        repo,
-      })
-      repositoryCreatedAt = undefined
+    // Use provided repositoryCreatedAt or fetch it
+    let repositoryCreatedAt = options?.repositoryCreatedAt
+    if (repositoryCreatedAt === undefined) {
+      try {
+        const repoData = await this.githubSdk.getRepository({ owner, repo })
+        repositoryCreatedAt = repoData.data.created_at
+          ? new Date(repoData.data.created_at)
+          : undefined
+      } catch (error) {
+        // Log error but don't fail - we'll fall back to default lookback window
+        console.error('Failed to fetch repository creation date', {
+          error,
+          owner,
+          repo,
+        })
+        repositoryCreatedAt = undefined
+      }
     }
 
     return {
@@ -448,21 +467,50 @@ export class GithubSCMLib extends SCMLib {
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const prNumber = Number(submitRequestId)
 
-    // Fetch PR details, commits, and changed files in parallel for optimization
-    const [prRes, commitsRes, filesRes] = await Promise.all([
+    // Fetch PR details, commits, changed files, and repo data in parallel for optimization
+    const [prRes, commitsRes, filesRes, repoData] = await Promise.all([
       this.githubSdk.getPr({ owner, repo, pull_number: prNumber }),
       this.githubSdk.getPrCommits({ owner, repo, pull_number: prNumber }),
       this.githubSdk.listPRFiles({ owner, repo, pull_number: prNumber }),
+      this.githubSdk.getRepository({ owner, repo }),
     ])
 
     const pr = prRes.data
 
-    // Get PR diff (needed for backward compatibility)
-    const prDiff = await this.getPrDiff({ pull_number: prNumber })
+    // Cache repositoryCreatedAt to avoid fetching it for each commit
+    const repositoryCreatedAt = repoData.data.created_at
+      ? new Date(repoData.data.created_at)
+      : undefined
+
+    // Collect all unique parent SHAs from all commits
+    const allParentShas = new Set<string>()
+    for (const commit of commitsRes.data) {
+      if (commit.parents) {
+        for (const parent of commit.parents) {
+          allParentShas.add(parent.sha)
+        }
+      }
+    }
+
+    // Batch fetch parent commit timestamps and PR diff in parallel
+    const [parentCommitTimestamps, prDiff] = await Promise.all([
+      this.githubSdk.getCommitsBatch({
+        owner,
+        repo,
+        commitShas: Array.from(allParentShas),
+      }),
+      this.getPrDiff({ pull_number: prNumber }),
+    ])
 
     // Get detailed commit data with diffs for each commit in parallel
+    // Pass cached repositoryCreatedAt and parentCommitTimestamps to avoid redundant API calls
     const commits: GetCommitDiffResult[] = await Promise.all(
-      commitsRes.data.map((commit) => this.getCommitDiff(commit.sha))
+      commitsRes.data.map((commit) =>
+        this.getCommitDiff(commit.sha, {
+          repositoryCreatedAt,
+          parentCommitTimestamps,
+        })
+      )
     )
 
     // Use optimized blame-based attribution
@@ -495,160 +543,117 @@ export class GithubSCMLib extends SCMLib {
 
     const pullsRes = await this.githubSdk.getRepoPullRequests({ owner, repo })
 
-    // Process each PR in parallel to fetch comments and diffs
-    const submitRequests = await Promise.all(
-      pullsRes.data.map(async (pr) => {
-        let status: ScmSubmitRequestStatus = 'open'
-        if (pr.state === 'closed') {
-          status = pr.merged_at ? 'merged' : 'closed'
-        } else if (pr.draft) {
-          status = 'draft'
-        }
+    // Extract all PR numbers for batch fetching
+    const prNumbers = pullsRes.data.map((pr) => pr.number)
 
-        // Fetch tickets and changed lines in parallel
-        const [tickets, changedLines] = await Promise.all([
-          this._extractLinearTicketsFromPR(owner, repo, pr.number),
-          this._calculateChangedLinesFromPR(owner, repo, pr.number),
-        ])
+    // Batch fetch additions/deletions and comments via GraphQL (2 API calls instead of 2N)
+    const [additionsDeletionsMap, commentsMap] = await Promise.all([
+      this.githubSdk.getPrAdditionsDeletionsBatch({ owner, repo, prNumbers }),
+      this.githubSdk.getPrCommentsBatch({ owner, repo, prNumbers }),
+    ])
 
-        return {
-          submitRequestId: String(pr.number),
-          submitRequestNumber: pr.number,
-          title: pr.title,
-          status,
-          sourceBranch: pr.head.ref,
-          targetBranch: pr.base.ref,
-          authorName: pr.user?.name || pr.user?.login,
-          authorEmail: pr.user?.email || undefined,
-          createdAt: new Date(pr.created_at),
-          updatedAt: new Date(pr.updated_at),
-          description: pr.body || undefined,
-          tickets,
-          changedLines,
-        }
-      })
-    )
+    // Process each PR using the pre-fetched data (no additional API calls)
+    const submitRequests = pullsRes.data.map((pr) => {
+      let status: ScmSubmitRequestStatus = 'open'
+      if (pr.state === 'closed') {
+        status = pr.merged_at ? 'merged' : 'closed'
+      } else if (pr.draft) {
+        status = 'draft'
+      }
+
+      // Get changedLines from batch response
+      const changedLinesData = additionsDeletionsMap.get(pr.number)
+      const changedLines = changedLinesData
+        ? {
+            added: changedLinesData.additions,
+            removed: changedLinesData.deletions,
+          }
+        : { added: 0, removed: 0 }
+
+      // Extract tickets from pre-fetched comments
+      const comments = commentsMap.get(pr.number) || []
+      const tickets = this._extractLinearTicketsFromComments(comments)
+
+      return {
+        submitRequestId: String(pr.number),
+        submitRequestNumber: pr.number,
+        title: pr.title,
+        status,
+        sourceBranch: pr.head.ref,
+        targetBranch: pr.base.ref,
+        authorName: pr.user?.name || pr.user?.login,
+        authorEmail: pr.user?.email || undefined,
+        createdAt: new Date(pr.created_at),
+        updatedAt: new Date(pr.updated_at),
+        description: pr.body || undefined,
+        tickets,
+        changedLines,
+      }
+    })
 
     return submitRequests
   }
 
-  private async _extractLinearTicketsFromPR(
-    owner: string,
-    repo: string,
-    prNumber: number
-  ): Promise<{ name: string; title: string; url: string }[]> {
-    try {
-      const commentsRes = await this.githubSdk.getGeneralPrComments({
-        owner,
-        repo,
-        issue_number: prNumber,
-      })
+  /**
+   * Parse a Linear ticket from URL and name
+   * Returns null if invalid or missing data
+   */
+  private _parseLinearTicket(
+    url: string | undefined,
+    name: string | undefined
+  ): { name: string; title: string; url: string } | null {
+    if (!name || !url) return null
 
-      const tickets: { name: string; title: string; url: string }[] = []
+    const urlParts = url.split('/')
+    const titleSlug = urlParts[urlParts.length - 1] || ''
+    const title = titleSlug.replace(/-/g, ' ')
 
-      // Look for Linear bot comments
-      for (const comment of commentsRes.data) {
-        // Check if comment is from Linear bot
-        if (
-          comment.user?.login === 'linear[bot]' ||
-          comment.user?.type === 'Bot'
-        ) {
-          // Extract Linear ticket links from comment body
-          // Support both HTML and Markdown formats:
-          // HTML: <a href="https://linear.app/team/issue/PROJECT-123">PROJECT-123</a>
-          // Markdown: [PROJECT-123](https://linear.app/team/issue/PROJECT-123/title)
-
-          // Try HTML pattern first
-          const htmlLinkPattern =
-            /<a href="(https:\/\/linear\.app\/[^"]+)">([A-Z]+-\d+)<\/a>/g
-          let match
-
-          while ((match = htmlLinkPattern.exec(comment.body || '')) !== null) {
-            const url = match[1]
-            const name = match[2]
-
-            // Skip if name or url are missing
-            if (!name || !url) {
-              continue
-            }
-
-            // Extract title from URL (after the last slash)
-            const urlParts = url.split('/')
-            const titleSlug = urlParts[urlParts.length - 1] || ''
-            const title = titleSlug.replace(/-/g, ' ')
-
-            tickets.push({ name, title, url })
-          }
-
-          // Also try Markdown pattern for compatibility
-          const markdownLinkPattern =
-            /\[([A-Z]+-\d+)\]\((https:\/\/linear\.app\/[^)]+)\)/g
-          while (
-            (match = markdownLinkPattern.exec(comment.body || '')) !== null
-          ) {
-            const name = match[1]
-            const url = match[2]
-
-            // Skip if already added via HTML pattern
-            if (tickets.some((t) => t.name === name && t.url === url)) {
-              continue
-            }
-
-            if (!name || !url) {
-              continue
-            }
-
-            const urlParts = url.split('/')
-            const titleSlug = urlParts[urlParts.length - 1] || ''
-            const title = titleSlug.replace(/-/g, ' ')
-
-            tickets.push({ name, title, url })
-          }
-        }
-      }
-
-      return tickets
-    } catch (error) {
-      // Return empty array if fetching comments fails
-      return []
-    }
+    return { name, title, url }
   }
 
-  private async _calculateChangedLinesFromPR(
-    owner: string,
-    repo: string,
-    prNumber: number
-  ): Promise<{ added: number; removed: number }> {
-    try {
-      const diffRes = await this.githubSdk.getPrDiff({
-        owner,
-        repo,
-        pull_number: prNumber,
-      })
+  /**
+   * Extract Linear ticket links from pre-fetched comments (pure function, no API calls)
+   */
+  private _extractLinearTicketsFromComments(
+    comments: PrCommentData[]
+  ): { name: string; title: string; url: string }[] {
+    const tickets: { name: string; title: string; url: string }[] = []
+    const seen = new Set<string>() // Track seen tickets by "name|url"
 
-      const diff = z.string().parse(diffRes.data)
+    for (const comment of comments) {
+      // Check if comment is from Linear bot
+      if (
+        comment.author?.login === 'linear[bot]' ||
+        comment.author?.type === 'Bot'
+      ) {
+        const body = comment.body || ''
 
-      // Count added and removed lines
-      let added = 0
-      let removed = 0
-
-      const lines = diff.split('\n')
-      for (const line of lines) {
-        // Count lines starting with '+' (excluding +++ file headers)
-        if (line.startsWith('+') && !line.startsWith('+++')) {
-          added++
+        // Extract from HTML format: <a href="...">PROJECT-123</a>
+        const htmlPattern =
+          /<a href="(https:\/\/linear\.app\/[^"]+)">([A-Z]+-\d+)<\/a>/g
+        let match
+        while ((match = htmlPattern.exec(body)) !== null) {
+          const ticket = this._parseLinearTicket(match[1], match[2])
+          if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
+            seen.add(`${ticket.name}|${ticket.url}`)
+            tickets.push(ticket)
+          }
         }
-        // Count lines starting with '-' (excluding --- file headers)
-        else if (line.startsWith('-') && !line.startsWith('---')) {
-          removed++
+
+        // Extract from Markdown format: [PROJECT-123](...)
+        const markdownPattern =
+          /\[([A-Z]+-\d+)\]\((https:\/\/linear\.app\/[^)]+)\)/g
+        while ((match = markdownPattern.exec(body)) !== null) {
+          const ticket = this._parseLinearTicket(match[2], match[1])
+          if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
+            seen.add(`${ticket.name}|${ticket.url}`)
+            tickets.push(ticket)
+          }
         }
       }
-
-      return { added, removed }
-    } catch (error) {
-      // Return zero counts if fetching diff fails
-      return { added: 0, removed: 0 }
     }
+
+    return tickets
   }
 
   /**
@@ -684,63 +689,56 @@ export class GithubSCMLib extends SCMLib {
   }
 
   /**
-   * Attribute lines in a single file to their commits using blame
+   * Process blame data for a single file to attribute lines to commits
+   * Uses pre-fetched blame data instead of making API calls
    */
-  private async _attributeFileLines(
+  private _processFileBlameSafe(
     file: { filename: string; patch?: string },
-    headRef: string,
+    blameData: BlameRangeData[],
     prCommitShas: Set<string>
-  ): Promise<{ file: string; line: number; commitSha: string }[]> {
-    try {
-      // Get blame for this file at PR head
-      const blame = await this.getRepoBlameRanges(headRef, file.filename)
+  ): { file: string; line: number; commitSha: string }[] {
+    // Parse patch to find added line numbers
+    const addedLines = this._parseAddedLinesFromPatch(file.patch!)
 
-      // Parse patch to find added line numbers
-      const addedLines = this._parseAddedLinesFromPatch(file.patch!)
+    // Convert to Set for O(1) lookup
+    const addedLinesSet = new Set(addedLines)
 
-      // Convert to Set for O(1) lookup
-      const addedLinesSet = new Set(addedLines)
+    // Map added lines to blame ranges - optimized by inverting the loop
+    const fileAttributions: {
+      file: string
+      line: number
+      commitSha: string
+    }[] = []
 
-      // Map added lines to blame ranges - optimized by inverting the loop
-      const fileAttributions: {
-        file: string
-        line: number
-        commitSha: string
-      }[] = []
-
-      // Iterate through blame ranges (typically fewer and larger than individual lines)
-      for (const blameRange of blame) {
-        // Skip if commit not in this PR
-        if (!prCommitShas.has(blameRange.commitSha)) {
-          continue
-        }
-
-        // Check each line in the blame range against added lines
-        for (
-          let lineNum = blameRange.startingLine;
-          lineNum <= blameRange.endingLine;
-          lineNum++
-        ) {
-          if (addedLinesSet.has(lineNum)) {
-            fileAttributions.push({
-              file: file.filename,
-              line: lineNum,
-              commitSha: blameRange.commitSha,
-            })
-          }
-        }
+    // Iterate through blame ranges (typically fewer and larger than individual lines)
+    for (const blameRange of blameData) {
+      // Skip if commit not in this PR
+      if (!prCommitShas.has(blameRange.commitSha)) {
+        continue
       }
 
-      return fileAttributions
-    } catch (error) {
-      // If blame fails for a file, skip it (file might be deleted or binary)
-      return []
+      // Check each line in the blame range against added lines
+      for (
+        let lineNum = blameRange.startingLine;
+        lineNum <= blameRange.endingLine;
+        lineNum++
+      ) {
+        if (addedLinesSet.has(lineNum)) {
+          fileAttributions.push({
+            file: file.filename,
+            line: lineNum,
+            commitSha: blameRange.commitSha,
+          })
+        }
+      }
     }
+
+    return fileAttributions
   }
 
   /**
    * Optimized helper to attribute PR lines to commits using blame API
-   * Parallel blame queries for minimal API call time
+   * Batch blame queries for minimal API call time (1 call instead of M calls)
    */
   private async _attributeLinesViaBlame(
     headRef: string,
@@ -755,14 +753,35 @@ export class GithubSCMLib extends SCMLib {
       file.patch?.includes('\n+')
     )
 
-    // Query blame for all files in parallel
-    const attributions = await Promise.all(
-      filesWithAdditions.map((file) =>
-        this._attributeFileLines(file, headRef, prCommitShas)
-      )
-    )
+    if (filesWithAdditions.length === 0) {
+      return []
+    }
 
-    return attributions.flat()
+    // Batch fetch blame data for all files in single GraphQL call
+    // this.url is guaranteed to be defined when called from getSubmitRequestDiff
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url!)
+    const blameMap = await this.githubSdk.getBlameBatch({
+      owner,
+      repo,
+      ref: headRef,
+      filePaths: filesWithAdditions.map((f) => f.filename),
+    })
+
+    // Process blame data for each file (no API calls, just data processing)
+    const allAttributions: { file: string; line: number; commitSha: string }[] =
+      []
+
+    for (const file of filesWithAdditions) {
+      const blameData = blameMap.get(file.filename) || []
+      const fileAttributions = this._processFileBlameSafe(
+        file,
+        blameData,
+        prCommitShas
+      )
+      allAttributions.push(...fileAttributions)
+    }
+
+    return allAttributions
   }
 }
 

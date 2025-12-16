@@ -44710,7 +44710,7 @@ export const GetVulByNodesMetadataDocument = `
     where: {id: {_eq: $vulnerabilityReportId}}
   ) {
     vulnerabilityReportIssues(
-      where: {fixId: {_is_null: true}, category: {_in: [Irrelevant, FalsePositive, Filtered]}}
+      where: {fixId: {_is_null: true}, category: {_in: [Irrelevant, FalsePositive, Filtered]}, _not: {vulnerabilityReportIssueTags: {vulnerability_report_issue_tag_value: {_eq: SUPPRESSED}}}}
     ) {
       id
       safeIssueType

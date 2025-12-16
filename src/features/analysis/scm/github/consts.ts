@@ -75,3 +75,66 @@ export const GET_BLAME_DOCUMENT = `
         }
       }
     `
+
+/**
+ * GraphQL fragments for batch operations on GitHub's GraphQL API.
+ * These are used with executeBatchGraphQL to fetch data for multiple items in a single request.
+ */
+export const GITHUB_GRAPHQL_FRAGMENTS = {
+  /**
+   * Fragment for fetching PR additions/deletions.
+   * Use with pullRequest(number: $n) alias.
+   */
+  PR_CHANGES: `
+    additions
+    deletions
+  `,
+
+  /**
+   * Fragment for fetching PR comments.
+   * Returns first 100 comments with author info.
+   */
+  PR_COMMENTS: `
+    comments(first: 100) {
+      nodes {
+        author {
+          login
+          __typename
+        }
+        body
+      }
+    }
+  `,
+
+  /**
+   * Fragment for fetching blame data.
+   * Use with object(expression: $ref) on Commit type.
+   */
+  BLAME_RANGES: `
+    blame(path: "$path") {
+      ranges {
+        startingLine
+        endingLine
+        commit {
+          oid
+          author {
+            user {
+              name
+              login
+              email
+            }
+          }
+        }
+      }
+    }
+  `,
+
+  /**
+   * Fragment for fetching commit timestamp.
+   * Use with object(oid: $sha) on Commit type.
+   */
+  COMMIT_TIMESTAMP: `
+    oid
+    committedDate
+  `,
+} as const

@@ -244,3 +244,256 @@ describe('GithubSCMLib wrappers for rate limit and recent commits', () => {
     expect(Array.isArray(commits.data)).toBe(true)
   })
 })
+
+// ============================================================================
+// Regression Tests for GitHub SCM Optimizations
+// These tests verify existing behavior before optimizations are applied
+// ============================================================================
+
+describe('getSubmitRequests - PR list with metadata', () => {
+  let scmLib: GithubSCMLib
+
+  beforeAll(async () => {
+    scmLib = (await createScmLib({
+      url: GITHUB_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      scmOrg: undefined,
+    })) as GithubSCMLib
+  })
+
+  it('returns PR list with all required fields', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+
+    expect(Array.isArray(submitRequests)).toBe(true)
+    expect(submitRequests.length).toBeGreaterThan(0)
+
+    // Verify structure of first PR
+    const pr = submitRequests[0]
+    expect(pr).toHaveProperty('submitRequestId')
+    expect(pr).toHaveProperty('submitRequestNumber')
+    expect(pr).toHaveProperty('title')
+    expect(pr).toHaveProperty('status')
+    expect(pr).toHaveProperty('sourceBranch')
+    expect(pr).toHaveProperty('targetBranch')
+    expect(pr).toHaveProperty('createdAt')
+    expect(pr).toHaveProperty('updatedAt')
+    expect(pr).toHaveProperty('changedLines')
+    expect(pr).toHaveProperty('tickets')
+  })
+
+  it('returns correct changedLines with added and removed as non-negative numbers', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const pr = submitRequests[0]!
+
+    expect(pr.changedLines).toHaveProperty('added')
+    expect(pr.changedLines).toHaveProperty('removed')
+    expect(typeof pr.changedLines.added).toBe('number')
+    expect(typeof pr.changedLines.removed).toBe('number')
+    expect(pr.changedLines.added).toBeGreaterThanOrEqual(0)
+    expect(pr.changedLines.removed).toBeGreaterThanOrEqual(0)
+  })
+
+  it('returns valid status values', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+
+    const validStatuses = ['open', 'closed', 'merged', 'draft']
+    for (const pr of submitRequests) {
+      expect(validStatuses).toContain(pr.status)
+    }
+  })
+
+  it('parses dates correctly as Date objects', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const pr = submitRequests[0]!
+
+    expect(pr.createdAt).toBeInstanceOf(Date)
+    expect(pr.updatedAt).toBeInstanceOf(Date)
+    expect(isNaN(pr.createdAt.getTime())).toBe(false)
+    expect(isNaN(pr.updatedAt.getTime())).toBe(false)
+  })
+
+  it('returns tickets as an array (may be empty)', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const pr = submitRequests[0]!
+
+    expect(Array.isArray(pr.tickets)).toBe(true)
+    // If tickets exist, verify structure
+    if (pr.tickets.length > 0) {
+      expect(pr.tickets[0]).toHaveProperty('name')
+      expect(pr.tickets[0]).toHaveProperty('title')
+      expect(pr.tickets[0]).toHaveProperty('url')
+    }
+  })
+
+  it('returns submitRequestId as string and submitRequestNumber as number', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const pr = submitRequests[0]!
+
+    expect(typeof pr.submitRequestId).toBe('string')
+    expect(typeof pr.submitRequestNumber).toBe('number')
+    expect(pr.submitRequestId).toBe(String(pr.submitRequestNumber))
+  })
+})
+
+describe('changedLines accuracy validation', () => {
+  let scmLib: GithubSCMLib
+
+  beforeAll(async () => {
+    scmLib = (await createScmLib({
+      url: GITHUB_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      scmOrg: undefined,
+    })) as GithubSCMLib
+  })
+
+  // Note: REST API pulls.list does NOT return additions/deletions fields
+  // Those are only available from pulls.get (single PR endpoint)
+  // The current implementation fetches diff for each PR to calculate changedLines
+
+  it('changedLines values are consistent across multiple calls', async () => {
+    // Call getSubmitRequests twice and verify consistency
+    const submitRequests1 = await scmLib.getSubmitRequests(GITHUB_URL)
+    const submitRequests2 = await scmLib.getSubmitRequests(GITHUB_URL)
+
+    // Find the same PR in both responses
+    const pr1 = submitRequests1[0]!
+    const pr2 = submitRequests2.find(
+      (p) => p.submitRequestNumber === pr1.submitRequestNumber
+    )
+
+    expect(pr2).toBeDefined()
+    expect(pr1.changedLines.added).toBe(pr2!.changedLines.added)
+    expect(pr1.changedLines.removed).toBe(pr2!.changedLines.removed)
+  })
+
+  it('changedLines values are reasonable for PRs', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+
+    // At least some PRs should have changes
+    const prsWithChanges = submitRequests.filter(
+      (pr) => pr.changedLines.added > 0 || pr.changedLines.removed > 0
+    )
+
+    expect(prsWithChanges.length).toBeGreaterThan(0)
+  })
+})
+
+describe('getSubmitRequestDiff - PR diff with commits', () => {
+  let scmLib: GithubSCMLib
+
+  beforeAll(async () => {
+    scmLib = (await createScmLib({
+      url: GITHUB_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      scmOrg: undefined,
+    })) as GithubSCMLib
+  })
+
+  it('returns diff result with all required fields', async () => {
+    // First get a PR number from the list
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const openPr = submitRequests.find((pr) => pr.status === 'open')
+
+    if (!openPr) {
+      console.log('No open PRs found, skipping test')
+      return
+    }
+
+    const diffResult = await scmLib.getSubmitRequestDiff(openPr.submitRequestId)
+
+    expect(diffResult).toHaveProperty('diff')
+    expect(diffResult).toHaveProperty('createdAt')
+    expect(diffResult).toHaveProperty('updatedAt')
+    expect(diffResult).toHaveProperty('submitRequestId')
+    expect(diffResult).toHaveProperty('submitRequestNumber')
+    expect(diffResult).toHaveProperty('sourceBranch')
+    expect(diffResult).toHaveProperty('targetBranch')
+    expect(diffResult).toHaveProperty('commits')
+    expect(diffResult).toHaveProperty('diffLines')
+
+    expect(typeof diffResult.diff).toBe('string')
+    expect(diffResult.createdAt).toBeInstanceOf(Date)
+    expect(diffResult.updatedAt).toBeInstanceOf(Date)
+    expect(Array.isArray(diffResult.commits)).toBe(true)
+    expect(Array.isArray(diffResult.diffLines)).toBe(true)
+  })
+
+  it('returns commit details with timestamps', async () => {
+    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
+    const openPr = submitRequests.find((pr) => pr.status === 'open')
+
+    if (!openPr) {
+      console.log('No open PRs found, skipping test')
+      return
+    }
+
+    const diffResult = await scmLib.getSubmitRequestDiff(openPr.submitRequestId)
+
+    if (diffResult.commits.length > 0) {
+      const commit = diffResult.commits[0]!
+      expect(commit).toHaveProperty('diff')
+      expect(commit).toHaveProperty('commitTimestamp')
+      expect(commit).toHaveProperty('commitSha')
+      expect(commit.commitTimestamp).toBeInstanceOf(Date)
+      expect(typeof commit.commitSha).toBe('string')
+    }
+  })
+})
+
+describe('getCommitDiff - individual commit diff', () => {
+  let scmLib: GithubSCMLib
+
+  beforeAll(async () => {
+    scmLib = (await createScmLib({
+      url: GITHUB_URL,
+      scmType: ScmLibScmType.GITHUB,
+      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      scmOrg: undefined,
+    })) as GithubSCMLib
+  })
+
+  it('returns commit diff with all required fields', async () => {
+    // Use a known commit SHA from facebook/react
+    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
+
+    const result = await scmLib.getCommitDiff(commitSha)
+
+    expect(result).toHaveProperty('diff')
+    expect(result).toHaveProperty('commitTimestamp')
+    expect(result).toHaveProperty('commitSha')
+    expect(typeof result.diff).toBe('string')
+    expect(result.commitTimestamp).toBeInstanceOf(Date)
+    expect(result.commitSha).toBe(commitSha)
+  })
+
+  it('includes repositoryCreatedAt in result', async () => {
+    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
+
+    const result = await scmLib.getCommitDiff(commitSha)
+
+    // repositoryCreatedAt should be present (may be undefined if fetch fails)
+    expect(result).toHaveProperty('repositoryCreatedAt')
+    if (result.repositoryCreatedAt) {
+      expect(result.repositoryCreatedAt).toBeInstanceOf(Date)
+    }
+  })
+
+  it('includes parentCommits in result', async () => {
+    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
+
+    const result = await scmLib.getCommitDiff(commitSha)
+
+    // parentCommits should be present for non-root commits
+    expect(result).toHaveProperty('parentCommits')
+    if (result.parentCommits && result.parentCommits.length > 0) {
+      const parent = result.parentCommits[0]!
+      expect(parent).toHaveProperty('sha')
+      expect(parent).toHaveProperty('timestamp')
+      expect(typeof parent.sha).toBe('string')
+      expect(parent.timestamp).toBeInstanceOf(Date)
+    }
+  })
+})

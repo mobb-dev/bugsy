@@ -322,6 +322,8 @@ input AIBlameInferenceInitInput {
   model: String
   toolName: String
   metadataJSON: String
+  computerName: String
+  userName: String
 }
 
 input AIBlameInferenceFinalizeInput {
@@ -332,6 +334,8 @@ input AIBlameInferenceFinalizeInput {
   model: String
   toolName: String
   metadataJSON: String
+  computerName: String
+  userName: String
 }
 
 mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {

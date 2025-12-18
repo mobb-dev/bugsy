@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -187,6 +188,81 @@ describe('CLI: upload-ai-blame', () => {
           false
         )
       ).rejects.toThrow('Init failed to return expected number of sessions')
+    })
+
+    it('should include computerName and userName from OS in upload sessions', async () => {
+      const { uploadAiBlameHandler } = await import(
+        '@mobb/bugsy/args/commands/upload_ai_blame'
+      )
+      const { getAuthenticatedGQLClient } = await import(
+        '@mobb/bugsy/commands/handleMobbLogin'
+      )
+
+      const promptPath = path.join(tmpDir, 'prompt-os-info.json')
+      const inferencePath = path.join(tmpDir, 'inference-os-info.json')
+      await fs.writeFile(promptPath, '{"p":1}')
+      await fs.writeFile(inferencePath, '{"i":2}')
+
+      // Create a mock client that captures the sessions
+      const mockClient = createMockGQLClient()
+      let capturedSessions: any[] = []
+      mockClient.uploadAIBlameInferencesInitRaw = vi.fn(
+        async ({ sessions }: any) => {
+          capturedSessions = sessions
+          return {
+            uploadAIBlameInferencesInit: {
+              uploadSessions: sessions.map((s: any, idx: number) => ({
+                aiBlameInferenceId: `session-${idx}`,
+                prompt: {
+                  url: 'https://s3.example/prompt',
+                  uploadFieldsJSON: JSON.stringify({ key: 'v' }),
+                  uploadKey: `ai-blame/user/session-${idx}/prompt/${s.promptFileName}`,
+                  fileName: s.promptFileName,
+                  artifactId: `art-${idx}-p`,
+                },
+                inference: {
+                  url: 'https://s3.example/inference',
+                  uploadFieldsJSON: JSON.stringify({ key: 'v' }),
+                  uploadKey: `ai-blame/user/session-${idx}/inference/${s.inferenceFileName}`,
+                  fileName: s.inferenceFileName,
+                  artifactId: `art-${idx}-i`,
+                },
+              })),
+            },
+          }
+        }
+      )
+
+      vi.mocked(getAuthenticatedGQLClient).mockResolvedValueOnce(
+        mockClient as any
+      )
+
+      await uploadAiBlameHandler({
+        prompt: [promptPath],
+        inference: [inferencePath],
+      })
+
+      // Verify that computerName and userName are included in the session
+      expect(capturedSessions).toHaveLength(1)
+      const session = capturedSessions[0]
+
+      // Get expected values by executing actual shell commands
+      const expectedHostname = execSync('hostname', {
+        encoding: 'utf-8',
+      }).trim()
+      const expectedUsername = execSync('whoami', { encoding: 'utf-8' }).trim()
+
+      // computerName should match the output of `hostname` command
+      expect(session.computerName).toBe(expectedHostname)
+
+      // userName should match the output of `whoami` command
+      expect(session.userName).toBe(expectedUsername)
+
+      // Both should be non-empty strings
+      expect(typeof session.computerName).toBe('string')
+      expect(session.computerName.length).toBeGreaterThan(0)
+      expect(typeof session.userName).toBe('string')
+      expect(session.userName.length).toBeGreaterThan(0)
     })
   })
 })

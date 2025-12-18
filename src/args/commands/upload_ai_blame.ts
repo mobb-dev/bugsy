@@ -1,4 +1,5 @@
 import fsPromises from 'node:fs/promises'
+import * as os from 'node:os'
 import path from 'node:path'
 
 import chalk from 'chalk'
@@ -63,6 +64,19 @@ type SessionInput = {
   model?: string
   toolName?: string
   blameType?: AiBlameInferenceType
+  computerName?: string
+  userName?: string
+}
+
+/**
+ * Get system information for tracking inference source.
+ * Works cross-platform (Windows, macOS, Linux).
+ */
+function getSystemInfo() {
+  return {
+    computerName: os.hostname(),
+    userName: os.userInfo().username,
+  }
 }
 
 export type UploadAiBlameOptions = {
@@ -226,6 +240,7 @@ export async function uploadAiBlameHandler(
   }
 
   const nowIso = new Date().toISOString()
+  const { computerName, userName } = getSystemInfo()
   const sessions: SessionInput[] = []
   for (let i = 0; i < prompts.length; i++) {
     const promptPath = String(prompts[i])
@@ -250,6 +265,8 @@ export async function uploadAiBlameHandler(
       model: models[i],
       toolName: tools[i],
       blameType: blameTypes[i] || AiBlameInferenceType.Chat,
+      computerName,
+      userName,
     })
   }
 
@@ -315,6 +332,8 @@ export async function uploadAiBlameHandler(
         model: s.model,
         toolName: s.toolName,
         blameType: s.blameType,
+        computerName: s.computerName,
+        userName: s.userName,
       }
     })
 

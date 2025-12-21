@@ -71,11 +71,23 @@ type SessionInput = {
 /**
  * Get system information for tracking inference source.
  * Works cross-platform (Windows, macOS, Linux).
+ * Handles errors gracefully for containerized environments where user info may not be available.
  */
-function getSystemInfo() {
+function getSystemInfo(): {
+  computerName: string
+  userName: string | undefined
+} {
+  let userName: string | undefined
+  try {
+    userName = os.userInfo().username
+  } catch {
+    // os.userInfo() can throw in some environments (e.g., containerized or restricted permissions)
+    userName = undefined
+  }
+
   return {
     computerName: os.hostname(),
-    userName: os.userInfo().username,
+    userName,
   }
 }
 

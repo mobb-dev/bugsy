@@ -111,6 +111,22 @@ export abstract class SCMLib {
 
   abstract getSubmitRequests(repoUrl: string): Promise<GetSubmitRequestInfo[]>
 
+  /**
+   * Fetches commits for multiple PRs in a single batch request.
+   * This is an optimization that not all SCM providers may support efficiently.
+   * Default implementation throws - override in subclasses that support batching.
+   *
+   * @param repoUrl - Repository URL
+   * @param prNumbers - Array of PR numbers to fetch commits for
+   * @returns Map of PR number to array of commit SHAs
+   */
+  async getPrCommitsBatch(
+    _repoUrl: string,
+    _prNumbers: number[]
+  ): Promise<Map<number, string[]>> {
+    throw new Error('getPrCommitsBatch not implemented for this SCM provider')
+  }
+
   public getAccessToken(): string {
     return this.accessToken || ''
   }

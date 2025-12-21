@@ -300,6 +300,18 @@ export type DeleteIntegrationResponseSuccess = {
   status: Status;
 };
 
+export type DeveloperStatistic = {
+  __typename?: 'DeveloperStatistic';
+  aiLinesCount: Scalars['Int']['output'];
+  autocompleteLinesCount: Scalars['Int']['output'];
+  computerName?: Maybe<Scalars['String']['output']>;
+  humanLinesCount: Scalars['Int']['output'];
+  lastSeenDate?: Maybe<Scalars['String']['output']>;
+  mainModel?: Maybe<Scalars['String']['output']>;
+  mainTool?: Maybe<Scalars['String']['output']>;
+  userName: Scalars['String']['output'];
+};
+
 export type DiffLineAttribution = {
   __typename?: 'DiffLineAttribution';
   attributions: Array<Attribution>;
@@ -503,6 +515,20 @@ export type GetCheckmarxProjectsError = {
 };
 
 export type GetCheckmarxProjectsResponse = GetCheckmarxProjectsError | ListOfProjectsSuccess;
+
+export type GetDeveloperStatisticsError = {
+  __typename?: 'GetDeveloperStatisticsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetDeveloperStatisticsResponse = GetDeveloperStatisticsError | GetDeveloperStatisticsSuccess;
+
+export type GetDeveloperStatisticsSuccess = {
+  __typename?: 'GetDeveloperStatisticsSuccess';
+  developers: Array<DeveloperStatistic>;
+  status: Status;
+};
 
 export type GetFalsePositiveResponseUnion = FalsePositiveData | GetFixNoFixError;
 
@@ -1030,6 +1056,7 @@ export type ScmNoScmTokenError = ScmBaseError & {
 
 export type ScmRepo = {
   __typename?: 'ScmRepo';
+  hasAttributions?: Maybe<Scalars['Boolean']['output']>;
   repoIsPublic: Scalars['Boolean']['output'];
   repoLanguages: Array<Scalars['String']['output']>;
   repoName: Scalars['String']['output'];
@@ -1169,6 +1196,7 @@ export type SubmitRequestInfo = {
   changedLines: ChangedLines;
   createdAt: Scalars['Timestamp']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  hasAttributions?: Maybe<Scalars['Boolean']['output']>;
   sourceBranch: Scalars['String']['output'];
   status: SubmitRequestStatus;
   submitRequestId: Scalars['String']['output'];
@@ -10161,6 +10189,206 @@ export type DeployedVulnerabilityIssuesCount_Project_Args = {
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
+/** columns and relationships of "developer_statistics_row" */
+export type Developer_Statistics_Row = {
+  __typename?: 'developer_statistics_row';
+  ai_lines_count?: Maybe<Scalars['bigint']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  human_lines_count?: Maybe<Scalars['bigint']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  main_model?: Maybe<Scalars['String']['output']>;
+  main_tool?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "developer_statistics_row" */
+export type Developer_Statistics_Row_Aggregate = {
+  __typename?: 'developer_statistics_row_aggregate';
+  aggregate?: Maybe<Developer_Statistics_Row_Aggregate_Fields>;
+  nodes: Array<Developer_Statistics_Row>;
+};
+
+/** aggregate fields of "developer_statistics_row" */
+export type Developer_Statistics_Row_Aggregate_Fields = {
+  __typename?: 'developer_statistics_row_aggregate_fields';
+  avg?: Maybe<Developer_Statistics_Row_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Developer_Statistics_Row_Max_Fields>;
+  min?: Maybe<Developer_Statistics_Row_Min_Fields>;
+  stddev?: Maybe<Developer_Statistics_Row_Stddev_Fields>;
+  stddev_pop?: Maybe<Developer_Statistics_Row_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Developer_Statistics_Row_Stddev_Samp_Fields>;
+  sum?: Maybe<Developer_Statistics_Row_Sum_Fields>;
+  var_pop?: Maybe<Developer_Statistics_Row_Var_Pop_Fields>;
+  var_samp?: Maybe<Developer_Statistics_Row_Var_Samp_Fields>;
+  variance?: Maybe<Developer_Statistics_Row_Variance_Fields>;
+};
+
+
+/** aggregate fields of "developer_statistics_row" */
+export type Developer_Statistics_Row_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Developer_Statistics_Row_Avg_Fields = {
+  __typename?: 'developer_statistics_row_avg_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "developer_statistics_row". All fields are combined with a logical 'AND'. */
+export type Developer_Statistics_Row_Bool_Exp = {
+  _and?: InputMaybe<Array<Developer_Statistics_Row_Bool_Exp>>;
+  _not?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+  _or?: InputMaybe<Array<Developer_Statistics_Row_Bool_Exp>>;
+  ai_lines_count?: InputMaybe<Bigint_Comparison_Exp>;
+  autocomplete_lines_count?: InputMaybe<Bigint_Comparison_Exp>;
+  computer_name?: InputMaybe<String_Comparison_Exp>;
+  human_lines_count?: InputMaybe<Bigint_Comparison_Exp>;
+  last_seen_date?: InputMaybe<Timestamp_Comparison_Exp>;
+  main_model?: InputMaybe<String_Comparison_Exp>;
+  main_tool?: InputMaybe<String_Comparison_Exp>;
+  user_name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Developer_Statistics_Row_Max_Fields = {
+  __typename?: 'developer_statistics_row_max_fields';
+  ai_lines_count?: Maybe<Scalars['bigint']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  human_lines_count?: Maybe<Scalars['bigint']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  main_model?: Maybe<Scalars['String']['output']>;
+  main_tool?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Developer_Statistics_Row_Min_Fields = {
+  __typename?: 'developer_statistics_row_min_fields';
+  ai_lines_count?: Maybe<Scalars['bigint']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  human_lines_count?: Maybe<Scalars['bigint']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  main_model?: Maybe<Scalars['String']['output']>;
+  main_tool?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "developer_statistics_row". */
+export type Developer_Statistics_Row_Order_By = {
+  ai_lines_count?: InputMaybe<Order_By>;
+  autocomplete_lines_count?: InputMaybe<Order_By>;
+  computer_name?: InputMaybe<Order_By>;
+  human_lines_count?: InputMaybe<Order_By>;
+  last_seen_date?: InputMaybe<Order_By>;
+  main_model?: InputMaybe<Order_By>;
+  main_tool?: InputMaybe<Order_By>;
+  user_name?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "developer_statistics_row" */
+export enum Developer_Statistics_Row_Select_Column {
+  /** column name */
+  AiLinesCount = 'ai_lines_count',
+  /** column name */
+  AutocompleteLinesCount = 'autocomplete_lines_count',
+  /** column name */
+  ComputerName = 'computer_name',
+  /** column name */
+  HumanLinesCount = 'human_lines_count',
+  /** column name */
+  LastSeenDate = 'last_seen_date',
+  /** column name */
+  MainModel = 'main_model',
+  /** column name */
+  MainTool = 'main_tool',
+  /** column name */
+  UserName = 'user_name'
+}
+
+/** aggregate stddev on columns */
+export type Developer_Statistics_Row_Stddev_Fields = {
+  __typename?: 'developer_statistics_row_stddev_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Developer_Statistics_Row_Stddev_Pop_Fields = {
+  __typename?: 'developer_statistics_row_stddev_pop_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Developer_Statistics_Row_Stddev_Samp_Fields = {
+  __typename?: 'developer_statistics_row_stddev_samp_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "developer_statistics_row" */
+export type Developer_Statistics_Row_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Developer_Statistics_Row_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Developer_Statistics_Row_Stream_Cursor_Value_Input = {
+  ai_lines_count?: InputMaybe<Scalars['bigint']['input']>;
+  autocomplete_lines_count?: InputMaybe<Scalars['bigint']['input']>;
+  computer_name?: InputMaybe<Scalars['String']['input']>;
+  human_lines_count?: InputMaybe<Scalars['bigint']['input']>;
+  last_seen_date?: InputMaybe<Scalars['timestamp']['input']>;
+  main_model?: InputMaybe<Scalars['String']['input']>;
+  main_tool?: InputMaybe<Scalars['String']['input']>;
+  user_name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Developer_Statistics_Row_Sum_Fields = {
+  __typename?: 'developer_statistics_row_sum_fields';
+  ai_lines_count?: Maybe<Scalars['bigint']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
+  human_lines_count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Developer_Statistics_Row_Var_Pop_Fields = {
+  __typename?: 'developer_statistics_row_var_pop_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Developer_Statistics_Row_Var_Samp_Fields = {
+  __typename?: 'developer_statistics_row_var_samp_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Developer_Statistics_Row_Variance_Fields = {
+  __typename?: 'developer_statistics_row_variance_fields';
+  ai_lines_count?: Maybe<Scalars['Float']['output']>;
+  autocomplete_lines_count?: Maybe<Scalars['Float']['output']>;
+  human_lines_count?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "effort_to_apply_fix" */
 export type Effort_To_Apply_Fix = {
   __typename?: 'effort_to_apply_fix';
@@ -14640,6 +14868,11 @@ export type GeneratedFixAndVulUnique_Organization_Args = {
 export type GeneratedFixAndVulUnique_Project_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type Get_Developer_Statistics_Args = {
+  p_from_date?: InputMaybe<Scalars['timestamp']['input']>;
+  p_organization_id?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 export type Get_Expiring_Fix_Reports_Args = {
@@ -28068,6 +28301,10 @@ export type Query_Root = {
   commit_blame_request_aggregate: Commit_Blame_Request_Aggregate;
   /** fetch data from the table: "commit_blame_request" using primary key columns */
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** fetch data from the table: "developer_statistics_row" */
+  developer_statistics_row: Array<Developer_Statistics_Row>;
+  /** fetch aggregated fields from the table: "developer_statistics_row" */
+  developer_statistics_row_aggregate: Developer_Statistics_Row_Aggregate;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -28175,6 +28412,11 @@ export type Query_Root = {
   getAiToolUsageStatistics?: Maybe<GetAiToolUsageStatisticsResponse>;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
   getCheckmarxProjects?: Maybe<GetCheckmarxProjectsResponse>;
+  /**
+   * Get developer statistics aggregated from AI blame attribution data.
+   * Returns usage counts grouped by developer (userName + computerName).
+   */
+  getDeveloperStatistics: GetDeveloperStatisticsResponse;
   getFalsePositive: GetFalsePositiveResponseUnion;
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
@@ -28189,6 +28431,10 @@ export type Query_Root = {
   getSplitFix: GetSplitFixResponseUnion;
   /** Get submit requests (PRs/MRs) for a specific repository */
   getSubmitRequests: Array<SubmitRequestInfo>;
+  /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
+  get_developer_statistics: Array<Developer_Statistics_Row>;
+  /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
+  get_developer_statistics_aggregate: Developer_Statistics_Row_Aggregate;
   /** execute function "get_expiring_fix_reports" which returns "fix_report" */
   get_expiring_fix_reports: Array<FixReport>;
   /** execute function "get_expiring_fix_reports" and query aggregates on result of table type "fix_report" */
@@ -29294,6 +29540,24 @@ export type Query_RootCommit_Blame_Request_By_PkArgs = {
 };
 
 
+export type Query_RootDeveloper_Statistics_RowArgs = {
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Statistics_Row_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
 export type Query_RootEffort_To_Apply_FixArgs = {
   distinct_on?: InputMaybe<Array<Effort_To_Apply_Fix_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -29695,6 +29959,12 @@ export type Query_RootGetCheckmarxProjectsArgs = {
 };
 
 
+export type Query_RootGetDeveloperStatisticsArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  organizationId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetFalsePositiveArgs = {
   fpId: Scalars['uuid']['input'];
 };
@@ -29745,6 +30015,8 @@ export type Query_RootGetReportsApiV2Args = {
 
 
 export type Query_RootGetScmReposArgs = {
+  onlyWithAttributions?: InputMaybe<Scalars['Boolean']['input']>;
+  organizationId?: InputMaybe<Scalars['String']['input']>;
   url: Scalars['String']['input'];
 };
 
@@ -29763,7 +30035,29 @@ export type Query_RootGetSplitFixArgs = {
 
 
 export type Query_RootGetSubmitRequestsArgs = {
+  onlyWithAttributions?: InputMaybe<Scalars['Boolean']['input']>;
+  organizationId?: InputMaybe<Scalars['String']['input']>;
   repoUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootGet_Developer_StatisticsArgs = {
+  args: Get_Developer_Statistics_Args;
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Query_RootGet_Developer_Statistics_AggregateArgs = {
+  args: Get_Developer_Statistics_Args;
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
 };
 
 
@@ -34017,6 +34311,12 @@ export type Subscription_Root = {
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** fetch data from the table in a streaming manner: "commit_blame_request" */
   commit_blame_request_stream: Array<Commit_Blame_Request>;
+  /** fetch data from the table: "developer_statistics_row" */
+  developer_statistics_row: Array<Developer_Statistics_Row>;
+  /** fetch aggregated fields from the table: "developer_statistics_row" */
+  developer_statistics_row_aggregate: Developer_Statistics_Row_Aggregate;
+  /** fetch data from the table in a streaming manner: "developer_statistics_row" */
+  developer_statistics_row_stream: Array<Developer_Statistics_Row>;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -34145,6 +34445,10 @@ export type Subscription_Root = {
   fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   /** fetch data from the table in a streaming manner: "fix_to_submit_fix_request" */
   fix_to_submit_fix_request_stream: Array<Fix_To_Submit_Fix_Request>;
+  /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
+  get_developer_statistics: Array<Developer_Statistics_Row>;
+  /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
+  get_developer_statistics_aggregate: Developer_Statistics_Row_Aggregate;
   /** execute function "get_expiring_fix_reports" which returns "fix_report" */
   get_expiring_fix_reports: Array<FixReport>;
   /** execute function "get_expiring_fix_reports" and query aggregates on result of table type "fix_report" */
@@ -35565,6 +35869,31 @@ export type Subscription_RootCommit_Blame_Request_StreamArgs = {
 };
 
 
+export type Subscription_RootDeveloper_Statistics_RowArgs = {
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Statistics_Row_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Statistics_Row_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Developer_Statistics_Row_Stream_Cursor_Input>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
 export type Subscription_RootEffort_To_Apply_FixArgs = {
   distinct_on?: InputMaybe<Array<Effort_To_Apply_Fix_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -36042,6 +36371,26 @@ export type Subscription_RootFix_To_Submit_Fix_Request_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Fix_To_Submit_Fix_Request_Stream_Cursor_Input>>;
   where?: InputMaybe<Fix_To_Submit_Fix_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootGet_Developer_StatisticsArgs = {
+  args: Get_Developer_Statistics_Args;
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootGet_Developer_Statistics_AggregateArgs = {
+  args: Get_Developer_Statistics_Args;
+  distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
+  where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
 };
 
 

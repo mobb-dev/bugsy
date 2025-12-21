@@ -99,13 +99,6 @@ export type GithubBlameResponse = {
           startingLine: number
           commit: {
             oid: string
-            author: {
-              user: {
-                email: string
-                name: string
-                login: string
-              }
-            }
           }
         }[]
       }
@@ -120,9 +113,6 @@ export type BlameRangeData = {
   startingLine: number
   endingLine: number
   commitSha: string
-  email: string
-  name: string
-  login: string
 }
 
 // Shared type for commit timestamp data
@@ -173,9 +163,6 @@ export type BlameRangesGraphQLResponse = {
       endingLine: number
       commit: {
         oid: string
-        author: {
-          user: { name: string; login: string; email: string } | null
-        }
       }
     }[]
   }

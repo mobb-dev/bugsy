@@ -56,13 +56,6 @@ export const GET_BLAME_DOCUMENT = `
                 ranges {
                   commit {
                     oid
-                    author {
-                      user {
-                        name
-                        login
-                      }
-                    }
-                    authoredDate
                   }
                   startingLine
                   endingLine
@@ -109,6 +102,7 @@ export const GITHUB_GRAPHQL_FRAGMENTS = {
   /**
    * Fragment for fetching blame data.
    * Use with object(expression: $ref) on Commit type.
+   * Note: $path placeholder must be replaced with actual file path.
    */
   BLAME_RANGES: `
     blame(path: "$path") {
@@ -117,13 +111,6 @@ export const GITHUB_GRAPHQL_FRAGMENTS = {
         endingLine
         commit {
           oid
-          author {
-            user {
-              name
-              login
-              email
-            }
-          }
         }
       }
     }

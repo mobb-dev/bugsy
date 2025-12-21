@@ -513,12 +513,10 @@ export class GithubSCMLib extends SCMLib {
       )
     )
 
-    // Use optimized blame-based attribution
-    const diffLines = await this._attributeLinesViaBlame(
-      pr.head.ref,
-      filesRes.data,
-      commits
-    )
+    // Use optimized blame-based attribution (skip if files couldn't be fetched)
+    const diffLines = filesRes
+      ? await this._attributeLinesViaBlame(pr.head.ref, filesRes.data, commits)
+      : []
 
     return {
       diff: prDiff,
@@ -592,6 +590,23 @@ export class GithubSCMLib extends SCMLib {
     })
 
     return submitRequests
+  }
+
+  /**
+   * Fetches commits for multiple PRs in a single GraphQL request.
+   * Much more efficient than calling getSubmitRequestDiff for each PR.
+   *
+   * @param repoUrl - Repository URL
+   * @param prNumbers - Array of PR numbers to fetch commits for
+   * @returns Map of PR number to array of commit SHAs
+   */
+  override async getPrCommitsBatch(
+    repoUrl: string,
+    prNumbers: number[]
+  ): Promise<Map<number, string[]>> {
+    this._validateAccessToken()
+    const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
+    return this.githubSdk.getPrCommitsBatch({ owner, repo, prNumbers })
   }
 
   /**

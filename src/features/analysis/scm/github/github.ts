@@ -80,6 +80,7 @@ type BatchQueryConfig<TKey, TResult> = {
 /**
  * Generic helper to execute batch GraphQL queries
  * Reduces code duplication across all batch operations
+ * Handles partial GraphQL responses when some items don't exist
  */
 async function executeBatchGraphQL<TKey, TResult>(
   octokit: ReturnType<typeof getOctoKit>,
@@ -106,23 +107,40 @@ async function executeBatchGraphQL<TKey, TResult>(
     }
   `
 
-  const response = await octokit.graphql<{
-    repository: Record<string, unknown>
-  }>(query, { owner, repo })
+  // GitHub GraphQL returns partial data even when some items don't exist,
+  // but throws an error. We catch it and extract the partial data.
+  let response: { repository: Record<string, unknown> }
+  try {
+    response = await octokit.graphql<{
+      repository: Record<string, unknown>
+    }>(query, { owner, repo })
+  } catch (error) {
+    // Check if error contains partial data (GraphQL partial response)
+    const graphqlError = error as {
+      data?: { repository: Record<string, unknown> }
+      errors?: { message: string }[]
+    }
+    if (graphqlError.data?.repository) {
+      // Use partial data even if some items failed
+      response = graphqlError.data
+    } else {
+      throw error
+    }
+  }
 
   // Map response back to items
   const result = new Map<TKey, TResult>()
   items.forEach((item, index) => {
     const data = response.repository[`${aliasPrefix}${index}`]
-    if (data) {
-      const extracted = extractResult(
-        data as Record<string, unknown>,
-        item,
-        index
-      )
-      if (extracted !== undefined) {
-        result.set(item, extracted)
-      }
+    // Always call extractResult, even if data is null/undefined
+    // This allows extractResult to return a default value for missing items
+    const extracted = extractResult(
+      (data as Record<string, unknown>) || {},
+      item,
+      index
+    )
+    if (extracted !== undefined) {
+      result.set(item, extracted)
     }
   })
 
@@ -315,9 +333,15 @@ export function getGithubSdk(
         }))
       } catch (e) {
         if (e instanceof RequestError && e.status === 401) {
+          console.warn(
+            'GitHub API returned 401 Unauthorized when listing repos - token may be expired or lack repo scope'
+          )
           return []
         }
         if (e instanceof RequestError && e.status === 404) {
+          console.warn(
+            'GitHub API returned 404 Not Found when listing repos - user may not exist'
+          )
           return []
         }
         throw e
@@ -494,11 +518,46 @@ export function getGithubSdk(
           startingLine: range.startingLine,
           endingLine: range.endingLine,
           commitSha: range.commit.oid,
-          email: range.commit.author.user?.email || '',
-          name: range.commit.author.user?.name || '',
-          login: range.commit.author.user?.login || '',
         })
       )
+    },
+    /**
+     * Fetches commits for multiple PRs in a single GraphQL request.
+     * This is much more efficient than making N separate REST API calls.
+     *
+     * @param params.owner - Repository owner
+     * @param params.repo - Repository name
+     * @param params.prNumbers - Array of PR numbers to fetch commits for
+     * @returns Map of PR number to array of commit SHAs
+     */
+    async getPrCommitsBatch(params: {
+      owner: string
+      repo: string
+      prNumbers: number[]
+    }): Promise<Map<number, string[]>> {
+      return executeBatchGraphQL(octokit, params.owner, params.repo, {
+        items: params.prNumbers,
+        aliasPrefix: 'prCommits',
+        buildFragment: (prNumber, index) => `
+          prCommits${index}: pullRequest(number: ${prNumber}) {
+            commits(first: 100) {
+              nodes {
+                commit {
+                  oid
+                }
+              }
+            }
+          }`,
+        extractResult: (data) => {
+          const prData = data as {
+            commits?: { nodes: { commit: { oid: string } }[] }
+          }
+          if (prData?.commits?.nodes) {
+            return prData.commits.nodes.map((node) => node.commit.oid)
+          }
+          return []
+        },
+      })
     },
     // todo: refactor the name for this function
     async createPr(params: {
@@ -798,7 +857,7 @@ export function getGithubSdk(
 
     /**
      * Batch fetch blame data for multiple files via GraphQL.
-     * Field selection matches GITHUB_GRAPHQL_FRAGMENTS.BLAME_RANGES pattern.
+     * Uses GITHUB_GRAPHQL_FRAGMENTS.BLAME_RANGES for the field selection.
      */
     async getBlameBatch(params: {
       owner: string
@@ -812,15 +871,7 @@ export function getGithubSdk(
         buildFragment: (path, index) => `
           file${index}: object(expression: "${params.ref}") {
             ... on Commit {
-              blame(path: "${path}") {
-                ranges {
-                  startingLine
-                  endingLine
-                  commit {
-                    oid
-                  }
-                }
-              }
+              ${GITHUB_GRAPHQL_FRAGMENTS.BLAME_RANGES.replace('$path', path)}
             }
           }`,
         extractResult: (data) => {
@@ -830,10 +881,6 @@ export function getGithubSdk(
               startingLine: range.startingLine,
               endingLine: range.endingLine,
               commitSha: range.commit.oid,
-              // This is an urgent fix. We need to later remove these fields from the return type and propagate the change.
-              email: '',
-              name: '',
-              login: '',
             }))
           }
           return undefined

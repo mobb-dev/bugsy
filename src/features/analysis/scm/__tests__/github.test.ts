@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getGithubSdk, parseGithubOwnerAndRepo } from '../github'
-import type { GithubSCMLib } from '../github/GithubSCMLib'
+import { GithubSCMLib } from '../github/GithubSCMLib'
 import { createScmLib } from '../scmFactory'
 import { ScmLibScmType } from '../types'
 import { RepoConfig } from './common'
@@ -242,6 +242,97 @@ describe('GithubSCMLib wrappers for rate limit and recent commits', () => {
     const since = new Date('2020-01-01T00:00:00Z').toISOString()
     const commits = await (scmLib as GithubSCMLib).getRecentCommits(since)
     expect(Array.isArray(commits.data)).toBe(true)
+  })
+})
+
+describe('getPrCommitsBatch - batch fetch PR commits via GraphQL', () => {
+  it('fetches commits for multiple PRs in a single request', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    // Use known merged PRs from facebook/react that have commits
+    // PR #28379, #28378, #28377 are recent PRs that should exist
+    const prNumbers = [28379, 28378, 28377]
+
+    const result = await sdk.getPrCommitsBatch({
+      owner: OWNER,
+      repo: REPO,
+      prNumbers,
+    })
+
+    // Should return a Map with entries for each PR
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(prNumbers.length)
+
+    // Each PR should have an array of commit SHAs
+    for (const prNumber of prNumbers) {
+      const commits = result.get(prNumber)
+      expect(Array.isArray(commits)).toBe(true)
+      // Each commit SHA should be a string (40 char hex)
+      if (commits && commits.length > 0) {
+        expect(typeof commits[0]).toBe('string')
+        expect(commits[0]).toMatch(/^[a-f0-9]{40}$/)
+      }
+    }
+  })
+
+  it('handles non-existent PR numbers gracefully', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    // Mix of existing and non-existing PRs
+    const prNumbers = [28379, 999999999]
+
+    const result = await sdk.getPrCommitsBatch({
+      owner: OWNER,
+      repo: REPO,
+      prNumbers,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    // Existing PR should have commits
+    expect(result.get(28379)?.length).toBeGreaterThan(0)
+    // Non-existing PR should have empty array
+    expect(result.get(999999999)).toEqual([])
+  })
+
+  it('returns empty map for empty input', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const result = await sdk.getPrCommitsBatch({
+      owner: OWNER,
+      repo: REPO,
+      prNumbers: [],
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(0)
+  })
+
+  it('works via GithubSCMLib wrapper', async () => {
+    // Instantiate GithubSCMLib directly to avoid createScmLib's fallback behavior
+    const scmLib = new GithubSCMLib(
+      GITHUB_URL,
+      env.PLAYWRIGHT_GH_CLOUD_PAT,
+      undefined
+    )
+
+    const prNumbers = [28379, 28378]
+    const result = await scmLib.getPrCommitsBatch(GITHUB_URL, prNumbers)
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(2)
+    expect(result.get(28379)?.length).toBeGreaterThan(0)
   })
 })
 

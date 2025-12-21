@@ -484,9 +484,6 @@ export async function getGitlabBlameRanges(
         startingLine: oldLineNumber,
         endingLine: lineNumber - 1,
         commitSha: range.commit.id,
-        login: range.commit.author_email,
-        email: range.commit.author_email,
-        name: range.commit.author_name,
       }
     })
 }

@@ -3,8 +3,109 @@ import { spawn } from 'child_process'
 // @ts-expect-error - gitleaks-secret-scanner doesn't have type definitions
 import { installGitleaks } from 'gitleaks-secret-scanner/lib/installer.js'
 
-// Initialize OpenRedaction with all patterns, but we'll filter out problematic ones
-const openRedaction = new OpenRedaction()
+// Initialize OpenRedaction with comprehensive PII patterns while avoiding false-positive-prone patterns
+const openRedaction = new OpenRedaction({
+  patterns: [
+    // Core Personal Data
+    'EMAIL',
+    'SSN',
+    'NATIONAL_INSURANCE_UK',
+    'DATE_OF_BIRTH',
+
+    // Identity Documents
+    'PASSPORT_UK',
+    'PASSPORT_US',
+    'PASSPORT_MRZ_TD1',
+    'PASSPORT_MRZ_TD3',
+    'DRIVING_LICENSE_UK',
+    'DRIVING_LICENSE_US',
+    'VISA_NUMBER',
+    'VISA_MRZ',
+    'TAX_ID',
+
+    // Financial Data
+    'CREDIT_CARD',
+    'IBAN',
+    'BANK_ACCOUNT_UK',
+    'ROUTING_NUMBER_US',
+    'SWIFT_BIC',
+    'CARD_TRACK1_DATA',
+    'CARD_TRACK2_DATA',
+    'CARD_EXPIRY',
+    'CARD_AUTH_CODE',
+
+    // Cryptocurrency
+    'BITCOIN_ADDRESS',
+    'ETHEREUM_ADDRESS',
+    'LITECOIN_ADDRESS',
+    'CARDANO_ADDRESS',
+    'SOLANA_ADDRESS',
+    'MONERO_ADDRESS',
+    'RIPPLE_ADDRESS',
+
+    // Medical Data
+    'NHS_NUMBER',
+    'MEDICAL_RECORD_NUMBER',
+    'AUSTRALIAN_MEDICARE',
+    'HEALTH_PLAN_NUMBER',
+    'PRESCRIPTION_NUMBER',
+    'PATIENT_ID',
+
+    // Communications
+    'PHONE_US',
+    'PHONE_UK',
+    'PHONE_UK_MOBILE',
+    'PHONE_INTERNATIONAL',
+    'PHONE_LINE_NUMBER',
+    'EMERGENCY_CONTACT',
+    'ADDRESS_STREET',
+    'ADDRESS_PO_BOX',
+    'POSTCODE_UK',
+    'ZIP_CODE_US',
+
+    // Network & Technical
+    'IPV4',
+    'IPV6',
+    'MAC_ADDRESS',
+    'URL_WITH_AUTH',
+
+    // Security Keys & Tokens
+    'PRIVATE_KEY',
+    'SSH_PRIVATE_KEY',
+    'AWS_SECRET_KEY',
+    'AWS_ACCESS_KEY',
+    'AZURE_STORAGE_KEY',
+    'GCP_SERVICE_ACCOUNT',
+    'JWT_TOKEN',
+    'OAUTH_TOKEN',
+    'OAUTH_CLIENT_SECRET',
+    'BEARER_TOKEN',
+    'PAYMENT_TOKEN',
+    'GENERIC_SECRET',
+    'GENERIC_API_KEY',
+
+    // Platform-Specific API Keys
+    'GITHUB_TOKEN',
+    'SLACK_TOKEN',
+    'STRIPE_API_KEY',
+    'GOOGLE_API_KEY',
+    'FIREBASE_API_KEY',
+    'HEROKU_API_KEY',
+    'MAILGUN_API_KEY',
+    'SENDGRID_API_KEY',
+    'TWILIO_API_KEY',
+    'NPM_TOKEN',
+    'PYPI_TOKEN',
+    'DOCKER_AUTH',
+    'KUBERNETES_SECRET',
+
+    // Government & Legal
+    'POLICE_REPORT_NUMBER',
+    'IMMIGRATION_NUMBER',
+    'COURT_REPORTER_LICENSE',
+    'CLIENT_ID',
+  ],
+})
 
 let gitleaksBinaryPath: string | null = null
 
@@ -118,7 +219,7 @@ export async function sanitizeDataWithCounts(
   const sanitizeString = async (str: string): Promise<string> => {
     let result = str
 
-    // First apply PII detection using OpenRedaction
+    // Apply PII detection using OpenRedaction (now configured with security-focused patterns only)
     const piiDetections = openRedaction.scan(str)
     if (piiDetections && piiDetections.total > 0) {
       const allDetections = [
@@ -126,28 +227,15 @@ export async function sanitizeDataWithCounts(
         ...piiDetections.medium,
         ...piiDetections.low,
       ]
-      // Filter out overly broad patterns that cause false positives
-      const filteredDetections = allDetections.filter((detection) => {
-        // Skip Instagram username detection as it's too broad (matches "config", "ig", etc.)
-        if (detection.type === 'INSTAGRAM_USERNAME') {
-          return false
-        }
-        // Skip very short detections (less than 3 chars) unless they're high severity
-        if (detection.value.length < 3 && detection.severity !== 'high') {
-          return false
-        }
-        return true
-      })
 
-      // Count PII by severity
-      for (const detection of filteredDetections) {
+      // Count PII by severity and sanitize
+      for (const detection of allDetections) {
         counts.pii.total++
         if (detection.severity === 'high') counts.pii.high++
         else if (detection.severity === 'medium') counts.pii.medium++
         else if (detection.severity === 'low') counts.pii.low++
 
         const masked = maskString(detection.value)
-        // Use replaceAll to ensure all occurrences are replaced
         result = result.replaceAll(detection.value, masked)
       }
     }

@@ -470,9 +470,8 @@ describe('MCP Server', () => {
         delete process.env['PROJECT_ROOT']
 
         // Also clear the known workspace path from WorkspaceService
-        const { WorkspaceService } = await import(
-          '../../src/mcp/services/WorkspaceService'
-        )
+        const { WorkspaceService } =
+          await import('../../src/mcp/services/WorkspaceService')
         const originalKnownPath = (
           WorkspaceService as unknown as { knownWorkspacePath?: string }
         ).knownWorkspacePath
@@ -554,9 +553,8 @@ describe('MCP Server', () => {
         // Get access to mocked functions for verification
         const { default: fetch } = await import('node-fetch')
         const mockedFetch = vi.mocked(fetch)
-        const { subscribe } = await import(
-          '../../src/features/analysis/graphql/subscribe'
-        )
+        const { subscribe } =
+          await import('../../src/features/analysis/graphql/subscribe')
         const mockedSubscribe = vi.mocked(subscribe)
 
         const tool = new FixVulnerabilitiesTool()

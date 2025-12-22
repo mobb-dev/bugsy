@@ -120,15 +120,12 @@ describe('CLI: upload-ai-blame', () => {
 
   describe('uploadAiBlameHandler', () => {
     it('should authenticate a client and upload files successfully', async () => {
-      const { uploadAiBlameHandler } = await import(
-        '@mobb/bugsy/args/commands/upload_ai_blame'
-      )
-      const { getAuthenticatedGQLClient } = await import(
-        '@mobb/bugsy/commands/handleMobbLogin'
-      )
-      const uploadMod = await import(
-        '@mobb/bugsy/features/analysis/upload-file'
-      )
+      const { uploadAiBlameHandler } =
+        await import('@mobb/bugsy/args/commands/upload_ai_blame')
+      const { getAuthenticatedGQLClient } =
+        await import('@mobb/bugsy/commands/handleMobbLogin')
+      const uploadMod =
+        await import('@mobb/bugsy/features/analysis/upload-file')
       const uploadSpy = vi.spyOn(uploadMod, 'uploadFile')
 
       const promptPath = path.join(tmpDir, 'prompt-no-auth.json')
@@ -153,12 +150,10 @@ describe('CLI: upload-ai-blame', () => {
     })
 
     it('should not exit on error when exitOnError is false', async () => {
-      const { uploadAiBlameHandler } = await import(
-        '@mobb/bugsy/args/commands/upload_ai_blame'
-      )
-      const { getAuthenticatedGQLClient } = await import(
-        '@mobb/bugsy/commands/handleMobbLogin'
-      )
+      const { uploadAiBlameHandler } =
+        await import('@mobb/bugsy/args/commands/upload_ai_blame')
+      const { getAuthenticatedGQLClient } =
+        await import('@mobb/bugsy/commands/handleMobbLogin')
 
       const promptPath = path.join(tmpDir, 'prompt-error.json')
       const inferencePath = path.join(tmpDir, 'inference-error.json')
@@ -191,12 +186,10 @@ describe('CLI: upload-ai-blame', () => {
     })
 
     it('should include computerName and userName from OS in upload sessions', async () => {
-      const { uploadAiBlameHandler } = await import(
-        '@mobb/bugsy/args/commands/upload_ai_blame'
-      )
-      const { getAuthenticatedGQLClient } = await import(
-        '@mobb/bugsy/commands/handleMobbLogin'
-      )
+      const { uploadAiBlameHandler } =
+        await import('@mobb/bugsy/args/commands/upload_ai_blame')
+      const { getAuthenticatedGQLClient } =
+        await import('@mobb/bugsy/commands/handleMobbLogin')
 
       const promptPath = path.join(tmpDir, 'prompt-os-info.json')
       const inferencePath = path.join(tmpDir, 'inference-os-info.json')

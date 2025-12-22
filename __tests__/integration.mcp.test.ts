@@ -59,18 +59,16 @@ vi.useFakeTimers({
 })
 
 vi.mock('open', async () => {
-  const { createOpenMockImplementation } = await import(
-    './integration-test-utils'
-  )
+  const { createOpenMockImplementation } =
+    await import('./integration-test-utils')
   return {
     default: vi.fn().mockImplementation(createOpenMockImplementation()),
   }
 })
 
 vi.mock('../src/features/analysis/scanners/snyk', async () => {
-  const { createSnykMockImplementation } = await import(
-    './integration-test-utils'
-  )
+  const { createSnykMockImplementation } =
+    await import('./integration-test-utils')
   return {
     getSnykReport: vi.fn().mockImplementation(createSnykMockImplementation()),
   }

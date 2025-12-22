@@ -8888,6 +8888,8 @@ export type Bigint_Comparison_Exp = {
 /** columns and relationships of "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request = {
   __typename?: 'blame_ai_analysis_request';
+  batchCount?: Maybe<Scalars['Int']['output']>;
+  batchIndex?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   commit?: Maybe<Ai_Blame_Commit>;
   commitId?: Maybe<Scalars['uuid']['output']>;
@@ -8924,9 +8926,17 @@ export type Blame_Ai_Analysis_Request_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Aggregate_Fields = {
   __typename?: 'blame_ai_analysis_request_aggregate_fields';
+  avg?: Maybe<Blame_Ai_Analysis_Request_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Blame_Ai_Analysis_Request_Max_Fields>;
   min?: Maybe<Blame_Ai_Analysis_Request_Min_Fields>;
+  stddev?: Maybe<Blame_Ai_Analysis_Request_Stddev_Fields>;
+  stddev_pop?: Maybe<Blame_Ai_Analysis_Request_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Blame_Ai_Analysis_Request_Stddev_Samp_Fields>;
+  sum?: Maybe<Blame_Ai_Analysis_Request_Sum_Fields>;
+  var_pop?: Maybe<Blame_Ai_Analysis_Request_Var_Pop_Fields>;
+  var_samp?: Maybe<Blame_Ai_Analysis_Request_Var_Samp_Fields>;
+  variance?: Maybe<Blame_Ai_Analysis_Request_Variance_Fields>;
 };
 
 
@@ -8938,9 +8948,17 @@ export type Blame_Ai_Analysis_Request_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Aggregate_Order_By = {
+  avg?: InputMaybe<Blame_Ai_Analysis_Request_Avg_Order_By>;
   count?: InputMaybe<Order_By>;
   max?: InputMaybe<Blame_Ai_Analysis_Request_Max_Order_By>;
   min?: InputMaybe<Blame_Ai_Analysis_Request_Min_Order_By>;
+  stddev?: InputMaybe<Blame_Ai_Analysis_Request_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Blame_Ai_Analysis_Request_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Blame_Ai_Analysis_Request_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Blame_Ai_Analysis_Request_Sum_Order_By>;
+  var_pop?: InputMaybe<Blame_Ai_Analysis_Request_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Blame_Ai_Analysis_Request_Var_Samp_Order_By>;
+  variance?: InputMaybe<Blame_Ai_Analysis_Request_Variance_Order_By>;
 };
 
 /** input type for inserting array relation for remote table "blame_ai_analysis_request" */
@@ -8950,11 +8968,26 @@ export type Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input = {
   on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_On_Conflict>;
 };
 
+/** aggregate avg on columns */
+export type Blame_Ai_Analysis_Request_Avg_Fields = {
+  __typename?: 'blame_ai_analysis_request_avg_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Avg_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
 /** Boolean expression to filter rows from the table "blame_ai_analysis_request". All fields are combined with a logical 'AND'. */
 export type Blame_Ai_Analysis_Request_Bool_Exp = {
   _and?: InputMaybe<Array<Blame_Ai_Analysis_Request_Bool_Exp>>;
   _not?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
   _or?: InputMaybe<Array<Blame_Ai_Analysis_Request_Bool_Exp>>;
+  batchCount?: InputMaybe<Int_Comparison_Exp>;
+  batchIndex?: InputMaybe<Int_Comparison_Exp>;
   commit?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
   commitId?: InputMaybe<Uuid_Comparison_Exp>;
   createdByUser?: InputMaybe<User_Bool_Exp>;
@@ -8973,8 +9006,16 @@ export enum Blame_Ai_Analysis_Request_Constraint {
   BlameAiAnalysisRequestPkey = 'blame_ai_analysis_request_pkey'
 }
 
+/** input type for incrementing numeric columns in table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Inc_Input = {
+  batchCount?: InputMaybe<Scalars['Int']['input']>;
+  batchIndex?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Insert_Input = {
+  batchCount?: InputMaybe<Scalars['Int']['input']>;
+  batchIndex?: InputMaybe<Scalars['Int']['input']>;
   commit?: InputMaybe<Ai_Blame_Commit_Obj_Rel_Insert_Input>;
   commitId?: InputMaybe<Scalars['uuid']['input']>;
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -8990,6 +9031,8 @@ export type Blame_Ai_Analysis_Request_Insert_Input = {
 /** aggregate max on columns */
 export type Blame_Ai_Analysis_Request_Max_Fields = {
   __typename?: 'blame_ai_analysis_request_max_fields';
+  batchCount?: Maybe<Scalars['Int']['output']>;
+  batchIndex?: Maybe<Scalars['Int']['output']>;
   commitId?: Maybe<Scalars['uuid']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
@@ -9000,6 +9043,8 @@ export type Blame_Ai_Analysis_Request_Max_Fields = {
 
 /** order by max() on columns of table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Max_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
   commitId?: InputMaybe<Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
@@ -9011,6 +9056,8 @@ export type Blame_Ai_Analysis_Request_Max_Order_By = {
 /** aggregate min on columns */
 export type Blame_Ai_Analysis_Request_Min_Fields = {
   __typename?: 'blame_ai_analysis_request_min_fields';
+  batchCount?: Maybe<Scalars['Int']['output']>;
+  batchIndex?: Maybe<Scalars['Int']['output']>;
   commitId?: Maybe<Scalars['uuid']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
@@ -9021,6 +9068,8 @@ export type Blame_Ai_Analysis_Request_Min_Fields = {
 
 /** order by min() on columns of table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Min_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
   commitId?: InputMaybe<Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
@@ -9047,6 +9096,8 @@ export type Blame_Ai_Analysis_Request_On_Conflict = {
 
 /** Ordering options when selecting data from "blame_ai_analysis_request". */
 export type Blame_Ai_Analysis_Request_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
   commit?: InputMaybe<Ai_Blame_Commit_Order_By>;
   commitId?: InputMaybe<Order_By>;
   createdByUser?: InputMaybe<User_Order_By>;
@@ -9067,6 +9118,10 @@ export type Blame_Ai_Analysis_Request_Pk_Columns_Input = {
 /** select columns of table "blame_ai_analysis_request" */
 export enum Blame_Ai_Analysis_Request_Select_Column {
   /** column name */
+  BatchCount = 'batchCount',
+  /** column name */
+  BatchIndex = 'batchIndex',
+  /** column name */
   CommitId = 'commitId',
   /** column name */
   CreatedByUserId = 'createdByUserId',
@@ -9084,6 +9139,8 @@ export enum Blame_Ai_Analysis_Request_Select_Column {
 
 /** input type for updating data in table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Set_Input = {
+  batchCount?: InputMaybe<Scalars['Int']['input']>;
+  batchIndex?: InputMaybe<Scalars['Int']['input']>;
   commitId?: InputMaybe<Scalars['uuid']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -9245,6 +9302,45 @@ export type Blame_Ai_Analysis_Request_State_Updates = {
   where: Blame_Ai_Analysis_Request_State_Bool_Exp;
 };
 
+/** aggregate stddev on columns */
+export type Blame_Ai_Analysis_Request_Stddev_Fields = {
+  __typename?: 'blame_ai_analysis_request_stddev_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Stddev_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Blame_Ai_Analysis_Request_Stddev_Pop_Fields = {
+  __typename?: 'blame_ai_analysis_request_stddev_pop_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Stddev_Pop_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Blame_Ai_Analysis_Request_Stddev_Samp_Fields = {
+  __typename?: 'blame_ai_analysis_request_stddev_samp_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Stddev_Samp_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
 /** Streaming cursor of the table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Stream_Cursor_Input = {
   /** Stream column input with initial value */
@@ -9255,6 +9351,8 @@ export type Blame_Ai_Analysis_Request_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input = {
+  batchCount?: InputMaybe<Scalars['Int']['input']>;
+  batchIndex?: InputMaybe<Scalars['Int']['input']>;
   commitId?: InputMaybe<Scalars['uuid']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -9264,8 +9362,25 @@ export type Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input = {
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
+/** aggregate sum on columns */
+export type Blame_Ai_Analysis_Request_Sum_Fields = {
+  __typename?: 'blame_ai_analysis_request_sum_fields';
+  batchCount?: Maybe<Scalars['Int']['output']>;
+  batchIndex?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Sum_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
 /** update columns of table "blame_ai_analysis_request" */
 export enum Blame_Ai_Analysis_Request_Update_Column {
+  /** column name */
+  BatchCount = 'batchCount',
+  /** column name */
+  BatchIndex = 'batchIndex',
   /** column name */
   CommitId = 'commitId',
   /** column name */
@@ -9283,10 +9398,51 @@ export enum Blame_Ai_Analysis_Request_Update_Column {
 }
 
 export type Blame_Ai_Analysis_Request_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   /** filter the rows which have to be updated */
   where: Blame_Ai_Analysis_Request_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Blame_Ai_Analysis_Request_Var_Pop_Fields = {
+  __typename?: 'blame_ai_analysis_request_var_pop_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Var_Pop_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Blame_Ai_Analysis_Request_Var_Samp_Fields = {
+  __typename?: 'blame_ai_analysis_request_var_samp_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Var_Samp_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Blame_Ai_Analysis_Request_Variance_Fields = {
+  __typename?: 'blame_ai_analysis_request_variance_fields';
+  batchCount?: Maybe<Scalars['Float']['output']>;
+  batchIndex?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_Request_Variance_Order_By = {
+  batchCount?: InputMaybe<Order_By>;
+  batchIndex?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "broker_host" */
@@ -21670,6 +21826,7 @@ export type Mutation_RootUpdate_Api_Token_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
+  _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   where: Blame_Ai_Analysis_Request_Bool_Exp;
 };
@@ -21677,6 +21834,7 @@ export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_By_PkArgs = {
+  _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   pk_columns: Blame_Ai_Analysis_Request_Pk_Columns_Input;
 };

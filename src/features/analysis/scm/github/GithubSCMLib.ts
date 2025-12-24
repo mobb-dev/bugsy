@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { InvalidRepoUrlError } from '../errors'
+import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
 import {
@@ -11,6 +12,7 @@ import {
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
   PostPRReviewCommentParams,
+  PullRequestMetrics,
   SCMDeleteGeneralPrCommentParams,
   SCMDeleteGeneralPrReviewResponse,
   SCMGetPrReviewCommentsParams,
@@ -608,6 +610,79 @@ export class GithubSCMLib extends SCMLib {
     const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
     return this.githubSdk.getPrCommitsBatch({ owner, repo, prNumbers })
   }
+  async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+
+    // Single GraphQL query replaces 4 REST calls
+    const res = await this.githubSdk.getPRMetricsGraphQL({
+      owner,
+      repo,
+      prNumber,
+    })
+
+    const pr = res.repository.pullRequest
+    if (!pr) {
+      throw new Error(`Pull request #${prNumber} not found`)
+    }
+
+    // Determine PR status
+    let prStatus: Pr_Status_Enum = Pr_Status_Enum.Active
+    if (pr.state === 'CLOSED') {
+      prStatus = pr.mergedAt ? Pr_Status_Enum.Merged : Pr_Status_Enum.Closed
+    } else if (pr.isDraft) {
+      prStatus = Pr_Status_Enum.Draft
+    }
+
+    // Get first commit date
+    const firstCommit = pr.commits.nodes[0]
+    const firstCommitDate = firstCommit
+      ? new Date(
+          firstCommit.commit.author?.date ||
+            firstCommit.commit.committedDate ||
+            pr.createdAt
+        )
+      : null
+
+    // Extract commit SHAs
+    let commitShas = pr.commits.nodes.map((node) => node.commit.oid)
+
+    // If commits exceed GraphQL limit, fall back to REST pagination
+    if (pr.commits.totalCount > 100) {
+      const commitsRes = await this.githubSdk.getPrCommits({
+        owner,
+        repo,
+        pull_number: prNumber,
+      })
+      commitShas = commitsRes.data.map((c) => c.sha)
+    }
+
+    // Extract comment IDs
+    let commentIds = pr.comments.nodes.map((node) => node.id)
+
+    // If comments exceed GraphQL limit, fall back to REST pagination
+    if (pr.comments.totalCount > 100) {
+      const commentsRes = await this.githubSdk.getGeneralPrComments({
+        owner,
+        repo,
+        issue_number: prNumber,
+      })
+      commentIds = commentsRes.data.map((c) => String(c.id))
+    }
+
+    return {
+      prId: String(prNumber),
+      repositoryUrl: this.url,
+      prCreatedAt: new Date(pr.createdAt),
+      prMergedAt: pr.mergedAt ? new Date(pr.mergedAt) : null,
+      firstCommitDate,
+      linesAdded: pr.additions,
+      commitsCount: pr.commits.totalCount,
+      commitShas,
+      prStatus,
+      commentIds,
+    }
+  }
 
   /**
    * Parse a Linear ticket from URL and name
@@ -617,7 +692,9 @@ export class GithubSCMLib extends SCMLib {
     url: string | undefined,
     name: string | undefined
   ): { name: string; title: string; url: string } | null {
-    if (!name || !url) return null
+    if (!name || !url) {
+      return null
+    }
 
     const urlParts = url.split('/')
     const titleSlug = urlParts[urlParts.length - 1] || ''

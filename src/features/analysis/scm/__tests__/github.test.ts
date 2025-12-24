@@ -586,5 +586,64 @@ describe('getCommitDiff - individual commit diff', () => {
       expect(typeof parent.sha).toBe('string')
       expect(parent.timestamp).toBeInstanceOf(Date)
     }
+    describe('getPullRequestMetrics', () => {
+      const TEST_REPO_URL =
+        'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
+      const TEST_PR_NUMBER = 2303
+
+      it('returns comprehensive PR metrics for closed PR', async () => {
+        const scmLib = await createScmLib({
+          url: TEST_REPO_URL,
+          scmType: ScmLibScmType.GITHUB,
+          accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+          scmOrg: undefined,
+        })
+
+        const metrics = await (scmLib as GithubSCMLib).getPullRequestMetrics(
+          TEST_PR_NUMBER
+        )
+
+        // Verify basic fields
+        expect(metrics.prId).toBe(String(TEST_PR_NUMBER))
+        expect(metrics.repositoryUrl).toBe(TEST_REPO_URL)
+
+        // Verify PR status is one of the valid types
+        expect(['open', 'closed', 'merged', 'draft']).toContain(
+          metrics.prStatus
+        )
+
+        // Verify dates are valid Date objects
+        expect(metrics.prCreatedAt).toBeInstanceOf(Date)
+        expect(metrics.prCreatedAt.getTime()).toBeGreaterThan(0)
+
+        // prMergedAt can be null for unmerged PRs
+        if (metrics.prMergedAt !== null) {
+          expect(metrics.prMergedAt).toBeInstanceOf(Date)
+        }
+
+        // firstCommitDate can be null but usually isn't
+        if (metrics.firstCommitDate !== null) {
+          expect(metrics.firstCommitDate).toBeInstanceOf(Date)
+        }
+
+        // Verify numeric fields are valid
+        expect(typeof metrics.linesAdded).toBe('number')
+        expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
+
+        expect(typeof metrics.commitsCount).toBe('number')
+        expect(metrics.commitsCount).toBeGreaterThan(0)
+
+        expect(Array.isArray(metrics.commentIds)).toBe(true)
+        expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
+
+        // Verify commit SHAs array
+        expect(Array.isArray(metrics.commitShas)).toBe(true)
+        expect(metrics.commitShas.length).toBe(metrics.commitsCount)
+        metrics.commitShas.forEach((sha: string) => {
+          expect(typeof sha).toBe('string')
+          expect(sha.length).toBeGreaterThan(0)
+        })
+      })
+    })
   })
 })

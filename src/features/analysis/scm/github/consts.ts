@@ -125,3 +125,37 @@ export const GITHUB_GRAPHQL_FRAGMENTS = {
     committedDate
   `,
 } as const
+export const GET_PR_METRICS_QUERY = `
+  query GetPRMetrics($owner: String!, $repo: String!, $prNumber: Int!) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $prNumber) {
+        id
+        number
+        state
+        isDraft
+        createdAt
+        mergedAt
+        additions
+        deletions
+        commits(first: 100) {
+          totalCount
+          nodes {
+            commit {
+              oid
+              committedDate
+              author {
+                date
+              }
+            }
+          }
+        }
+        comments(first: 100) {
+          totalCount
+          nodes {
+            id
+          }
+        }
+      }
+    }
+  }
+`

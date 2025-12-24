@@ -173,3 +173,35 @@ export type CommitTimestampGraphQLResponse = {
   oid?: string
   committedDate?: string
 }
+export type GetPRMetricsResponse = {
+  repository: {
+    pullRequest: {
+      id: string
+      number: number
+      state: 'OPEN' | 'CLOSED' | 'MERGED'
+      isDraft: boolean
+      createdAt: string
+      mergedAt: string | null
+      additions: number
+      deletions: number
+      commits: {
+        totalCount: number
+        nodes: {
+          commit: {
+            oid: string
+            committedDate: string
+            author: {
+              date: string | null
+            } | null
+          }
+        }[]
+      }
+      comments: {
+        totalCount: number
+        nodes: {
+          id: string
+        }[]
+      }
+    } | null
+  }
+}

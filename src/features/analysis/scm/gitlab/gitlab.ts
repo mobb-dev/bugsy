@@ -359,6 +359,52 @@ export async function getGitlabMergeRequest({
   return await api.MergeRequests.show(projectPath, prNumber)
 }
 
+type GetGitlabMergeRequestLinesAddedParams = {
+  url: string
+  prNumber: number
+  accessToken?: string
+}
+
+/**
+ * Calculate lines added from merge request diffs.
+ * GitLab's changes_count represents files changed, not lines added.
+ * This function fetches the diffs and counts actual lines added.
+ */
+export async function getGitlabMergeRequestLinesAdded({
+  url,
+  prNumber,
+  accessToken,
+}: GetGitlabMergeRequestLinesAddedParams): Promise<number> {
+  try {
+    const { projectPath } = parseGitlabOwnerAndRepo(url)
+    const api = getGitBeaker({
+      url,
+      gitlabAuthToken: accessToken,
+    })
+    const diffs = await api.MergeRequests.allDiffs(projectPath, prNumber)
+
+    // Sum up additions from all file diffs
+    let linesAdded = 0
+    for (const diff of diffs) {
+      if (diff.diff) {
+        // Count lines starting with '+' that are actual code (not metadata)
+        const addedLines = diff.diff
+          .split('\n')
+          .filter(
+            (line: string) => line.startsWith('+') && !line.startsWith('+++')
+          ).length
+        linesAdded += addedLines
+      }
+    }
+    return linesAdded
+  } catch (error) {
+    // If diff fetch fails, fall back to 0
+    // Log error but don't throw - metrics can still be useful without line count
+    console.warn(`Failed to fetch diffs for MR ${prNumber}:`, error)
+    return 0
+  }
+}
+
 type GetGitlabCommitUrlParams = {
   url: string
   commitSha: string

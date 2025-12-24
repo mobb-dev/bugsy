@@ -6,6 +6,7 @@ import {
   GetReferenceResult,
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  PullRequestMetrics,
   ReferenceType,
   ScmLibScmType,
   ScmRepoInfo,
@@ -174,5 +175,9 @@ export class StubSCMLib extends SCMLib {
   async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
     console.warn('getSubmitRequests() returning empty array')
     return []
+  }
+  async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
+    console.warn('getPullRequestMetrics() returning empty object')
+    throw new Error('getPullRequestMetrics() not implemented')
   }
 }

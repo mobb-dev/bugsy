@@ -7,6 +7,7 @@ import {
   GetReferenceResult,
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  PullRequestMetrics,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -126,6 +127,7 @@ export abstract class SCMLib {
   ): Promise<Map<number, string[]>> {
     throw new Error('getPrCommitsBatch not implemented for this SCM provider')
   }
+  abstract getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics>
 
   public getAccessToken(): string {
     return this.accessToken || ''

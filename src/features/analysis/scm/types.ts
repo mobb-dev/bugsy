@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { Pr_Status_Enum } from './generates/client_generates'
 import {
   DeleteGeneralPrCommentResponse,
   GetGeneralPrCommentResponse,
@@ -75,6 +76,19 @@ export type GetSubmitRequestInfo = {
   description?: string
   tickets: { name: string; title: string; url: string }[]
   changedLines: { added: number; removed: number }
+}
+
+export type PullRequestMetrics = {
+  prId: string
+  repositoryUrl: string
+  prCreatedAt: Date
+  prMergedAt: Date | null
+  firstCommitDate: Date | null
+  linesAdded: number
+  commitsCount: number
+  commitShas: string[]
+  prStatus: Pr_Status_Enum
+  commentIds: string[]
 }
 
 export const scmSubmitRequestStatus = {

@@ -15,6 +15,7 @@ import {
   GET_PR,
   GET_PR_COMMENT_PATH,
   GET_PR_COMMENTS_PATH,
+  GET_PR_METRICS_QUERY,
   GET_USER,
   GET_USER_REPOS,
   GITHUB_GRAPHQL_FRAGMENTS,
@@ -42,6 +43,7 @@ import {
   GetPrCommentResponse,
   GetPrCommentsParams,
   GetPrCommentsResponse,
+  GetPRMetricsResponse,
   GetPrParams,
   GetPrResponse,
   GetPrReviewCommentsParams,
@@ -917,6 +919,21 @@ export function getGithubSdk(
           return undefined
         },
       })
+    },
+    async getPRMetricsGraphQL(params: {
+      owner: string
+      repo: string
+      prNumber: number
+    }): Promise<GetPRMetricsResponse> {
+      const res = await octokit.graphql<GetPRMetricsResponse>(
+        GET_PR_METRICS_QUERY,
+        {
+          owner: params.owner,
+          repo: params.repo,
+          prNumber: params.prNumber,
+        }
+      )
+      return res
     },
   }
 }

@@ -1143,6 +1143,23 @@ export type StatusQueryResponse = {
 };
 
 /** Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'. */
+export type String_Array_Comparison_Exp = {
+  /** is the array contained in the given array value */
+  _contained_in?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** does the array contain the given value */
+  _contains?: InputMaybe<Array<Scalars['String']['input']>>;
+  _eq?: InputMaybe<Array<Scalars['String']['input']>>;
+  _gt?: InputMaybe<Array<Scalars['String']['input']>>;
+  _gte?: InputMaybe<Array<Scalars['String']['input']>>;
+  _in?: InputMaybe<Array<Array<Scalars['String']['input']>>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Array<Scalars['String']['input']>>;
+  _lte?: InputMaybe<Array<Scalars['String']['input']>>;
+  _neq?: InputMaybe<Array<Scalars['String']['input']>>;
+  _nin?: InputMaybe<Array<Array<Scalars['String']['input']>>>;
+};
+
+/** Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'. */
 export type String_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['String']['input']>;
   _gt?: InputMaybe<Scalars['String']['input']>;
@@ -1927,7 +1944,7 @@ export type Ai_Blame_Attribution = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines: Scalars['Int']['output'];
   change_matched_lines: Scalars['Int']['output'];
-  createdAt: Scalars['timestamp']['output'];
+  createdAt: Scalars['timestamptz']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
   lineNumber: Scalars['Int']['output'];
@@ -2025,7 +2042,7 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   aiBlameInferenceId?: InputMaybe<Uuid_Comparison_Exp>;
   change_lines?: InputMaybe<Int_Comparison_Exp>;
   change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
-  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   lineNumber?: InputMaybe<Int_Comparison_Exp>;
@@ -2055,7 +2072,7 @@ export type Ai_Blame_Attribution_Insert_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
@@ -2071,7 +2088,7 @@ export type Ai_Blame_Attribution_Max_Fields = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
@@ -2102,7 +2119,7 @@ export type Ai_Blame_Attribution_Min_Fields = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
@@ -2196,7 +2213,7 @@ export type Ai_Blame_Attribution_Set_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
@@ -2264,7 +2281,7 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
@@ -2380,7 +2397,7 @@ export type Ai_Blame_Commit = {
   /** An aggregate relationship */
   blameAiAnalysisRequests_aggregate: Blame_Ai_Analysis_Request_Aggregate;
   commitSha: Scalars['String']['output'];
-  createdAt: Scalars['timestamp']['output'];
+  createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   inferenceCount: Scalars['Int']['output'];
   /** An object relationship */
@@ -2475,7 +2492,7 @@ export type Ai_Blame_Commit_Bool_Exp = {
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
   blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Bool_Exp>;
   commitSha?: InputMaybe<String_Comparison_Exp>;
-  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   inferenceCount?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
@@ -2501,7 +2518,7 @@ export type Ai_Blame_Commit_Insert_Input = {
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Arr_Rel_Insert_Input>;
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
@@ -2513,7 +2530,7 @@ export type Ai_Blame_Commit_Insert_Input = {
 export type Ai_Blame_Commit_Max_Fields = {
   __typename?: 'ai_blame_commit_max_fields';
   commitSha?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferenceCount?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
@@ -2524,7 +2541,7 @@ export type Ai_Blame_Commit_Max_Fields = {
 export type Ai_Blame_Commit_Min_Fields = {
   __typename?: 'ai_blame_commit_min_fields';
   commitSha?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferenceCount?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
@@ -2591,7 +2608,7 @@ export enum Ai_Blame_Commit_Select_Column {
 /** input type for updating data in table "ai_blame_commit" */
 export type Ai_Blame_Commit_Set_Input = {
   commitSha?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -2627,7 +2644,7 @@ export type Ai_Blame_Commit_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
   commitSha?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -2688,9 +2705,9 @@ export type Ai_Blame_Inference = {
   __typename?: 'ai_blame_inference';
   /** An object relationship */
   aiBlameInferenceTypeByType: Ai_Blame_Inference_Type;
-  aiResponseAt: Scalars['timestamp']['output'];
+  aiResponseAt: Scalars['timestamptz']['output'];
   computerName?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['timestamp']['output'];
+  createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   inferencesS3Path: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
@@ -2756,9 +2773,9 @@ export type Ai_Blame_Inference_Bool_Exp = {
   _not?: InputMaybe<Ai_Blame_Inference_Bool_Exp>;
   _or?: InputMaybe<Array<Ai_Blame_Inference_Bool_Exp>>;
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Bool_Exp>;
-  aiResponseAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  aiResponseAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   computerName?: InputMaybe<String_Comparison_Exp>;
-  createdAt?: InputMaybe<Timestamp_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
@@ -2779,9 +2796,9 @@ export enum Ai_Blame_Inference_Constraint {
 /** input type for inserting data into table "ai_blame_inference" */
 export type Ai_Blame_Inference_Insert_Input = {
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Obj_Rel_Insert_Input>;
-  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
@@ -2796,9 +2813,9 @@ export type Ai_Blame_Inference_Insert_Input = {
 /** aggregate max on columns */
 export type Ai_Blame_Inference_Max_Fields = {
   __typename?: 'ai_blame_inference_max_fields';
-  aiResponseAt?: Maybe<Scalars['timestamp']['output']>;
+  aiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
@@ -2825,9 +2842,9 @@ export type Ai_Blame_Inference_Max_Order_By = {
 /** aggregate min on columns */
 export type Ai_Blame_Inference_Min_Fields = {
   __typename?: 'ai_blame_inference_min_fields';
-  aiResponseAt?: Maybe<Scalars['timestamp']['output']>;
+  aiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
-  createdAt?: Maybe<Scalars['timestamp']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
@@ -2924,9 +2941,9 @@ export enum Ai_Blame_Inference_Select_Column {
 
 /** input type for updating data in table "ai_blame_inference" */
 export type Ai_Blame_Inference_Set_Input = {
-  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
@@ -2947,9 +2964,9 @@ export type Ai_Blame_Inference_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
-  aiResponseAt?: InputMaybe<Scalars['timestamp']['input']>;
+  aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['timestamp']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
@@ -17410,6 +17427,10 @@ export type Mutation_Root = {
   delete_ticket_integration?: Maybe<Ticket_Integration_Mutation_Response>;
   /** delete single row from the table: "ticket_integration" */
   delete_ticket_integration_by_pk?: Maybe<Ticket_Integration>;
+  /** delete data from the table: "tracy.ai_blame_pr" */
+  delete_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** delete single row from the table: "tracy.ai_blame_pr" */
+  delete_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** delete data from the table: "unfixable" */
   delete_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** delete single row from the table: "unfixable" */
@@ -17804,6 +17825,10 @@ export type Mutation_Root = {
   insert_ticket_integration?: Maybe<Ticket_Integration_Mutation_Response>;
   /** insert a single row into the table: "ticket_integration" */
   insert_ticket_integration_one?: Maybe<Ticket_Integration>;
+  /** insert data into the table: "tracy.ai_blame_pr" */
+  insert_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** insert a single row into the table: "tracy.ai_blame_pr" */
+  insert_tracy_ai_blame_pr_one?: Maybe<Tracy_Ai_Blame_Pr>;
   /** insert data into the table: "unfixable" */
   insert_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** insert a single row into the table: "unfixable" */
@@ -18367,6 +18392,12 @@ export type Mutation_Root = {
   update_ticket_integration_by_pk?: Maybe<Ticket_Integration>;
   /** update multiples rows of table: "ticket_integration" */
   update_ticket_integration_many?: Maybe<Array<Maybe<Ticket_Integration_Mutation_Response>>>;
+  /** update data of the table: "tracy.ai_blame_pr" */
+  update_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** update single row of the table: "tracy.ai_blame_pr" */
+  update_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** update multiples rows of table: "tracy.ai_blame_pr" */
+  update_tracy_ai_blame_pr_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>>>;
   /** update data of the table: "unfixable" */
   update_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** update single row of the table: "unfixable" */
@@ -19583,6 +19614,18 @@ export type Mutation_RootDelete_Ticket_IntegrationArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Ticket_Integration_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_PrArgs = {
+  where: Tracy_Ai_Blame_Pr_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -20930,6 +20973,20 @@ export type Mutation_RootInsert_Ticket_IntegrationArgs = {
 export type Mutation_RootInsert_Ticket_Integration_OneArgs = {
   object: Ticket_Integration_Insert_Input;
   on_conflict?: InputMaybe<Ticket_Integration_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_PrArgs = {
+  objects: Array<Tracy_Ai_Blame_Pr_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_OneArgs = {
+  object: Tracy_Ai_Blame_Pr_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
 };
 
 
@@ -23009,6 +23066,28 @@ export type Mutation_RootUpdate_Ticket_Integration_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Ticket_Integration_ManyArgs = {
   updates: Array<Ticket_Integration_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_PrArgs = {
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Inc_Input>;
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Set_Input>;
+  where: Tracy_Ai_Blame_Pr_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_By_PkArgs = {
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Inc_Input>;
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Set_Input>;
+  pk_columns: Tracy_Ai_Blame_Pr_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_ManyArgs = {
+  updates: Array<Tracy_Ai_Blame_Pr_Updates>;
 };
 
 
@@ -26365,6 +26444,8 @@ export enum Pr_Status_Enum {
   Active = 'ACTIVE',
   /** PR was closed without merging */
   Closed = 'CLOSED',
+  /** PR is in draft state */
+  Draft = 'DRAFT',
   /** PR was successfully merged */
   Merged = 'MERGED'
 }
@@ -28835,6 +28916,12 @@ export type Query_Root = {
   ticket_integration_aggregate: Ticket_Integration_Aggregate;
   /** fetch data from the table: "ticket_integration" using primary key columns */
   ticket_integration_by_pk?: Maybe<Ticket_Integration>;
+  /** fetch data from the table: "tracy.ai_blame_pr" */
+  tracy_ai_blame_pr: Array<Tracy_Ai_Blame_Pr>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr" */
+  tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
+  tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -31164,6 +31251,29 @@ export type Query_RootTicket_Integration_AggregateArgs = {
 
 
 export type Query_RootTicket_Integration_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Ai_Blame_PrArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -34907,6 +35017,14 @@ export type Subscription_Root = {
   ticket_integration_by_pk?: Maybe<Ticket_Integration>;
   /** fetch data from the table in a streaming manner: "ticket_integration" */
   ticket_integration_stream: Array<Ticket_Integration>;
+  /** fetch data from the table: "tracy.ai_blame_pr" */
+  tracy_ai_blame_pr: Array<Tracy_Ai_Blame_Pr>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr" */
+  tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
+  tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
+  tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -37703,6 +37821,36 @@ export type Subscription_RootTicket_Integration_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Ai_Blame_PrArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
 export type Subscription_RootUnfixableArgs = {
   distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -38776,6 +38924,400 @@ export type Timestamptz_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['timestamptz']['input']>;
   _neq?: InputMaybe<Scalars['timestamptz']['input']>;
   _nin?: InputMaybe<Array<Scalars['timestamptz']['input']>>;
+};
+
+/** columns and relationships of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr = {
+  __typename?: 'tracy_ai_blame_pr';
+  additionalData?: Maybe<Scalars['json']['output']>;
+  aiLinesAdded?: Maybe<Scalars['Int']['output']>;
+  commentIds?: Maybe<Array<Scalars['String']['output']>>;
+  commitShas?: Maybe<Array<Scalars['String']['output']>>;
+  commitsCount?: Maybe<Scalars['Int']['output']>;
+  firstCommitDate?: Maybe<Scalars['timestamptz']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['uuid']['output'];
+  linesAdded?: Maybe<Scalars['Int']['output']>;
+  organizationId: Scalars['uuid']['output'];
+  prCreatedAt: Scalars['timestamptz']['output'];
+  prId: Scalars['String']['output'];
+  prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  prStatus: Pr_Status_Enum;
+  repositoryUrl: Scalars['String']['output'];
+  rowCreatedAt: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_PrAdditionalDataArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregated selection of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Aggregate = {
+  __typename?: 'tracy_ai_blame_pr_aggregate';
+  aggregate?: Maybe<Tracy_Ai_Blame_Pr_Aggregate_Fields>;
+  nodes: Array<Tracy_Ai_Blame_Pr>;
+};
+
+/** aggregate fields of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Aggregate_Fields = {
+  __typename?: 'tracy_ai_blame_pr_aggregate_fields';
+  avg?: Maybe<Tracy_Ai_Blame_Pr_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Ai_Blame_Pr_Max_Fields>;
+  min?: Maybe<Tracy_Ai_Blame_Pr_Min_Fields>;
+  stddev?: Maybe<Tracy_Ai_Blame_Pr_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Ai_Blame_Pr_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Ai_Blame_Pr_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Ai_Blame_Pr_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Ai_Blame_Pr_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Ai_Blame_Pr_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Ai_Blame_Pr_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Ai_Blame_Pr_Avg_Fields = {
+  __typename?: 'tracy_ai_blame_pr_avg_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.ai_blame_pr". All fields are combined with a logical 'AND'. */
+export type Tracy_Ai_Blame_Pr_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Bool_Exp>>;
+  additionalData?: InputMaybe<Json_Comparison_Exp>;
+  aiLinesAdded?: InputMaybe<Int_Comparison_Exp>;
+  commentIds?: InputMaybe<String_Array_Comparison_Exp>;
+  commitShas?: InputMaybe<String_Array_Comparison_Exp>;
+  commitsCount?: InputMaybe<Int_Comparison_Exp>;
+  firstCommitDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  humanLinesAdded?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  linesAdded?: InputMaybe<Int_Comparison_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  prCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  prId?: InputMaybe<String_Comparison_Exp>;
+  prMergedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  prStatus?: InputMaybe<Pr_Status_Enum_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  rowCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.ai_blame_pr" */
+export enum Tracy_Ai_Blame_Pr_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiBlamePrPkey = 'ai_blame_pr_pkey'
+}
+
+/** input type for incrementing numeric columns in table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Inc_Input = {
+  aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  commitsCount?: InputMaybe<Scalars['Int']['input']>;
+  humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  linesAdded?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Insert_Input = {
+  additionalData?: InputMaybe<Scalars['json']['input']>;
+  aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitsCount?: InputMaybe<Scalars['Int']['input']>;
+  firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Ai_Blame_Pr_Max_Fields = {
+  __typename?: 'tracy_ai_blame_pr_max_fields';
+  aiLinesAdded?: Maybe<Scalars['Int']['output']>;
+  commentIds?: Maybe<Array<Scalars['String']['output']>>;
+  commitShas?: Maybe<Array<Scalars['String']['output']>>;
+  commitsCount?: Maybe<Scalars['Int']['output']>;
+  firstCommitDate?: Maybe<Scalars['timestamptz']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  linesAdded?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
+  prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Ai_Blame_Pr_Min_Fields = {
+  __typename?: 'tracy_ai_blame_pr_min_fields';
+  aiLinesAdded?: Maybe<Scalars['Int']['output']>;
+  commentIds?: Maybe<Array<Scalars['String']['output']>>;
+  commitShas?: Maybe<Array<Scalars['String']['output']>>;
+  commitsCount?: Maybe<Scalars['Int']['output']>;
+  firstCommitDate?: Maybe<Scalars['timestamptz']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  linesAdded?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
+  prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Mutation_Response = {
+  __typename?: 'tracy_ai_blame_pr_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Ai_Blame_Pr>;
+};
+
+/** on_conflict condition type for table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_On_Conflict = {
+  constraint: Tracy_Ai_Blame_Pr_Constraint;
+  update_columns?: Array<Tracy_Ai_Blame_Pr_Update_Column>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.ai_blame_pr". */
+export type Tracy_Ai_Blame_Pr_Order_By = {
+  additionalData?: InputMaybe<Order_By>;
+  aiLinesAdded?: InputMaybe<Order_By>;
+  commentIds?: InputMaybe<Order_By>;
+  commitShas?: InputMaybe<Order_By>;
+  commitsCount?: InputMaybe<Order_By>;
+  firstCommitDate?: InputMaybe<Order_By>;
+  humanLinesAdded?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  linesAdded?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  prCreatedAt?: InputMaybe<Order_By>;
+  prId?: InputMaybe<Order_By>;
+  prMergedAt?: InputMaybe<Order_By>;
+  prStatus?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  rowCreatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.ai_blame_pr */
+export type Tracy_Ai_Blame_Pr_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.ai_blame_pr" */
+export enum Tracy_Ai_Blame_Pr_Select_Column {
+  /** column name */
+  AdditionalData = 'additionalData',
+  /** column name */
+  AiLinesAdded = 'aiLinesAdded',
+  /** column name */
+  CommentIds = 'commentIds',
+  /** column name */
+  CommitShas = 'commitShas',
+  /** column name */
+  CommitsCount = 'commitsCount',
+  /** column name */
+  FirstCommitDate = 'firstCommitDate',
+  /** column name */
+  HumanLinesAdded = 'humanLinesAdded',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LinesAdded = 'linesAdded',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  PrCreatedAt = 'prCreatedAt',
+  /** column name */
+  PrId = 'prId',
+  /** column name */
+  PrMergedAt = 'prMergedAt',
+  /** column name */
+  PrStatus = 'prStatus',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  RowCreatedAt = 'rowCreatedAt'
+}
+
+/** input type for updating data in table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Set_Input = {
+  additionalData?: InputMaybe<Scalars['json']['input']>;
+  aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitsCount?: InputMaybe<Scalars['Int']['input']>;
+  firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Tracy_Ai_Blame_Pr_Stddev_Fields = {
+  __typename?: 'tracy_ai_blame_pr_stddev_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Ai_Blame_Pr_Stddev_Pop_Fields = {
+  __typename?: 'tracy_ai_blame_pr_stddev_pop_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Ai_Blame_Pr_Stddev_Samp_Fields = {
+  __typename?: 'tracy_ai_blame_pr_stddev_samp_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "tracy_ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
+  additionalData?: InputMaybe<Scalars['json']['input']>;
+  aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
+  commitsCount?: InputMaybe<Scalars['Int']['input']>;
+  firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  prStatus?: InputMaybe<Pr_Status_Enum>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Ai_Blame_Pr_Sum_Fields = {
+  __typename?: 'tracy_ai_blame_pr_sum_fields';
+  aiLinesAdded?: Maybe<Scalars['Int']['output']>;
+  commitsCount?: Maybe<Scalars['Int']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Int']['output']>;
+  linesAdded?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "tracy.ai_blame_pr" */
+export enum Tracy_Ai_Blame_Pr_Update_Column {
+  /** column name */
+  AdditionalData = 'additionalData',
+  /** column name */
+  AiLinesAdded = 'aiLinesAdded',
+  /** column name */
+  CommentIds = 'commentIds',
+  /** column name */
+  CommitShas = 'commitShas',
+  /** column name */
+  CommitsCount = 'commitsCount',
+  /** column name */
+  FirstCommitDate = 'firstCommitDate',
+  /** column name */
+  HumanLinesAdded = 'humanLinesAdded',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LinesAdded = 'linesAdded',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  PrCreatedAt = 'prCreatedAt',
+  /** column name */
+  PrId = 'prId',
+  /** column name */
+  PrMergedAt = 'prMergedAt',
+  /** column name */
+  PrStatus = 'prStatus',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  RowCreatedAt = 'rowCreatedAt'
+}
+
+export type Tracy_Ai_Blame_Pr_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Ai_Blame_Pr_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Ai_Blame_Pr_Var_Pop_Fields = {
+  __typename?: 'tracy_ai_blame_pr_var_pop_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Ai_Blame_Pr_Var_Samp_Fields = {
+  __typename?: 'tracy_ai_blame_pr_var_samp_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Ai_Blame_Pr_Variance_Fields = {
+  __typename?: 'tracy_ai_blame_pr_variance_fields';
+  aiLinesAdded?: Maybe<Scalars['Float']['output']>;
+  commitsCount?: Maybe<Scalars['Float']['output']>;
+  humanLinesAdded?: Maybe<Scalars['Float']['output']>;
+  linesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
 /** a table which stores the un-fixable info where we have fix info object */

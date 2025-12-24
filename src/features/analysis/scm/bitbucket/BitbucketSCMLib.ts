@@ -12,6 +12,7 @@ import {
   GetGitBlameResponse,
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  PullRequestMetrics,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -315,5 +316,11 @@ export class BitbucketSCMLib extends SCMLib {
 
   async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
     throw new Error('getSubmitRequests not implemented for Bitbucket')
+  }
+
+  // TODO: Add comprehensive tests for getPullRequestMetrics (Bitbucket)
+  // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
+  async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
+    throw new Error('getPullRequestMetrics not implemented for Bitbucket')
   }
 }

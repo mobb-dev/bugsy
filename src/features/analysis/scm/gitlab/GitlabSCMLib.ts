@@ -6,6 +6,7 @@ import {
   GetReferenceResult,
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  PullRequestMetrics,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -252,5 +253,11 @@ export class GitlabSCMLib extends SCMLib {
 
   async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
     throw new Error('getSubmitRequests not implemented for GitLab')
+  }
+
+  // TODO: Add comprehensive tests for getPullRequestMetrics (GitLab)
+  // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
+  async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
+    throw new Error('getPullRequestMetrics not implemented for GitLab')
   }
 }

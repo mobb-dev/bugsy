@@ -6,9 +6,22 @@ import { ReviewAndFixCriticalPrompt } from '@mobb/bugsy/mcp/prompts/ReviewAndFix
 import { ScanRecentChangesPrompt } from '@mobb/bugsy/mcp/prompts/ScanRecentChangesPrompt'
 import { ScanRepositoryPrompt } from '@mobb/bugsy/mcp/prompts/ScanRepositoryPrompt'
 import { SecurityToolsOverviewPrompt } from '@mobb/bugsy/mcp/prompts/SecurityToolsOverviewPrompt'
-import { GetPromptResult } from '@modelcontextprotocol/sdk/types.js'
+import {
+  GetPromptResult,
+  TextContent,
+} from '@modelcontextprotocol/sdk/types.js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
+
+// Helper to extract text from content (handles union type from MCP SDK 1.25+)
+function getTextContent(
+  content: GetPromptResult['messages'][0]['content']
+): string {
+  if (content.type === 'text') {
+    return (content as TextContent).text
+  }
+  throw new Error(`Expected text content but got ${content.type}`)
+}
 
 // Mock Logger
 vi.mock('@mobb/bugsy/mcp/Logger', () => ({
@@ -210,7 +223,7 @@ describe('BasePrompt', () => {
 
     const result = await prompt.getPrompt(validArgs)
 
-    expect(result.messages[0]?.content.text).toContain('test-value')
+    expect(getTextContent(result.messages[0]!.content)).toContain('test-value')
   })
 
   it('should call generatePrompt with validated arguments', async () => {
@@ -219,7 +232,7 @@ describe('BasePrompt', () => {
 
     const result = await prompt.getPrompt(args)
 
-    expect(result.messages[0]?.content.text).toContain('hello')
+    expect(getTextContent(result.messages[0]!.content)).toContain('hello')
   })
 
   it('should handle prompts with no arguments', async () => {
@@ -255,7 +268,7 @@ describe('BasePrompt', () => {
     expect(result.description).toBe('Test prompt for unit testing')
     expect(result.messages[0]?.role).toBe('user')
     expect(result.messages[0]?.content.type).toBe('text')
-    expect(typeof result.messages[0]?.content.text).toBe('string')
+    expect(typeof getTextContent(result.messages[0]!.content)).toBe('string')
   })
 
   it('should handle Zod validation errors properly', async () => {
@@ -305,7 +318,9 @@ describe('Prompt Snapshots', () => {
 
       expect(result).toBeDefined()
       expect(result.messages).toHaveLength(1)
-      expect(result.messages[0]?.content.text).toContain('Mobb Security Tools')
+      expect(getTextContent(result.messages[0]!.content)).toContain(
+        'Mobb Security Tools'
+      )
     })
 
     it('should match snapshot', async () => {
@@ -324,7 +339,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt()
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(
+      expect(getTextContent(result.messages[0]!.content)).toContain(
         'Security Repository Scan'
       )
     })
@@ -336,7 +351,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt({ path })
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should include path in output when provided', async () => {
@@ -345,7 +360,7 @@ describe('Prompt Snapshots', () => {
 
       const result = await prompt.getPrompt({ path })
 
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should match snapshots', async () => {
@@ -366,7 +381,9 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt()
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain('Scan Recent Changes')
+      expect(getTextContent(result.messages[0]!.content)).toContain(
+        'Scan Recent Changes'
+      )
     })
 
     it('should generate prompt with path parameter', async () => {
@@ -376,7 +393,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt({ path })
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should match snapshots', async () => {
@@ -397,7 +414,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt()
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(
+      expect(getTextContent(result.messages[0]!.content)).toContain(
         'Continuous Security Monitoring'
       )
     })
@@ -409,7 +426,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt({ path })
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should match snapshots', async () => {
@@ -430,7 +447,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt()
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(
+      expect(getTextContent(result.messages[0]!.content)).toContain(
         'Critical Security Vulnerabilities'
       )
     })
@@ -442,7 +459,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt({ path })
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should match snapshots', async () => {
@@ -463,7 +480,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt()
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(
+      expect(getTextContent(result.messages[0]!.content)).toContain(
         'Complete Security Audit'
       )
     })
@@ -472,7 +489,7 @@ describe('Prompt Snapshots', () => {
       const prompt = new FullSecurityAuditPrompt()
 
       const result = await prompt.getPrompt()
-      const text = result.messages[0]?.content.text || ''
+      const text = getTextContent(result.messages[0]!.content) || ''
 
       expect(text).toContain('Phase 1')
       expect(text).toContain('Phase 2')
@@ -490,7 +507,7 @@ describe('Prompt Snapshots', () => {
       const result = await prompt.getPrompt({ path })
 
       expect(result).toBeDefined()
-      expect(result.messages[0]?.content.text).toContain(path)
+      expect(getTextContent(result.messages[0]!.content)).toContain(path)
     })
 
     it('should match snapshots', async () => {

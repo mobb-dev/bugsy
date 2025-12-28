@@ -386,14 +386,13 @@ export class McpServer {
         tools: [
           {
             name: mcpCheckerTool.name,
-            display_name: mcpCheckerTool.display_name || mcpCheckerTool.name,
             description: mcpCheckerTool.description,
             inputSchema: {
               type: 'object' as const,
               properties:
                 (
                   mcpCheckerTool.inputSchema as {
-                    properties?: Record<string, unknown>
+                    properties?: Record<string, object>
                   }
                 ).properties || {},
               required:
@@ -428,12 +427,11 @@ export class McpServer {
     const response = {
       tools: toolsDefinitions.map((tool: ToolDefinition) => ({
         name: tool.name,
-        display_name: tool.display_name || tool.name,
         description: tool.description || '',
         inputSchema: {
           type: 'object' as const,
           properties:
-            (tool.inputSchema as { properties?: Record<string, unknown> })
+            (tool.inputSchema as { properties?: Record<string, object> })
               .properties || {},
           required:
             (tool.inputSchema as { required?: string[] }).required || [],

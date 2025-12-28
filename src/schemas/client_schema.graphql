@@ -338,6 +338,58 @@ input AIBlameInferenceFinalizeInput {
   userName: String
 }
 
+mutation AnalyzeCommitForExtensionAIBlame(
+  $repositoryURL: String!
+  $commitSha: String!
+  $organizationId: String!
+) {
+  analyzeCommitForAIBlame(
+    repositoryURL: $repositoryURL
+    commitSha: $commitSha
+    organizationId: $organizationId
+  ) {
+    __typename
+    ... on ProcessAIBlameFinalResult {
+      status
+      inferencesProcessed
+      attributionsCreated
+      attributions {
+        id
+        aiBlameCommitId
+        aiBlameInferenceId
+        filePath
+        lineNumber
+        model
+        toolName
+        commitSha
+        inferenceType
+      }
+    }
+    ... on ProcessAIBlameErrorResult {
+      status
+      error
+    }
+    ... on ProcessAIBlameRequestedResult {
+      status
+      requestIds
+    }
+  }
+}
+
+query GetAIBlameInference($aiBlameInferenceIds: [uuid!]) {
+  ai_blame_inference(where: { id: { _in: $aiBlameInferenceIds } }) {
+    id
+    type
+    aiResponseAt
+  }
+}
+
+query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
+  getAIBlameInferenceData(aiBlameAttributionId: $aiBlameAttributionId) {
+    promptUrl
+  }
+}
+
 mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
   uploadAIBlameInferencesInit(sessions: $sessions) {
     status

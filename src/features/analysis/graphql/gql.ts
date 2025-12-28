@@ -1,7 +1,6 @@
 import fetchOrig from 'cross-fetch'
 import Debug from 'debug'
 import { GraphQLClient } from 'graphql-request'
-import { HttpProxyAgent } from 'http-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -9,12 +8,17 @@ import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
 import { ReportDigestError } from '../../../mcp/core/Errors'
 import { ScanContext } from '../../../types'
 import { sleep } from '../../../utils'
+import { subscribe } from '../../../utils/subscribe/subscribe'
 import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
+  AnalyzeCommitForExtensionAiBlameMutation,
+  AnalyzeCommitForExtensionAiBlameMutationVariables,
   CreateCliLoginMutationVariables,
   FinalizeAiBlameInferencesUploadMutation,
   FinalizeAiBlameInferencesUploadMutationVariables,
   Fix_Report_State_Enum,
+  GetAiBlameAttributionPromptQuery,
+  GetAiBlameAttributionPromptQueryVariables,
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
   GetAnalysisSubscriptionSubscriptionVariables,
@@ -29,7 +33,6 @@ import {
   UploadAiBlameInferencesInitMutationVariables,
   ValidateRepoUrlQueryVariables,
 } from '../scm/generates/client_generates'
-import { subscribe } from './subscribe'
 import {
   GetVulByNodesMetadataFilter,
   GetVulByNodesMetadataParams,
@@ -59,12 +62,23 @@ export function getProxyAgent(url: string) {
     const isHttp = parsedUrl.protocol === 'http:'
     const isHttps = parsedUrl.protocol === 'https:'
 
-    const proxy = isHttps ? HTTPS_PROXY : isHttp ? HTTP_PROXY : null
+    // Prefer protocol-specific proxy vars, but allow HTTPS to fall back to HTTP_PROXY
+    // (common in local/dev environments).
+    const proxy = isHttps
+      ? HTTPS_PROXY || HTTP_PROXY
+      : isHttp
+        ? HTTP_PROXY
+        : null
 
     if (proxy) {
       debug('Using proxy %s', proxy)
       debug('Proxy agent %o', proxy)
-      return isHttps ? new HttpsProxyAgent(proxy) : new HttpProxyAgent(proxy)
+      // IMPORTANT:
+      // Use HttpsProxyAgent for both HTTP and HTTPS targets.
+      // HttpProxyAgent does not tunnel via CONNECT, which breaks WebSocket upgrades
+      // through HTTP proxies. HttpsProxyAgent forces CONNECT tunneling, which is
+      // required for websocket connections even for non-encrypted (ws://) URLs.
+      return new HttpsProxyAgent(proxy)
     }
   } catch (err) {
     debug(`Skipping proxy for ${url}. Reason: ${(err as Error).message}`)
@@ -478,11 +492,13 @@ export class GQLClient {
             apiKey: this._auth.apiKey,
             type: 'apiKey',
             timeoutInMs: params.timeoutInMs,
+            proxyAgent: getProxyAgent(API_URL),
           }
         : {
             token: this._auth.token,
             type: 'token',
             timeoutInMs: params.timeoutInMs,
+            proxyAgent: getProxyAgent(API_URL),
           }
     )
   }
@@ -547,5 +563,17 @@ export class GQLClient {
     variables: FinalizeAiBlameInferencesUploadMutationVariables
   ): Promise<FinalizeAiBlameInferencesUploadMutation> {
     return await this._clientSdk.FinalizeAIBlameInferencesUpload(variables)
+  }
+
+  async analyzeCommitForExtensionAIBlame(
+    variables: AnalyzeCommitForExtensionAiBlameMutationVariables
+  ): Promise<AnalyzeCommitForExtensionAiBlameMutation> {
+    return await this._clientSdk.AnalyzeCommitForExtensionAIBlame(variables)
+  }
+
+  async getAIBlameAttributionPrompt(
+    variables: GetAiBlameAttributionPromptQueryVariables
+  ): Promise<GetAiBlameAttributionPromptQuery> {
+    return await this._clientSdk.GetAIBlameAttributionPrompt(variables)
   }
 }

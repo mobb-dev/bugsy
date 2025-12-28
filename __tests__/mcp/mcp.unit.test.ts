@@ -125,7 +125,7 @@ vi.mock('node-fetch', async () => {
 })
 
 // Mock the subscribe function to prevent actual WebSocket connections
-vi.mock('../../src/features/analysis/graphql/subscribe', () => ({
+vi.mock('../../src/utils/subscribe/subscribe', () => ({
   subscribe: vi.fn().mockResolvedValue({
     analysis: {
       id: 'test-analysis-id',
@@ -554,7 +554,7 @@ describe('MCP Server', () => {
         const { default: fetch } = await import('node-fetch')
         const mockedFetch = vi.mocked(fetch)
         const { subscribe } =
-          await import('../../src/features/analysis/graphql/subscribe')
+          await import('../../src/utils/subscribe/subscribe')
         const mockedSubscribe = vi.mocked(subscribe)
 
         const tool = new FixVulnerabilitiesTool()
@@ -1064,9 +1064,9 @@ describe('MCP Server', () => {
 
       expectValidResult(result)
       const responseText = result.content[0]?.text ?? ''
-      // remove the timestamp from the response formant i 1/1/2024, 2:00:00 AM
+      // remove the timestamp from the response - handles both US (1/1/2024, 2:00:00 AM) and EU (1.1.2024, 3:00:00) formats
       const responseTextWithoutTimestamp = responseText.replace(
-        /(\d{1,2}\/\d{1,2}\/\d{4},\s\d{1,2}:\d{2}:\d{2}\s[AP]M)/,
+        /(\d{1,2}[./]\d{1,2}[./]\d{4},\s\d{1,2}:\d{2}:\d{2}(\s[AP]M)?)/,
         '1/1/2000, 12:00:00 AM'
       )
       expect(responseTextWithoutTimestamp).toMatchSnapshot()

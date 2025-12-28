@@ -22,6 +22,7 @@ export type Scalars = {
   date: { input: any; output: any; }
   json: { input: any; output: any; }
   jsonb: { input: any; output: any; }
+  numeric: { input: any; output: any; }
   organization_scalar: { input: any; output: any; }
   project_scalar: { input: any; output: any; }
   smallint: { input: any; output: any; }
@@ -40,6 +41,7 @@ export type AiBlameAttribution = {
   commitSha: Scalars['String']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  inferenceType: AiBlameInferenceType;
   lineNumber: Scalars['Int']['output'];
   model?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
@@ -10095,6 +10097,11 @@ export type Cli_Login_Updates = {
   where: Cli_Login_Bool_Exp;
 };
 
+export type CodingTimeStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
 /** columns and relationships of "commit_blame_request" */
 export type Commit_Blame_Request = {
   __typename?: 'commit_blame_request';
@@ -17069,6 +17076,11 @@ export type Jsonb_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['jsonb']['input']>>;
 };
 
+export type LinesOfCodeStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
 /** mutation root */
 export type Mutation_Root = {
   __typename?: 'mutation_root';
@@ -23407,6 +23419,19 @@ export type Mutation_RootVoteOnFixArgs = {
   voteScore: Scalars['Int']['input'];
 };
 
+/** Boolean expression to compare columns of type "numeric". All fields are combined with logical 'AND'. */
+export type Numeric_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['numeric']['input']>;
+  _gt?: InputMaybe<Scalars['numeric']['input']>;
+  _gte?: InputMaybe<Scalars['numeric']['input']>;
+  _in?: InputMaybe<Array<Scalars['numeric']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['numeric']['input']>;
+  _lte?: InputMaybe<Scalars['numeric']['input']>;
+  _neq?: InputMaybe<Scalars['numeric']['input']>;
+  _nin?: InputMaybe<Array<Scalars['numeric']['input']>>;
+};
+
 /** columns and relationships of "on_prem_scm_oauth_config" */
 export type On_Prem_Scm_Oauth_Config = {
   __typename?: 'on_prem_scm_oauth_config';
@@ -23671,6 +23696,8 @@ export type Organization = {
   /** An aggregate relationship */
   brokerHosts_aggregate: Broker_Host_Aggregate;
   brokerTokenExpiryInDays: Scalars['Int']['output'];
+  /** A computed field, executes function "organization_coding_time_stats" */
+  codingTimeStats?: Maybe<Array<View_Types_Ai_Human_Days_Stats>>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   /** A computed field, executes function "organization_deployed_fixes_count" */
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
@@ -23700,6 +23727,8 @@ export type Organization = {
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
   /** A computed field, executes function "organization_count_vulnerability_issues_by_categories" */
   issuesByCategories?: Maybe<Array<View_Types_Aggregated_Categories>>;
+  /** A computed field, executes function "organization_lines_of_code_stats" */
+  linesOfCodeStats?: Maybe<Array<View_Types_Lines_Of_Code_Stats>>;
   name: Scalars['String']['output'];
   /** An array relationship */
   onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
@@ -23730,9 +23759,13 @@ export type Organization = {
   remainingUnstableFixes: Scalars['Int']['output'];
   /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
+  /** A computed field, executes function "organization_review_time_stats" */
+  reviewTimeStats?: Maybe<Array<View_Types_Ai_Human_Days_Stats>>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_roi_trends_time_series" */
+  roiTrendsTimeSeries?: Maybe<Array<View_Types_Roi_Trends_Time_Series>>;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** An array relationship */
   scmConfigs: Array<Scm_Config>;
@@ -23822,6 +23855,17 @@ export type OrganizationBrokerHosts_AggregateArgs = {
 
 
 /** columns and relationships of "organization" */
+export type OrganizationCodingTimeStatsArgs = {
+  args: CodingTimeStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
 export type OrganizationDeployedFixesCountArgs = {
   args: DeployedFixesCount_Organization_Args;
 };
@@ -23888,6 +23932,17 @@ export type OrganizationIssuesByCategoriesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
   where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationLinesOfCodeStatsArgs = {
+  args: LinesOfCodeStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
 };
 
 
@@ -24019,6 +24074,28 @@ export type OrganizationResolvedAggregatedVulnerabilitySeveritiesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Aggregated_Severities_Order_By>>;
   where?: InputMaybe<Aggregated_Severities_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationReviewTimeStatsArgs = {
+  args: ReviewTimeStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRoiTrendsTimeSeriesArgs = {
+  args?: InputMaybe<RoiTrendsTimeSeries_Organization_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
 };
 
 
@@ -28965,6 +29042,10 @@ export type Query_Root = {
   view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
   /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
   view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
+  /** fetch data from the table: "view_types.ai_human_days_stats" */
+  view_types_ai_human_days_stats: Array<View_Types_Ai_Human_Days_Stats>;
+  /** fetch aggregated fields from the table: "view_types.ai_human_days_stats" */
+  view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -28973,6 +29054,14 @@ export type Query_Root = {
   view_types_language_count: Array<View_Types_Language_Count>;
   /** fetch aggregated fields from the table: "view_types.language_count" */
   view_types_language_count_aggregate: View_Types_Language_Count_Aggregate;
+  /** fetch data from the table: "view_types.lines_of_code_stats" */
+  view_types_lines_of_code_stats: Array<View_Types_Lines_Of_Code_Stats>;
+  /** fetch aggregated fields from the table: "view_types.lines_of_code_stats" */
+  view_types_lines_of_code_stats_aggregate: View_Types_Lines_Of_Code_Stats_Aggregate;
+  /** fetch data from the table: "view_types.roi_trends_time_series" */
+  view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
+  /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
+  view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -31468,6 +31557,24 @@ export type Query_RootView_Types_Aggregated_Categories_AggregateArgs = {
 };
 
 
+export type Query_RootView_Types_Ai_Human_Days_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Ai_Human_Days_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
 export type Query_RootView_Types_Issue_Type_CountArgs = {
   distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -31501,6 +31608,42 @@ export type Query_RootView_Types_Language_Count_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Language_Count_Order_By>>;
   where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Lines_Of_Code_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Lines_Of_Code_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Roi_Trends_Time_SeriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Roi_Trends_Time_Series_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
 };
 
 
@@ -32108,6 +32251,16 @@ export type Repo_Variance_Fields = {
 
 export type ResolvedAggregatedVulnerabilitySeverities_Organization_Args = {
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ReviewTimeStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type RoiTrendsTimeSeries_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** columns and relationships of "scan" */
@@ -35079,6 +35232,12 @@ export type Subscription_Root = {
   view_types_aggregated_categories_aggregate: View_Types_Aggregated_Categories_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.aggregated_categories" */
   view_types_aggregated_categories_stream: Array<View_Types_Aggregated_Categories>;
+  /** fetch data from the table: "view_types.ai_human_days_stats" */
+  view_types_ai_human_days_stats: Array<View_Types_Ai_Human_Days_Stats>;
+  /** fetch aggregated fields from the table: "view_types.ai_human_days_stats" */
+  view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.ai_human_days_stats" */
+  view_types_ai_human_days_stats_stream: Array<View_Types_Ai_Human_Days_Stats>;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -35091,6 +35250,18 @@ export type Subscription_Root = {
   view_types_language_count_aggregate: View_Types_Language_Count_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.language_count" */
   view_types_language_count_stream: Array<View_Types_Language_Count>;
+  /** fetch data from the table: "view_types.lines_of_code_stats" */
+  view_types_lines_of_code_stats: Array<View_Types_Lines_Of_Code_Stats>;
+  /** fetch aggregated fields from the table: "view_types.lines_of_code_stats" */
+  view_types_lines_of_code_stats_aggregate: View_Types_Lines_Of_Code_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.lines_of_code_stats" */
+  view_types_lines_of_code_stats_stream: Array<View_Types_Lines_Of_Code_Stats>;
+  /** fetch data from the table: "view_types.roi_trends_time_series" */
+  view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
+  /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
+  view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.roi_trends_time_series" */
+  view_types_roi_trends_time_series_stream: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -38066,6 +38237,31 @@ export type Subscription_RootView_Types_Aggregated_Categories_StreamArgs = {
 };
 
 
+export type Subscription_RootView_Types_Ai_Human_Days_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Ai_Human_Days_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Ai_Human_Days_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Ai_Human_Days_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
 export type Subscription_RootView_Types_Issue_Type_CountArgs = {
   distinct_on?: InputMaybe<Array<View_Types_Issue_Type_Count_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -38113,6 +38309,56 @@ export type Subscription_RootView_Types_Language_Count_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Language_Count_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Language_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Lines_Of_Code_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Lines_Of_Code_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Lines_Of_Code_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Lines_Of_Code_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Roi_Trends_Time_SeriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Roi_Trends_Time_Series_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Roi_Trends_Time_Series_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Roi_Trends_Time_Series_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
 };
 
 
@@ -41282,6 +41528,150 @@ export type View_Types_Aggregated_Categories_Variance_Fields = {
   count?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.ai_human_days_stats" */
+export type View_Types_Ai_Human_Days_Stats = {
+  __typename?: 'view_types_ai_human_days_stats';
+  aiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregated selection of "view_types.ai_human_days_stats" */
+export type View_Types_Ai_Human_Days_Stats_Aggregate = {
+  __typename?: 'view_types_ai_human_days_stats_aggregate';
+  aggregate?: Maybe<View_Types_Ai_Human_Days_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Ai_Human_Days_Stats>;
+};
+
+/** aggregate fields of "view_types.ai_human_days_stats" */
+export type View_Types_Ai_Human_Days_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Ai_Human_Days_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Ai_Human_Days_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Ai_Human_Days_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Ai_Human_Days_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Ai_Human_Days_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Ai_Human_Days_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Ai_Human_Days_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Ai_Human_Days_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Ai_Human_Days_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Ai_Human_Days_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.ai_human_days_stats" */
+export type View_Types_Ai_Human_Days_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Ai_Human_Days_Stats_Avg_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_avg_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.ai_human_days_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Ai_Human_Days_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Bool_Exp>>;
+  aiAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
+  humanAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Ai_Human_Days_Stats_Max_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_max_fields';
+  aiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Ai_Human_Days_Stats_Min_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_min_fields';
+  aiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.ai_human_days_stats". */
+export type View_Types_Ai_Human_Days_Stats_Order_By = {
+  aiAvgDays?: InputMaybe<Order_By>;
+  humanAvgDays?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.ai_human_days_stats" */
+export enum View_Types_Ai_Human_Days_Stats_Select_Column {
+  /** column name */
+  AiAvgDays = 'aiAvgDays',
+  /** column name */
+  HumanAvgDays = 'humanAvgDays'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Ai_Human_Days_Stats_Stddev_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_stddev_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Ai_Human_Days_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_stddev_pop_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Ai_Human_Days_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_stddev_samp_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_ai_human_days_stats" */
+export type View_Types_Ai_Human_Days_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Ai_Human_Days_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Ai_Human_Days_Stats_Stream_Cursor_Value_Input = {
+  aiAvgDays?: InputMaybe<Scalars['numeric']['input']>;
+  humanAvgDays?: InputMaybe<Scalars['numeric']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Ai_Human_Days_Stats_Sum_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_sum_fields';
+  aiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Ai_Human_Days_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_var_pop_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Ai_Human_Days_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_var_samp_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Ai_Human_Days_Stats_Variance_Fields = {
+  __typename?: 'view_types_ai_human_days_stats_variance_fields';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "view_types.issue_type_count" */
 export type View_Types_Issue_Type_Count = {
   __typename?: 'view_types_issue_type_count';
@@ -41552,6 +41942,318 @@ export type View_Types_Language_Count_Var_Samp_Fields = {
 export type View_Types_Language_Count_Variance_Fields = {
   __typename?: 'view_types_language_count_variance_fields';
   count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.lines_of_code_stats" */
+export type View_Types_Lines_Of_Code_Stats = {
+  __typename?: 'view_types_lines_of_code_stats';
+  aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.lines_of_code_stats" */
+export type View_Types_Lines_Of_Code_Stats_Aggregate = {
+  __typename?: 'view_types_lines_of_code_stats_aggregate';
+  aggregate?: Maybe<View_Types_Lines_Of_Code_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Lines_Of_Code_Stats>;
+};
+
+/** aggregate fields of "view_types.lines_of_code_stats" */
+export type View_Types_Lines_Of_Code_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Lines_Of_Code_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Lines_Of_Code_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Lines_Of_Code_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Lines_Of_Code_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Lines_Of_Code_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Lines_Of_Code_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Lines_Of_Code_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Lines_Of_Code_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Lines_Of_Code_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Lines_Of_Code_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.lines_of_code_stats" */
+export type View_Types_Lines_Of_Code_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Lines_Of_Code_Stats_Avg_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_avg_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.lines_of_code_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Lines_Of_Code_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Bool_Exp>>;
+  aiLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
+  humanLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
+  totalLines?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Lines_Of_Code_Stats_Max_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_max_fields';
+  aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Lines_Of_Code_Stats_Min_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_min_fields';
+  aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.lines_of_code_stats". */
+export type View_Types_Lines_Of_Code_Stats_Order_By = {
+  aiLinesOfCode?: InputMaybe<Order_By>;
+  humanLinesOfCode?: InputMaybe<Order_By>;
+  totalLines?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.lines_of_code_stats" */
+export enum View_Types_Lines_Of_Code_Stats_Select_Column {
+  /** column name */
+  AiLinesOfCode = 'aiLinesOfCode',
+  /** column name */
+  HumanLinesOfCode = 'humanLinesOfCode',
+  /** column name */
+  TotalLines = 'totalLines'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Lines_Of_Code_Stats_Stddev_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_stddev_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Lines_Of_Code_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_stddev_pop_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Lines_Of_Code_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_stddev_samp_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_lines_of_code_stats" */
+export type View_Types_Lines_Of_Code_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Lines_Of_Code_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Lines_Of_Code_Stats_Stream_Cursor_Value_Input = {
+  aiLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
+  humanLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
+  totalLines?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Lines_Of_Code_Stats_Sum_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_sum_fields';
+  aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Lines_Of_Code_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_var_pop_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Lines_Of_Code_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_var_samp_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Lines_Of_Code_Stats_Variance_Fields = {
+  __typename?: 'view_types_lines_of_code_stats_variance_fields';
+  aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.roi_trends_time_series" */
+export type View_Types_Roi_Trends_Time_Series = {
+  __typename?: 'view_types_roi_trends_time_series';
+  aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+  humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregated selection of "view_types.roi_trends_time_series" */
+export type View_Types_Roi_Trends_Time_Series_Aggregate = {
+  __typename?: 'view_types_roi_trends_time_series_aggregate';
+  aggregate?: Maybe<View_Types_Roi_Trends_Time_Series_Aggregate_Fields>;
+  nodes: Array<View_Types_Roi_Trends_Time_Series>;
+};
+
+/** aggregate fields of "view_types.roi_trends_time_series" */
+export type View_Types_Roi_Trends_Time_Series_Aggregate_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_aggregate_fields';
+  avg?: Maybe<View_Types_Roi_Trends_Time_Series_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Roi_Trends_Time_Series_Max_Fields>;
+  min?: Maybe<View_Types_Roi_Trends_Time_Series_Min_Fields>;
+  stddev?: Maybe<View_Types_Roi_Trends_Time_Series_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Roi_Trends_Time_Series_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Roi_Trends_Time_Series_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Roi_Trends_Time_Series_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Roi_Trends_Time_Series_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Roi_Trends_Time_Series_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Roi_Trends_Time_Series_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.roi_trends_time_series" */
+export type View_Types_Roi_Trends_Time_Series_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Roi_Trends_Time_Series_Avg_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_avg_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.roi_trends_time_series". All fields are combined with a logical 'AND'. */
+export type View_Types_Roi_Trends_Time_Series_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Bool_Exp>>;
+  aiCycleDays?: InputMaybe<Numeric_Comparison_Exp>;
+  date?: InputMaybe<Date_Comparison_Exp>;
+  humanCycleDays?: InputMaybe<Numeric_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Roi_Trends_Time_Series_Max_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_max_fields';
+  aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+  humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Roi_Trends_Time_Series_Min_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_min_fields';
+  aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+  humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.roi_trends_time_series". */
+export type View_Types_Roi_Trends_Time_Series_Order_By = {
+  aiCycleDays?: InputMaybe<Order_By>;
+  date?: InputMaybe<Order_By>;
+  humanCycleDays?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.roi_trends_time_series" */
+export enum View_Types_Roi_Trends_Time_Series_Select_Column {
+  /** column name */
+  AiCycleDays = 'aiCycleDays',
+  /** column name */
+  Date = 'date',
+  /** column name */
+  HumanCycleDays = 'humanCycleDays'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Roi_Trends_Time_Series_Stddev_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_stddev_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Roi_Trends_Time_Series_Stddev_Pop_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_stddev_pop_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Roi_Trends_Time_Series_Stddev_Samp_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_stddev_samp_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_roi_trends_time_series" */
+export type View_Types_Roi_Trends_Time_Series_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Roi_Trends_Time_Series_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Roi_Trends_Time_Series_Stream_Cursor_Value_Input = {
+  aiCycleDays?: InputMaybe<Scalars['numeric']['input']>;
+  date?: InputMaybe<Scalars['date']['input']>;
+  humanCycleDays?: InputMaybe<Scalars['numeric']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Roi_Trends_Time_Series_Sum_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_sum_fields';
+  aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Roi_Trends_Time_Series_Var_Pop_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_var_pop_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Roi_Trends_Time_Series_Var_Samp_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_var_samp_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Roi_Trends_Time_Series_Variance_Fields = {
+  __typename?: 'view_types_roi_trends_time_series_variance_fields';
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "view_types.severity_count" */
@@ -45305,6 +46007,29 @@ export type UploadS3BucketInfoMutationVariables = Exact<{
 
 export type UploadS3BucketInfoMutation = { __typename?: 'mutation_root', uploadS3BucketInfo: { __typename?: 'UploadResponse', status: Status, error?: string | null, reportUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null, repoUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null } };
 
+export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
+  repositoryURL: Scalars['String']['input'];
+  commitSha: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+}>;
+
+
+export type AnalyzeCommitForExtensionAiBlameMutation = { __typename?: 'mutation_root', analyzeCommitForAIBlame: { __typename: 'ProcessAIBlameErrorResult', status: BlameStatus, error: string } | { __typename: 'ProcessAIBlameFinalResult', status: BlameStatus, inferencesProcessed: number, attributionsCreated: number, attributions: Array<{ __typename?: 'AIBlameAttribution', id: string, aiBlameCommitId: string, aiBlameInferenceId: string, filePath: string, lineNumber: number, model?: string | null, toolName?: string | null, commitSha: string, inferenceType: AiBlameInferenceType }> } | { __typename: 'ProcessAIBlameRequestedResult', status: BlameStatus, requestIds: Array<string> } };
+
+export type GetAiBlameInferenceQueryVariables = Exact<{
+  aiBlameInferenceIds?: InputMaybe<Array<Scalars['uuid']['input']> | Scalars['uuid']['input']>;
+}>;
+
+
+export type GetAiBlameInferenceQuery = { __typename?: 'query_root', ai_blame_inference: Array<{ __typename?: 'ai_blame_inference', id: any, type: Ai_Blame_Inference_Type_Enum, aiResponseAt: any }> };
+
+export type GetAiBlameAttributionPromptQueryVariables = Exact<{
+  aiBlameAttributionId: Scalars['String']['input'];
+}>;
+
+
+export type GetAiBlameAttributionPromptQuery = { __typename?: 'query_root', getAIBlameInferenceData: { __typename?: 'GetAIBlameInferencePromptResponse', promptUrl?: string | null } };
+
 export type UploadAiBlameInferencesInitMutationVariables = Exact<{
   sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
 }>;
@@ -45869,6 +46594,57 @@ export const UploadS3BucketInfoDocument = `
   }
 }
     `;
+export const AnalyzeCommitForExtensionAiBlameDocument = `
+    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!) {
+  analyzeCommitForAIBlame(
+    repositoryURL: $repositoryURL
+    commitSha: $commitSha
+    organizationId: $organizationId
+  ) {
+    __typename
+    ... on ProcessAIBlameFinalResult {
+      status
+      inferencesProcessed
+      attributionsCreated
+      attributions {
+        id
+        aiBlameCommitId
+        aiBlameInferenceId
+        filePath
+        lineNumber
+        model
+        toolName
+        commitSha
+        inferenceType
+      }
+    }
+    ... on ProcessAIBlameErrorResult {
+      status
+      error
+    }
+    ... on ProcessAIBlameRequestedResult {
+      status
+      requestIds
+    }
+  }
+}
+    `;
+export const GetAiBlameInferenceDocument = `
+    query GetAIBlameInference($aiBlameInferenceIds: [uuid!]) {
+  ai_blame_inference(where: {id: {_in: $aiBlameInferenceIds}}) {
+    id
+    type
+    aiResponseAt
+  }
+}
+    `;
+export const GetAiBlameAttributionPromptDocument = `
+    query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
+  getAIBlameInferenceData(aiBlameAttributionId: $aiBlameAttributionId) {
+    promptUrl
+  }
+}
+    `;
 export const UploadAiBlameInferencesInitDocument = `
     mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
   uploadAIBlameInferencesInit(sessions: $sessions) {
@@ -46166,6 +46942,15 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     uploadS3BucketInfo(variables: UploadS3BucketInfoMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadS3BucketInfoMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadS3BucketInfoMutation>({ document: UploadS3BucketInfoDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'uploadS3BucketInfo', 'mutation', variables);
+    },
+    AnalyzeCommitForExtensionAIBlame(variables: AnalyzeCommitForExtensionAiBlameMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AnalyzeCommitForExtensionAiBlameMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AnalyzeCommitForExtensionAiBlameMutation>({ document: AnalyzeCommitForExtensionAiBlameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AnalyzeCommitForExtensionAIBlame', 'mutation', variables);
+    },
+    GetAIBlameInference(variables?: GetAiBlameInferenceQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAiBlameInferenceQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAiBlameInferenceQuery>({ document: GetAiBlameInferenceDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAIBlameInference', 'query', variables);
+    },
+    GetAIBlameAttributionPrompt(variables: GetAiBlameAttributionPromptQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAiBlameAttributionPromptQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAiBlameAttributionPromptQuery>({ document: GetAiBlameAttributionPromptDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAIBlameAttributionPrompt', 'query', variables);
     },
     UploadAIBlameInferencesInit(variables: UploadAiBlameInferencesInitMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadAiBlameInferencesInitMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadAiBlameInferencesInitMutation>({ document: UploadAiBlameInferencesInitDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UploadAIBlameInferencesInit', 'mutation', variables);

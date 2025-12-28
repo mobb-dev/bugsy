@@ -1,9 +1,9 @@
 import crypto from 'crypto'
 import { GraphQLClient } from 'graphql-request'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import { v4 as uuidv4 } from 'uuid'
 
-import { DEFAULT_API_URL } from '../../constants'
-import { subscribe } from '../../features/analysis/graphql/subscribe'
+import { DEFAULT_API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../constants'
 import {
   CreateCliLoginMutationVariables,
   FinalizeAiBlameInferencesUploadMutation,
@@ -24,6 +24,7 @@ import {
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { configStore } from '../../utils/ConfigStoreService'
+import { subscribe } from '../../utils/subscribe/subscribe'
 import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_LIMIT } from '../core/configs'
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
@@ -39,6 +40,38 @@ type GQLClientArgs =
       token: string
       type: 'token'
     }
+
+function getProxyAgent(url: string) {
+  try {
+    const parsedUrl = new URL(url)
+
+    const isHttp = parsedUrl.protocol === 'http:'
+    const isHttps = parsedUrl.protocol === 'https:'
+
+    // Prefer protocol-specific proxy vars, but allow HTTPS to fall back to HTTP_PROXY
+    // (common in local/dev environments).
+    const proxy = isHttps
+      ? HTTPS_PROXY || HTTP_PROXY
+      : isHttp
+        ? HTTP_PROXY
+        : null
+
+    if (proxy) {
+      logDebug('[GraphQL] Using proxy for websocket subscriptions', { proxy })
+      // IMPORTANT:
+      // Use HttpsProxyAgent for both HTTP and HTTPS targets.
+      // HttpProxyAgent does not tunnel via CONNECT, which breaks WebSocket upgrades
+      // through HTTP proxies. HttpsProxyAgent forces CONNECT tunneling, which is
+      // required for websocket connections even for non-encrypted (ws://) URLs.
+      return new HttpsProxyAgent(proxy)
+    }
+  } catch (err) {
+    logDebug(`[GraphQL] Skipping proxy for ${url}`, {
+      error: (err as Error).message,
+    })
+  }
+  return undefined
+}
 
 // Simple GQLClient for the fixVulnerabilities tool
 export class McpGQLClient {
@@ -259,11 +292,13 @@ export class McpGQLClient {
               apiKey: this._auth.apiKey,
               type: 'apiKey',
               timeoutInMs: params.timeoutInMs,
+              proxyAgent: getProxyAgent(this.apiUrl),
             }
           : {
               token: this._auth.token,
               type: 'token',
               timeoutInMs: params.timeoutInMs,
+              proxyAgent: getProxyAgent(this.apiUrl),
             }
       )
       logDebug(`[${scanContext}] GraphQL: GetAnalysis subscription completed`, {

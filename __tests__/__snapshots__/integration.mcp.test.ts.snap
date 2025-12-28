@@ -1649,7 +1649,6 @@ Example payload:
   "maxFiles": 50,
   "rescan": false
 }",
-      "display_name": "Scan and Fix Vulnerabilities",
       "inputSchema": {
         "properties": {
           "limit": {
@@ -1713,7 +1712,6 @@ File Filtering Behavior:
 • If BOTH are provided: Returns an error (parameters are mutually exclusive).
 
 Call this tool instead of scan_and_fix_vulnerabilities when you only need a fixes summary and do NOT want to perform scanning or code modifications.",
-      "display_name": "Fetch Available Fixes",
       "inputSchema": {
         "properties": {
           "fetchFixesFromAnyFile": {
@@ -1769,7 +1767,6 @@ Example payload:
 {
   "path": "/home/user/my-project"
 }",
-      "display_name": "Check for New Available Fixes",
       "inputSchema": {
         "properties": {
           "path": {

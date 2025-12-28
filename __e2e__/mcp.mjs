@@ -136,7 +136,6 @@ test('Bugsy MCP E2E tests', async (t) => {
         tools: [
           {
             name: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-            display_name: 'Scan and Fix Vulnerabilities',
             description: `Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
 
 When to invoke:
@@ -208,7 +207,6 @@ Example payload:
           },
           {
             name: MCP_TOOL_FETCH_AVAILABLE_FIXES,
-            display_name: 'Fetch Available Fixes',
             description: `Check the MOBB backend for pre-generated fixes (patch sets) that correspond to vulnerabilities detected in the supplied Git repository.
 
 Use when:
@@ -270,7 +268,6 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
           },
           {
             name: MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
-            display_name: 'Check for New Available Fixes',
             description: `Continuesly monitors your code and scans for new security vulnerabilities.
 
 When to invoke:

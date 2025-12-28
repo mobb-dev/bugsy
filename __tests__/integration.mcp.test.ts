@@ -10,7 +10,9 @@ import { McpGQLClient } from '@mobb/bugsy/mcp/services/McpGQLClient'
 import { sleep } from '@mobb/bugsy/utils'
 import {
   CallToolResult,
+  GetPromptResult,
   ListToolsResult,
+  TextContent,
 } from '@modelcontextprotocol/sdk/types'
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'fs'
 import fs from 'fs/promises'
@@ -42,6 +44,19 @@ import {
   NonGitRepo,
 } from './mcp/helpers/MockRepo'
 import { expectLoggerMessage } from './mcp/helpers/testHelpers'
+
+// Helper to extract text from content (handles union type from MCP SDK 1.25+)
+type ContentType =
+  | CallToolResult['content'][number]
+  | GetPromptResult['messages'][number]['content']
+  | undefined
+
+function getTextContent(content: ContentType): string {
+  if (content?.type === 'text') {
+    return (content as TextContent).text
+  }
+  return ''
+}
 
 // Filter for debug logs to show on test failure
 const FAIL_DEBUG_LOG_FILTER = [
@@ -697,7 +712,9 @@ describe('mcp tests', () => {
 
       const start = Date.now()
       console.log('waiting for initial scan to complete')
-      while (response!.content![0]!.text === initialScanInProgressPrompt) {
+      while (
+        getTextContent(response!.content![0]) === initialScanInProgressPrompt
+      ) {
         // Check for timeout
         if (Date.now() - start > timeoutMs) {
           throw new Error(`Scan completion timeout after ${timeoutMs}ms`)
@@ -718,7 +735,7 @@ describe('mcp tests', () => {
       )
       console.log(
         'initial scan completed with',
-        (response!.content![0]!.text as string).substring(0, 100)
+        getTextContent(response!.content![0]).substring(0, 100)
       )
       return response
     }
@@ -728,7 +745,7 @@ describe('mcp tests', () => {
         MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
         { path: activeRepoPath }
       )
-      expect(res!.content![0]!.text).toBe(noFreshFixesPrompt)
+      expect(getTextContent(res!.content![0])).toBe(noFreshFixesPrompt)
     }
 
     const expectSingleFix = async (timeout = 60000, interval = 50) => {
@@ -741,8 +758,8 @@ describe('mcp tests', () => {
             MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
             { path: activeRepoPath }
           )
-          expect(res!.content![0]!.text).toContain('## Fix 1:')
-          expect(res!.content![0]!.text).not.toContain('## Fix 2:')
+          expect(getTextContent(res!.content![0])).toContain('## Fix 1:')
+          expect(getTextContent(res!.content![0])).not.toContain('## Fix 2:')
           return // success
         } catch (err) {
           lastError = err
@@ -847,7 +864,7 @@ describe('mcp tests', () => {
       )
 
       console.log('initial scan complete, fetching fixes')
-      expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
+      expect(getTextContent(firstFixesRes!.content![0])).toContain('## Fix 3:')
 
       await expectNoFreshFixes()
     }, 200000)
@@ -864,7 +881,7 @@ describe('mcp tests', () => {
         activeRepoPath
       )
 
-      expect(firstFixesRes!.content![0]!.text).toContain('## Fix 3:')
+      expect(getTextContent(firstFixesRes!.content![0])).toContain('## Fix 3:')
 
       await expectSingleFix()
 
@@ -997,7 +1014,9 @@ describe('mcp tests', () => {
           const firstContent = scanResult.content[0]
 
           expect(firstContent).toBeDefined()
-          expect((firstContent?.text as string).length).toBeGreaterThan(0)
+          expect(
+            (getTextContent(firstContent) as string).length
+          ).toBeGreaterThan(0)
 
           await expectLoggerMessage(logs, 'Successfully auto-applied')
 
@@ -1067,9 +1086,9 @@ describe('mcp tests', () => {
           // )
           // expect(patchApplicationLogs.length).toBe(3)
 
-          expect(firstContent?.text).toContain('fix')
+          expect(getTextContent(firstContent)).toContain('fix')
 
-          expect(firstContent?.text).toContain('vulnerability')
+          expect(getTextContent(firstContent)).toContain('vulnerability')
         } finally {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
@@ -1123,7 +1142,7 @@ describe('mcp tests', () => {
           const finalContent = readFileSync(jsFilePath, 'utf8')
           expect(finalContent).not.toContain('Mobb security fix applied')
 
-          expect(secondTestContent?.text).toContain(
+          expect(getTextContent(secondTestContent)).toContain(
             'MOBB AUTO-FIX MONITORING ACTIVE'
           )
         } finally {
@@ -1152,7 +1171,9 @@ describe('mcp tests', () => {
           const firstContent = scanResult.content[0]
 
           expect(firstContent).toBeDefined()
-          expect((firstContent?.text as string).length).toBeGreaterThan(0)
+          expect(
+            (getTextContent(firstContent) as string).length
+          ).toBeGreaterThan(0)
 
           await expectLoggerMessage(logs, 'Successfully auto-applied')
 
@@ -1251,8 +1272,10 @@ describe('mcp tests', () => {
           const thirdTestContent = scanResult.content[0]
 
           expect(thirdTestContent).toBeDefined()
-          expect(typeof thirdTestContent?.text).toBe('string')
-          expect((thirdTestContent?.text as string).length).toBeGreaterThan(0)
+          expect(typeof getTextContent(thirdTestContent)).toBe('string')
+          expect(
+            (getTextContent(thirdTestContent) as string).length
+          ).toBeGreaterThan(0)
 
           await expectLoggerMessage(
             logs,
@@ -1326,14 +1349,14 @@ describe('mcp tests', () => {
             cmdInjection2Fixed
           expect(hasVulnFix).toBe(true)
 
-          expect(thirdTestContent?.text).toContain('fix')
+          expect(getTextContent(thirdTestContent)).toContain('fix')
 
-          expect(thirdTestContent?.text).toContain('vulnerability')
+          expect(getTextContent(thirdTestContent)).toContain('vulnerability')
 
           const successPattern = /success|applied|fixed|complete/
-          expect((thirdTestContent?.text as string).toLowerCase()).toMatch(
-            successPattern
-          )
+          expect(
+            (getTextContent(thirdTestContent) as string).toLowerCase()
+          ).toMatch(successPattern)
         } finally {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
@@ -1472,7 +1495,7 @@ describe('mcp tests', () => {
         expect(response.description).toBeDefined()
         expect(response.messages).toBeDefined()
         expect(response.messages.length).toBeGreaterThan(0)
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Mobb Security Tools'
         )
       })
@@ -1481,10 +1504,10 @@ describe('mcp tests', () => {
         const response = await mcpClient.getPrompt('scan-repository')
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Security Repository Scan'
         )
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'What is the full path'
         )
       })
@@ -1496,8 +1519,10 @@ describe('mcp tests', () => {
         })
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(testPath)
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
+          testPath
+        )
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Repository path provided'
         )
       })
@@ -1506,7 +1531,7 @@ describe('mcp tests', () => {
         const response = await mcpClient.getPrompt('scan-recent-changes')
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Scan Recent Changes'
         )
       })
@@ -1518,7 +1543,9 @@ describe('mcp tests', () => {
         })
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(testPath)
+        expect(getTextContent(response.messages[0]?.content)).toContain(
+          testPath
+        )
       })
 
       it('should execute CheckForNewVulnerabilitiesPrompt without path', async () => {
@@ -1527,7 +1554,7 @@ describe('mcp tests', () => {
         )
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Continuous Security Monitoring'
         )
       })
@@ -1540,14 +1567,16 @@ describe('mcp tests', () => {
         )
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(testPath)
+        expect(getTextContent(response.messages[0]?.content)).toContain(
+          testPath
+        )
       })
 
       it('should execute ReviewAndFixCriticalPrompt without path', async () => {
         const response = await mcpClient.getPrompt('review-and-fix-critical')
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Critical Security Vulnerabilities'
         )
       })
@@ -1559,14 +1588,16 @@ describe('mcp tests', () => {
         })
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(testPath)
+        expect(getTextContent(response.messages[0]?.content)).toContain(
+          testPath
+        )
       })
 
       it('should execute FullSecurityAuditPrompt without path', async () => {
         const response = await mcpClient.getPrompt('full-security-audit')
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(
+        expect(getTextContent(response.messages[0]?.content)).toContain(
           'Complete Security Audit'
         )
       })
@@ -1578,7 +1609,9 @@ describe('mcp tests', () => {
         })
 
         expect(response).toBeDefined()
-        expect(response.messages[0]?.content.text).toContain(testPath)
+        expect(getTextContent(response.messages[0]?.content)).toContain(
+          testPath
+        )
       })
 
       it('should validate arguments through MCP protocol', async () => {
@@ -1617,10 +1650,14 @@ describe('mcp tests', () => {
           path: path2,
         })
 
-        expect(response1.messages[0]?.content.text).toContain(path1)
-        expect(response1.messages[0]?.content.text).not.toContain(path2)
-        expect(response2.messages[0]?.content.text).toContain(path2)
-        expect(response2.messages[0]?.content.text).not.toContain(path1)
+        expect(getTextContent(response1.messages[0]?.content)).toContain(path1)
+        expect(getTextContent(response1.messages[0]?.content)).not.toContain(
+          path2
+        )
+        expect(getTextContent(response2.messages[0]?.content)).toContain(path2)
+        expect(getTextContent(response2.messages[0]?.content)).not.toContain(
+          path1
+        )
       })
 
       it('should handle all prompts with snapshots', async () => {

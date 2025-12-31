@@ -15,6 +15,10 @@ export const mockGetAnalysis = {
         projectId: 'test-project-id',
         project: {
           organizationId: 'test-organization-id',
+          organization: {
+            __typename: 'organization' as const,
+            ghFixerNoFixComments: false,
+          },
         },
         file: {
           signedFile: {

@@ -34,6 +34,7 @@ import {
   DeleteCommentParams,
   GetPrCommentResponse,
   GetPrCommentsParams,
+  GetPRMetricsResponse,
   GetPrParams,
   PostCommentParams,
   PrCommentData,
@@ -41,6 +42,24 @@ import {
   UpdateCommentResponse,
 } from './types'
 import { encryptSecret } from './utils/encrypt_secret'
+
+type PrState = NonNullable<
+  GetPRMetricsResponse['repository']['pullRequest']
+>['state']
+
+/**
+ * Determine PR status from state and draft flag
+ */
+function determinePrStatus(state: PrState, isDraft: boolean): Pr_Status_Enum {
+  switch (state) {
+    case 'CLOSED':
+      return Pr_Status_Enum.Closed
+    case 'MERGED':
+      return Pr_Status_Enum.Merged
+    case 'OPEN':
+      return isDraft ? Pr_Status_Enum.Draft : Pr_Status_Enum.Active
+  }
+}
 
 export class GithubSCMLib extends SCMLib {
   public readonly githubSdk: ReturnType<typeof getGithubSdk>
@@ -627,12 +646,7 @@ export class GithubSCMLib extends SCMLib {
     }
 
     // Determine PR status
-    let prStatus: Pr_Status_Enum = Pr_Status_Enum.Active
-    if (pr.state === 'CLOSED') {
-      prStatus = pr.mergedAt ? Pr_Status_Enum.Merged : Pr_Status_Enum.Closed
-    } else if (pr.isDraft) {
-      prStatus = Pr_Status_Enum.Draft
-    }
+    const prStatus = determinePrStatus(pr.state, pr.isDraft)
 
     // Get first commit date
     const firstCommit = pr.commits.nodes[0]

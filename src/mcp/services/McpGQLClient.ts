@@ -24,7 +24,7 @@ import {
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { configStore } from '../../utils/ConfigStoreService'
-import { subscribe } from '../../utils/subscribe/subscribe'
+import { subscribeStream } from '../../utils/subscribe/subscribe'
 import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_LIMIT } from '../core/configs'
 import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
@@ -246,65 +246,87 @@ export class McpGQLClient {
         params: params.subscribeToAnalysisParams,
       })
       const { callbackStates } = params
-      const result = await subscribe<
-        GetAnalysisSubscriptionSubscription,
-        GetAnalysisSubscriptionSubscriptionVariables
-      >(
-        GetAnalysisSubscriptionDocument,
-        params.subscribeToAnalysisParams,
-        async (resolve, reject, data) => {
-          logDebug(
-            `[${scanContext}] GraphQL: GetAnalysis subscription data received ${data.analysis?.state}`,
-            { data }
+      return new Promise<GetAnalysisSubscriptionSubscription>(
+        (resolve, reject) => {
+          const subscription = subscribeStream<
+            GetAnalysisSubscriptionSubscription,
+            GetAnalysisSubscriptionSubscriptionVariables
+          >(
+            GetAnalysisSubscriptionDocument,
+            params.subscribeToAnalysisParams,
+            {
+              next: async (data) => {
+                logDebug(
+                  `[${scanContext}] GraphQL: GetAnalysis subscription data received ${data.analysis?.state}`,
+                  { data }
+                )
+                if (
+                  !data.analysis?.state ||
+                  data.analysis?.state === Fix_Report_State_Enum.Failed
+                ) {
+                  const errorMessage =
+                    data.analysis?.failReason ||
+                    `Analysis failed with id: ${data.analysis?.id}`
+                  logError(`[${scanContext}] GraphQL: Analysis failed`, {
+                    analysisId: data.analysis?.id,
+                    state: data.analysis?.state,
+                    failReason: data.analysis?.failReason,
+                    ...this.getErrorContext(),
+                  })
+                  subscription.unsubscribe()
+                  reject(new Error(errorMessage))
+                  return
+                }
+                if (callbackStates.includes(data.analysis?.state)) {
+                  logDebug(
+                    `[${scanContext}] GraphQL: Analysis state matches callback states: ${data.analysis.state}`,
+                    {
+                      analysisId: data.analysis.id,
+                      state: data.analysis.state,
+                      callbackStates,
+                    }
+                  )
+                  await params.callback(data.analysis.id)
+                  subscription.unsubscribe()
+                  logDebug(
+                    `[${scanContext}] GraphQL: GetAnalysis subscription completed`,
+                    {
+                      analysisId: data.analysis.id,
+                      state: data.analysis.state,
+                    }
+                  )
+                  resolve(data)
+                }
+              },
+              error: (error) => {
+                logError(
+                  `[${scanContext}] GraphQL: GetAnalysis subscription failed`,
+                  {
+                    error,
+                    params: params.subscribeToAnalysisParams,
+                    ...this.getErrorContext(),
+                  }
+                )
+                subscription.unsubscribe()
+                reject(error)
+              },
+            },
+            this._auth.type === 'apiKey'
+              ? {
+                  apiKey: this._auth.apiKey,
+                  type: 'apiKey',
+                  timeoutInMs: params.timeoutInMs,
+                  proxyAgent: getProxyAgent(this.apiUrl),
+                }
+              : {
+                  token: this._auth.token,
+                  type: 'token',
+                  timeoutInMs: params.timeoutInMs,
+                  proxyAgent: getProxyAgent(this.apiUrl),
+                }
           )
-          if (
-            !data.analysis?.state ||
-            data.analysis?.state === Fix_Report_State_Enum.Failed
-          ) {
-            const errorMessage =
-              data.analysis?.failReason ||
-              `Analysis failed with id: ${data.analysis?.id}`
-            logError(`[${scanContext}] GraphQL: Analysis failed`, {
-              analysisId: data.analysis?.id,
-              state: data.analysis?.state,
-              failReason: data.analysis?.failReason,
-              ...this.getErrorContext(),
-            })
-            reject(new Error(errorMessage))
-            return
-          }
-          if (callbackStates.includes(data.analysis?.state)) {
-            logDebug(
-              `[${scanContext}] GraphQL: Analysis state matches callback states: ${data.analysis.state}`,
-              {
-                analysisId: data.analysis.id,
-                state: data.analysis.state,
-                callbackStates,
-              }
-            )
-            await params.callback(data.analysis.id)
-            resolve(data)
-          }
-        },
-
-        this._auth.type === 'apiKey'
-          ? {
-              apiKey: this._auth.apiKey,
-              type: 'apiKey',
-              timeoutInMs: params.timeoutInMs,
-              proxyAgent: getProxyAgent(this.apiUrl),
-            }
-          : {
-              token: this._auth.token,
-              type: 'token',
-              timeoutInMs: params.timeoutInMs,
-              proxyAgent: getProxyAgent(this.apiUrl),
-            }
+        }
       )
-      logDebug(`[${scanContext}] GraphQL: GetAnalysis subscription completed`, {
-        result,
-      })
-      return result
     } catch (e) {
       logError(`[${scanContext}] GraphQL: GetAnalysis subscription failed`, {
         error: e,

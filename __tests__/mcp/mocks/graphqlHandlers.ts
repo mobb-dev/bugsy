@@ -5,6 +5,8 @@ import type {
   CreateCommunityUserMutationVariables,
   CreateProjectMutation,
   CreateProjectMutationVariables,
+  GetAnalysisQuery,
+  GetAnalysisQueryVariables,
   GetLastOrgAndNamedProjectQuery,
   GetLastOrgAndNamedProjectQueryVariables,
   GetLatestReportByRepoUrlQuery,
@@ -27,6 +29,7 @@ import {
   mockCreateCommunityUserError,
   mockCreateProject,
   mockCreateProjectError,
+  mockGetAnalysis,
   mockGetLastOrgAndNamedProject,
   mockGetLastOrgAndNamedProjectError,
   mockGetLastOrgAndNamedProjectProjectNotFound,
@@ -68,6 +71,7 @@ type MockState = {
   getLastOrgAndNamedProject: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
+  getAnalysis: 'success' | 'missing'
   getLatestReportByRepoUrl: 'success' | 'error' | 'empty' | 'expired'
   createCliLogin: 'success' | 'error'
   updateDownloadedFixData: 'success'
@@ -85,6 +89,7 @@ const mockState: MockState = {
   getLastOrgAndNamedProject: 'success',
   createProject: 'success',
   submitVulnerabilityReport: 'success',
+  getAnalysis: 'success',
   getLatestReportByRepoUrl: 'success',
   createCliLogin: 'success',
   updateDownloadedFixData: 'success',
@@ -196,6 +201,16 @@ export const graphqlHandlers = [
     return HttpResponse.json(mockSubmitVulnerabilityReport)
   }),
 
+  graphql.query<GetAnalysisQuery, GetAnalysisQueryVariables>(
+    'getAnalysis',
+    () => {
+      if (mockState.getAnalysis === 'missing') {
+        return HttpResponse.json({ data: { analysis: null } })
+      }
+      return HttpResponse.json(mockGetAnalysis)
+    }
+  ),
+
   graphql.mutation<
     UpdateDownloadedFixDataMutation,
     UpdateDownloadedFixDataMutationVariables
@@ -286,6 +301,7 @@ export const mockGraphQL = (
         mockState.getLastOrgAndNamedProject = 'success'
         mockState.createProject = 'success'
         mockState.submitVulnerabilityReport = 'success'
+        mockState.getAnalysis = 'success'
         mockState.getLatestReportByRepoUrl = 'success'
         mockState.createCliLogin = 'success'
         mockState.updateDownloadedFixData = 'success'
@@ -371,6 +387,18 @@ export const mockGraphQL = (
       failsWithError(message: string) {
         mockState.submitVulnerabilityReport = 'error'
         mockState.errorMessages['submitVulnerabilityReport'] = message
+        return this
+      },
+    }
+  },
+  getAnalysis: () => {
+    return {
+      succeeds() {
+        mockState.getAnalysis = 'success'
+        return this
+      },
+      returnsMissingAnalysis() {
+        mockState.getAnalysis = 'missing'
         return this
       },
     }

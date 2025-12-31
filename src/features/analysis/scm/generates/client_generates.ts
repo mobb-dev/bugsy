@@ -46196,6 +46196,20 @@ export type GetUserMvsAutoFixQueryVariables = Exact<{
 
 export type GetUserMvsAutoFixQuery = { __typename?: 'query_root', user_email_notification_settings: Array<{ __typename?: 'user_email_notification_settings', mvs_auto_fix: boolean }> };
 
+export type StreamBlameAiAnalysisRequestsSubscriptionVariables = Exact<{
+  requestIds: Array<Scalars['uuid']['input']> | Scalars['uuid']['input'];
+}>;
+
+
+export type StreamBlameAiAnalysisRequestsSubscription = { __typename?: 'subscription_root', blame_ai_analysis_request: Array<{ __typename?: 'blame_ai_analysis_request', id: any, state: Blame_Ai_Analysis_Request_State_Enum, commitId?: any | null, organizationId: any, createdOn: any }> };
+
+export type StreamCommitBlameRequestsSubscriptionVariables = Exact<{
+  requestIds: Array<Scalars['uuid']['input']> | Scalars['uuid']['input'];
+}>;
+
+
+export type StreamCommitBlameRequestsSubscription = { __typename?: 'subscription_root', commit_blame_request: Array<{ __typename?: 'commit_blame_request', id: any, state: Blame_Ai_Analysis_Request_State_Enum, organizationId: any, repositoryUrl: string, commitSha: string, createdOn: any, completedOn?: any | null, error?: string | null }> };
+
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
   id
@@ -46917,6 +46931,31 @@ export const GetUserMvsAutoFixDocument = `
   }
 }
     `;
+export const StreamBlameAiAnalysisRequestsDocument = `
+    subscription streamBlameAiAnalysisRequests($requestIds: [uuid!]!) {
+  blame_ai_analysis_request(where: {id: {_in: $requestIds}}) {
+    id
+    state
+    commitId
+    organizationId
+    createdOn
+  }
+}
+    `;
+export const StreamCommitBlameRequestsDocument = `
+    subscription streamCommitBlameRequests($requestIds: [uuid!]!) {
+  commit_blame_request(where: {id: {_in: $requestIds}}) {
+    id
+    state
+    organizationId
+    repositoryUrl
+    commitSha
+    createdOn
+    completedOn
+    error
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -47020,6 +47059,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetUserMvsAutoFix(variables: GetUserMvsAutoFixQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetUserMvsAutoFixQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetUserMvsAutoFixQuery>({ document: GetUserMvsAutoFixDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetUserMvsAutoFix', 'query', variables);
+    },
+    streamBlameAiAnalysisRequests(variables: StreamBlameAiAnalysisRequestsSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StreamBlameAiAnalysisRequestsSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StreamBlameAiAnalysisRequestsSubscription>({ document: StreamBlameAiAnalysisRequestsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'streamBlameAiAnalysisRequests', 'subscription', variables);
+    },
+    streamCommitBlameRequests(variables: StreamCommitBlameRequestsSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StreamCommitBlameRequestsSubscription> {
+      return withWrapper((wrappedRequestHeaders) => client.request<StreamCommitBlameRequestsSubscription>({ document: StreamCommitBlameRequestsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'streamCommitBlameRequests', 'subscription', variables);
     }
   };
 }

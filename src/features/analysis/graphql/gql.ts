@@ -8,7 +8,7 @@ import { API_URL, HTTP_PROXY, HTTPS_PROXY } from '../../../constants'
 import { ReportDigestError } from '../../../mcp/core/Errors'
 import { ScanContext } from '../../../types'
 import { sleep } from '../../../utils'
-import { subscribe } from '../../../utils/subscribe/subscribe'
+import { subscribeStream } from '../../../utils/subscribe/subscribe'
 import { REPORT_DEFAULT_FILE_NAME } from '../scm'
 import {
   AnalyzeCommitForExtensionAiBlameMutation,
@@ -463,43 +463,58 @@ export class GQLClient {
     timeoutInMs?: number
   }) {
     const { callbackStates } = params
-    return subscribe<
-      GetAnalysisSubscriptionSubscription,
-      GetAnalysisSubscriptionSubscriptionVariables
-    >(
-      GetAnalysisSubscriptionDocument,
-      params.subscribeToAnalysisParams,
-      async (resolve, reject, data) => {
-        if (
-          !data.analysis?.state ||
-          data.analysis?.state === Fix_Report_State_Enum.Failed
-        ) {
-          const errorMessage =
-            data.analysis?.failReason ||
-            `Analysis failed with id: ${data.analysis?.id}`
-          reject(
-            new ReportDigestError(errorMessage, data.analysis?.failReason ?? '')
-          )
-          return
-        }
-        if (callbackStates.includes(data.analysis?.state)) {
-          await params.callback(data.analysis.id)
-          resolve(data)
-        }
-      },
-      this._auth.type === 'apiKey'
-        ? {
-            apiKey: this._auth.apiKey,
-            type: 'apiKey',
-            timeoutInMs: params.timeoutInMs,
-            proxyAgent: getProxyAgent(API_URL),
-          }
-        : {
-            token: this._auth.token,
-            type: 'token',
-            timeoutInMs: params.timeoutInMs,
-            proxyAgent: getProxyAgent(API_URL),
-          }
+    return new Promise<GetAnalysisSubscriptionSubscription>(
+      (resolve, reject) => {
+        const subscription = subscribeStream<
+          GetAnalysisSubscriptionSubscription,
+          GetAnalysisSubscriptionSubscriptionVariables
+        >(
+          GetAnalysisSubscriptionDocument,
+          params.subscribeToAnalysisParams,
+          {
+            next: async (data) => {
+              if (
+                !data.analysis?.state ||
+                data.analysis?.state === Fix_Report_State_Enum.Failed
+              ) {
+                const errorMessage =
+                  data.analysis?.failReason ||
+                  `Analysis failed with id: ${data.analysis?.id}`
+                subscription.unsubscribe()
+                reject(
+                  new ReportDigestError(
+                    errorMessage,
+                    data.analysis?.failReason ?? ''
+                  )
+                )
+                return
+              }
+              if (callbackStates.includes(data.analysis?.state)) {
+                await params.callback(data.analysis.id)
+                subscription.unsubscribe()
+                resolve(data)
+              }
+            },
+            error: (error) => {
+              subscription.unsubscribe()
+              reject(error)
+            },
+          },
+          this._auth.type === 'apiKey'
+            ? {
+                apiKey: this._auth.apiKey,
+                type: 'apiKey',
+                timeoutInMs: params.timeoutInMs,
+                proxyAgent: getProxyAgent(API_URL),
+              }
+            : {
+                token: this._auth.token,
+                type: 'token',
+                timeoutInMs: params.timeoutInMs,
+                proxyAgent: getProxyAgent(API_URL),
+              }
+        )
+      }
     )
   }
 

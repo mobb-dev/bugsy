@@ -848,3 +848,26 @@ query GetUserMvsAutoFix($userEmail: String!) {
     mvs_auto_fix
   }
 }
+
+subscription streamBlameAiAnalysisRequests($requestIds: [uuid!]!) {
+  blame_ai_analysis_request(where: { id: { _in: $requestIds } }) {
+    id
+    state
+    commitId
+    organizationId
+    createdOn
+  }
+}
+
+subscription streamCommitBlameRequests($requestIds: [uuid!]!) {
+  commit_blame_request(where: { id: { _in: $requestIds } }) {
+    id
+    state
+    organizationId
+    repositoryUrl
+    commitSha
+    createdOn
+    completedOn
+    error
+  }
+}

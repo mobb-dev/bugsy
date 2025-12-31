@@ -184,17 +184,9 @@ export class GitService {
         this.git.revparse(['--abbrev-ref', 'HEAD']),
       ])
 
-      let normalizedRepoUrl = repoUrl.value || ''
-      // Normalize git URL
-      if (normalizedRepoUrl.endsWith('.git')) {
-        normalizedRepoUrl = normalizedRepoUrl.slice(0, -'.git'.length)
-      }
-      if (normalizedRepoUrl.startsWith('git@github.com:')) {
-        normalizedRepoUrl = normalizedRepoUrl.replace(
-          'git@github.com:',
-          'https://github.com/'
-        )
-      }
+      const normalizedRepoUrl = repoUrl.value
+        ? this.normalizeGitUrl(repoUrl.value)
+        : ''
 
       this.log('[GitService] Git repository information retrieved', 'debug', {
         repoUrl: normalizedRepoUrl,
@@ -567,6 +559,16 @@ export class GitService {
           break
         }
       }
+    }
+
+    // Strip credentials from HTTPS URLs (e.g. https://token@github.com/org/repo).
+    // This is common in CI environments where checkout injects an access token.
+    if (
+      normalizedUrl.startsWith('https://') ||
+      normalizedUrl.startsWith('http://')
+    ) {
+      // Remove any "userinfo@" segment after the protocol.
+      normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)([^@/]+@)/, '$1')
     }
 
     return normalizedUrl

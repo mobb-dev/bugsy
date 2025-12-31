@@ -126,12 +126,37 @@ vi.mock('node-fetch', async () => {
 
 // Mock the subscribe function to prevent actual WebSocket connections
 vi.mock('../../src/utils/subscribe/subscribe', () => ({
-  subscribe: vi.fn().mockResolvedValue({
-    analysis: {
-      id: 'test-analysis-id',
-      state: 'FINISHED',
-    },
-  }),
+  // New streaming subscription API (used by analysis flows).
+  // Return an immediate unsubscribe handle and emit one payload.
+  subscribeStream: vi
+    .fn()
+    .mockImplementation(
+      (
+        _query: string,
+        _variables: Record<string, unknown>,
+        handlers: { next: (data: unknown) => void; error: (e: unknown) => void }
+      ) => {
+        // Emit a single "finished" payload asynchronously to simulate a WS message.
+        queueMicrotask(() => {
+          try {
+            handlers.next({
+              analysis: {
+                id: 'test-fix-report-id',
+                state: 'Finished',
+                failReason: null,
+              },
+            })
+          } catch (e) {
+            handlers.error(e)
+          }
+        })
+
+        return { unsubscribe: vi.fn() }
+      }
+    ),
+
+  // Backwards-compatible export for any legacy imports.
+  subscribe: vi.fn(),
 }))
 
 // Move expectDebugMessage to a higher scope so it is available in all describe blocks
@@ -316,6 +341,14 @@ describe('MCP Server', () => {
 
     it('should handle path that is not a git repository', async () => {
       log('Starting test...')
+      // Configure GraphQL mocks for complete successful flow.
+      // Without these mocks, the tool will attempt to reach the API and can hang.
+      mockGraphQL().me().succeeds()
+      mockGraphQL().uploadS3BucketInfo().succeeds()
+      mockGraphQL().getLastOrgAndNamedProject().succeeds()
+      mockGraphQL().submitVulnerabilityReport().succeeds()
+      mockGraphQL().getReportFixes().succeeds()
+
       const tool = new FixVulnerabilitiesTool()
       log('Executing tool with nonRepoPath...')
       const result = await tool.execute({ path: codeNotInGitRepoPath })
@@ -553,9 +586,9 @@ describe('MCP Server', () => {
         // Get access to mocked functions for verification
         const { default: fetch } = await import('node-fetch')
         const mockedFetch = vi.mocked(fetch)
-        const { subscribe } =
+        const { subscribeStream } =
           await import('../../src/utils/subscribe/subscribe')
-        const mockedSubscribe = vi.mocked(subscribe)
+        const mockedSubscribeStream = vi.mocked(subscribeStream)
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -627,18 +660,23 @@ describe('MCP Server', () => {
         expect(formData.has('file')).toBe(true)
 
         // === VERIFY SUBSCRIPTION ===
-        expect(mockedSubscribe).toHaveBeenCalledTimes(1)
-        const subscribeCall = mockedSubscribe.mock.calls[0]
+        expect(mockedSubscribeStream).toHaveBeenCalledTimes(1)
+        const subscribeCall = mockedSubscribeStream.mock.calls[0]
         expect(subscribeCall?.[0]).toBeDefined() // query
         expect(subscribeCall?.[1]).toEqual({
           analysisId: 'test-fix-report-id',
         }) // variables
-        expect(subscribeCall?.[2]).toBeTypeOf('function') // callback
-        expect(subscribeCall?.[3]).toEqual({
-          apiKey: expect.any(String),
-          type: 'apiKey',
-          timeoutInMs: 1800000, // 30 minutes
-        }) // wsClientOptions
+        expect(subscribeCall?.[2]).toEqual({
+          next: expect.any(Function),
+          error: expect.any(Function),
+        }) // handlers
+        expect(subscribeCall?.[3]).toEqual(
+          expect.objectContaining({
+            apiKey: expect.any(String),
+            type: 'apiKey',
+            timeoutInMs: 1800000, // 30 minutes
+          })
+        ) // wsClientOptions
 
         // === VERIFY FINAL RESULT ===
         expectValidResult(result)

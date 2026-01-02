@@ -45,7 +45,7 @@ const debug = Debug('mobbdev:gql')
 export const API_KEY_HEADER_NAME = 'x-mobb-key'
 const REPORT_STATE_CHECK_DELAY = 5 * 1000 // 5 sec
 
-type GQLClientArgs =
+type GQLClientAuthArgs =
   | {
       apiKey: string
       type: 'apiKey'
@@ -54,6 +54,11 @@ type GQLClientArgs =
       token: string
       type: 'token'
     }
+
+type GQLClientArgs = GQLClientAuthArgs & {
+  /** Optional API URL. If not provided, uses DEFAULT_API_URL from constants or process.env */
+  apiUrl?: string
+}
 
 export function getProxyAgent(url: string) {
   try {
@@ -108,12 +113,14 @@ export const fetchWithProxy: typeof fetchOrig = (url, options = {}) => {
 export class GQLClient {
   _client: GraphQLClient
   _clientSdk: Sdk
+  _apiUrl: string
 
   _auth: GQLClientArgs
   constructor(args: GQLClientArgs) {
     debug(`init with  ${args}`)
     this._auth = args
-    this._client = new GraphQLClient(API_URL, {
+    this._apiUrl = args.apiUrl || API_URL
+    this._client = new GraphQLClient(this._apiUrl, {
       headers:
         args.type === 'apiKey'
           ? { [API_KEY_HEADER_NAME]: args.apiKey || '' }
@@ -505,13 +512,13 @@ export class GQLClient {
                 apiKey: this._auth.apiKey,
                 type: 'apiKey',
                 timeoutInMs: params.timeoutInMs,
-                proxyAgent: getProxyAgent(API_URL),
+                proxyAgent: getProxyAgent(this._apiUrl),
               }
             : {
                 token: this._auth.token,
                 type: 'token',
                 timeoutInMs: params.timeoutInMs,
-                proxyAgent: getProxyAgent(API_URL),
+                proxyAgent: getProxyAgent(this._apiUrl),
               }
         )
       }

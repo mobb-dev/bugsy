@@ -579,6 +579,8 @@ export type GetLinearIntegrationDataSuccess = {
   teamId?: Maybe<Scalars['String']['output']>;
 };
 
+export type GetPromptSummaryResponse = PromptSummaryError | PromptSummarySuccess;
+
 export type GetReportsResponseError = {
   __typename?: 'GetReportsResponseError';
   error: Scalars['String']['output'];
@@ -846,6 +848,25 @@ export enum Projects {
   JuiceShop = 'JuiceShop',
   Webgoat = 'Webgoat'
 }
+
+export type PromptSummaryData = {
+  __typename?: 'PromptSummaryData';
+  action: Scalars['String']['output'];
+  intent: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type PromptSummaryError = {
+  __typename?: 'PromptSummaryError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type PromptSummarySuccess = {
+  __typename?: 'PromptSummarySuccess';
+  status: Status;
+  summary: PromptSummaryData;
+};
 
 export type QuestionAnswer = {
   key: Scalars['String']['input'];
@@ -28741,6 +28762,13 @@ export type Query_Root = {
   getIssuesApiV5: GetIssuesV5Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
+  /**
+   * Get AI-generated summary of a prompt associated with an AI Blame attribution.
+   * Returns a structured summary with title, intent, and action fields.
+   * Takes an AI Blame attribution ID and checks user access via organization.
+   * Summaries are cached for 2 weeks with automatic invalidation.
+   */
+  getPromptSummary: GetPromptSummaryResponse;
   getReportsApiV2: GetReportsV2Response;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
@@ -30340,6 +30368,11 @@ export type Query_RootGetLinearIntegrationDataArgs = {
 
 export type Query_RootGetLinearTeamsArgs = {
   organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetPromptSummaryArgs = {
+  aiBlameAttributionId: Scalars['String']['input'];
 };
 
 

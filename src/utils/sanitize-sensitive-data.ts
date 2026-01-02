@@ -23,19 +23,17 @@ const openRedaction = new OpenRedaction({
     'VISA_MRZ',
     'TAX_ID',
 
-    // Financial Data
+    // Financial Data (removed SWIFT_BIC - too broad, matches bank code formats in variables)
     'CREDIT_CARD',
     'IBAN',
     'BANK_ACCOUNT_UK',
     'ROUTING_NUMBER_US',
-    'SWIFT_BIC',
     'CARD_TRACK1_DATA',
     'CARD_TRACK2_DATA',
     'CARD_EXPIRY',
     'CARD_AUTH_CODE',
 
-    // Cryptocurrency
-    'BITCOIN_ADDRESS',
+    // Cryptocurrency (removed BITCOIN_ADDRESS - too broad, matches hash-like strings)
     'ETHEREUM_ADDRESS',
     'LITECOIN_ADDRESS',
     'CARDANO_ADDRESS',
@@ -43,25 +41,21 @@ const openRedaction = new OpenRedaction({
     'MONERO_ADDRESS',
     'RIPPLE_ADDRESS',
 
-    // Medical Data
+    // Medical Data (removed PRESCRIPTION_NUMBER - too broad, matches words containing "ription")
     'NHS_NUMBER',
     'MEDICAL_RECORD_NUMBER',
     'AUSTRALIAN_MEDICARE',
     'HEALTH_PLAN_NUMBER',
-    'PRESCRIPTION_NUMBER',
     'PATIENT_ID',
 
-    // Communications
+    // Communications (removed EMERGENCY_CONTACT, ADDRESS_PO_BOX, ZIP_CODE_US - too broad)
     'PHONE_US',
     'PHONE_UK',
     'PHONE_UK_MOBILE',
     'PHONE_INTERNATIONAL',
     'PHONE_LINE_NUMBER',
-    'EMERGENCY_CONTACT',
     'ADDRESS_STREET',
-    'ADDRESS_PO_BOX',
     'POSTCODE_UK',
-    'ZIP_CODE_US',
 
     // Network & Technical
     'IPV4',

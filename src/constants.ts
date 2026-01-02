@@ -10,10 +10,12 @@ import { ScmType } from './features/analysis/scm/shared/src/types'
 import { getModuleRootDir } from './utils/dirname'
 
 const debug = Debug('mobbdev:constants')
+
 dotenv.config({ path: path.join(getModuleRootDir(), '.env') })
 
-// Base GraphQL endpoint
+// Default URLs - used as fallbacks when env vars are not set
 export const DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
+export const DEFAULT_WEB_APP_URL = 'https://app.mobb.ai'
 
 export const scmFriendlyText: Record<ScmType, string> = {
   [ScmType.Ado]: 'Azure DevOps',
@@ -48,16 +50,17 @@ export type SupportedScanners = z.infer<typeof SupportedScannersZ>
 type ScannerType = typeof SCANNERS
 export type Scanner = ScannerType[keyof typeof SCANNERS]
 
-const envVariablesSchema = z
-  .object({
-    WEB_APP_URL: z.string(),
-    API_URL: z.string(),
-    HASURA_ACCESS_KEY: z.string(),
-    LOCAL_GRAPHQL_ENDPOINT: z.string(),
-    HTTP_PROXY: z.string().optional().default(''),
-    HTTPS_PROXY: z.string().optional().default(''),
-  })
-  .required()
+const envVariablesSchema = z.object({
+  // These have safe defaults for production - the VS Code extension passes explicit URLs
+  WEB_APP_URL: z.string().optional().default(DEFAULT_WEB_APP_URL),
+  API_URL: z.string().optional().default(DEFAULT_API_URL),
+  // These are only needed for local development with Hasura
+  HASURA_ACCESS_KEY: z.string().optional().default(''),
+  LOCAL_GRAPHQL_ENDPOINT: z.string().optional().default(''),
+  // Proxy settings
+  HTTP_PROXY: z.string().optional().default(''),
+  HTTPS_PROXY: z.string().optional().default(''),
+})
 
 const envVariables = envVariablesSchema.parse(process.env)
 debug('config %o', envVariables)
@@ -119,10 +122,10 @@ export const errorMessages = {
 
 export const progressMassages = {
   processingVulnerabilityReportSuccess:
-    '⚙️  Vulnerability report proccessed successfully',
-  processingVulnerabilityReport: '⚙️  Proccessing vulnerability report',
+    '⚙️  Vulnerability report processed successfully',
+  processingVulnerabilityReport: '⚙️  Processing vulnerability report',
   processingVulnerabilityReportFailed:
-    '⚙️  Error Proccessing vulnerability report',
+    '⚙️  Error Processing vulnerability report',
 } as const
 
 export const VUL_REPORT_DIGEST_TIMEOUT_MS = 1000 * 60 * 30 // 30 minutes in msec

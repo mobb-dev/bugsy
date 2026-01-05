@@ -1,9 +1,6 @@
 import { OpenRedaction } from '@openredaction/openredaction'
-import { spawn } from 'child_process'
-// @ts-expect-error - gitleaks-secret-scanner doesn't have type definitions
-import { installGitleaks } from 'gitleaks-secret-scanner/lib/installer.js'
 
-// Initialize OpenRedaction with comprehensive PII patterns while avoiding false-positive-prone patterns
+// Initialize OpenRedaction with comprehensive PII and secrets patterns while avoiding false-positive-prone patterns
 const openRedaction = new OpenRedaction({
   patterns: [
     // Core Personal Data
@@ -101,81 +98,6 @@ const openRedaction = new OpenRedaction({
   ],
 })
 
-let gitleaksBinaryPath: string | null = null
-
-// Initialize gitleaks binary path
-async function initializeGitleaks(): Promise<string | null> {
-  try {
-    gitleaksBinaryPath = await installGitleaks({ version: '8.27.2' })
-    return gitleaksBinaryPath
-  } catch {
-    // Silently fail if gitleaks cannot be installed
-    return null
-  }
-}
-
-// Initialize on module load
-const gitleaksInitPromise = initializeGitleaks()
-
-async function detectSecretsWithGitleaks(text: string): Promise<Set<string>> {
-  const secrets = new Set<string>()
-
-  // Ensure gitleaks is initialized
-  const binaryPath = gitleaksBinaryPath || (await gitleaksInitPromise)
-  if (!binaryPath) {
-    return secrets
-  }
-
-  return new Promise((resolve) => {
-    const gitleaks = spawn(
-      binaryPath,
-      [
-        'detect',
-        '--pipe',
-        '--no-banner',
-        '--exit-code',
-        '0',
-        '--report-format',
-        'json',
-      ],
-      {
-        stdio: ['pipe', 'pipe', 'ignore'],
-      }
-    )
-
-    let output = ''
-
-    gitleaks.stdout.on('data', (data) => {
-      output += data.toString()
-    })
-
-    gitleaks.on('close', () => {
-      try {
-        const findings = JSON.parse(output)
-        if (Array.isArray(findings)) {
-          for (const finding of findings) {
-            if (finding.Secret) {
-              secrets.add(finding.Secret)
-            }
-          }
-        }
-      } catch {
-        // Failed to parse JSON, no secrets found
-      }
-      resolve(secrets)
-    })
-
-    gitleaks.on('error', () => {
-      // If gitleaks fails, return empty set
-      resolve(secrets)
-    })
-
-    // Write the text to stdin
-    gitleaks.stdin.write(text)
-    gitleaks.stdin.end()
-  })
-}
-
 function maskString(str: string, showStart = 2, showEnd = 2): string {
   if (str.length <= showStart + showEnd) {
     return '*'.repeat(str.length)
@@ -188,13 +110,12 @@ function maskString(str: string, showStart = 2, showEnd = 2): string {
 }
 
 export type SanitizationCounts = {
-  pii: {
+  detections: {
     total: number
     high: number
     medium: number
     low: number
   }
-  secrets: number
 }
 
 export type SanitizationResult = {
@@ -206,14 +127,13 @@ export async function sanitizeDataWithCounts(
   obj: unknown
 ): Promise<SanitizationResult> {
   const counts: SanitizationCounts = {
-    pii: { total: 0, high: 0, medium: 0, low: 0 },
-    secrets: 0,
+    detections: { total: 0, high: 0, medium: 0, low: 0 },
   }
 
   const sanitizeString = async (str: string): Promise<string> => {
     let result = str
 
-    // Apply PII detection using OpenRedaction (now configured with security-focused patterns only)
+    // Apply PII and secrets detection using OpenRedaction
     const piiDetections = openRedaction.scan(str)
     if (piiDetections && piiDetections.total > 0) {
       const allDetections = [
@@ -222,27 +142,16 @@ export async function sanitizeDataWithCounts(
         ...piiDetections.low,
       ]
 
-      // Count PII by severity and sanitize
+      // Count PII and secrets by severity and sanitize
       for (const detection of allDetections) {
-        counts.pii.total++
-        if (detection.severity === 'high') counts.pii.high++
-        else if (detection.severity === 'medium') counts.pii.medium++
-        else if (detection.severity === 'low') counts.pii.low++
+        counts.detections.total++
+        if (detection.severity === 'high') counts.detections.high++
+        else if (detection.severity === 'medium') counts.detections.medium++
+        else if (detection.severity === 'low') counts.detections.low++
 
         const masked = maskString(detection.value)
         result = result.replaceAll(detection.value, masked)
       }
-    }
-
-    // Then apply secret detection using Gitleaks
-    const secrets = await detectSecretsWithGitleaks(result)
-    counts.secrets += secrets.size
-    for (const secret of secrets) {
-      const masked = maskString(secret)
-      // Replace ALL occurrences of the secret in the text
-      // Note: simple string.replace() only replaces the first occurrence
-      // We use replaceAll() to replace all occurrences
-      result = result.replaceAll(secret, masked)
     }
 
     return result

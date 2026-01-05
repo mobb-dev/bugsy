@@ -653,8 +653,7 @@ public class MortgageProduct {
             const { sanitizeDataWithCounts } =
               await import('../sanitize-sensitive-data')
             const result = await sanitizeDataWithCounts(testCase)
-            const hasDetections =
-              result.counts.pii.total > 0 || result.counts.secrets > 0
+            const hasDetections = result.counts.detections.total > 0
 
             console.log(`\nInput: "${testCase}"`)
             console.log(`Result: "${result.sanitizedData}"`)
@@ -662,9 +661,8 @@ public class MortgageProduct {
 
             if (hasDetections) {
               console.log(
-                `  📊 PII Detections: ${result.counts.pii.total} (H:${result.counts.pii.high} M:${result.counts.pii.medium} L:${result.counts.pii.low})`
+                `  📊 PII & Secrets Detections: ${result.counts.detections.total} (H:${result.counts.detections.high} M:${result.counts.detections.medium} L:${result.counts.detections.low})`
               )
-              console.log(`  🔐 Secret Detections: ${result.counts.secrets}`)
 
               // Get exact patterns that matched using our same configuration
               const { OpenRedaction } =

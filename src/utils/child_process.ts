@@ -15,6 +15,10 @@ type BaseChildProcessArgs = {
   cwd?: string
 }
 
+type SpawnWithStdinArgs = BaseChildProcessArgs & {
+  stdinData?: string
+}
+
 type ChildProcessOptions = {
   display: boolean
 }
@@ -38,6 +42,25 @@ export function createSpawn(
     env: { ...process.env },
     cwd,
   })
+  return createChildProcess({ childProcess: child, name }, options)
+}
+
+export function createSpawnWithStdin(
+  { args, processPath, name, cwd, stdinData }: SpawnWithStdinArgs,
+  options: ChildProcessOptions
+) {
+  const child = cp.spawn(processPath, args, {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: { ...process.env },
+    cwd,
+  })
+
+  // Write stdin data if provided
+  if (stdinData && child.stdin) {
+    child.stdin.write(stdinData)
+    child.stdin.end()
+  }
+
   return createChildProcess({ childProcess: child, name }, options)
 }
 

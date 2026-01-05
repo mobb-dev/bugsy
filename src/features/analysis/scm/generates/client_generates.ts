@@ -56,6 +56,7 @@ export type AiBlameInferenceFinalizeInput = {
   metadataJSON?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptKey: Scalars['String']['input'];
+  sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2735,6 +2736,7 @@ export type Ai_Blame_Inference = {
   inferencesS3Path: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path: Scalars['String']['output'];
+  sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   type: Ai_Blame_Inference_Type_Enum;
   /** An object relationship */
@@ -2803,6 +2805,7 @@ export type Ai_Blame_Inference_Bool_Exp = {
   inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   promptS3Path?: InputMaybe<String_Comparison_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
   toolName?: InputMaybe<String_Comparison_Exp>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
@@ -2826,6 +2829,7 @@ export type Ai_Blame_Inference_Insert_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -2843,6 +2847,7 @@ export type Ai_Blame_Inference_Max_Fields = {
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
   userName?: Maybe<Scalars['String']['output']>;
@@ -2857,6 +2862,7 @@ export type Ai_Blame_Inference_Max_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
   userName?: InputMaybe<Order_By>;
@@ -2872,6 +2878,7 @@ export type Ai_Blame_Inference_Min_Fields = {
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
   userName?: Maybe<Scalars['String']['output']>;
@@ -2886,6 +2893,7 @@ export type Ai_Blame_Inference_Min_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
   userName?: InputMaybe<Order_By>;
@@ -2924,6 +2932,7 @@ export type Ai_Blame_Inference_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
@@ -2953,6 +2962,8 @@ export enum Ai_Blame_Inference_Select_Column {
   /** column name */
   PromptS3Path = 'promptS3Path',
   /** column name */
+  SessionId = 'sessionId',
+  /** column name */
   ToolName = 'toolName',
   /** column name */
   Type = 'type',
@@ -2971,6 +2982,7 @@ export type Ai_Blame_Inference_Set_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -2994,6 +3006,7 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -3203,6 +3216,8 @@ export enum Ai_Blame_Inference_Update_Column {
   Model = 'model',
   /** column name */
   PromptS3Path = 'promptS3Path',
+  /** column name */
+  SessionId = 'sessionId',
   /** column name */
   ToolName = 'toolName',
   /** column name */

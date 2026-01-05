@@ -66,6 +66,7 @@ type SessionInput = {
   blameType?: AiBlameInferenceType
   computerName?: string
   userName?: string
+  sessionId?: string
 }
 
 /**
@@ -98,10 +99,12 @@ export type UploadAiBlameOptions = {
   model?: string[]
   toolName?: string[]
   blameType?: AiBlameInferenceType[]
+  sessionId?: string[]
   // yargs also exposes kebab-case keys; include them to satisfy typing
   'ai-response-at'?: string[]
   'tool-name'?: string[]
   'blame-type'?: AiBlameInferenceType[]
+  'session-id'?: string[]
 }
 
 export function uploadAiBlameBuilder(
@@ -164,6 +167,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   tool: string
   responseTime: string
   blameType?: AiBlameInferenceType
+  sessionId?: string
 }): Promise<UploadAiBlameResult> {
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
@@ -172,6 +176,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
     toolName: [],
     aiResponseAt: [],
     blameType: [],
+    sessionId: [],
   }
 
   let promptsCounts: SanitizationCounts
@@ -211,6 +216,9 @@ export async function uploadAiBlameHandlerFromExtension(args: {
       uploadArgs.toolName!.push(args.tool)
       uploadArgs.aiResponseAt!.push(args.responseTime)
       uploadArgs.blameType!.push(args.blameType || AiBlameInferenceType.Chat)
+      if (args.sessionId) {
+        uploadArgs.sessionId!.push(args.sessionId)
+      }
 
       await uploadAiBlameHandler(uploadArgs, false)
     })
@@ -240,6 +248,9 @@ export async function uploadAiBlameHandler(
   const blameTypes = (args.blameType ||
     (args['blame-type'] as AiBlameInferenceType[] | undefined) ||
     []) as AiBlameInferenceType[]
+  const sessionIds = (args.sessionId ||
+    (args['session-id'] as string[] | undefined) ||
+    []) as string[]
 
   if (prompts.length !== inferences.length) {
     const errorMsg = 'prompt and inference must have the same number of entries'
@@ -279,6 +290,7 @@ export async function uploadAiBlameHandler(
       blameType: blameTypes[i] || AiBlameInferenceType.Chat,
       computerName,
       userName,
+      sessionId: sessionIds[i],
     })
   }
 
@@ -289,8 +301,12 @@ export async function uploadAiBlameHandler(
 
   // Init: presign
   // Sanitize sessions data before sending to server
+  // Note: sessionId is only needed for finalize, not for init
+  const initSessions = sessions.map(
+    ({ sessionId: _sessionId, ...rest }) => rest
+  )
   const sanitizedSessions = (await sanitizeData(
-    sessions
+    initSessions
   )) as AiBlameInferenceInitInput[]
   const initRes = await authenticatedClient.uploadAIBlameInferencesInitRaw({
     sessions: sanitizedSessions,
@@ -346,6 +362,7 @@ export async function uploadAiBlameHandler(
         blameType: s.blameType,
         computerName: s.computerName,
         userName: s.userName,
+        sessionId: s.sessionId,
       }
     })
 

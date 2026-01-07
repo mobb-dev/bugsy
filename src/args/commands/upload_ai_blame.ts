@@ -9,8 +9,6 @@ import z from 'zod'
 
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import {
-  type AiBlameInferenceFinalizeInput,
-  type AiBlameInferenceInitInput,
   AiBlameInferenceType,
   type FinalizeAiBlameInferencesUploadMutationVariables,
   type UploadAiBlameInferencesInitMutation,
@@ -18,7 +16,6 @@ import {
 import { uploadFile } from '../../features/analysis/upload-file'
 import {
   type SanitizationCounts,
-  sanitizeData,
   sanitizeDataWithCounts,
 } from '../../utils/sanitize-sensitive-data'
 
@@ -305,11 +302,8 @@ export async function uploadAiBlameHandler(
   const initSessions = sessions.map(
     ({ sessionId: _sessionId, ...rest }) => rest
   )
-  const sanitizedSessions = (await sanitizeData(
-    initSessions
-  )) as AiBlameInferenceInitInput[]
   const initRes = await authenticatedClient.uploadAIBlameInferencesInitRaw({
-    sessions: sanitizedSessions,
+    sessions: initSessions,
   })
   const uploadSessions: NonNullable<
     UploadAiBlameInferencesInitMutation['uploadAIBlameInferencesInit']
@@ -366,12 +360,8 @@ export async function uploadAiBlameHandler(
       }
     })
 
-  // Sanitize finalizeSessions data before sending to server
-  const sanitizedFinalizeSessions = (await sanitizeData(
-    finalizeSessions
-  )) as AiBlameInferenceFinalizeInput[]
   const finRes = await authenticatedClient.finalizeAIBlameInferencesUploadRaw({
-    sessions: sanitizedFinalizeSessions,
+    sessions: finalizeSessions,
   })
   const status = finRes?.finalizeAIBlameInferencesUpload?.status
   if (status !== 'OK') {

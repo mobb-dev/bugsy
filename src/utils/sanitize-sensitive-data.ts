@@ -20,7 +20,7 @@ const openRedaction = new OpenRedaction({
     'VISA_MRZ',
     'TAX_ID',
 
-    // Financial Data (removed SWIFT_BIC - too broad, matches bank code formats in variables)
+    // Financial Data (removed SWIFT_BIC, CARD_AUTH_CODE - too broad, causing false positives with authentication words)
     'CREDIT_CARD',
     'IBAN',
     'BANK_ACCOUNT_UK',
@@ -28,7 +28,6 @@ const openRedaction = new OpenRedaction({
     'CARD_TRACK1_DATA',
     'CARD_TRACK2_DATA',
     'CARD_EXPIRY',
-    'CARD_AUTH_CODE',
 
     // Cryptocurrency (removed BITCOIN_ADDRESS - too broad, matches hash-like strings)
     'ETHEREUM_ADDRESS',
@@ -45,11 +44,9 @@ const openRedaction = new OpenRedaction({
     'HEALTH_PLAN_NUMBER',
     'PATIENT_ID',
 
-    // Communications (removed EMERGENCY_CONTACT, ADDRESS_PO_BOX, ZIP_CODE_US - too broad)
-    'PHONE_US',
+    // Communications (removed EMERGENCY_CONTACT, ADDRESS_PO_BOX, ZIP_CODE_US, PHONE_US, PHONE_INTERNATIONAL - too broad, causing false positives)
     'PHONE_UK',
     'PHONE_UK_MOBILE',
-    'PHONE_INTERNATIONAL',
     'PHONE_LINE_NUMBER',
     'ADDRESS_STREET',
     'POSTCODE_UK',

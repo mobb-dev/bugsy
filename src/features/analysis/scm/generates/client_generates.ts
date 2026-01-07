@@ -101,6 +101,12 @@ export type AiBlameValidationResponse = {
   status: Status;
 };
 
+export type AcceptanceRateStats = {
+  __typename?: 'AcceptanceRateStats';
+  acceptedInferences: InferenceStats;
+  rejectedInferences: InferenceStats;
+};
+
 export type AddUserToOrganizationResponse = {
   __typename?: 'AddUserToOrganizationResponse';
   userId: Scalars['String']['output'];
@@ -138,6 +144,7 @@ export type AiToolTypeUsage = {
 
 export type Attribution = {
   __typename?: 'Attribution';
+  id: Scalars['String']['output'];
   inferenceType?: Maybe<AiBlameInferenceType>;
   model?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
@@ -460,6 +467,12 @@ export type ForkRepoSuccess = {
   url: Scalars['String']['output'];
 };
 
+export type FrictionScore = {
+  __typename?: 'FrictionScore';
+  justification: Scalars['String']['output'];
+  score: Scalars['Int']['output'];
+};
+
 export type GetAiBlameInferencePromptResponse = {
   __typename?: 'GetAIBlameInferencePromptResponse';
   error?: Maybe<Scalars['String']['output']>;
@@ -631,6 +644,12 @@ export type GithubWebhookSuccess = {
   __typename?: 'GithubWebhookSuccess';
   message?: Maybe<Scalars['String']['output']>;
   status: Status;
+};
+
+export type InferenceStats = {
+  __typename?: 'InferenceStats';
+  count: Scalars['Int']['output'];
+  totalSize: Scalars['Int']['output'];
 };
 
 export type InitOrganizationAndProjectGoodResponse = {
@@ -810,6 +829,7 @@ export type ProcessAiBlameErrorResult = {
 
 export type ProcessAiBlameFinalResult = {
   __typename?: 'ProcessAIBlameFinalResult';
+  acceptanceRate?: Maybe<AcceptanceRateStats>;
   attributions: Array<AiBlameAttribution>;
   attributionsCreated: Scalars['Int']['output'];
   diff: Scalars['String']['output'];
@@ -852,9 +872,11 @@ export enum Projects {
 
 export type PromptSummaryData = {
   __typename?: 'PromptSummaryData';
-  action: Scalars['String']['output'];
-  intent: Scalars['String']['output'];
-  title: Scalars['String']['output'];
+  aiImplementationDetails: Scalars['String']['output'];
+  developersPlan: Array<Scalars['String']['output']>;
+  frictionScore: FrictionScore;
+  goal: Scalars['String']['output'];
+  importantInstructionsAndPushbacks: Array<Scalars['String']['output']>;
 };
 
 export type PromptSummaryError = {
@@ -2733,6 +2755,8 @@ export type Ai_Blame_Inference = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path: Scalars['String']['output'];
@@ -2766,9 +2790,17 @@ export type Ai_Blame_Inference_Aggregate_Bool_Exp_Count = {
 /** aggregate fields of "ai_blame_inference" */
 export type Ai_Blame_Inference_Aggregate_Fields = {
   __typename?: 'ai_blame_inference_aggregate_fields';
+  avg?: Maybe<Ai_Blame_Inference_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Ai_Blame_Inference_Max_Fields>;
   min?: Maybe<Ai_Blame_Inference_Min_Fields>;
+  stddev?: Maybe<Ai_Blame_Inference_Stddev_Fields>;
+  stddev_pop?: Maybe<Ai_Blame_Inference_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Ai_Blame_Inference_Stddev_Samp_Fields>;
+  sum?: Maybe<Ai_Blame_Inference_Sum_Fields>;
+  var_pop?: Maybe<Ai_Blame_Inference_Var_Pop_Fields>;
+  var_samp?: Maybe<Ai_Blame_Inference_Var_Samp_Fields>;
+  variance?: Maybe<Ai_Blame_Inference_Variance_Fields>;
 };
 
 
@@ -2780,9 +2812,17 @@ export type Ai_Blame_Inference_Aggregate_FieldsCountArgs = {
 
 /** order by aggregate values of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Aggregate_Order_By = {
+  avg?: InputMaybe<Ai_Blame_Inference_Avg_Order_By>;
   count?: InputMaybe<Order_By>;
   max?: InputMaybe<Ai_Blame_Inference_Max_Order_By>;
   min?: InputMaybe<Ai_Blame_Inference_Min_Order_By>;
+  stddev?: InputMaybe<Ai_Blame_Inference_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Ai_Blame_Inference_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Ai_Blame_Inference_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Ai_Blame_Inference_Sum_Order_By>;
+  var_pop?: InputMaybe<Ai_Blame_Inference_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Ai_Blame_Inference_Var_Samp_Order_By>;
+  variance?: InputMaybe<Ai_Blame_Inference_Variance_Order_By>;
 };
 
 /** input type for inserting array relation for remote table "ai_blame_inference" */
@@ -2790,6 +2830,19 @@ export type Ai_Blame_Inference_Arr_Rel_Insert_Input = {
   data: Array<Ai_Blame_Inference_Insert_Input>;
   /** upsert condition */
   on_conflict?: InputMaybe<Ai_Blame_Inference_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Ai_Blame_Inference_Avg_Fields = {
+  __typename?: 'ai_blame_inference_avg_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Avg_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "ai_blame_inference". All fields are combined with a logical 'AND'. */
@@ -2802,6 +2855,7 @@ export type Ai_Blame_Inference_Bool_Exp = {
   computerName?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  inferenceFileSize?: InputMaybe<Int_Comparison_Exp>;
   inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   promptS3Path?: InputMaybe<String_Comparison_Exp>;
@@ -2819,6 +2873,12 @@ export enum Ai_Blame_Inference_Constraint {
   AiBlameInferencePkey = 'ai_blame_inference_pkey'
 }
 
+/** input type for incrementing numeric columns in table "ai_blame_inference" */
+export type Ai_Blame_Inference_Inc_Input = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "ai_blame_inference" */
 export type Ai_Blame_Inference_Insert_Input = {
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Obj_Rel_Insert_Input>;
@@ -2826,6 +2886,8 @@ export type Ai_Blame_Inference_Insert_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -2844,6 +2906,8 @@ export type Ai_Blame_Inference_Max_Fields = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
@@ -2859,6 +2923,8 @@ export type Ai_Blame_Inference_Max_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
@@ -2875,6 +2941,8 @@ export type Ai_Blame_Inference_Min_Fields = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
@@ -2890,6 +2958,8 @@ export type Ai_Blame_Inference_Min_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
@@ -2929,6 +2999,7 @@ export type Ai_Blame_Inference_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
@@ -2956,6 +3027,8 @@ export enum Ai_Blame_Inference_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceFileSize = 'inferenceFileSize',
+  /** column name */
   InferencesS3Path = 'inferencesS3Path',
   /** column name */
   Model = 'model',
@@ -2979,6 +3052,8 @@ export type Ai_Blame_Inference_Set_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -2987,6 +3062,45 @@ export type Ai_Blame_Inference_Set_Input = {
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Ai_Blame_Inference_Stddev_Fields = {
+  __typename?: 'ai_blame_inference_stddev_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Stddev_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Ai_Blame_Inference_Stddev_Pop_Fields = {
+  __typename?: 'ai_blame_inference_stddev_pop_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Stddev_Pop_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Ai_Blame_Inference_Stddev_Samp_Fields = {
+  __typename?: 'ai_blame_inference_stddev_samp_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Stddev_Samp_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "ai_blame_inference" */
@@ -3003,6 +3117,8 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -3011,6 +3127,19 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Ai_Blame_Inference_Sum_Fields = {
+  __typename?: 'ai_blame_inference_sum_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Sum_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "ai_blame_inference_type" */
@@ -3211,6 +3340,8 @@ export enum Ai_Blame_Inference_Update_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceFileSize = 'inferenceFileSize',
+  /** column name */
   InferencesS3Path = 'inferencesS3Path',
   /** column name */
   Model = 'model',
@@ -3229,10 +3360,51 @@ export enum Ai_Blame_Inference_Update_Column {
 }
 
 export type Ai_Blame_Inference_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Ai_Blame_Inference_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
   /** filter the rows which have to be updated */
   where: Ai_Blame_Inference_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Ai_Blame_Inference_Var_Pop_Fields = {
+  __typename?: 'ai_blame_inference_var_pop_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Var_Pop_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Ai_Blame_Inference_Var_Samp_Fields = {
+  __typename?: 'ai_blame_inference_var_samp_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Var_Samp_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Ai_Blame_Inference_Variance_Fields = {
+  __typename?: 'ai_blame_inference_variance_fields';
+  /** file size in bytes */
+  inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "ai_blame_inference" */
+export type Ai_Blame_Inference_Variance_Order_By = {
+  /** file size in bytes */
+  inferenceFileSize?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "ai_ide" */
@@ -21483,6 +21655,7 @@ export type Mutation_RootUpdate_Ai_Blame_Commit_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Blame_InferenceArgs = {
+  _inc?: InputMaybe<Ai_Blame_Inference_Inc_Input>;
   _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
   where: Ai_Blame_Inference_Bool_Exp;
 };
@@ -21490,6 +21663,7 @@ export type Mutation_RootUpdate_Ai_Blame_InferenceArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Ai_Blame_Inference_By_PkArgs = {
+  _inc?: InputMaybe<Ai_Blame_Inference_Inc_Input>;
   _set?: InputMaybe<Ai_Blame_Inference_Set_Input>;
   pk_columns: Ai_Blame_Inference_Pk_Columns_Input;
 };
@@ -28779,7 +28953,8 @@ export type Query_Root = {
   getLinearTeams: LinearTeamsResponse;
   /**
    * Get AI-generated summary of a prompt associated with an AI Blame attribution.
-   * Returns a structured summary with title, intent, and action fields.
+   * Returns a structured summary with goal, developer's plan, AI implementation details,
+   * important instructions/pushbacks, and a friction score.
    * Takes an AI Blame attribution ID and checks user access via organization.
    * Summaries are cached for 2 weeks with automatic invalidation.
    */

@@ -120,6 +120,11 @@ export class GQLClient {
     debug(`init with  ${args}`)
     this._auth = args
     this._apiUrl = args.apiUrl || API_URL
+    debug(
+      'GQLClient constructor: resolved apiUrl=%s (from param: %s)',
+      this._apiUrl,
+      args.apiUrl || 'fallback to API_URL constant'
+    )
     this._client = new GraphQLClient(this._apiUrl, {
       headers:
         args.type === 'apiKey'

@@ -137,8 +137,10 @@ describe('CLI: upload-ai-blame', () => {
       vi.clearAllMocks()
 
       await uploadAiBlameHandler({
-        prompt: [promptPath],
-        inference: [inferencePath],
+        args: {
+          prompt: [promptPath],
+          inference: [inferencePath],
+        },
       })
 
       // Should call handleMobbLogin to authenticate
@@ -175,13 +177,13 @@ describe('CLI: upload-ai-blame', () => {
 
       // Should throw error instead of exiting
       await expect(
-        uploadAiBlameHandler(
-          {
+        uploadAiBlameHandler({
+          args: {
             prompt: [promptPath],
             inference: [inferencePath],
           },
-          false
-        )
+          exitOnError: false,
+        })
       ).rejects.toThrow('Init failed to return expected number of sessions')
     })
 
@@ -231,8 +233,10 @@ describe('CLI: upload-ai-blame', () => {
       )
 
       await uploadAiBlameHandler({
-        prompt: [promptPath],
-        inference: [inferencePath],
+        args: {
+          prompt: [promptPath],
+          inference: [inferencePath],
+        },
       })
 
       // Verify that computerName and userName are included in the session

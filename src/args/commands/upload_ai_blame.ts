@@ -19,6 +19,30 @@ import {
   sanitizeDataWithCounts,
 } from '../../utils/sanitize-sensitive-data'
 
+// Logger interface for dependency injection
+type Logger = {
+  info: (msg: string, data?: unknown) => void
+  error: (msg: string, data?: unknown) => void
+}
+
+// Default console logger fallback
+const defaultLogger: Logger = {
+  info: (msg: string, data?: unknown) => {
+    if (data !== undefined) {
+      console.log(msg, data)
+    } else {
+      console.log(msg)
+    }
+  },
+  error: (msg: string, data?: unknown) => {
+    if (data !== undefined) {
+      console.error(msg, data)
+    } else {
+      console.error(msg)
+    }
+  },
+}
+
 const PromptItemZ = z.object({
   type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
   attachedFiles: z
@@ -165,6 +189,8 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   responseTime: string
   blameType?: AiBlameInferenceType
   sessionId?: string
+  apiUrl?: string
+  webAppUrl?: string
 }): Promise<UploadAiBlameResult> {
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
@@ -217,7 +243,12 @@ export async function uploadAiBlameHandlerFromExtension(args: {
         uploadArgs.sessionId!.push(args.sessionId)
       }
 
-      await uploadAiBlameHandler(uploadArgs, false)
+      await uploadAiBlameHandler({
+        args: uploadArgs,
+        exitOnError: false,
+        apiUrl: args.apiUrl,
+        webAppUrl: args.webAppUrl,
+      })
     })
   })
 
@@ -229,10 +260,25 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   }
 }
 
+// Options for uploadAiBlameHandler
+type UploadAiBlameHandlerOptions = {
+  args: UploadAiBlameOptions
+  exitOnError?: boolean
+  apiUrl?: string
+  webAppUrl?: string
+  logger?: Logger
+}
+
 export async function uploadAiBlameHandler(
-  args: UploadAiBlameOptions,
-  exitOnError = true
+  options: UploadAiBlameHandlerOptions
 ) {
+  const {
+    args,
+    exitOnError = true,
+    apiUrl,
+    webAppUrl,
+    logger = defaultLogger,
+  } = options
   const prompts = (args.prompt || []) as string[]
   const inferences = (args.inference || []) as string[]
   const models = (args.model || []) as string[]
@@ -251,7 +297,7 @@ export async function uploadAiBlameHandler(
 
   if (prompts.length !== inferences.length) {
     const errorMsg = 'prompt and inference must have the same number of entries'
-    console.error(chalk.red(errorMsg))
+    logger.error(chalk.red(errorMsg))
 
     if (exitOnError) {
       process.exit(1)
@@ -272,7 +318,7 @@ export async function uploadAiBlameHandler(
       ])
     } catch {
       const errorMsg = `File not found for session ${i + 1}`
-      console.error(chalk.red(errorMsg))
+      logger.error(chalk.red(errorMsg))
       if (exitOnError) {
         process.exit(1)
       }
@@ -294,6 +340,8 @@ export async function uploadAiBlameHandler(
   // Use provided client or authenticate a new one
   const authenticatedClient = await getAuthenticatedGQLClient({
     isSkipPrompts: true,
+    apiUrl,
+    webAppUrl,
   })
 
   // Init: presign
@@ -311,7 +359,7 @@ export async function uploadAiBlameHandler(
     initRes.uploadAIBlameInferencesInit?.uploadSessions ?? []
   if (uploadSessions.length !== sessions.length) {
     const errorMsg = 'Init failed to return expected number of sessions'
-    console.error(chalk.red(errorMsg))
+    logger.error(chalk.red(errorMsg))
     if (exitOnError) {
       process.exit(1)
     }
@@ -360,18 +408,41 @@ export async function uploadAiBlameHandler(
       }
     })
 
-  const finRes = await authenticatedClient.finalizeAIBlameInferencesUploadRaw({
-    sessions: finalizeSessions,
-  })
-  const status = finRes?.finalizeAIBlameInferencesUpload?.status
-  if (status !== 'OK') {
-    const errorMsg =
-      finRes?.finalizeAIBlameInferencesUpload?.error || 'unknown error'
-    console.error(chalk.red(errorMsg))
-    if (exitOnError) {
-      process.exit(1)
+  // Finalize with detailed logging
+  try {
+    logger.info(
+      `[UPLOAD] Calling finalizeAIBlameInferencesUploadRaw with ${finalizeSessions.length} sessions`
+    )
+    const finRes = await authenticatedClient.finalizeAIBlameInferencesUploadRaw(
+      {
+        sessions: finalizeSessions,
+      }
+    )
+    logger.info('[UPLOAD] Finalize response:', JSON.stringify(finRes, null, 2))
+    const status = finRes?.finalizeAIBlameInferencesUpload?.status
+    if (status !== 'OK') {
+      const errorMsg =
+        finRes?.finalizeAIBlameInferencesUpload?.error || 'unknown error'
+      logger.error(
+        chalk.red(
+          `[UPLOAD] Finalize failed with status: ${status}, error: ${errorMsg}`
+        )
+      )
+      if (exitOnError) {
+        process.exit(1)
+      }
+      throw new Error(errorMsg)
     }
-    throw new Error(errorMsg)
+    logger.info(chalk.green('[UPLOAD] AI Blame uploads finalized successfully'))
+  } catch (error) {
+    logger.error('[UPLOAD] Finalize threw error:', error)
+    throw error
   }
-  console.log(chalk.green('AI Blame uploads finalized successfully'))
+}
+
+// Yargs-compatible handler wrapper for CLI usage
+export async function uploadAiBlameCommandHandler(
+  args: UploadAiBlameOptions
+): Promise<void> {
+  await uploadAiBlameHandler({ args })
 }

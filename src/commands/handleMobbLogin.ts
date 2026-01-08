@@ -42,6 +42,11 @@ export async function getAuthenticatedGQLClient({
   apiUrl?: string
   webAppUrl?: string
 }): Promise<GQLClient> {
+  debug(
+    'getAuthenticatedGQLClient called with: apiUrl=%s, webAppUrl=%s',
+    apiUrl || 'undefined',
+    webAppUrl || 'undefined'
+  )
   let gqlClient = new GQLClient({
     apiKey: inputApiKey || configStore.get('apiToken') || '',
     type: 'apiKey',
@@ -75,6 +80,13 @@ export async function handleMobbLogin({
 }) {
   const resolvedWebAppUrl = webAppUrl || WEB_APP_URL
   const resolvedApiUrl = apiUrl || API_URL
+  debug(
+    'handleMobbLogin: resolved URLs - apiUrl=%s (from param: %s), webAppUrl=%s (from param: %s)',
+    resolvedApiUrl,
+    apiUrl || 'fallback',
+    resolvedWebAppUrl,
+    webAppUrl || 'fallback'
+  )
   const { createSpinner } = Spinner({ ci: skipPrompts })
 
   const isConnected = await inGqlClient.verifyApiConnection()

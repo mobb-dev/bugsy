@@ -10584,7 +10584,7 @@ export type Developer_Statistics_Row = {
   autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   human_lines_count?: Maybe<Scalars['bigint']['output']>;
-  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamptz']['output']>;
   main_model?: Maybe<Scalars['String']['output']>;
   main_tool?: Maybe<Scalars['String']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
@@ -10637,7 +10637,7 @@ export type Developer_Statistics_Row_Bool_Exp = {
   autocomplete_lines_count?: InputMaybe<Bigint_Comparison_Exp>;
   computer_name?: InputMaybe<String_Comparison_Exp>;
   human_lines_count?: InputMaybe<Bigint_Comparison_Exp>;
-  last_seen_date?: InputMaybe<Timestamp_Comparison_Exp>;
+  last_seen_date?: InputMaybe<Timestamptz_Comparison_Exp>;
   main_model?: InputMaybe<String_Comparison_Exp>;
   main_tool?: InputMaybe<String_Comparison_Exp>;
   user_name?: InputMaybe<String_Comparison_Exp>;
@@ -10650,7 +10650,7 @@ export type Developer_Statistics_Row_Max_Fields = {
   autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   human_lines_count?: Maybe<Scalars['bigint']['output']>;
-  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamptz']['output']>;
   main_model?: Maybe<Scalars['String']['output']>;
   main_tool?: Maybe<Scalars['String']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
@@ -10663,7 +10663,7 @@ export type Developer_Statistics_Row_Min_Fields = {
   autocomplete_lines_count?: Maybe<Scalars['bigint']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   human_lines_count?: Maybe<Scalars['bigint']['output']>;
-  last_seen_date?: Maybe<Scalars['timestamp']['output']>;
+  last_seen_date?: Maybe<Scalars['timestamptz']['output']>;
   main_model?: Maybe<Scalars['String']['output']>;
   main_tool?: Maybe<Scalars['String']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
@@ -10739,7 +10739,7 @@ export type Developer_Statistics_Row_Stream_Cursor_Value_Input = {
   autocomplete_lines_count?: InputMaybe<Scalars['bigint']['input']>;
   computer_name?: InputMaybe<Scalars['String']['input']>;
   human_lines_count?: InputMaybe<Scalars['bigint']['input']>;
-  last_seen_date?: InputMaybe<Scalars['timestamp']['input']>;
+  last_seen_date?: InputMaybe<Scalars['timestamptz']['input']>;
   main_model?: InputMaybe<Scalars['String']['input']>;
   main_tool?: InputMaybe<Scalars['String']['input']>;
   user_name?: InputMaybe<Scalars['String']['input']>;
@@ -15259,7 +15259,7 @@ export type GeneratedFixAndVulUnique_Project_Args = {
 };
 
 export type Get_Developer_Statistics_Args = {
-  p_from_date?: InputMaybe<Scalars['timestamp']['input']>;
+  p_from_date?: InputMaybe<Scalars['timestamptz']['input']>;
   p_organization_id?: InputMaybe<Scalars['uuid']['input']>;
 };
 

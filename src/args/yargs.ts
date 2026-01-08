@@ -19,7 +19,7 @@ import { scanBuilder, scanHandler } from './commands/scan'
 import { addScmTokenBuilder, addScmTokenHandler } from './commands/token'
 import {
   uploadAiBlameBuilder,
-  uploadAiBlameHandler,
+  uploadAiBlameCommandHandler,
 } from './commands/upload_ai_blame'
 
 export const parseArgs = async (args: readonly string[]) => {
@@ -91,7 +91,7 @@ export const parseArgs = async (args: readonly string[]) => {
         'Upload AI Blame inference artifacts (prompt + inference) and finalize them.'
       ),
       uploadAiBlameBuilder,
-      uploadAiBlameHandler
+      uploadAiBlameCommandHandler
     )
     .command(
       mobbCliCommand.claudeCodeInstallHook,

@@ -17,6 +17,7 @@ import {
 } from '../core/Errors'
 import { logDebug } from '../Logger'
 import { McpGQLClient } from './McpGQLClient'
+import { buildLoginUrl, LoginContext } from './types'
 
 /**
  * Service for handling authentication operations with the Mobb API
@@ -50,9 +51,13 @@ export class McpAuthService {
   /**
    * Handles the complete authentication flow
    * @param isBackgoundCall Whether this is called from tools context
+   * @param loginContext Context information about who triggered the login
    * @returns Authenticated API token
    */
-  async authenticate(isBackgoundCall = false): Promise<string> {
+  async authenticate(
+    isBackgoundCall = false,
+    loginContext?: LoginContext
+  ): Promise<string> {
     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
       modulusLength: 2048,
     })
@@ -68,7 +73,11 @@ export class McpAuthService {
 
     logDebug(`cli login created ${loginId}`)
     const webLoginUrl = `${WEB_APP_URL}/mvs-login`
-    const browserUrl = `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
+
+    // Build URL with context query parameters if provided
+    const browserUrl = loginContext
+      ? buildLoginUrl(webLoginUrl, loginId, os.hostname(), loginContext)
+      : `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
 
     await this.openBrowser(browserUrl, isBackgoundCall)
 

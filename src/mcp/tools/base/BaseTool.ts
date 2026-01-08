@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { logDebug, logInfo } from '../../Logger'
 import { createAuthenticatedMcpGQLClient } from '../../services/McpGQLClient'
+import { createMcpLoginContext } from '../../services/types'
 
 export type ToolResponse = {
   content: {
@@ -40,7 +41,10 @@ export abstract class BaseTool {
   public async execute(args: unknown): Promise<ToolResponse> {
     if (this.hasAuthentication) {
       logDebug(`Authenticating tool: ${this.name}`, { args })
-      const mcpGqlClient = await createAuthenticatedMcpGQLClient()
+      const loginContext = createMcpLoginContext(this.name)
+      const mcpGqlClient = await createAuthenticatedMcpGQLClient({
+        loginContext,
+      })
       const userInfo = await mcpGqlClient.getUserInfo()
       logDebug('User authenticated successfully', { userInfo })
     }

@@ -209,6 +209,7 @@ export async function processAndUploadHookData(): Promise<{
       tool: result.tracePayload.tool,
       responseTime: result.tracePayload.responseTime,
       blameType: AiBlameInferenceType.Chat,
+      sessionId: result.hookData.session_id,
     })
     uploadSuccess = true
   } catch (error) {

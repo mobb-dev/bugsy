@@ -6,6 +6,7 @@ import {
 } from '../../core/prompts'
 import { logDebug, logError, logInfo } from '../../Logger'
 import { createAuthenticatedMcpGQLClient } from '../../services/McpGQLClient'
+import { createMcpLoginContext } from '../../services/types'
 
 export class FetchAvailableFixesService {
   private static instance: FetchAvailableFixesService
@@ -32,7 +33,8 @@ export class FetchAvailableFixesService {
 
   private async initializeGqlClient() {
     if (!this.gqlClient) {
-      this.gqlClient = await createAuthenticatedMcpGQLClient()
+      const loginContext = createMcpLoginContext('fetch_fixes')
+      this.gqlClient = await createAuthenticatedMcpGQLClient({ loginContext })
     }
     return this.gqlClient
   }

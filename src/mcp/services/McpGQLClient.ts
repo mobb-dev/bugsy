@@ -30,6 +30,7 @@ import { ApiConnectionError } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
 import { McpAuthService } from './McpAuthService'
+import { LoginContext } from './types'
 
 type GQLClientArgs =
   | {
@@ -880,8 +881,10 @@ export class McpGQLClient {
 
 export async function createAuthenticatedMcpGQLClient({
   isBackgroundCall = false,
+  loginContext,
 }: {
   isBackgroundCall?: boolean
+  loginContext?: LoginContext
 } = {}): Promise<McpGQLClient> {
   logDebug('[GraphQL] Getting config', {
     apiToken: configStore.get('apiToken'),
@@ -909,7 +912,10 @@ export async function createAuthenticatedMcpGQLClient({
 
   // Token verification failed, authenticate using the auth service
   const authService = new McpAuthService(initialClient)
-  const newApiToken = await authService.authenticate(isBackgroundCall)
+  const newApiToken = await authService.authenticate(
+    isBackgroundCall,
+    loginContext
+  )
 
   // Store the new token for future use
   configStore.set('apiToken', newApiToken)

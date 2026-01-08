@@ -26,6 +26,7 @@ import {
 } from '../../services/McpGQLClient'
 import { PatchApplicationService } from '../../services/PatchApplicationService'
 import { scanFiles } from '../../services/ScanFiles'
+import { createMcpLoginContext } from '../../services/types'
 import { McpFix } from '../../types'
 
 function extractPathFromPatch(patch?: string): string | null {
@@ -567,7 +568,8 @@ export class CheckForNewAvailableFixesService {
       logInfo(`[${scanContext}] Reset service state for new path`, { path })
     }
     try {
-      this.gqlClient = await createAuthenticatedMcpGQLClient()
+      const loginContext = createMcpLoginContext('check_new_fixes')
+      this.gqlClient = await createAuthenticatedMcpGQLClient({ loginContext })
     } catch (error) {
       const errorMessage = (error as Error).message
       if (

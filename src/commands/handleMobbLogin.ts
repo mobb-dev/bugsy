@@ -7,6 +7,7 @@ import open from 'open'
 
 import { API_URL, WEB_APP_URL } from '../constants'
 import { GQLClient } from '../features/analysis/graphql'
+import { buildLoginUrl, LoginContext } from '../mcp/services/types'
 import { CliError, keypress, sleep, Spinner } from '../utils'
 import { configStore } from '../utils/ConfigStoreService'
 
@@ -63,12 +64,14 @@ export async function handleMobbLogin({
   skipPrompts,
   apiUrl,
   webAppUrl,
+  loginContext,
 }: {
   inGqlClient: GQLClient
   apiKey?: string
   skipPrompts?: boolean
   apiUrl?: string
   webAppUrl?: string
+  loginContext?: LoginContext
 }) {
   const resolvedWebAppUrl = webAppUrl || WEB_APP_URL
   const resolvedApiUrl = apiUrl || API_URL
@@ -123,7 +126,12 @@ export async function handleMobbLogin({
   const loginId = await inGqlClient.createCliLogin({
     publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
   })
-  const browserUrl = `${resolvedWebAppUrl}/cli-login/${loginId}?hostname=${os.hostname()}`
+
+  // Build URL with context query parameters if provided
+  const webLoginUrl = `${resolvedWebAppUrl}/cli-login`
+  const browserUrl = loginContext
+    ? buildLoginUrl(webLoginUrl, loginId, os.hostname(), loginContext)
+    : `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
 
   !skipPrompts &&
     console.log(

@@ -15,6 +15,7 @@ import {
   McpGQLClient,
 } from '../../services/McpGQLClient'
 import { scanFiles } from '../../services/ScanFiles'
+import { createMcpLoginContext } from '../../services/types'
 import { McpFix } from '../../types'
 
 export class ScanAndFixVulnerabilitiesService {
@@ -163,7 +164,8 @@ export class ScanAndFixVulnerabilitiesService {
   }
 
   private async initializeGqlClient(): Promise<McpGQLClient> {
-    const gqlClient = await createAuthenticatedMcpGQLClient()
+    const loginContext = createMcpLoginContext('scan_vulnerabilities')
+    const gqlClient = await createAuthenticatedMcpGQLClient({ loginContext })
 
     const isConnected = await gqlClient.verifyApiConnection()
     if (!isConnected) {

@@ -24,6 +24,8 @@ import {
   GetAnalysisSubscriptionSubscriptionVariables,
   GetEncryptedApiTokenQueryVariables,
   GetFalsePositiveQueryVariables,
+  GetPromptSummaryQuery,
+  GetPromptSummaryQueryVariables,
   getSdk,
   GitReferenceQueryVariables,
   PrStrategy,
@@ -602,5 +604,11 @@ export class GQLClient {
     variables: GetAiBlameAttributionPromptQueryVariables
   ): Promise<GetAiBlameAttributionPromptQuery> {
     return await this._clientSdk.GetAIBlameAttributionPrompt(variables)
+  }
+
+  async getAIBlameAttributionPromptSummary(
+    variables: GetPromptSummaryQueryVariables
+  ): Promise<GetPromptSummaryQuery> {
+    return await this._clientSdk.GetPromptSummary(variables)
   }
 }

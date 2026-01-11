@@ -7,6 +7,9 @@ import { SimpleGit, simpleGit, StatusResult } from 'simple-git'
 import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../../../mcp/core/configs'
 import { FileUtils } from './FileUtils'
 
+/** Maximum diff size in bytes for local commit data (3MB) */
+const MAX_COMMIT_DIFF_SIZE_BYTES = 3 * 1024 * 1024
+
 export type GitValidationResult = {
   isValid: boolean
   error?: string
@@ -27,6 +30,19 @@ export type GitInfo = {
 export type RecentFilesResult = {
   files: string[]
   commitCount: number
+}
+
+/**
+ * Local commit data retrieved from git for Tracy extension.
+ * Used to send commit diff directly without requiring SCM token.
+ */
+export type LocalCommitData = {
+  /** Raw diff from git show */
+  diff: string
+  /** Commit timestamp */
+  timestamp: Date
+  /** Parent commits with timestamps (for time window calculation) */
+  parentCommits?: { sha: string; timestamp: Date }[]
 }
 
 export class GitService {
@@ -776,6 +792,134 @@ export class GitService {
       const errorMessage = `Failed to check .gitignore existence: ${(error as Error).message}`
       this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
+    }
+  }
+
+  /**
+   * Gets timestamps for parent commits in a single git call.
+   * @param parentShas Array of parent commit SHAs
+   * @returns Array of parent commits with timestamps, or undefined if unavailable
+   */
+  private async getParentCommitTimestamps(
+    parentShas: string[]
+  ): Promise<{ sha: string; timestamp: Date }[] | undefined> {
+    if (parentShas.length === 0) {
+      return undefined
+    }
+
+    try {
+      // Get all parent timestamps in one call using git log --no-walk
+      // Format: %H = full commit hash, %cI = committer date in ISO 8601 format
+      // Output: "sha timestamp" per line
+      const output = await this.git.raw([
+        'log',
+        '--format=%H %cI',
+        '--no-walk',
+        ...parentShas,
+      ])
+
+      const parentCommits = output
+        .trim()
+        .split('\n')
+        .filter(Boolean)
+        .map((line: string) => {
+          const [sha, ts] = line.split(' ')
+          return { sha: sha ?? '', timestamp: new Date(ts ?? '') }
+        })
+        .filter((p) => p.sha !== '')
+
+      return parentCommits.length > 0 ? parentCommits : undefined
+    } catch {
+      // Parents might not be available in shallow clone
+      this.log('[GitService] Could not get parent commit timestamps', 'debug', {
+        parentShas,
+      })
+      return undefined
+    }
+  }
+
+  /**
+   * Gets local commit data including diff, timestamp, and parent commits.
+   * Used by Tracy extension to send commit data directly without requiring SCM token.
+   * @param commitSha The commit SHA to get data for
+   * @param maxDiffSizeBytes Maximum diff size in bytes (default 3MB). Returns null if exceeded.
+   * @returns Commit data or null if unavailable/too large
+   */
+  public async getLocalCommitData(
+    commitSha: string,
+    maxDiffSizeBytes: number = MAX_COMMIT_DIFF_SIZE_BYTES
+  ): Promise<LocalCommitData | null> {
+    this.log('[GitService] Getting local commit data', 'debug', { commitSha })
+
+    try {
+      // Get commit metadata and diff in a single call
+      // Format: %cI = committer date ISO 8601, %P = parent SHAs (space-separated)
+      // Output: "timestamp\nparentShas\n<DIFF_DELIMITER>\ndiff..."
+      const DIFF_DELIMITER = '---MOBB_DIFF_START---'
+      const output = await this.git.show([
+        commitSha,
+        `--format=%cI%n%P%n${DIFF_DELIMITER}`,
+        '--patch',
+      ])
+
+      // Split output into metadata and diff parts
+      const delimiterIndex = output.indexOf(DIFF_DELIMITER)
+      if (delimiterIndex === -1) {
+        this.log('[GitService] Could not parse git show output', 'warning', {
+          commitSha,
+        })
+        return null
+      }
+      const metadataOutput = output.substring(0, delimiterIndex)
+      const diff = output.substring(delimiterIndex + DIFF_DELIMITER.length + 1) // +1 for newline
+
+      // Check diff size limit
+      const diffSizeBytes = Buffer.byteLength(diff, 'utf8')
+      if (diffSizeBytes > maxDiffSizeBytes) {
+        this.log('[GitService] Commit diff exceeds size limit', 'warning', {
+          commitSha,
+          diffSizeBytes,
+          maxDiffSizeBytes,
+        })
+        return null
+      }
+
+      // Parse metadata: first line is timestamp, second line (if present) is space-separated parent SHAs
+      // Note: Initial commits have no parents, so the second line may be empty or missing
+      const metadataLines = metadataOutput.trim().split('\n')
+      if (metadataLines.length < 1 || !metadataLines[0]) {
+        this.log('[GitService] Unexpected metadata format', 'warning', {
+          commitSha,
+          metadataLines,
+        })
+        return null
+      }
+      const timestampStr = metadataLines[0]
+      const timestamp = new Date(timestampStr)
+      const parentShas = (metadataLines[1] ?? '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+
+      // Get parent commits with timestamps
+      const parentCommits = await this.getParentCommitTimestamps(parentShas)
+
+      this.log('[GitService] Local commit data retrieved', 'debug', {
+        commitSha,
+        diffSizeBytes,
+        timestamp: timestamp.toISOString(),
+        parentCommitCount: parentCommits?.length ?? 0,
+      })
+
+      return {
+        diff,
+        timestamp,
+        parentCommits,
+      }
+    } catch (error) {
+      const errorMessage = `Failed to get local commit data: ${(error as Error).message}`
+      this.log(`[GitService] ${errorMessage}`, 'debug', { error, commitSha })
+      return null
     }
   }
 }

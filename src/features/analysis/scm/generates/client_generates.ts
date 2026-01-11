@@ -821,6 +821,15 @@ export type PackageInfoResponse = {
   version: Scalars['String']['output'];
 };
 
+/**
+ * Input type for parent commit information, used for time window calculation.
+ * Mirrors the existing parentCommits structure in the codebase.
+ */
+export type ParentCommitInput = {
+  sha: Scalars['String']['input'];
+  timestamp: Scalars['Timestamp']['input'];
+};
+
 export type ProcessAiBlameErrorResult = {
   __typename?: 'ProcessAIBlameErrorResult';
   error: Scalars['String']['output'];
@@ -17295,8 +17304,11 @@ export type Mutation_Root = {
   addUserToOrganization?: Maybe<AddUserToOrganizationResponse>;
   addUsersToProject?: Maybe<AddUsersToProjectResponse>;
   /**
-   * Process a git commit by fetching its diff from the SCM provider and analyzing it
-   * for AI-generated code. User must have access to both the repository and organization.
+   * Process a git commit and analyze it for AI-generated code.
+   * User must have access to both the repository and organization.
+   *
+   * If commitDiff and commitTimestamp are provided, uses them directly (no SCM token needed).
+   * Otherwise, fetches the diff from the SCM provider (requires SCM token).
    */
   analyzeCommitForAIBlame: ProcessAiBlameResult;
   /**
@@ -18732,8 +18744,11 @@ export type Mutation_RootAddUsersToProjectArgs = {
 
 /** mutation root */
 export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
+  commitDiff?: InputMaybe<Scalars['String']['input']>;
   commitSha: Scalars['String']['input'];
+  commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
   organizationId: Scalars['String']['input'];
+  parentCommits?: InputMaybe<Array<ParentCommitInput>>;
   repositoryURL: Scalars['String']['input'];
 };
 
@@ -46255,6 +46270,9 @@ export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
   repositoryURL: Scalars['String']['input'];
   commitSha: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
+  commitDiff?: InputMaybe<Scalars['String']['input']>;
+  commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
+  parentCommits?: InputMaybe<Array<ParentCommitInput> | ParentCommitInput>;
 }>;
 
 
@@ -46273,6 +46291,13 @@ export type GetAiBlameAttributionPromptQueryVariables = Exact<{
 
 
 export type GetAiBlameAttributionPromptQuery = { __typename?: 'query_root', getAIBlameInferenceData: { __typename?: 'GetAIBlameInferencePromptResponse', promptUrl?: string | null } };
+
+export type GetPromptSummaryQueryVariables = Exact<{
+  aiBlameAttributionId: Scalars['String']['input'];
+}>;
+
+
+export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: string, importantInstructionsAndPushbacks: Array<string>, frictionScore: { __typename?: 'FrictionScore', score: number, justification: string } } } };
 
 export type UploadAiBlameInferencesInitMutationVariables = Exact<{
   sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
@@ -46853,11 +46878,14 @@ export const UploadS3BucketInfoDocument = `
 }
     `;
 export const AnalyzeCommitForExtensionAiBlameDocument = `
-    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!) {
+    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitDiff: String, $commitTimestamp: Timestamp, $parentCommits: [ParentCommitInput!]) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
+    commitDiff: $commitDiff
+    commitTimestamp: $commitTimestamp
+    parentCommits: $parentCommits
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {
@@ -46900,6 +46928,30 @@ export const GetAiBlameAttributionPromptDocument = `
     query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
   getAIBlameInferenceData(aiBlameAttributionId: $aiBlameAttributionId) {
     promptUrl
+  }
+}
+    `;
+export const GetPromptSummaryDocument = `
+    query GetPromptSummary($aiBlameAttributionId: String!) {
+  getPromptSummary(aiBlameAttributionId: $aiBlameAttributionId) {
+    __typename
+    ... on PromptSummarySuccess {
+      status
+      summary {
+        goal
+        developersPlan
+        aiImplementationDetails
+        importantInstructionsAndPushbacks
+        frictionScore {
+          score
+          justification
+        }
+      }
+    }
+    ... on PromptSummaryError {
+      status
+      error
+    }
   }
 }
     `;
@@ -47234,6 +47286,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetAIBlameAttributionPrompt(variables: GetAiBlameAttributionPromptQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetAiBlameAttributionPromptQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetAiBlameAttributionPromptQuery>({ document: GetAiBlameAttributionPromptDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetAIBlameAttributionPrompt', 'query', variables);
+    },
+    GetPromptSummary(variables: GetPromptSummaryQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetPromptSummaryQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetPromptSummaryQuery>({ document: GetPromptSummaryDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetPromptSummary', 'query', variables);
     },
     UploadAIBlameInferencesInit(variables: UploadAiBlameInferencesInitMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadAiBlameInferencesInitMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadAiBlameInferencesInitMutation>({ document: UploadAiBlameInferencesInitDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UploadAIBlameInferencesInit', 'mutation', variables);

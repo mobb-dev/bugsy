@@ -338,15 +338,26 @@ input AIBlameInferenceFinalizeInput {
   userName: String
 }
 
+input ParentCommitInput {
+  sha: String!
+  timestamp: Timestamp!
+}
+
 mutation AnalyzeCommitForExtensionAIBlame(
   $repositoryURL: String!
   $commitSha: String!
   $organizationId: String!
+  $commitDiff: String
+  $commitTimestamp: Timestamp
+  $parentCommits: [ParentCommitInput!]
 ) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
+    commitDiff: $commitDiff
+    commitTimestamp: $commitTimestamp
+    parentCommits: $parentCommits
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {
@@ -389,6 +400,30 @@ query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
     promptUrl
   }
 }
+
+query GetPromptSummary($aiBlameAttributionId: String!) {
+  getPromptSummary(aiBlameAttributionId: $aiBlameAttributionId) {
+    __typename
+    ... on PromptSummarySuccess {
+      status
+      summary {
+        goal
+        developersPlan
+        aiImplementationDetails
+        importantInstructionsAndPushbacks
+        frictionScore {
+          score
+          justification
+        }
+      }
+    }
+    ... on PromptSummaryError {
+      status
+      error
+    }
+  }
+}
+
 
 mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
   uploadAIBlameInferencesInit(sessions: $sessions) {

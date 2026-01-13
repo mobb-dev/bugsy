@@ -424,7 +424,6 @@ query GetPromptSummary($aiBlameAttributionId: String!) {
   }
 }
 
-
 mutation UploadAIBlameInferencesInit($sessions: [AIBlameInferenceInitInput!]!) {
   uploadAIBlameInferencesInit(sessions: $sessions) {
     status

@@ -618,6 +618,13 @@ export type GetScmReposResponse = GetReposSuccess | ScmAdminError | ScmError | S
 
 export type GetSplitFixResponseUnion = GetFixNoFixError | SplitFixData;
 
+export type GetTracyDiffUploadUrlResponse = {
+  __typename?: 'GetTracyDiffUploadUrlResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+  uploadInfo?: Maybe<TracyDiffUploadInfo>;
+};
+
 export type GitReferenceData = {
   __typename?: 'GitReferenceData';
   date: Scalars['String']['output'];
@@ -1307,6 +1314,13 @@ export type Ticket = {
 export type TicketAccessToken = {
   __typename?: 'TicketAccessToken';
   accessToken: Scalars['String']['output'];
+};
+
+export type TracyDiffUploadInfo = {
+  __typename?: 'TracyDiffUploadInfo';
+  uploadFieldsJSON: Scalars['String']['output'];
+  uploadKey: Scalars['String']['output'];
+  url: Scalars['String']['output'];
 };
 
 export type UnstructuredFixExtraContext = {
@@ -17307,8 +17321,8 @@ export type Mutation_Root = {
    * Process a git commit and analyze it for AI-generated code.
    * User must have access to both the repository and organization.
    *
-   * If commitDiff and commitTimestamp are provided, uses them directly (no SCM token needed).
-   * Otherwise, fetches the diff from the SCM provider (requires SCM token).
+   * The diff should be uploaded to S3 first via getTracyDiffUploadUrl mutation.
+   * If no diff is found in S3, fetches the diff from the SCM provider (requires SCM token).
    */
   analyzeCommitForAIBlame: ProcessAiBlameResult;
   /**
@@ -17733,6 +17747,12 @@ export type Mutation_Root = {
   finalizeAIBlameInferencesUpload: AiBlameValidationResponse;
   forkRepo?: Maybe<ForkRepoResponse>;
   generateDiffsFile?: Maybe<FileDiffsResponse>;
+  /**
+   * Get a presigned S3 URL for uploading a commit diff.
+   * Used by the extension to upload diffs before calling analyzeCommitForAIBlame.
+   * This avoids sending large diffs through the GraphQL payload.
+   */
+  getTracyDiffUploadUrl: GetTracyDiffUploadUrlResponse;
   handleGithubAppCallback: BaseResponseWithMessage;
   handleGithubWebhook: GithubWebhookResponse;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
@@ -18744,7 +18764,6 @@ export type Mutation_RootAddUsersToProjectArgs = {
 
 /** mutation root */
 export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
-  commitDiff?: InputMaybe<Scalars['String']['input']>;
   commitSha: Scalars['String']['input'];
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
   organizationId: Scalars['String']['input'];
@@ -20068,6 +20087,12 @@ export type Mutation_RootForkRepoArgs = {
 export type Mutation_RootGenerateDiffsFileArgs = {
   fixIds: Array<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootGetTracyDiffUploadUrlArgs = {
+  commitSha: Scalars['String']['input'];
 };
 
 
@@ -46266,11 +46291,17 @@ export type UploadS3BucketInfoMutationVariables = Exact<{
 
 export type UploadS3BucketInfoMutation = { __typename?: 'mutation_root', uploadS3BucketInfo: { __typename?: 'UploadResponse', status: Status, error?: string | null, reportUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null, repoUploadInfo?: { __typename?: 'UploadResult', url: string, fixReportId: string, uploadFieldsJSON: string, uploadKey: string } | null } };
 
+export type GetTracyDiffUploadUrlMutationVariables = Exact<{
+  commitSha: Scalars['String']['input'];
+}>;
+
+
+export type GetTracyDiffUploadUrlMutation = { __typename?: 'mutation_root', getTracyDiffUploadUrl: { __typename?: 'GetTracyDiffUploadUrlResponse', status: Status, error?: string | null, uploadInfo?: { __typename?: 'TracyDiffUploadInfo', url: string, uploadFieldsJSON: string, uploadKey: string } | null } };
+
 export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
   repositoryURL: Scalars['String']['input'];
   commitSha: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
-  commitDiff?: InputMaybe<Scalars['String']['input']>;
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
   parentCommits?: InputMaybe<Array<ParentCommitInput> | ParentCommitInput>;
 }>;
@@ -46877,13 +46908,25 @@ export const UploadS3BucketInfoDocument = `
   }
 }
     `;
+export const GetTracyDiffUploadUrlDocument = `
+    mutation GetTracyDiffUploadUrl($commitSha: String!) {
+  getTracyDiffUploadUrl(commitSha: $commitSha) {
+    status
+    error
+    uploadInfo {
+      url
+      uploadFieldsJSON
+      uploadKey
+    }
+  }
+}
+    `;
 export const AnalyzeCommitForExtensionAiBlameDocument = `
-    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitDiff: String, $commitTimestamp: Timestamp, $parentCommits: [ParentCommitInput!]) {
+    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitTimestamp: Timestamp, $parentCommits: [ParentCommitInput!]) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
-    commitDiff: $commitDiff
     commitTimestamp: $commitTimestamp
     parentCommits: $parentCommits
   ) {
@@ -47277,6 +47320,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     uploadS3BucketInfo(variables: UploadS3BucketInfoMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadS3BucketInfoMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadS3BucketInfoMutation>({ document: UploadS3BucketInfoDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'uploadS3BucketInfo', 'mutation', variables);
+    },
+    GetTracyDiffUploadUrl(variables: GetTracyDiffUploadUrlMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTracyDiffUploadUrlMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTracyDiffUploadUrlMutation>({ document: GetTracyDiffUploadUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTracyDiffUploadUrl', 'mutation', variables);
     },
     AnalyzeCommitForExtensionAIBlame(variables: AnalyzeCommitForExtensionAiBlameMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AnalyzeCommitForExtensionAiBlameMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AnalyzeCommitForExtensionAiBlameMutation>({ document: AnalyzeCommitForExtensionAiBlameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'AnalyzeCommitForExtensionAIBlame', 'mutation', variables);

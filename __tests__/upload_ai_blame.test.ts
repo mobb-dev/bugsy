@@ -15,7 +15,10 @@ vi.mock('@mobb/bugsy/features/analysis/upload-file', () => ({
 // Mock Configstore
 vi.mock('configstore', () => ({
   default: vi.fn().mockImplementation(() => ({
-    get: vi.fn(() => 'test-api-token'),
+    get: vi.fn((key: string) => {
+      // Only return token for apiToken key, undefined for others (stableComputerName)
+      return key === 'apiToken' ? 'test-api-token' : undefined
+    }),
     set: vi.fn(),
   })),
 }))
@@ -243,21 +246,19 @@ describe('CLI: upload-ai-blame', () => {
       expect(capturedSessions).toHaveLength(1)
       const session = capturedSessions[0]
 
-      // Get expected values by executing actual shell commands
-      const expectedHostname = execSync('hostname', {
-        encoding: 'utf-8',
-      }).trim()
+      // Get expected username by executing whoami
       const expectedUsername = execSync('whoami', { encoding: 'utf-8' }).trim()
 
-      // computerName should match the output of `hostname` command
-      expect(session.computerName).toBe(expectedHostname)
+      // computerName should be a stable name (not necessarily matching raw hostname due to getStableComputerName)
+      expect(typeof session.computerName).toBe('string')
+      expect(session.computerName.length).toBeGreaterThan(0)
+      // Stable computer name should not contain network suffixes
+      expect(session.computerName).not.toMatch(
+        /\.(local|localdomain|lan|home)$/
+      )
 
       // userName should match the output of `whoami` command
       expect(session.userName).toBe(expectedUsername)
-
-      // Both should be non-empty strings
-      expect(typeof session.computerName).toBe('string')
-      expect(session.computerName.length).toBeGreaterThan(0)
       expect(typeof session.userName).toBe('string')
       expect(session.userName.length).toBeGreaterThan(0)
     })

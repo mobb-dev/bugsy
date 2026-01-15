@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 
 import chalk from 'chalk'
@@ -11,6 +12,27 @@ import { getModuleRootDir } from './utils/dirname'
 
 const debug = Debug('mobbdev:constants')
 
+// Try loading runtime.config.json first (used in packaged test extensions)
+// This file is placed in out/ directory and won't be filtered by VSCE
+const runtimeConfigPath = path.join(
+  getModuleRootDir(),
+  'out',
+  'runtime.config.json'
+)
+if (fs.existsSync(runtimeConfigPath)) {
+  try {
+    const runtimeConfig = JSON.parse(
+      fs.readFileSync(runtimeConfigPath, 'utf-8')
+    )
+    // Override process.env with runtime config values
+    Object.assign(process.env, runtimeConfig)
+    debug('Loaded runtime config from %s', runtimeConfigPath)
+  } catch (e) {
+    debug('Failed to load runtime config: %o', e)
+  }
+}
+
+// Fall back to .env for development
 dotenv.config({ path: path.join(getModuleRootDir(), '.env') })
 
 // Default URLs - used as fallbacks when env vars are not set

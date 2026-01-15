@@ -343,11 +343,22 @@ input ParentCommitInput {
   timestamp: Timestamp!
 }
 
+mutation GetTracyDiffUploadUrl($commitSha: String!) {
+  getTracyDiffUploadUrl(commitSha: $commitSha) {
+    status
+    error
+    uploadInfo {
+      url
+      uploadFieldsJSON
+      uploadKey
+    }
+  }
+}
+
 mutation AnalyzeCommitForExtensionAIBlame(
   $repositoryURL: String!
   $commitSha: String!
   $organizationId: String!
-  $commitDiff: String
   $commitTimestamp: Timestamp
   $parentCommits: [ParentCommitInput!]
 ) {
@@ -355,7 +366,6 @@ mutation AnalyzeCommitForExtensionAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
-    commitDiff: $commitDiff
     commitTimestamp: $commitTimestamp
     parentCommits: $parentCommits
   ) {

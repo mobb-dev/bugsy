@@ -14,6 +14,7 @@ import {
   type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { uploadFile } from '../../features/analysis/upload-file'
+import { getStableComputerName } from '../../utils/computerName'
 import {
   type SanitizationCounts,
   sanitizeDataWithCounts,
@@ -108,7 +109,7 @@ function getSystemInfo(): {
   }
 
   return {
-    computerName: os.hostname(),
+    computerName: getStableComputerName(),
     userName,
   }
 }

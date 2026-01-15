@@ -27,6 +27,8 @@ import {
   GetPromptSummaryQuery,
   GetPromptSummaryQueryVariables,
   getSdk,
+  GetTracyDiffUploadUrlMutation,
+  GetTracyDiffUploadUrlMutationVariables,
   GitReferenceQueryVariables,
   PrStrategy,
   Sdk,
@@ -65,6 +67,29 @@ type GQLClientArgs = GQLClientAuthArgs & {
 export function getProxyAgent(url: string) {
   try {
     const parsedUrl = new URL(url)
+
+    // CRITICAL: Never use proxy for localhost connections
+    // This prevents the common issue where HTTP_PROXY blocks local mock servers in tests
+    const hostname = parsedUrl.hostname.toLowerCase()
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '[::1]'
+    ) {
+      debug('Skipping proxy for localhost URL: %s', url)
+      return undefined
+    }
+
+    // Check NO_PROXY environment variable (standard proxy bypass list)
+    const noProxy = process.env['NO_PROXY'] || process.env['no_proxy']
+    if (noProxy) {
+      const noProxyList = noProxy.split(',').map((h) => h.trim().toLowerCase())
+      if (noProxyList.includes(hostname) || noProxyList.includes('*')) {
+        debug('Skipping proxy due to NO_PROXY for: %s', url)
+        return undefined
+      }
+    }
 
     const isHttp = parsedUrl.protocol === 'http:'
     const isHttps = parsedUrl.protocol === 'https:'
@@ -610,5 +635,11 @@ export class GQLClient {
     variables: GetPromptSummaryQueryVariables
   ): Promise<GetPromptSummaryQuery> {
     return await this._clientSdk.GetPromptSummary(variables)
+  }
+
+  async getTracyDiffUploadUrl(
+    variables: GetTracyDiffUploadUrlMutationVariables
+  ): Promise<GetTracyDiffUploadUrlMutation> {
+    return await this._clientSdk.GetTracyDiffUploadUrl(variables)
   }
 }

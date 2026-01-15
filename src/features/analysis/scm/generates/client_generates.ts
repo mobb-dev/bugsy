@@ -28431,9 +28431,7 @@ export enum Project_To_User_Constraint {
   /** unique or primary key constraint on columns "id" */
   ProjectToUserIdKey = 'project_to_user_id_key',
   /** unique or primary key constraint on columns "user_id", "project_id" */
-  ProjectUserPkey = 'project_user_pkey',
-  /** unique or primary key constraint on columns "user_id", "project_id" */
-  ProjectUserUserIdProjectIdKey = 'project_user_user_id_project_id_key'
+  ProjectUserPkey = 'project_user_pkey'
 }
 
 /** input type for inserting data into table "project_to_user" */

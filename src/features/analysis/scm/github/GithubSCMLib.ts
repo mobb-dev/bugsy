@@ -1,3 +1,4 @@
+import pLimit from 'p-limit'
 import { z } from 'zod'
 
 import { InvalidRepoUrlError } from '../errors'
@@ -42,6 +43,9 @@ import {
   UpdateCommentResponse,
 } from './types'
 import { encryptSecret } from './utils/encrypt_secret'
+
+const GITHUB_COMMIT_FETCH_CONCURRENCY =
+  parseInt(process.env['GITHUB_COMMIT_CONCURRENCY'] || '10', 10) || 10
 
 type PrState = NonNullable<
   GetPRMetricsResponse['repository']['pullRequest']
@@ -523,14 +527,19 @@ export class GithubSCMLib extends SCMLib {
       this.getPrDiff({ pull_number: prNumber }),
     ])
 
-    // Get detailed commit data with diffs for each commit in parallel
+    // Rate limit concurrent commit diff fetches to avoid GitHub API rate limits
+    const limit = pLimit(GITHUB_COMMIT_FETCH_CONCURRENCY)
+
+    // Get detailed commit data with diffs for each commit with controlled concurrency
     // Pass cached repositoryCreatedAt and parentCommitTimestamps to avoid redundant API calls
     const commits: GetCommitDiffResult[] = await Promise.all(
       commitsRes.data.map((commit) =>
-        this.getCommitDiff(commit.sha, {
-          repositoryCreatedAt,
-          parentCommitTimestamps,
-        })
+        limit(() =>
+          this.getCommitDiff(commit.sha, {
+            repositoryCreatedAt,
+            parentCommitTimestamps,
+          })
+        )
       )
     )
 

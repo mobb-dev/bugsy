@@ -45,6 +45,90 @@ export type LocalCommitData = {
   parentCommits?: { sha: string; timestamp: Date }[]
 }
 
+/**
+ * Normalizes a Git URL to HTTPS format for various Git hosting platforms.
+ * Handles SSH, git://, and HTTPS URLs. Strips credentials and .git suffix.
+ * @param url The Git URL to normalize
+ * @returns The normalized HTTPS URL
+ */
+export function normalizeGitUrl(url: string): string {
+  let normalizedUrl = url
+
+  // Remove .git suffix if present
+  if (normalizedUrl.endsWith('.git')) {
+    normalizedUrl = normalizedUrl.slice(0, -'.git'.length)
+  }
+
+  // Convert SSH URLs to HTTPS for various platforms
+  const sshToHttpsMappings = [
+    // GitHub
+    { pattern: 'git@github.com:', replacement: 'https://github.com/' },
+    // GitLab
+    { pattern: 'git@gitlab.com:', replacement: 'https://gitlab.com/' },
+    // Bitbucket
+    { pattern: 'git@bitbucket.org:', replacement: 'https://bitbucket.org/' },
+    // Azure DevOps (SSH format)
+    {
+      pattern: 'git@ssh.dev.azure.com:',
+      replacement: 'https://dev.azure.com/',
+    },
+    // Azure DevOps (alternative SSH format)
+    {
+      pattern: /git@([^:]+):v3\/([^/]+)\/([^/]+)\/([^/]+)/,
+      replacement: 'https://$1/$2/_git/$4',
+    },
+  ]
+
+  for (const mapping of sshToHttpsMappings) {
+    if (typeof mapping.pattern === 'string') {
+      if (normalizedUrl.startsWith(mapping.pattern)) {
+        normalizedUrl = normalizedUrl.replace(
+          mapping.pattern,
+          mapping.replacement
+        )
+        break
+      }
+    } else {
+      // Handle regex patterns
+      const match = normalizedUrl.match(mapping.pattern)
+      if (match) {
+        normalizedUrl = normalizedUrl.replace(
+          mapping.pattern,
+          mapping.replacement
+        )
+        break
+      }
+    }
+  }
+
+  // Strip credentials from HTTPS URLs (e.g. https://token@github.com/org/repo).
+  // This is common in CI environments where checkout injects an access token.
+  if (
+    normalizedUrl.startsWith('https://') ||
+    normalizedUrl.startsWith('http://')
+  ) {
+    // Remove any "userinfo@" segment after the protocol.
+    normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)([^@/]+@)/, '$1')
+  }
+
+  return normalizedUrl
+}
+
+/**
+ * Checks if a normalized Git URL is a GitHub URL.
+ * @param normalizedUrl The normalized Git URL (from normalizeGitUrl)
+ * @returns True if the URL is a GitHub URL
+ */
+export function isGitHubUrl(normalizedUrl: string): boolean {
+  try {
+    const url = new URL(normalizedUrl)
+    const host = url.host.toLowerCase()
+    return host === 'github.com' || host.endsWith('.github.com')
+  } catch {
+    return false
+  }
+}
+
 export class GitService {
   private git: SimpleGit
   private repositoryPath: string
@@ -201,7 +285,7 @@ export class GitService {
       ])
 
       const normalizedRepoUrl = repoUrl.value
-        ? this.normalizeGitUrl(repoUrl.value)
+        ? normalizeGitUrl(repoUrl.value)
         : ''
 
       this.log('[GitService] Git repository information retrieved', 'debug', {
@@ -316,7 +400,7 @@ export class GitService {
   }
 
   /**
-   * Gets the remote repository URL
+   * Gets the remote repository URL (origin)
    */
   public async getRemoteUrl(): Promise<string> {
     this.log('[GitService] Getting remote repository URL', 'debug')
@@ -324,17 +408,7 @@ export class GitService {
     try {
       const remoteUrl = await this.git.getConfig('remote.origin.url')
       const url = remoteUrl.value || ''
-      let normalizedUrl = url
-      // Normalize git URL
-      if (normalizedUrl.endsWith('.git')) {
-        normalizedUrl = normalizedUrl.slice(0, -'.git'.length)
-      }
-      if (normalizedUrl.startsWith('git@github.com:')) {
-        normalizedUrl = normalizedUrl.replace(
-          'git@github.com:',
-          'https://github.com/'
-        )
-      }
+      const normalizedUrl = normalizeGitUrl(url)
 
       this.log('[GitService] Remote repository URL retrieved', 'debug', {
         url: normalizedUrl,
@@ -517,126 +591,6 @@ export class GitService {
       }
     } catch (error) {
       const errorMessage = `Failed to get recently changed files: ${(error as Error).message}`
-      this.log(`[GitService] ${errorMessage}`, 'error', { error })
-      throw new Error(errorMessage)
-    }
-  }
-
-  /**
-   * Normalizes a Git URL to HTTPS format for various Git hosting platforms
-   * @param url The Git URL to normalize
-   * @returns The normalized HTTPS URL
-   */
-  private normalizeGitUrl(url: string): string {
-    let normalizedUrl = url
-
-    // Remove .git suffix if present
-    if (normalizedUrl.endsWith('.git')) {
-      normalizedUrl = normalizedUrl.slice(0, -'.git'.length)
-    }
-
-    // Convert SSH URLs to HTTPS for various platforms
-    const sshToHttpsMappings = [
-      // GitHub
-      { pattern: 'git@github.com:', replacement: 'https://github.com/' },
-      // GitLab
-      { pattern: 'git@gitlab.com:', replacement: 'https://gitlab.com/' },
-      // Bitbucket
-      { pattern: 'git@bitbucket.org:', replacement: 'https://bitbucket.org/' },
-      // Azure DevOps (SSH format)
-      {
-        pattern: 'git@ssh.dev.azure.com:',
-        replacement: 'https://dev.azure.com/',
-      },
-      // Azure DevOps (alternative SSH format)
-      {
-        pattern: /git@([^:]+):v3\/([^/]+)\/([^/]+)\/([^/]+)/,
-        replacement: 'https://$1/$2/_git/$4',
-      },
-    ]
-
-    for (const mapping of sshToHttpsMappings) {
-      if (typeof mapping.pattern === 'string') {
-        if (normalizedUrl.startsWith(mapping.pattern)) {
-          normalizedUrl = normalizedUrl.replace(
-            mapping.pattern,
-            mapping.replacement
-          )
-          break
-        }
-      } else {
-        // Handle regex patterns
-        const match = normalizedUrl.match(mapping.pattern)
-        if (match) {
-          normalizedUrl = normalizedUrl.replace(
-            mapping.pattern,
-            mapping.replacement
-          )
-          break
-        }
-      }
-    }
-
-    // Strip credentials from HTTPS URLs (e.g. https://token@github.com/org/repo).
-    // This is common in CI environments where checkout injects an access token.
-    if (
-      normalizedUrl.startsWith('https://') ||
-      normalizedUrl.startsWith('http://')
-    ) {
-      // Remove any "userinfo@" segment after the protocol.
-      normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)([^@/]+@)/, '$1')
-    }
-
-    return normalizedUrl
-  }
-
-  /**
-   * Gets all remote repository URLs (equivalent to 'git remote -v')
-   */
-  public async getRepoUrls(): Promise<
-    Record<string, { fetch: string; push: string }>
-  > {
-    this.log('[GitService] Getting all remote repository URLs', 'debug')
-
-    try {
-      const remotes = await this.git.remote(['-v'])
-      if (!remotes) {
-        return {}
-      }
-
-      const remoteMap: Record<string, { fetch: string; push: string }> = {}
-
-      // Parse the output of 'git remote -v'
-      // Format is: "remote_name\turl (fetch)\nremote_name\turl (push)"
-      remotes.split('\n').forEach((line: string) => {
-        if (!line.trim()) return
-
-        const [remoteName, url, type] = line.split(/\s+/)
-        if (!remoteName || !url || !type) return
-
-        // Initialize the remote entry if it doesn't exist
-        if (!remoteMap[remoteName]) {
-          remoteMap[remoteName] = { fetch: '', push: '' }
-        }
-
-        // Normalize URL using the helper method
-        const normalizedUrl = this.normalizeGitUrl(url)
-
-        // At this point we know remoteMap[remoteName] exists because we initialized it above
-        const remote = remoteMap[remoteName]!
-        if (type === '(fetch)') {
-          remote.fetch = normalizedUrl
-        } else if (type === '(push)') {
-          remote.push = normalizedUrl
-        }
-      })
-
-      this.log('[GitService] Remote repository URLs retrieved', 'debug', {
-        remotes: remoteMap,
-      })
-      return remoteMap
-    } catch (error) {
-      const errorMessage = `Failed to get remote repository URLs: ${(error as Error).message}`
       this.log(`[GitService] ${errorMessage}`, 'error', { error })
       throw new Error(errorMessage)
     }

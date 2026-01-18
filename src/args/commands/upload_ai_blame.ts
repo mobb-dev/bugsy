@@ -13,6 +13,10 @@ import {
   type FinalizeAiBlameInferencesUploadMutationVariables,
   type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
+import {
+  GitService,
+  isGitHubUrl,
+} from '../../features/analysis/scm/services/GitService'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { getStableComputerName } from '../../utils/computerName'
 import {
@@ -89,6 +93,25 @@ type SessionInput = {
   computerName?: string
   userName?: string
   sessionId?: string
+  repositoryUrl?: string | null
+}
+
+/**
+ * Gets the normalized GitHub repository URL from the current working directory.
+ * Returns null if not in a git repository or if not a GitHub repository.
+ */
+async function getRepositoryUrl(): Promise<string | null> {
+  try {
+    const gitService = new GitService(process.cwd())
+    const isRepo = await gitService.isGitRepository()
+    if (!isRepo) {
+      return null
+    }
+    const remoteUrl = await gitService.getRemoteUrl()
+    return isGitHubUrl(remoteUrl) ? remoteUrl : null
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -192,6 +215,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   sessionId?: string
   apiUrl?: string
   webAppUrl?: string
+  repositoryUrl?: string | null
 }): Promise<UploadAiBlameResult> {
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
@@ -249,6 +273,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
         exitOnError: false,
         apiUrl: args.apiUrl,
         webAppUrl: args.webAppUrl,
+        repositoryUrl: args.repositoryUrl,
       })
     })
   })
@@ -268,6 +293,7 @@ type UploadAiBlameHandlerOptions = {
   apiUrl?: string
   webAppUrl?: string
   logger?: Logger
+  repositoryUrl?: string | null
 }
 
 export async function uploadAiBlameHandler(
@@ -308,6 +334,11 @@ export async function uploadAiBlameHandler(
 
   const nowIso = new Date().toISOString()
   const { computerName, userName } = getSystemInfo()
+  // Use provided repositoryUrl if available, otherwise try to detect from cwd
+  const repositoryUrl =
+    options.repositoryUrl !== undefined
+      ? options.repositoryUrl
+      : await getRepositoryUrl()
   const sessions: SessionInput[] = []
   for (let i = 0; i < prompts.length; i++) {
     const promptPath = String(prompts[i])
@@ -335,6 +366,7 @@ export async function uploadAiBlameHandler(
       computerName,
       userName,
       sessionId: sessionIds[i],
+      repositoryUrl,
     })
   }
 
@@ -406,6 +438,7 @@ export async function uploadAiBlameHandler(
         computerName: s.computerName,
         userName: s.userName,
         sessionId: s.sessionId,
+        repositoryUrl: s.repositoryUrl,
       }
     })
 

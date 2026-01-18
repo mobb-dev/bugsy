@@ -321,9 +321,17 @@ input AIBlameInferenceInitInput {
   aiResponseAt: Timestamp!
   model: String
   toolName: String
+  blameType: AIBlameInferenceType
   metadataJSON: String
   computerName: String
   userName: String
+  repositoryUrl: String
+}
+
+enum AIBlameInferenceType {
+  CHAT
+  TAB_AUTOCOMPLETE
+  HUMAN_EDIT
 }
 
 input AIBlameInferenceFinalizeInput {
@@ -333,9 +341,12 @@ input AIBlameInferenceFinalizeInput {
   aiResponseAt: Timestamp!
   model: String
   toolName: String
+  blameType: AIBlameInferenceType
   metadataJSON: String
   computerName: String
   userName: String
+  sessionId: String
+  repositoryUrl: String
 }
 
 input ParentCommitInput {
@@ -420,9 +431,10 @@ query GetPromptSummary($aiBlameAttributionId: String!) {
         goal
         developersPlan
         aiImplementationDetails
-        importantInstructionsAndPushbacks
-        frictionScore {
-          score
+        developersPushbacks
+        importantInstructionsAndDecisions
+        backAndForthLevel {
+          level
           justification
         }
       }

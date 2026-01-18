@@ -56,6 +56,12 @@ export type AiBlameInferenceFinalizeInput = {
   metadataJSON?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptKey: Scalars['String']['input'];
+  /**
+   * Normalized GitHub repository URL for filtering inferences.
+   * Should be normalized using normalizeGitUrl() and checked with isGitHubUrl() before sending.
+   * Only GitHub URLs are supported; non-GitHub repos should send null.
+   */
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
@@ -69,6 +75,12 @@ export type AiBlameInferenceInitInput = {
   metadataJSON?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptFileName: Scalars['String']['input'];
+  /**
+   * Normalized GitHub repository URL for filtering inferences.
+   * Should be normalized using normalizeGitUrl() and checked with isGitHubUrl() before sending.
+   * Only GitHub URLs are supported; non-GitHub repos should send null.
+   */
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
 };
@@ -162,6 +174,12 @@ export type AutoPrSuccess = {
   __typename?: 'AutoPrSuccess';
   appliedAutoPrIssueTypes: Array<Scalars['String']['output']>;
   status: Status;
+};
+
+export type BackAndForthLevel = {
+  __typename?: 'BackAndForthLevel';
+  justification: Scalars['String']['output'];
+  level: Scalars['Int']['output'];
 };
 
 export type BadScmCredentials = BaseError & {
@@ -465,12 +483,6 @@ export type ForkRepoSuccess = {
   __typename?: 'ForkRepoSuccess';
   status: Status;
   url: Scalars['String']['output'];
-};
-
-export type FrictionScore = {
-  __typename?: 'FrictionScore';
-  justification: Scalars['String']['output'];
-  score: Scalars['Int']['output'];
 };
 
 export type GetAiBlameInferencePromptResponse = {
@@ -888,11 +900,12 @@ export enum Projects {
 
 export type PromptSummaryData = {
   __typename?: 'PromptSummaryData';
-  aiImplementationDetails: Scalars['String']['output'];
+  aiImplementationDetails: Array<Scalars['String']['output']>;
+  backAndForthLevel: BackAndForthLevel;
   developersPlan: Array<Scalars['String']['output']>;
-  frictionScore: FrictionScore;
+  developersPushbacks: Array<Scalars['String']['output']>;
   goal: Scalars['String']['output'];
-  importantInstructionsAndPushbacks: Array<Scalars['String']['output']>;
+  importantInstructionsAndDecisions: Array<Scalars['String']['output']>;
 };
 
 export type PromptSummaryError = {
@@ -2783,6 +2796,7 @@ export type Ai_Blame_Inference = {
   inferencesS3Path: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path: Scalars['String']['output'];
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
   sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   type: Ai_Blame_Inference_Type_Enum;
@@ -2882,6 +2896,7 @@ export type Ai_Blame_Inference_Bool_Exp = {
   inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   promptS3Path?: InputMaybe<String_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   sessionId?: InputMaybe<String_Comparison_Exp>;
   toolName?: InputMaybe<String_Comparison_Exp>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum_Comparison_Exp>;
@@ -2914,6 +2929,7 @@ export type Ai_Blame_Inference_Insert_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
@@ -2934,6 +2950,7 @@ export type Ai_Blame_Inference_Max_Fields = {
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
   sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
@@ -2951,6 +2968,7 @@ export type Ai_Blame_Inference_Max_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
   sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
@@ -2969,6 +2987,7 @@ export type Ai_Blame_Inference_Min_Fields = {
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
   sessionId?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
@@ -2986,6 +3005,7 @@ export type Ai_Blame_Inference_Min_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
   sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
@@ -3026,6 +3046,7 @@ export type Ai_Blame_Inference_Order_By = {
   inferencesS3Path?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
   sessionId?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
@@ -3058,6 +3079,8 @@ export enum Ai_Blame_Inference_Select_Column {
   /** column name */
   PromptS3Path = 'promptS3Path',
   /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
   SessionId = 'sessionId',
   /** column name */
   ToolName = 'toolName',
@@ -3080,6 +3103,7 @@ export type Ai_Blame_Inference_Set_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
@@ -3145,6 +3169,7 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Ai_Blame_Inference_Type_Enum>;
@@ -3370,6 +3395,8 @@ export enum Ai_Blame_Inference_Update_Column {
   Model = 'model',
   /** column name */
   PromptS3Path = 'promptS3Path',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
   /** column name */
   SessionId = 'sessionId',
   /** column name */
@@ -46326,7 +46353,7 @@ export type GetPromptSummaryQueryVariables = Exact<{
 }>;
 
 
-export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: string, importantInstructionsAndPushbacks: Array<string>, frictionScore: { __typename?: 'FrictionScore', score: number, justification: string } } } };
+export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: Array<string>, developersPushbacks: Array<string>, importantInstructionsAndDecisions: Array<string>, backAndForthLevel: { __typename?: 'BackAndForthLevel', level: number, justification: string } } } };
 
 export type UploadAiBlameInferencesInitMutationVariables = Exact<{
   sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
@@ -46982,9 +47009,10 @@ export const GetPromptSummaryDocument = `
         goal
         developersPlan
         aiImplementationDetails
-        importantInstructionsAndPushbacks
-        frictionScore {
-          score
+        developersPushbacks
+        importantInstructionsAndDecisions
+        backAndForthLevel {
+          level
           justification
         }
       }

@@ -126,15 +126,8 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
       throw new Error(`Invalid git repository: ${gitValidation.error}`)
     }
 
-    // Get repository URLs
-    const repoUrls = await gitService.getRepoUrls()
-
-    // For active repositories, ensure we have an origin remote
-    if (Object.keys(repoUrls).length > 0 && !repoUrls['origin']) {
-      throw new Error('Repository must have an origin remote')
-    }
-
-    const originUrl = repoUrls['origin']?.fetch
+    // Get origin repository URL
+    const originUrl = await gitService.getRemoteUrl()
     if (!originUrl) {
       throw new Error('No origin URL found for the repository')
     }

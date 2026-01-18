@@ -5,7 +5,10 @@ import { SimpleGit, StatusResult } from 'simple-git'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { FileUtils } from '../../src/features/analysis/scm/services/FileUtils'
-import { GitService } from '../../src/features/analysis/scm/services/GitService'
+import {
+  GitService,
+  normalizeGitUrl,
+} from '../../src/features/analysis/scm/services/GitService'
 import {
   ActiveGitRepo,
   EmptyGitRepo,
@@ -578,100 +581,6 @@ describe('GitService', () => {
     })
   })
 
-  describe('getRepoUrls', () => {
-    it('should return all remote repository URLs', async () => {
-      const activeRepo = new ActiveGitRepo()
-      repoPath = activeRepo.getRepoPath()!
-      gitService = new GitService(repoPath, logSpy)
-
-      const remotes = await gitService.getRepoUrls()
-
-      expect(Object.keys(remotes)).toContain('origin')
-      expect(remotes['origin']).toHaveProperty('fetch')
-      expect(remotes['origin']).toHaveProperty('push')
-      expect(logSpy).toHaveBeenCalledWith(
-        '[GitService] Getting all remote repository URLs',
-        'debug'
-      )
-      expect(logSpy).toHaveBeenCalledWith(
-        '[GitService] Remote repository URLs retrieved',
-        'debug',
-        expect.anything()
-      )
-    })
-
-    it('should handle repositories with multiple remotes', async () => {
-      const activeRepo = new ActiveGitRepo()
-      repoPath = activeRepo.getRepoPath()!
-      gitService = new GitService(repoPath, logSpy)
-
-      // Add a second remote
-      const git = await import('simple-git')
-      const gitInstance = git.simpleGit(repoPath)
-      await gitInstance.addRemote(
-        'upstream',
-        'https://github.com/upstream/repo.git'
-      )
-
-      const remotes = await gitService.getRepoUrls()
-
-      expect(Object.keys(remotes).length).toBeGreaterThanOrEqual(2)
-      expect(Object.keys(remotes)).toContain('origin')
-      expect(Object.keys(remotes)).toContain('upstream')
-    })
-
-    it('should normalize URLs for all remotes', async () => {
-      const emptyRepo = new EmptyGitRepo()
-      repoPath = emptyRepo.getRepoPath()!
-      gitService = new GitService(repoPath, logSpy)
-
-      // Add remotes with different URL formats
-      const git = await import('simple-git')
-      const gitInstance = git.simpleGit(repoPath)
-      await gitInstance.addRemote(
-        'origin',
-        'git@github.com:test-org/test-repo.git'
-      )
-      await gitInstance.addRemote(
-        'gitlab',
-        'git@gitlab.com:test-org/test-repo.git'
-      )
-
-      const remotes = await gitService.getRepoUrls()
-
-      const originRemote = remotes['origin']
-      const gitlabRemote = remotes['gitlab']
-
-      expect(originRemote?.fetch).toBe('https://github.com/test-org/test-repo')
-      expect(gitlabRemote?.fetch).toBe('https://gitlab.com/test-org/test-repo')
-    })
-
-    it('should handle errors when getting repo URLs', async () => {
-      const emptyRepo = new EmptyGitRepo()
-      repoPath = emptyRepo.getRepoPath()!
-      gitService = new GitService(repoPath, logSpy)
-
-      // Mock remote to throw an error
-      const gitMock = {
-        remote: vi.fn().mockImplementation(() => {
-          throw new Error('Failed to get remote repository URLs')
-        }),
-      } as unknown as SimpleGit
-
-      // Intentionally accessing private property for testing via index signature
-      gitService['git'] = gitMock
-
-      await expect(gitService.getRepoUrls()).rejects.toThrow(
-        'Failed to get remote repository URLs'
-      )
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to get remote repository URLs'),
-        'error',
-        expect.anything()
-      )
-    })
-  })
-
   describe('getGitignoreContent', () => {
     it('should return gitignore content when it exists', async () => {
       const emptyRepo = new EmptyGitRepo()
@@ -849,21 +758,12 @@ describe('GitService', () => {
 
   // Additional edge-case tests to improve coverage
   describe('edge-case coverage', () => {
-    it('normalizeGitUrl should handle Azure DevOps SSH formats', async () => {
-      const repo = new EmptyGitRepo()
-      const gitService = new GitService(repo.getRepoPath()!)
-      // Access the private method using type assertion
-      const normalize = (
-        gitService as unknown as {
-          normalizeGitUrl(url: string): string
-        }
-      ).normalizeGitUrl.bind(gitService)
-
-      expect(normalize('git@ssh.dev.azure.com:v3/org/proj/repo')).toBe(
+    it('normalizeGitUrl should handle Azure DevOps SSH formats', () => {
+      expect(normalizeGitUrl('git@ssh.dev.azure.com:v3/org/proj/repo')).toBe(
         'https://dev.azure.com/v3/org/proj/repo'
       )
 
-      expect(normalize('git@contoso.com:v3/org/proj/repo')).toBe(
+      expect(normalizeGitUrl('git@contoso.com:v3/org/proj/repo')).toBe(
         'https://contoso.com/org/_git/repo'
       )
     })
@@ -884,17 +784,6 @@ describe('GitService', () => {
 
       const content = await gitService.getGitignoreContent()
       expect(content).toBe(localContent)
-    })
-
-    it('getRepoUrls should return empty object when no remotes', async () => {
-      const repo = new EmptyGitRepo()
-      const gitService = new GitService(repo.getRepoPath()!)
-      gitService['git'] = {
-        remote: vi.fn().mockResolvedValue(''),
-      } as unknown as SimpleGit
-
-      const remotes = await gitService.getRepoUrls()
-      expect(remotes).toEqual({})
     })
 
     it('isValidBranchName should return false on git error', async () => {

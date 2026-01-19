@@ -24,23 +24,11 @@ dotenv.config({
 
 // Fake timers configuration (to be imported by test files)
 
-// GitHub test tokens setup
-export const TEST_GITHUB_USER_PATS = z
-  .object({
-    PLAYWRIGHT_GH_CLOUD_PAT: z.string(),
-    PLAYWRIGHT_GH_CLOUD_PAT_1: z.string(),
-    PLAYWRIGHT_GH_CLOUD_PAT_2: z.string(),
-    PLAYWRIGHT_GH_CLOUD_PAT_3: z.string(),
-    PLAYWRIGHT_GH_CLOUD_PAT_4: z.string(),
-  })
-  .parse(process.env)
-
-// Choose random PAT from the list
-const TEST_GITHUB_TOKEN_CHOSEN = Object.values(TEST_GITHUB_USER_PATS)[
-  Math.floor(Math.random() * Object.values(TEST_GITHUB_USER_PATS).length)
-]
-
-export const TEST_GITHUB_TOKEN = z.string().parse(TEST_GITHUB_TOKEN_CHOSEN)
+// GitHub test token - uses PLAYWRIGHT_GH_CLOUD_PAT which is set by the
+// "Select GitHub PAT with Available Quota" CI action to the token with most quota remaining
+export const TEST_GITHUB_TOKEN = z
+  .string()
+  .parse(process.env['PLAYWRIGHT_GH_CLOUD_PAT'])
 
 // Parse token from environment
 export const token = z.string().parse(process.env['TOKEN'])

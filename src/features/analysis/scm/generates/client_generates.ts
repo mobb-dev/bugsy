@@ -1581,6 +1581,16 @@ export type VulnerabilityReportIssueV5 = {
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
 
+export type ActiveDevelopers_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type AdoptionTrendsTimeSeries_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
 export type AggregatedUnexpiredVulnerabilitiesState_Organization_Args = {
   linear_vul_count_limit?: InputMaybe<Scalars['Int']['input']>;
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
@@ -23956,6 +23966,10 @@ export enum Order_By {
 /** columns and relationships of "organization" */
 export type Organization = {
   __typename?: 'organization';
+  /** A computed field, executes function "organization_active_developers_stats" */
+  activeDevelopers?: Maybe<Array<View_Types_Active_Developers_Stats>>;
+  /** A computed field, executes function "organization_adoption_trends_time_series" */
+  adoptionTrendsTimeSeries?: Maybe<Array<View_Types_Adoption_Trends_Time_Series>>;
   /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v3" */
   aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
@@ -24025,6 +24039,12 @@ export type Organization = {
   organizationUsers: Array<Organization_To_User>;
   /** An aggregate relationship */
   organizationUsers_aggregate: Organization_To_User_Aggregate;
+  /** A computed field, executes function "organization_percent_ai_code_stats" */
+  percentAiCodeStats?: Maybe<Array<View_Types_Percent_Ai_Code_Stats>>;
+  /** A computed field, executes function "organization_percent_prs_with_ai_stats" */
+  percentPrsWithAiStats?: Maybe<Array<View_Types_Percent_Prs_With_Ai_Stats>>;
+  /** A computed field, executes function "organization_percent_repos_with_ai_stats" */
+  percentReposWithAiStats?: Maybe<Array<View_Types_Percent_Repos_With_Ai_Stats>>;
   /** An array relationship */
   projects: Array<Project>;
   /** An aggregate relationship */
@@ -24050,6 +24070,28 @@ export type Organization = {
   scmConfigs_aggregate: Scm_Config_Aggregate;
   /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationActiveDevelopersArgs = {
+  args: ActiveDevelopers_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationAdoptionTrendsTimeSeriesArgs = {
+  args?: InputMaybe<AdoptionTrendsTimeSeries_Organization_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
 };
 
 
@@ -24300,6 +24342,39 @@ export type OrganizationOrganizationUsers_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Organization_To_User_Order_By>>;
   where?: InputMaybe<Organization_To_User_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationPercentAiCodeStatsArgs = {
+  args: PercentAiCodeStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationPercentPrsWithAiStatsArgs = {
+  args: PercentPrsWithAiStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationPercentReposWithAiStatsArgs = {
+  args: PercentReposWithAiStats_Organization_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
 };
 
 
@@ -26747,6 +26822,21 @@ export type Organization_Variance_FieldsDeployedFixesCountArgs = {
 /** aggregate variance on columns */
 export type Organization_Variance_FieldsDeployedVulnerabilityIssuesCountArgs = {
   args: DeployedVulnerabilityIssuesCount_Organization_Args;
+};
+
+export type PercentAiCodeStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type PercentPrsWithAiStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type PercentReposWithAiStats_Organization_Args = {
+  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** columns and relationships of "pr_status" */
@@ -29321,6 +29411,14 @@ export type Query_Root = {
   view_total_unique_unresolved_vulnerabilities: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
   /** fetch aggregated fields from the table: "view_total_unique_unresolved_vulnerabilities" */
   view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
+  /** fetch data from the table: "view_types.active_developers_stats" */
+  view_types_active_developers_stats: Array<View_Types_Active_Developers_Stats>;
+  /** fetch aggregated fields from the table: "view_types.active_developers_stats" */
+  view_types_active_developers_stats_aggregate: View_Types_Active_Developers_Stats_Aggregate;
+  /** fetch data from the table: "view_types.adoption_trends_time_series" */
+  view_types_adoption_trends_time_series: Array<View_Types_Adoption_Trends_Time_Series>;
+  /** fetch aggregated fields from the table: "view_types.adoption_trends_time_series" */
+  view_types_adoption_trends_time_series_aggregate: View_Types_Adoption_Trends_Time_Series_Aggregate;
   /** fetch data from the table: "view_types.aggregated_categories" */
   view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
   /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
@@ -29341,6 +29439,18 @@ export type Query_Root = {
   view_types_lines_of_code_stats: Array<View_Types_Lines_Of_Code_Stats>;
   /** fetch aggregated fields from the table: "view_types.lines_of_code_stats" */
   view_types_lines_of_code_stats_aggregate: View_Types_Lines_Of_Code_Stats_Aggregate;
+  /** fetch data from the table: "view_types.percent_ai_code_stats" */
+  view_types_percent_ai_code_stats: Array<View_Types_Percent_Ai_Code_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_ai_code_stats" */
+  view_types_percent_ai_code_stats_aggregate: View_Types_Percent_Ai_Code_Stats_Aggregate;
+  /** fetch data from the table: "view_types.percent_prs_with_ai_stats" */
+  view_types_percent_prs_with_ai_stats: Array<View_Types_Percent_Prs_With_Ai_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_prs_with_ai_stats" */
+  view_types_percent_prs_with_ai_stats_aggregate: View_Types_Percent_Prs_With_Ai_Stats_Aggregate;
+  /** fetch data from the table: "view_types.percent_repos_with_ai_stats" */
+  view_types_percent_repos_with_ai_stats: Array<View_Types_Percent_Repos_With_Ai_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_repos_with_ai_stats" */
+  view_types_percent_repos_with_ai_stats_aggregate: View_Types_Percent_Repos_With_Ai_Stats_Aggregate;
   /** fetch data from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
@@ -31827,6 +31937,42 @@ export type Query_RootView_Total_Unique_Unresolved_Vulnerabilities_AggregateArgs
 };
 
 
+export type Query_RootView_Types_Active_Developers_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Active_Developers_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Adoption_Trends_Time_SeriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Adoption_Trends_Time_Series_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+};
+
+
 export type Query_RootView_Types_Aggregated_CategoriesArgs = {
   distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -31914,6 +32060,60 @@ export type Query_RootView_Types_Lines_Of_Code_Stats_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Order_By>>;
   where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Ai_Code_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Ai_Code_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Prs_With_Ai_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Prs_With_Ai_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Repos_With_Ai_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Percent_Repos_With_Ai_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
 };
 
 
@@ -35514,6 +35714,18 @@ export type Subscription_Root = {
   view_total_unique_unresolved_vulnerabilities_aggregate: View_Total_Unique_Unresolved_Vulnerabilities_Aggregate;
   /** fetch data from the table in a streaming manner: "view_total_unique_unresolved_vulnerabilities" */
   view_total_unique_unresolved_vulnerabilities_stream: Array<View_Total_Unique_Unresolved_Vulnerabilities>;
+  /** fetch data from the table: "view_types.active_developers_stats" */
+  view_types_active_developers_stats: Array<View_Types_Active_Developers_Stats>;
+  /** fetch aggregated fields from the table: "view_types.active_developers_stats" */
+  view_types_active_developers_stats_aggregate: View_Types_Active_Developers_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.active_developers_stats" */
+  view_types_active_developers_stats_stream: Array<View_Types_Active_Developers_Stats>;
+  /** fetch data from the table: "view_types.adoption_trends_time_series" */
+  view_types_adoption_trends_time_series: Array<View_Types_Adoption_Trends_Time_Series>;
+  /** fetch aggregated fields from the table: "view_types.adoption_trends_time_series" */
+  view_types_adoption_trends_time_series_aggregate: View_Types_Adoption_Trends_Time_Series_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.adoption_trends_time_series" */
+  view_types_adoption_trends_time_series_stream: Array<View_Types_Adoption_Trends_Time_Series>;
   /** fetch data from the table: "view_types.aggregated_categories" */
   view_types_aggregated_categories: Array<View_Types_Aggregated_Categories>;
   /** fetch aggregated fields from the table: "view_types.aggregated_categories" */
@@ -35544,6 +35756,24 @@ export type Subscription_Root = {
   view_types_lines_of_code_stats_aggregate: View_Types_Lines_Of_Code_Stats_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.lines_of_code_stats" */
   view_types_lines_of_code_stats_stream: Array<View_Types_Lines_Of_Code_Stats>;
+  /** fetch data from the table: "view_types.percent_ai_code_stats" */
+  view_types_percent_ai_code_stats: Array<View_Types_Percent_Ai_Code_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_ai_code_stats" */
+  view_types_percent_ai_code_stats_aggregate: View_Types_Percent_Ai_Code_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.percent_ai_code_stats" */
+  view_types_percent_ai_code_stats_stream: Array<View_Types_Percent_Ai_Code_Stats>;
+  /** fetch data from the table: "view_types.percent_prs_with_ai_stats" */
+  view_types_percent_prs_with_ai_stats: Array<View_Types_Percent_Prs_With_Ai_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_prs_with_ai_stats" */
+  view_types_percent_prs_with_ai_stats_aggregate: View_Types_Percent_Prs_With_Ai_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.percent_prs_with_ai_stats" */
+  view_types_percent_prs_with_ai_stats_stream: Array<View_Types_Percent_Prs_With_Ai_Stats>;
+  /** fetch data from the table: "view_types.percent_repos_with_ai_stats" */
+  view_types_percent_repos_with_ai_stats: Array<View_Types_Percent_Repos_With_Ai_Stats>;
+  /** fetch aggregated fields from the table: "view_types.percent_repos_with_ai_stats" */
+  view_types_percent_repos_with_ai_stats_aggregate: View_Types_Percent_Repos_With_Ai_Stats_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.percent_repos_with_ai_stats" */
+  view_types_percent_repos_with_ai_stats_stream: Array<View_Types_Percent_Repos_With_Ai_Stats>;
   /** fetch data from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
@@ -38500,6 +38730,56 @@ export type Subscription_RootView_Total_Unique_Unresolved_Vulnerabilities_Stream
 };
 
 
+export type Subscription_RootView_Types_Active_Developers_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Active_Developers_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Active_Developers_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Active_Developers_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Adoption_Trends_Time_SeriesArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Adoption_Trends_Time_Series_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Adoption_Trends_Time_Series_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Adoption_Trends_Time_Series_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+};
+
+
 export type Subscription_RootView_Types_Aggregated_CategoriesArgs = {
   distinct_on?: InputMaybe<Array<View_Types_Aggregated_Categories_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -38622,6 +38902,81 @@ export type Subscription_RootView_Types_Lines_Of_Code_Stats_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Lines_Of_Code_Stats_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Lines_Of_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Ai_Code_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Ai_Code_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Ai_Code_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Percent_Ai_Code_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Prs_With_Ai_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Prs_With_Ai_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Prs_With_Ai_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Repos_With_Ai_StatsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Repos_With_Ai_Stats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Percent_Repos_With_Ai_Stats_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
 };
 
 
@@ -41701,6 +42056,318 @@ export type View_Total_Unique_Unresolved_Vulnerabilities_Variance_Fields = {
   total_unique_unresolved_vulnerabilities?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.active_developers_stats" */
+export type View_Types_Active_Developers_Stats = {
+  __typename?: 'view_types_active_developers_stats';
+  activeAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  trendChange?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.active_developers_stats" */
+export type View_Types_Active_Developers_Stats_Aggregate = {
+  __typename?: 'view_types_active_developers_stats_aggregate';
+  aggregate?: Maybe<View_Types_Active_Developers_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Active_Developers_Stats>;
+};
+
+/** aggregate fields of "view_types.active_developers_stats" */
+export type View_Types_Active_Developers_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_active_developers_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Active_Developers_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Active_Developers_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Active_Developers_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Active_Developers_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Active_Developers_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Active_Developers_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Active_Developers_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Active_Developers_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Active_Developers_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Active_Developers_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.active_developers_stats" */
+export type View_Types_Active_Developers_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Active_Developers_Stats_Avg_Fields = {
+  __typename?: 'view_types_active_developers_stats_avg_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.active_developers_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Active_Developers_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Active_Developers_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Active_Developers_Stats_Bool_Exp>>;
+  activeAiDevelopers?: InputMaybe<Bigint_Comparison_Exp>;
+  previousActiveAiDevelopers?: InputMaybe<Bigint_Comparison_Exp>;
+  trendChange?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Active_Developers_Stats_Max_Fields = {
+  __typename?: 'view_types_active_developers_stats_max_fields';
+  activeAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  trendChange?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Active_Developers_Stats_Min_Fields = {
+  __typename?: 'view_types_active_developers_stats_min_fields';
+  activeAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  trendChange?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.active_developers_stats". */
+export type View_Types_Active_Developers_Stats_Order_By = {
+  activeAiDevelopers?: InputMaybe<Order_By>;
+  previousActiveAiDevelopers?: InputMaybe<Order_By>;
+  trendChange?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.active_developers_stats" */
+export enum View_Types_Active_Developers_Stats_Select_Column {
+  /** column name */
+  ActiveAiDevelopers = 'activeAiDevelopers',
+  /** column name */
+  PreviousActiveAiDevelopers = 'previousActiveAiDevelopers',
+  /** column name */
+  TrendChange = 'trendChange'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Active_Developers_Stats_Stddev_Fields = {
+  __typename?: 'view_types_active_developers_stats_stddev_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Active_Developers_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_active_developers_stats_stddev_pop_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Active_Developers_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_active_developers_stats_stddev_samp_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_active_developers_stats" */
+export type View_Types_Active_Developers_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Active_Developers_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Active_Developers_Stats_Stream_Cursor_Value_Input = {
+  activeAiDevelopers?: InputMaybe<Scalars['bigint']['input']>;
+  previousActiveAiDevelopers?: InputMaybe<Scalars['bigint']['input']>;
+  trendChange?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Active_Developers_Stats_Sum_Fields = {
+  __typename?: 'view_types_active_developers_stats_sum_fields';
+  activeAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['bigint']['output']>;
+  trendChange?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Active_Developers_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_active_developers_stats_var_pop_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Active_Developers_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_active_developers_stats_var_samp_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Active_Developers_Stats_Variance_Fields = {
+  __typename?: 'view_types_active_developers_stats_variance_fields';
+  activeAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  previousActiveAiDevelopers?: Maybe<Scalars['Float']['output']>;
+  trendChange?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.adoption_trends_time_series" */
+export type View_Types_Adoption_Trends_Time_Series = {
+  __typename?: 'view_types_adoption_trends_time_series';
+  activeDevelopersCount?: Maybe<Scalars['numeric']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+};
+
+/** aggregated selection of "view_types.adoption_trends_time_series" */
+export type View_Types_Adoption_Trends_Time_Series_Aggregate = {
+  __typename?: 'view_types_adoption_trends_time_series_aggregate';
+  aggregate?: Maybe<View_Types_Adoption_Trends_Time_Series_Aggregate_Fields>;
+  nodes: Array<View_Types_Adoption_Trends_Time_Series>;
+};
+
+/** aggregate fields of "view_types.adoption_trends_time_series" */
+export type View_Types_Adoption_Trends_Time_Series_Aggregate_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_aggregate_fields';
+  avg?: Maybe<View_Types_Adoption_Trends_Time_Series_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Adoption_Trends_Time_Series_Max_Fields>;
+  min?: Maybe<View_Types_Adoption_Trends_Time_Series_Min_Fields>;
+  stddev?: Maybe<View_Types_Adoption_Trends_Time_Series_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Adoption_Trends_Time_Series_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Adoption_Trends_Time_Series_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Adoption_Trends_Time_Series_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Adoption_Trends_Time_Series_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Adoption_Trends_Time_Series_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Adoption_Trends_Time_Series_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.adoption_trends_time_series" */
+export type View_Types_Adoption_Trends_Time_Series_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Adoption_Trends_Time_Series_Avg_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_avg_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.adoption_trends_time_series". All fields are combined with a logical 'AND'. */
+export type View_Types_Adoption_Trends_Time_Series_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Bool_Exp>>;
+  activeDevelopersCount?: InputMaybe<Numeric_Comparison_Exp>;
+  aiCodeUsagePercentage?: InputMaybe<Numeric_Comparison_Exp>;
+  date?: InputMaybe<Date_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Adoption_Trends_Time_Series_Max_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_max_fields';
+  activeDevelopersCount?: Maybe<Scalars['numeric']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Adoption_Trends_Time_Series_Min_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_min_fields';
+  activeDevelopersCount?: Maybe<Scalars['numeric']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['numeric']['output']>;
+  date?: Maybe<Scalars['date']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.adoption_trends_time_series". */
+export type View_Types_Adoption_Trends_Time_Series_Order_By = {
+  activeDevelopersCount?: InputMaybe<Order_By>;
+  aiCodeUsagePercentage?: InputMaybe<Order_By>;
+  date?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.adoption_trends_time_series" */
+export enum View_Types_Adoption_Trends_Time_Series_Select_Column {
+  /** column name */
+  ActiveDevelopersCount = 'activeDevelopersCount',
+  /** column name */
+  AiCodeUsagePercentage = 'aiCodeUsagePercentage',
+  /** column name */
+  Date = 'date'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Adoption_Trends_Time_Series_Stddev_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_stddev_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Adoption_Trends_Time_Series_Stddev_Pop_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_stddev_pop_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Adoption_Trends_Time_Series_Stddev_Samp_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_stddev_samp_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_adoption_trends_time_series" */
+export type View_Types_Adoption_Trends_Time_Series_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Adoption_Trends_Time_Series_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Adoption_Trends_Time_Series_Stream_Cursor_Value_Input = {
+  activeDevelopersCount?: InputMaybe<Scalars['numeric']['input']>;
+  aiCodeUsagePercentage?: InputMaybe<Scalars['numeric']['input']>;
+  date?: InputMaybe<Scalars['date']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Adoption_Trends_Time_Series_Sum_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_sum_fields';
+  activeDevelopersCount?: Maybe<Scalars['numeric']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['numeric']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Adoption_Trends_Time_Series_Var_Pop_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_var_pop_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Adoption_Trends_Time_Series_Var_Samp_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_var_samp_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Adoption_Trends_Time_Series_Variance_Fields = {
+  __typename?: 'view_types_adoption_trends_time_series_variance_fields';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "view_types.aggregated_categories" */
 export type View_Types_Aggregated_Categories = {
   __typename?: 'view_types_aggregated_categories';
@@ -41842,6 +42509,8 @@ export type View_Types_Ai_Human_Days_Stats = {
   __typename?: 'view_types_ai_human_days_stats';
   aiAvgDays?: Maybe<Scalars['numeric']['output']>;
   humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregated selection of "view_types.ai_human_days_stats" */
@@ -41879,6 +42548,8 @@ export type View_Types_Ai_Human_Days_Stats_Avg_Fields = {
   __typename?: 'view_types_ai_human_days_stats_avg_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Boolean expression to filter rows from the table "view_types.ai_human_days_stats". All fields are combined with a logical 'AND'. */
@@ -41888,6 +42559,8 @@ export type View_Types_Ai_Human_Days_Stats_Bool_Exp = {
   _or?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Bool_Exp>>;
   aiAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
   humanAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
+  previousAiAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
+  previousHumanAvgDays?: InputMaybe<Numeric_Comparison_Exp>;
 };
 
 /** aggregate max on columns */
@@ -41895,6 +42568,8 @@ export type View_Types_Ai_Human_Days_Stats_Max_Fields = {
   __typename?: 'view_types_ai_human_days_stats_max_fields';
   aiAvgDays?: Maybe<Scalars['numeric']['output']>;
   humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregate min on columns */
@@ -41902,12 +42577,16 @@ export type View_Types_Ai_Human_Days_Stats_Min_Fields = {
   __typename?: 'view_types_ai_human_days_stats_min_fields';
   aiAvgDays?: Maybe<Scalars['numeric']['output']>;
   humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** Ordering options when selecting data from "view_types.ai_human_days_stats". */
 export type View_Types_Ai_Human_Days_Stats_Order_By = {
   aiAvgDays?: InputMaybe<Order_By>;
   humanAvgDays?: InputMaybe<Order_By>;
+  previousAiAvgDays?: InputMaybe<Order_By>;
+  previousHumanAvgDays?: InputMaybe<Order_By>;
 };
 
 /** select columns of table "view_types.ai_human_days_stats" */
@@ -41915,7 +42594,11 @@ export enum View_Types_Ai_Human_Days_Stats_Select_Column {
   /** column name */
   AiAvgDays = 'aiAvgDays',
   /** column name */
-  HumanAvgDays = 'humanAvgDays'
+  HumanAvgDays = 'humanAvgDays',
+  /** column name */
+  PreviousAiAvgDays = 'previousAiAvgDays',
+  /** column name */
+  PreviousHumanAvgDays = 'previousHumanAvgDays'
 }
 
 /** aggregate stddev on columns */
@@ -41923,6 +42606,8 @@ export type View_Types_Ai_Human_Days_Stats_Stddev_Fields = {
   __typename?: 'view_types_ai_human_days_stats_stddev_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_pop on columns */
@@ -41930,6 +42615,8 @@ export type View_Types_Ai_Human_Days_Stats_Stddev_Pop_Fields = {
   __typename?: 'view_types_ai_human_days_stats_stddev_pop_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_samp on columns */
@@ -41937,6 +42624,8 @@ export type View_Types_Ai_Human_Days_Stats_Stddev_Samp_Fields = {
   __typename?: 'view_types_ai_human_days_stats_stddev_samp_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "view_types_ai_human_days_stats" */
@@ -41951,6 +42640,8 @@ export type View_Types_Ai_Human_Days_Stats_Stream_Cursor_Input = {
 export type View_Types_Ai_Human_Days_Stats_Stream_Cursor_Value_Input = {
   aiAvgDays?: InputMaybe<Scalars['numeric']['input']>;
   humanAvgDays?: InputMaybe<Scalars['numeric']['input']>;
+  previousAiAvgDays?: InputMaybe<Scalars['numeric']['input']>;
+  previousHumanAvgDays?: InputMaybe<Scalars['numeric']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -41958,6 +42649,8 @@ export type View_Types_Ai_Human_Days_Stats_Sum_Fields = {
   __typename?: 'view_types_ai_human_days_stats_sum_fields';
   aiAvgDays?: Maybe<Scalars['numeric']['output']>;
   humanAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['numeric']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregate var_pop on columns */
@@ -41965,6 +42658,8 @@ export type View_Types_Ai_Human_Days_Stats_Var_Pop_Fields = {
   __typename?: 'view_types_ai_human_days_stats_var_pop_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate var_samp on columns */
@@ -41972,6 +42667,8 @@ export type View_Types_Ai_Human_Days_Stats_Var_Samp_Fields = {
   __typename?: 'view_types_ai_human_days_stats_var_samp_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate variance on columns */
@@ -41979,6 +42676,8 @@ export type View_Types_Ai_Human_Days_Stats_Variance_Fields = {
   __typename?: 'view_types_ai_human_days_stats_variance_fields';
   aiAvgDays?: Maybe<Scalars['Float']['output']>;
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "view_types.issue_type_count" */
@@ -42258,6 +42957,9 @@ export type View_Types_Lines_Of_Code_Stats = {
   __typename?: 'view_types_lines_of_code_stats';
   aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
   humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
   totalLines?: Maybe<Scalars['bigint']['output']>;
 };
 
@@ -42296,6 +42998,9 @@ export type View_Types_Lines_Of_Code_Stats_Avg_Fields = {
   __typename?: 'view_types_lines_of_code_stats_avg_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42306,6 +43011,9 @@ export type View_Types_Lines_Of_Code_Stats_Bool_Exp = {
   _or?: InputMaybe<Array<View_Types_Lines_Of_Code_Stats_Bool_Exp>>;
   aiLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
   humanLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
+  previousAiLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
+  previousHumanLinesOfCode?: InputMaybe<Bigint_Comparison_Exp>;
+  previousTotalLines?: InputMaybe<Bigint_Comparison_Exp>;
   totalLines?: InputMaybe<Bigint_Comparison_Exp>;
 };
 
@@ -42314,6 +43022,9 @@ export type View_Types_Lines_Of_Code_Stats_Max_Fields = {
   __typename?: 'view_types_lines_of_code_stats_max_fields';
   aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
   humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
   totalLines?: Maybe<Scalars['bigint']['output']>;
 };
 
@@ -42322,6 +43033,9 @@ export type View_Types_Lines_Of_Code_Stats_Min_Fields = {
   __typename?: 'view_types_lines_of_code_stats_min_fields';
   aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
   humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
   totalLines?: Maybe<Scalars['bigint']['output']>;
 };
 
@@ -42329,6 +43043,9 @@ export type View_Types_Lines_Of_Code_Stats_Min_Fields = {
 export type View_Types_Lines_Of_Code_Stats_Order_By = {
   aiLinesOfCode?: InputMaybe<Order_By>;
   humanLinesOfCode?: InputMaybe<Order_By>;
+  previousAiLinesOfCode?: InputMaybe<Order_By>;
+  previousHumanLinesOfCode?: InputMaybe<Order_By>;
+  previousTotalLines?: InputMaybe<Order_By>;
   totalLines?: InputMaybe<Order_By>;
 };
 
@@ -42339,6 +43056,12 @@ export enum View_Types_Lines_Of_Code_Stats_Select_Column {
   /** column name */
   HumanLinesOfCode = 'humanLinesOfCode',
   /** column name */
+  PreviousAiLinesOfCode = 'previousAiLinesOfCode',
+  /** column name */
+  PreviousHumanLinesOfCode = 'previousHumanLinesOfCode',
+  /** column name */
+  PreviousTotalLines = 'previousTotalLines',
+  /** column name */
   TotalLines = 'totalLines'
 }
 
@@ -42347,6 +43070,9 @@ export type View_Types_Lines_Of_Code_Stats_Stddev_Fields = {
   __typename?: 'view_types_lines_of_code_stats_stddev_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42355,6 +43081,9 @@ export type View_Types_Lines_Of_Code_Stats_Stddev_Pop_Fields = {
   __typename?: 'view_types_lines_of_code_stats_stddev_pop_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42363,6 +43092,9 @@ export type View_Types_Lines_Of_Code_Stats_Stddev_Samp_Fields = {
   __typename?: 'view_types_lines_of_code_stats_stddev_samp_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42378,6 +43110,9 @@ export type View_Types_Lines_Of_Code_Stats_Stream_Cursor_Input = {
 export type View_Types_Lines_Of_Code_Stats_Stream_Cursor_Value_Input = {
   aiLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
   humanLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
+  previousAiLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
+  previousHumanLinesOfCode?: InputMaybe<Scalars['bigint']['input']>;
+  previousTotalLines?: InputMaybe<Scalars['bigint']['input']>;
   totalLines?: InputMaybe<Scalars['bigint']['input']>;
 };
 
@@ -42386,6 +43121,9 @@ export type View_Types_Lines_Of_Code_Stats_Sum_Fields = {
   __typename?: 'view_types_lines_of_code_stats_sum_fields';
   aiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
   humanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
   totalLines?: Maybe<Scalars['bigint']['output']>;
 };
 
@@ -42394,6 +43132,9 @@ export type View_Types_Lines_Of_Code_Stats_Var_Pop_Fields = {
   __typename?: 'view_types_lines_of_code_stats_var_pop_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42402,6 +43143,9 @@ export type View_Types_Lines_Of_Code_Stats_Var_Samp_Fields = {
   __typename?: 'view_types_lines_of_code_stats_var_samp_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42410,15 +43154,550 @@ export type View_Types_Lines_Of_Code_Stats_Variance_Fields = {
   __typename?: 'view_types_lines_of_code_stats_variance_fields';
   aiLinesOfCode?: Maybe<Scalars['Float']['output']>;
   humanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousAiLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousHumanLinesOfCode?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
   totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.percent_ai_code_stats" */
+export type View_Types_Percent_Ai_Code_Stats = {
+  __typename?: 'view_types_percent_ai_code_stats';
+  previousTotalAiLines?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
+  totalAiLines?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.percent_ai_code_stats" */
+export type View_Types_Percent_Ai_Code_Stats_Aggregate = {
+  __typename?: 'view_types_percent_ai_code_stats_aggregate';
+  aggregate?: Maybe<View_Types_Percent_Ai_Code_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Percent_Ai_Code_Stats>;
+};
+
+/** aggregate fields of "view_types.percent_ai_code_stats" */
+export type View_Types_Percent_Ai_Code_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Percent_Ai_Code_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Percent_Ai_Code_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Percent_Ai_Code_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Percent_Ai_Code_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Percent_Ai_Code_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Percent_Ai_Code_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Percent_Ai_Code_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Percent_Ai_Code_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Percent_Ai_Code_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Percent_Ai_Code_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.percent_ai_code_stats" */
+export type View_Types_Percent_Ai_Code_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Percent_Ai_Code_Stats_Avg_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_avg_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.percent_ai_code_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Percent_Ai_Code_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Percent_Ai_Code_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Percent_Ai_Code_Stats_Bool_Exp>>;
+  previousTotalAiLines?: InputMaybe<Bigint_Comparison_Exp>;
+  previousTotalLines?: InputMaybe<Bigint_Comparison_Exp>;
+  totalAiLines?: InputMaybe<Bigint_Comparison_Exp>;
+  totalLines?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Percent_Ai_Code_Stats_Max_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_max_fields';
+  previousTotalAiLines?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
+  totalAiLines?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Percent_Ai_Code_Stats_Min_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_min_fields';
+  previousTotalAiLines?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
+  totalAiLines?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.percent_ai_code_stats". */
+export type View_Types_Percent_Ai_Code_Stats_Order_By = {
+  previousTotalAiLines?: InputMaybe<Order_By>;
+  previousTotalLines?: InputMaybe<Order_By>;
+  totalAiLines?: InputMaybe<Order_By>;
+  totalLines?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.percent_ai_code_stats" */
+export enum View_Types_Percent_Ai_Code_Stats_Select_Column {
+  /** column name */
+  PreviousTotalAiLines = 'previousTotalAiLines',
+  /** column name */
+  PreviousTotalLines = 'previousTotalLines',
+  /** column name */
+  TotalAiLines = 'totalAiLines',
+  /** column name */
+  TotalLines = 'totalLines'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Percent_Ai_Code_Stats_Stddev_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_stddev_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Percent_Ai_Code_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_stddev_pop_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Percent_Ai_Code_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_stddev_samp_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_percent_ai_code_stats" */
+export type View_Types_Percent_Ai_Code_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Percent_Ai_Code_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Percent_Ai_Code_Stats_Stream_Cursor_Value_Input = {
+  previousTotalAiLines?: InputMaybe<Scalars['bigint']['input']>;
+  previousTotalLines?: InputMaybe<Scalars['bigint']['input']>;
+  totalAiLines?: InputMaybe<Scalars['bigint']['input']>;
+  totalLines?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Percent_Ai_Code_Stats_Sum_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_sum_fields';
+  previousTotalAiLines?: Maybe<Scalars['bigint']['output']>;
+  previousTotalLines?: Maybe<Scalars['bigint']['output']>;
+  totalAiLines?: Maybe<Scalars['bigint']['output']>;
+  totalLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Percent_Ai_Code_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_var_pop_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Percent_Ai_Code_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_var_samp_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Percent_Ai_Code_Stats_Variance_Fields = {
+  __typename?: 'view_types_percent_ai_code_stats_variance_fields';
+  previousTotalAiLines?: Maybe<Scalars['Float']['output']>;
+  previousTotalLines?: Maybe<Scalars['Float']['output']>;
+  totalAiLines?: Maybe<Scalars['Float']['output']>;
+  totalLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.percent_prs_with_ai_stats" */
+export type View_Types_Percent_Prs_With_Ai_Stats = {
+  __typename?: 'view_types_percent_prs_with_ai_stats';
+  previousPrsWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalPrs?: Maybe<Scalars['bigint']['output']>;
+  prsWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalPrs?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.percent_prs_with_ai_stats" */
+export type View_Types_Percent_Prs_With_Ai_Stats_Aggregate = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_aggregate';
+  aggregate?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Percent_Prs_With_Ai_Stats>;
+};
+
+/** aggregate fields of "view_types.percent_prs_with_ai_stats" */
+export type View_Types_Percent_Prs_With_Ai_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Percent_Prs_With_Ai_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.percent_prs_with_ai_stats" */
+export type View_Types_Percent_Prs_With_Ai_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Avg_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_avg_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.percent_prs_with_ai_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Percent_Prs_With_Ai_Stats_Bool_Exp>>;
+  previousPrsWithAi?: InputMaybe<Bigint_Comparison_Exp>;
+  previousTotalPrs?: InputMaybe<Bigint_Comparison_Exp>;
+  prsWithAi?: InputMaybe<Bigint_Comparison_Exp>;
+  totalPrs?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Max_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_max_fields';
+  previousPrsWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalPrs?: Maybe<Scalars['bigint']['output']>;
+  prsWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalPrs?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Min_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_min_fields';
+  previousPrsWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalPrs?: Maybe<Scalars['bigint']['output']>;
+  prsWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalPrs?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.percent_prs_with_ai_stats". */
+export type View_Types_Percent_Prs_With_Ai_Stats_Order_By = {
+  previousPrsWithAi?: InputMaybe<Order_By>;
+  previousTotalPrs?: InputMaybe<Order_By>;
+  prsWithAi?: InputMaybe<Order_By>;
+  totalPrs?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.percent_prs_with_ai_stats" */
+export enum View_Types_Percent_Prs_With_Ai_Stats_Select_Column {
+  /** column name */
+  PreviousPrsWithAi = 'previousPrsWithAi',
+  /** column name */
+  PreviousTotalPrs = 'previousTotalPrs',
+  /** column name */
+  PrsWithAi = 'prsWithAi',
+  /** column name */
+  TotalPrs = 'totalPrs'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Stddev_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_stddev_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_stddev_pop_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_stddev_samp_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_percent_prs_with_ai_stats" */
+export type View_Types_Percent_Prs_With_Ai_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Percent_Prs_With_Ai_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Percent_Prs_With_Ai_Stats_Stream_Cursor_Value_Input = {
+  previousPrsWithAi?: InputMaybe<Scalars['bigint']['input']>;
+  previousTotalPrs?: InputMaybe<Scalars['bigint']['input']>;
+  prsWithAi?: InputMaybe<Scalars['bigint']['input']>;
+  totalPrs?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Sum_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_sum_fields';
+  previousPrsWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalPrs?: Maybe<Scalars['bigint']['output']>;
+  prsWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalPrs?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_var_pop_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_var_samp_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Percent_Prs_With_Ai_Stats_Variance_Fields = {
+  __typename?: 'view_types_percent_prs_with_ai_stats_variance_fields';
+  previousPrsWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalPrs?: Maybe<Scalars['Float']['output']>;
+  prsWithAi?: Maybe<Scalars['Float']['output']>;
+  totalPrs?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.percent_repos_with_ai_stats" */
+export type View_Types_Percent_Repos_With_Ai_Stats = {
+  __typename?: 'view_types_percent_repos_with_ai_stats';
+  previousReposWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalRepos?: Maybe<Scalars['bigint']['output']>;
+  reposWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalRepos?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.percent_repos_with_ai_stats" */
+export type View_Types_Percent_Repos_With_Ai_Stats_Aggregate = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_aggregate';
+  aggregate?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Aggregate_Fields>;
+  nodes: Array<View_Types_Percent_Repos_With_Ai_Stats>;
+};
+
+/** aggregate fields of "view_types.percent_repos_with_ai_stats" */
+export type View_Types_Percent_Repos_With_Ai_Stats_Aggregate_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_aggregate_fields';
+  avg?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Max_Fields>;
+  min?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Min_Fields>;
+  stddev?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Percent_Repos_With_Ai_Stats_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.percent_repos_with_ai_stats" */
+export type View_Types_Percent_Repos_With_Ai_Stats_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Avg_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_avg_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.percent_repos_with_ai_stats". All fields are combined with a logical 'AND'. */
+export type View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>>;
+  previousReposWithAi?: InputMaybe<Bigint_Comparison_Exp>;
+  previousTotalRepos?: InputMaybe<Bigint_Comparison_Exp>;
+  reposWithAi?: InputMaybe<Bigint_Comparison_Exp>;
+  totalRepos?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Max_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_max_fields';
+  previousReposWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalRepos?: Maybe<Scalars['bigint']['output']>;
+  reposWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalRepos?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Min_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_min_fields';
+  previousReposWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalRepos?: Maybe<Scalars['bigint']['output']>;
+  reposWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalRepos?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.percent_repos_with_ai_stats". */
+export type View_Types_Percent_Repos_With_Ai_Stats_Order_By = {
+  previousReposWithAi?: InputMaybe<Order_By>;
+  previousTotalRepos?: InputMaybe<Order_By>;
+  reposWithAi?: InputMaybe<Order_By>;
+  totalRepos?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.percent_repos_with_ai_stats" */
+export enum View_Types_Percent_Repos_With_Ai_Stats_Select_Column {
+  /** column name */
+  PreviousReposWithAi = 'previousReposWithAi',
+  /** column name */
+  PreviousTotalRepos = 'previousTotalRepos',
+  /** column name */
+  ReposWithAi = 'reposWithAi',
+  /** column name */
+  TotalRepos = 'totalRepos'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Stddev_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_stddev_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Stddev_Pop_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_stddev_pop_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Stddev_Samp_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_stddev_samp_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_percent_repos_with_ai_stats" */
+export type View_Types_Percent_Repos_With_Ai_Stats_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Percent_Repos_With_Ai_Stats_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Percent_Repos_With_Ai_Stats_Stream_Cursor_Value_Input = {
+  previousReposWithAi?: InputMaybe<Scalars['bigint']['input']>;
+  previousTotalRepos?: InputMaybe<Scalars['bigint']['input']>;
+  reposWithAi?: InputMaybe<Scalars['bigint']['input']>;
+  totalRepos?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Sum_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_sum_fields';
+  previousReposWithAi?: Maybe<Scalars['bigint']['output']>;
+  previousTotalRepos?: Maybe<Scalars['bigint']['output']>;
+  reposWithAi?: Maybe<Scalars['bigint']['output']>;
+  totalRepos?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Var_Pop_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_var_pop_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Var_Samp_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_var_samp_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Percent_Repos_With_Ai_Stats_Variance_Fields = {
+  __typename?: 'view_types_percent_repos_with_ai_stats_variance_fields';
+  previousReposWithAi?: Maybe<Scalars['Float']['output']>;
+  previousTotalRepos?: Maybe<Scalars['Float']['output']>;
+  reposWithAi?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "view_types.roi_trends_time_series" */
 export type View_Types_Roi_Trends_Time_Series = {
   __typename?: 'view_types_roi_trends_time_series';
+  aiCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
   date?: Maybe<Scalars['date']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregated selection of "view_types.roi_trends_time_series" */
@@ -42454,8 +43733,12 @@ export type View_Types_Roi_Trends_Time_Series_Aggregate_FieldsCountArgs = {
 /** aggregate avg on columns */
 export type View_Types_Roi_Trends_Time_Series_Avg_Fields = {
   __typename?: 'view_types_roi_trends_time_series_avg_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Boolean expression to filter rows from the table "view_types.roi_trends_time_series". All fields are combined with a logical 'AND'. */
@@ -42463,63 +43746,99 @@ export type View_Types_Roi_Trends_Time_Series_Bool_Exp = {
   _and?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Bool_Exp>>;
   _not?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
   _or?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Bool_Exp>>;
+  aiCodingTimeDays?: InputMaybe<Numeric_Comparison_Exp>;
   aiCycleDays?: InputMaybe<Numeric_Comparison_Exp>;
+  aiReviewTimeDays?: InputMaybe<Numeric_Comparison_Exp>;
   date?: InputMaybe<Date_Comparison_Exp>;
+  humanCodingTimeDays?: InputMaybe<Numeric_Comparison_Exp>;
   humanCycleDays?: InputMaybe<Numeric_Comparison_Exp>;
+  humanReviewTimeDays?: InputMaybe<Numeric_Comparison_Exp>;
 };
 
 /** aggregate max on columns */
 export type View_Types_Roi_Trends_Time_Series_Max_Fields = {
   __typename?: 'view_types_roi_trends_time_series_max_fields';
+  aiCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
   date?: Maybe<Scalars['date']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregate min on columns */
 export type View_Types_Roi_Trends_Time_Series_Min_Fields = {
   __typename?: 'view_types_roi_trends_time_series_min_fields';
+  aiCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
   date?: Maybe<Scalars['date']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** Ordering options when selecting data from "view_types.roi_trends_time_series". */
 export type View_Types_Roi_Trends_Time_Series_Order_By = {
+  aiCodingTimeDays?: InputMaybe<Order_By>;
   aiCycleDays?: InputMaybe<Order_By>;
+  aiReviewTimeDays?: InputMaybe<Order_By>;
   date?: InputMaybe<Order_By>;
+  humanCodingTimeDays?: InputMaybe<Order_By>;
   humanCycleDays?: InputMaybe<Order_By>;
+  humanReviewTimeDays?: InputMaybe<Order_By>;
 };
 
 /** select columns of table "view_types.roi_trends_time_series" */
 export enum View_Types_Roi_Trends_Time_Series_Select_Column {
   /** column name */
+  AiCodingTimeDays = 'aiCodingTimeDays',
+  /** column name */
   AiCycleDays = 'aiCycleDays',
+  /** column name */
+  AiReviewTimeDays = 'aiReviewTimeDays',
   /** column name */
   Date = 'date',
   /** column name */
-  HumanCycleDays = 'humanCycleDays'
+  HumanCodingTimeDays = 'humanCodingTimeDays',
+  /** column name */
+  HumanCycleDays = 'humanCycleDays',
+  /** column name */
+  HumanReviewTimeDays = 'humanReviewTimeDays'
 }
 
 /** aggregate stddev on columns */
 export type View_Types_Roi_Trends_Time_Series_Stddev_Fields = {
   __typename?: 'view_types_roi_trends_time_series_stddev_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_pop on columns */
 export type View_Types_Roi_Trends_Time_Series_Stddev_Pop_Fields = {
   __typename?: 'view_types_roi_trends_time_series_stddev_pop_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_samp on columns */
 export type View_Types_Roi_Trends_Time_Series_Stddev_Samp_Fields = {
   __typename?: 'view_types_roi_trends_time_series_stddev_samp_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "view_types_roi_trends_time_series" */
@@ -42532,37 +43851,57 @@ export type View_Types_Roi_Trends_Time_Series_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type View_Types_Roi_Trends_Time_Series_Stream_Cursor_Value_Input = {
+  aiCodingTimeDays?: InputMaybe<Scalars['numeric']['input']>;
   aiCycleDays?: InputMaybe<Scalars['numeric']['input']>;
+  aiReviewTimeDays?: InputMaybe<Scalars['numeric']['input']>;
   date?: InputMaybe<Scalars['date']['input']>;
+  humanCodingTimeDays?: InputMaybe<Scalars['numeric']['input']>;
   humanCycleDays?: InputMaybe<Scalars['numeric']['input']>;
+  humanReviewTimeDays?: InputMaybe<Scalars['numeric']['input']>;
 };
 
 /** aggregate sum on columns */
 export type View_Types_Roi_Trends_Time_Series_Sum_Fields = {
   __typename?: 'view_types_roi_trends_time_series_sum_fields';
+  aiCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   aiCycleDays?: Maybe<Scalars['numeric']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['numeric']['output']>;
   humanCycleDays?: Maybe<Scalars['numeric']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['numeric']['output']>;
 };
 
 /** aggregate var_pop on columns */
 export type View_Types_Roi_Trends_Time_Series_Var_Pop_Fields = {
   __typename?: 'view_types_roi_trends_time_series_var_pop_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate var_samp on columns */
 export type View_Types_Roi_Trends_Time_Series_Var_Samp_Fields = {
   __typename?: 'view_types_roi_trends_time_series_var_samp_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate variance on columns */
 export type View_Types_Roi_Trends_Time_Series_Variance_Fields = {
   __typename?: 'view_types_roi_trends_time_series_variance_fields';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "view_types.severity_count" */

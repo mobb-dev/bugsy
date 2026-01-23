@@ -170,12 +170,17 @@ export type PrepareCommitBlameMessage = z.infer<
  * Blame info for a single line.
  * null if the line doesn't exist (e.g., index 0 in 1-indexed array).
  */
+
 export const BlameLineInfoZ = z
   .object({
     /** Line number as it appeared in the introducing commit */
     originalLineNumber: z.number(),
     /** Commit SHA that introduced this line */
     commitSha: z.string(),
+    /** Author name for this line */
+    authorName: z.string().optional(),
+    /** Author email for this line */
+    authorEmail: z.string().optional(),
   })
   .nullable()
 

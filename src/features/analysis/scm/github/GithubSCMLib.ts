@@ -544,8 +544,14 @@ export class GithubSCMLib extends SCMLib {
     )
 
     // Use optimized blame-based attribution (skip if files couldn't be fetched)
+    // Use pr.head.sha (latest commit SHA) directly instead of deriving from prCommits
+    // This ensures we always use the correct latest commit even if prCommits array is stale
     const diffLines = filesRes
-      ? await this._attributeLinesViaBlame(pr.head.ref, filesRes.data, commits)
+      ? await this._attributeLinesViaBlame({
+          headSha: pr.head.sha,
+          changedFiles: filesRes.data,
+          prCommits: commits,
+        })
       : []
 
     return {
@@ -855,18 +861,27 @@ export class GithubSCMLib extends SCMLib {
    * Optimized helper to attribute PR lines to commits using blame API
    * Batch blame queries for minimal API call time (1 call instead of M calls)
    */
-  private async _attributeLinesViaBlame(
-    headRef: string,
-    changedFiles: { filename: string; patch?: string }[],
+  private async _attributeLinesViaBlame(params: {
+    headSha: string // Latest commit SHA from PR.head.sha
+    changedFiles: { filename: string; patch?: string }[]
     prCommits: GetCommitDiffResult[]
-  ): Promise<{ file: string; line: number; commitSha: string }[]> {
+  }): Promise<{ file: string; line: number; commitSha: string }[]> {
+    const { headSha, changedFiles, prCommits } = params
     // Create set of PR commit SHAs for O(1) lookup
     const prCommitShas = new Set(prCommits.map((c) => c.commitSha))
 
     // Filter to only files with patches (additions)
-    const filesWithAdditions = changedFiles.filter((file) =>
-      file.patch?.includes('\n+')
-    )
+    // GitHub API returns null patch for files >1MB - we can't process those without patch
+    // For files with patches, we'll parse them to find additions (even if filter is lenient)
+    const filesWithAdditions = changedFiles.filter((file) => {
+      // Must have a patch to parse line numbers
+      if (!file.patch || file.patch.trim().length === 0) {
+        return false
+      }
+      // Include all files with patches - let _parseAddedLinesFromPatch determine if there are additions
+      // This is more lenient than checking for '+' patterns which might miss edge cases
+      return true
+    })
 
     if (filesWithAdditions.length === 0) {
       return []
@@ -875,10 +890,15 @@ export class GithubSCMLib extends SCMLib {
     // Batch fetch blame data for all files in single GraphQL call
     // this.url is guaranteed to be defined when called from getSubmitRequestDiff
     const { owner, repo } = parseGithubOwnerAndRepo(this.url!)
+    // Use pr.head.sha directly - it's always the latest commit SHA in the PR
+    // This is more reliable than deriving from prCommits array which might be stale
+    // Commit SHA is always reliable for GraphQL object(expression) queries
+    const refToUse: string = headSha
+
     const blameMap = await this.githubSdk.getBlameBatch({
       owner,
       repo,
-      ref: headRef,
+      ref: refToUse, // Use commit SHA directly from PR.head.sha
       filePaths: filesWithAdditions.map((f) => f.filename),
     })
 

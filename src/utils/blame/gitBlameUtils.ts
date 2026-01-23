@@ -79,8 +79,10 @@ export function parseGitBlamePorcelain(output: string): FileBlameData {
 export type BlameLineInfo = {
   commit: string
   originalLine: number
+  authorName?: string
+  authorEmail?: string
+  authorTime?: number
 }
-
 /**
  * Parses git blame --porcelain output into a map keyed by final line number.
  * Useful for looking up blame info for specific lines in the current file version.
@@ -98,25 +100,71 @@ export function parseGitBlamePorcelainByLine(
   }
 
   const lines = output.split('\n')
+  let i = 0
 
-  for (let i = 0; i < lines.length; i++) {
+  // Store author info by commit hash - git blame only shows full metadata once per commit
+  const commitMetaInfo: Record<
+    string,
+    {
+      authorName?: string
+      authorEmail?: string
+      authorTime?: number
+      authorTz?: number
+    }
+  > = {}
+
+  while (i < lines.length) {
     const line = lines[i]
-
     if (!line?.trim()) {
+      i++
       continue
     }
 
-    // Format: <hash> <orig_lineno> <final_lineno> <num_lines>
+    // Header line: <hash> <orig_lineno> <final_lineno> <num_lines>
     const match = line.match(/^([a-f0-9]+)\s+(\d+)\s+(\d+)/)
     if (match) {
-      const commit = match[1]
+      const commit = match[1]!
       const originalLine = parseInt(match[2]!, 10)
       const finalLine = parseInt(match[3]!, 10)
 
-      result[finalLine] = { commit: commit!, originalLine }
-    }
-  }
+      let authorName: string | undefined
+      let authorEmail: string | undefined
+      let authorTime: number | undefined
 
+      // Parse metadata lines until tab-prefixed content line
+      i++
+      while (i < lines.length && !lines[i]!.startsWith('\t')) {
+        const l = lines[i]!
+        if (l.startsWith('author ')) authorName = l.slice('author '.length)
+        else if (l.startsWith('author-mail '))
+          authorEmail = l.slice('author-mail '.length).replace(/^<|>$/g, '')
+        else if (l.startsWith('author-time '))
+          authorTime = parseInt(l.slice('author-time '.length), 10)
+        i++
+      }
+
+      // Store author info for this commit if we found any
+      if (authorName || authorEmail) {
+        commitMetaInfo[commit] = { authorName, authorEmail, authorTime }
+      }
+
+      // Use stored author info for this commit (either just parsed or from previous occurrence)
+      const storedInfo = commitMetaInfo[commit]
+
+      // Skip content line
+      i++
+
+      result[finalLine] = {
+        commit,
+        originalLine,
+        authorName: storedInfo?.authorName,
+        authorEmail: storedInfo?.authorEmail,
+        authorTime: storedInfo?.authorTime,
+      }
+      continue
+    }
+    i++
+  }
   return result
 }
 

@@ -124,7 +124,7 @@ export type AddUserToOrganizationResponse = {
   userId: Scalars['String']['output'];
 };
 
-export type AddUsersToProjectResponse = AddUsersToProjectSuccess | UserAlreadyInProjectError | UserInNotInTheOrganizationError;
+export type AddUsersToProjectResponse = AddUsersToProjectSuccess | UserAlreadyInProjectError | UserCannotBeAddedToProjectError | UserInNotInTheOrganizationError;
 
 export type AddUsersToProjectSuccess = {
   __typename?: 'AddUsersToProjectSuccess';
@@ -668,13 +668,13 @@ export type GithubWebhookSuccess = {
 export type InferenceStats = {
   __typename?: 'InferenceStats';
   count: Scalars['Int']['output'];
-  totalSize: Scalars['Int']['output'];
+  totalLines: Scalars['Int']['output'];
 };
 
 export type InitOrganizationAndProjectGoodResponse = {
   __typename?: 'InitOrganizationAndProjectGoodResponse';
   organizationId: Scalars['String']['output'];
-  projectId: Scalars['String']['output'];
+  projectId?: Maybe<Scalars['String']['output']>;
   userId: Scalars['String']['output'];
 };
 
@@ -1419,6 +1419,12 @@ export type UserAiToolUsage = {
 
 export type UserAlreadyInProjectError = {
   __typename?: 'UserAlreadyInProjectError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type UserCannotBeAddedToProjectError = {
+  __typename?: 'UserCannotBeAddedToProjectError';
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
 };
@@ -2801,9 +2807,12 @@ export type Ai_Blame_Inference = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
+  inferenceFileMd5?: Maybe<Scalars['String']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path: Scalars['String']['output'];
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path: Scalars['String']['output'];
   repositoryUrl?: Maybe<Scalars['String']['output']>;
@@ -2884,12 +2893,16 @@ export type Ai_Blame_Inference_Avg_Fields = {
   __typename?: 'ai_blame_inference_avg_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Avg_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "ai_blame_inference". All fields are combined with a logical 'AND'. */
@@ -2902,8 +2915,10 @@ export type Ai_Blame_Inference_Bool_Exp = {
   computerName?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  inferenceFileMd5?: InputMaybe<String_Comparison_Exp>;
   inferenceFileSize?: InputMaybe<Int_Comparison_Exp>;
   inferencesS3Path?: InputMaybe<String_Comparison_Exp>;
+  lineCount?: InputMaybe<Int_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   promptS3Path?: InputMaybe<String_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
@@ -2925,6 +2940,8 @@ export enum Ai_Blame_Inference_Constraint {
 export type Ai_Blame_Inference_Inc_Input = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "ai_blame_inference" */
@@ -2934,9 +2951,12 @@ export type Ai_Blame_Inference_Insert_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceFileMd5?: InputMaybe<Scalars['String']['input']>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
@@ -2955,9 +2975,12 @@ export type Ai_Blame_Inference_Max_Fields = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceFileMd5?: Maybe<Scalars['String']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
@@ -2973,9 +2996,12 @@ export type Ai_Blame_Inference_Max_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceFileMd5?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
@@ -2992,9 +3018,12 @@ export type Ai_Blame_Inference_Min_Fields = {
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceFileMd5?: Maybe<Scalars['String']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   inferencesS3Path?: Maybe<Scalars['String']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptS3Path?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
@@ -3010,9 +3039,12 @@ export type Ai_Blame_Inference_Min_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceFileMd5?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
@@ -3052,8 +3084,10 @@ export type Ai_Blame_Inference_Order_By = {
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceFileMd5?: InputMaybe<Order_By>;
   inferenceFileSize?: InputMaybe<Order_By>;
   inferencesS3Path?: InputMaybe<Order_By>;
+  lineCount?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptS3Path?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
@@ -3081,9 +3115,13 @@ export enum Ai_Blame_Inference_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceFileMd5 = 'inferenceFileMd5',
+  /** column name */
   InferenceFileSize = 'inferenceFileSize',
   /** column name */
   InferencesS3Path = 'inferencesS3Path',
+  /** column name */
+  LineCount = 'lineCount',
   /** column name */
   Model = 'model',
   /** column name */
@@ -3108,9 +3146,12 @@ export type Ai_Blame_Inference_Set_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceFileMd5?: InputMaybe<Scalars['String']['input']>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
@@ -3126,12 +3167,16 @@ export type Ai_Blame_Inference_Stddev_Fields = {
   __typename?: 'ai_blame_inference_stddev_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
@@ -3139,12 +3184,16 @@ export type Ai_Blame_Inference_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_inference_stddev_pop_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Pop_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_samp on columns */
@@ -3152,12 +3201,16 @@ export type Ai_Blame_Inference_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_inference_stddev_samp_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Samp_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "ai_blame_inference" */
@@ -3174,9 +3227,12 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceFileMd5?: InputMaybe<Scalars['String']['input']>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   inferencesS3Path?: InputMaybe<Scalars['String']['input']>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptS3Path?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
@@ -3192,12 +3248,16 @@ export type Ai_Blame_Inference_Sum_Fields = {
   __typename?: 'ai_blame_inference_sum_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Int']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by sum() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Sum_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "ai_blame_inference_type" */
@@ -3398,9 +3458,13 @@ export enum Ai_Blame_Inference_Update_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceFileMd5 = 'inferenceFileMd5',
+  /** column name */
   InferenceFileSize = 'inferenceFileSize',
   /** column name */
   InferencesS3Path = 'inferencesS3Path',
+  /** column name */
+  LineCount = 'lineCount',
   /** column name */
   Model = 'model',
   /** column name */
@@ -3433,12 +3497,16 @@ export type Ai_Blame_Inference_Var_Pop_Fields = {
   __typename?: 'ai_blame_inference_var_pop_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Var_Pop_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
@@ -3446,12 +3514,16 @@ export type Ai_Blame_Inference_Var_Samp_Fields = {
   __typename?: 'ai_blame_inference_var_samp_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Var_Samp_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate variance on columns */
@@ -3459,12 +3531,16 @@ export type Ai_Blame_Inference_Variance_Fields = {
   __typename?: 'ai_blame_inference_variance_fields';
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
+  /** number of lines in the inference file */
+  lineCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Variance_Order_By = {
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
+  /** number of lines in the inference file */
+  lineCount?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "ai_ide" */
@@ -25625,6 +25701,7 @@ export type Organization_Raw_Issue_Type_Blocklist_Updates = {
 /** columns and relationships of "organization_role" */
 export type Organization_Role = {
   __typename?: 'organization_role';
+  canBeAddedToAProject: Scalars['Boolean']['output'];
   canChangeRole: Scalars['Boolean']['output'];
   canCreateProject: Scalars['Boolean']['output'];
   canDeleteUserFromOrganization: Scalars['Boolean']['output'];
@@ -25685,6 +25762,7 @@ export type Organization_Role_Bool_Exp = {
   _and?: InputMaybe<Array<Organization_Role_Bool_Exp>>;
   _not?: InputMaybe<Organization_Role_Bool_Exp>;
   _or?: InputMaybe<Array<Organization_Role_Bool_Exp>>;
+  canBeAddedToAProject?: InputMaybe<Boolean_Comparison_Exp>;
   canChangeRole?: InputMaybe<Boolean_Comparison_Exp>;
   canCreateProject?: InputMaybe<Boolean_Comparison_Exp>;
   canDeleteUserFromOrganization?: InputMaybe<Boolean_Comparison_Exp>;
@@ -25704,6 +25782,7 @@ export enum Organization_Role_Constraint {
 
 /** input type for inserting data into table "organization_role" */
 export type Organization_Role_Insert_Input = {
+  canBeAddedToAProject?: InputMaybe<Scalars['Boolean']['input']>;
   canChangeRole?: InputMaybe<Scalars['Boolean']['input']>;
   canCreateProject?: InputMaybe<Scalars['Boolean']['input']>;
   canDeleteUserFromOrganization?: InputMaybe<Scalars['Boolean']['input']>;
@@ -25751,6 +25830,7 @@ export type Organization_Role_On_Conflict = {
 
 /** Ordering options when selecting data from "organization_role". */
 export type Organization_Role_Order_By = {
+  canBeAddedToAProject?: InputMaybe<Order_By>;
   canChangeRole?: InputMaybe<Order_By>;
   canCreateProject?: InputMaybe<Order_By>;
   canDeleteUserFromOrganization?: InputMaybe<Order_By>;
@@ -25769,6 +25849,8 @@ export type Organization_Role_Pk_Columns_Input = {
 /** select columns of table "organization_role" */
 export enum Organization_Role_Select_Column {
   /** column name */
+  CanBeAddedToAProject = 'canBeAddedToAProject',
+  /** column name */
   CanChangeRole = 'canChangeRole',
   /** column name */
   CanCreateProject = 'canCreateProject',
@@ -25786,6 +25868,7 @@ export enum Organization_Role_Select_Column {
 
 /** input type for updating data in table "organization_role" */
 export type Organization_Role_Set_Input = {
+  canBeAddedToAProject?: InputMaybe<Scalars['Boolean']['input']>;
   canChangeRole?: InputMaybe<Scalars['Boolean']['input']>;
   canCreateProject?: InputMaybe<Scalars['Boolean']['input']>;
   canDeleteUserFromOrganization?: InputMaybe<Scalars['Boolean']['input']>;
@@ -25805,6 +25888,7 @@ export type Organization_Role_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Organization_Role_Stream_Cursor_Value_Input = {
+  canBeAddedToAProject?: InputMaybe<Scalars['Boolean']['input']>;
   canChangeRole?: InputMaybe<Scalars['Boolean']['input']>;
   canCreateProject?: InputMaybe<Scalars['Boolean']['input']>;
   canDeleteUserFromOrganization?: InputMaybe<Scalars['Boolean']['input']>;
@@ -25859,6 +25943,8 @@ export enum Organization_Role_Type_Constraint {
 }
 
 export enum Organization_Role_Type_Enum {
+  /** Data contributor role - can only upload Tracy data */
+  DataContributor = 'data_contributor',
   /** manager */
   Manager = 'manager',
   /** member role */
@@ -25968,6 +26054,8 @@ export type Organization_Role_Type_Updates = {
 
 /** update columns of table "organization_role" */
 export enum Organization_Role_Update_Column {
+  /** column name */
+  CanBeAddedToAProject = 'canBeAddedToAProject',
   /** column name */
   CanChangeRole = 'canChangeRole',
   /** column name */
@@ -39832,6 +39920,7 @@ export type Tracy_Ai_Blame_Pr = {
   prId: Scalars['String']['output'];
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
   prStatus: Pr_Status_Enum;
+  rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl: Scalars['String']['output'];
   rowCreatedAt: Scalars['timestamptz']['output'];
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
@@ -39880,6 +39969,7 @@ export type Tracy_Ai_Blame_Pr_Avg_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -39902,6 +39992,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   prId?: InputMaybe<String_Comparison_Exp>;
   prMergedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   prStatus?: InputMaybe<Pr_Status_Enum_Comparison_Exp>;
+  rejectedLines?: InputMaybe<Int_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   rowCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tabAutocompleteLinesAdded?: InputMaybe<Int_Comparison_Exp>;
@@ -39919,6 +40010,7 @@ export type Tracy_Ai_Blame_Pr_Inc_Input = {
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -39938,6 +40030,7 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -39958,6 +40051,7 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
@@ -39978,6 +40072,7 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
@@ -40015,6 +40110,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   prId?: InputMaybe<Order_By>;
   prMergedAt?: InputMaybe<Order_By>;
   prStatus?: InputMaybe<Order_By>;
+  rejectedLines?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
   rowCreatedAt?: InputMaybe<Order_By>;
   tabAutocompleteLinesAdded?: InputMaybe<Order_By>;
@@ -40056,6 +40152,8 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   PrStatus = 'prStatus',
   /** column name */
+  RejectedLines = 'rejectedLines',
+  /** column name */
   RepositoryUrl = 'repositoryUrl',
   /** column name */
   RowCreatedAt = 'rowCreatedAt',
@@ -40079,6 +40177,7 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -40091,6 +40190,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -40101,6 +40201,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Pop_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -40111,6 +40212,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Samp_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -40138,6 +40240,7 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -40150,6 +40253,7 @@ export type Tracy_Ai_Blame_Pr_Sum_Fields = {
   commitsCount?: Maybe<Scalars['Int']['output']>;
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  rejectedLines?: Maybe<Scalars['Int']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -40184,6 +40288,8 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   /** column name */
   PrStatus = 'prStatus',
   /** column name */
+  RejectedLines = 'rejectedLines',
+  /** column name */
   RepositoryUrl = 'repositoryUrl',
   /** column name */
   RowCreatedAt = 'rowCreatedAt',
@@ -40207,6 +40313,7 @@ export type Tracy_Ai_Blame_Pr_Var_Pop_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -40217,6 +40324,7 @@ export type Tracy_Ai_Blame_Pr_Var_Samp_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -40227,6 +40335,7 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -47742,7 +47851,7 @@ export type SubmitVulnerabilityReportMutation = { __typename?: 'mutation_root', 
 export type CreateCommunityUserMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CreateCommunityUserMutation = { __typename?: 'mutation_root', initOrganizationAndProject?: { __typename: 'InitOrganizationAndProjectGoodResponse', projectId: string, userId: string, organizationId: string } | { __typename: 'UserAlreadyInProjectError', error?: string | null, status: Status } | { __typename: 'UserHasNoPermissionInProjectError', error?: string | null, status: Status } | null };
+export type CreateCommunityUserMutation = { __typename?: 'mutation_root', initOrganizationAndProject?: { __typename: 'InitOrganizationAndProjectGoodResponse', projectId?: string | null, userId: string, organizationId: string } | { __typename: 'UserAlreadyInProjectError', error?: string | null, status: Status } | { __typename: 'UserHasNoPermissionInProjectError', error?: string | null, status: Status } | null };
 
 export type CreateCliLoginMutationVariables = Exact<{
   publicKey: Scalars['String']['input'];

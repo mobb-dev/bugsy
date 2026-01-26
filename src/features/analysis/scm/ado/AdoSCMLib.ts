@@ -13,6 +13,10 @@ import {
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
+  SearchReposParams,
+  SearchReposResult,
+  SearchSubmitRequestsParams,
+  SearchSubmitRequestsResult,
 } from '../types'
 import {
   AdoPullRequestStatus,
@@ -267,6 +271,18 @@ export class AdoSCMLib extends SCMLib {
 
   async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
     throw new Error('getSubmitRequests not implemented for ADO')
+  }
+
+  override async searchSubmitRequests(
+    _params: SearchSubmitRequestsParams
+  ): Promise<SearchSubmitRequestsResult> {
+    throw new Error('searchSubmitRequests not implemented for ADO')
+  }
+
+  override async searchRepos(
+    _params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    throw new Error('searchRepos not implemented for ADO')
   }
 
   // TODO: Add comprehensive tests for getPullRequestMetrics (ADO)

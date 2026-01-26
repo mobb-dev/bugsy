@@ -11,6 +11,10 @@ import {
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
+  SearchReposParams,
+  SearchReposResult,
+  SearchSubmitRequestsParams,
+  SearchSubmitRequestsResult,
 } from './types'
 import { buildAuthorizedRepoUrl } from './utils'
 
@@ -113,6 +117,39 @@ export abstract class SCMLib {
   abstract getSubmitRequests(repoUrl: string): Promise<GetSubmitRequestInfo[]>
 
   /**
+   * Search for PRs with optional filters and sorting.
+   * IMPORTANT: Sort order must remain consistent across paginated requests
+   * for cursor-based pagination to work correctly.
+   *
+   * Default implementation uses getSubmitRequests and applies filters/sorting in-memory.
+   * Override in subclasses for provider-specific optimizations (e.g., GitHub Search API).
+   *
+   * @param params - Search parameters including filters, sort, and pagination
+   * @returns Paginated search results with cursor
+   */
+  async searchSubmitRequests(
+    _params: SearchSubmitRequestsParams
+  ): Promise<SearchSubmitRequestsResult> {
+    throw new Error(
+      'searchSubmitRequests is not implemented for this SCM provider'
+    )
+  }
+
+  /**
+   * Search repositories with pagination support.
+   * IMPORTANT: Sort order must remain consistent across paginated requests
+   * for cursor-based pagination to work correctly.
+   *
+   * Must be overridden in subclasses with provider-specific implementations.
+   *
+   * @param params - Search parameters including sort and pagination
+   * @returns Paginated search results with cursor
+   */
+  async searchRepos(_params: SearchReposParams): Promise<SearchReposResult> {
+    throw new Error('searchRepos is not implemented for this SCM provider')
+  }
+
+  /**
    * Fetches commits for multiple PRs in a single batch request.
    * This is an optimization that not all SCM providers may support efficiently.
    * Default implementation throws - override in subclasses that support batching.
@@ -127,6 +164,51 @@ export abstract class SCMLib {
   ): Promise<Map<number, string[]>> {
     throw new Error('getPrCommitsBatch not implemented for this SCM provider')
   }
+
+  /**
+   * Fetches additions and deletions counts for multiple PRs in batch.
+   * More efficient than fetching individual PR details.
+   *
+   * @param repoUrl - Repository URL
+   * @param prNumbers - Array of PR numbers to fetch metrics for
+   * @returns Map of PR number to additions/deletions count
+   */
+  async getPrAdditionsDeletionsBatch(
+    _repoUrl: string,
+    _prNumbers: number[]
+  ): Promise<Map<number, { additions: number; deletions: number }>> {
+    throw new Error(
+      'getPrAdditionsDeletionsBatch not implemented for this SCM provider'
+    )
+  }
+
+  /**
+   * Batch fetch PR data (additions/deletions + comments) for multiple PRs.
+   * Only implemented for GitHub (via GraphQL). Other providers should override if supported.
+   * This is more efficient than calling getPrAdditionsDeletionsBatch separately.
+   *
+   * @param _repoUrl - Repository URL
+   * @param _prNumbers - Array of PR numbers to fetch data for
+   * @returns Map of PR number to { changedLines, comments }
+   */
+  async getPrDataBatch(
+    _repoUrl: string,
+    _prNumbers: number[]
+  ): Promise<
+    Map<
+      number,
+      {
+        changedLines: { additions: number; deletions: number }
+        comments: {
+          author: { login: string; type: string } | null
+          body: string
+        }[]
+      }
+    >
+  > {
+    throw new Error('getPrDataBatch not implemented for this SCM provider')
+  }
+
   abstract getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics>
 
   public getAccessToken(): string {

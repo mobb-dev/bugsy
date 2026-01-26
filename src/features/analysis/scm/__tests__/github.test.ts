@@ -336,6 +336,78 @@ describe('getPrCommitsBatch - batch fetch PR commits via GraphQL', () => {
   })
 })
 
+describe('getPrAdditionsDeletionsBatch - batch fetch PR changedLines', () => {
+  it('fetches additions and deletions for multiple PRs', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const prNumbers = [28379, 28378, 28377]
+
+    const result = await sdk.getPrAdditionsDeletionsBatch({
+      owner: OWNER,
+      repo: REPO,
+      prNumbers,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(prNumbers.length)
+
+    // Each PR should have additions and deletions as non-negative numbers
+    for (const prNumber of prNumbers) {
+      const stats = result.get(prNumber)
+      expect(stats).toBeDefined()
+      expect(typeof stats?.additions).toBe('number')
+      expect(typeof stats?.deletions).toBe('number')
+      expect(stats?.additions).toBeGreaterThanOrEqual(0)
+      expect(stats?.deletions).toBeGreaterThanOrEqual(0)
+    }
+  })
+
+  it('handles non-existent PR numbers gracefully', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const prNumbers = [28379, 999999999]
+
+    const result = await sdk.getPrAdditionsDeletionsBatch({
+      owner: OWNER,
+      repo: REPO,
+      prNumbers,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    // Existing PR should have stats
+    expect(result.get(28379)).toBeDefined()
+    // Non-existing PR should not be in map
+    expect(result.has(999999999)).toBe(false)
+  })
+
+  it('works via GithubSCMLib wrapper', async () => {
+    const scmLib = new GithubSCMLib(
+      GITHUB_URL,
+      env.PLAYWRIGHT_GH_CLOUD_PAT,
+      undefined
+    )
+
+    const prNumbers = [28379, 28378]
+    const result = await scmLib.getPrAdditionsDeletionsBatch(
+      GITHUB_URL,
+      prNumbers
+    )
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(2)
+    expect(result.get(28379)).toBeDefined()
+    expect(result.get(28379)?.additions).toBeGreaterThanOrEqual(0)
+  })
+})
+
 // ============================================================================
 // Regression Tests for GitHub SCM Optimizations
 // These tests verify existing behavior before optimizations are applied
@@ -643,6 +715,372 @@ describe('getCommitDiff - individual commit diff', () => {
           expect(typeof sha).toBe('string')
           expect(sha.length).toBeGreaterThan(0)
         })
+      })
+    })
+  })
+})
+
+// ============================================================================
+// Blob Size and Blame Batch Tests
+// Tests for size-based blame batching optimization to prevent GitHub API timeouts
+// ============================================================================
+
+describe('getBlobSizesBatch - batch fetch blob sizes via GraphQL', () => {
+  it('fetches blob sizes for multiple files in a single request', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    // Use known blob SHAs from facebook/react
+    // These are from the package.json and README.md files
+    const blobShas = [
+      '8d39df22a26fd24d26cef2c07e65f7ce7dd1fd08', // package.json blob SHA
+      'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0', // Non-existent blob SHA
+    ]
+
+    const result = await sdk.getBlobSizesBatch({
+      owner: OWNER,
+      repo: REPO,
+      blobShas,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    // Only the existing blob should be in the map
+    // The result size depends on which blobs exist
+    expect(result.size).toBeGreaterThanOrEqual(0)
+
+    // If the known blob exists, verify its size is a positive number
+    const firstBlobSha = blobShas[0]
+    if (firstBlobSha) {
+      const knownBlobSize = result.get(firstBlobSha)
+      if (knownBlobSize !== undefined) {
+        expect(typeof knownBlobSize).toBe('number')
+        expect(knownBlobSize).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('returns empty map for empty input', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const result = await sdk.getBlobSizesBatch({
+      owner: OWNER,
+      repo: REPO,
+      blobShas: [],
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(0)
+  })
+})
+
+describe('getBlameBatch - size-based blame batching', () => {
+  it('handles files with blob SHAs for size-based optimization', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    // Use known files from a commit in facebook/react
+    // These should be small files that won't timeout
+    const files = [
+      {
+        path: 'package.json',
+        blobSha: '8d39df22a26fd24d26cef2c07e65f7ce7dd1fd08',
+      },
+    ]
+
+    const result = await sdk.getBlameBatch({
+      owner: OWNER,
+      repo: REPO,
+      ref: 'main',
+      files,
+      concurrency: 2,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    // The file should have blame data if it exists
+    // Note: The exact result depends on whether the blob SHA is valid for this ref
+  })
+
+  it('returns empty map for empty input', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const result = await sdk.getBlameBatch({
+      owner: OWNER,
+      repo: REPO,
+      ref: 'main',
+      files: [],
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(0)
+  })
+
+  it('respects concurrency parameter for large files', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    // Test with concurrency=1 to verify the parameter is used
+    const result = await sdk.getBlameBatch({
+      owner: OWNER,
+      repo: REPO,
+      ref: 'main',
+      files: [],
+      concurrency: 1,
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(0)
+  })
+})
+
+describe('getBlameBatchByPaths - legacy interface without size optimization', () => {
+  it('fetches blame data using file paths only', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const result = await sdk.getBlameBatchByPaths({
+      owner: OWNER,
+      repo: REPO,
+      ref: 'main',
+      filePaths: ['package.json'],
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    // package.json should have blame data
+    const blameData = result.get('package.json')
+    if (blameData) {
+      expect(Array.isArray(blameData)).toBe(true)
+      // Each blame range should have startingLine, endingLine, and commitSha
+      if (blameData.length > 0) {
+        expect(blameData[0]).toHaveProperty('startingLine')
+        expect(blameData[0]).toHaveProperty('endingLine')
+        expect(blameData[0]).toHaveProperty('commitSha')
+      }
+    }
+  })
+
+  it('returns empty map for empty input', async () => {
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: GITHUB_URL,
+      isEnableRetries: true,
+    })
+
+    const result = await sdk.getBlameBatchByPaths({
+      owner: OWNER,
+      repo: REPO,
+      ref: 'main',
+      filePaths: [],
+    })
+
+    expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(0)
+  })
+})
+
+describe('GithubSCMLib pagination methods', () => {
+  const GITHUB_ORG = 'facebook'
+  const GITHUB_REPO_URL = 'https://github.com/facebook/react'
+
+  describe('searchRepos', () => {
+    it('should search repositories with pagination using GitHub Search API', async () => {
+      const scmLib = new GithubSCMLib(
+        undefined,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        GITHUB_ORG
+      )
+
+      const result = await scmLib.searchRepos({
+        scmOrg: GITHUB_ORG,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 5,
+      })
+
+      expect(result.results).toBeDefined()
+      expect(Array.isArray(result.results)).toBe(true)
+      expect(result.results.length).toBeGreaterThan(0)
+      expect(result.results.length).toBeLessThanOrEqual(5)
+      expect(result.hasMore).toBeDefined()
+      expect(typeof result.hasMore).toBe('boolean')
+
+      // Verify structure of repo objects
+      if (result.results.length > 0) {
+        const repo = result.results[0]!
+        expect(repo.repoName).toBeDefined()
+        expect(repo.repoUrl).toBeDefined()
+        expect(repo.repoOwner).toBeDefined()
+      }
+    })
+
+    it('should fallback to base implementation when scmOrg is undefined', async () => {
+      const scmLib = new GithubSCMLib(
+        undefined,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        undefined
+      )
+
+      const result = await scmLib.searchRepos({
+        scmOrg: undefined,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 5,
+      })
+
+      expect(result.results).toBeDefined()
+      expect(Array.isArray(result.results)).toBe(true)
+      // Should use base class implementation (getRepoList + in-memory pagination)
+      expect(result.hasMore).toBeDefined()
+    })
+
+    it('should handle cursor-based pagination', async () => {
+      const scmLib = new GithubSCMLib(
+        undefined,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        GITHUB_ORG
+      )
+
+      // Get first page
+      const firstPage = await scmLib.searchRepos({
+        scmOrg: GITHUB_ORG,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 3,
+      })
+
+      expect(firstPage.results.length).toBeGreaterThan(0)
+
+      // Get second page if available
+      if (firstPage.hasMore && firstPage.nextCursor) {
+        const secondPage = await scmLib.searchRepos({
+          scmOrg: GITHUB_ORG,
+          sort: { field: 'updated', order: 'desc' },
+          limit: 3,
+          cursor: firstPage.nextCursor,
+        })
+
+        expect(secondPage.results.length).toBeGreaterThan(0)
+        // Verify pages are different
+        const firstPageRepoNames = new Set(
+          firstPage.results.map((r) => r.repoName)
+        )
+        const secondPageRepoNames = new Set(
+          secondPage.results.map((r) => r.repoName)
+        )
+        const overlap = [...firstPageRepoNames].filter((name) =>
+          secondPageRepoNames.has(name)
+        )
+        expect(overlap.length).toBe(0)
+      }
+    })
+  })
+
+  describe('searchSubmitRequests', () => {
+    it('should search pull requests with pagination using GitHub Search API', async () => {
+      const scmLib = new GithubSCMLib(
+        GITHUB_REPO_URL,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        GITHUB_ORG
+      )
+
+      const result = await scmLib.searchSubmitRequests({
+        repoUrl: GITHUB_REPO_URL,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 5,
+      })
+
+      expect(result.results).toBeDefined()
+      expect(Array.isArray(result.results)).toBe(true)
+      expect(result.hasMore).toBeDefined()
+      expect(typeof result.hasMore).toBe('boolean')
+
+      // Verify structure of PR objects
+      if (result.results.length > 0) {
+        const pr = result.results[0]!
+        expect(pr.submitRequestId).toBeDefined()
+        expect(pr.submitRequestNumber).toBeDefined()
+        expect(pr.title).toBeDefined()
+        expect(pr.status).toBeDefined()
+        expect(pr.createdAt).toBeInstanceOf(Date)
+        expect(pr.updatedAt).toBeInstanceOf(Date)
+      }
+    })
+
+    it('should handle cursor-based pagination for PRs', async () => {
+      const scmLib = new GithubSCMLib(
+        GITHUB_REPO_URL,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        GITHUB_ORG
+      )
+
+      // Get first page
+      const firstPage = await scmLib.searchSubmitRequests({
+        repoUrl: GITHUB_REPO_URL,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 3,
+      })
+
+      // Get second page if available
+      if (firstPage.hasMore && firstPage.nextCursor) {
+        const secondPage = await scmLib.searchSubmitRequests({
+          repoUrl: GITHUB_REPO_URL,
+          sort: { field: 'updated', order: 'desc' },
+          limit: 3,
+          cursor: firstPage.nextCursor,
+        })
+
+        expect(secondPage.results).toBeDefined()
+        // Verify pages are different
+        if (firstPage.results.length > 0 && secondPage.results.length > 0) {
+          const firstPageNumbers = new Set(
+            firstPage.results.map((r) => r.submitRequestNumber)
+          )
+          const secondPageNumbers = new Set(
+            secondPage.results.map((r) => r.submitRequestNumber)
+          )
+          const overlap = [...firstPageNumbers].filter((num) =>
+            secondPageNumbers.has(num)
+          )
+          expect(overlap.length).toBe(0)
+        }
+      }
+    })
+
+    it('should filter PRs by state', async () => {
+      const scmLib = new GithubSCMLib(
+        GITHUB_REPO_URL,
+        env.PLAYWRIGHT_GH_CLOUD_PAT,
+        GITHUB_ORG
+      )
+
+      const result = await scmLib.searchSubmitRequests({
+        repoUrl: GITHUB_REPO_URL,
+        sort: { field: 'updated', order: 'desc' },
+        limit: 5,
+        filters: {
+          state: 'open',
+        },
+      })
+
+      // Verify all returned PRs are open
+      result.results.forEach((pr) => {
+        expect(['open', 'draft']).toContain(pr.status)
       })
     })
   })

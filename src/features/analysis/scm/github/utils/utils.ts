@@ -13,6 +13,9 @@ import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
   InvalidUrlPatternError,
+  NetworkError,
+  RateLimitError,
+  ScmBadCredentialsError,
 } from '../../errors'
 import { parseScmURL, scmCloudUrl, ScmType } from '../../shared/src'
 import { isBrokerUrl } from '../../utils'
@@ -149,6 +152,124 @@ function isGithubActionActionToken(token: string) {
   return token.startsWith('ghs_')
 }
 
+/**
+ * Centralized GitHub API error handler.
+ * Detects error types and throws appropriate typed errors.
+ *
+ * @param error - The error from GitHub API
+ * @param scmType - The SCM type (GitHub or GitHub Enterprise)
+ * @throws Typed error classes for structured error handling
+ */
+export function handleGitHubError(
+  error: unknown,
+  scmType: ScmType = ScmType.GitHub
+): never {
+  const errorObj = error as {
+    status?: number
+    statusCode?: number
+    code?: string
+    message?: string
+    response?: {
+      status?: number
+      statusCode?: number
+      code?: string
+      headers?: Record<string, string>
+    }
+    headers?: Record<string, string>
+  }
+
+  const status =
+    errorObj.status ||
+    errorObj.statusCode ||
+    errorObj.response?.status ||
+    errorObj.response?.statusCode
+
+  // Check for rate limit headers
+  const headers = errorObj.headers || errorObj.response?.headers
+  const retryAfter = headers?.['retry-after']
+    ? Number.parseInt(headers['retry-after'], 10)
+    : headers?.['x-ratelimit-reset']
+      ? Math.max(
+          0,
+          Math.floor(
+            (Number.parseInt(headers['x-ratelimit-reset'], 10) * 1000 -
+              Date.now()) /
+              1000
+          )
+        )
+      : undefined
+
+  const errorMessage =
+    errorObj.message || (error instanceof Error ? error.message : String(error))
+
+  // Rate limit errors (403 with rate limit headers or explicit rate limit message)
+  if (
+    (status === 403 && retryAfter !== undefined) ||
+    errorMessage.toLowerCase().includes('rate limit') ||
+    errorMessage.toLowerCase().includes('api rate limit exceeded')
+  ) {
+    throw new RateLimitError(
+      'GitHub API rate limit exceeded',
+      scmType,
+      retryAfter
+    )
+  }
+
+  // Authentication errors (401)
+  if (status === 401) {
+    throw new InvalidAccessTokenError(
+      'GitHub authentication failed - token may be expired or invalid',
+      scmType
+    )
+  }
+
+  // Permission/credential errors (403 without rate limit)
+  if (status === 403) {
+    throw new ScmBadCredentialsError(
+      'GitHub access forbidden - insufficient permissions or invalid credentials',
+      scmType
+    )
+  }
+
+  // Not found errors (404)
+  if (status === 404) {
+    throw new InvalidRepoUrlError(
+      'GitHub repository or resource not found',
+      scmType
+    )
+  }
+
+  // Network errors (connection issues)
+  const errorCode = errorObj.code || errorObj.response?.code
+  if (
+    errorCode === 'ECONNREFUSED' ||
+    errorCode === 'ETIMEDOUT' ||
+    errorCode === 'ENOTFOUND' ||
+    errorCode === 'EAI_AGAIN'
+  ) {
+    throw new NetworkError(
+      `GitHub network error: ${errorMessage}`,
+      scmType,
+      errorCode
+    )
+  }
+
+  // Re-throw if it's already one of our custom errors
+  if (
+    error instanceof RateLimitError ||
+    error instanceof InvalidAccessTokenError ||
+    error instanceof ScmBadCredentialsError ||
+    error instanceof InvalidRepoUrlError ||
+    error instanceof NetworkError ||
+    error instanceof InvalidUrlPatternError
+  ) {
+    throw error
+  }
+
+  // Generic fallback
+  throw new Error(`GitHub API error: ${errorMessage}`)
+}
+
 export async function githubValidateParams(
   url: string | undefined,
   accessToken: string | undefined
@@ -171,27 +292,6 @@ export async function githubValidateParams(
     }
   } catch (e) {
     console.log('could not init github scm', e)
-    const error = e as {
-      code?: string
-      status?: number
-      statusCode?: number
-      response?: { status?: number; statusCode?: number; code?: string }
-    }
-    const code =
-      error.status ||
-      error.statusCode ||
-      error.response?.status ||
-      error.response?.statusCode ||
-      error.response?.code
-    if (code === 401 || code === 403) {
-      throw new InvalidAccessTokenError(`invalid github access token`)
-    }
-    if (code === 404) {
-      throw new InvalidRepoUrlError(`invalid github repo Url ${url}`)
-    }
-    console.log('githubValidateParams error', e)
-    throw new InvalidRepoUrlError(
-      `cannot access GH repo URL: ${url} with the provided access token`
-    )
+    handleGitHubError(e, ScmType.GitHub)
   }
 }

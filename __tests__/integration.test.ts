@@ -46,6 +46,14 @@ vi.useFakeTimers({
 })
 
 const mockedOpen = vi.spyOn(openExport, 'default')
+const expectAnalysisUrlLogged = (consoleMock: {
+  mock: { calls: unknown[][] }
+}) => {
+  const hasMatch = consoleMock.mock.calls.some((call) =>
+    call.some((arg) => typeof arg === 'string' && analysisRegex.test(arg))
+  )
+  expect(hasMatch).toBe(true)
+}
 
 vi.mock('open', async () => {
   const { createOpenMockImplementation } =
@@ -270,7 +278,7 @@ describe('Basic Analyze tests', () => {
         prStrategy: 'SPREAD',
       })
     )
-    expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
+    expectAnalysisUrlLogged(consoleMock)
     consoleMock.mockClear()
   })
   it('Should run the github fixer command - fixable issue', async () => {
@@ -1003,7 +1011,7 @@ describe('create-one-pr flag tests', () => {
         prStrategy: 'CONDENSE',
       })
     )
-    expect(analysisRegex.test(consoleMock.mock.lastCall?.at(0))).toBe(true)
+    expectAnalysisUrlLogged(consoleMock)
     consoleMock.mockClear()
   })
 

@@ -622,8 +622,11 @@ export type GetReportsV2ResponseSuccess = {
 
 export type GetReposSuccess = {
   __typename?: 'GetReposSuccess';
+  hasMore: Scalars['Boolean']['output'];
+  nextCursor?: Maybe<Scalars['String']['output']>;
   repos: Array<ScmRepo>;
   status: Status;
+  totalCount?: Maybe<Scalars['Int']['output']>;
 };
 
 export type GetScmReposResponse = GetReposSuccess | ScmAdminError | ScmError | ScmNoProjectPermissionsError | ScmNoScmTokenError | ScmRepoNoTokenAccessError | ScmUnsupportedScmTypeError;
@@ -939,6 +942,17 @@ export type ReferenceNotFoundError = BaseError & {
 
 export type RegisterUserResponse = FixData | GetFixNoFixError;
 
+export type RepoSort = {
+  field: RepoSortField;
+  order: SortOrder;
+};
+
+export enum RepoSortField {
+  Created = 'CREATED',
+  Name = 'NAME',
+  Updated = 'UPDATED'
+}
+
 export type RepoSubmitReport = {
   __typename?: 'RepoSubmitReport';
   originalUrl: Scalars['String']['output'];
@@ -1056,6 +1070,23 @@ export type ScmError = ScmBaseError & {
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
 };
+
+export enum ScmErrorType {
+  /** Authentication token is invalid, expired, or missing */
+  AuthError = 'AUTH_ERROR',
+  /** Repository not found or doesn't exist */
+  NotFound = 'NOT_FOUND',
+  /** User does not have access to the repository */
+  NoAccess = 'NO_ACCESS',
+  /** Rate limit exceeded on SCM provider (GitHub, GitLab, etc) */
+  RateLimit = 'RATE_LIMIT',
+  /** Generic SCM provider error */
+  ScmError = 'SCM_ERROR',
+  /** Network timeout or connectivity issue */
+  Timeout = 'TIMEOUT',
+  /** Unknown or unexpected error */
+  Unknown = 'UNKNOWN'
+}
 
 export type ScmGetSubmitRequestStatusResponse = ScmAdminError | ScmError | ScmGetSubmitRequestStatusSuccess | ScmNoProjectPermissionsError | ScmNoScmTokenError | ScmRepoNoTokenAccessError | ScmUnsupportedScmTypeError;
 
@@ -1199,6 +1230,11 @@ export type SetAnswersResponse = {
   status: FixerStatus;
 };
 
+export enum SortOrder {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type SplitFixData = {
   __typename?: 'SplitFixData';
   extraContext: FixExtraContextResponse;
@@ -1299,6 +1335,17 @@ export type SubmitRequestInfo = {
   updatedAt: Scalars['Timestamp']['output'];
 };
 
+export type SubmitRequestSort = {
+  field: SubmitRequestSortField;
+  order: SortOrder;
+};
+
+export enum SubmitRequestSortField {
+  Comments = 'COMMENTS',
+  Created = 'CREATED',
+  Updated = 'UPDATED'
+}
+
 export enum SubmitRequestStatus {
   Closed = 'CLOSED',
   Draft = 'DRAFT',
@@ -1308,6 +1355,37 @@ export enum SubmitRequestStatus {
   Open = 'OPEN',
   Skipped = 'SKIPPED'
 }
+
+export type SubmitRequestsError = {
+  __typename?: 'SubmitRequestsError';
+  /** Type of SCM error that occurred */
+  errorType: ScmErrorType;
+  /** Human-readable error message */
+  message: Scalars['String']['output'];
+  /** For rate limits: when the limit resets (ISO 8601 timestamp) */
+  retryAfter?: Maybe<Scalars['String']['output']>;
+  /** Indicates if the error is retryable (rate limits, timeouts) */
+  retryable: Scalars['Boolean']['output'];
+};
+
+export type SubmitRequestsResponse = SubmitRequestsError | SubmitRequestsSuccess;
+
+export type SubmitRequestsSuccess = {
+  __typename?: 'SubmitRequestsSuccess';
+  /** Indicates if more PRs are available for pagination */
+  hasMore: Scalars['Boolean']['output'];
+  /**
+   * Cursor for next page. Pass this value to the cursor parameter
+   * to fetch the next batch of results.
+   */
+  nextCursor?: Maybe<Scalars['String']['output']>;
+  submitRequests: Array<SubmitRequestInfo>;
+  /**
+   * Total count of PRs. May be null when filtering by attributions
+   * or using search API (count unknown until all PRs checked).
+   */
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
 
 export type SubmitToScmResponse = ScmAdminError | ScmCommitHashError | ScmError | ScmInvalidSubmitBranchNameError | ScmInvalidTargetBranchNameError | ScmNoFixesPermissionsError | ScmNoProjectPermissionsError | ScmNoScmTokenError | ScmRepoNoTokenAccessError | ScmSubmitBranchAlreadyExistsError | ScmTargetBranchMissingError | ScmUnsupportedScmTypeError | SubmitToScmSuccess;
 
@@ -9265,7 +9343,17 @@ export type Blame_Ai_Analysis_Request = {
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: Maybe<Scalars['jsonb']['output']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: Maybe<Scalars['String']['output']>;
   state: Blame_Ai_Analysis_Request_State_Enum;
+};
+
+
+/** columns and relationships of "blame_ai_analysis_request" */
+export type Blame_Ai_Analysis_RequestProgressMetadataArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregated selection of "blame_ai_analysis_request" */
@@ -9324,6 +9412,12 @@ export type Blame_Ai_Analysis_Request_Aggregate_Order_By = {
   variance?: InputMaybe<Blame_Ai_Analysis_Request_Variance_Order_By>;
 };
 
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Blame_Ai_Analysis_Request_Append_Input = {
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** input type for inserting array relation for remote table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input = {
   data: Array<Blame_Ai_Analysis_Request_Insert_Input>;
@@ -9360,6 +9454,8 @@ export type Blame_Ai_Analysis_Request_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  progressMetadata?: InputMaybe<Jsonb_Comparison_Exp>;
+  progressStage?: InputMaybe<String_Comparison_Exp>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum_Comparison_Exp>;
 };
 
@@ -9368,6 +9464,24 @@ export enum Blame_Ai_Analysis_Request_Constraint {
   /** unique or primary key constraint on columns "id" */
   BlameAiAnalysisRequestPkey = 'blame_ai_analysis_request_pkey'
 }
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Blame_Ai_Analysis_Request_Delete_At_Path_Input = {
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Blame_Ai_Analysis_Request_Delete_Elem_Input = {
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Blame_Ai_Analysis_Request_Delete_Key_Input = {
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['String']['input']>;
+};
 
 /** input type for incrementing numeric columns in table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Inc_Input = {
@@ -9388,6 +9502,10 @@ export type Blame_Ai_Analysis_Request_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -9402,6 +9520,8 @@ export type Blame_Ai_Analysis_Request_Max_Fields = {
   error?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "blame_ai_analysis_request" */
@@ -9414,6 +9534,8 @@ export type Blame_Ai_Analysis_Request_Max_Order_By = {
   error?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -9427,6 +9549,8 @@ export type Blame_Ai_Analysis_Request_Min_Fields = {
   error?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "blame_ai_analysis_request" */
@@ -9439,6 +9563,8 @@ export type Blame_Ai_Analysis_Request_Min_Order_By = {
   error?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "blame_ai_analysis_request" */
@@ -9470,12 +9596,20 @@ export type Blame_Ai_Analysis_Request_Order_By = {
   id?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  progressMetadata?: InputMaybe<Order_By>;
+  progressStage?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: blame_ai_analysis_request */
 export type Blame_Ai_Analysis_Request_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Blame_Ai_Analysis_Request_Prepend_Input = {
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** select columns of table "blame_ai_analysis_request" */
@@ -9497,6 +9631,10 @@ export enum Blame_Ai_Analysis_Request_Select_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  ProgressMetadata = 'progressMetadata',
+  /** column name */
+  ProgressStage = 'progressStage',
+  /** column name */
   State = 'state'
 }
 
@@ -9510,6 +9648,10 @@ export type Blame_Ai_Analysis_Request_Set_Input = {
   error?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -9722,6 +9864,10 @@ export type Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input = {
   error?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
+  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
+  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -9757,12 +9903,26 @@ export enum Blame_Ai_Analysis_Request_Update_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  ProgressMetadata = 'progressMetadata',
+  /** column name */
+  ProgressStage = 'progressStage',
+  /** column name */
   State = 'state'
 }
 
 export type Blame_Ai_Analysis_Request_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   /** increments the numeric columns with given value of the filtered values */
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   /** filter the rows which have to be updated */
@@ -22258,7 +22418,12 @@ export type Mutation_RootUpdate_Api_Token_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
+  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
+  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
+  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   where: Blame_Ai_Analysis_Request_Bool_Exp;
 };
@@ -22266,7 +22431,12 @@ export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_By_PkArgs = {
+  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
+  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
+  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   pk_columns: Blame_Ai_Analysis_Request_Pk_Columns_Input;
 };
@@ -29206,8 +29376,12 @@ export type Query_Root = {
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
-  /** Get submit requests (PRs/MRs) for a specific repository */
-  getSubmitRequests: Array<SubmitRequestInfo>;
+  /**
+   * Get submit requests (PRs/MRs) for a specific repository with pagination.
+   * Uses cursor-based pagination for consistent results.
+   * Default sort: updated desc (most recently updated first)
+   */
+  getSubmitRequests: SubmitRequestsResponse;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -30835,8 +31009,11 @@ export type Query_RootGetReportsApiV2Args = {
 
 
 export type Query_RootGetScmReposArgs = {
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
   onlyWithAttributions?: InputMaybe<Scalars['Boolean']['input']>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<RepoSort>;
   url: Scalars['String']['input'];
 };
 
@@ -30855,9 +31032,12 @@ export type Query_RootGetSplitFixArgs = {
 
 
 export type Query_RootGetSubmitRequestsArgs = {
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
   onlyWithAttributions?: InputMaybe<Scalars['Boolean']['input']>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
   repoUrl: Scalars['String']['input'];
+  sort?: InputMaybe<SubmitRequestSort>;
 };
 
 

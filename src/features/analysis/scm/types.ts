@@ -78,6 +78,51 @@ export type GetSubmitRequestInfo = {
   changedLines: { added: number; removed: number }
 }
 
+export type SubmitRequestSortField = 'updated' | 'created' | 'comments'
+export type SortOrder = 'asc' | 'desc'
+
+export type SubmitRequestSort = {
+  field: SubmitRequestSortField
+  order: SortOrder
+}
+
+export type SearchSubmitRequestsParams = {
+  repoUrl: string
+  filters?: {
+    updatedAfter?: Date
+    state?: 'open' | 'closed' | 'all'
+  }
+  sort?: SubmitRequestSort
+  limit?: number
+  cursor?: string
+}
+
+export type SearchSubmitRequestsResult = {
+  results: GetSubmitRequestInfo[]
+  nextCursor?: string
+  hasMore: boolean
+}
+
+export type RepoSortField = 'updated' | 'name' | 'created' // 'created' is mapped to 'updated' in implementation
+
+export type RepoSort = {
+  field: RepoSortField
+  order: SortOrder
+}
+
+export type SearchReposParams = {
+  scmOrg: string | undefined
+  sort?: RepoSort
+  limit?: number
+  cursor?: string
+}
+
+export type SearchReposResult = {
+  results: ScmRepoInfo[]
+  nextCursor?: string
+  hasMore: boolean
+}
+
 export type PullRequestMetrics = {
   prId: string
   repositoryUrl: string

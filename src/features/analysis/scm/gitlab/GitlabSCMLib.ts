@@ -10,6 +10,10 @@ import {
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
+  SearchReposParams,
+  SearchReposResult,
+  SearchSubmitRequestsParams,
+  SearchSubmitRequestsResult,
 } from '../types'
 import {
   createMarkdownCommentOnPullRequest,
@@ -253,6 +257,18 @@ export class GitlabSCMLib extends SCMLib {
 
   async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
     throw new Error('getSubmitRequests not implemented for GitLab')
+  }
+
+  override async searchSubmitRequests(
+    _params: SearchSubmitRequestsParams
+  ): Promise<SearchSubmitRequestsResult> {
+    throw new Error('searchSubmitRequests not implemented for GitLab')
+  }
+
+  override async searchRepos(
+    _params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    throw new Error('searchRepos not implemented for GitLab')
   }
 
   // TODO: Add comprehensive tests for getPullRequestMetrics (GitLab)

@@ -41,6 +41,13 @@ export type BlameRequestBase = {
 export type BlameAiAnalysisRequest = BlameRequestBase & {
   __typename?: 'blame_ai_analysis_request'
   commitId?: string | null // UUID (string when serialized)
+  // Progress tracking fields (used by web app for UI updates)
+  progressStage?: string | null
+  progressMetadata?: {
+    commitsProcessed?: number
+    totalCommits?: number
+    message?: string
+  } | null
 }
 
 // Commit blame request data structure (matches actual GraphQL response)

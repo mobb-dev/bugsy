@@ -1,6 +1,7 @@
 import pLimit from 'p-limit'
 import { z } from 'zod'
 
+import { GITHUB_API_CONCURRENCY } from '../env'
 import { InvalidRepoUrlError } from '../errors'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
@@ -22,7 +23,12 @@ import {
   SCMPostGeneralPrCommentsResponse,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
+  SearchReposParams,
+  SearchReposResult,
+  SearchSubmitRequestsParams,
+  SearchSubmitRequestsResult,
 } from '../types'
+import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   getGithubSdk,
   githubValidateParams,
@@ -43,9 +49,6 @@ import {
   UpdateCommentResponse,
 } from './types'
 import { encryptSecret } from './utils/encrypt_secret'
-
-const GITHUB_COMMIT_FETCH_CONCURRENCY =
-  parseInt(process.env['GITHUB_COMMIT_CONCURRENCY'] || '10', 10) || 10
 
 type PrState = NonNullable<
   GetPRMetricsResponse['repository']['pullRequest']
@@ -528,7 +531,7 @@ export class GithubSCMLib extends SCMLib {
     ])
 
     // Rate limit concurrent commit diff fetches to avoid GitHub API rate limits
-    const limit = pLimit(GITHUB_COMMIT_FETCH_CONCURRENCY)
+    const limit = pLimit(GITHUB_API_CONCURRENCY)
 
     // Get detailed commit data with diffs for each commit with controlled concurrency
     // Pass cached repositoryCreatedAt and parentCommitTimestamps to avoid redundant API calls
@@ -606,7 +609,7 @@ export class GithubSCMLib extends SCMLib {
 
       // Extract tickets from pre-fetched comments
       const comments = commentsMap.get(pr.number) || []
-      const tickets = this._extractLinearTicketsFromComments(comments)
+      const tickets = GithubSCMLib.extractLinearTicketsFromComments(comments)
 
       return {
         submitRequestId: String(pr.number),
@@ -629,6 +632,65 @@ export class GithubSCMLib extends SCMLib {
   }
 
   /**
+   * Override searchSubmitRequests to use GitHub's Search API for efficient pagination.
+   * This is much faster than fetching all PRs and filtering in-memory.
+   */
+  override async searchSubmitRequests(
+    params: SearchSubmitRequestsParams
+  ): Promise<SearchSubmitRequestsResult> {
+    this._validateAccessToken()
+    const { owner, repo } = parseGithubOwnerAndRepo(params.repoUrl)
+
+    // Use page-based pagination for GitHub (cursor is page number)
+    const page = parseCursorSafe(params.cursor, 1)
+    const perPage = params.limit || 10
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    const searchResult = await this.githubSdk.searchPullRequests({
+      owner,
+      repo,
+      updatedAfter: params.filters?.updatedAfter,
+      state: params.filters?.state,
+      sort,
+      perPage,
+      page,
+    })
+
+    // Convert GitHub's Issue format to GetSubmitRequestInfo
+    const results: GetSubmitRequestInfo[] = searchResult.items.map((issue) => {
+      let status: ScmSubmitRequestStatus = 'open'
+      if (issue.state === 'closed') {
+        // Check if merged (pull_request object has merged_at field)
+        status = issue.pull_request?.merged_at ? 'merged' : 'closed'
+      } else if (issue.draft) {
+        status = 'draft'
+      }
+
+      return {
+        submitRequestId: String(issue.number),
+        submitRequestNumber: issue.number,
+        title: issue.title,
+        status,
+        sourceBranch: '', // Not available in search API
+        targetBranch: '', // Not available in search API
+        authorName: issue.user?.login,
+        authorEmail: undefined, // Not available in search API
+        createdAt: new Date(issue.created_at),
+        updatedAt: new Date(issue.updated_at),
+        description: issue.body || undefined,
+        tickets: [], // Would need separate parsing
+        changedLines: { added: 0, removed: 0 }, // Not available in search API
+      }
+    })
+
+    return {
+      results,
+      nextCursor: searchResult.hasMore ? String(page + 1) : undefined,
+      hasMore: searchResult.hasMore,
+    }
+  }
+
+  /**
    * Fetches commits for multiple PRs in a single GraphQL request.
    * Much more efficient than calling getSubmitRequestDiff for each PR.
    *
@@ -644,6 +706,155 @@ export class GithubSCMLib extends SCMLib {
     const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
     return this.githubSdk.getPrCommitsBatch({ owner, repo, prNumbers })
   }
+
+  /**
+   * Fetches additions and deletions counts for multiple PRs in a single GraphQL request.
+   * Used to enrich search results with changed lines data.
+   *
+   * @param repoUrl - Repository URL
+   * @param prNumbers - Array of PR numbers to fetch metrics for
+   * @returns Map of PR number to additions/deletions count
+   */
+  override async getPrAdditionsDeletionsBatch(
+    repoUrl: string,
+    prNumbers: number[]
+  ): Promise<Map<number, { additions: number; deletions: number }>> {
+    this._validateAccessToken()
+    const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
+    return this.githubSdk.getPrAdditionsDeletionsBatch({
+      owner,
+      repo,
+      prNumbers,
+    })
+  }
+
+  /**
+   * Batch fetch PR data (additions/deletions + comments) for multiple PRs.
+   * Combines both metrics into a single GraphQL call for efficiency.
+   *
+   * @param repoUrl - Repository URL
+   * @param prNumbers - Array of PR numbers to fetch data for
+   * @returns Map of PR number to { changedLines, comments }
+   */
+  override async getPrDataBatch(
+    repoUrl: string,
+    prNumbers: number[]
+  ): Promise<
+    Map<
+      number,
+      {
+        changedLines: { additions: number; deletions: number }
+        comments: {
+          author: { login: string; type: string } | null
+          body: string
+        }[]
+      }
+    >
+  > {
+    this._validateAccessToken()
+    const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
+    return this.githubSdk.getPrDataBatch({
+      owner,
+      repo,
+      prNumbers,
+    })
+  }
+
+  /**
+   * Override searchRepos to use GitHub's Search API for efficient pagination.
+   * This is much faster than fetching all repos and filtering in-memory.
+   *
+   * Note: GitHub Search API doesn't support sorting by name, so when name sorting
+   * is requested, we fall back to fetching all repos and sorting in-memory.
+   */
+  override async searchRepos(
+    params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    this._validateAccessToken()
+
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    // GitHub Search API doesn't support name sorting, so use in-memory sorting
+    // Also use in-memory sorting when no organization is provided
+    if (!params.scmOrg || sort.field === 'name') {
+      return this.searchReposInMemory(params)
+    }
+
+    // Use GitHub Search API for date-based sorting (more efficient)
+    return this.searchReposWithApi(params)
+  }
+
+  /**
+   * Search repos by fetching all and sorting/paginating in-memory.
+   * Used when name sorting is requested or no organization is provided.
+   */
+  private async searchReposInMemory(
+    params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    const repos = await this.getRepoList(params.scmOrg)
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+    const sortOrder = sort.order === 'asc' ? 1 : -1
+
+    const sortedRepos = [...repos].sort((a, b) => {
+      if (sort.field === 'name') {
+        return a.repoName.localeCompare(b.repoName) * sortOrder
+      }
+
+      // Always sort by updated date, never by created date
+      // This handles both 'updated' and 'created' field values
+      const aDate = a.repoUpdatedAt ? Date.parse(a.repoUpdatedAt) : 0
+      const bDate = b.repoUpdatedAt ? Date.parse(b.repoUpdatedAt) : 0
+      return (aDate - bDate) * sortOrder
+    })
+
+    const limit = params.limit || 10
+    const offset = parseCursorSafe(params.cursor, 0)
+    const paged = sortedRepos.slice(offset, offset + limit)
+    const nextOffset = offset + limit
+
+    return {
+      results: paged,
+      nextCursor:
+        nextOffset < sortedRepos.length ? String(nextOffset) : undefined,
+      hasMore: nextOffset < sortedRepos.length,
+    }
+  }
+
+  /**
+   * Search repos using GitHub Search API for efficient server-side pagination.
+   * Only supports date-based sorting (updated/created).
+   */
+  private async searchReposWithApi(
+    params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    const page = parseCursorSafe(params.cursor, 1)
+    const perPage = params.limit || 10
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    const searchResult = await this.githubSdk.searchRepositories({
+      org: params.scmOrg,
+      sort,
+      perPage,
+      page,
+    })
+
+    // Convert GitHub's Repository format to ScmRepoInfo
+    const results: ScmRepoInfo[] = searchResult.items.map((repo) => ({
+      repoName: repo.name,
+      repoUrl: repo.html_url || repo.url,
+      repoOwner: repo.owner?.login || '',
+      repoLanguages: repo.language ? [repo.language] : [],
+      repoIsPublic: !repo.private,
+      repoUpdatedAt: repo.updated_at || null,
+    }))
+
+    return {
+      results,
+      nextCursor: searchResult.hasMore ? String(page + 1) : undefined,
+      hasMore: searchResult.hasMore,
+    }
+  }
+
   async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
@@ -717,7 +928,7 @@ export class GithubSCMLib extends SCMLib {
    * Parse a Linear ticket from URL and name
    * Returns null if invalid or missing data
    */
-  private _parseLinearTicket(
+  private static _parseLinearTicket(
     url: string | undefined,
     name: string | undefined
   ): { name: string; title: string; url: string } | null {
@@ -734,8 +945,9 @@ export class GithubSCMLib extends SCMLib {
 
   /**
    * Extract Linear ticket links from pre-fetched comments (pure function, no API calls)
+   * Public static method so it can be reused by backend services.
    */
-  private _extractLinearTicketsFromComments(
+  public static extractLinearTicketsFromComments(
     comments: PrCommentData[]
   ): { name: string; title: string; url: string }[] {
     const tickets: { name: string; title: string; url: string }[] = []
@@ -754,7 +966,7 @@ export class GithubSCMLib extends SCMLib {
           /<a href="(https:\/\/linear\.app\/[^"]+)">([A-Z]+-\d+)<\/a>/g
         let match
         while ((match = htmlPattern.exec(body)) !== null) {
-          const ticket = this._parseLinearTicket(match[1], match[2])
+          const ticket = GithubSCMLib._parseLinearTicket(match[1], match[2])
           if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
             seen.add(`${ticket.name}|${ticket.url}`)
             tickets.push(ticket)
@@ -765,7 +977,7 @@ export class GithubSCMLib extends SCMLib {
         const markdownPattern =
           /\[([A-Z]+-\d+)\]\((https:\/\/linear\.app\/[^)]+)\)/g
         while ((match = markdownPattern.exec(body)) !== null) {
-          const ticket = this._parseLinearTicket(match[2], match[1])
+          const ticket = GithubSCMLib._parseLinearTicket(match[2], match[1])
           if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
             seen.add(`${ticket.name}|${ticket.url}`)
             tickets.push(ticket)
@@ -860,10 +1072,15 @@ export class GithubSCMLib extends SCMLib {
   /**
    * Optimized helper to attribute PR lines to commits using blame API
    * Batch blame queries for minimal API call time (1 call instead of M calls)
+   *
+   * Uses size-based batching to handle large files:
+   * - Files > 1MB are processed individually with rate limiting
+   * - Smaller files are batched together in a single request
+   * This prevents GitHub API timeouts (~10s) on large generated files.
    */
   private async _attributeLinesViaBlame(params: {
     headSha: string // Latest commit SHA from PR.head.sha
-    changedFiles: { filename: string; patch?: string }[]
+    changedFiles: { filename: string; patch?: string; sha?: string }[]
     prCommits: GetCommitDiffResult[]
   }): Promise<{ file: string; line: number; commitSha: string }[]> {
     const { headSha, changedFiles, prCommits } = params
@@ -878,6 +1095,9 @@ export class GithubSCMLib extends SCMLib {
       if (!file.patch || file.patch.trim().length === 0) {
         return false
       }
+      if (!file.sha) {
+        return false
+      }
       // Include all files with patches - let _parseAddedLinesFromPatch determine if there are additions
       // This is more lenient than checking for '+' patterns which might miss edge cases
       return true
@@ -887,19 +1107,18 @@ export class GithubSCMLib extends SCMLib {
       return []
     }
 
-    // Batch fetch blame data for all files in single GraphQL call
+    // Batch fetch blame data for all files with size-based optimization
     // this.url is guaranteed to be defined when called from getSubmitRequestDiff
     const { owner, repo } = parseGithubOwnerAndRepo(this.url!)
-    // Use pr.head.sha directly - it's always the latest commit SHA in the PR
-    // This is more reliable than deriving from prCommits array which might be stale
-    // Commit SHA is always reliable for GraphQL object(expression) queries
-    const refToUse: string = headSha
-
     const blameMap = await this.githubSdk.getBlameBatch({
       owner,
       repo,
-      ref: refToUse, // Use commit SHA directly from PR.head.sha
-      filePaths: filesWithAdditions.map((f) => f.filename),
+      ref: headSha, // Use commit SHA directly from PR.head.sha
+      files: filesWithAdditions.map((f) => ({
+        path: f.filename,
+        blobSha: f.sha!,
+      })),
+      concurrency: GITHUB_API_CONCURRENCY,
     })
 
     // Process blame data for each file (no API calls, just data processing)

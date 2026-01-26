@@ -630,10 +630,10 @@ describe('GithubSCMLib.getSubmitRequestDiff - Rate Limiting', () => {
     )
   })
 
-  it('should respect GITHUB_COMMIT_CONCURRENCY environment variable', async () => {
+  it('should respect GITHUB_API_CONCURRENCY environment variable', async () => {
     // Save original env var
-    const originalEnv = process.env['GITHUB_COMMIT_CONCURRENCY']
-    process.env['GITHUB_COMMIT_CONCURRENCY'] = '3'
+    const originalEnv = process.env['GITHUB_API_CONCURRENCY']
+    process.env['GITHUB_API_CONCURRENCY'] = '3'
 
     try {
       // Create a PR with multiple commits for testing
@@ -696,17 +696,17 @@ describe('GithubSCMLib.getSubmitRequestDiff - Rate Limiting', () => {
     } finally {
       // Restore original env var
       if (originalEnv !== undefined) {
-        process.env['GITHUB_COMMIT_CONCURRENCY'] = originalEnv
+        process.env['GITHUB_API_CONCURRENCY'] = originalEnv
       } else {
-        delete process.env['GITHUB_COMMIT_CONCURRENCY']
+        delete process.env['GITHUB_API_CONCURRENCY']
       }
     }
   }, 60000)
 
   it('should default to 10 when env var not set', () => {
     // Save and delete env var
-    const originalEnv = process.env['GITHUB_COMMIT_CONCURRENCY']
-    delete process.env['GITHUB_COMMIT_CONCURRENCY']
+    const originalEnv = process.env['GITHUB_API_CONCURRENCY']
+    delete process.env['GITHUB_API_CONCURRENCY']
 
     try {
       // Create a new instance to pick up the env change
@@ -723,15 +723,15 @@ describe('GithubSCMLib.getSubmitRequestDiff - Rate Limiting', () => {
     } finally {
       // Restore original env var
       if (originalEnv !== undefined) {
-        process.env['GITHUB_COMMIT_CONCURRENCY'] = originalEnv
+        process.env['GITHUB_API_CONCURRENCY'] = originalEnv
       }
     }
   })
 
   it('should handle invalid concurrency values gracefully', () => {
     // Save original env var
-    const originalEnv = process.env['GITHUB_COMMIT_CONCURRENCY']
-    process.env['GITHUB_COMMIT_CONCURRENCY'] = 'invalid'
+    const originalEnv = process.env['GITHUB_API_CONCURRENCY']
+    process.env['GITHUB_API_CONCURRENCY'] = 'invalid'
 
     try {
       // Create a new instance - should fall back to default (10)
@@ -747,9 +747,9 @@ describe('GithubSCMLib.getSubmitRequestDiff - Rate Limiting', () => {
     } finally {
       // Restore original env var
       if (originalEnv !== undefined) {
-        process.env['GITHUB_COMMIT_CONCURRENCY'] = originalEnv
+        process.env['GITHUB_API_CONCURRENCY'] = originalEnv
       } else {
-        delete process.env['GITHUB_COMMIT_CONCURRENCY']
+        delete process.env['GITHUB_API_CONCURRENCY']
       }
     }
   })

@@ -16,6 +16,10 @@ import {
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
+  SearchReposParams,
+  SearchReposResult,
+  SearchSubmitRequestsParams,
+  SearchSubmitRequestsResult,
 } from '../types'
 import {
   getBitbucketSdk,
@@ -131,7 +135,7 @@ export class BitbucketSCMLib extends SCMLib {
         return String(z.number().parse(pullRequestRes.id))
       } catch (e) {
         console.warn(
-          `error creating pull request for BB. Try number ${i + 1}`,
+          `error creating pull request for BB. Try number ${String(i + 1).replace(/\n|\r/g, '')}`,
           e
         )
         await setTimeout(1000)
@@ -318,9 +322,23 @@ export class BitbucketSCMLib extends SCMLib {
     throw new Error('getSubmitRequests not implemented for Bitbucket')
   }
 
+  override async searchSubmitRequests(
+    _params: SearchSubmitRequestsParams
+  ): Promise<SearchSubmitRequestsResult> {
+    throw new Error('searchSubmitRequests not implemented for Bitbucket')
+  }
+
+  override async searchRepos(
+    _params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    throw new Error('searchRepos not implemented for Bitbucket')
+  }
+
   // TODO: Add comprehensive tests for getPullRequestMetrics (Bitbucket)
   // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
   async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
     throw new Error('getPullRequestMetrics not implemented for Bitbucket')
   }
 }
+
+// Mobb security fix applied: LOG_FORGING https://api-st-stenant.mobb.dev/organization/d9e4bd39-84bb-4849-a4f7-975157cbc999/project/b8cd0ad0-b947-4fcf-bf4c-564c7e30a527/report/db049e0e-7516-46a4-9776-8849da852617/fix/e9f2ffe9-1abb-42b2-b746-2d7bfb567d9f

@@ -1,15 +1,10 @@
-import crypto from 'node:crypto'
-import os from 'node:os'
-
 import chalk from 'chalk'
 import Debug from 'debug'
-import open from 'open'
 
-import { API_URL, WEB_APP_URL } from '../constants'
 import { GQLClient } from '../features/analysis/graphql'
-import { buildLoginUrl, LoginContext } from '../mcp/services/types'
-import { CliError, keypress, sleep, Spinner } from '../utils'
-import { configStore } from '../utils/ConfigStoreService'
+import { LoginContext } from '../mcp/services/types'
+import { CliError, keypress, Spinner } from '../utils'
+import { AuthManager } from './AuthManager'
 
 const debug = Debug('mobbdev:commands')
 
@@ -47,11 +42,9 @@ export async function getAuthenticatedGQLClient({
     apiUrl || 'undefined',
     webAppUrl || 'undefined'
   )
-  let gqlClient = new GQLClient({
-    apiKey: inputApiKey || configStore.get('apiToken') || '',
-    type: 'apiKey',
-    apiUrl,
-  })
+
+  const authManager = new AuthManager(webAppUrl, apiUrl)
+  let gqlClient = authManager.getGQLClient(inputApiKey)
 
   gqlClient = await handleMobbLogin({
     inGqlClient: gqlClient,
@@ -77,41 +70,36 @@ export async function handleMobbLogin({
   apiUrl?: string
   webAppUrl?: string
   loginContext?: LoginContext
-}) {
-  const resolvedWebAppUrl = webAppUrl || WEB_APP_URL
-  const resolvedApiUrl = apiUrl || API_URL
+}): Promise<GQLClient> {
   debug(
     'handleMobbLogin: resolved URLs - apiUrl=%s (from param: %s), webAppUrl=%s (from param: %s)',
-    resolvedApiUrl,
     apiUrl || 'fallback',
-    resolvedWebAppUrl,
+    apiUrl || 'fallback',
+    webAppUrl || 'fallback',
     webAppUrl || 'fallback'
   )
+
   const { createSpinner } = Spinner({ ci: skipPrompts })
+  const authManager = new AuthManager(webAppUrl, apiUrl)
 
-  const isConnected = await inGqlClient.verifyApiConnection()
-  if (!isConnected) {
-    createSpinner().start().error({
-      text: '🔓 Connection to Mobb: failed to connect to the Mobb server',
-    })
-    throw new CliError(
-      'Connection to Mobb: failed to connect to the Mobb server'
-    )
-  }
-  createSpinner().start().success({
-    text: `🔓 Connection to Mobb: succeeded`,
-  })
+  // Use the provided GQL client
+  authManager.setGQLClient(inGqlClient)
 
-  const userVerify = await inGqlClient.validateUserToken()
-  if (userVerify) {
-    createSpinner()
-      .start()
-      .success({
-        text: `🔓 Login to Mobb succeeded. ${typeof userVerify === 'string' ? `Logged in as ${userVerify}` : ''}`,
+  // Check if already authenticated
+  try {
+    const isAuthenticated = await authManager.isAuthenticated()
+    if (isAuthenticated) {
+      createSpinner().start().success({
+        text: `🔓 Login to Mobb succeeded. Already authenticated`,
       })
+      return authManager.getGQLClient()
+    }
+  } catch (error) {
+    debug('Authentication check failed:', error)
+  }
 
-    return inGqlClient
-  } else if (apiKey) {
+  // If API key provided but authentication failed
+  if (apiKey) {
     createSpinner().start().error({
       text: '🔓 Login to Mobb failed: The provided API key does not match any configured API key on the system',
     })
@@ -131,70 +119,41 @@ export async function handleMobbLogin({
     text: '🔓 Waiting for Mobb login...',
   })
 
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-  })
+  try {
+    // Generate login URL and open browser
+    const loginUrl = await authManager.generateLoginUrl(loginContext)
 
-  const loginId = await inGqlClient.createCliLogin({
-    publicKey: publicKey.export({ format: 'pem', type: 'pkcs1' }).toString(),
-  })
-
-  // Build URL with context query parameters if provided
-  const webLoginUrl = `${resolvedWebAppUrl}/cli-login`
-  const browserUrl = loginContext
-    ? buildLoginUrl(webLoginUrl, loginId, os.hostname(), loginContext)
-    : `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
-
-  !skipPrompts &&
-    console.log(
-      `If the page does not open automatically, kindly access it through ${browserUrl}.`
-    )
-  await open(browserUrl)
-
-  let newApiToken = null
-
-  for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
-    const encryptedApiToken = await inGqlClient.getEncryptedApiToken({
-      loginId,
-    })
-    loginSpinner.spin()
-
-    if (encryptedApiToken) {
-      debug('encrypted API token received %s', encryptedApiToken)
-      newApiToken = crypto
-        .privateDecrypt(privateKey, Buffer.from(encryptedApiToken, 'base64'))
-        .toString('utf-8')
-      debug('API token decrypted')
-      break
+    if (!loginUrl) {
+      loginSpinner.error({
+        text: 'Failed to generate login URL',
+      })
+      throw new CliError('Failed to generate login URL')
     }
-    await sleep(LOGIN_CHECK_DELAY)
-  }
 
-  if (!newApiToken) {
-    loginSpinner.error({
-      text: 'Login timeout error',
-    })
-    throw new CliError()
-  }
+    !skipPrompts &&
+      console.log(
+        `If the page does not open automatically, kindly access it through ${loginUrl}.`
+      )
 
-  const newGqlClient = new GQLClient({
-    apiKey: newApiToken,
-    type: 'apiKey',
-    apiUrl: resolvedApiUrl,
-  })
+    authManager.openUrlInBrowser()
 
-  const loginSuccess = await newGqlClient.validateUserToken()
-  if (loginSuccess) {
-    debug(`set api token ${newApiToken}`)
-    configStore.set('apiToken', newApiToken)
+    // Wait for authentication
+    const authSuccess = await authManager.waitForAuthentication()
+
+    if (!authSuccess) {
+      loginSpinner.error({
+        text: 'Login timeout error',
+      })
+      throw new CliError('Login timeout error')
+    }
+
     loginSpinner.success({
-      text: `🔓 Login to Mobb successful! ${typeof loginSpinner === 'string' ? `Logged in as ${loginSuccess}` : ''}`,
+      text: `🔓 Login to Mobb successful!`,
     })
-  } else {
-    loginSpinner.error({
-      text: 'Something went wrong, API token is invalid.',
-    })
-    throw new CliError()
+
+    return authManager.getGQLClient()
+  } finally {
+    // Clean up the auth manager
+    authManager.cleanup()
   }
-  return newGqlClient
 }

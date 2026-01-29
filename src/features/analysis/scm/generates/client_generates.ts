@@ -24256,6 +24256,7 @@ export type Organization = {
   isAiEnabled: Scalars['Boolean']['output'];
   isDashboardActivityOrg: Scalars['Boolean']['output'];
   isDashboardActivityProject: Scalars['Boolean']['output'];
+  isMobbSastEnabled: Scalars['Boolean']['output'];
   isPrivateRepoEnabled: Scalars['Boolean']['output'];
   isSendInvitationEnabled: Scalars['Boolean']['output'];
   /** An array relationship */
@@ -24819,6 +24820,7 @@ export type Organization_Bool_Exp = {
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isDashboardActivityOrg?: InputMaybe<Boolean_Comparison_Exp>;
   isDashboardActivityProject?: InputMaybe<Boolean_Comparison_Exp>;
+  isMobbSastEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isPrivateRepoEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isSendInvitationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
@@ -25283,6 +25285,7 @@ export type Organization_Insert_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
@@ -25645,6 +25648,7 @@ export type Organization_Order_By = {
   isAiEnabled?: InputMaybe<Order_By>;
   isDashboardActivityOrg?: InputMaybe<Order_By>;
   isDashboardActivityProject?: InputMaybe<Order_By>;
+  isMobbSastEnabled?: InputMaybe<Order_By>;
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   isSendInvitationEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
@@ -26274,6 +26278,8 @@ export enum Organization_Select_Column {
   /** column name */
   IsDashboardActivityProject = 'isDashboardActivityProject',
   /** column name */
+  IsMobbSastEnabled = 'isMobbSastEnabled',
+  /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */
   IsSendInvitationEnabled = 'isSendInvitationEnabled',
@@ -26311,6 +26317,7 @@ export type Organization_Set_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -26431,6 +26438,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -26957,6 +26965,8 @@ export enum Organization_Update_Column {
   IsDashboardActivityOrg = 'isDashboardActivityOrg',
   /** column name */
   IsDashboardActivityProject = 'isDashboardActivityProject',
+  /** column name */
+  IsMobbSastEnabled = 'isMobbSastEnabled',
   /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */

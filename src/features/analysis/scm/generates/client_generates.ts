@@ -2229,6 +2229,8 @@ export type Ai_Blame_Attribution_Bool_Exp = {
 
 /** unique or primary key constraints on table "ai_blame_attribution" */
 export enum Ai_Blame_Attribution_Constraint {
+  /** unique or primary key constraint on columns "line_number", "file_path", "ai_blame_commit_id" */
+  AiBlameAttributionFileLineCommitUnique = 'ai_blame_attribution_file_line_commit_unique',
   /** unique or primary key constraint on columns "id" */
   AiBlameAttributionPkey1 = 'ai_blame_attribution_pkey1'
 }

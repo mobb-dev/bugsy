@@ -2563,6 +2563,286 @@ export type Ai_Blame_Attribution_Variance_Order_By = {
   lineNumber?: InputMaybe<Order_By>;
 };
 
+/** columns and relationships of "ai_blame_attribution_with_commit_and_inference" */
+export type Ai_Blame_Attribution_With_Commit_And_Inference = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference';
+  ai_blame_commit_id?: Maybe<Scalars['uuid']['output']>;
+  ai_blame_inference_id?: Maybe<Scalars['uuid']['output']>;
+  ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  commit_sha?: Maybe<Scalars['String']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  file_path?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  inference_type?: Maybe<Scalars['String']['output']>;
+  line_number?: Maybe<Scalars['Int']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  prompt_summary?: Maybe<Scalars['String']['output']>;
+  repository_url?: Maybe<Scalars['String']['output']>;
+  tool_name?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "ai_blame_attribution_with_commit_and_inference" */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_aggregate';
+  aggregate?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Attribution_With_Commit_And_Inference>;
+};
+
+/** aggregate fields of "ai_blame_attribution_with_commit_and_inference" */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_aggregate_fields';
+  avg?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Max_Fields>;
+  min?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Min_Fields>;
+  stddev?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Fields>;
+  stddev_pop?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Samp_Fields>;
+  sum?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Sum_Fields>;
+  var_pop?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Var_Pop_Fields>;
+  var_samp?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Var_Samp_Fields>;
+  variance?: Maybe<Ai_Blame_Attribution_With_Commit_And_Inference_Variance_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_attribution_with_commit_and_inference" */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Avg_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_avg_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_attribution_with_commit_and_inference". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>>;
+  ai_blame_commit_id?: InputMaybe<Uuid_Comparison_Exp>;
+  ai_blame_inference_id?: InputMaybe<Uuid_Comparison_Exp>;
+  ai_response_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  change_lines?: InputMaybe<Int_Comparison_Exp>;
+  change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
+  commit_sha?: InputMaybe<String_Comparison_Exp>;
+  computer_name?: InputMaybe<String_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  file_path?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  inference_type?: InputMaybe<String_Comparison_Exp>;
+  line_number?: InputMaybe<Int_Comparison_Exp>;
+  model?: InputMaybe<String_Comparison_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  prompt_summary?: InputMaybe<String_Comparison_Exp>;
+  repository_url?: InputMaybe<String_Comparison_Exp>;
+  tool_name?: InputMaybe<String_Comparison_Exp>;
+  user_name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Max_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_max_fields';
+  ai_blame_commit_id?: Maybe<Scalars['uuid']['output']>;
+  ai_blame_inference_id?: Maybe<Scalars['uuid']['output']>;
+  ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  commit_sha?: Maybe<Scalars['String']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  file_path?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  inference_type?: Maybe<Scalars['String']['output']>;
+  line_number?: Maybe<Scalars['Int']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  prompt_summary?: Maybe<Scalars['String']['output']>;
+  repository_url?: Maybe<Scalars['String']['output']>;
+  tool_name?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Min_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_min_fields';
+  ai_blame_commit_id?: Maybe<Scalars['uuid']['output']>;
+  ai_blame_inference_id?: Maybe<Scalars['uuid']['output']>;
+  ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  commit_sha?: Maybe<Scalars['String']['output']>;
+  computer_name?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  file_path?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  inference_type?: Maybe<Scalars['String']['output']>;
+  line_number?: Maybe<Scalars['Int']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  prompt_summary?: Maybe<Scalars['String']['output']>;
+  repository_url?: Maybe<Scalars['String']['output']>;
+  tool_name?: Maybe<Scalars['String']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "ai_blame_attribution_with_commit_and_inference". */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Order_By = {
+  ai_blame_commit_id?: InputMaybe<Order_By>;
+  ai_blame_inference_id?: InputMaybe<Order_By>;
+  ai_response_at?: InputMaybe<Order_By>;
+  change_lines?: InputMaybe<Order_By>;
+  change_matched_lines?: InputMaybe<Order_By>;
+  commit_sha?: InputMaybe<Order_By>;
+  computer_name?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  file_path?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  inference_type?: InputMaybe<Order_By>;
+  line_number?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  prompt_summary?: InputMaybe<Order_By>;
+  repository_url?: InputMaybe<Order_By>;
+  tool_name?: InputMaybe<Order_By>;
+  user_name?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "ai_blame_attribution_with_commit_and_inference" */
+export enum Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column {
+  /** column name */
+  AiBlameCommitId = 'ai_blame_commit_id',
+  /** column name */
+  AiBlameInferenceId = 'ai_blame_inference_id',
+  /** column name */
+  AiResponseAt = 'ai_response_at',
+  /** column name */
+  ChangeLines = 'change_lines',
+  /** column name */
+  ChangeMatchedLines = 'change_matched_lines',
+  /** column name */
+  CommitSha = 'commit_sha',
+  /** column name */
+  ComputerName = 'computer_name',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  FilePath = 'file_path',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  InferenceType = 'inference_type',
+  /** column name */
+  LineNumber = 'line_number',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  PromptSummary = 'prompt_summary',
+  /** column name */
+  RepositoryUrl = 'repository_url',
+  /** column name */
+  ToolName = 'tool_name',
+  /** column name */
+  UserName = 'user_name'
+}
+
+/** aggregate stddev on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Pop_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_pop_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Samp_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_samp_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "ai_blame_attribution_with_commit_and_inference" */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Value_Input = {
+  ai_blame_commit_id?: InputMaybe<Scalars['uuid']['input']>;
+  ai_blame_inference_id?: InputMaybe<Scalars['uuid']['input']>;
+  ai_response_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  change_lines?: InputMaybe<Scalars['Int']['input']>;
+  change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  commit_sha?: InputMaybe<Scalars['String']['input']>;
+  computer_name?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  file_path?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  inference_type?: InputMaybe<Scalars['String']['input']>;
+  line_number?: InputMaybe<Scalars['Int']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  prompt_summary?: InputMaybe<Scalars['String']['input']>;
+  repository_url?: InputMaybe<Scalars['String']['input']>;
+  tool_name?: InputMaybe<Scalars['String']['input']>;
+  user_name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Sum_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_sum_fields';
+  change_lines?: Maybe<Scalars['Int']['output']>;
+  change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  line_number?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Var_Pop_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_var_pop_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Var_Samp_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_var_samp_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Ai_Blame_Attribution_With_Commit_And_Inference_Variance_Fields = {
+  __typename?: 'ai_blame_attribution_with_commit_and_inference_variance_fields';
+  change_lines?: Maybe<Scalars['Float']['output']>;
+  change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  line_number?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "ai_blame_commit" */
 export type Ai_Blame_Commit = {
   __typename?: 'ai_blame_commit';
@@ -24242,6 +24522,7 @@ export type Organization = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  developersStats: GetDeveloperStatisticsResponse;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter: Scalars['Boolean']['output'];
   /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
@@ -24442,6 +24723,12 @@ export type OrganizationDeployedFixesCountArgs = {
 /** columns and relationships of "organization" */
 export type OrganizationDeployedVulnerabilityIssuesCountArgs = {
   args: DeployedVulnerabilityIssuesCount_Organization_Args;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationDevelopersStatsArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -29082,6 +29369,10 @@ export type Query_Root = {
   ai_blame_attribution_aggregate: Ai_Blame_Attribution_Aggregate;
   /** fetch data from the table: "ai_blame_attribution" using primary key columns */
   ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
+  /** fetch data from the table: "ai_blame_attribution_with_commit_and_inference" */
+  ai_blame_attribution_with_commit_and_inference: Array<Ai_Blame_Attribution_With_Commit_And_Inference>;
+  /** fetch aggregated fields from the table: "ai_blame_attribution_with_commit_and_inference" */
+  ai_blame_attribution_with_commit_and_inference_aggregate: Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate;
   /** fetch data from the table: "ai_blame_commit" */
   ai_blame_commit: Array<Ai_Blame_Commit>;
   /** fetch aggregated fields from the table: "ai_blame_commit" */
@@ -29884,6 +30175,24 @@ export type Query_RootAi_Blame_Attribution_AggregateArgs = {
 
 export type Query_RootAi_Blame_Attribution_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAi_Blame_Attribution_With_Commit_And_InferenceArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Attribution_With_Commit_And_Inference_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
 };
 
 
@@ -35276,6 +35585,12 @@ export type Subscription_Root = {
   ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
   /** fetch data from the table in a streaming manner: "ai_blame_attribution" */
   ai_blame_attribution_stream: Array<Ai_Blame_Attribution>;
+  /** fetch data from the table: "ai_blame_attribution_with_commit_and_inference" */
+  ai_blame_attribution_with_commit_and_inference: Array<Ai_Blame_Attribution_With_Commit_And_Inference>;
+  /** fetch aggregated fields from the table: "ai_blame_attribution_with_commit_and_inference" */
+  ai_blame_attribution_with_commit_and_inference_aggregate: Ai_Blame_Attribution_With_Commit_And_Inference_Aggregate;
+  /** fetch data from the table in a streaming manner: "ai_blame_attribution_with_commit_and_inference" */
+  ai_blame_attribution_with_commit_and_inference_stream: Array<Ai_Blame_Attribution_With_Commit_And_Inference>;
   /** fetch data from the table: "ai_blame_commit" */
   ai_blame_commit: Array<Ai_Blame_Commit>;
   /** fetch aggregated fields from the table: "ai_blame_commit" */
@@ -36271,6 +36586,31 @@ export type Subscription_RootAi_Blame_Attribution_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Ai_Blame_Attribution_Stream_Cursor_Input>>;
   where?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_With_Commit_And_InferenceArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_With_Commit_And_Inference_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Attribution_With_Commit_And_Inference_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Attribution_With_Commit_And_Inference_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp>;
 };
 
 

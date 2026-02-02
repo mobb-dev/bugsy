@@ -1,0 +1,17 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const BrainFilterStrategy = {
+  BRAIN_FILTER_STRATEGY_UNSPECIFIED: 'BRAIN_FILTER_STRATEGY_UNSPECIFIED',
+  BRAIN_FILTER_STRATEGY_NO_SYSTEM_INJECTED_STEPS: 'BRAIN_FILTER_STRATEGY_NO_SYSTEM_INJECTED_STEPS',
+  BRAIN_FILTER_STRATEGY_NO_MEMORIES: 'BRAIN_FILTER_STRATEGY_NO_MEMORIES',
+} as const;
+
+export type BrainFilterStrategy =
+  | 'BRAIN_FILTER_STRATEGY_UNSPECIFIED'
+  | 0
+  | 'BRAIN_FILTER_STRATEGY_NO_SYSTEM_INJECTED_STEPS'
+  | 1
+  | 'BRAIN_FILTER_STRATEGY_NO_MEMORIES'
+  | 2
+
+export type BrainFilterStrategy__Output = typeof BrainFilterStrategy[keyof typeof BrainFilterStrategy]

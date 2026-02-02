@@ -1,0 +1,20 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const InformPlannerMode = {
+  INFORM_PLANNER_MODE_UNSPECIFIED: 'INFORM_PLANNER_MODE_UNSPECIFIED',
+  INFORM_PLANNER_MODE_CCIS: 'INFORM_PLANNER_MODE_CCIS',
+  INFORM_PLANNER_MODE_DIRECTORY_TREE: 'INFORM_PLANNER_MODE_DIRECTORY_TREE',
+  INFORM_PLANNER_MODE_CLUSTERS: 'INFORM_PLANNER_MODE_CLUSTERS',
+} as const;
+
+export type InformPlannerMode =
+  | 'INFORM_PLANNER_MODE_UNSPECIFIED'
+  | 0
+  | 'INFORM_PLANNER_MODE_CCIS'
+  | 1
+  | 'INFORM_PLANNER_MODE_DIRECTORY_TREE'
+  | 2
+  | 'INFORM_PLANNER_MODE_CLUSTERS'
+  | 3
+
+export type InformPlannerMode__Output = typeof InformPlannerMode[keyof typeof InformPlannerMode]

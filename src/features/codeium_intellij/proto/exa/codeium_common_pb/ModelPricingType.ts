@@ -1,0 +1,23 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const ModelPricingType = {
+  MODEL_PRICING_TYPE_UNSPECIFIED: 'MODEL_PRICING_TYPE_UNSPECIFIED',
+  MODEL_PRICING_TYPE_STATIC_CREDIT: 'MODEL_PRICING_TYPE_STATIC_CREDIT',
+  MODEL_PRICING_TYPE_API: 'MODEL_PRICING_TYPE_API',
+  MODEL_PRICING_TYPE_BYOK: 'MODEL_PRICING_TYPE_BYOK',
+  MODEL_PRICING_TYPE_DEVIN_ENTERPRISE: 'MODEL_PRICING_TYPE_DEVIN_ENTERPRISE',
+} as const;
+
+export type ModelPricingType =
+  | 'MODEL_PRICING_TYPE_UNSPECIFIED'
+  | 0
+  | 'MODEL_PRICING_TYPE_STATIC_CREDIT'
+  | 1
+  | 'MODEL_PRICING_TYPE_API'
+  | 2
+  | 'MODEL_PRICING_TYPE_BYOK'
+  | 3
+  | 'MODEL_PRICING_TYPE_DEVIN_ENTERPRISE'
+  | 4
+
+export type ModelPricingType__Output = typeof ModelPricingType[keyof typeof ModelPricingType]

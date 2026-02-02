@@ -1,0 +1,20 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const ExperimentSource = {
+  EXPERIMENT_SOURCE_UNSPECIFIED: 'EXPERIMENT_SOURCE_UNSPECIFIED',
+  EXPERIMENT_SOURCE_EXTENSION: 'EXPERIMENT_SOURCE_EXTENSION',
+  EXPERIMENT_SOURCE_LANGUAGE_SERVER: 'EXPERIMENT_SOURCE_LANGUAGE_SERVER',
+  EXPERIMENT_SOURCE_API_SERVER: 'EXPERIMENT_SOURCE_API_SERVER',
+} as const;
+
+export type ExperimentSource =
+  | 'EXPERIMENT_SOURCE_UNSPECIFIED'
+  | 0
+  | 'EXPERIMENT_SOURCE_EXTENSION'
+  | 1
+  | 'EXPERIMENT_SOURCE_LANGUAGE_SERVER'
+  | 2
+  | 'EXPERIMENT_SOURCE_API_SERVER'
+  | 3
+
+export type ExperimentSource__Output = typeof ExperimentSource[keyof typeof ExperimentSource]

@@ -1,0 +1,69 @@
+// Original file: exa/cascade_plugins_pb/cascade_plugins.proto
+
+import type * as grpc from '@grpc/grpc-js'
+import type { MethodDefinition } from '@grpc/proto-loader'
+import type { GetAvailableCascadePluginsRequest as _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, GetAvailableCascadePluginsRequest__Output as _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest__Output } from '../../exa/cascade_plugins_pb/GetAvailableCascadePluginsRequest';
+import type { GetAvailableCascadePluginsResponse as _exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse, GetAvailableCascadePluginsResponse__Output as _exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output } from '../../exa/cascade_plugins_pb/GetAvailableCascadePluginsResponse';
+import type { GetCascadePluginByIdRequest as _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, GetCascadePluginByIdRequest__Output as _exa_cascade_plugins_pb_GetCascadePluginByIdRequest__Output } from '../../exa/cascade_plugins_pb/GetCascadePluginByIdRequest';
+import type { GetCascadePluginByIdResponse as _exa_cascade_plugins_pb_GetCascadePluginByIdResponse, GetCascadePluginByIdResponse__Output as _exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output } from '../../exa/cascade_plugins_pb/GetCascadePluginByIdResponse';
+import type { GetMcpClientInfosRequest as _exa_cascade_plugins_pb_GetMcpClientInfosRequest, GetMcpClientInfosRequest__Output as _exa_cascade_plugins_pb_GetMcpClientInfosRequest__Output } from '../../exa/cascade_plugins_pb/GetMcpClientInfosRequest';
+import type { GetMcpClientInfosResponse as _exa_cascade_plugins_pb_GetMcpClientInfosResponse, GetMcpClientInfosResponse__Output as _exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output } from '../../exa/cascade_plugins_pb/GetMcpClientInfosResponse';
+import type { InstallCascadePluginRequest as _exa_cascade_plugins_pb_InstallCascadePluginRequest, InstallCascadePluginRequest__Output as _exa_cascade_plugins_pb_InstallCascadePluginRequest__Output } from '../../exa/cascade_plugins_pb/InstallCascadePluginRequest';
+import type { InstallCascadePluginResponse as _exa_cascade_plugins_pb_InstallCascadePluginResponse, InstallCascadePluginResponse__Output as _exa_cascade_plugins_pb_InstallCascadePluginResponse__Output } from '../../exa/cascade_plugins_pb/InstallCascadePluginResponse';
+
+export interface CascadePluginsServiceClient extends grpc.Client {
+  GetAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_cascade_plugins_pb_GetCascadePluginByIdRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  getMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  getMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  getMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  getMcpClientInfos(argument: _exa_cascade_plugins_pb_GetMcpClientInfosRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>): grpc.ClientUnaryCall;
+  
+  InstallCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_cascade_plugins_pb_InstallCascadePluginRequest, callback: grpc.requestCallback<_exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  
+}
+
+export interface CascadePluginsServiceHandlers extends grpc.UntypedServiceImplementation {
+  GetAvailableCascadePlugins: grpc.handleUnaryCall<_exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest__Output, _exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse>;
+  
+  GetCascadePluginById: grpc.handleUnaryCall<_exa_cascade_plugins_pb_GetCascadePluginByIdRequest__Output, _exa_cascade_plugins_pb_GetCascadePluginByIdResponse>;
+  
+  GetMcpClientInfos: grpc.handleUnaryCall<_exa_cascade_plugins_pb_GetMcpClientInfosRequest__Output, _exa_cascade_plugins_pb_GetMcpClientInfosResponse>;
+  
+  InstallCascadePlugin: grpc.handleUnaryCall<_exa_cascade_plugins_pb_InstallCascadePluginRequest__Output, _exa_cascade_plugins_pb_InstallCascadePluginResponse>;
+  
+}
+
+export interface CascadePluginsServiceDefinition extends grpc.ServiceDefinition {
+  GetAvailableCascadePlugins: MethodDefinition<_exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest, _exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse, _exa_cascade_plugins_pb_GetAvailableCascadePluginsRequest__Output, _exa_cascade_plugins_pb_GetAvailableCascadePluginsResponse__Output>
+  GetCascadePluginById: MethodDefinition<_exa_cascade_plugins_pb_GetCascadePluginByIdRequest, _exa_cascade_plugins_pb_GetCascadePluginByIdResponse, _exa_cascade_plugins_pb_GetCascadePluginByIdRequest__Output, _exa_cascade_plugins_pb_GetCascadePluginByIdResponse__Output>
+  GetMcpClientInfos: MethodDefinition<_exa_cascade_plugins_pb_GetMcpClientInfosRequest, _exa_cascade_plugins_pb_GetMcpClientInfosResponse, _exa_cascade_plugins_pb_GetMcpClientInfosRequest__Output, _exa_cascade_plugins_pb_GetMcpClientInfosResponse__Output>
+  InstallCascadePlugin: MethodDefinition<_exa_cascade_plugins_pb_InstallCascadePluginRequest, _exa_cascade_plugins_pb_InstallCascadePluginResponse, _exa_cascade_plugins_pb_InstallCascadePluginRequest__Output, _exa_cascade_plugins_pb_InstallCascadePluginResponse__Output>
+}

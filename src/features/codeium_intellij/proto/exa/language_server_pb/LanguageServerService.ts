@@ -1,0 +1,2293 @@
+// Original file: exa/language_server_pb/language_server.proto
+
+import type * as grpc from '@grpc/grpc-js'
+import type { MethodDefinition } from '@grpc/proto-loader'
+import type { AcceptCompletionRequest as _exa_language_server_pb_AcceptCompletionRequest, AcceptCompletionRequest__Output as _exa_language_server_pb_AcceptCompletionRequest__Output } from '../../exa/language_server_pb/AcceptCompletionRequest';
+import type { AcceptCompletionResponse as _exa_language_server_pb_AcceptCompletionResponse, AcceptCompletionResponse__Output as _exa_language_server_pb_AcceptCompletionResponse__Output } from '../../exa/language_server_pb/AcceptCompletionResponse';
+import type { AcknowledgeCascadeCodeEditRequest as _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, AcknowledgeCascadeCodeEditRequest__Output as _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest__Output } from '../../exa/language_server_pb/AcknowledgeCascadeCodeEditRequest';
+import type { AcknowledgeCascadeCodeEditResponse as _exa_language_server_pb_AcknowledgeCascadeCodeEditResponse, AcknowledgeCascadeCodeEditResponse__Output as _exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output } from '../../exa/language_server_pb/AcknowledgeCascadeCodeEditResponse';
+import type { AddTrackedWorkspaceRequest as _exa_language_server_pb_AddTrackedWorkspaceRequest, AddTrackedWorkspaceRequest__Output as _exa_language_server_pb_AddTrackedWorkspaceRequest__Output } from '../../exa/language_server_pb/AddTrackedWorkspaceRequest';
+import type { AddTrackedWorkspaceResponse as _exa_language_server_pb_AddTrackedWorkspaceResponse, AddTrackedWorkspaceResponse__Output as _exa_language_server_pb_AddTrackedWorkspaceResponse__Output } from '../../exa/language_server_pb/AddTrackedWorkspaceResponse';
+import type { BranchCascadeAndGenerateCodeMapRequest as _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, BranchCascadeAndGenerateCodeMapRequest__Output as _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest__Output } from '../../exa/language_server_pb/BranchCascadeAndGenerateCodeMapRequest';
+import type { BranchCascadeAndGenerateCodeMapResponse as _exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse, BranchCascadeAndGenerateCodeMapResponse__Output as _exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output } from '../../exa/language_server_pb/BranchCascadeAndGenerateCodeMapResponse';
+import type { BranchCascadeRequest as _exa_language_server_pb_BranchCascadeRequest, BranchCascadeRequest__Output as _exa_language_server_pb_BranchCascadeRequest__Output } from '../../exa/language_server_pb/BranchCascadeRequest';
+import type { BranchCascadeResponse as _exa_language_server_pb_BranchCascadeResponse, BranchCascadeResponse__Output as _exa_language_server_pb_BranchCascadeResponse__Output } from '../../exa/language_server_pb/BranchCascadeResponse';
+import type { CancelCascadeInvocationAndWaitRequest as _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, CancelCascadeInvocationAndWaitRequest__Output as _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest__Output } from '../../exa/language_server_pb/CancelCascadeInvocationAndWaitRequest';
+import type { CancelCascadeInvocationAndWaitResponse as _exa_language_server_pb_CancelCascadeInvocationAndWaitResponse, CancelCascadeInvocationAndWaitResponse__Output as _exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output } from '../../exa/language_server_pb/CancelCascadeInvocationAndWaitResponse';
+import type { CancelCascadeInvocationRequest as _exa_language_server_pb_CancelCascadeInvocationRequest, CancelCascadeInvocationRequest__Output as _exa_language_server_pb_CancelCascadeInvocationRequest__Output } from '../../exa/language_server_pb/CancelCascadeInvocationRequest';
+import type { CancelCascadeInvocationResponse as _exa_language_server_pb_CancelCascadeInvocationResponse, CancelCascadeInvocationResponse__Output as _exa_language_server_pb_CancelCascadeInvocationResponse__Output } from '../../exa/language_server_pb/CancelCascadeInvocationResponse';
+import type { CancelCascadeStepsRequest as _exa_language_server_pb_CancelCascadeStepsRequest, CancelCascadeStepsRequest__Output as _exa_language_server_pb_CancelCascadeStepsRequest__Output } from '../../exa/language_server_pb/CancelCascadeStepsRequest';
+import type { CancelCascadeStepsResponse as _exa_language_server_pb_CancelCascadeStepsResponse, CancelCascadeStepsResponse__Output as _exa_language_server_pb_CancelCascadeStepsResponse__Output } from '../../exa/language_server_pb/CancelCascadeStepsResponse';
+import type { CancelRequestRequest as _exa_language_server_pb_CancelRequestRequest, CancelRequestRequest__Output as _exa_language_server_pb_CancelRequestRequest__Output } from '../../exa/language_server_pb/CancelRequestRequest';
+import type { CancelRequestResponse as _exa_language_server_pb_CancelRequestResponse, CancelRequestResponse__Output as _exa_language_server_pb_CancelRequestResponse__Output } from '../../exa/language_server_pb/CancelRequestResponse';
+import type { CaptureCodeRequest as _exa_language_server_pb_CaptureCodeRequest, CaptureCodeRequest__Output as _exa_language_server_pb_CaptureCodeRequest__Output } from '../../exa/language_server_pb/CaptureCodeRequest';
+import type { CaptureCodeResponse as _exa_language_server_pb_CaptureCodeResponse, CaptureCodeResponse__Output as _exa_language_server_pb_CaptureCodeResponse__Output } from '../../exa/language_server_pb/CaptureCodeResponse';
+import type { CaptureFileRequest as _exa_language_server_pb_CaptureFileRequest, CaptureFileRequest__Output as _exa_language_server_pb_CaptureFileRequest__Output } from '../../exa/language_server_pb/CaptureFileRequest';
+import type { CaptureFileResponse as _exa_language_server_pb_CaptureFileResponse, CaptureFileResponse__Output as _exa_language_server_pb_CaptureFileResponse__Output } from '../../exa/language_server_pb/CaptureFileResponse';
+import type { CheckBugsRequest as _exa_language_server_pb_CheckBugsRequest, CheckBugsRequest__Output as _exa_language_server_pb_CheckBugsRequest__Output } from '../../exa/language_server_pb/CheckBugsRequest';
+import type { CheckBugsResponse as _exa_language_server_pb_CheckBugsResponse, CheckBugsResponse__Output as _exa_language_server_pb_CheckBugsResponse__Output } from '../../exa/language_server_pb/CheckBugsResponse';
+import type { CheckChatCapacityRequest as _exa_language_server_pb_CheckChatCapacityRequest, CheckChatCapacityRequest__Output as _exa_language_server_pb_CheckChatCapacityRequest__Output } from '../../exa/language_server_pb/CheckChatCapacityRequest';
+import type { CheckChatCapacityResponse as _exa_language_server_pb_CheckChatCapacityResponse, CheckChatCapacityResponse__Output as _exa_language_server_pb_CheckChatCapacityResponse__Output } from '../../exa/language_server_pb/CheckChatCapacityResponse';
+import type { CheckUserMessageRateLimitRequest as _exa_language_server_pb_CheckUserMessageRateLimitRequest, CheckUserMessageRateLimitRequest__Output as _exa_language_server_pb_CheckUserMessageRateLimitRequest__Output } from '../../exa/language_server_pb/CheckUserMessageRateLimitRequest';
+import type { CheckUserMessageRateLimitResponse as _exa_language_server_pb_CheckUserMessageRateLimitResponse, CheckUserMessageRateLimitResponse__Output as _exa_language_server_pb_CheckUserMessageRateLimitResponse__Output } from '../../exa/language_server_pb/CheckUserMessageRateLimitResponse';
+import type { ConvergeArenaCascadesRequest as _exa_language_server_pb_ConvergeArenaCascadesRequest, ConvergeArenaCascadesRequest__Output as _exa_language_server_pb_ConvergeArenaCascadesRequest__Output } from '../../exa/language_server_pb/ConvergeArenaCascadesRequest';
+import type { ConvergeArenaCascadesResponse as _exa_language_server_pb_ConvergeArenaCascadesResponse, ConvergeArenaCascadesResponse__Output as _exa_language_server_pb_ConvergeArenaCascadesResponse__Output } from '../../exa/language_server_pb/ConvergeArenaCascadesResponse';
+import type { CopyBuiltinWorkflowToWorkspaceRequest as _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, CopyBuiltinWorkflowToWorkspaceRequest__Output as _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest__Output } from '../../exa/language_server_pb/CopyBuiltinWorkflowToWorkspaceRequest';
+import type { CopyBuiltinWorkflowToWorkspaceResponse as _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse, CopyBuiltinWorkflowToWorkspaceResponse__Output as _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output } from '../../exa/language_server_pb/CopyBuiltinWorkflowToWorkspaceResponse';
+import type { CreateCustomizationFileRequest as _exa_language_server_pb_CreateCustomizationFileRequest, CreateCustomizationFileRequest__Output as _exa_language_server_pb_CreateCustomizationFileRequest__Output } from '../../exa/language_server_pb/CreateCustomizationFileRequest';
+import type { CreateCustomizationFileResponse as _exa_language_server_pb_CreateCustomizationFileResponse, CreateCustomizationFileResponse__Output as _exa_language_server_pb_CreateCustomizationFileResponse__Output } from '../../exa/language_server_pb/CreateCustomizationFileResponse';
+import type { CreateTrajectoryShareRequest as _exa_language_server_pb_CreateTrajectoryShareRequest, CreateTrajectoryShareRequest__Output as _exa_language_server_pb_CreateTrajectoryShareRequest__Output } from '../../exa/language_server_pb/CreateTrajectoryShareRequest';
+import type { CreateTrajectoryShareResponse as _exa_language_server_pb_CreateTrajectoryShareResponse, CreateTrajectoryShareResponse__Output as _exa_language_server_pb_CreateTrajectoryShareResponse__Output } from '../../exa/language_server_pb/CreateTrajectoryShareResponse';
+import type { DeleteCascadeMemoryRequest as _exa_language_server_pb_DeleteCascadeMemoryRequest, DeleteCascadeMemoryRequest__Output as _exa_language_server_pb_DeleteCascadeMemoryRequest__Output } from '../../exa/language_server_pb/DeleteCascadeMemoryRequest';
+import type { DeleteCascadeMemoryResponse as _exa_language_server_pb_DeleteCascadeMemoryResponse, DeleteCascadeMemoryResponse__Output as _exa_language_server_pb_DeleteCascadeMemoryResponse__Output } from '../../exa/language_server_pb/DeleteCascadeMemoryResponse';
+import type { DeleteCascadeTrajectoryRequest as _exa_language_server_pb_DeleteCascadeTrajectoryRequest, DeleteCascadeTrajectoryRequest__Output as _exa_language_server_pb_DeleteCascadeTrajectoryRequest__Output } from '../../exa/language_server_pb/DeleteCascadeTrajectoryRequest';
+import type { DeleteCascadeTrajectoryResponse as _exa_language_server_pb_DeleteCascadeTrajectoryResponse, DeleteCascadeTrajectoryResponse__Output as _exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output } from '../../exa/language_server_pb/DeleteCascadeTrajectoryResponse';
+import type { DismissCodeMapSuggestionRequest as _exa_language_server_pb_DismissCodeMapSuggestionRequest, DismissCodeMapSuggestionRequest__Output as _exa_language_server_pb_DismissCodeMapSuggestionRequest__Output } from '../../exa/language_server_pb/DismissCodeMapSuggestionRequest';
+import type { DismissCodeMapSuggestionResponse as _exa_language_server_pb_DismissCodeMapSuggestionResponse, DismissCodeMapSuggestionResponse__Output as _exa_language_server_pb_DismissCodeMapSuggestionResponse__Output } from '../../exa/language_server_pb/DismissCodeMapSuggestionResponse';
+import type { EditConfigurationRequest as _exa_language_server_pb_EditConfigurationRequest, EditConfigurationRequest__Output as _exa_language_server_pb_EditConfigurationRequest__Output } from '../../exa/language_server_pb/EditConfigurationRequest';
+import type { EditConfigurationResponse as _exa_language_server_pb_EditConfigurationResponse, EditConfigurationResponse__Output as _exa_language_server_pb_EditConfigurationResponse__Output } from '../../exa/language_server_pb/EditConfigurationResponse';
+import type { ExitRequest as _exa_language_server_pb_ExitRequest, ExitRequest__Output as _exa_language_server_pb_ExitRequest__Output } from '../../exa/language_server_pb/ExitRequest';
+import type { ExitResponse as _exa_language_server_pb_ExitResponse, ExitResponse__Output as _exa_language_server_pb_ExitResponse__Output } from '../../exa/language_server_pb/ExitResponse';
+import type { ForceBackgroundResearchRefreshRequest as _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, ForceBackgroundResearchRefreshRequest__Output as _exa_language_server_pb_ForceBackgroundResearchRefreshRequest__Output } from '../../exa/language_server_pb/ForceBackgroundResearchRefreshRequest';
+import type { ForceBackgroundResearchRefreshResponse as _exa_language_server_pb_ForceBackgroundResearchRefreshResponse, ForceBackgroundResearchRefreshResponse__Output as _exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output } from '../../exa/language_server_pb/ForceBackgroundResearchRefreshResponse';
+import type { GenerateCodeMapRequest as _exa_language_server_pb_GenerateCodeMapRequest, GenerateCodeMapRequest__Output as _exa_language_server_pb_GenerateCodeMapRequest__Output } from '../../exa/language_server_pb/GenerateCodeMapRequest';
+import type { GenerateCodeMapResponse as _exa_language_server_pb_GenerateCodeMapResponse, GenerateCodeMapResponse__Output as _exa_language_server_pb_GenerateCodeMapResponse__Output } from '../../exa/language_server_pb/GenerateCodeMapResponse';
+import type { GenerateCommitMessageRequest as _exa_language_server_pb_GenerateCommitMessageRequest, GenerateCommitMessageRequest__Output as _exa_language_server_pb_GenerateCommitMessageRequest__Output } from '../../exa/language_server_pb/GenerateCommitMessageRequest';
+import type { GenerateCommitMessageResponse as _exa_language_server_pb_GenerateCommitMessageResponse, GenerateCommitMessageResponse__Output as _exa_language_server_pb_GenerateCommitMessageResponse__Output } from '../../exa/language_server_pb/GenerateCommitMessageResponse';
+import type { GenerateVibeAndReplaceStreamingRequest as _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, GenerateVibeAndReplaceStreamingRequest__Output as _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest__Output } from '../../exa/language_server_pb/GenerateVibeAndReplaceStreamingRequest';
+import type { GenerateVibeAndReplaceStreamingResponse as _exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse, GenerateVibeAndReplaceStreamingResponse__Output as _exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output } from '../../exa/language_server_pb/GenerateVibeAndReplaceStreamingResponse';
+import type { GetActiveAppDeploymentForWorkspaceRequest as _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, GetActiveAppDeploymentForWorkspaceRequest__Output as _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest__Output } from '../../exa/language_server_pb/GetActiveAppDeploymentForWorkspaceRequest';
+import type { GetActiveAppDeploymentForWorkspaceResponse as _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse, GetActiveAppDeploymentForWorkspaceResponse__Output as _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output } from '../../exa/language_server_pb/GetActiveAppDeploymentForWorkspaceResponse';
+import type { GetAllCascadeTrajectoriesRequest as _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, GetAllCascadeTrajectoriesRequest__Output as _exa_language_server_pb_GetAllCascadeTrajectoriesRequest__Output } from '../../exa/language_server_pb/GetAllCascadeTrajectoriesRequest';
+import type { GetAllCascadeTrajectoriesResponse as _exa_language_server_pb_GetAllCascadeTrajectoriesResponse, GetAllCascadeTrajectoriesResponse__Output as _exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output } from '../../exa/language_server_pb/GetAllCascadeTrajectoriesResponse';
+import type { GetAllPlansRequest as _exa_language_server_pb_GetAllPlansRequest, GetAllPlansRequest__Output as _exa_language_server_pb_GetAllPlansRequest__Output } from '../../exa/language_server_pb/GetAllPlansRequest';
+import type { GetAllPlansResponse as _exa_language_server_pb_GetAllPlansResponse, GetAllPlansResponse__Output as _exa_language_server_pb_GetAllPlansResponse__Output } from '../../exa/language_server_pb/GetAllPlansResponse';
+import type { GetAllRulesRequest as _exa_language_server_pb_GetAllRulesRequest, GetAllRulesRequest__Output as _exa_language_server_pb_GetAllRulesRequest__Output } from '../../exa/language_server_pb/GetAllRulesRequest';
+import type { GetAllRulesResponse as _exa_language_server_pb_GetAllRulesResponse, GetAllRulesResponse__Output as _exa_language_server_pb_GetAllRulesResponse__Output } from '../../exa/language_server_pb/GetAllRulesResponse';
+import type { GetAllSkillsRequest as _exa_language_server_pb_GetAllSkillsRequest, GetAllSkillsRequest__Output as _exa_language_server_pb_GetAllSkillsRequest__Output } from '../../exa/language_server_pb/GetAllSkillsRequest';
+import type { GetAllSkillsResponse as _exa_language_server_pb_GetAllSkillsResponse, GetAllSkillsResponse__Output as _exa_language_server_pb_GetAllSkillsResponse__Output } from '../../exa/language_server_pb/GetAllSkillsResponse';
+import type { GetAllWorkflowsRequest as _exa_language_server_pb_GetAllWorkflowsRequest, GetAllWorkflowsRequest__Output as _exa_language_server_pb_GetAllWorkflowsRequest__Output } from '../../exa/language_server_pb/GetAllWorkflowsRequest';
+import type { GetAllWorkflowsResponse as _exa_language_server_pb_GetAllWorkflowsResponse, GetAllWorkflowsResponse__Output as _exa_language_server_pb_GetAllWorkflowsResponse__Output } from '../../exa/language_server_pb/GetAllWorkflowsResponse';
+import type { GetAuthTokenRequest as _exa_language_server_pb_GetAuthTokenRequest, GetAuthTokenRequest__Output as _exa_language_server_pb_GetAuthTokenRequest__Output } from '../../exa/language_server_pb/GetAuthTokenRequest';
+import type { GetAuthTokenResponse as _exa_language_server_pb_GetAuthTokenResponse, GetAuthTokenResponse__Output as _exa_language_server_pb_GetAuthTokenResponse__Output } from '../../exa/language_server_pb/GetAuthTokenResponse';
+import type { GetAvailableCascadePluginsRequest as _exa_language_server_pb_GetAvailableCascadePluginsRequest, GetAvailableCascadePluginsRequest__Output as _exa_language_server_pb_GetAvailableCascadePluginsRequest__Output } from '../../exa/language_server_pb/GetAvailableCascadePluginsRequest';
+import type { GetAvailableCascadePluginsResponse as _exa_language_server_pb_GetAvailableCascadePluginsResponse, GetAvailableCascadePluginsResponse__Output as _exa_language_server_pb_GetAvailableCascadePluginsResponse__Output } from '../../exa/language_server_pb/GetAvailableCascadePluginsResponse';
+import type { GetBrainStatusRequest as _exa_language_server_pb_GetBrainStatusRequest, GetBrainStatusRequest__Output as _exa_language_server_pb_GetBrainStatusRequest__Output } from '../../exa/language_server_pb/GetBrainStatusRequest';
+import type { GetBrainStatusResponse as _exa_language_server_pb_GetBrainStatusResponse, GetBrainStatusResponse__Output as _exa_language_server_pb_GetBrainStatusResponse__Output } from '../../exa/language_server_pb/GetBrainStatusResponse';
+import type { GetCascadeMemoriesRequest as _exa_language_server_pb_GetCascadeMemoriesRequest, GetCascadeMemoriesRequest__Output as _exa_language_server_pb_GetCascadeMemoriesRequest__Output } from '../../exa/language_server_pb/GetCascadeMemoriesRequest';
+import type { GetCascadeMemoriesResponse as _exa_language_server_pb_GetCascadeMemoriesResponse, GetCascadeMemoriesResponse__Output as _exa_language_server_pb_GetCascadeMemoriesResponse__Output } from '../../exa/language_server_pb/GetCascadeMemoriesResponse';
+import type { GetCascadeModelConfigsRequest as _exa_language_server_pb_GetCascadeModelConfigsRequest, GetCascadeModelConfigsRequest__Output as _exa_language_server_pb_GetCascadeModelConfigsRequest__Output } from '../../exa/language_server_pb/GetCascadeModelConfigsRequest';
+import type { GetCascadeModelConfigsResponse as _exa_language_server_pb_GetCascadeModelConfigsResponse, GetCascadeModelConfigsResponse__Output as _exa_language_server_pb_GetCascadeModelConfigsResponse__Output } from '../../exa/language_server_pb/GetCascadeModelConfigsResponse';
+import type { GetCascadePluginByIdRequest as _exa_language_server_pb_GetCascadePluginByIdRequest, GetCascadePluginByIdRequest__Output as _exa_language_server_pb_GetCascadePluginByIdRequest__Output } from '../../exa/language_server_pb/GetCascadePluginByIdRequest';
+import type { GetCascadePluginByIdResponse as _exa_language_server_pb_GetCascadePluginByIdResponse, GetCascadePluginByIdResponse__Output as _exa_language_server_pb_GetCascadePluginByIdResponse__Output } from '../../exa/language_server_pb/GetCascadePluginByIdResponse';
+import type { GetCascadeTrajectoryGeneratorMetadataRequest as _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, GetCascadeTrajectoryGeneratorMetadataRequest__Output as _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryGeneratorMetadataRequest';
+import type { GetCascadeTrajectoryGeneratorMetadataResponse as _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse, GetCascadeTrajectoryGeneratorMetadataResponse__Output as _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryGeneratorMetadataResponse';
+import type { GetCascadeTrajectoryRequest as _exa_language_server_pb_GetCascadeTrajectoryRequest, GetCascadeTrajectoryRequest__Output as _exa_language_server_pb_GetCascadeTrajectoryRequest__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryRequest';
+import type { GetCascadeTrajectoryResponse as _exa_language_server_pb_GetCascadeTrajectoryResponse, GetCascadeTrajectoryResponse__Output as _exa_language_server_pb_GetCascadeTrajectoryResponse__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryResponse';
+import type { GetCascadeTrajectoryStepsRequest as _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, GetCascadeTrajectoryStepsRequest__Output as _exa_language_server_pb_GetCascadeTrajectoryStepsRequest__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryStepsRequest';
+import type { GetCascadeTrajectoryStepsResponse as _exa_language_server_pb_GetCascadeTrajectoryStepsResponse, GetCascadeTrajectoryStepsResponse__Output as _exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output } from '../../exa/language_server_pb/GetCascadeTrajectoryStepsResponse';
+import type { GetChangelogRequest as _exa_language_server_pb_GetChangelogRequest, GetChangelogRequest__Output as _exa_language_server_pb_GetChangelogRequest__Output } from '../../exa/language_server_pb/GetChangelogRequest';
+import type { GetChangelogResponse as _exa_language_server_pb_GetChangelogResponse, GetChangelogResponse__Output as _exa_language_server_pb_GetChangelogResponse__Output } from '../../exa/language_server_pb/GetChangelogResponse';
+import type { GetChatMessageRequest as _exa_chat_pb_GetChatMessageRequest, GetChatMessageRequest__Output as _exa_chat_pb_GetChatMessageRequest__Output } from '../../exa/chat_pb/GetChatMessageRequest';
+import type { GetChatMessageResponse as _exa_language_server_pb_GetChatMessageResponse, GetChatMessageResponse__Output as _exa_language_server_pb_GetChatMessageResponse__Output } from '../../exa/language_server_pb/GetChatMessageResponse';
+import type { GetClassInfosRequest as _exa_language_server_pb_GetClassInfosRequest, GetClassInfosRequest__Output as _exa_language_server_pb_GetClassInfosRequest__Output } from '../../exa/language_server_pb/GetClassInfosRequest';
+import type { GetClassInfosResponse as _exa_language_server_pb_GetClassInfosResponse, GetClassInfosResponse__Output as _exa_language_server_pb_GetClassInfosResponse__Output } from '../../exa/language_server_pb/GetClassInfosResponse';
+import type { GetCodeMapSuggestionsRequest as _exa_language_server_pb_GetCodeMapSuggestionsRequest, GetCodeMapSuggestionsRequest__Output as _exa_language_server_pb_GetCodeMapSuggestionsRequest__Output } from '../../exa/language_server_pb/GetCodeMapSuggestionsRequest';
+import type { GetCodeMapSuggestionsResponse as _exa_language_server_pb_GetCodeMapSuggestionsResponse, GetCodeMapSuggestionsResponse__Output as _exa_language_server_pb_GetCodeMapSuggestionsResponse__Output } from '../../exa/language_server_pb/GetCodeMapSuggestionsResponse';
+import type { GetCodeMapsForFileRequest as _exa_language_server_pb_GetCodeMapsForFileRequest, GetCodeMapsForFileRequest__Output as _exa_language_server_pb_GetCodeMapsForFileRequest__Output } from '../../exa/language_server_pb/GetCodeMapsForFileRequest';
+import type { GetCodeMapsForFileResponse as _exa_language_server_pb_GetCodeMapsForFileResponse, GetCodeMapsForFileResponse__Output as _exa_language_server_pb_GetCodeMapsForFileResponse__Output } from '../../exa/language_server_pb/GetCodeMapsForFileResponse';
+import type { GetCodeMapsForReposRequest as _exa_language_server_pb_GetCodeMapsForReposRequest, GetCodeMapsForReposRequest__Output as _exa_language_server_pb_GetCodeMapsForReposRequest__Output } from '../../exa/language_server_pb/GetCodeMapsForReposRequest';
+import type { GetCodeMapsForReposResponse as _exa_language_server_pb_GetCodeMapsForReposResponse, GetCodeMapsForReposResponse__Output as _exa_language_server_pb_GetCodeMapsForReposResponse__Output } from '../../exa/language_server_pb/GetCodeMapsForReposResponse';
+import type { GetCodeValidationStatesRequest as _exa_language_server_pb_GetCodeValidationStatesRequest, GetCodeValidationStatesRequest__Output as _exa_language_server_pb_GetCodeValidationStatesRequest__Output } from '../../exa/language_server_pb/GetCodeValidationStatesRequest';
+import type { GetCodeValidationStatesResponse as _exa_language_server_pb_GetCodeValidationStatesResponse, GetCodeValidationStatesResponse__Output as _exa_language_server_pb_GetCodeValidationStatesResponse__Output } from '../../exa/language_server_pb/GetCodeValidationStatesResponse';
+import type { GetCommandModelConfigsRequest as _exa_language_server_pb_GetCommandModelConfigsRequest, GetCommandModelConfigsRequest__Output as _exa_language_server_pb_GetCommandModelConfigsRequest__Output } from '../../exa/language_server_pb/GetCommandModelConfigsRequest';
+import type { GetCommandModelConfigsResponse as _exa_language_server_pb_GetCommandModelConfigsResponse, GetCommandModelConfigsResponse__Output as _exa_language_server_pb_GetCommandModelConfigsResponse__Output } from '../../exa/language_server_pb/GetCommandModelConfigsResponse';
+import type { GetCompletionsRequest as _exa_language_server_pb_GetCompletionsRequest, GetCompletionsRequest__Output as _exa_language_server_pb_GetCompletionsRequest__Output } from '../../exa/language_server_pb/GetCompletionsRequest';
+import type { GetCompletionsResponse as _exa_language_server_pb_GetCompletionsResponse, GetCompletionsResponse__Output as _exa_language_server_pb_GetCompletionsResponse__Output } from '../../exa/language_server_pb/GetCompletionsResponse';
+import type { GetConversationTagsRequest as _exa_language_server_pb_GetConversationTagsRequest, GetConversationTagsRequest__Output as _exa_language_server_pb_GetConversationTagsRequest__Output } from '../../exa/language_server_pb/GetConversationTagsRequest';
+import type { GetConversationTagsResponse as _exa_language_server_pb_GetConversationTagsResponse, GetConversationTagsResponse__Output as _exa_language_server_pb_GetConversationTagsResponse__Output } from '../../exa/language_server_pb/GetConversationTagsResponse';
+import type { GetDebugDiagnosticsRequest as _exa_language_server_pb_GetDebugDiagnosticsRequest, GetDebugDiagnosticsRequest__Output as _exa_language_server_pb_GetDebugDiagnosticsRequest__Output } from '../../exa/language_server_pb/GetDebugDiagnosticsRequest';
+import type { GetDebugDiagnosticsResponse as _exa_language_server_pb_GetDebugDiagnosticsResponse, GetDebugDiagnosticsResponse__Output as _exa_language_server_pb_GetDebugDiagnosticsResponse__Output } from '../../exa/language_server_pb/GetDebugDiagnosticsResponse';
+import type { GetDeepWikiRequest as _exa_chat_pb_GetDeepWikiRequest, GetDeepWikiRequest__Output as _exa_chat_pb_GetDeepWikiRequest__Output } from '../../exa/chat_pb/GetDeepWikiRequest';
+import type { GetDeepWikiResponse as _exa_language_server_pb_GetDeepWikiResponse, GetDeepWikiResponse__Output as _exa_language_server_pb_GetDeepWikiResponse__Output } from '../../exa/language_server_pb/GetDeepWikiResponse';
+import type { GetDefaultWebOriginsRequest as _exa_language_server_pb_GetDefaultWebOriginsRequest, GetDefaultWebOriginsRequest__Output as _exa_language_server_pb_GetDefaultWebOriginsRequest__Output } from '../../exa/language_server_pb/GetDefaultWebOriginsRequest';
+import type { GetDefaultWebOriginsResponse as _exa_language_server_pb_GetDefaultWebOriginsResponse, GetDefaultWebOriginsResponse__Output as _exa_language_server_pb_GetDefaultWebOriginsResponse__Output } from '../../exa/language_server_pb/GetDefaultWebOriginsResponse';
+import type { GetExternalModelRequest as _exa_language_server_pb_GetExternalModelRequest, GetExternalModelRequest__Output as _exa_language_server_pb_GetExternalModelRequest__Output } from '../../exa/language_server_pb/GetExternalModelRequest';
+import type { GetExternalModelResponse as _exa_language_server_pb_GetExternalModelResponse, GetExternalModelResponse__Output as _exa_language_server_pb_GetExternalModelResponse__Output } from '../../exa/language_server_pb/GetExternalModelResponse';
+import type { GetFunctionsRequest as _exa_language_server_pb_GetFunctionsRequest, GetFunctionsRequest__Output as _exa_language_server_pb_GetFunctionsRequest__Output } from '../../exa/language_server_pb/GetFunctionsRequest';
+import type { GetFunctionsResponse as _exa_language_server_pb_GetFunctionsResponse, GetFunctionsResponse__Output as _exa_language_server_pb_GetFunctionsResponse__Output } from '../../exa/language_server_pb/GetFunctionsResponse';
+import type { GetGithubPullRequestSearchInfoRequest as _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, GetGithubPullRequestSearchInfoRequest__Output as _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest__Output } from '../../exa/language_server_pb/GetGithubPullRequestSearchInfoRequest';
+import type { GetGithubPullRequestSearchInfoResponse as _exa_language_server_pb_GetGithubPullRequestSearchInfoResponse, GetGithubPullRequestSearchInfoResponse__Output as _exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output } from '../../exa/language_server_pb/GetGithubPullRequestSearchInfoResponse';
+import type { GetKnowledgeBaseItemsForTeamRequest as _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, GetKnowledgeBaseItemsForTeamRequest__Output as _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest__Output } from '../../exa/language_server_pb/GetKnowledgeBaseItemsForTeamRequest';
+import type { GetKnowledgeBaseItemsForTeamResponse as _exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse, GetKnowledgeBaseItemsForTeamResponse__Output as _exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output } from '../../exa/language_server_pb/GetKnowledgeBaseItemsForTeamResponse';
+import type { GetLifeguardConfigRequest as _exa_language_server_pb_GetLifeguardConfigRequest, GetLifeguardConfigRequest__Output as _exa_language_server_pb_GetLifeguardConfigRequest__Output } from '../../exa/language_server_pb/GetLifeguardConfigRequest';
+import type { GetLifeguardConfigResponse as _exa_language_server_pb_GetLifeguardConfigResponse, GetLifeguardConfigResponse__Output as _exa_language_server_pb_GetLifeguardConfigResponse__Output } from '../../exa/language_server_pb/GetLifeguardConfigResponse';
+import type { GetMatchingCodeContextRequest as _exa_language_server_pb_GetMatchingCodeContextRequest, GetMatchingCodeContextRequest__Output as _exa_language_server_pb_GetMatchingCodeContextRequest__Output } from '../../exa/language_server_pb/GetMatchingCodeContextRequest';
+import type { GetMatchingCodeContextResponse as _exa_language_server_pb_GetMatchingCodeContextResponse, GetMatchingCodeContextResponse__Output as _exa_language_server_pb_GetMatchingCodeContextResponse__Output } from '../../exa/language_server_pb/GetMatchingCodeContextResponse';
+import type { GetMatchingContextScopeItemsRequest as _exa_language_server_pb_GetMatchingContextScopeItemsRequest, GetMatchingContextScopeItemsRequest__Output as _exa_language_server_pb_GetMatchingContextScopeItemsRequest__Output } from '../../exa/language_server_pb/GetMatchingContextScopeItemsRequest';
+import type { GetMatchingContextScopeItemsResponse as _exa_language_server_pb_GetMatchingContextScopeItemsResponse, GetMatchingContextScopeItemsResponse__Output as _exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output } from '../../exa/language_server_pb/GetMatchingContextScopeItemsResponse';
+import type { GetMatchingIndexedReposRequest as _exa_language_server_pb_GetMatchingIndexedReposRequest, GetMatchingIndexedReposRequest__Output as _exa_language_server_pb_GetMatchingIndexedReposRequest__Output } from '../../exa/language_server_pb/GetMatchingIndexedReposRequest';
+import type { GetMatchingIndexedReposResponse as _exa_language_server_pb_GetMatchingIndexedReposResponse, GetMatchingIndexedReposResponse__Output as _exa_language_server_pb_GetMatchingIndexedReposResponse__Output } from '../../exa/language_server_pb/GetMatchingIndexedReposResponse';
+import type { GetMcpPromptRequest as _exa_language_server_pb_GetMcpPromptRequest, GetMcpPromptRequest__Output as _exa_language_server_pb_GetMcpPromptRequest__Output } from '../../exa/language_server_pb/GetMcpPromptRequest';
+import type { GetMcpPromptResponse as _exa_language_server_pb_GetMcpPromptResponse, GetMcpPromptResponse__Output as _exa_language_server_pb_GetMcpPromptResponse__Output } from '../../exa/language_server_pb/GetMcpPromptResponse';
+import type { GetMcpServerStatesRequest as _exa_language_server_pb_GetMcpServerStatesRequest, GetMcpServerStatesRequest__Output as _exa_language_server_pb_GetMcpServerStatesRequest__Output } from '../../exa/language_server_pb/GetMcpServerStatesRequest';
+import type { GetMcpServerStatesResponse as _exa_language_server_pb_GetMcpServerStatesResponse, GetMcpServerStatesResponse__Output as _exa_language_server_pb_GetMcpServerStatesResponse__Output } from '../../exa/language_server_pb/GetMcpServerStatesResponse';
+import type { GetMessageTokenCountRequest as _exa_language_server_pb_GetMessageTokenCountRequest, GetMessageTokenCountRequest__Output as _exa_language_server_pb_GetMessageTokenCountRequest__Output } from '../../exa/language_server_pb/GetMessageTokenCountRequest';
+import type { GetMessageTokenCountResponse as _exa_language_server_pb_GetMessageTokenCountResponse, GetMessageTokenCountResponse__Output as _exa_language_server_pb_GetMessageTokenCountResponse__Output } from '../../exa/language_server_pb/GetMessageTokenCountResponse';
+import type { GetModelStatusesRequest as _exa_language_server_pb_GetModelStatusesRequest, GetModelStatusesRequest__Output as _exa_language_server_pb_GetModelStatusesRequest__Output } from '../../exa/language_server_pb/GetModelStatusesRequest';
+import type { GetModelStatusesResponse as _exa_language_server_pb_GetModelStatusesResponse, GetModelStatusesResponse__Output as _exa_language_server_pb_GetModelStatusesResponse__Output } from '../../exa/language_server_pb/GetModelStatusesResponse';
+import type { GetPatchAndCodeChangeRequest as _exa_language_server_pb_GetPatchAndCodeChangeRequest, GetPatchAndCodeChangeRequest__Output as _exa_language_server_pb_GetPatchAndCodeChangeRequest__Output } from '../../exa/language_server_pb/GetPatchAndCodeChangeRequest';
+import type { GetPatchAndCodeChangeResponse as _exa_language_server_pb_GetPatchAndCodeChangeResponse, GetPatchAndCodeChangeResponse__Output as _exa_language_server_pb_GetPatchAndCodeChangeResponse__Output } from '../../exa/language_server_pb/GetPatchAndCodeChangeResponse';
+import type { GetPrimaryApiKeyForDevsOnlyRequest as _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, GetPrimaryApiKeyForDevsOnlyRequest__Output as _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest__Output } from '../../exa/language_server_pb/GetPrimaryApiKeyForDevsOnlyRequest';
+import type { GetPrimaryApiKeyForDevsOnlyResponse as _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse, GetPrimaryApiKeyForDevsOnlyResponse__Output as _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output } from '../../exa/language_server_pb/GetPrimaryApiKeyForDevsOnlyResponse';
+import type { GetProcessesRequest as _exa_language_server_pb_GetProcessesRequest, GetProcessesRequest__Output as _exa_language_server_pb_GetProcessesRequest__Output } from '../../exa/language_server_pb/GetProcessesRequest';
+import type { GetProcessesResponse as _exa_language_server_pb_GetProcessesResponse, GetProcessesResponse__Output as _exa_language_server_pb_GetProcessesResponse__Output } from '../../exa/language_server_pb/GetProcessesResponse';
+import type { GetProfileDataRequest as _exa_language_server_pb_GetProfileDataRequest, GetProfileDataRequest__Output as _exa_language_server_pb_GetProfileDataRequest__Output } from '../../exa/language_server_pb/GetProfileDataRequest';
+import type { GetProfileDataResponse as _exa_language_server_pb_GetProfileDataResponse, GetProfileDataResponse__Output as _exa_language_server_pb_GetProfileDataResponse__Output } from '../../exa/language_server_pb/GetProfileDataResponse';
+import type { GetRepoInfosRequest as _exa_language_server_pb_GetRepoInfosRequest, GetRepoInfosRequest__Output as _exa_language_server_pb_GetRepoInfosRequest__Output } from '../../exa/language_server_pb/GetRepoInfosRequest';
+import type { GetRepoInfosResponse as _exa_language_server_pb_GetRepoInfosResponse, GetRepoInfosResponse__Output as _exa_language_server_pb_GetRepoInfosResponse__Output } from '../../exa/language_server_pb/GetRepoInfosResponse';
+import type { GetRevertPreviewRequest as _exa_language_server_pb_GetRevertPreviewRequest, GetRevertPreviewRequest__Output as _exa_language_server_pb_GetRevertPreviewRequest__Output } from '../../exa/language_server_pb/GetRevertPreviewRequest';
+import type { GetRevertPreviewResponse as _exa_language_server_pb_GetRevertPreviewResponse, GetRevertPreviewResponse__Output as _exa_language_server_pb_GetRevertPreviewResponse__Output } from '../../exa/language_server_pb/GetRevertPreviewResponse';
+import type { GetSharedCodeMapRequest as _exa_language_server_pb_GetSharedCodeMapRequest, GetSharedCodeMapRequest__Output as _exa_language_server_pb_GetSharedCodeMapRequest__Output } from '../../exa/language_server_pb/GetSharedCodeMapRequest';
+import type { GetSharedCodeMapResponse as _exa_language_server_pb_GetSharedCodeMapResponse, GetSharedCodeMapResponse__Output as _exa_language_server_pb_GetSharedCodeMapResponse__Output } from '../../exa/language_server_pb/GetSharedCodeMapResponse';
+import type { GetStatusRequest as _exa_language_server_pb_GetStatusRequest, GetStatusRequest__Output as _exa_language_server_pb_GetStatusRequest__Output } from '../../exa/language_server_pb/GetStatusRequest';
+import type { GetStatusResponse as _exa_language_server_pb_GetStatusResponse, GetStatusResponse__Output as _exa_language_server_pb_GetStatusResponse__Output } from '../../exa/language_server_pb/GetStatusResponse';
+import type { GetSuggestedContextScopeItemsRequest as _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, GetSuggestedContextScopeItemsRequest__Output as _exa_language_server_pb_GetSuggestedContextScopeItemsRequest__Output } from '../../exa/language_server_pb/GetSuggestedContextScopeItemsRequest';
+import type { GetSuggestedContextScopeItemsResponse as _exa_language_server_pb_GetSuggestedContextScopeItemsResponse, GetSuggestedContextScopeItemsResponse__Output as _exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output } from '../../exa/language_server_pb/GetSuggestedContextScopeItemsResponse';
+import type { GetSystemPromptAndToolsRequest as _exa_language_server_pb_GetSystemPromptAndToolsRequest, GetSystemPromptAndToolsRequest__Output as _exa_language_server_pb_GetSystemPromptAndToolsRequest__Output } from '../../exa/language_server_pb/GetSystemPromptAndToolsRequest';
+import type { GetSystemPromptAndToolsResponse as _exa_language_server_pb_GetSystemPromptAndToolsResponse, GetSystemPromptAndToolsResponse__Output as _exa_language_server_pb_GetSystemPromptAndToolsResponse__Output } from '../../exa/language_server_pb/GetSystemPromptAndToolsResponse';
+import type { GetTeamOrganizationalControlsRequest as _exa_language_server_pb_GetTeamOrganizationalControlsRequest, GetTeamOrganizationalControlsRequest__Output as _exa_language_server_pb_GetTeamOrganizationalControlsRequest__Output } from '../../exa/language_server_pb/GetTeamOrganizationalControlsRequest';
+import type { GetTeamOrganizationalControlsResponse as _exa_language_server_pb_GetTeamOrganizationalControlsResponse, GetTeamOrganizationalControlsResponse__Output as _exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output } from '../../exa/language_server_pb/GetTeamOrganizationalControlsResponse';
+import type { GetTranscriptionRequest as _exa_language_server_pb_GetTranscriptionRequest, GetTranscriptionRequest__Output as _exa_language_server_pb_GetTranscriptionRequest__Output } from '../../exa/language_server_pb/GetTranscriptionRequest';
+import type { GetTranscriptionResponse as _exa_language_server_pb_GetTranscriptionResponse, GetTranscriptionResponse__Output as _exa_language_server_pb_GetTranscriptionResponse__Output } from '../../exa/language_server_pb/GetTranscriptionResponse';
+import type { GetUnleashDataRequest as _exa_language_server_pb_GetUnleashDataRequest, GetUnleashDataRequest__Output as _exa_language_server_pb_GetUnleashDataRequest__Output } from '../../exa/language_server_pb/GetUnleashDataRequest';
+import type { GetUnleashDataResponse as _exa_language_server_pb_GetUnleashDataResponse, GetUnleashDataResponse__Output as _exa_language_server_pb_GetUnleashDataResponse__Output } from '../../exa/language_server_pb/GetUnleashDataResponse';
+import type { GetUserMemoriesRequest as _exa_language_server_pb_GetUserMemoriesRequest, GetUserMemoriesRequest__Output as _exa_language_server_pb_GetUserMemoriesRequest__Output } from '../../exa/language_server_pb/GetUserMemoriesRequest';
+import type { GetUserMemoriesResponse as _exa_language_server_pb_GetUserMemoriesResponse, GetUserMemoriesResponse__Output as _exa_language_server_pb_GetUserMemoriesResponse__Output } from '../../exa/language_server_pb/GetUserMemoriesResponse';
+import type { GetUserSettingsRequest as _exa_language_server_pb_GetUserSettingsRequest, GetUserSettingsRequest__Output as _exa_language_server_pb_GetUserSettingsRequest__Output } from '../../exa/language_server_pb/GetUserSettingsRequest';
+import type { GetUserSettingsResponse as _exa_language_server_pb_GetUserSettingsResponse, GetUserSettingsResponse__Output as _exa_language_server_pb_GetUserSettingsResponse__Output } from '../../exa/language_server_pb/GetUserSettingsResponse';
+import type { GetUserStatusRequest as _exa_language_server_pb_GetUserStatusRequest, GetUserStatusRequest__Output as _exa_language_server_pb_GetUserStatusRequest__Output } from '../../exa/language_server_pb/GetUserStatusRequest';
+import type { GetUserStatusResponse as _exa_language_server_pb_GetUserStatusResponse, GetUserStatusResponse__Output as _exa_language_server_pb_GetUserStatusResponse__Output } from '../../exa/language_server_pb/GetUserStatusResponse';
+import type { GetUserTrajectoryDebugRequest as _exa_language_server_pb_GetUserTrajectoryDebugRequest, GetUserTrajectoryDebugRequest__Output as _exa_language_server_pb_GetUserTrajectoryDebugRequest__Output } from '../../exa/language_server_pb/GetUserTrajectoryDebugRequest';
+import type { GetUserTrajectoryDebugResponse as _exa_language_server_pb_GetUserTrajectoryDebugResponse, GetUserTrajectoryDebugResponse__Output as _exa_language_server_pb_GetUserTrajectoryDebugResponse__Output } from '../../exa/language_server_pb/GetUserTrajectoryDebugResponse';
+import type { GetUserTrajectoryDescriptionsRequest as _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, GetUserTrajectoryDescriptionsRequest__Output as _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest__Output } from '../../exa/language_server_pb/GetUserTrajectoryDescriptionsRequest';
+import type { GetUserTrajectoryDescriptionsResponse as _exa_language_server_pb_GetUserTrajectoryDescriptionsResponse, GetUserTrajectoryDescriptionsResponse__Output as _exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output } from '../../exa/language_server_pb/GetUserTrajectoryDescriptionsResponse';
+import type { GetUserTrajectoryRequest as _exa_language_server_pb_GetUserTrajectoryRequest, GetUserTrajectoryRequest__Output as _exa_language_server_pb_GetUserTrajectoryRequest__Output } from '../../exa/language_server_pb/GetUserTrajectoryRequest';
+import type { GetUserTrajectoryResponse as _exa_language_server_pb_GetUserTrajectoryResponse, GetUserTrajectoryResponse__Output as _exa_language_server_pb_GetUserTrajectoryResponse__Output } from '../../exa/language_server_pb/GetUserTrajectoryResponse';
+import type { GetWebDocsOptionsRequest as _exa_language_server_pb_GetWebDocsOptionsRequest, GetWebDocsOptionsRequest__Output as _exa_language_server_pb_GetWebDocsOptionsRequest__Output } from '../../exa/language_server_pb/GetWebDocsOptionsRequest';
+import type { GetWebDocsOptionsResponse as _exa_language_server_pb_GetWebDocsOptionsResponse, GetWebDocsOptionsResponse__Output as _exa_language_server_pb_GetWebDocsOptionsResponse__Output } from '../../exa/language_server_pb/GetWebDocsOptionsResponse';
+import type { GetWindsurfJSAppDeploymentRequest as _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, GetWindsurfJSAppDeploymentRequest__Output as _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest__Output } from '../../exa/language_server_pb/GetWindsurfJSAppDeploymentRequest';
+import type { GetWindsurfJSAppDeploymentResponse as _exa_language_server_pb_GetWindsurfJSAppDeploymentResponse, GetWindsurfJSAppDeploymentResponse__Output as _exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output } from '../../exa/language_server_pb/GetWindsurfJSAppDeploymentResponse';
+import type { GetWorkspaceEditStateRequest as _exa_language_server_pb_GetWorkspaceEditStateRequest, GetWorkspaceEditStateRequest__Output as _exa_language_server_pb_GetWorkspaceEditStateRequest__Output } from '../../exa/language_server_pb/GetWorkspaceEditStateRequest';
+import type { GetWorkspaceEditStateResponse as _exa_language_server_pb_GetWorkspaceEditStateResponse, GetWorkspaceEditStateResponse__Output as _exa_language_server_pb_GetWorkspaceEditStateResponse__Output } from '../../exa/language_server_pb/GetWorkspaceEditStateResponse';
+import type { GetWorkspaceInfosRequest as _exa_language_server_pb_GetWorkspaceInfosRequest, GetWorkspaceInfosRequest__Output as _exa_language_server_pb_GetWorkspaceInfosRequest__Output } from '../../exa/language_server_pb/GetWorkspaceInfosRequest';
+import type { GetWorkspaceInfosResponse as _exa_language_server_pb_GetWorkspaceInfosResponse, GetWorkspaceInfosResponse__Output as _exa_language_server_pb_GetWorkspaceInfosResponse__Output } from '../../exa/language_server_pb/GetWorkspaceInfosResponse';
+import type { HandleCascadeUserInteractionRequest as _exa_language_server_pb_HandleCascadeUserInteractionRequest, HandleCascadeUserInteractionRequest__Output as _exa_language_server_pb_HandleCascadeUserInteractionRequest__Output } from '../../exa/language_server_pb/HandleCascadeUserInteractionRequest';
+import type { HandleCascadeUserInteractionResponse as _exa_language_server_pb_HandleCascadeUserInteractionResponse, HandleCascadeUserInteractionResponse__Output as _exa_language_server_pb_HandleCascadeUserInteractionResponse__Output } from '../../exa/language_server_pb/HandleCascadeUserInteractionResponse';
+import type { HandleStreamingCommandRequest as _exa_language_server_pb_HandleStreamingCommandRequest, HandleStreamingCommandRequest__Output as _exa_language_server_pb_HandleStreamingCommandRequest__Output } from '../../exa/language_server_pb/HandleStreamingCommandRequest';
+import type { HandleStreamingCommandResponse as _exa_language_server_pb_HandleStreamingCommandResponse, HandleStreamingCommandResponse__Output as _exa_language_server_pb_HandleStreamingCommandResponse__Output } from '../../exa/language_server_pb/HandleStreamingCommandResponse';
+import type { HandleStreamingTabRequest as _exa_language_server_pb_HandleStreamingTabRequest, HandleStreamingTabRequest__Output as _exa_language_server_pb_HandleStreamingTabRequest__Output } from '../../exa/language_server_pb/HandleStreamingTabRequest';
+import type { HandleStreamingTabResponse as _exa_language_server_pb_HandleStreamingTabResponse, HandleStreamingTabResponse__Output as _exa_language_server_pb_HandleStreamingTabResponse__Output } from '../../exa/language_server_pb/HandleStreamingTabResponse';
+import type { HandleStreamingTabV2Request as _exa_language_server_pb_HandleStreamingTabV2Request, HandleStreamingTabV2Request__Output as _exa_language_server_pb_HandleStreamingTabV2Request__Output } from '../../exa/language_server_pb/HandleStreamingTabV2Request';
+import type { HandleStreamingTabV2Response as _exa_language_server_pb_HandleStreamingTabV2Response, HandleStreamingTabV2Response__Output as _exa_language_server_pb_HandleStreamingTabV2Response__Output } from '../../exa/language_server_pb/HandleStreamingTabV2Response';
+import type { HandleStreamingTerminalCommandRequest as _exa_language_server_pb_HandleStreamingTerminalCommandRequest, HandleStreamingTerminalCommandRequest__Output as _exa_language_server_pb_HandleStreamingTerminalCommandRequest__Output } from '../../exa/language_server_pb/HandleStreamingTerminalCommandRequest';
+import type { HandleStreamingTerminalCommandResponse as _exa_language_server_pb_HandleStreamingTerminalCommandResponse, HandleStreamingTerminalCommandResponse__Output as _exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output } from '../../exa/language_server_pb/HandleStreamingTerminalCommandResponse';
+import type { HeartbeatRequest as _exa_language_server_pb_HeartbeatRequest, HeartbeatRequest__Output as _exa_language_server_pb_HeartbeatRequest__Output } from '../../exa/language_server_pb/HeartbeatRequest';
+import type { HeartbeatResponse as _exa_language_server_pb_HeartbeatResponse, HeartbeatResponse__Output as _exa_language_server_pb_HeartbeatResponse__Output } from '../../exa/language_server_pb/HeartbeatResponse';
+import type { ImportFromCursorRequest as _exa_language_server_pb_ImportFromCursorRequest, ImportFromCursorRequest__Output as _exa_language_server_pb_ImportFromCursorRequest__Output } from '../../exa/language_server_pb/ImportFromCursorRequest';
+import type { ImportFromCursorResponse as _exa_language_server_pb_ImportFromCursorResponse, ImportFromCursorResponse__Output as _exa_language_server_pb_ImportFromCursorResponse__Output } from '../../exa/language_server_pb/ImportFromCursorResponse';
+import type { InitializeCascadePanelStateRequest as _exa_language_server_pb_InitializeCascadePanelStateRequest, InitializeCascadePanelStateRequest__Output as _exa_language_server_pb_InitializeCascadePanelStateRequest__Output } from '../../exa/language_server_pb/InitializeCascadePanelStateRequest';
+import type { InitializeCascadePanelStateResponse as _exa_language_server_pb_InitializeCascadePanelStateResponse, InitializeCascadePanelStateResponse__Output as _exa_language_server_pb_InitializeCascadePanelStateResponse__Output } from '../../exa/language_server_pb/InitializeCascadePanelStateResponse';
+import type { InstallCascadePluginRequest as _exa_language_server_pb_InstallCascadePluginRequest, InstallCascadePluginRequest__Output as _exa_language_server_pb_InstallCascadePluginRequest__Output } from '../../exa/language_server_pb/InstallCascadePluginRequest';
+import type { InstallCascadePluginResponse as _exa_language_server_pb_InstallCascadePluginResponse, InstallCascadePluginResponse__Output as _exa_language_server_pb_InstallCascadePluginResponse__Output } from '../../exa/language_server_pb/InstallCascadePluginResponse';
+import type { InterruptWithQueuedMessageRequest as _exa_language_server_pb_InterruptWithQueuedMessageRequest, InterruptWithQueuedMessageRequest__Output as _exa_language_server_pb_InterruptWithQueuedMessageRequest__Output } from '../../exa/language_server_pb/InterruptWithQueuedMessageRequest';
+import type { InterruptWithQueuedMessageResponse as _exa_language_server_pb_InterruptWithQueuedMessageResponse, InterruptWithQueuedMessageResponse__Output as _exa_language_server_pb_InterruptWithQueuedMessageResponse__Output } from '../../exa/language_server_pb/InterruptWithQueuedMessageResponse';
+import type { LogCascadeSessionRequest as _exa_language_server_pb_LogCascadeSessionRequest, LogCascadeSessionRequest__Output as _exa_language_server_pb_LogCascadeSessionRequest__Output } from '../../exa/language_server_pb/LogCascadeSessionRequest';
+import type { LogCascadeSessionResponse as _exa_language_server_pb_LogCascadeSessionResponse, LogCascadeSessionResponse__Output as _exa_language_server_pb_LogCascadeSessionResponse__Output } from '../../exa/language_server_pb/LogCascadeSessionResponse';
+import type { MigrateApiKeyRequest as _exa_language_server_pb_MigrateApiKeyRequest, MigrateApiKeyRequest__Output as _exa_language_server_pb_MigrateApiKeyRequest__Output } from '../../exa/language_server_pb/MigrateApiKeyRequest';
+import type { MigrateApiKeyResponse as _exa_language_server_pb_MigrateApiKeyResponse, MigrateApiKeyResponse__Output as _exa_language_server_pb_MigrateApiKeyResponse__Output } from '../../exa/language_server_pb/MigrateApiKeyResponse';
+import type { MountCascadeFilesystemRequest as _exa_language_server_pb_MountCascadeFilesystemRequest, MountCascadeFilesystemRequest__Output as _exa_language_server_pb_MountCascadeFilesystemRequest__Output } from '../../exa/language_server_pb/MountCascadeFilesystemRequest';
+import type { MountCascadeFilesystemResponse as _exa_language_server_pb_MountCascadeFilesystemResponse, MountCascadeFilesystemResponse__Output as _exa_language_server_pb_MountCascadeFilesystemResponse__Output } from '../../exa/language_server_pb/MountCascadeFilesystemResponse';
+import type { MoveQueuedMessageRequest as _exa_language_server_pb_MoveQueuedMessageRequest, MoveQueuedMessageRequest__Output as _exa_language_server_pb_MoveQueuedMessageRequest__Output } from '../../exa/language_server_pb/MoveQueuedMessageRequest';
+import type { MoveQueuedMessageResponse as _exa_language_server_pb_MoveQueuedMessageResponse, MoveQueuedMessageResponse__Output as _exa_language_server_pb_MoveQueuedMessageResponse__Output } from '../../exa/language_server_pb/MoveQueuedMessageResponse';
+import type { OnEditRequest as _exa_language_server_pb_OnEditRequest, OnEditRequest__Output as _exa_language_server_pb_OnEditRequest__Output } from '../../exa/language_server_pb/OnEditRequest';
+import type { OnEditResponse as _exa_language_server_pb_OnEditResponse, OnEditResponse__Output as _exa_language_server_pb_OnEditResponse__Output } from '../../exa/language_server_pb/OnEditResponse';
+import type { ProgressBarsRequest as _exa_language_server_pb_ProgressBarsRequest, ProgressBarsRequest__Output as _exa_language_server_pb_ProgressBarsRequest__Output } from '../../exa/language_server_pb/ProgressBarsRequest';
+import type { ProgressBarsResponse as _exa_language_server_pb_ProgressBarsResponse, ProgressBarsResponse__Output as _exa_language_server_pb_ProgressBarsResponse__Output } from '../../exa/language_server_pb/ProgressBarsResponse';
+import type { ProvideCompletionFeedbackRequest as _exa_language_server_pb_ProvideCompletionFeedbackRequest, ProvideCompletionFeedbackRequest__Output as _exa_language_server_pb_ProvideCompletionFeedbackRequest__Output } from '../../exa/language_server_pb/ProvideCompletionFeedbackRequest';
+import type { ProvideCompletionFeedbackResponse as _exa_language_server_pb_ProvideCompletionFeedbackResponse, ProvideCompletionFeedbackResponse__Output as _exa_language_server_pb_ProvideCompletionFeedbackResponse__Output } from '../../exa/language_server_pb/ProvideCompletionFeedbackResponse';
+import type { QueueCascadeMessageRequest as _exa_language_server_pb_QueueCascadeMessageRequest, QueueCascadeMessageRequest__Output as _exa_language_server_pb_QueueCascadeMessageRequest__Output } from '../../exa/language_server_pb/QueueCascadeMessageRequest';
+import type { QueueCascadeMessageResponse as _exa_language_server_pb_QueueCascadeMessageResponse, QueueCascadeMessageResponse__Output as _exa_language_server_pb_QueueCascadeMessageResponse__Output } from '../../exa/language_server_pb/QueueCascadeMessageResponse';
+import type { RawGetChatMessageRequest as _exa_chat_pb_RawGetChatMessageRequest, RawGetChatMessageRequest__Output as _exa_chat_pb_RawGetChatMessageRequest__Output } from '../../exa/chat_pb/RawGetChatMessageRequest';
+import type { RawGetChatMessageResponse as _exa_language_server_pb_RawGetChatMessageResponse, RawGetChatMessageResponse__Output as _exa_language_server_pb_RawGetChatMessageResponse__Output } from '../../exa/language_server_pb/RawGetChatMessageResponse';
+import type { RecordChatFeedbackRequest as _exa_language_server_pb_RecordChatFeedbackRequest, RecordChatFeedbackRequest__Output as _exa_language_server_pb_RecordChatFeedbackRequest__Output } from '../../exa/language_server_pb/RecordChatFeedbackRequest';
+import type { RecordChatFeedbackResponse as _exa_language_server_pb_RecordChatFeedbackResponse, RecordChatFeedbackResponse__Output as _exa_language_server_pb_RecordChatFeedbackResponse__Output } from '../../exa/language_server_pb/RecordChatFeedbackResponse';
+import type { RecordChatPanelSessionRequest as _exa_language_server_pb_RecordChatPanelSessionRequest, RecordChatPanelSessionRequest__Output as _exa_language_server_pb_RecordChatPanelSessionRequest__Output } from '../../exa/language_server_pb/RecordChatPanelSessionRequest';
+import type { RecordChatPanelSessionResponse as _exa_language_server_pb_RecordChatPanelSessionResponse, RecordChatPanelSessionResponse__Output as _exa_language_server_pb_RecordChatPanelSessionResponse__Output } from '../../exa/language_server_pb/RecordChatPanelSessionResponse';
+import type { RecordCommitMessageSaveRequest as _exa_language_server_pb_RecordCommitMessageSaveRequest, RecordCommitMessageSaveRequest__Output as _exa_language_server_pb_RecordCommitMessageSaveRequest__Output } from '../../exa/language_server_pb/RecordCommitMessageSaveRequest';
+import type { RecordCommitMessageSaveResponse as _exa_language_server_pb_RecordCommitMessageSaveResponse, RecordCommitMessageSaveResponse__Output as _exa_language_server_pb_RecordCommitMessageSaveResponse__Output } from '../../exa/language_server_pb/RecordCommitMessageSaveResponse';
+import type { RecordEventRequest as _exa_language_server_pb_RecordEventRequest, RecordEventRequest__Output as _exa_language_server_pb_RecordEventRequest__Output } from '../../exa/language_server_pb/RecordEventRequest';
+import type { RecordEventResponse as _exa_language_server_pb_RecordEventResponse, RecordEventResponse__Output as _exa_language_server_pb_RecordEventResponse__Output } from '../../exa/language_server_pb/RecordEventResponse';
+import type { RecordLintsRequest as _exa_language_server_pb_RecordLintsRequest, RecordLintsRequest__Output as _exa_language_server_pb_RecordLintsRequest__Output } from '../../exa/language_server_pb/RecordLintsRequest';
+import type { RecordLintsResponse as _exa_language_server_pb_RecordLintsResponse, RecordLintsResponse__Output as _exa_language_server_pb_RecordLintsResponse__Output } from '../../exa/language_server_pb/RecordLintsResponse';
+import type { RecordSearchDocOpenRequest as _exa_language_server_pb_RecordSearchDocOpenRequest, RecordSearchDocOpenRequest__Output as _exa_language_server_pb_RecordSearchDocOpenRequest__Output } from '../../exa/language_server_pb/RecordSearchDocOpenRequest';
+import type { RecordSearchDocOpenResponse as _exa_language_server_pb_RecordSearchDocOpenResponse, RecordSearchDocOpenResponse__Output as _exa_language_server_pb_RecordSearchDocOpenResponse__Output } from '../../exa/language_server_pb/RecordSearchDocOpenResponse';
+import type { RecordSearchResultsViewRequest as _exa_language_server_pb_RecordSearchResultsViewRequest, RecordSearchResultsViewRequest__Output as _exa_language_server_pb_RecordSearchResultsViewRequest__Output } from '../../exa/language_server_pb/RecordSearchResultsViewRequest';
+import type { RecordSearchResultsViewResponse as _exa_language_server_pb_RecordSearchResultsViewResponse, RecordSearchResultsViewResponse__Output as _exa_language_server_pb_RecordSearchResultsViewResponse__Output } from '../../exa/language_server_pb/RecordSearchResultsViewResponse';
+import type { RecordSystemMetricsRequest as _exa_language_server_pb_RecordSystemMetricsRequest, RecordSystemMetricsRequest__Output as _exa_language_server_pb_RecordSystemMetricsRequest__Output } from '../../exa/language_server_pb/RecordSystemMetricsRequest';
+import type { RecordSystemMetricsResponse as _exa_language_server_pb_RecordSystemMetricsResponse, RecordSystemMetricsResponse__Output as _exa_language_server_pb_RecordSystemMetricsResponse__Output } from '../../exa/language_server_pb/RecordSystemMetricsResponse';
+import type { RecordUserGrepRequest as _exa_language_server_pb_RecordUserGrepRequest, RecordUserGrepRequest__Output as _exa_language_server_pb_RecordUserGrepRequest__Output } from '../../exa/language_server_pb/RecordUserGrepRequest';
+import type { RecordUserGrepResponse as _exa_language_server_pb_RecordUserGrepResponse, RecordUserGrepResponse__Output as _exa_language_server_pb_RecordUserGrepResponse__Output } from '../../exa/language_server_pb/RecordUserGrepResponse';
+import type { RecordUserStepSnapshotRequest as _exa_language_server_pb_RecordUserStepSnapshotRequest, RecordUserStepSnapshotRequest__Output as _exa_language_server_pb_RecordUserStepSnapshotRequest__Output } from '../../exa/language_server_pb/RecordUserStepSnapshotRequest';
+import type { RecordUserStepSnapshotResponse as _exa_language_server_pb_RecordUserStepSnapshotResponse, RecordUserStepSnapshotResponse__Output as _exa_language_server_pb_RecordUserStepSnapshotResponse__Output } from '../../exa/language_server_pb/RecordUserStepSnapshotResponse';
+import type { RefreshContextForIdeActionRequest as _exa_language_server_pb_RefreshContextForIdeActionRequest, RefreshContextForIdeActionRequest__Output as _exa_language_server_pb_RefreshContextForIdeActionRequest__Output } from '../../exa/language_server_pb/RefreshContextForIdeActionRequest';
+import type { RefreshContextForIdeActionResponse as _exa_language_server_pb_RefreshContextForIdeActionResponse, RefreshContextForIdeActionResponse__Output as _exa_language_server_pb_RefreshContextForIdeActionResponse__Output } from '../../exa/language_server_pb/RefreshContextForIdeActionResponse';
+import type { RefreshCustomizationRequest as _exa_language_server_pb_RefreshCustomizationRequest, RefreshCustomizationRequest__Output as _exa_language_server_pb_RefreshCustomizationRequest__Output } from '../../exa/language_server_pb/RefreshCustomizationRequest';
+import type { RefreshCustomizationResponse as _exa_language_server_pb_RefreshCustomizationResponse, RefreshCustomizationResponse__Output as _exa_language_server_pb_RefreshCustomizationResponse__Output } from '../../exa/language_server_pb/RefreshCustomizationResponse';
+import type { RefreshMcpServersRequest as _exa_language_server_pb_RefreshMcpServersRequest, RefreshMcpServersRequest__Output as _exa_language_server_pb_RefreshMcpServersRequest__Output } from '../../exa/language_server_pb/RefreshMcpServersRequest';
+import type { RefreshMcpServersResponse as _exa_language_server_pb_RefreshMcpServersResponse, RefreshMcpServersResponse__Output as _exa_language_server_pb_RefreshMcpServersResponse__Output } from '../../exa/language_server_pb/RefreshMcpServersResponse';
+import type { RemoveFromQueueRequest as _exa_language_server_pb_RemoveFromQueueRequest, RemoveFromQueueRequest__Output as _exa_language_server_pb_RemoveFromQueueRequest__Output } from '../../exa/language_server_pb/RemoveFromQueueRequest';
+import type { RemoveFromQueueResponse as _exa_language_server_pb_RemoveFromQueueResponse, RemoveFromQueueResponse__Output as _exa_language_server_pb_RemoveFromQueueResponse__Output } from '../../exa/language_server_pb/RemoveFromQueueResponse';
+import type { RemoveTrackedWorkspaceRequest as _exa_language_server_pb_RemoveTrackedWorkspaceRequest, RemoveTrackedWorkspaceRequest__Output as _exa_language_server_pb_RemoveTrackedWorkspaceRequest__Output } from '../../exa/language_server_pb/RemoveTrackedWorkspaceRequest';
+import type { RemoveTrackedWorkspaceResponse as _exa_language_server_pb_RemoveTrackedWorkspaceResponse, RemoveTrackedWorkspaceResponse__Output as _exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output } from '../../exa/language_server_pb/RemoveTrackedWorkspaceResponse';
+import type { RenameCascadeTrajectoryRequest as _exa_language_server_pb_RenameCascadeTrajectoryRequest, RenameCascadeTrajectoryRequest__Output as _exa_language_server_pb_RenameCascadeTrajectoryRequest__Output } from '../../exa/language_server_pb/RenameCascadeTrajectoryRequest';
+import type { RenameCascadeTrajectoryResponse as _exa_language_server_pb_RenameCascadeTrajectoryResponse, RenameCascadeTrajectoryResponse__Output as _exa_language_server_pb_RenameCascadeTrajectoryResponse__Output } from '../../exa/language_server_pb/RenameCascadeTrajectoryResponse';
+import type { ReplayGroundTruthTrajectoryRequest as _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, ReplayGroundTruthTrajectoryRequest__Output as _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest__Output } from '../../exa/language_server_pb/ReplayGroundTruthTrajectoryRequest';
+import type { ReplayGroundTruthTrajectoryResponse as _exa_language_server_pb_ReplayGroundTruthTrajectoryResponse, ReplayGroundTruthTrajectoryResponse__Output as _exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output } from '../../exa/language_server_pb/ReplayGroundTruthTrajectoryResponse';
+import type { ResetOnboardingRequest as _exa_language_server_pb_ResetOnboardingRequest, ResetOnboardingRequest__Output as _exa_language_server_pb_ResetOnboardingRequest__Output } from '../../exa/language_server_pb/ResetOnboardingRequest';
+import type { ResetOnboardingResponse as _exa_language_server_pb_ResetOnboardingResponse, ResetOnboardingResponse__Output as _exa_language_server_pb_ResetOnboardingResponse__Output } from '../../exa/language_server_pb/ResetOnboardingResponse';
+import type { ResolveOutstandingStepsRequest as _exa_language_server_pb_ResolveOutstandingStepsRequest, ResolveOutstandingStepsRequest__Output as _exa_language_server_pb_ResolveOutstandingStepsRequest__Output } from '../../exa/language_server_pb/ResolveOutstandingStepsRequest';
+import type { ResolveOutstandingStepsResponse as _exa_language_server_pb_ResolveOutstandingStepsResponse, ResolveOutstandingStepsResponse__Output as _exa_language_server_pb_ResolveOutstandingStepsResponse__Output } from '../../exa/language_server_pb/ResolveOutstandingStepsResponse';
+import type { ResolveWorktreeChangesRequest as _exa_language_server_pb_ResolveWorktreeChangesRequest, ResolveWorktreeChangesRequest__Output as _exa_language_server_pb_ResolveWorktreeChangesRequest__Output } from '../../exa/language_server_pb/ResolveWorktreeChangesRequest';
+import type { ResolveWorktreeChangesResponse as _exa_language_server_pb_ResolveWorktreeChangesResponse, ResolveWorktreeChangesResponse__Output as _exa_language_server_pb_ResolveWorktreeChangesResponse__Output } from '../../exa/language_server_pb/ResolveWorktreeChangesResponse';
+import type { RevertToCascadeStepRequest as _exa_language_server_pb_RevertToCascadeStepRequest, RevertToCascadeStepRequest__Output as _exa_language_server_pb_RevertToCascadeStepRequest__Output } from '../../exa/language_server_pb/RevertToCascadeStepRequest';
+import type { RevertToCascadeStepResponse as _exa_language_server_pb_RevertToCascadeStepResponse, RevertToCascadeStepResponse__Output as _exa_language_server_pb_RevertToCascadeStepResponse__Output } from '../../exa/language_server_pb/RevertToCascadeStepResponse';
+import type { SaveCodeMapFromJsonRequest as _exa_language_server_pb_SaveCodeMapFromJsonRequest, SaveCodeMapFromJsonRequest__Output as _exa_language_server_pb_SaveCodeMapFromJsonRequest__Output } from '../../exa/language_server_pb/SaveCodeMapFromJsonRequest';
+import type { SaveCodeMapFromJsonResponse as _exa_language_server_pb_SaveCodeMapFromJsonResponse, SaveCodeMapFromJsonResponse__Output as _exa_language_server_pb_SaveCodeMapFromJsonResponse__Output } from '../../exa/language_server_pb/SaveCodeMapFromJsonResponse';
+import type { SaveMcpServerToConfigFileRequest as _exa_language_server_pb_SaveMcpServerToConfigFileRequest, SaveMcpServerToConfigFileRequest__Output as _exa_language_server_pb_SaveMcpServerToConfigFileRequest__Output } from '../../exa/language_server_pb/SaveMcpServerToConfigFileRequest';
+import type { SaveMcpServerToConfigFileResponse as _exa_language_server_pb_SaveMcpServerToConfigFileResponse, SaveMcpServerToConfigFileResponse__Output as _exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output } from '../../exa/language_server_pb/SaveMcpServerToConfigFileResponse';
+import type { SaveWindsurfJSAppProjectNameRequest as _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, SaveWindsurfJSAppProjectNameRequest__Output as _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest__Output } from '../../exa/language_server_pb/SaveWindsurfJSAppProjectNameRequest';
+import type { SaveWindsurfJSAppProjectNameResponse as _exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse, SaveWindsurfJSAppProjectNameResponse__Output as _exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output } from '../../exa/language_server_pb/SaveWindsurfJSAppProjectNameResponse';
+import type { SendActionToChatPanelRequest as _exa_language_server_pb_SendActionToChatPanelRequest, SendActionToChatPanelRequest__Output as _exa_language_server_pb_SendActionToChatPanelRequest__Output } from '../../exa/language_server_pb/SendActionToChatPanelRequest';
+import type { SendActionToChatPanelResponse as _exa_language_server_pb_SendActionToChatPanelResponse, SendActionToChatPanelResponse__Output as _exa_language_server_pb_SendActionToChatPanelResponse__Output } from '../../exa/language_server_pb/SendActionToChatPanelResponse';
+import type { SendUserCascadeMessageRequest as _exa_language_server_pb_SendUserCascadeMessageRequest, SendUserCascadeMessageRequest__Output as _exa_language_server_pb_SendUserCascadeMessageRequest__Output } from '../../exa/language_server_pb/SendUserCascadeMessageRequest';
+import type { SendUserCascadeMessageResponse as _exa_language_server_pb_SendUserCascadeMessageResponse, SendUserCascadeMessageResponse__Output as _exa_language_server_pb_SendUserCascadeMessageResponse__Output } from '../../exa/language_server_pb/SendUserCascadeMessageResponse';
+import type { SetBaseExperimentsRequest as _exa_language_server_pb_SetBaseExperimentsRequest, SetBaseExperimentsRequest__Output as _exa_language_server_pb_SetBaseExperimentsRequest__Output } from '../../exa/language_server_pb/SetBaseExperimentsRequest';
+import type { SetBaseExperimentsResponse as _exa_language_server_pb_SetBaseExperimentsResponse, SetBaseExperimentsResponse__Output as _exa_language_server_pb_SetBaseExperimentsResponse__Output } from '../../exa/language_server_pb/SetBaseExperimentsResponse';
+import type { SetPinnedContextRequest as _exa_language_server_pb_SetPinnedContextRequest, SetPinnedContextRequest__Output as _exa_language_server_pb_SetPinnedContextRequest__Output } from '../../exa/language_server_pb/SetPinnedContextRequest';
+import type { SetPinnedContextResponse as _exa_language_server_pb_SetPinnedContextResponse, SetPinnedContextResponse__Output as _exa_language_server_pb_SetPinnedContextResponse__Output } from '../../exa/language_server_pb/SetPinnedContextResponse';
+import type { SetPinnedGuidelineRequest as _exa_language_server_pb_SetPinnedGuidelineRequest, SetPinnedGuidelineRequest__Output as _exa_language_server_pb_SetPinnedGuidelineRequest__Output } from '../../exa/language_server_pb/SetPinnedGuidelineRequest';
+import type { SetPinnedGuidelineResponse as _exa_language_server_pb_SetPinnedGuidelineResponse, SetPinnedGuidelineResponse__Output as _exa_language_server_pb_SetPinnedGuidelineResponse__Output } from '../../exa/language_server_pb/SetPinnedGuidelineResponse';
+import type { SetUserSettingsRequest as _exa_language_server_pb_SetUserSettingsRequest, SetUserSettingsRequest__Output as _exa_language_server_pb_SetUserSettingsRequest__Output } from '../../exa/language_server_pb/SetUserSettingsRequest';
+import type { SetUserSettingsResponse as _exa_language_server_pb_SetUserSettingsResponse, SetUserSettingsResponse__Output as _exa_language_server_pb_SetUserSettingsResponse__Output } from '../../exa/language_server_pb/SetUserSettingsResponse';
+import type { SetupUniversitySandboxRequest as _exa_language_server_pb_SetupUniversitySandboxRequest, SetupUniversitySandboxRequest__Output as _exa_language_server_pb_SetupUniversitySandboxRequest__Output } from '../../exa/language_server_pb/SetupUniversitySandboxRequest';
+import type { SetupUniversitySandboxResponse as _exa_language_server_pb_SetupUniversitySandboxResponse, SetupUniversitySandboxResponse__Output as _exa_language_server_pb_SetupUniversitySandboxResponse__Output } from '../../exa/language_server_pb/SetupUniversitySandboxResponse';
+import type { ShareCodeMapRequest as _exa_language_server_pb_ShareCodeMapRequest, ShareCodeMapRequest__Output as _exa_language_server_pb_ShareCodeMapRequest__Output } from '../../exa/language_server_pb/ShareCodeMapRequest';
+import type { ShareCodeMapResponse as _exa_language_server_pb_ShareCodeMapResponse, ShareCodeMapResponse__Output as _exa_language_server_pb_ShareCodeMapResponse__Output } from '../../exa/language_server_pb/ShareCodeMapResponse';
+import type { ShouldEnableUnleashRequest as _exa_language_server_pb_ShouldEnableUnleashRequest, ShouldEnableUnleashRequest__Output as _exa_language_server_pb_ShouldEnableUnleashRequest__Output } from '../../exa/language_server_pb/ShouldEnableUnleashRequest';
+import type { ShouldEnableUnleashResponse as _exa_language_server_pb_ShouldEnableUnleashResponse, ShouldEnableUnleashResponse__Output as _exa_language_server_pb_ShouldEnableUnleashResponse__Output } from '../../exa/language_server_pb/ShouldEnableUnleashResponse';
+import type { SkipOnboardingRequest as _exa_language_server_pb_SkipOnboardingRequest, SkipOnboardingRequest__Output as _exa_language_server_pb_SkipOnboardingRequest__Output } from '../../exa/language_server_pb/SkipOnboardingRequest';
+import type { SkipOnboardingResponse as _exa_language_server_pb_SkipOnboardingResponse, SkipOnboardingResponse__Output as _exa_language_server_pb_SkipOnboardingResponse__Output } from '../../exa/language_server_pb/SkipOnboardingResponse';
+import type { SpawnArenaModeMidConversationRequest as _exa_language_server_pb_SpawnArenaModeMidConversationRequest, SpawnArenaModeMidConversationRequest__Output as _exa_language_server_pb_SpawnArenaModeMidConversationRequest__Output } from '../../exa/language_server_pb/SpawnArenaModeMidConversationRequest';
+import type { SpawnArenaModeMidConversationResponse as _exa_language_server_pb_SpawnArenaModeMidConversationResponse, SpawnArenaModeMidConversationResponse__Output as _exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output } from '../../exa/language_server_pb/SpawnArenaModeMidConversationResponse';
+import type { StartCascadeRequest as _exa_language_server_pb_StartCascadeRequest, StartCascadeRequest__Output as _exa_language_server_pb_StartCascadeRequest__Output } from '../../exa/language_server_pb/StartCascadeRequest';
+import type { StartCascadeResponse as _exa_language_server_pb_StartCascadeResponse, StartCascadeResponse__Output as _exa_language_server_pb_StartCascadeResponse__Output } from '../../exa/language_server_pb/StartCascadeResponse';
+import type { StatUriRequest as _exa_language_server_pb_StatUriRequest, StatUriRequest__Output as _exa_language_server_pb_StatUriRequest__Output } from '../../exa/language_server_pb/StatUriRequest';
+import type { StatUriResponse as _exa_language_server_pb_StatUriResponse, StatUriResponse__Output as _exa_language_server_pb_StatUriResponse__Output } from '../../exa/language_server_pb/StatUriResponse';
+import type { StreamReactiveUpdatesRequest as _exa_reactive_component_pb_StreamReactiveUpdatesRequest, StreamReactiveUpdatesRequest__Output as _exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output } from '../../exa/reactive_component_pb/StreamReactiveUpdatesRequest';
+import type { StreamReactiveUpdatesResponse as _exa_reactive_component_pb_StreamReactiveUpdatesResponse, StreamReactiveUpdatesResponse__Output as _exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output } from '../../exa/reactive_component_pb/StreamReactiveUpdatesResponse';
+import type { StreamTerminalShellCommandResponse as _exa_language_server_pb_StreamTerminalShellCommandResponse, StreamTerminalShellCommandResponse__Output as _exa_language_server_pb_StreamTerminalShellCommandResponse__Output } from '../../exa/language_server_pb/StreamTerminalShellCommandResponse';
+import type { SubmitBugReportRequest as _exa_language_server_pb_SubmitBugReportRequest, SubmitBugReportRequest__Output as _exa_language_server_pb_SubmitBugReportRequest__Output } from '../../exa/language_server_pb/SubmitBugReportRequest';
+import type { SubmitBugReportResponse as _exa_language_server_pb_SubmitBugReportResponse, SubmitBugReportResponse__Output as _exa_language_server_pb_SubmitBugReportResponse__Output } from '../../exa/language_server_pb/SubmitBugReportResponse';
+import type { SyncExploreAgentRunRequest as _exa_language_server_pb_SyncExploreAgentRunRequest, SyncExploreAgentRunRequest__Output as _exa_language_server_pb_SyncExploreAgentRunRequest__Output } from '../../exa/language_server_pb/SyncExploreAgentRunRequest';
+import type { SyncExploreAgentRunResponse as _exa_language_server_pb_SyncExploreAgentRunResponse, SyncExploreAgentRunResponse__Output as _exa_language_server_pb_SyncExploreAgentRunResponse__Output } from '../../exa/language_server_pb/SyncExploreAgentRunResponse';
+import type { TerminalShellCommandStreamChunk as _exa_codeium_common_pb_TerminalShellCommandStreamChunk, TerminalShellCommandStreamChunk__Output as _exa_codeium_common_pb_TerminalShellCommandStreamChunk__Output } from '../../exa/codeium_common_pb/TerminalShellCommandStreamChunk';
+import type { ToggleMcpToolRequest as _exa_language_server_pb_ToggleMcpToolRequest, ToggleMcpToolRequest__Output as _exa_language_server_pb_ToggleMcpToolRequest__Output } from '../../exa/language_server_pb/ToggleMcpToolRequest';
+import type { ToggleMcpToolResponse as _exa_language_server_pb_ToggleMcpToolResponse, ToggleMcpToolResponse__Output as _exa_language_server_pb_ToggleMcpToolResponse__Output } from '../../exa/language_server_pb/ToggleMcpToolResponse';
+import type { UnmountCascadeFilesystemRequest as _exa_language_server_pb_UnmountCascadeFilesystemRequest, UnmountCascadeFilesystemRequest__Output as _exa_language_server_pb_UnmountCascadeFilesystemRequest__Output } from '../../exa/language_server_pb/UnmountCascadeFilesystemRequest';
+import type { UnmountCascadeFilesystemResponse as _exa_language_server_pb_UnmountCascadeFilesystemResponse, UnmountCascadeFilesystemResponse__Output as _exa_language_server_pb_UnmountCascadeFilesystemResponse__Output } from '../../exa/language_server_pb/UnmountCascadeFilesystemResponse';
+import type { UpdateAutoCascadeGithubCredentialsRequest as _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, UpdateAutoCascadeGithubCredentialsRequest__Output as _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest__Output } from '../../exa/language_server_pb/UpdateAutoCascadeGithubCredentialsRequest';
+import type { UpdateAutoCascadeGithubCredentialsResponse as _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse, UpdateAutoCascadeGithubCredentialsResponse__Output as _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output } from '../../exa/language_server_pb/UpdateAutoCascadeGithubCredentialsResponse';
+import type { UpdateCascadeMemoryRequest as _exa_language_server_pb_UpdateCascadeMemoryRequest, UpdateCascadeMemoryRequest__Output as _exa_language_server_pb_UpdateCascadeMemoryRequest__Output } from '../../exa/language_server_pb/UpdateCascadeMemoryRequest';
+import type { UpdateCascadeMemoryResponse as _exa_language_server_pb_UpdateCascadeMemoryResponse, UpdateCascadeMemoryResponse__Output as _exa_language_server_pb_UpdateCascadeMemoryResponse__Output } from '../../exa/language_server_pb/UpdateCascadeMemoryResponse';
+import type { UpdateCodeMapMetadataRequest as _exa_language_server_pb_UpdateCodeMapMetadataRequest, UpdateCodeMapMetadataRequest__Output as _exa_language_server_pb_UpdateCodeMapMetadataRequest__Output } from '../../exa/language_server_pb/UpdateCodeMapMetadataRequest';
+import type { UpdateCodeMapMetadataResponse as _exa_language_server_pb_UpdateCodeMapMetadataResponse, UpdateCodeMapMetadataResponse__Output as _exa_language_server_pb_UpdateCodeMapMetadataResponse__Output } from '../../exa/language_server_pb/UpdateCodeMapMetadataResponse';
+import type { UpdateConversationTagsRequest as _exa_language_server_pb_UpdateConversationTagsRequest, UpdateConversationTagsRequest__Output as _exa_language_server_pb_UpdateConversationTagsRequest__Output } from '../../exa/language_server_pb/UpdateConversationTagsRequest';
+import type { UpdateConversationTagsResponse as _exa_language_server_pb_UpdateConversationTagsResponse, UpdateConversationTagsResponse__Output as _exa_language_server_pb_UpdateConversationTagsResponse__Output } from '../../exa/language_server_pb/UpdateConversationTagsResponse';
+import type { UpdateDevExperimentsRequest as _exa_language_server_pb_UpdateDevExperimentsRequest, UpdateDevExperimentsRequest__Output as _exa_language_server_pb_UpdateDevExperimentsRequest__Output } from '../../exa/language_server_pb/UpdateDevExperimentsRequest';
+import type { UpdateDevExperimentsResponse as _exa_language_server_pb_UpdateDevExperimentsResponse, UpdateDevExperimentsResponse__Output as _exa_language_server_pb_UpdateDevExperimentsResponse__Output } from '../../exa/language_server_pb/UpdateDevExperimentsResponse';
+import type { UpdateEnterpriseExperimentsFromUrlRequest as _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, UpdateEnterpriseExperimentsFromUrlRequest__Output as _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest__Output } from '../../exa/language_server_pb/UpdateEnterpriseExperimentsFromUrlRequest';
+import type { UpdateEnterpriseExperimentsFromUrlResponse as _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse, UpdateEnterpriseExperimentsFromUrlResponse__Output as _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output } from '../../exa/language_server_pb/UpdateEnterpriseExperimentsFromUrlResponse';
+import type { UpdateMcpServerInConfigFileRequest as _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, UpdateMcpServerInConfigFileRequest__Output as _exa_language_server_pb_UpdateMcpServerInConfigFileRequest__Output } from '../../exa/language_server_pb/UpdateMcpServerInConfigFileRequest';
+import type { UpdateMcpServerInConfigFileResponse as _exa_language_server_pb_UpdateMcpServerInConfigFileResponse, UpdateMcpServerInConfigFileResponse__Output as _exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output } from '../../exa/language_server_pb/UpdateMcpServerInConfigFileResponse';
+import type { UpdatePanelStateWithUserStatusRequest as _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, UpdatePanelStateWithUserStatusRequest__Output as _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest__Output } from '../../exa/language_server_pb/UpdatePanelStateWithUserStatusRequest';
+import type { UpdatePanelStateWithUserStatusResponse as _exa_language_server_pb_UpdatePanelStateWithUserStatusResponse, UpdatePanelStateWithUserStatusResponse__Output as _exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output } from '../../exa/language_server_pb/UpdatePanelStateWithUserStatusResponse';
+import type { UpdateWorkspaceTrustRequest as _exa_language_server_pb_UpdateWorkspaceTrustRequest, UpdateWorkspaceTrustRequest__Output as _exa_language_server_pb_UpdateWorkspaceTrustRequest__Output } from '../../exa/language_server_pb/UpdateWorkspaceTrustRequest';
+import type { UpdateWorkspaceTrustResponse as _exa_language_server_pb_UpdateWorkspaceTrustResponse, UpdateWorkspaceTrustResponse__Output as _exa_language_server_pb_UpdateWorkspaceTrustResponse__Output } from '../../exa/language_server_pb/UpdateWorkspaceTrustResponse';
+import type { UploadRecentCommandsRequest as _exa_language_server_pb_UploadRecentCommandsRequest, UploadRecentCommandsRequest__Output as _exa_language_server_pb_UploadRecentCommandsRequest__Output } from '../../exa/language_server_pb/UploadRecentCommandsRequest';
+import type { UploadRecentCommandsResponse as _exa_language_server_pb_UploadRecentCommandsResponse, UploadRecentCommandsResponse__Output as _exa_language_server_pb_UploadRecentCommandsResponse__Output } from '../../exa/language_server_pb/UploadRecentCommandsResponse';
+import type { ValidateWindsurfJSAppProjectNameRequest as _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, ValidateWindsurfJSAppProjectNameRequest__Output as _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest__Output } from '../../exa/language_server_pb/ValidateWindsurfJSAppProjectNameRequest';
+import type { ValidateWindsurfJSAppProjectNameResponse as _exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse, ValidateWindsurfJSAppProjectNameResponse__Output as _exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output } from '../../exa/language_server_pb/ValidateWindsurfJSAppProjectNameResponse';
+import type { WellSupportedLanguagesRequest as _exa_language_server_pb_WellSupportedLanguagesRequest, WellSupportedLanguagesRequest__Output as _exa_language_server_pb_WellSupportedLanguagesRequest__Output } from '../../exa/language_server_pb/WellSupportedLanguagesRequest';
+import type { WellSupportedLanguagesResponse as _exa_language_server_pb_WellSupportedLanguagesResponse, WellSupportedLanguagesResponse__Output as _exa_language_server_pb_WellSupportedLanguagesResponse__Output } from '../../exa/language_server_pb/WellSupportedLanguagesResponse';
+
+export interface LanguageServerServiceClient extends grpc.Client {
+  AcceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  AcceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  AcceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  AcceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  acceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  acceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  acceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  acceptCompletion(argument: _exa_language_server_pb_AcceptCompletionRequest, callback: grpc.requestCallback<_exa_language_server_pb_AcceptCompletionResponse__Output>): grpc.ClientUnaryCall;
+  
+  AcknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  AcknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  AcknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  AcknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  acknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  acknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  acknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  acknowledgeCascadeCodeEdit(argument: _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, callback: grpc.requestCallback<_exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>): grpc.ClientUnaryCall;
+  
+  AddTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  AddTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  AddTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  AddTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  addTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  addTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  addTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  addTrackedWorkspace(argument: _exa_language_server_pb_AddTrackedWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_AddTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  
+  BranchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  BranchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  BranchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  BranchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  branchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  branchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  branchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  branchCascade(argument: _exa_language_server_pb_BranchCascadeRequest, callback: grpc.requestCallback<_exa_language_server_pb_BranchCascadeResponse__Output>): grpc.ClientUnaryCall;
+  
+  BranchCascadeAndGenerateCodeMap(argument: _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output>;
+  BranchCascadeAndGenerateCodeMap(argument: _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output>;
+  branchCascadeAndGenerateCodeMap(argument: _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output>;
+  branchCascadeAndGenerateCodeMap(argument: _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output>;
+  
+  CancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocation(argument: _exa_language_server_pb_CancelCascadeInvocationRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationResponse__Output>): grpc.ClientUnaryCall;
+  
+  CancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeInvocationAndWait(argument: _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>): grpc.ClientUnaryCall;
+  
+  CancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  CancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  cancelCascadeSteps(argument: _exa_language_server_pb_CancelCascadeStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelCascadeStepsResponse__Output>): grpc.ClientUnaryCall;
+  
+  CancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  CancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  CancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  CancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  cancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  cancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  cancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  cancelRequest(argument: _exa_language_server_pb_CancelRequestRequest, callback: grpc.requestCallback<_exa_language_server_pb_CancelRequestResponse__Output>): grpc.ClientUnaryCall;
+  
+  CaptureCode(argument: _exa_language_server_pb_CaptureCodeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  CaptureCode(argument: _exa_language_server_pb_CaptureCodeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  CaptureCode(argument: _exa_language_server_pb_CaptureCodeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  CaptureCode(argument: _exa_language_server_pb_CaptureCodeRequest, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  captureCode(argument: _exa_language_server_pb_CaptureCodeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  captureCode(argument: _exa_language_server_pb_CaptureCodeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  captureCode(argument: _exa_language_server_pb_CaptureCodeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  captureCode(argument: _exa_language_server_pb_CaptureCodeRequest, callback: grpc.requestCallback<_exa_language_server_pb_CaptureCodeResponse__Output>): grpc.ClientUnaryCall;
+  
+  CaptureFile(argument: _exa_language_server_pb_CaptureFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  CaptureFile(argument: _exa_language_server_pb_CaptureFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  CaptureFile(argument: _exa_language_server_pb_CaptureFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  CaptureFile(argument: _exa_language_server_pb_CaptureFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  captureFile(argument: _exa_language_server_pb_CaptureFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  captureFile(argument: _exa_language_server_pb_CaptureFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  captureFile(argument: _exa_language_server_pb_CaptureFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  captureFile(argument: _exa_language_server_pb_CaptureFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_CaptureFileResponse__Output>): grpc.ClientUnaryCall;
+  
+  CheckBugs(argument: _exa_language_server_pb_CheckBugsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  CheckBugs(argument: _exa_language_server_pb_CheckBugsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  CheckBugs(argument: _exa_language_server_pb_CheckBugsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  CheckBugs(argument: _exa_language_server_pb_CheckBugsRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  checkBugs(argument: _exa_language_server_pb_CheckBugsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  checkBugs(argument: _exa_language_server_pb_CheckBugsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  checkBugs(argument: _exa_language_server_pb_CheckBugsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  checkBugs(argument: _exa_language_server_pb_CheckBugsRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckBugsResponse__Output>): grpc.ClientUnaryCall;
+  
+  CheckChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  CheckChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  CheckChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  CheckChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  checkChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  checkChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  checkChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  checkChatCapacity(argument: _exa_language_server_pb_CheckChatCapacityRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckChatCapacityResponse__Output>): grpc.ClientUnaryCall;
+  
+  CheckUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  CheckUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  CheckUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  CheckUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  checkUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  checkUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  checkUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  checkUserMessageRateLimit(argument: _exa_language_server_pb_CheckUserMessageRateLimitRequest, callback: grpc.requestCallback<_exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>): grpc.ClientUnaryCall;
+  
+  ConvergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  ConvergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  ConvergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  ConvergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  convergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  convergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  convergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  convergeArenaCascades(argument: _exa_language_server_pb_ConvergeArenaCascadesRequest, callback: grpc.requestCallback<_exa_language_server_pb_ConvergeArenaCascadesResponse__Output>): grpc.ClientUnaryCall;
+  
+  CopyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  CopyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  CopyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  CopyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  copyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  copyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  copyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  copyBuiltinWorkflowToWorkspace(argument: _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  
+  CreateCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  CreateCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  CreateCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  CreateCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  createCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  createCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  createCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  createCustomizationFile(argument: _exa_language_server_pb_CreateCustomizationFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_CreateCustomizationFileResponse__Output>): grpc.ClientUnaryCall;
+  
+  CreateTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  CreateTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  CreateTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  CreateTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  createTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  createTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  createTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  createTrajectoryShare(argument: _exa_language_server_pb_CreateTrajectoryShareRequest, callback: grpc.requestCallback<_exa_language_server_pb_CreateTrajectoryShareResponse__Output>): grpc.ClientUnaryCall;
+  
+  DeleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeMemory(argument: _exa_language_server_pb_DeleteCascadeMemoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  DeleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  DeleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  deleteCascadeTrajectory(argument: _exa_language_server_pb_DeleteCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  DismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  DismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  DismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  DismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  dismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  dismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  dismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  dismissCodeMapSuggestion(argument: _exa_language_server_pb_DismissCodeMapSuggestionRequest, callback: grpc.requestCallback<_exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>): grpc.ClientUnaryCall;
+  
+  EditConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  EditConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  EditConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  EditConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  editConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  editConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  editConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  editConfiguration(argument: _exa_language_server_pb_EditConfigurationRequest, callback: grpc.requestCallback<_exa_language_server_pb_EditConfigurationResponse__Output>): grpc.ClientUnaryCall;
+  
+  Exit(argument: _exa_language_server_pb_ExitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  Exit(argument: _exa_language_server_pb_ExitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  Exit(argument: _exa_language_server_pb_ExitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  Exit(argument: _exa_language_server_pb_ExitRequest, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  exit(argument: _exa_language_server_pb_ExitRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  exit(argument: _exa_language_server_pb_ExitRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  exit(argument: _exa_language_server_pb_ExitRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  exit(argument: _exa_language_server_pb_ExitRequest, callback: grpc.requestCallback<_exa_language_server_pb_ExitResponse__Output>): grpc.ClientUnaryCall;
+  
+  ForceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  ForceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  ForceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  ForceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  forceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  forceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  forceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  forceBackgroundResearchRefresh(argument: _exa_language_server_pb_ForceBackgroundResearchRefreshRequest, callback: grpc.requestCallback<_exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>): grpc.ClientUnaryCall;
+  
+  GenerateCodeMap(argument: _exa_language_server_pb_GenerateCodeMapRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateCodeMapResponse__Output>;
+  GenerateCodeMap(argument: _exa_language_server_pb_GenerateCodeMapRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateCodeMapResponse__Output>;
+  generateCodeMap(argument: _exa_language_server_pb_GenerateCodeMapRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateCodeMapResponse__Output>;
+  generateCodeMap(argument: _exa_language_server_pb_GenerateCodeMapRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateCodeMapResponse__Output>;
+  
+  GenerateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  GenerateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  GenerateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  GenerateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  generateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  generateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  generateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  generateCommitMessage(argument: _exa_language_server_pb_GenerateCommitMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_GenerateCommitMessageResponse__Output>): grpc.ClientUnaryCall;
+  
+  GenerateVibeAndReplaceStreaming(argument: _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output>;
+  GenerateVibeAndReplaceStreaming(argument: _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output>;
+  generateVibeAndReplaceStreaming(argument: _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output>;
+  generateVibeAndReplaceStreaming(argument: _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output>;
+  
+  GetActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  GetActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  GetActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  GetActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  getActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  getActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  getActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  getActiveAppDeploymentForWorkspace(argument: _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  getAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  getAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  getAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  getAllCascadeTrajectories(argument: _exa_language_server_pb_GetAllCascadeTrajectoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  GetAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  GetAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  GetAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  getAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  getAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  getAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  getAllPlans(argument: _exa_language_server_pb_GetAllPlansRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllPlansResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  GetAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  getAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  getAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  getAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  getAllRules(argument: _exa_language_server_pb_GetAllRulesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllRulesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  getAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  getAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  getAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  getAllSkills(argument: _exa_language_server_pb_GetAllSkillsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllSkillsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  GetAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  getAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  getAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  getAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  getAllWorkflows(argument: _exa_language_server_pb_GetAllWorkflowsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAllWorkflowsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  GetAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  GetAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  GetAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  getAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  getAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  getAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  getAuthToken(argument: _exa_language_server_pb_GetAuthTokenRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAuthTokenResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  GetAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  getAvailableCascadePlugins(argument: _exa_language_server_pb_GetAvailableCascadePluginsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  getBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  getBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  getBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  getBrainStatus(argument: _exa_language_server_pb_GetBrainStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetBrainStatusResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeMemories(argument: _exa_language_server_pb_GetCascadeMemoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeModelConfigs(argument: _exa_language_server_pb_GetCascadeModelConfigsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  getCascadePluginById(argument: _exa_language_server_pb_GetCascadePluginByIdRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadePluginByIdResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectory(argument: _exa_language_server_pb_GetCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectoryGeneratorMetadata(argument: _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  GetCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  getCascadeTrajectorySteps(argument: _exa_language_server_pb_GetCascadeTrajectoryStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetChangelog(argument: _exa_language_server_pb_GetChangelogRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  GetChangelog(argument: _exa_language_server_pb_GetChangelogRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  GetChangelog(argument: _exa_language_server_pb_GetChangelogRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  GetChangelog(argument: _exa_language_server_pb_GetChangelogRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  getChangelog(argument: _exa_language_server_pb_GetChangelogRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  getChangelog(argument: _exa_language_server_pb_GetChangelogRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  getChangelog(argument: _exa_language_server_pb_GetChangelogRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  getChangelog(argument: _exa_language_server_pb_GetChangelogRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetChangelogResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetChatMessage(argument: _exa_chat_pb_GetChatMessageRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetChatMessageResponse__Output>;
+  GetChatMessage(argument: _exa_chat_pb_GetChatMessageRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetChatMessageResponse__Output>;
+  getChatMessage(argument: _exa_chat_pb_GetChatMessageRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetChatMessageResponse__Output>;
+  getChatMessage(argument: _exa_chat_pb_GetChatMessageRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetChatMessageResponse__Output>;
+  
+  GetClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  getClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  getClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  getClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  getClassInfos(argument: _exa_language_server_pb_GetClassInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetClassInfosResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapSuggestions(argument: _exa_language_server_pb_GetCodeMapSuggestionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForFile(argument: _exa_language_server_pb_GetCodeMapsForFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForFileResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  getCodeMapsForRepos(argument: _exa_language_server_pb_GetCodeMapsForReposRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeMapsForReposResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  getCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  getCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  getCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  getCodeValidationStates(argument: _exa_language_server_pb_GetCodeValidationStatesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCodeValidationStatesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  GetCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  getCommandModelConfigs(argument: _exa_language_server_pb_GetCommandModelConfigsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCommandModelConfigsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  GetCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  getCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  getCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  getCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  getCompletions(argument: _exa_language_server_pb_GetCompletionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetCompletionsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  GetConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  GetConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  GetConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  getConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  getConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  getConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  getConversationTags(argument: _exa_language_server_pb_GetConversationTagsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  GetDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  GetDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  GetDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  getDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  getDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  getDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  getDebugDiagnostics(argument: _exa_language_server_pb_GetDebugDiagnosticsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetDebugDiagnosticsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetDeepWiki(argument: _exa_chat_pb_GetDeepWikiRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetDeepWikiResponse__Output>;
+  GetDeepWiki(argument: _exa_chat_pb_GetDeepWikiRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetDeepWikiResponse__Output>;
+  getDeepWiki(argument: _exa_chat_pb_GetDeepWikiRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetDeepWikiResponse__Output>;
+  getDeepWiki(argument: _exa_chat_pb_GetDeepWikiRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_GetDeepWikiResponse__Output>;
+  
+  GetDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  GetDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  GetDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  GetDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  getDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  getDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  getDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  getDefaultWebOrigins(argument: _exa_language_server_pb_GetDefaultWebOriginsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetDefaultWebOriginsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  GetExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  GetExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  GetExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  getExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  getExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  getExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  getExternalModel(argument: _exa_language_server_pb_GetExternalModelRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetExternalModelResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  GetFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  GetFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  GetFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  getFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  getFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  getFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  getFunctions(argument: _exa_language_server_pb_GetFunctionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetFunctionsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  GetGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  GetGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  GetGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  getGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  getGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  getGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  getGithubPullRequestSearchInfo(argument: _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  GetKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  GetKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  GetKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  getKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  getKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  getKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  getKnowledgeBaseItemsForTeam(argument: _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  GetLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  GetLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  GetLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  getLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  getLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  getLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  getLifeguardConfig(argument: _exa_language_server_pb_GetLifeguardConfigRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetLifeguardConfigResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingCodeContext(argument: _exa_language_server_pb_GetMatchingCodeContextRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingCodeContextResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingContextScopeItems(argument: _exa_language_server_pb_GetMatchingContextScopeItemsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  GetMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  getMatchingIndexedRepos(argument: _exa_language_server_pb_GetMatchingIndexedReposRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMatchingIndexedReposResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  getMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  getMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  getMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  getMcpPrompt(argument: _exa_language_server_pb_GetMcpPromptRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpPromptResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  GetMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  getMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  getMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  getMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  getMcpServerStates(argument: _exa_language_server_pb_GetMcpServerStatesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMcpServerStatesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  GetMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  GetMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  GetMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  getMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  getMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  getMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  getMessageTokenCount(argument: _exa_language_server_pb_GetMessageTokenCountRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetMessageTokenCountResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  GetModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  GetModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  GetModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  getModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  getModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  getModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  getModelStatuses(argument: _exa_language_server_pb_GetModelStatusesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetModelStatusesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  GetPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  GetPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  GetPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  getPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  getPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  getPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  getPatchAndCodeChange(argument: _exa_language_server_pb_GetPatchAndCodeChangeRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  GetPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  GetPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  GetPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  getPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  getPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  getPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  getPrimaryApiKeyForDevsOnly(argument: _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetProcesses(argument: _exa_language_server_pb_GetProcessesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  GetProcesses(argument: _exa_language_server_pb_GetProcessesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  GetProcesses(argument: _exa_language_server_pb_GetProcessesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  GetProcesses(argument: _exa_language_server_pb_GetProcessesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  getProcesses(argument: _exa_language_server_pb_GetProcessesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  getProcesses(argument: _exa_language_server_pb_GetProcessesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  getProcesses(argument: _exa_language_server_pb_GetProcessesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  getProcesses(argument: _exa_language_server_pb_GetProcessesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetProcessesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  GetProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  GetProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  GetProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  getProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  getProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  getProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  getProfileData(argument: _exa_language_server_pb_GetProfileDataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetProfileDataResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  getRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  getRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  getRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  getRepoInfos(argument: _exa_language_server_pb_GetRepoInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetRepoInfosResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  GetRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  GetRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  GetRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  getRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  getRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  getRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  getRevertPreview(argument: _exa_language_server_pb_GetRevertPreviewRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetRevertPreviewResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  GetSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  GetSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  GetSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  getSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  getSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  getSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  getSharedCodeMap(argument: _exa_language_server_pb_GetSharedCodeMapRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSharedCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetStatus(argument: _exa_language_server_pb_GetStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetStatus(argument: _exa_language_server_pb_GetStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetStatus(argument: _exa_language_server_pb_GetStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetStatus(argument: _exa_language_server_pb_GetStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  getStatus(argument: _exa_language_server_pb_GetStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  getStatus(argument: _exa_language_server_pb_GetStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  getStatus(argument: _exa_language_server_pb_GetStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  getStatus(argument: _exa_language_server_pb_GetStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetStatusResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  GetSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  getSuggestedContextScopeItems(argument: _exa_language_server_pb_GetSuggestedContextScopeItemsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  GetSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  GetSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  GetSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  getSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  getSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  getSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  getSystemPromptAndTools(argument: _exa_language_server_pb_GetSystemPromptAndToolsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  GetTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  GetTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  GetTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  getTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  getTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  getTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  getTeamOrganizationalControls(argument: _exa_language_server_pb_GetTeamOrganizationalControlsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  GetTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  GetTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  GetTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  getTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  getTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  getTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  getTranscription(argument: _exa_language_server_pb_GetTranscriptionRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetTranscriptionResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  GetUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  GetUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  GetUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  getUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  getUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  getUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  getUnleashData(argument: _exa_language_server_pb_GetUnleashDataRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUnleashDataResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  GetUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  getUserMemories(argument: _exa_language_server_pb_GetUserMemoriesRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserMemoriesResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  getUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  getUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  getUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  getUserSettings(argument: _exa_language_server_pb_GetUserSettingsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  GetUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  getUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  getUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  getUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  getUserStatus(argument: _exa_language_server_pb_GetUserStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectory(argument: _exa_language_server_pb_GetUserTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDebug(argument: _exa_language_server_pb_GetUserTrajectoryDebugRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  getUserTrajectoryDescriptions(argument: _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  GetWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  getWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  getWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  getWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  getWebDocsOptions(argument: _exa_language_server_pb_GetWebDocsOptionsRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWebDocsOptionsResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetWindsurfJSAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  GetWindsurfJSAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  GetWindsurfJSAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  GetWindsurfJSAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  getWindsurfJsAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  getWindsurfJsAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  getWindsurfJsAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  getWindsurfJsAppDeployment(argument: _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceEditState(argument: _exa_language_server_pb_GetWorkspaceEditStateRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceEditStateResponse__Output>): grpc.ClientUnaryCall;
+  
+  GetWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  GetWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  getWorkspaceInfos(argument: _exa_language_server_pb_GetWorkspaceInfosRequest, callback: grpc.requestCallback<_exa_language_server_pb_GetWorkspaceInfosResponse__Output>): grpc.ClientUnaryCall;
+  
+  HandleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  HandleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  HandleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  HandleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  handleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  handleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  handleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  handleCascadeUserInteraction(argument: _exa_language_server_pb_HandleCascadeUserInteractionRequest, callback: grpc.requestCallback<_exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>): grpc.ClientUnaryCall;
+  
+  HandleStreamingCommand(argument: _exa_language_server_pb_HandleStreamingCommandRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingCommandResponse__Output>;
+  HandleStreamingCommand(argument: _exa_language_server_pb_HandleStreamingCommandRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingCommandResponse__Output>;
+  handleStreamingCommand(argument: _exa_language_server_pb_HandleStreamingCommandRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingCommandResponse__Output>;
+  handleStreamingCommand(argument: _exa_language_server_pb_HandleStreamingCommandRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingCommandResponse__Output>;
+  
+  HandleStreamingTab(argument: _exa_language_server_pb_HandleStreamingTabRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTabResponse__Output>;
+  HandleStreamingTab(argument: _exa_language_server_pb_HandleStreamingTabRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTabResponse__Output>;
+  handleStreamingTab(argument: _exa_language_server_pb_HandleStreamingTabRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTabResponse__Output>;
+  handleStreamingTab(argument: _exa_language_server_pb_HandleStreamingTabRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTabResponse__Output>;
+  
+  HandleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  HandleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  HandleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  HandleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  handleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  handleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  handleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  handleStreamingTabV2(argument: _exa_language_server_pb_HandleStreamingTabV2Request, callback: grpc.requestCallback<_exa_language_server_pb_HandleStreamingTabV2Response__Output>): grpc.ClientUnaryCall;
+  
+  HandleStreamingTerminalCommand(argument: _exa_language_server_pb_HandleStreamingTerminalCommandRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output>;
+  HandleStreamingTerminalCommand(argument: _exa_language_server_pb_HandleStreamingTerminalCommandRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output>;
+  handleStreamingTerminalCommand(argument: _exa_language_server_pb_HandleStreamingTerminalCommandRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output>;
+  handleStreamingTerminalCommand(argument: _exa_language_server_pb_HandleStreamingTerminalCommandRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output>;
+  
+  Heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  Heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  Heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  Heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  heartbeat(argument: _exa_language_server_pb_HeartbeatRequest, callback: grpc.requestCallback<_exa_language_server_pb_HeartbeatResponse__Output>): grpc.ClientUnaryCall;
+  
+  ImportFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  ImportFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  ImportFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  ImportFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  importFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  importFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  importFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  importFromCursor(argument: _exa_language_server_pb_ImportFromCursorRequest, callback: grpc.requestCallback<_exa_language_server_pb_ImportFromCursorResponse__Output>): grpc.ClientUnaryCall;
+  
+  InitializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  InitializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  InitializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  InitializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  initializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  initializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  initializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  initializeCascadePanelState(argument: _exa_language_server_pb_InitializeCascadePanelStateRequest, callback: grpc.requestCallback<_exa_language_server_pb_InitializeCascadePanelStateResponse__Output>): grpc.ClientUnaryCall;
+  
+  InstallCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  InstallCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  installCascadePlugin(argument: _exa_language_server_pb_InstallCascadePluginRequest, callback: grpc.requestCallback<_exa_language_server_pb_InstallCascadePluginResponse__Output>): grpc.ClientUnaryCall;
+  
+  InterruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  InterruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  InterruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  InterruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  interruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  interruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  interruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  interruptWithQueuedMessage(argument: _exa_language_server_pb_InterruptWithQueuedMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  
+  LogCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  LogCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  LogCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  LogCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  logCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  logCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  logCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  logCascadeSession(argument: _exa_language_server_pb_LogCascadeSessionRequest, callback: grpc.requestCallback<_exa_language_server_pb_LogCascadeSessionResponse__Output>): grpc.ClientUnaryCall;
+  
+  MigrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  MigrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  MigrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  MigrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  migrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  migrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  migrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  migrateApiKey(argument: _exa_language_server_pb_MigrateApiKeyRequest, callback: grpc.requestCallback<_exa_language_server_pb_MigrateApiKeyResponse__Output>): grpc.ClientUnaryCall;
+  
+  MountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  MountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  MountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  MountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  mountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  mountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  mountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  mountCascadeFilesystem(argument: _exa_language_server_pb_MountCascadeFilesystemRequest, callback: grpc.requestCallback<_exa_language_server_pb_MountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  
+  MoveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  MoveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  MoveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  MoveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  moveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  moveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  moveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  moveQueuedMessage(argument: _exa_language_server_pb_MoveQueuedMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_MoveQueuedMessageResponse__Output>): grpc.ClientUnaryCall;
+  
+  OnEdit(argument: _exa_language_server_pb_OnEditRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  OnEdit(argument: _exa_language_server_pb_OnEditRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  OnEdit(argument: _exa_language_server_pb_OnEditRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  OnEdit(argument: _exa_language_server_pb_OnEditRequest, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  onEdit(argument: _exa_language_server_pb_OnEditRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  onEdit(argument: _exa_language_server_pb_OnEditRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  onEdit(argument: _exa_language_server_pb_OnEditRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  onEdit(argument: _exa_language_server_pb_OnEditRequest, callback: grpc.requestCallback<_exa_language_server_pb_OnEditResponse__Output>): grpc.ClientUnaryCall;
+  
+  ProgressBars(argument: _exa_language_server_pb_ProgressBarsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  ProgressBars(argument: _exa_language_server_pb_ProgressBarsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  ProgressBars(argument: _exa_language_server_pb_ProgressBarsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  ProgressBars(argument: _exa_language_server_pb_ProgressBarsRequest, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  progressBars(argument: _exa_language_server_pb_ProgressBarsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  progressBars(argument: _exa_language_server_pb_ProgressBarsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  progressBars(argument: _exa_language_server_pb_ProgressBarsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  progressBars(argument: _exa_language_server_pb_ProgressBarsRequest, callback: grpc.requestCallback<_exa_language_server_pb_ProgressBarsResponse__Output>): grpc.ClientUnaryCall;
+  
+  ProvideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  ProvideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  ProvideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  ProvideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  provideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  provideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  provideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  provideCompletionFeedback(argument: _exa_language_server_pb_ProvideCompletionFeedbackRequest, callback: grpc.requestCallback<_exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  
+  QueueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  QueueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  QueueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  QueueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  queueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  queueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  queueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  queueCascadeMessage(argument: _exa_language_server_pb_QueueCascadeMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_QueueCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  
+  RawGetChatMessage(argument: _exa_chat_pb_RawGetChatMessageRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_RawGetChatMessageResponse__Output>;
+  RawGetChatMessage(argument: _exa_chat_pb_RawGetChatMessageRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_RawGetChatMessageResponse__Output>;
+  rawGetChatMessage(argument: _exa_chat_pb_RawGetChatMessageRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_RawGetChatMessageResponse__Output>;
+  rawGetChatMessage(argument: _exa_chat_pb_RawGetChatMessageRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_language_server_pb_RawGetChatMessageResponse__Output>;
+  
+  RecordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  recordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  recordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  recordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  recordChatFeedback(argument: _exa_language_server_pb_RecordChatFeedbackRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatFeedbackResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  RecordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  recordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  recordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  recordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  recordChatPanelSession(argument: _exa_language_server_pb_RecordChatPanelSessionRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordChatPanelSessionResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  RecordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  RecordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  RecordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  recordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  recordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  recordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  recordCommitMessageSave(argument: _exa_language_server_pb_RecordCommitMessageSaveRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordCommitMessageSaveResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordEvent(argument: _exa_language_server_pb_RecordEventRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  RecordEvent(argument: _exa_language_server_pb_RecordEventRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  RecordEvent(argument: _exa_language_server_pb_RecordEventRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  RecordEvent(argument: _exa_language_server_pb_RecordEventRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  recordEvent(argument: _exa_language_server_pb_RecordEventRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  recordEvent(argument: _exa_language_server_pb_RecordEventRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  recordEvent(argument: _exa_language_server_pb_RecordEventRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  recordEvent(argument: _exa_language_server_pb_RecordEventRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordEventResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordLints(argument: _exa_language_server_pb_RecordLintsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  RecordLints(argument: _exa_language_server_pb_RecordLintsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  RecordLints(argument: _exa_language_server_pb_RecordLintsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  RecordLints(argument: _exa_language_server_pb_RecordLintsRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  recordLints(argument: _exa_language_server_pb_RecordLintsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  recordLints(argument: _exa_language_server_pb_RecordLintsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  recordLints(argument: _exa_language_server_pb_RecordLintsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  recordLints(argument: _exa_language_server_pb_RecordLintsRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordLintsResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchDocOpen(argument: _exa_language_server_pb_RecordSearchDocOpenRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchDocOpenResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  RecordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  recordSearchResultsView(argument: _exa_language_server_pb_RecordSearchResultsViewRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSearchResultsViewResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  RecordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  RecordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  RecordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  recordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  recordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  recordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  recordSystemMetrics(argument: _exa_language_server_pb_RecordSystemMetricsRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordSystemMetricsResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  recordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  recordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  recordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  recordUserGrep(argument: _exa_language_server_pb_RecordUserGrepRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserGrepResponse__Output>): grpc.ClientUnaryCall;
+  
+  RecordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  RecordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  recordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  recordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  recordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  recordUserStepSnapshot(argument: _exa_language_server_pb_RecordUserStepSnapshotRequest, callback: grpc.requestCallback<_exa_language_server_pb_RecordUserStepSnapshotResponse__Output>): grpc.ClientUnaryCall;
+  
+  RefreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  RefreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  RefreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  RefreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  refreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  refreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  refreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  refreshContextForIdeAction(argument: _exa_language_server_pb_RefreshContextForIdeActionRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshContextForIdeActionResponse__Output>): grpc.ClientUnaryCall;
+  
+  RefreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  RefreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  RefreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  RefreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  refreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  refreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  refreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  refreshCustomization(argument: _exa_language_server_pb_RefreshCustomizationRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshCustomizationResponse__Output>): grpc.ClientUnaryCall;
+  
+  RefreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  RefreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  RefreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  RefreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  refreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  refreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  refreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  refreshMcpServers(argument: _exa_language_server_pb_RefreshMcpServersRequest, callback: grpc.requestCallback<_exa_language_server_pb_RefreshMcpServersResponse__Output>): grpc.ClientUnaryCall;
+  
+  RemoveFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  RemoveFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  RemoveFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  RemoveFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  removeFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  removeFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  removeFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  removeFromQueue(argument: _exa_language_server_pb_RemoveFromQueueRequest, callback: grpc.requestCallback<_exa_language_server_pb_RemoveFromQueueResponse__Output>): grpc.ClientUnaryCall;
+  
+  RemoveTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  RemoveTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  RemoveTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  RemoveTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  removeTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  removeTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  removeTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  removeTrackedWorkspace(argument: _exa_language_server_pb_RemoveTrackedWorkspaceRequest, callback: grpc.requestCallback<_exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>): grpc.ClientUnaryCall;
+  
+  RenameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  RenameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  RenameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  RenameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  renameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  renameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  renameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  renameCascadeTrajectory(argument: _exa_language_server_pb_RenameCascadeTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  ReplayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  ReplayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  ReplayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  ReplayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  replayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  replayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  replayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  replayGroundTruthTrajectory(argument: _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  ResetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  ResetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  ResetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  ResetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  resetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  resetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  resetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  resetOnboarding(argument: _exa_language_server_pb_ResetOnboardingRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResetOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  
+  ResolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  ResolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  ResolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  ResolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  resolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  resolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  resolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  resolveOutstandingSteps(argument: _exa_language_server_pb_ResolveOutstandingStepsRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResolveOutstandingStepsResponse__Output>): grpc.ClientUnaryCall;
+  
+  ResolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  ResolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  ResolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  ResolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  resolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  resolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  resolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  resolveWorktreeChanges(argument: _exa_language_server_pb_ResolveWorktreeChangesRequest, callback: grpc.requestCallback<_exa_language_server_pb_ResolveWorktreeChangesResponse__Output>): grpc.ClientUnaryCall;
+  
+  RevertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  RevertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  RevertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  RevertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  revertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  revertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  revertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  revertToCascadeStep(argument: _exa_language_server_pb_RevertToCascadeStepRequest, callback: grpc.requestCallback<_exa_language_server_pb_RevertToCascadeStepResponse__Output>): grpc.ClientUnaryCall;
+  
+  SaveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  SaveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  SaveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  SaveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  saveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  saveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  saveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  saveCodeMapFromJson(argument: _exa_language_server_pb_SaveCodeMapFromJsonRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>): grpc.ClientUnaryCall;
+  
+  SaveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  SaveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  SaveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  SaveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  saveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  saveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  saveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  saveMcpServerToConfigFile(argument: _exa_language_server_pb_SaveMcpServerToConfigFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  
+  SaveWindsurfJSAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  SaveWindsurfJSAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  SaveWindsurfJSAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  SaveWindsurfJSAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  saveWindsurfJsAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  saveWindsurfJsAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  saveWindsurfJsAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  saveWindsurfJsAppProjectName(argument: _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, callback: grpc.requestCallback<_exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  
+  SendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  SendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  SendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  SendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  sendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  sendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  sendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  sendActionToChatPanel(argument: _exa_language_server_pb_SendActionToChatPanelRequest, callback: grpc.requestCallback<_exa_language_server_pb_SendActionToChatPanelResponse__Output>): grpc.ClientUnaryCall;
+  
+  SendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  SendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  SendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  SendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  sendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  sendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  sendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  sendUserCascadeMessage(argument: _exa_language_server_pb_SendUserCascadeMessageRequest, callback: grpc.requestCallback<_exa_language_server_pb_SendUserCascadeMessageResponse__Output>): grpc.ClientUnaryCall;
+  
+  SetBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  SetBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  SetBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  SetBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  setBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  setBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  setBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  setBaseExperiments(argument: _exa_language_server_pb_SetBaseExperimentsRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetBaseExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  
+  SetPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedContext(argument: _exa_language_server_pb_SetPinnedContextRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedContextResponse__Output>): grpc.ClientUnaryCall;
+  
+  SetPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  SetPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  setPinnedGuideline(argument: _exa_language_server_pb_SetPinnedGuidelineRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetPinnedGuidelineResponse__Output>): grpc.ClientUnaryCall;
+  
+  SetUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  SetUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  SetUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  SetUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  setUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  setUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  setUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  setUserSettings(argument: _exa_language_server_pb_SetUserSettingsRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetUserSettingsResponse__Output>): grpc.ClientUnaryCall;
+  
+  SetupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  SetupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  SetupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  SetupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  setupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  setupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  setupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  setupUniversitySandbox(argument: _exa_language_server_pb_SetupUniversitySandboxRequest, callback: grpc.requestCallback<_exa_language_server_pb_SetupUniversitySandboxResponse__Output>): grpc.ClientUnaryCall;
+  
+  ShareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  ShareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  ShareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  ShareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  shareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  shareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  shareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  shareCodeMap(argument: _exa_language_server_pb_ShareCodeMapRequest, callback: grpc.requestCallback<_exa_language_server_pb_ShareCodeMapResponse__Output>): grpc.ClientUnaryCall;
+  
+  ShouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  ShouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  ShouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  ShouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  shouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  shouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  shouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  shouldEnableUnleash(argument: _exa_language_server_pb_ShouldEnableUnleashRequest, callback: grpc.requestCallback<_exa_language_server_pb_ShouldEnableUnleashResponse__Output>): grpc.ClientUnaryCall;
+  
+  SkipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  SkipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  SkipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  SkipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  skipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  skipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  skipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  skipOnboarding(argument: _exa_language_server_pb_SkipOnboardingRequest, callback: grpc.requestCallback<_exa_language_server_pb_SkipOnboardingResponse__Output>): grpc.ClientUnaryCall;
+  
+  SpawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  SpawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  SpawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  SpawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  spawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  spawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  spawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  spawnArenaModeMidConversation(argument: _exa_language_server_pb_SpawnArenaModeMidConversationRequest, callback: grpc.requestCallback<_exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>): grpc.ClientUnaryCall;
+  
+  StartCascade(argument: _exa_language_server_pb_StartCascadeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  StartCascade(argument: _exa_language_server_pb_StartCascadeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  StartCascade(argument: _exa_language_server_pb_StartCascadeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  StartCascade(argument: _exa_language_server_pb_StartCascadeRequest, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  startCascade(argument: _exa_language_server_pb_StartCascadeRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  startCascade(argument: _exa_language_server_pb_StartCascadeRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  startCascade(argument: _exa_language_server_pb_StartCascadeRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  startCascade(argument: _exa_language_server_pb_StartCascadeRequest, callback: grpc.requestCallback<_exa_language_server_pb_StartCascadeResponse__Output>): grpc.ClientUnaryCall;
+  
+  StatUri(argument: _exa_language_server_pb_StatUriRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  StatUri(argument: _exa_language_server_pb_StatUriRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  StatUri(argument: _exa_language_server_pb_StatUriRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  StatUri(argument: _exa_language_server_pb_StatUriRequest, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  statUri(argument: _exa_language_server_pb_StatUriRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  statUri(argument: _exa_language_server_pb_StatUriRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  statUri(argument: _exa_language_server_pb_StatUriRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  statUri(argument: _exa_language_server_pb_StatUriRequest, callback: grpc.requestCallback<_exa_language_server_pb_StatUriResponse__Output>): grpc.ClientUnaryCall;
+  
+  StreamCascadePanelReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  StreamCascadePanelReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadePanelReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadePanelReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  
+  StreamCascadeReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  StreamCascadeReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadeReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadeReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  
+  StreamCascadeSummariesReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  StreamCascadeSummariesReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadeSummariesReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamCascadeSummariesReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  
+  StreamTerminalShellCommand(metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  StreamTerminalShellCommand(metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  StreamTerminalShellCommand(options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  StreamTerminalShellCommand(callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  streamTerminalShellCommand(metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  streamTerminalShellCommand(metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  streamTerminalShellCommand(options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  streamTerminalShellCommand(callback: grpc.requestCallback<_exa_language_server_pb_StreamTerminalShellCommandResponse__Output>): grpc.ClientWritableStream<_exa_codeium_common_pb_TerminalShellCommandStreamChunk>;
+  
+  StreamUserTrajectoryReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  StreamUserTrajectoryReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamUserTrajectoryReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  streamUserTrajectoryReactiveUpdates(argument: _exa_reactive_component_pb_StreamReactiveUpdatesRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>;
+  
+  SubmitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  SubmitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  SubmitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  SubmitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  submitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  submitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  submitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  submitBugReport(argument: _exa_language_server_pb_SubmitBugReportRequest, callback: grpc.requestCallback<_exa_language_server_pb_SubmitBugReportResponse__Output>): grpc.ClientUnaryCall;
+  
+  SyncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  SyncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  SyncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  SyncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  syncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  syncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  syncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  syncExploreAgentRun(argument: _exa_language_server_pb_SyncExploreAgentRunRequest, callback: grpc.requestCallback<_exa_language_server_pb_SyncExploreAgentRunResponse__Output>): grpc.ClientUnaryCall;
+  
+  ToggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  ToggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  ToggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  ToggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  toggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  toggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  toggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  toggleMcpTool(argument: _exa_language_server_pb_ToggleMcpToolRequest, callback: grpc.requestCallback<_exa_language_server_pb_ToggleMcpToolResponse__Output>): grpc.ClientUnaryCall;
+  
+  UnmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  UnmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  UnmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  UnmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  unmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  unmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  unmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  unmountCascadeFilesystem(argument: _exa_language_server_pb_UnmountCascadeFilesystemRequest, callback: grpc.requestCallback<_exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  updateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  updateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  updateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  updateAutoCascadeGithubCredentials(argument: _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  updateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  updateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  updateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  updateCascadeMemory(argument: _exa_language_server_pb_UpdateCascadeMemoryRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCascadeMemoryResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  UpdateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  updateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  updateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  updateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  updateCodeMapMetadata(argument: _exa_language_server_pb_UpdateCodeMapMetadataRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  updateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  updateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  updateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  updateConversationTags(argument: _exa_language_server_pb_UpdateConversationTagsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateConversationTagsResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  UpdateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  updateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  updateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  updateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  updateDevExperiments(argument: _exa_language_server_pb_UpdateDevExperimentsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateDevExperimentsResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  UpdateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  UpdateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  UpdateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  updateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  updateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  updateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  updateEnterpriseExperimentsFromUrl(argument: _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  UpdateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  UpdateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  UpdateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  updateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  updateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  updateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  updateMcpServerInConfigFile(argument: _exa_language_server_pb_UpdateMcpServerInConfigFileRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  UpdatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  UpdatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  UpdatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  updatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  updatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  updatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  updatePanelStateWithUserStatus(argument: _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>): grpc.ClientUnaryCall;
+  
+  UpdateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  UpdateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  UpdateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  UpdateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  updateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  updateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  updateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  updateWorkspaceTrust(argument: _exa_language_server_pb_UpdateWorkspaceTrustRequest, callback: grpc.requestCallback<_exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>): grpc.ClientUnaryCall;
+  
+  UploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  UploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  UploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  UploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  uploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  uploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  uploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  uploadRecentCommands(argument: _exa_language_server_pb_UploadRecentCommandsRequest, callback: grpc.requestCallback<_exa_language_server_pb_UploadRecentCommandsResponse__Output>): grpc.ClientUnaryCall;
+  
+  ValidateWindsurfJSAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  ValidateWindsurfJSAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  ValidateWindsurfJSAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  ValidateWindsurfJSAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  validateWindsurfJsAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  validateWindsurfJsAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  validateWindsurfJsAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  validateWindsurfJsAppProjectName(argument: _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, callback: grpc.requestCallback<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>): grpc.ClientUnaryCall;
+  
+  WellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  WellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  WellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  WellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  wellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  wellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, metadata: grpc.Metadata, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  wellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, options: grpc.CallOptions, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  wellSupportedLanguages(argument: _exa_language_server_pb_WellSupportedLanguagesRequest, callback: grpc.requestCallback<_exa_language_server_pb_WellSupportedLanguagesResponse__Output>): grpc.ClientUnaryCall;
+  
+}
+
+export interface LanguageServerServiceHandlers extends grpc.UntypedServiceImplementation {
+  AcceptCompletion: grpc.handleUnaryCall<_exa_language_server_pb_AcceptCompletionRequest__Output, _exa_language_server_pb_AcceptCompletionResponse>;
+  
+  AcknowledgeCascadeCodeEdit: grpc.handleUnaryCall<_exa_language_server_pb_AcknowledgeCascadeCodeEditRequest__Output, _exa_language_server_pb_AcknowledgeCascadeCodeEditResponse>;
+  
+  AddTrackedWorkspace: grpc.handleUnaryCall<_exa_language_server_pb_AddTrackedWorkspaceRequest__Output, _exa_language_server_pb_AddTrackedWorkspaceResponse>;
+  
+  BranchCascade: grpc.handleUnaryCall<_exa_language_server_pb_BranchCascadeRequest__Output, _exa_language_server_pb_BranchCascadeResponse>;
+  
+  BranchCascadeAndGenerateCodeMap: grpc.handleServerStreamingCall<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest__Output, _exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse>;
+  
+  CancelCascadeInvocation: grpc.handleUnaryCall<_exa_language_server_pb_CancelCascadeInvocationRequest__Output, _exa_language_server_pb_CancelCascadeInvocationResponse>;
+  
+  CancelCascadeInvocationAndWait: grpc.handleUnaryCall<_exa_language_server_pb_CancelCascadeInvocationAndWaitRequest__Output, _exa_language_server_pb_CancelCascadeInvocationAndWaitResponse>;
+  
+  CancelCascadeSteps: grpc.handleUnaryCall<_exa_language_server_pb_CancelCascadeStepsRequest__Output, _exa_language_server_pb_CancelCascadeStepsResponse>;
+  
+  CancelRequest: grpc.handleUnaryCall<_exa_language_server_pb_CancelRequestRequest__Output, _exa_language_server_pb_CancelRequestResponse>;
+  
+  CaptureCode: grpc.handleUnaryCall<_exa_language_server_pb_CaptureCodeRequest__Output, _exa_language_server_pb_CaptureCodeResponse>;
+  
+  CaptureFile: grpc.handleUnaryCall<_exa_language_server_pb_CaptureFileRequest__Output, _exa_language_server_pb_CaptureFileResponse>;
+  
+  CheckBugs: grpc.handleUnaryCall<_exa_language_server_pb_CheckBugsRequest__Output, _exa_language_server_pb_CheckBugsResponse>;
+  
+  CheckChatCapacity: grpc.handleUnaryCall<_exa_language_server_pb_CheckChatCapacityRequest__Output, _exa_language_server_pb_CheckChatCapacityResponse>;
+  
+  CheckUserMessageRateLimit: grpc.handleUnaryCall<_exa_language_server_pb_CheckUserMessageRateLimitRequest__Output, _exa_language_server_pb_CheckUserMessageRateLimitResponse>;
+  
+  ConvergeArenaCascades: grpc.handleUnaryCall<_exa_language_server_pb_ConvergeArenaCascadesRequest__Output, _exa_language_server_pb_ConvergeArenaCascadesResponse>;
+  
+  CopyBuiltinWorkflowToWorkspace: grpc.handleUnaryCall<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest__Output, _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse>;
+  
+  CreateCustomizationFile: grpc.handleUnaryCall<_exa_language_server_pb_CreateCustomizationFileRequest__Output, _exa_language_server_pb_CreateCustomizationFileResponse>;
+  
+  CreateTrajectoryShare: grpc.handleUnaryCall<_exa_language_server_pb_CreateTrajectoryShareRequest__Output, _exa_language_server_pb_CreateTrajectoryShareResponse>;
+  
+  DeleteCascadeMemory: grpc.handleUnaryCall<_exa_language_server_pb_DeleteCascadeMemoryRequest__Output, _exa_language_server_pb_DeleteCascadeMemoryResponse>;
+  
+  DeleteCascadeTrajectory: grpc.handleUnaryCall<_exa_language_server_pb_DeleteCascadeTrajectoryRequest__Output, _exa_language_server_pb_DeleteCascadeTrajectoryResponse>;
+  
+  DismissCodeMapSuggestion: grpc.handleUnaryCall<_exa_language_server_pb_DismissCodeMapSuggestionRequest__Output, _exa_language_server_pb_DismissCodeMapSuggestionResponse>;
+  
+  EditConfiguration: grpc.handleUnaryCall<_exa_language_server_pb_EditConfigurationRequest__Output, _exa_language_server_pb_EditConfigurationResponse>;
+  
+  Exit: grpc.handleUnaryCall<_exa_language_server_pb_ExitRequest__Output, _exa_language_server_pb_ExitResponse>;
+  
+  ForceBackgroundResearchRefresh: grpc.handleUnaryCall<_exa_language_server_pb_ForceBackgroundResearchRefreshRequest__Output, _exa_language_server_pb_ForceBackgroundResearchRefreshResponse>;
+  
+  GenerateCodeMap: grpc.handleServerStreamingCall<_exa_language_server_pb_GenerateCodeMapRequest__Output, _exa_language_server_pb_GenerateCodeMapResponse>;
+  
+  GenerateCommitMessage: grpc.handleUnaryCall<_exa_language_server_pb_GenerateCommitMessageRequest__Output, _exa_language_server_pb_GenerateCommitMessageResponse>;
+  
+  GenerateVibeAndReplaceStreaming: grpc.handleServerStreamingCall<_exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest__Output, _exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse>;
+  
+  GetActiveAppDeploymentForWorkspace: grpc.handleUnaryCall<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest__Output, _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse>;
+  
+  GetAllCascadeTrajectories: grpc.handleUnaryCall<_exa_language_server_pb_GetAllCascadeTrajectoriesRequest__Output, _exa_language_server_pb_GetAllCascadeTrajectoriesResponse>;
+  
+  GetAllPlans: grpc.handleUnaryCall<_exa_language_server_pb_GetAllPlansRequest__Output, _exa_language_server_pb_GetAllPlansResponse>;
+  
+  GetAllRules: grpc.handleUnaryCall<_exa_language_server_pb_GetAllRulesRequest__Output, _exa_language_server_pb_GetAllRulesResponse>;
+  
+  GetAllSkills: grpc.handleUnaryCall<_exa_language_server_pb_GetAllSkillsRequest__Output, _exa_language_server_pb_GetAllSkillsResponse>;
+  
+  GetAllWorkflows: grpc.handleUnaryCall<_exa_language_server_pb_GetAllWorkflowsRequest__Output, _exa_language_server_pb_GetAllWorkflowsResponse>;
+  
+  GetAuthToken: grpc.handleUnaryCall<_exa_language_server_pb_GetAuthTokenRequest__Output, _exa_language_server_pb_GetAuthTokenResponse>;
+  
+  GetAvailableCascadePlugins: grpc.handleUnaryCall<_exa_language_server_pb_GetAvailableCascadePluginsRequest__Output, _exa_language_server_pb_GetAvailableCascadePluginsResponse>;
+  
+  GetBrainStatus: grpc.handleUnaryCall<_exa_language_server_pb_GetBrainStatusRequest__Output, _exa_language_server_pb_GetBrainStatusResponse>;
+  
+  GetCascadeMemories: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadeMemoriesRequest__Output, _exa_language_server_pb_GetCascadeMemoriesResponse>;
+  
+  GetCascadeModelConfigs: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadeModelConfigsRequest__Output, _exa_language_server_pb_GetCascadeModelConfigsResponse>;
+  
+  GetCascadePluginById: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadePluginByIdRequest__Output, _exa_language_server_pb_GetCascadePluginByIdResponse>;
+  
+  GetCascadeTrajectory: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadeTrajectoryRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryResponse>;
+  
+  GetCascadeTrajectoryGeneratorMetadata: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse>;
+  
+  GetCascadeTrajectorySteps: grpc.handleUnaryCall<_exa_language_server_pb_GetCascadeTrajectoryStepsRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryStepsResponse>;
+  
+  GetChangelog: grpc.handleUnaryCall<_exa_language_server_pb_GetChangelogRequest__Output, _exa_language_server_pb_GetChangelogResponse>;
+  
+  GetChatMessage: grpc.handleServerStreamingCall<_exa_chat_pb_GetChatMessageRequest__Output, _exa_language_server_pb_GetChatMessageResponse>;
+  
+  GetClassInfos: grpc.handleUnaryCall<_exa_language_server_pb_GetClassInfosRequest__Output, _exa_language_server_pb_GetClassInfosResponse>;
+  
+  GetCodeMapSuggestions: grpc.handleUnaryCall<_exa_language_server_pb_GetCodeMapSuggestionsRequest__Output, _exa_language_server_pb_GetCodeMapSuggestionsResponse>;
+  
+  GetCodeMapsForFile: grpc.handleUnaryCall<_exa_language_server_pb_GetCodeMapsForFileRequest__Output, _exa_language_server_pb_GetCodeMapsForFileResponse>;
+  
+  GetCodeMapsForRepos: grpc.handleUnaryCall<_exa_language_server_pb_GetCodeMapsForReposRequest__Output, _exa_language_server_pb_GetCodeMapsForReposResponse>;
+  
+  GetCodeValidationStates: grpc.handleUnaryCall<_exa_language_server_pb_GetCodeValidationStatesRequest__Output, _exa_language_server_pb_GetCodeValidationStatesResponse>;
+  
+  GetCommandModelConfigs: grpc.handleUnaryCall<_exa_language_server_pb_GetCommandModelConfigsRequest__Output, _exa_language_server_pb_GetCommandModelConfigsResponse>;
+  
+  GetCompletions: grpc.handleUnaryCall<_exa_language_server_pb_GetCompletionsRequest__Output, _exa_language_server_pb_GetCompletionsResponse>;
+  
+  GetConversationTags: grpc.handleUnaryCall<_exa_language_server_pb_GetConversationTagsRequest__Output, _exa_language_server_pb_GetConversationTagsResponse>;
+  
+  GetDebugDiagnostics: grpc.handleUnaryCall<_exa_language_server_pb_GetDebugDiagnosticsRequest__Output, _exa_language_server_pb_GetDebugDiagnosticsResponse>;
+  
+  GetDeepWiki: grpc.handleServerStreamingCall<_exa_chat_pb_GetDeepWikiRequest__Output, _exa_language_server_pb_GetDeepWikiResponse>;
+  
+  GetDefaultWebOrigins: grpc.handleUnaryCall<_exa_language_server_pb_GetDefaultWebOriginsRequest__Output, _exa_language_server_pb_GetDefaultWebOriginsResponse>;
+  
+  GetExternalModel: grpc.handleUnaryCall<_exa_language_server_pb_GetExternalModelRequest__Output, _exa_language_server_pb_GetExternalModelResponse>;
+  
+  GetFunctions: grpc.handleUnaryCall<_exa_language_server_pb_GetFunctionsRequest__Output, _exa_language_server_pb_GetFunctionsResponse>;
+  
+  GetGithubPullRequestSearchInfo: grpc.handleUnaryCall<_exa_language_server_pb_GetGithubPullRequestSearchInfoRequest__Output, _exa_language_server_pb_GetGithubPullRequestSearchInfoResponse>;
+  
+  GetKnowledgeBaseItemsForTeam: grpc.handleUnaryCall<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest__Output, _exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse>;
+  
+  GetLifeguardConfig: grpc.handleUnaryCall<_exa_language_server_pb_GetLifeguardConfigRequest__Output, _exa_language_server_pb_GetLifeguardConfigResponse>;
+  
+  GetMatchingCodeContext: grpc.handleUnaryCall<_exa_language_server_pb_GetMatchingCodeContextRequest__Output, _exa_language_server_pb_GetMatchingCodeContextResponse>;
+  
+  GetMatchingContextScopeItems: grpc.handleUnaryCall<_exa_language_server_pb_GetMatchingContextScopeItemsRequest__Output, _exa_language_server_pb_GetMatchingContextScopeItemsResponse>;
+  
+  GetMatchingIndexedRepos: grpc.handleUnaryCall<_exa_language_server_pb_GetMatchingIndexedReposRequest__Output, _exa_language_server_pb_GetMatchingIndexedReposResponse>;
+  
+  GetMcpPrompt: grpc.handleUnaryCall<_exa_language_server_pb_GetMcpPromptRequest__Output, _exa_language_server_pb_GetMcpPromptResponse>;
+  
+  GetMcpServerStates: grpc.handleUnaryCall<_exa_language_server_pb_GetMcpServerStatesRequest__Output, _exa_language_server_pb_GetMcpServerStatesResponse>;
+  
+  GetMessageTokenCount: grpc.handleUnaryCall<_exa_language_server_pb_GetMessageTokenCountRequest__Output, _exa_language_server_pb_GetMessageTokenCountResponse>;
+  
+  GetModelStatuses: grpc.handleUnaryCall<_exa_language_server_pb_GetModelStatusesRequest__Output, _exa_language_server_pb_GetModelStatusesResponse>;
+  
+  GetPatchAndCodeChange: grpc.handleUnaryCall<_exa_language_server_pb_GetPatchAndCodeChangeRequest__Output, _exa_language_server_pb_GetPatchAndCodeChangeResponse>;
+  
+  GetPrimaryApiKeyForDevsOnly: grpc.handleUnaryCall<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest__Output, _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse>;
+  
+  GetProcesses: grpc.handleUnaryCall<_exa_language_server_pb_GetProcessesRequest__Output, _exa_language_server_pb_GetProcessesResponse>;
+  
+  GetProfileData: grpc.handleUnaryCall<_exa_language_server_pb_GetProfileDataRequest__Output, _exa_language_server_pb_GetProfileDataResponse>;
+  
+  GetRepoInfos: grpc.handleUnaryCall<_exa_language_server_pb_GetRepoInfosRequest__Output, _exa_language_server_pb_GetRepoInfosResponse>;
+  
+  GetRevertPreview: grpc.handleUnaryCall<_exa_language_server_pb_GetRevertPreviewRequest__Output, _exa_language_server_pb_GetRevertPreviewResponse>;
+  
+  GetSharedCodeMap: grpc.handleUnaryCall<_exa_language_server_pb_GetSharedCodeMapRequest__Output, _exa_language_server_pb_GetSharedCodeMapResponse>;
+  
+  GetStatus: grpc.handleUnaryCall<_exa_language_server_pb_GetStatusRequest__Output, _exa_language_server_pb_GetStatusResponse>;
+  
+  GetSuggestedContextScopeItems: grpc.handleUnaryCall<_exa_language_server_pb_GetSuggestedContextScopeItemsRequest__Output, _exa_language_server_pb_GetSuggestedContextScopeItemsResponse>;
+  
+  GetSystemPromptAndTools: grpc.handleUnaryCall<_exa_language_server_pb_GetSystemPromptAndToolsRequest__Output, _exa_language_server_pb_GetSystemPromptAndToolsResponse>;
+  
+  GetTeamOrganizationalControls: grpc.handleUnaryCall<_exa_language_server_pb_GetTeamOrganizationalControlsRequest__Output, _exa_language_server_pb_GetTeamOrganizationalControlsResponse>;
+  
+  GetTranscription: grpc.handleUnaryCall<_exa_language_server_pb_GetTranscriptionRequest__Output, _exa_language_server_pb_GetTranscriptionResponse>;
+  
+  GetUnleashData: grpc.handleUnaryCall<_exa_language_server_pb_GetUnleashDataRequest__Output, _exa_language_server_pb_GetUnleashDataResponse>;
+  
+  GetUserMemories: grpc.handleUnaryCall<_exa_language_server_pb_GetUserMemoriesRequest__Output, _exa_language_server_pb_GetUserMemoriesResponse>;
+  
+  GetUserSettings: grpc.handleUnaryCall<_exa_language_server_pb_GetUserSettingsRequest__Output, _exa_language_server_pb_GetUserSettingsResponse>;
+  
+  GetUserStatus: grpc.handleUnaryCall<_exa_language_server_pb_GetUserStatusRequest__Output, _exa_language_server_pb_GetUserStatusResponse>;
+  
+  GetUserTrajectory: grpc.handleUnaryCall<_exa_language_server_pb_GetUserTrajectoryRequest__Output, _exa_language_server_pb_GetUserTrajectoryResponse>;
+  
+  GetUserTrajectoryDebug: grpc.handleUnaryCall<_exa_language_server_pb_GetUserTrajectoryDebugRequest__Output, _exa_language_server_pb_GetUserTrajectoryDebugResponse>;
+  
+  GetUserTrajectoryDescriptions: grpc.handleUnaryCall<_exa_language_server_pb_GetUserTrajectoryDescriptionsRequest__Output, _exa_language_server_pb_GetUserTrajectoryDescriptionsResponse>;
+  
+  GetWebDocsOptions: grpc.handleUnaryCall<_exa_language_server_pb_GetWebDocsOptionsRequest__Output, _exa_language_server_pb_GetWebDocsOptionsResponse>;
+  
+  GetWindsurfJSAppDeployment: grpc.handleUnaryCall<_exa_language_server_pb_GetWindsurfJSAppDeploymentRequest__Output, _exa_language_server_pb_GetWindsurfJSAppDeploymentResponse>;
+  
+  GetWorkspaceEditState: grpc.handleUnaryCall<_exa_language_server_pb_GetWorkspaceEditStateRequest__Output, _exa_language_server_pb_GetWorkspaceEditStateResponse>;
+  
+  GetWorkspaceInfos: grpc.handleUnaryCall<_exa_language_server_pb_GetWorkspaceInfosRequest__Output, _exa_language_server_pb_GetWorkspaceInfosResponse>;
+  
+  HandleCascadeUserInteraction: grpc.handleUnaryCall<_exa_language_server_pb_HandleCascadeUserInteractionRequest__Output, _exa_language_server_pb_HandleCascadeUserInteractionResponse>;
+  
+  HandleStreamingCommand: grpc.handleServerStreamingCall<_exa_language_server_pb_HandleStreamingCommandRequest__Output, _exa_language_server_pb_HandleStreamingCommandResponse>;
+  
+  HandleStreamingTab: grpc.handleServerStreamingCall<_exa_language_server_pb_HandleStreamingTabRequest__Output, _exa_language_server_pb_HandleStreamingTabResponse>;
+  
+  HandleStreamingTabV2: grpc.handleUnaryCall<_exa_language_server_pb_HandleStreamingTabV2Request__Output, _exa_language_server_pb_HandleStreamingTabV2Response>;
+  
+  HandleStreamingTerminalCommand: grpc.handleServerStreamingCall<_exa_language_server_pb_HandleStreamingTerminalCommandRequest__Output, _exa_language_server_pb_HandleStreamingTerminalCommandResponse>;
+  
+  Heartbeat: grpc.handleUnaryCall<_exa_language_server_pb_HeartbeatRequest__Output, _exa_language_server_pb_HeartbeatResponse>;
+  
+  ImportFromCursor: grpc.handleUnaryCall<_exa_language_server_pb_ImportFromCursorRequest__Output, _exa_language_server_pb_ImportFromCursorResponse>;
+  
+  InitializeCascadePanelState: grpc.handleUnaryCall<_exa_language_server_pb_InitializeCascadePanelStateRequest__Output, _exa_language_server_pb_InitializeCascadePanelStateResponse>;
+  
+  InstallCascadePlugin: grpc.handleUnaryCall<_exa_language_server_pb_InstallCascadePluginRequest__Output, _exa_language_server_pb_InstallCascadePluginResponse>;
+  
+  InterruptWithQueuedMessage: grpc.handleUnaryCall<_exa_language_server_pb_InterruptWithQueuedMessageRequest__Output, _exa_language_server_pb_InterruptWithQueuedMessageResponse>;
+  
+  LogCascadeSession: grpc.handleUnaryCall<_exa_language_server_pb_LogCascadeSessionRequest__Output, _exa_language_server_pb_LogCascadeSessionResponse>;
+  
+  MigrateApiKey: grpc.handleUnaryCall<_exa_language_server_pb_MigrateApiKeyRequest__Output, _exa_language_server_pb_MigrateApiKeyResponse>;
+  
+  MountCascadeFilesystem: grpc.handleUnaryCall<_exa_language_server_pb_MountCascadeFilesystemRequest__Output, _exa_language_server_pb_MountCascadeFilesystemResponse>;
+  
+  MoveQueuedMessage: grpc.handleUnaryCall<_exa_language_server_pb_MoveQueuedMessageRequest__Output, _exa_language_server_pb_MoveQueuedMessageResponse>;
+  
+  OnEdit: grpc.handleUnaryCall<_exa_language_server_pb_OnEditRequest__Output, _exa_language_server_pb_OnEditResponse>;
+  
+  ProgressBars: grpc.handleUnaryCall<_exa_language_server_pb_ProgressBarsRequest__Output, _exa_language_server_pb_ProgressBarsResponse>;
+  
+  ProvideCompletionFeedback: grpc.handleUnaryCall<_exa_language_server_pb_ProvideCompletionFeedbackRequest__Output, _exa_language_server_pb_ProvideCompletionFeedbackResponse>;
+  
+  QueueCascadeMessage: grpc.handleUnaryCall<_exa_language_server_pb_QueueCascadeMessageRequest__Output, _exa_language_server_pb_QueueCascadeMessageResponse>;
+  
+  RawGetChatMessage: grpc.handleServerStreamingCall<_exa_chat_pb_RawGetChatMessageRequest__Output, _exa_language_server_pb_RawGetChatMessageResponse>;
+  
+  RecordChatFeedback: grpc.handleUnaryCall<_exa_language_server_pb_RecordChatFeedbackRequest__Output, _exa_language_server_pb_RecordChatFeedbackResponse>;
+  
+  RecordChatPanelSession: grpc.handleUnaryCall<_exa_language_server_pb_RecordChatPanelSessionRequest__Output, _exa_language_server_pb_RecordChatPanelSessionResponse>;
+  
+  RecordCommitMessageSave: grpc.handleUnaryCall<_exa_language_server_pb_RecordCommitMessageSaveRequest__Output, _exa_language_server_pb_RecordCommitMessageSaveResponse>;
+  
+  RecordEvent: grpc.handleUnaryCall<_exa_language_server_pb_RecordEventRequest__Output, _exa_language_server_pb_RecordEventResponse>;
+  
+  RecordLints: grpc.handleUnaryCall<_exa_language_server_pb_RecordLintsRequest__Output, _exa_language_server_pb_RecordLintsResponse>;
+  
+  RecordSearchDocOpen: grpc.handleUnaryCall<_exa_language_server_pb_RecordSearchDocOpenRequest__Output, _exa_language_server_pb_RecordSearchDocOpenResponse>;
+  
+  RecordSearchResultsView: grpc.handleUnaryCall<_exa_language_server_pb_RecordSearchResultsViewRequest__Output, _exa_language_server_pb_RecordSearchResultsViewResponse>;
+  
+  RecordSystemMetrics: grpc.handleUnaryCall<_exa_language_server_pb_RecordSystemMetricsRequest__Output, _exa_language_server_pb_RecordSystemMetricsResponse>;
+  
+  RecordUserGrep: grpc.handleUnaryCall<_exa_language_server_pb_RecordUserGrepRequest__Output, _exa_language_server_pb_RecordUserGrepResponse>;
+  
+  RecordUserStepSnapshot: grpc.handleUnaryCall<_exa_language_server_pb_RecordUserStepSnapshotRequest__Output, _exa_language_server_pb_RecordUserStepSnapshotResponse>;
+  
+  RefreshContextForIdeAction: grpc.handleUnaryCall<_exa_language_server_pb_RefreshContextForIdeActionRequest__Output, _exa_language_server_pb_RefreshContextForIdeActionResponse>;
+  
+  RefreshCustomization: grpc.handleUnaryCall<_exa_language_server_pb_RefreshCustomizationRequest__Output, _exa_language_server_pb_RefreshCustomizationResponse>;
+  
+  RefreshMcpServers: grpc.handleUnaryCall<_exa_language_server_pb_RefreshMcpServersRequest__Output, _exa_language_server_pb_RefreshMcpServersResponse>;
+  
+  RemoveFromQueue: grpc.handleUnaryCall<_exa_language_server_pb_RemoveFromQueueRequest__Output, _exa_language_server_pb_RemoveFromQueueResponse>;
+  
+  RemoveTrackedWorkspace: grpc.handleUnaryCall<_exa_language_server_pb_RemoveTrackedWorkspaceRequest__Output, _exa_language_server_pb_RemoveTrackedWorkspaceResponse>;
+  
+  RenameCascadeTrajectory: grpc.handleUnaryCall<_exa_language_server_pb_RenameCascadeTrajectoryRequest__Output, _exa_language_server_pb_RenameCascadeTrajectoryResponse>;
+  
+  ReplayGroundTruthTrajectory: grpc.handleUnaryCall<_exa_language_server_pb_ReplayGroundTruthTrajectoryRequest__Output, _exa_language_server_pb_ReplayGroundTruthTrajectoryResponse>;
+  
+  ResetOnboarding: grpc.handleUnaryCall<_exa_language_server_pb_ResetOnboardingRequest__Output, _exa_language_server_pb_ResetOnboardingResponse>;
+  
+  ResolveOutstandingSteps: grpc.handleUnaryCall<_exa_language_server_pb_ResolveOutstandingStepsRequest__Output, _exa_language_server_pb_ResolveOutstandingStepsResponse>;
+  
+  ResolveWorktreeChanges: grpc.handleUnaryCall<_exa_language_server_pb_ResolveWorktreeChangesRequest__Output, _exa_language_server_pb_ResolveWorktreeChangesResponse>;
+  
+  RevertToCascadeStep: grpc.handleUnaryCall<_exa_language_server_pb_RevertToCascadeStepRequest__Output, _exa_language_server_pb_RevertToCascadeStepResponse>;
+  
+  SaveCodeMapFromJson: grpc.handleUnaryCall<_exa_language_server_pb_SaveCodeMapFromJsonRequest__Output, _exa_language_server_pb_SaveCodeMapFromJsonResponse>;
+  
+  SaveMcpServerToConfigFile: grpc.handleUnaryCall<_exa_language_server_pb_SaveMcpServerToConfigFileRequest__Output, _exa_language_server_pb_SaveMcpServerToConfigFileResponse>;
+  
+  SaveWindsurfJSAppProjectName: grpc.handleUnaryCall<_exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest__Output, _exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse>;
+  
+  SendActionToChatPanel: grpc.handleUnaryCall<_exa_language_server_pb_SendActionToChatPanelRequest__Output, _exa_language_server_pb_SendActionToChatPanelResponse>;
+  
+  SendUserCascadeMessage: grpc.handleUnaryCall<_exa_language_server_pb_SendUserCascadeMessageRequest__Output, _exa_language_server_pb_SendUserCascadeMessageResponse>;
+  
+  SetBaseExperiments: grpc.handleUnaryCall<_exa_language_server_pb_SetBaseExperimentsRequest__Output, _exa_language_server_pb_SetBaseExperimentsResponse>;
+  
+  SetPinnedContext: grpc.handleUnaryCall<_exa_language_server_pb_SetPinnedContextRequest__Output, _exa_language_server_pb_SetPinnedContextResponse>;
+  
+  SetPinnedGuideline: grpc.handleUnaryCall<_exa_language_server_pb_SetPinnedGuidelineRequest__Output, _exa_language_server_pb_SetPinnedGuidelineResponse>;
+  
+  SetUserSettings: grpc.handleUnaryCall<_exa_language_server_pb_SetUserSettingsRequest__Output, _exa_language_server_pb_SetUserSettingsResponse>;
+  
+  SetupUniversitySandbox: grpc.handleUnaryCall<_exa_language_server_pb_SetupUniversitySandboxRequest__Output, _exa_language_server_pb_SetupUniversitySandboxResponse>;
+  
+  ShareCodeMap: grpc.handleUnaryCall<_exa_language_server_pb_ShareCodeMapRequest__Output, _exa_language_server_pb_ShareCodeMapResponse>;
+  
+  ShouldEnableUnleash: grpc.handleUnaryCall<_exa_language_server_pb_ShouldEnableUnleashRequest__Output, _exa_language_server_pb_ShouldEnableUnleashResponse>;
+  
+  SkipOnboarding: grpc.handleUnaryCall<_exa_language_server_pb_SkipOnboardingRequest__Output, _exa_language_server_pb_SkipOnboardingResponse>;
+  
+  SpawnArenaModeMidConversation: grpc.handleUnaryCall<_exa_language_server_pb_SpawnArenaModeMidConversationRequest__Output, _exa_language_server_pb_SpawnArenaModeMidConversationResponse>;
+  
+  StartCascade: grpc.handleUnaryCall<_exa_language_server_pb_StartCascadeRequest__Output, _exa_language_server_pb_StartCascadeResponse>;
+  
+  StatUri: grpc.handleUnaryCall<_exa_language_server_pb_StatUriRequest__Output, _exa_language_server_pb_StatUriResponse>;
+  
+  StreamCascadePanelReactiveUpdates: grpc.handleServerStreamingCall<_exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse>;
+  
+  StreamCascadeReactiveUpdates: grpc.handleServerStreamingCall<_exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse>;
+  
+  StreamCascadeSummariesReactiveUpdates: grpc.handleServerStreamingCall<_exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse>;
+  
+  StreamTerminalShellCommand: grpc.handleClientStreamingCall<_exa_codeium_common_pb_TerminalShellCommandStreamChunk__Output, _exa_language_server_pb_StreamTerminalShellCommandResponse>;
+  
+  StreamUserTrajectoryReactiveUpdates: grpc.handleServerStreamingCall<_exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse>;
+  
+  SubmitBugReport: grpc.handleUnaryCall<_exa_language_server_pb_SubmitBugReportRequest__Output, _exa_language_server_pb_SubmitBugReportResponse>;
+  
+  SyncExploreAgentRun: grpc.handleUnaryCall<_exa_language_server_pb_SyncExploreAgentRunRequest__Output, _exa_language_server_pb_SyncExploreAgentRunResponse>;
+  
+  ToggleMcpTool: grpc.handleUnaryCall<_exa_language_server_pb_ToggleMcpToolRequest__Output, _exa_language_server_pb_ToggleMcpToolResponse>;
+  
+  UnmountCascadeFilesystem: grpc.handleUnaryCall<_exa_language_server_pb_UnmountCascadeFilesystemRequest__Output, _exa_language_server_pb_UnmountCascadeFilesystemResponse>;
+  
+  UpdateAutoCascadeGithubCredentials: grpc.handleUnaryCall<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest__Output, _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse>;
+  
+  UpdateCascadeMemory: grpc.handleUnaryCall<_exa_language_server_pb_UpdateCascadeMemoryRequest__Output, _exa_language_server_pb_UpdateCascadeMemoryResponse>;
+  
+  UpdateCodeMapMetadata: grpc.handleUnaryCall<_exa_language_server_pb_UpdateCodeMapMetadataRequest__Output, _exa_language_server_pb_UpdateCodeMapMetadataResponse>;
+  
+  UpdateConversationTags: grpc.handleUnaryCall<_exa_language_server_pb_UpdateConversationTagsRequest__Output, _exa_language_server_pb_UpdateConversationTagsResponse>;
+  
+  UpdateDevExperiments: grpc.handleUnaryCall<_exa_language_server_pb_UpdateDevExperimentsRequest__Output, _exa_language_server_pb_UpdateDevExperimentsResponse>;
+  
+  UpdateEnterpriseExperimentsFromUrl: grpc.handleUnaryCall<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest__Output, _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse>;
+  
+  UpdateMcpServerInConfigFile: grpc.handleUnaryCall<_exa_language_server_pb_UpdateMcpServerInConfigFileRequest__Output, _exa_language_server_pb_UpdateMcpServerInConfigFileResponse>;
+  
+  UpdatePanelStateWithUserStatus: grpc.handleUnaryCall<_exa_language_server_pb_UpdatePanelStateWithUserStatusRequest__Output, _exa_language_server_pb_UpdatePanelStateWithUserStatusResponse>;
+  
+  UpdateWorkspaceTrust: grpc.handleUnaryCall<_exa_language_server_pb_UpdateWorkspaceTrustRequest__Output, _exa_language_server_pb_UpdateWorkspaceTrustResponse>;
+  
+  UploadRecentCommands: grpc.handleUnaryCall<_exa_language_server_pb_UploadRecentCommandsRequest__Output, _exa_language_server_pb_UploadRecentCommandsResponse>;
+  
+  ValidateWindsurfJSAppProjectName: grpc.handleUnaryCall<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest__Output, _exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse>;
+  
+  WellSupportedLanguages: grpc.handleUnaryCall<_exa_language_server_pb_WellSupportedLanguagesRequest__Output, _exa_language_server_pb_WellSupportedLanguagesResponse>;
+  
+}
+
+export interface LanguageServerServiceDefinition extends grpc.ServiceDefinition {
+  AcceptCompletion: MethodDefinition<_exa_language_server_pb_AcceptCompletionRequest, _exa_language_server_pb_AcceptCompletionResponse, _exa_language_server_pb_AcceptCompletionRequest__Output, _exa_language_server_pb_AcceptCompletionResponse__Output>
+  AcknowledgeCascadeCodeEdit: MethodDefinition<_exa_language_server_pb_AcknowledgeCascadeCodeEditRequest, _exa_language_server_pb_AcknowledgeCascadeCodeEditResponse, _exa_language_server_pb_AcknowledgeCascadeCodeEditRequest__Output, _exa_language_server_pb_AcknowledgeCascadeCodeEditResponse__Output>
+  AddTrackedWorkspace: MethodDefinition<_exa_language_server_pb_AddTrackedWorkspaceRequest, _exa_language_server_pb_AddTrackedWorkspaceResponse, _exa_language_server_pb_AddTrackedWorkspaceRequest__Output, _exa_language_server_pb_AddTrackedWorkspaceResponse__Output>
+  BranchCascade: MethodDefinition<_exa_language_server_pb_BranchCascadeRequest, _exa_language_server_pb_BranchCascadeResponse, _exa_language_server_pb_BranchCascadeRequest__Output, _exa_language_server_pb_BranchCascadeResponse__Output>
+  BranchCascadeAndGenerateCodeMap: MethodDefinition<_exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest, _exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse, _exa_language_server_pb_BranchCascadeAndGenerateCodeMapRequest__Output, _exa_language_server_pb_BranchCascadeAndGenerateCodeMapResponse__Output>
+  CancelCascadeInvocation: MethodDefinition<_exa_language_server_pb_CancelCascadeInvocationRequest, _exa_language_server_pb_CancelCascadeInvocationResponse, _exa_language_server_pb_CancelCascadeInvocationRequest__Output, _exa_language_server_pb_CancelCascadeInvocationResponse__Output>
+  CancelCascadeInvocationAndWait: MethodDefinition<_exa_language_server_pb_CancelCascadeInvocationAndWaitRequest, _exa_language_server_pb_CancelCascadeInvocationAndWaitResponse, _exa_language_server_pb_CancelCascadeInvocationAndWaitRequest__Output, _exa_language_server_pb_CancelCascadeInvocationAndWaitResponse__Output>
+  CancelCascadeSteps: MethodDefinition<_exa_language_server_pb_CancelCascadeStepsRequest, _exa_language_server_pb_CancelCascadeStepsResponse, _exa_language_server_pb_CancelCascadeStepsRequest__Output, _exa_language_server_pb_CancelCascadeStepsResponse__Output>
+  CancelRequest: MethodDefinition<_exa_language_server_pb_CancelRequestRequest, _exa_language_server_pb_CancelRequestResponse, _exa_language_server_pb_CancelRequestRequest__Output, _exa_language_server_pb_CancelRequestResponse__Output>
+  CaptureCode: MethodDefinition<_exa_language_server_pb_CaptureCodeRequest, _exa_language_server_pb_CaptureCodeResponse, _exa_language_server_pb_CaptureCodeRequest__Output, _exa_language_server_pb_CaptureCodeResponse__Output>
+  CaptureFile: MethodDefinition<_exa_language_server_pb_CaptureFileRequest, _exa_language_server_pb_CaptureFileResponse, _exa_language_server_pb_CaptureFileRequest__Output, _exa_language_server_pb_CaptureFileResponse__Output>
+  CheckBugs: MethodDefinition<_exa_language_server_pb_CheckBugsRequest, _exa_language_server_pb_CheckBugsResponse, _exa_language_server_pb_CheckBugsRequest__Output, _exa_language_server_pb_CheckBugsResponse__Output>
+  CheckChatCapacity: MethodDefinition<_exa_language_server_pb_CheckChatCapacityRequest, _exa_language_server_pb_CheckChatCapacityResponse, _exa_language_server_pb_CheckChatCapacityRequest__Output, _exa_language_server_pb_CheckChatCapacityResponse__Output>
+  CheckUserMessageRateLimit: MethodDefinition<_exa_language_server_pb_CheckUserMessageRateLimitRequest, _exa_language_server_pb_CheckUserMessageRateLimitResponse, _exa_language_server_pb_CheckUserMessageRateLimitRequest__Output, _exa_language_server_pb_CheckUserMessageRateLimitResponse__Output>
+  ConvergeArenaCascades: MethodDefinition<_exa_language_server_pb_ConvergeArenaCascadesRequest, _exa_language_server_pb_ConvergeArenaCascadesResponse, _exa_language_server_pb_ConvergeArenaCascadesRequest__Output, _exa_language_server_pb_ConvergeArenaCascadesResponse__Output>
+  CopyBuiltinWorkflowToWorkspace: MethodDefinition<_exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest, _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse, _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceRequest__Output, _exa_language_server_pb_CopyBuiltinWorkflowToWorkspaceResponse__Output>
+  CreateCustomizationFile: MethodDefinition<_exa_language_server_pb_CreateCustomizationFileRequest, _exa_language_server_pb_CreateCustomizationFileResponse, _exa_language_server_pb_CreateCustomizationFileRequest__Output, _exa_language_server_pb_CreateCustomizationFileResponse__Output>
+  CreateTrajectoryShare: MethodDefinition<_exa_language_server_pb_CreateTrajectoryShareRequest, _exa_language_server_pb_CreateTrajectoryShareResponse, _exa_language_server_pb_CreateTrajectoryShareRequest__Output, _exa_language_server_pb_CreateTrajectoryShareResponse__Output>
+  DeleteCascadeMemory: MethodDefinition<_exa_language_server_pb_DeleteCascadeMemoryRequest, _exa_language_server_pb_DeleteCascadeMemoryResponse, _exa_language_server_pb_DeleteCascadeMemoryRequest__Output, _exa_language_server_pb_DeleteCascadeMemoryResponse__Output>
+  DeleteCascadeTrajectory: MethodDefinition<_exa_language_server_pb_DeleteCascadeTrajectoryRequest, _exa_language_server_pb_DeleteCascadeTrajectoryResponse, _exa_language_server_pb_DeleteCascadeTrajectoryRequest__Output, _exa_language_server_pb_DeleteCascadeTrajectoryResponse__Output>
+  DismissCodeMapSuggestion: MethodDefinition<_exa_language_server_pb_DismissCodeMapSuggestionRequest, _exa_language_server_pb_DismissCodeMapSuggestionResponse, _exa_language_server_pb_DismissCodeMapSuggestionRequest__Output, _exa_language_server_pb_DismissCodeMapSuggestionResponse__Output>
+  EditConfiguration: MethodDefinition<_exa_language_server_pb_EditConfigurationRequest, _exa_language_server_pb_EditConfigurationResponse, _exa_language_server_pb_EditConfigurationRequest__Output, _exa_language_server_pb_EditConfigurationResponse__Output>
+  Exit: MethodDefinition<_exa_language_server_pb_ExitRequest, _exa_language_server_pb_ExitResponse, _exa_language_server_pb_ExitRequest__Output, _exa_language_server_pb_ExitResponse__Output>
+  ForceBackgroundResearchRefresh: MethodDefinition<_exa_language_server_pb_ForceBackgroundResearchRefreshRequest, _exa_language_server_pb_ForceBackgroundResearchRefreshResponse, _exa_language_server_pb_ForceBackgroundResearchRefreshRequest__Output, _exa_language_server_pb_ForceBackgroundResearchRefreshResponse__Output>
+  GenerateCodeMap: MethodDefinition<_exa_language_server_pb_GenerateCodeMapRequest, _exa_language_server_pb_GenerateCodeMapResponse, _exa_language_server_pb_GenerateCodeMapRequest__Output, _exa_language_server_pb_GenerateCodeMapResponse__Output>
+  GenerateCommitMessage: MethodDefinition<_exa_language_server_pb_GenerateCommitMessageRequest, _exa_language_server_pb_GenerateCommitMessageResponse, _exa_language_server_pb_GenerateCommitMessageRequest__Output, _exa_language_server_pb_GenerateCommitMessageResponse__Output>
+  GenerateVibeAndReplaceStreaming: MethodDefinition<_exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest, _exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse, _exa_language_server_pb_GenerateVibeAndReplaceStreamingRequest__Output, _exa_language_server_pb_GenerateVibeAndReplaceStreamingResponse__Output>
+  GetActiveAppDeploymentForWorkspace: MethodDefinition<_exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest, _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse, _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceRequest__Output, _exa_language_server_pb_GetActiveAppDeploymentForWorkspaceResponse__Output>
+  GetAllCascadeTrajectories: MethodDefinition<_exa_language_server_pb_GetAllCascadeTrajectoriesRequest, _exa_language_server_pb_GetAllCascadeTrajectoriesResponse, _exa_language_server_pb_GetAllCascadeTrajectoriesRequest__Output, _exa_language_server_pb_GetAllCascadeTrajectoriesResponse__Output>
+  GetAllPlans: MethodDefinition<_exa_language_server_pb_GetAllPlansRequest, _exa_language_server_pb_GetAllPlansResponse, _exa_language_server_pb_GetAllPlansRequest__Output, _exa_language_server_pb_GetAllPlansResponse__Output>
+  GetAllRules: MethodDefinition<_exa_language_server_pb_GetAllRulesRequest, _exa_language_server_pb_GetAllRulesResponse, _exa_language_server_pb_GetAllRulesRequest__Output, _exa_language_server_pb_GetAllRulesResponse__Output>
+  GetAllSkills: MethodDefinition<_exa_language_server_pb_GetAllSkillsRequest, _exa_language_server_pb_GetAllSkillsResponse, _exa_language_server_pb_GetAllSkillsRequest__Output, _exa_language_server_pb_GetAllSkillsResponse__Output>
+  GetAllWorkflows: MethodDefinition<_exa_language_server_pb_GetAllWorkflowsRequest, _exa_language_server_pb_GetAllWorkflowsResponse, _exa_language_server_pb_GetAllWorkflowsRequest__Output, _exa_language_server_pb_GetAllWorkflowsResponse__Output>
+  GetAuthToken: MethodDefinition<_exa_language_server_pb_GetAuthTokenRequest, _exa_language_server_pb_GetAuthTokenResponse, _exa_language_server_pb_GetAuthTokenRequest__Output, _exa_language_server_pb_GetAuthTokenResponse__Output>
+  GetAvailableCascadePlugins: MethodDefinition<_exa_language_server_pb_GetAvailableCascadePluginsRequest, _exa_language_server_pb_GetAvailableCascadePluginsResponse, _exa_language_server_pb_GetAvailableCascadePluginsRequest__Output, _exa_language_server_pb_GetAvailableCascadePluginsResponse__Output>
+  GetBrainStatus: MethodDefinition<_exa_language_server_pb_GetBrainStatusRequest, _exa_language_server_pb_GetBrainStatusResponse, _exa_language_server_pb_GetBrainStatusRequest__Output, _exa_language_server_pb_GetBrainStatusResponse__Output>
+  GetCascadeMemories: MethodDefinition<_exa_language_server_pb_GetCascadeMemoriesRequest, _exa_language_server_pb_GetCascadeMemoriesResponse, _exa_language_server_pb_GetCascadeMemoriesRequest__Output, _exa_language_server_pb_GetCascadeMemoriesResponse__Output>
+  GetCascadeModelConfigs: MethodDefinition<_exa_language_server_pb_GetCascadeModelConfigsRequest, _exa_language_server_pb_GetCascadeModelConfigsResponse, _exa_language_server_pb_GetCascadeModelConfigsRequest__Output, _exa_language_server_pb_GetCascadeModelConfigsResponse__Output>
+  GetCascadePluginById: MethodDefinition<_exa_language_server_pb_GetCascadePluginByIdRequest, _exa_language_server_pb_GetCascadePluginByIdResponse, _exa_language_server_pb_GetCascadePluginByIdRequest__Output, _exa_language_server_pb_GetCascadePluginByIdResponse__Output>
+  GetCascadeTrajectory: MethodDefinition<_exa_language_server_pb_GetCascadeTrajectoryRequest, _exa_language_server_pb_GetCascadeTrajectoryResponse, _exa_language_server_pb_GetCascadeTrajectoryRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryResponse__Output>
+  GetCascadeTrajectoryGeneratorMetadata: MethodDefinition<_exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest, _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse, _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryGeneratorMetadataResponse__Output>
+  GetCascadeTrajectorySteps: MethodDefinition<_exa_language_server_pb_GetCascadeTrajectoryStepsRequest, _exa_language_server_pb_GetCascadeTrajectoryStepsResponse, _exa_language_server_pb_GetCascadeTrajectoryStepsRequest__Output, _exa_language_server_pb_GetCascadeTrajectoryStepsResponse__Output>
+  GetChangelog: MethodDefinition<_exa_language_server_pb_GetChangelogRequest, _exa_language_server_pb_GetChangelogResponse, _exa_language_server_pb_GetChangelogRequest__Output, _exa_language_server_pb_GetChangelogResponse__Output>
+  GetChatMessage: MethodDefinition<_exa_chat_pb_GetChatMessageRequest, _exa_language_server_pb_GetChatMessageResponse, _exa_chat_pb_GetChatMessageRequest__Output, _exa_language_server_pb_GetChatMessageResponse__Output>
+  GetClassInfos: MethodDefinition<_exa_language_server_pb_GetClassInfosRequest, _exa_language_server_pb_GetClassInfosResponse, _exa_language_server_pb_GetClassInfosRequest__Output, _exa_language_server_pb_GetClassInfosResponse__Output>
+  GetCodeMapSuggestions: MethodDefinition<_exa_language_server_pb_GetCodeMapSuggestionsRequest, _exa_language_server_pb_GetCodeMapSuggestionsResponse, _exa_language_server_pb_GetCodeMapSuggestionsRequest__Output, _exa_language_server_pb_GetCodeMapSuggestionsResponse__Output>
+  GetCodeMapsForFile: MethodDefinition<_exa_language_server_pb_GetCodeMapsForFileRequest, _exa_language_server_pb_GetCodeMapsForFileResponse, _exa_language_server_pb_GetCodeMapsForFileRequest__Output, _exa_language_server_pb_GetCodeMapsForFileResponse__Output>
+  GetCodeMapsForRepos: MethodDefinition<_exa_language_server_pb_GetCodeMapsForReposRequest, _exa_language_server_pb_GetCodeMapsForReposResponse, _exa_language_server_pb_GetCodeMapsForReposRequest__Output, _exa_language_server_pb_GetCodeMapsForReposResponse__Output>
+  GetCodeValidationStates: MethodDefinition<_exa_language_server_pb_GetCodeValidationStatesRequest, _exa_language_server_pb_GetCodeValidationStatesResponse, _exa_language_server_pb_GetCodeValidationStatesRequest__Output, _exa_language_server_pb_GetCodeValidationStatesResponse__Output>
+  GetCommandModelConfigs: MethodDefinition<_exa_language_server_pb_GetCommandModelConfigsRequest, _exa_language_server_pb_GetCommandModelConfigsResponse, _exa_language_server_pb_GetCommandModelConfigsRequest__Output, _exa_language_server_pb_GetCommandModelConfigsResponse__Output>
+  GetCompletions: MethodDefinition<_exa_language_server_pb_GetCompletionsRequest, _exa_language_server_pb_GetCompletionsResponse, _exa_language_server_pb_GetCompletionsRequest__Output, _exa_language_server_pb_GetCompletionsResponse__Output>
+  GetConversationTags: MethodDefinition<_exa_language_server_pb_GetConversationTagsRequest, _exa_language_server_pb_GetConversationTagsResponse, _exa_language_server_pb_GetConversationTagsRequest__Output, _exa_language_server_pb_GetConversationTagsResponse__Output>
+  GetDebugDiagnostics: MethodDefinition<_exa_language_server_pb_GetDebugDiagnosticsRequest, _exa_language_server_pb_GetDebugDiagnosticsResponse, _exa_language_server_pb_GetDebugDiagnosticsRequest__Output, _exa_language_server_pb_GetDebugDiagnosticsResponse__Output>
+  GetDeepWiki: MethodDefinition<_exa_chat_pb_GetDeepWikiRequest, _exa_language_server_pb_GetDeepWikiResponse, _exa_chat_pb_GetDeepWikiRequest__Output, _exa_language_server_pb_GetDeepWikiResponse__Output>
+  GetDefaultWebOrigins: MethodDefinition<_exa_language_server_pb_GetDefaultWebOriginsRequest, _exa_language_server_pb_GetDefaultWebOriginsResponse, _exa_language_server_pb_GetDefaultWebOriginsRequest__Output, _exa_language_server_pb_GetDefaultWebOriginsResponse__Output>
+  GetExternalModel: MethodDefinition<_exa_language_server_pb_GetExternalModelRequest, _exa_language_server_pb_GetExternalModelResponse, _exa_language_server_pb_GetExternalModelRequest__Output, _exa_language_server_pb_GetExternalModelResponse__Output>
+  GetFunctions: MethodDefinition<_exa_language_server_pb_GetFunctionsRequest, _exa_language_server_pb_GetFunctionsResponse, _exa_language_server_pb_GetFunctionsRequest__Output, _exa_language_server_pb_GetFunctionsResponse__Output>
+  GetGithubPullRequestSearchInfo: MethodDefinition<_exa_language_server_pb_GetGithubPullRequestSearchInfoRequest, _exa_language_server_pb_GetGithubPullRequestSearchInfoResponse, _exa_language_server_pb_GetGithubPullRequestSearchInfoRequest__Output, _exa_language_server_pb_GetGithubPullRequestSearchInfoResponse__Output>
+  GetKnowledgeBaseItemsForTeam: MethodDefinition<_exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest, _exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse, _exa_language_server_pb_GetKnowledgeBaseItemsForTeamRequest__Output, _exa_language_server_pb_GetKnowledgeBaseItemsForTeamResponse__Output>
+  GetLifeguardConfig: MethodDefinition<_exa_language_server_pb_GetLifeguardConfigRequest, _exa_language_server_pb_GetLifeguardConfigResponse, _exa_language_server_pb_GetLifeguardConfigRequest__Output, _exa_language_server_pb_GetLifeguardConfigResponse__Output>
+  GetMatchingCodeContext: MethodDefinition<_exa_language_server_pb_GetMatchingCodeContextRequest, _exa_language_server_pb_GetMatchingCodeContextResponse, _exa_language_server_pb_GetMatchingCodeContextRequest__Output, _exa_language_server_pb_GetMatchingCodeContextResponse__Output>
+  GetMatchingContextScopeItems: MethodDefinition<_exa_language_server_pb_GetMatchingContextScopeItemsRequest, _exa_language_server_pb_GetMatchingContextScopeItemsResponse, _exa_language_server_pb_GetMatchingContextScopeItemsRequest__Output, _exa_language_server_pb_GetMatchingContextScopeItemsResponse__Output>
+  GetMatchingIndexedRepos: MethodDefinition<_exa_language_server_pb_GetMatchingIndexedReposRequest, _exa_language_server_pb_GetMatchingIndexedReposResponse, _exa_language_server_pb_GetMatchingIndexedReposRequest__Output, _exa_language_server_pb_GetMatchingIndexedReposResponse__Output>
+  GetMcpPrompt: MethodDefinition<_exa_language_server_pb_GetMcpPromptRequest, _exa_language_server_pb_GetMcpPromptResponse, _exa_language_server_pb_GetMcpPromptRequest__Output, _exa_language_server_pb_GetMcpPromptResponse__Output>
+  GetMcpServerStates: MethodDefinition<_exa_language_server_pb_GetMcpServerStatesRequest, _exa_language_server_pb_GetMcpServerStatesResponse, _exa_language_server_pb_GetMcpServerStatesRequest__Output, _exa_language_server_pb_GetMcpServerStatesResponse__Output>
+  GetMessageTokenCount: MethodDefinition<_exa_language_server_pb_GetMessageTokenCountRequest, _exa_language_server_pb_GetMessageTokenCountResponse, _exa_language_server_pb_GetMessageTokenCountRequest__Output, _exa_language_server_pb_GetMessageTokenCountResponse__Output>
+  GetModelStatuses: MethodDefinition<_exa_language_server_pb_GetModelStatusesRequest, _exa_language_server_pb_GetModelStatusesResponse, _exa_language_server_pb_GetModelStatusesRequest__Output, _exa_language_server_pb_GetModelStatusesResponse__Output>
+  GetPatchAndCodeChange: MethodDefinition<_exa_language_server_pb_GetPatchAndCodeChangeRequest, _exa_language_server_pb_GetPatchAndCodeChangeResponse, _exa_language_server_pb_GetPatchAndCodeChangeRequest__Output, _exa_language_server_pb_GetPatchAndCodeChangeResponse__Output>
+  GetPrimaryApiKeyForDevsOnly: MethodDefinition<_exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest, _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse, _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyRequest__Output, _exa_language_server_pb_GetPrimaryApiKeyForDevsOnlyResponse__Output>
+  GetProcesses: MethodDefinition<_exa_language_server_pb_GetProcessesRequest, _exa_language_server_pb_GetProcessesResponse, _exa_language_server_pb_GetProcessesRequest__Output, _exa_language_server_pb_GetProcessesResponse__Output>
+  GetProfileData: MethodDefinition<_exa_language_server_pb_GetProfileDataRequest, _exa_language_server_pb_GetProfileDataResponse, _exa_language_server_pb_GetProfileDataRequest__Output, _exa_language_server_pb_GetProfileDataResponse__Output>
+  GetRepoInfos: MethodDefinition<_exa_language_server_pb_GetRepoInfosRequest, _exa_language_server_pb_GetRepoInfosResponse, _exa_language_server_pb_GetRepoInfosRequest__Output, _exa_language_server_pb_GetRepoInfosResponse__Output>
+  GetRevertPreview: MethodDefinition<_exa_language_server_pb_GetRevertPreviewRequest, _exa_language_server_pb_GetRevertPreviewResponse, _exa_language_server_pb_GetRevertPreviewRequest__Output, _exa_language_server_pb_GetRevertPreviewResponse__Output>
+  GetSharedCodeMap: MethodDefinition<_exa_language_server_pb_GetSharedCodeMapRequest, _exa_language_server_pb_GetSharedCodeMapResponse, _exa_language_server_pb_GetSharedCodeMapRequest__Output, _exa_language_server_pb_GetSharedCodeMapResponse__Output>
+  GetStatus: MethodDefinition<_exa_language_server_pb_GetStatusRequest, _exa_language_server_pb_GetStatusResponse, _exa_language_server_pb_GetStatusRequest__Output, _exa_language_server_pb_GetStatusResponse__Output>
+  GetSuggestedContextScopeItems: MethodDefinition<_exa_language_server_pb_GetSuggestedContextScopeItemsRequest, _exa_language_server_pb_GetSuggestedContextScopeItemsResponse, _exa_language_server_pb_GetSuggestedContextScopeItemsRequest__Output, _exa_language_server_pb_GetSuggestedContextScopeItemsResponse__Output>
+  GetSystemPromptAndTools: MethodDefinition<_exa_language_server_pb_GetSystemPromptAndToolsRequest, _exa_language_server_pb_GetSystemPromptAndToolsResponse, _exa_language_server_pb_GetSystemPromptAndToolsRequest__Output, _exa_language_server_pb_GetSystemPromptAndToolsResponse__Output>
+  GetTeamOrganizationalControls: MethodDefinition<_exa_language_server_pb_GetTeamOrganizationalControlsRequest, _exa_language_server_pb_GetTeamOrganizationalControlsResponse, _exa_language_server_pb_GetTeamOrganizationalControlsRequest__Output, _exa_language_server_pb_GetTeamOrganizationalControlsResponse__Output>
+  GetTranscription: MethodDefinition<_exa_language_server_pb_GetTranscriptionRequest, _exa_language_server_pb_GetTranscriptionResponse, _exa_language_server_pb_GetTranscriptionRequest__Output, _exa_language_server_pb_GetTranscriptionResponse__Output>
+  GetUnleashData: MethodDefinition<_exa_language_server_pb_GetUnleashDataRequest, _exa_language_server_pb_GetUnleashDataResponse, _exa_language_server_pb_GetUnleashDataRequest__Output, _exa_language_server_pb_GetUnleashDataResponse__Output>
+  GetUserMemories: MethodDefinition<_exa_language_server_pb_GetUserMemoriesRequest, _exa_language_server_pb_GetUserMemoriesResponse, _exa_language_server_pb_GetUserMemoriesRequest__Output, _exa_language_server_pb_GetUserMemoriesResponse__Output>
+  GetUserSettings: MethodDefinition<_exa_language_server_pb_GetUserSettingsRequest, _exa_language_server_pb_GetUserSettingsResponse, _exa_language_server_pb_GetUserSettingsRequest__Output, _exa_language_server_pb_GetUserSettingsResponse__Output>
+  GetUserStatus: MethodDefinition<_exa_language_server_pb_GetUserStatusRequest, _exa_language_server_pb_GetUserStatusResponse, _exa_language_server_pb_GetUserStatusRequest__Output, _exa_language_server_pb_GetUserStatusResponse__Output>
+  GetUserTrajectory: MethodDefinition<_exa_language_server_pb_GetUserTrajectoryRequest, _exa_language_server_pb_GetUserTrajectoryResponse, _exa_language_server_pb_GetUserTrajectoryRequest__Output, _exa_language_server_pb_GetUserTrajectoryResponse__Output>
+  GetUserTrajectoryDebug: MethodDefinition<_exa_language_server_pb_GetUserTrajectoryDebugRequest, _exa_language_server_pb_GetUserTrajectoryDebugResponse, _exa_language_server_pb_GetUserTrajectoryDebugRequest__Output, _exa_language_server_pb_GetUserTrajectoryDebugResponse__Output>
+  GetUserTrajectoryDescriptions: MethodDefinition<_exa_language_server_pb_GetUserTrajectoryDescriptionsRequest, _exa_language_server_pb_GetUserTrajectoryDescriptionsResponse, _exa_language_server_pb_GetUserTrajectoryDescriptionsRequest__Output, _exa_language_server_pb_GetUserTrajectoryDescriptionsResponse__Output>
+  GetWebDocsOptions: MethodDefinition<_exa_language_server_pb_GetWebDocsOptionsRequest, _exa_language_server_pb_GetWebDocsOptionsResponse, _exa_language_server_pb_GetWebDocsOptionsRequest__Output, _exa_language_server_pb_GetWebDocsOptionsResponse__Output>
+  GetWindsurfJSAppDeployment: MethodDefinition<_exa_language_server_pb_GetWindsurfJSAppDeploymentRequest, _exa_language_server_pb_GetWindsurfJSAppDeploymentResponse, _exa_language_server_pb_GetWindsurfJSAppDeploymentRequest__Output, _exa_language_server_pb_GetWindsurfJSAppDeploymentResponse__Output>
+  GetWorkspaceEditState: MethodDefinition<_exa_language_server_pb_GetWorkspaceEditStateRequest, _exa_language_server_pb_GetWorkspaceEditStateResponse, _exa_language_server_pb_GetWorkspaceEditStateRequest__Output, _exa_language_server_pb_GetWorkspaceEditStateResponse__Output>
+  GetWorkspaceInfos: MethodDefinition<_exa_language_server_pb_GetWorkspaceInfosRequest, _exa_language_server_pb_GetWorkspaceInfosResponse, _exa_language_server_pb_GetWorkspaceInfosRequest__Output, _exa_language_server_pb_GetWorkspaceInfosResponse__Output>
+  HandleCascadeUserInteraction: MethodDefinition<_exa_language_server_pb_HandleCascadeUserInteractionRequest, _exa_language_server_pb_HandleCascadeUserInteractionResponse, _exa_language_server_pb_HandleCascadeUserInteractionRequest__Output, _exa_language_server_pb_HandleCascadeUserInteractionResponse__Output>
+  HandleStreamingCommand: MethodDefinition<_exa_language_server_pb_HandleStreamingCommandRequest, _exa_language_server_pb_HandleStreamingCommandResponse, _exa_language_server_pb_HandleStreamingCommandRequest__Output, _exa_language_server_pb_HandleStreamingCommandResponse__Output>
+  HandleStreamingTab: MethodDefinition<_exa_language_server_pb_HandleStreamingTabRequest, _exa_language_server_pb_HandleStreamingTabResponse, _exa_language_server_pb_HandleStreamingTabRequest__Output, _exa_language_server_pb_HandleStreamingTabResponse__Output>
+  HandleStreamingTabV2: MethodDefinition<_exa_language_server_pb_HandleStreamingTabV2Request, _exa_language_server_pb_HandleStreamingTabV2Response, _exa_language_server_pb_HandleStreamingTabV2Request__Output, _exa_language_server_pb_HandleStreamingTabV2Response__Output>
+  HandleStreamingTerminalCommand: MethodDefinition<_exa_language_server_pb_HandleStreamingTerminalCommandRequest, _exa_language_server_pb_HandleStreamingTerminalCommandResponse, _exa_language_server_pb_HandleStreamingTerminalCommandRequest__Output, _exa_language_server_pb_HandleStreamingTerminalCommandResponse__Output>
+  Heartbeat: MethodDefinition<_exa_language_server_pb_HeartbeatRequest, _exa_language_server_pb_HeartbeatResponse, _exa_language_server_pb_HeartbeatRequest__Output, _exa_language_server_pb_HeartbeatResponse__Output>
+  ImportFromCursor: MethodDefinition<_exa_language_server_pb_ImportFromCursorRequest, _exa_language_server_pb_ImportFromCursorResponse, _exa_language_server_pb_ImportFromCursorRequest__Output, _exa_language_server_pb_ImportFromCursorResponse__Output>
+  InitializeCascadePanelState: MethodDefinition<_exa_language_server_pb_InitializeCascadePanelStateRequest, _exa_language_server_pb_InitializeCascadePanelStateResponse, _exa_language_server_pb_InitializeCascadePanelStateRequest__Output, _exa_language_server_pb_InitializeCascadePanelStateResponse__Output>
+  InstallCascadePlugin: MethodDefinition<_exa_language_server_pb_InstallCascadePluginRequest, _exa_language_server_pb_InstallCascadePluginResponse, _exa_language_server_pb_InstallCascadePluginRequest__Output, _exa_language_server_pb_InstallCascadePluginResponse__Output>
+  InterruptWithQueuedMessage: MethodDefinition<_exa_language_server_pb_InterruptWithQueuedMessageRequest, _exa_language_server_pb_InterruptWithQueuedMessageResponse, _exa_language_server_pb_InterruptWithQueuedMessageRequest__Output, _exa_language_server_pb_InterruptWithQueuedMessageResponse__Output>
+  LogCascadeSession: MethodDefinition<_exa_language_server_pb_LogCascadeSessionRequest, _exa_language_server_pb_LogCascadeSessionResponse, _exa_language_server_pb_LogCascadeSessionRequest__Output, _exa_language_server_pb_LogCascadeSessionResponse__Output>
+  MigrateApiKey: MethodDefinition<_exa_language_server_pb_MigrateApiKeyRequest, _exa_language_server_pb_MigrateApiKeyResponse, _exa_language_server_pb_MigrateApiKeyRequest__Output, _exa_language_server_pb_MigrateApiKeyResponse__Output>
+  MountCascadeFilesystem: MethodDefinition<_exa_language_server_pb_MountCascadeFilesystemRequest, _exa_language_server_pb_MountCascadeFilesystemResponse, _exa_language_server_pb_MountCascadeFilesystemRequest__Output, _exa_language_server_pb_MountCascadeFilesystemResponse__Output>
+  MoveQueuedMessage: MethodDefinition<_exa_language_server_pb_MoveQueuedMessageRequest, _exa_language_server_pb_MoveQueuedMessageResponse, _exa_language_server_pb_MoveQueuedMessageRequest__Output, _exa_language_server_pb_MoveQueuedMessageResponse__Output>
+  OnEdit: MethodDefinition<_exa_language_server_pb_OnEditRequest, _exa_language_server_pb_OnEditResponse, _exa_language_server_pb_OnEditRequest__Output, _exa_language_server_pb_OnEditResponse__Output>
+  ProgressBars: MethodDefinition<_exa_language_server_pb_ProgressBarsRequest, _exa_language_server_pb_ProgressBarsResponse, _exa_language_server_pb_ProgressBarsRequest__Output, _exa_language_server_pb_ProgressBarsResponse__Output>
+  ProvideCompletionFeedback: MethodDefinition<_exa_language_server_pb_ProvideCompletionFeedbackRequest, _exa_language_server_pb_ProvideCompletionFeedbackResponse, _exa_language_server_pb_ProvideCompletionFeedbackRequest__Output, _exa_language_server_pb_ProvideCompletionFeedbackResponse__Output>
+  QueueCascadeMessage: MethodDefinition<_exa_language_server_pb_QueueCascadeMessageRequest, _exa_language_server_pb_QueueCascadeMessageResponse, _exa_language_server_pb_QueueCascadeMessageRequest__Output, _exa_language_server_pb_QueueCascadeMessageResponse__Output>
+  RawGetChatMessage: MethodDefinition<_exa_chat_pb_RawGetChatMessageRequest, _exa_language_server_pb_RawGetChatMessageResponse, _exa_chat_pb_RawGetChatMessageRequest__Output, _exa_language_server_pb_RawGetChatMessageResponse__Output>
+  RecordChatFeedback: MethodDefinition<_exa_language_server_pb_RecordChatFeedbackRequest, _exa_language_server_pb_RecordChatFeedbackResponse, _exa_language_server_pb_RecordChatFeedbackRequest__Output, _exa_language_server_pb_RecordChatFeedbackResponse__Output>
+  RecordChatPanelSession: MethodDefinition<_exa_language_server_pb_RecordChatPanelSessionRequest, _exa_language_server_pb_RecordChatPanelSessionResponse, _exa_language_server_pb_RecordChatPanelSessionRequest__Output, _exa_language_server_pb_RecordChatPanelSessionResponse__Output>
+  RecordCommitMessageSave: MethodDefinition<_exa_language_server_pb_RecordCommitMessageSaveRequest, _exa_language_server_pb_RecordCommitMessageSaveResponse, _exa_language_server_pb_RecordCommitMessageSaveRequest__Output, _exa_language_server_pb_RecordCommitMessageSaveResponse__Output>
+  RecordEvent: MethodDefinition<_exa_language_server_pb_RecordEventRequest, _exa_language_server_pb_RecordEventResponse, _exa_language_server_pb_RecordEventRequest__Output, _exa_language_server_pb_RecordEventResponse__Output>
+  RecordLints: MethodDefinition<_exa_language_server_pb_RecordLintsRequest, _exa_language_server_pb_RecordLintsResponse, _exa_language_server_pb_RecordLintsRequest__Output, _exa_language_server_pb_RecordLintsResponse__Output>
+  RecordSearchDocOpen: MethodDefinition<_exa_language_server_pb_RecordSearchDocOpenRequest, _exa_language_server_pb_RecordSearchDocOpenResponse, _exa_language_server_pb_RecordSearchDocOpenRequest__Output, _exa_language_server_pb_RecordSearchDocOpenResponse__Output>
+  RecordSearchResultsView: MethodDefinition<_exa_language_server_pb_RecordSearchResultsViewRequest, _exa_language_server_pb_RecordSearchResultsViewResponse, _exa_language_server_pb_RecordSearchResultsViewRequest__Output, _exa_language_server_pb_RecordSearchResultsViewResponse__Output>
+  RecordSystemMetrics: MethodDefinition<_exa_language_server_pb_RecordSystemMetricsRequest, _exa_language_server_pb_RecordSystemMetricsResponse, _exa_language_server_pb_RecordSystemMetricsRequest__Output, _exa_language_server_pb_RecordSystemMetricsResponse__Output>
+  RecordUserGrep: MethodDefinition<_exa_language_server_pb_RecordUserGrepRequest, _exa_language_server_pb_RecordUserGrepResponse, _exa_language_server_pb_RecordUserGrepRequest__Output, _exa_language_server_pb_RecordUserGrepResponse__Output>
+  RecordUserStepSnapshot: MethodDefinition<_exa_language_server_pb_RecordUserStepSnapshotRequest, _exa_language_server_pb_RecordUserStepSnapshotResponse, _exa_language_server_pb_RecordUserStepSnapshotRequest__Output, _exa_language_server_pb_RecordUserStepSnapshotResponse__Output>
+  RefreshContextForIdeAction: MethodDefinition<_exa_language_server_pb_RefreshContextForIdeActionRequest, _exa_language_server_pb_RefreshContextForIdeActionResponse, _exa_language_server_pb_RefreshContextForIdeActionRequest__Output, _exa_language_server_pb_RefreshContextForIdeActionResponse__Output>
+  RefreshCustomization: MethodDefinition<_exa_language_server_pb_RefreshCustomizationRequest, _exa_language_server_pb_RefreshCustomizationResponse, _exa_language_server_pb_RefreshCustomizationRequest__Output, _exa_language_server_pb_RefreshCustomizationResponse__Output>
+  RefreshMcpServers: MethodDefinition<_exa_language_server_pb_RefreshMcpServersRequest, _exa_language_server_pb_RefreshMcpServersResponse, _exa_language_server_pb_RefreshMcpServersRequest__Output, _exa_language_server_pb_RefreshMcpServersResponse__Output>
+  RemoveFromQueue: MethodDefinition<_exa_language_server_pb_RemoveFromQueueRequest, _exa_language_server_pb_RemoveFromQueueResponse, _exa_language_server_pb_RemoveFromQueueRequest__Output, _exa_language_server_pb_RemoveFromQueueResponse__Output>
+  RemoveTrackedWorkspace: MethodDefinition<_exa_language_server_pb_RemoveTrackedWorkspaceRequest, _exa_language_server_pb_RemoveTrackedWorkspaceResponse, _exa_language_server_pb_RemoveTrackedWorkspaceRequest__Output, _exa_language_server_pb_RemoveTrackedWorkspaceResponse__Output>
+  RenameCascadeTrajectory: MethodDefinition<_exa_language_server_pb_RenameCascadeTrajectoryRequest, _exa_language_server_pb_RenameCascadeTrajectoryResponse, _exa_language_server_pb_RenameCascadeTrajectoryRequest__Output, _exa_language_server_pb_RenameCascadeTrajectoryResponse__Output>
+  ReplayGroundTruthTrajectory: MethodDefinition<_exa_language_server_pb_ReplayGroundTruthTrajectoryRequest, _exa_language_server_pb_ReplayGroundTruthTrajectoryResponse, _exa_language_server_pb_ReplayGroundTruthTrajectoryRequest__Output, _exa_language_server_pb_ReplayGroundTruthTrajectoryResponse__Output>
+  ResetOnboarding: MethodDefinition<_exa_language_server_pb_ResetOnboardingRequest, _exa_language_server_pb_ResetOnboardingResponse, _exa_language_server_pb_ResetOnboardingRequest__Output, _exa_language_server_pb_ResetOnboardingResponse__Output>
+  ResolveOutstandingSteps: MethodDefinition<_exa_language_server_pb_ResolveOutstandingStepsRequest, _exa_language_server_pb_ResolveOutstandingStepsResponse, _exa_language_server_pb_ResolveOutstandingStepsRequest__Output, _exa_language_server_pb_ResolveOutstandingStepsResponse__Output>
+  ResolveWorktreeChanges: MethodDefinition<_exa_language_server_pb_ResolveWorktreeChangesRequest, _exa_language_server_pb_ResolveWorktreeChangesResponse, _exa_language_server_pb_ResolveWorktreeChangesRequest__Output, _exa_language_server_pb_ResolveWorktreeChangesResponse__Output>
+  RevertToCascadeStep: MethodDefinition<_exa_language_server_pb_RevertToCascadeStepRequest, _exa_language_server_pb_RevertToCascadeStepResponse, _exa_language_server_pb_RevertToCascadeStepRequest__Output, _exa_language_server_pb_RevertToCascadeStepResponse__Output>
+  SaveCodeMapFromJson: MethodDefinition<_exa_language_server_pb_SaveCodeMapFromJsonRequest, _exa_language_server_pb_SaveCodeMapFromJsonResponse, _exa_language_server_pb_SaveCodeMapFromJsonRequest__Output, _exa_language_server_pb_SaveCodeMapFromJsonResponse__Output>
+  SaveMcpServerToConfigFile: MethodDefinition<_exa_language_server_pb_SaveMcpServerToConfigFileRequest, _exa_language_server_pb_SaveMcpServerToConfigFileResponse, _exa_language_server_pb_SaveMcpServerToConfigFileRequest__Output, _exa_language_server_pb_SaveMcpServerToConfigFileResponse__Output>
+  SaveWindsurfJSAppProjectName: MethodDefinition<_exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest, _exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse, _exa_language_server_pb_SaveWindsurfJSAppProjectNameRequest__Output, _exa_language_server_pb_SaveWindsurfJSAppProjectNameResponse__Output>
+  SendActionToChatPanel: MethodDefinition<_exa_language_server_pb_SendActionToChatPanelRequest, _exa_language_server_pb_SendActionToChatPanelResponse, _exa_language_server_pb_SendActionToChatPanelRequest__Output, _exa_language_server_pb_SendActionToChatPanelResponse__Output>
+  SendUserCascadeMessage: MethodDefinition<_exa_language_server_pb_SendUserCascadeMessageRequest, _exa_language_server_pb_SendUserCascadeMessageResponse, _exa_language_server_pb_SendUserCascadeMessageRequest__Output, _exa_language_server_pb_SendUserCascadeMessageResponse__Output>
+  SetBaseExperiments: MethodDefinition<_exa_language_server_pb_SetBaseExperimentsRequest, _exa_language_server_pb_SetBaseExperimentsResponse, _exa_language_server_pb_SetBaseExperimentsRequest__Output, _exa_language_server_pb_SetBaseExperimentsResponse__Output>
+  SetPinnedContext: MethodDefinition<_exa_language_server_pb_SetPinnedContextRequest, _exa_language_server_pb_SetPinnedContextResponse, _exa_language_server_pb_SetPinnedContextRequest__Output, _exa_language_server_pb_SetPinnedContextResponse__Output>
+  SetPinnedGuideline: MethodDefinition<_exa_language_server_pb_SetPinnedGuidelineRequest, _exa_language_server_pb_SetPinnedGuidelineResponse, _exa_language_server_pb_SetPinnedGuidelineRequest__Output, _exa_language_server_pb_SetPinnedGuidelineResponse__Output>
+  SetUserSettings: MethodDefinition<_exa_language_server_pb_SetUserSettingsRequest, _exa_language_server_pb_SetUserSettingsResponse, _exa_language_server_pb_SetUserSettingsRequest__Output, _exa_language_server_pb_SetUserSettingsResponse__Output>
+  SetupUniversitySandbox: MethodDefinition<_exa_language_server_pb_SetupUniversitySandboxRequest, _exa_language_server_pb_SetupUniversitySandboxResponse, _exa_language_server_pb_SetupUniversitySandboxRequest__Output, _exa_language_server_pb_SetupUniversitySandboxResponse__Output>
+  ShareCodeMap: MethodDefinition<_exa_language_server_pb_ShareCodeMapRequest, _exa_language_server_pb_ShareCodeMapResponse, _exa_language_server_pb_ShareCodeMapRequest__Output, _exa_language_server_pb_ShareCodeMapResponse__Output>
+  ShouldEnableUnleash: MethodDefinition<_exa_language_server_pb_ShouldEnableUnleashRequest, _exa_language_server_pb_ShouldEnableUnleashResponse, _exa_language_server_pb_ShouldEnableUnleashRequest__Output, _exa_language_server_pb_ShouldEnableUnleashResponse__Output>
+  SkipOnboarding: MethodDefinition<_exa_language_server_pb_SkipOnboardingRequest, _exa_language_server_pb_SkipOnboardingResponse, _exa_language_server_pb_SkipOnboardingRequest__Output, _exa_language_server_pb_SkipOnboardingResponse__Output>
+  SpawnArenaModeMidConversation: MethodDefinition<_exa_language_server_pb_SpawnArenaModeMidConversationRequest, _exa_language_server_pb_SpawnArenaModeMidConversationResponse, _exa_language_server_pb_SpawnArenaModeMidConversationRequest__Output, _exa_language_server_pb_SpawnArenaModeMidConversationResponse__Output>
+  StartCascade: MethodDefinition<_exa_language_server_pb_StartCascadeRequest, _exa_language_server_pb_StartCascadeResponse, _exa_language_server_pb_StartCascadeRequest__Output, _exa_language_server_pb_StartCascadeResponse__Output>
+  StatUri: MethodDefinition<_exa_language_server_pb_StatUriRequest, _exa_language_server_pb_StatUriResponse, _exa_language_server_pb_StatUriRequest__Output, _exa_language_server_pb_StatUriResponse__Output>
+  StreamCascadePanelReactiveUpdates: MethodDefinition<_exa_reactive_component_pb_StreamReactiveUpdatesRequest, _exa_reactive_component_pb_StreamReactiveUpdatesResponse, _exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>
+  StreamCascadeReactiveUpdates: MethodDefinition<_exa_reactive_component_pb_StreamReactiveUpdatesRequest, _exa_reactive_component_pb_StreamReactiveUpdatesResponse, _exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>
+  StreamCascadeSummariesReactiveUpdates: MethodDefinition<_exa_reactive_component_pb_StreamReactiveUpdatesRequest, _exa_reactive_component_pb_StreamReactiveUpdatesResponse, _exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>
+  StreamTerminalShellCommand: MethodDefinition<_exa_codeium_common_pb_TerminalShellCommandStreamChunk, _exa_language_server_pb_StreamTerminalShellCommandResponse, _exa_codeium_common_pb_TerminalShellCommandStreamChunk__Output, _exa_language_server_pb_StreamTerminalShellCommandResponse__Output>
+  StreamUserTrajectoryReactiveUpdates: MethodDefinition<_exa_reactive_component_pb_StreamReactiveUpdatesRequest, _exa_reactive_component_pb_StreamReactiveUpdatesResponse, _exa_reactive_component_pb_StreamReactiveUpdatesRequest__Output, _exa_reactive_component_pb_StreamReactiveUpdatesResponse__Output>
+  SubmitBugReport: MethodDefinition<_exa_language_server_pb_SubmitBugReportRequest, _exa_language_server_pb_SubmitBugReportResponse, _exa_language_server_pb_SubmitBugReportRequest__Output, _exa_language_server_pb_SubmitBugReportResponse__Output>
+  SyncExploreAgentRun: MethodDefinition<_exa_language_server_pb_SyncExploreAgentRunRequest, _exa_language_server_pb_SyncExploreAgentRunResponse, _exa_language_server_pb_SyncExploreAgentRunRequest__Output, _exa_language_server_pb_SyncExploreAgentRunResponse__Output>
+  ToggleMcpTool: MethodDefinition<_exa_language_server_pb_ToggleMcpToolRequest, _exa_language_server_pb_ToggleMcpToolResponse, _exa_language_server_pb_ToggleMcpToolRequest__Output, _exa_language_server_pb_ToggleMcpToolResponse__Output>
+  UnmountCascadeFilesystem: MethodDefinition<_exa_language_server_pb_UnmountCascadeFilesystemRequest, _exa_language_server_pb_UnmountCascadeFilesystemResponse, _exa_language_server_pb_UnmountCascadeFilesystemRequest__Output, _exa_language_server_pb_UnmountCascadeFilesystemResponse__Output>
+  UpdateAutoCascadeGithubCredentials: MethodDefinition<_exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest, _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse, _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsRequest__Output, _exa_language_server_pb_UpdateAutoCascadeGithubCredentialsResponse__Output>
+  UpdateCascadeMemory: MethodDefinition<_exa_language_server_pb_UpdateCascadeMemoryRequest, _exa_language_server_pb_UpdateCascadeMemoryResponse, _exa_language_server_pb_UpdateCascadeMemoryRequest__Output, _exa_language_server_pb_UpdateCascadeMemoryResponse__Output>
+  UpdateCodeMapMetadata: MethodDefinition<_exa_language_server_pb_UpdateCodeMapMetadataRequest, _exa_language_server_pb_UpdateCodeMapMetadataResponse, _exa_language_server_pb_UpdateCodeMapMetadataRequest__Output, _exa_language_server_pb_UpdateCodeMapMetadataResponse__Output>
+  UpdateConversationTags: MethodDefinition<_exa_language_server_pb_UpdateConversationTagsRequest, _exa_language_server_pb_UpdateConversationTagsResponse, _exa_language_server_pb_UpdateConversationTagsRequest__Output, _exa_language_server_pb_UpdateConversationTagsResponse__Output>
+  UpdateDevExperiments: MethodDefinition<_exa_language_server_pb_UpdateDevExperimentsRequest, _exa_language_server_pb_UpdateDevExperimentsResponse, _exa_language_server_pb_UpdateDevExperimentsRequest__Output, _exa_language_server_pb_UpdateDevExperimentsResponse__Output>
+  UpdateEnterpriseExperimentsFromUrl: MethodDefinition<_exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest, _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse, _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlRequest__Output, _exa_language_server_pb_UpdateEnterpriseExperimentsFromUrlResponse__Output>
+  UpdateMcpServerInConfigFile: MethodDefinition<_exa_language_server_pb_UpdateMcpServerInConfigFileRequest, _exa_language_server_pb_UpdateMcpServerInConfigFileResponse, _exa_language_server_pb_UpdateMcpServerInConfigFileRequest__Output, _exa_language_server_pb_UpdateMcpServerInConfigFileResponse__Output>
+  UpdatePanelStateWithUserStatus: MethodDefinition<_exa_language_server_pb_UpdatePanelStateWithUserStatusRequest, _exa_language_server_pb_UpdatePanelStateWithUserStatusResponse, _exa_language_server_pb_UpdatePanelStateWithUserStatusRequest__Output, _exa_language_server_pb_UpdatePanelStateWithUserStatusResponse__Output>
+  UpdateWorkspaceTrust: MethodDefinition<_exa_language_server_pb_UpdateWorkspaceTrustRequest, _exa_language_server_pb_UpdateWorkspaceTrustResponse, _exa_language_server_pb_UpdateWorkspaceTrustRequest__Output, _exa_language_server_pb_UpdateWorkspaceTrustResponse__Output>
+  UploadRecentCommands: MethodDefinition<_exa_language_server_pb_UploadRecentCommandsRequest, _exa_language_server_pb_UploadRecentCommandsResponse, _exa_language_server_pb_UploadRecentCommandsRequest__Output, _exa_language_server_pb_UploadRecentCommandsResponse__Output>
+  ValidateWindsurfJSAppProjectName: MethodDefinition<_exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest, _exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse, _exa_language_server_pb_ValidateWindsurfJSAppProjectNameRequest__Output, _exa_language_server_pb_ValidateWindsurfJSAppProjectNameResponse__Output>
+  WellSupportedLanguages: MethodDefinition<_exa_language_server_pb_WellSupportedLanguagesRequest, _exa_language_server_pb_WellSupportedLanguagesResponse, _exa_language_server_pb_WellSupportedLanguagesRequest__Output, _exa_language_server_pb_WellSupportedLanguagesResponse__Output>
+}

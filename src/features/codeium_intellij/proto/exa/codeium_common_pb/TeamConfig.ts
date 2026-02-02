@@ -1,0 +1,93 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+import type { McpServerConfig as _exa_codeium_common_pb_McpServerConfig, McpServerConfig__Output as _exa_codeium_common_pb_McpServerConfig__Output } from '../../exa/codeium_common_pb/McpServerConfig';
+import type { CustomProviderSettings as _exa_codeium_common_pb_CustomProviderSettings, CustomProviderSettings__Output as _exa_codeium_common_pb_CustomProviderSettings__Output } from '../../exa/codeium_common_pb/CustomProviderSettings';
+import type { CascadeCommandsAutoExecution as _exa_codeium_common_pb_CascadeCommandsAutoExecution, CascadeCommandsAutoExecution__Output as _exa_codeium_common_pb_CascadeCommandsAutoExecution__Output } from '../../exa/codeium_common_pb/CascadeCommandsAutoExecution';
+
+export interface TeamConfig {
+  'teamId'?: (string);
+  'userPromptCreditCap'?: (number);
+  'userFlowCreditCap'?: (number);
+  'autoProvisionCascadeSeat'?: (boolean);
+  'allowMcpServers'?: (boolean);
+  'allowAutoRunCommands'?: (boolean);
+  'allowCustomRecipes'?: (boolean);
+  'maxUnclaimedSites'?: (number);
+  'allowAppDeployments'?: (boolean);
+  'maxNewSitesPerDay'?: (number);
+  'allowGithubReviews'?: (boolean);
+  'allowGithubDescriptionEdits'?: (boolean);
+  'pullRequestReviewGuidelines'?: (string);
+  'disableToolCalls'?: (boolean);
+  'pullRequestDescriptionGuidelines'?: (string);
+  'allowIndividualLevelAnalytics'?: (boolean);
+  'allowConversationSharing'?: (boolean);
+  'allowSandboxAppDeployments'?: (boolean);
+  'allowTeamsAppDeployments'?: (boolean);
+  'pullRequestReviewRateLimit'?: (number);
+  'allowAttribution'?: (boolean);
+  'allowedMcpServers'?: (_exa_codeium_common_pb_McpServerConfig)[];
+  'allowGithubAutoReviews'?: (boolean);
+  'allowBrowserExperimentalFeatures'?: (boolean);
+  'disableToolCallExecutionOutsideWorkspace'?: (boolean);
+  'allowVibeAndReplace'?: (boolean);
+  'disableDeepwiki'?: (boolean);
+  'customProviderSettings'?: (_exa_codeium_common_pb_CustomProviderSettings | null);
+  'userAddOnCreditCap'?: (number);
+  'disableCodemaps'?: (boolean);
+  'allowCodemapSharing'?: (string);
+  'disableFastContext'?: (boolean);
+  'disableLifeguard'?: (boolean);
+  'allowedIpRanges'?: (string)[];
+  'maxCascadeAutoExecutionLevel'?: (_exa_codeium_common_pb_CascadeCommandsAutoExecution);
+  'cascadeWebSearchEnabled'?: (boolean);
+  'terminalAllowList'?: (string)[];
+  'terminalDenyList'?: (string)[];
+  '_allowConversationSharing'?: "allowConversationSharing";
+  '_pullRequestReviewRateLimit'?: "pullRequestReviewRateLimit";
+  '_cascadeWebSearchEnabled'?: "cascadeWebSearchEnabled";
+}
+
+export interface TeamConfig__Output {
+  'teamId': (string);
+  'userPromptCreditCap': (number);
+  'userFlowCreditCap': (number);
+  'autoProvisionCascadeSeat': (boolean);
+  'allowMcpServers': (boolean);
+  'allowAutoRunCommands': (boolean);
+  'allowCustomRecipes': (boolean);
+  'maxUnclaimedSites': (number);
+  'allowAppDeployments': (boolean);
+  'maxNewSitesPerDay': (number);
+  'allowGithubReviews': (boolean);
+  'allowGithubDescriptionEdits': (boolean);
+  'pullRequestReviewGuidelines': (string);
+  'disableToolCalls': (boolean);
+  'pullRequestDescriptionGuidelines': (string);
+  'allowIndividualLevelAnalytics': (boolean);
+  'allowConversationSharing'?: (boolean);
+  'allowSandboxAppDeployments': (boolean);
+  'allowTeamsAppDeployments': (boolean);
+  'pullRequestReviewRateLimit'?: (number);
+  'allowAttribution': (boolean);
+  'allowedMcpServers': (_exa_codeium_common_pb_McpServerConfig__Output)[];
+  'allowGithubAutoReviews': (boolean);
+  'allowBrowserExperimentalFeatures': (boolean);
+  'disableToolCallExecutionOutsideWorkspace': (boolean);
+  'allowVibeAndReplace': (boolean);
+  'disableDeepwiki': (boolean);
+  'customProviderSettings': (_exa_codeium_common_pb_CustomProviderSettings__Output | null);
+  'userAddOnCreditCap': (number);
+  'disableCodemaps': (boolean);
+  'allowCodemapSharing': (string);
+  'disableFastContext': (boolean);
+  'disableLifeguard': (boolean);
+  'allowedIpRanges': (string)[];
+  'maxCascadeAutoExecutionLevel': (_exa_codeium_common_pb_CascadeCommandsAutoExecution__Output);
+  'cascadeWebSearchEnabled'?: (boolean);
+  'terminalAllowList': (string)[];
+  'terminalDenyList': (string)[];
+  '_allowConversationSharing'?: "allowConversationSharing";
+  '_pullRequestReviewRateLimit'?: "pullRequestReviewRateLimit";
+  '_cascadeWebSearchEnabled'?: "cascadeWebSearchEnabled";
+}

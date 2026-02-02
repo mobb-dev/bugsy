@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.1.45",
+  "version": "1.2.0",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.mjs",
@@ -53,6 +53,8 @@
   "dependencies": {
     "@gitbeaker/requester-utils": "43.8.0",
     "@gitbeaker/rest": "43.8.0",
+    "@grpc/grpc-js": "1.14.3",
+    "@grpc/proto-loader": "0.8.0",
     "@modelcontextprotocol/sdk": "1.25.2",
     "@octokit/core": "5.2.0",
     "@octokit/request-error": "5.1.1",
@@ -146,6 +148,7 @@
     "bin/cli.mjs",
     "dist",
     ".env",
-    "src/post_install"
+    "src/post_install",
+    "src/features/codeium_intellij/proto/**/*.proto"
   ]
 }

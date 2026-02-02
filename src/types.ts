@@ -8,6 +8,7 @@ export const mobbCliCommand = {
   uploadAiBlame: 'upload-ai-blame',
   claudeCodeInstallHook: 'claude-code-install-hook',
   claudeCodeProcessHook: 'claude-code-process-hook',
+  windsurfIntellijMonitor: 'windsurf-intellij-monitor',
 } as const
 
 type MobbCliCommandType = typeof mobbCliCommand

@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package exa.diff_action_pb;
+
+import "exa/codeium_common_pb/codeium_common.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/diff_action_pb";
+
+message UnifiedDiff {
+    repeated UnifiedDiffLine lines = 3;
+    message UnifiedDiffLine {
+        string text = 1;
+        UnifiedDiffLineType type = 2;
+    }
+}
+
+message DiffBlock {
+    int32 start_line = 1;
+    int32 end_line = 2;
+    UnifiedDiff unified_diff = 3;
+    codeium_common_pb.Language from_language = 4;
+    codeium_common_pb.Language to_language = 5;
+}
+
+message CharacterDiffChange {
+    string text = 1;
+    DiffChangeType type = 2;
+}
+
+message CharacterDiff {
+    repeated CharacterDiffChange changes = 1;
+}
+
+message ComboDiffLine {
+    string text = 1;
+    DiffChangeType type = 2;
+    CharacterDiff character_diff = 3;
+}
+
+message ComboDiff {
+    repeated ComboDiffLine lines = 1;
+}
+
+message DiffSet {
+    UnifiedDiff unified_diff = 1;
+    CharacterDiff character_diff = 2;
+    ComboDiff combo_diff = 3;
+}
+
+message DiffList {
+    repeated DiffBlock diffs = 2;
+}
+
+enum UnifiedDiffLineType {
+    UNIFIED_DIFF_LINE_TYPE_UNSPECIFIED = 0;
+    UNIFIED_DIFF_LINE_TYPE_INSERT = 1;
+    UNIFIED_DIFF_LINE_TYPE_DELETE = 2;
+    UNIFIED_DIFF_LINE_TYPE_UNCHANGED = 3;
+}
+
+enum DiffChangeType {
+    DIFF_CHANGE_TYPE_UNSPECIFIED = 0;
+    DIFF_CHANGE_TYPE_INSERT = 1;
+    DIFF_CHANGE_TYPE_DELETE = 2;
+    DIFF_CHANGE_TYPE_UNCHANGED = 3;
+}
+
+enum DiffType {
+    DIFF_TYPE_UNSPECIFIED = 0;
+    DIFF_TYPE_UNIFIED = 1;
+    DIFF_TYPE_CHARACTER = 2;
+    DIFF_TYPE_COMBO = 3;
+}

@@ -1,0 +1,23 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const ValidationStatus = {
+  VALIDATION_STATUS_UNSPECIFIED: 'VALIDATION_STATUS_UNSPECIFIED',
+  VALIDATION_STATUS_AVAILABLE: 'VALIDATION_STATUS_AVAILABLE',
+  VALIDATION_STATUS_IN_USE: 'VALIDATION_STATUS_IN_USE',
+  VALIDATION_STATUS_TAKEN: 'VALIDATION_STATUS_TAKEN',
+  VALIDATION_STATUS_INVALID: 'VALIDATION_STATUS_INVALID',
+} as const;
+
+export type ValidationStatus =
+  | 'VALIDATION_STATUS_UNSPECIFIED'
+  | 0
+  | 'VALIDATION_STATUS_AVAILABLE'
+  | 1
+  | 'VALIDATION_STATUS_IN_USE'
+  | 2
+  | 'VALIDATION_STATUS_TAKEN'
+  | 3
+  | 'VALIDATION_STATUS_INVALID'
+  | 4
+
+export type ValidationStatus__Output = typeof ValidationStatus[keyof typeof ValidationStatus]

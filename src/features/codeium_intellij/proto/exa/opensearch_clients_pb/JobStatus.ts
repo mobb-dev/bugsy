@@ -1,0 +1,32 @@
+// Original file: exa/opensearch_clients_pb/opensearch_clients.proto
+
+export const JobStatus = {
+  JOB_STATUS_UNSPECIFIED: 'JOB_STATUS_UNSPECIFIED',
+  JOB_STATUS_QUEUED: 'JOB_STATUS_QUEUED',
+  JOB_STATUS_RUNNING: 'JOB_STATUS_RUNNING',
+  JOB_STATUS_COMPLETED: 'JOB_STATUS_COMPLETED',
+  JOB_STATUS_CANCELLED: 'JOB_STATUS_CANCELLED',
+  JOB_STATUS_CANCELLING: 'JOB_STATUS_CANCELLING',
+  JOB_STATUS_ERRORED: 'JOB_STATUS_ERRORED',
+  JOB_STATUS_RETRYABLE: 'JOB_STATUS_RETRYABLE',
+} as const;
+
+export type JobStatus =
+  | 'JOB_STATUS_UNSPECIFIED'
+  | 0
+  | 'JOB_STATUS_QUEUED'
+  | 1
+  | 'JOB_STATUS_RUNNING'
+  | 2
+  | 'JOB_STATUS_COMPLETED'
+  | 3
+  | 'JOB_STATUS_CANCELLED'
+  | 4
+  | 'JOB_STATUS_CANCELLING'
+  | 5
+  | 'JOB_STATUS_ERRORED'
+  | 6
+  | 'JOB_STATUS_RETRYABLE'
+  | 7
+
+export type JobStatus__Output = typeof JobStatus[keyof typeof JobStatus]

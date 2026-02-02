@@ -1,0 +1,17 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const BrowserExperimentalFeaturesConfig = {
+  BROWSER_EXPERIMENTAL_FEATURES_CONFIG_UNSPECIFIED: 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_UNSPECIFIED',
+  BROWSER_EXPERIMENTAL_FEATURES_CONFIG_ENABLED: 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_ENABLED',
+  BROWSER_EXPERIMENTAL_FEATURES_CONFIG_DISABLED: 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_DISABLED',
+} as const;
+
+export type BrowserExperimentalFeaturesConfig =
+  | 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_UNSPECIFIED'
+  | 0
+  | 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_ENABLED'
+  | 1
+  | 'BROWSER_EXPERIMENTAL_FEATURES_CONFIG_DISABLED'
+  | 2
+
+export type BrowserExperimentalFeaturesConfig__Output = typeof BrowserExperimentalFeaturesConfig[keyof typeof BrowserExperimentalFeaturesConfig]

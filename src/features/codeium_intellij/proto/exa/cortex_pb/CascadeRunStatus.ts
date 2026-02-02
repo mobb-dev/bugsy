@@ -1,0 +1,23 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const CascadeRunStatus = {
+  CASCADE_RUN_STATUS_UNSPECIFIED: 'CASCADE_RUN_STATUS_UNSPECIFIED',
+  CASCADE_RUN_STATUS_IDLE: 'CASCADE_RUN_STATUS_IDLE',
+  CASCADE_RUN_STATUS_RUNNING: 'CASCADE_RUN_STATUS_RUNNING',
+  CASCADE_RUN_STATUS_CANCELING: 'CASCADE_RUN_STATUS_CANCELING',
+  CASCADE_RUN_STATUS_BUSY: 'CASCADE_RUN_STATUS_BUSY',
+} as const;
+
+export type CascadeRunStatus =
+  | 'CASCADE_RUN_STATUS_UNSPECIFIED'
+  | 0
+  | 'CASCADE_RUN_STATUS_IDLE'
+  | 1
+  | 'CASCADE_RUN_STATUS_RUNNING'
+  | 2
+  | 'CASCADE_RUN_STATUS_CANCELING'
+  | 3
+  | 'CASCADE_RUN_STATUS_BUSY'
+  | 4
+
+export type CascadeRunStatus__Output = typeof CascadeRunStatus[keyof typeof CascadeRunStatus]

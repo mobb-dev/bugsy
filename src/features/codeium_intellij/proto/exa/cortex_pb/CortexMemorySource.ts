@@ -1,0 +1,20 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const CortexMemorySource = {
+  CORTEX_MEMORY_SOURCE_UNSPECIFIED: 'CORTEX_MEMORY_SOURCE_UNSPECIFIED',
+  CORTEX_MEMORY_SOURCE_USER: 'CORTEX_MEMORY_SOURCE_USER',
+  CORTEX_MEMORY_SOURCE_CASCADE: 'CORTEX_MEMORY_SOURCE_CASCADE',
+  CORTEX_MEMORY_SOURCE_AUTO_CASCADE: 'CORTEX_MEMORY_SOURCE_AUTO_CASCADE',
+} as const;
+
+export type CortexMemorySource =
+  | 'CORTEX_MEMORY_SOURCE_UNSPECIFIED'
+  | 0
+  | 'CORTEX_MEMORY_SOURCE_USER'
+  | 1
+  | 'CORTEX_MEMORY_SOURCE_CASCADE'
+  | 2
+  | 'CORTEX_MEMORY_SOURCE_AUTO_CASCADE'
+  | 3
+
+export type CortexMemorySource__Output = typeof CortexMemorySource[keyof typeof CortexMemorySource]

@@ -1,0 +1,20 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const OnboardingActionType = {
+  ONBOARDING_ACTION_TYPE_UNSPECIFIED: 'ONBOARDING_ACTION_TYPE_UNSPECIFIED',
+  ONBOARDING_ACTION_TYPE_AUTOCOMPLETE: 'ONBOARDING_ACTION_TYPE_AUTOCOMPLETE',
+  ONBOARDING_ACTION_TYPE_COMMAND: 'ONBOARDING_ACTION_TYPE_COMMAND',
+  ONBOARDING_ACTION_TYPE_CHAT: 'ONBOARDING_ACTION_TYPE_CHAT',
+} as const;
+
+export type OnboardingActionType =
+  | 'ONBOARDING_ACTION_TYPE_UNSPECIFIED'
+  | 0
+  | 'ONBOARDING_ACTION_TYPE_AUTOCOMPLETE'
+  | 1
+  | 'ONBOARDING_ACTION_TYPE_COMMAND'
+  | 2
+  | 'ONBOARDING_ACTION_TYPE_CHAT'
+  | 3
+
+export type OnboardingActionType__Output = typeof OnboardingActionType[keyof typeof OnboardingActionType]

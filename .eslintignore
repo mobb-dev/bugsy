@@ -4,6 +4,7 @@ build
 html
 coverage
 src/features/analysis/scm/generates/client_generates.ts
+src/features/codeium_intellij/proto
 src/mcp/client_generates.ts
 client_codegen.ts
 tsup.config.js

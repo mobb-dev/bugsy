@@ -1,0 +1,26 @@
+// Original file: exa/index_pb/index.proto
+
+export const IndexMode = {
+  INDEX_MODE_UNSPECIFIED: 'INDEX_MODE_UNSPECIFIED',
+  INDEX_MODE_HALFVEC: 'INDEX_MODE_HALFVEC',
+  INDEX_MODE_BINARY: 'INDEX_MODE_BINARY',
+  INDEX_MODE_BINARY_WITH_RERANK: 'INDEX_MODE_BINARY_WITH_RERANK',
+  INDEX_MODE_BRUTE_FORCE: 'INDEX_MODE_BRUTE_FORCE',
+  INDEX_MODE_RANDOM_SEARCH: 'INDEX_MODE_RANDOM_SEARCH',
+} as const;
+
+export type IndexMode =
+  | 'INDEX_MODE_UNSPECIFIED'
+  | 0
+  | 'INDEX_MODE_HALFVEC'
+  | 1
+  | 'INDEX_MODE_BINARY'
+  | 2
+  | 'INDEX_MODE_BINARY_WITH_RERANK'
+  | 3
+  | 'INDEX_MODE_BRUTE_FORCE'
+  | 4
+  | 'INDEX_MODE_RANDOM_SEARCH'
+  | 5
+
+export type IndexMode__Output = typeof IndexMode[keyof typeof IndexMode]

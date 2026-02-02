@@ -1,0 +1,26 @@
+// Original file: exa/language_server_pb/language_server.proto
+
+export const CodeiumState = {
+  CODEIUM_STATE_UNSPECIFIED: 'CODEIUM_STATE_UNSPECIFIED',
+  CODEIUM_STATE_INACTIVE: 'CODEIUM_STATE_INACTIVE',
+  CODEIUM_STATE_PROCESSING: 'CODEIUM_STATE_PROCESSING',
+  CODEIUM_STATE_SUCCESS: 'CODEIUM_STATE_SUCCESS',
+  CODEIUM_STATE_WARNING: 'CODEIUM_STATE_WARNING',
+  CODEIUM_STATE_ERROR: 'CODEIUM_STATE_ERROR',
+} as const;
+
+export type CodeiumState =
+  | 'CODEIUM_STATE_UNSPECIFIED'
+  | 0
+  | 'CODEIUM_STATE_INACTIVE'
+  | 1
+  | 'CODEIUM_STATE_PROCESSING'
+  | 2
+  | 'CODEIUM_STATE_SUCCESS'
+  | 3
+  | 'CODEIUM_STATE_WARNING'
+  | 4
+  | 'CODEIUM_STATE_ERROR'
+  | 5
+
+export type CodeiumState__Output = typeof CodeiumState[keyof typeof CodeiumState]

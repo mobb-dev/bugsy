@@ -1,0 +1,20 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const CortexErrorCategory = {
+  CORTEX_ERROR_CATEGORY_UNSPECIFIED: 'CORTEX_ERROR_CATEGORY_UNSPECIFIED',
+  CORTEX_ERROR_CATEGORY_OVERALL: 'CORTEX_ERROR_CATEGORY_OVERALL',
+  CORTEX_ERROR_CATEGORY_ACTION_PREPARE: 'CORTEX_ERROR_CATEGORY_ACTION_PREPARE',
+  CORTEX_ERROR_CATEGORY_ACTION_APPLY: 'CORTEX_ERROR_CATEGORY_ACTION_APPLY',
+} as const;
+
+export type CortexErrorCategory =
+  | 'CORTEX_ERROR_CATEGORY_UNSPECIFIED'
+  | 0
+  | 'CORTEX_ERROR_CATEGORY_OVERALL'
+  | 1
+  | 'CORTEX_ERROR_CATEGORY_ACTION_PREPARE'
+  | 2
+  | 'CORTEX_ERROR_CATEGORY_ACTION_APPLY'
+  | 3
+
+export type CortexErrorCategory__Output = typeof CortexErrorCategory[keyof typeof CortexErrorCategory]

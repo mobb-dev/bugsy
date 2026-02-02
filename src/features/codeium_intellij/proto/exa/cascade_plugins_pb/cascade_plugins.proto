@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package exa.cascade_plugins_pb;
+
+import "buf/validate/validate.proto";
+import "exa/codeium_common_pb/codeium_common.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/cascade_plugins_pb";
+
+service CascadePluginsService {
+    rpc GetAvailableCascadePlugins(GetAvailableCascadePluginsRequest) returns (GetAvailableCascadePluginsResponse);
+    rpc InstallCascadePlugin(InstallCascadePluginRequest) returns (InstallCascadePluginResponse);
+    rpc GetCascadePluginById(GetCascadePluginByIdRequest) returns (GetCascadePluginByIdResponse);
+    rpc GetMcpClientInfos(GetMcpClientInfosRequest) returns (GetMcpClientInfosResponse);
+}
+
+message CascadePluginTemplate {
+    string title = 1;
+    string id = 2;
+    string link = 3;
+    string description = 4;
+    map<string, CascadePluginCommand> commands = 5 [deprecated = true];
+    int64 installation_count = 6;
+    string trust_level = 7;
+    string readme = 8;
+    
+    oneof configuration {
+        CascadePluginLocalConfig local = 9;
+        CascadePluginRemoteConfig remote = 10;
+    }
+}
+
+message CascadePluginLocalConfig {
+    map<string, CascadePluginCommand> commands = 5;
+}
+
+message CascadePluginCommand {
+    CascadePluginCommandTemplate template = 1;
+    repeated CascadePluginCommandVariable variables = 2;
+}
+
+message CascadePluginCommandTemplate {
+    string command = 1;
+    repeated string args = 2;
+    map<string, string> env = 3;
+}
+
+message CascadePluginCommandVariable {
+    string name = 1;
+    string title = 2;
+    string description = 3;
+    string link = 4;
+    string type = 5;
+}
+
+message CascadePluginRemoteConfig {
+    CascadePluginRemoteConfigTemplate template = 1;
+}
+
+message CascadePluginRemoteConfigTemplate {
+    string server_url = 1;
+    map<string, string> headers = 2;
+}
+
+message GetAvailableCascadePluginsRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string os = 2;
+    
+    oneof _search_query {
+        string search_query = 3 [deprecated = true];
+    }
+}
+
+message GetAvailableCascadePluginsResponse {
+    repeated CascadePluginTemplate plugins = 1;
+}
+
+message InstallCascadePluginRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string plugin_id = 2;
+}
+
+message InstallCascadePluginResponse {
+    int64 installation_count = 1;
+}
+
+message GetCascadePluginByIdRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string os = 2;
+    string plugin_id = 3;
+}
+
+message GetCascadePluginByIdResponse {
+    CascadePluginTemplate plugin = 1;
+}
+
+message McpClientInfo {
+    string client_id = 1;
+    string client_secret = 2;
+}
+
+message GetMcpClientInfosRequest {
+    codeium_common_pb.Metadata metadata = 1;
+}
+
+message GetMcpClientInfosResponse {
+    map<string, McpClientInfo> client_infos = 1;
+}

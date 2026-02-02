@@ -1,0 +1,95 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+import type { PathScopeItem as _exa_codeium_common_pb_PathScopeItem, PathScopeItem__Output as _exa_codeium_common_pb_PathScopeItem__Output } from '../../exa/codeium_common_pb/PathScopeItem';
+import type { RepositoryScopeItem as _exa_codeium_common_pb_RepositoryScopeItem, RepositoryScopeItem__Output as _exa_codeium_common_pb_RepositoryScopeItem__Output } from '../../exa/codeium_common_pb/RepositoryScopeItem';
+import type { CodeContextItem as _exa_codeium_common_pb_CodeContextItem, CodeContextItem__Output as _exa_codeium_common_pb_CodeContextItem__Output } from '../../exa/codeium_common_pb/CodeContextItem';
+import type { CciWithSubrange as _exa_codeium_common_pb_CciWithSubrange, CciWithSubrange__Output as _exa_codeium_common_pb_CciWithSubrange__Output } from '../../exa/codeium_common_pb/CciWithSubrange';
+import type { RepositoryPathScopeItem as _exa_codeium_common_pb_RepositoryPathScopeItem, RepositoryPathScopeItem__Output as _exa_codeium_common_pb_RepositoryPathScopeItem__Output } from '../../exa/codeium_common_pb/RepositoryPathScopeItem';
+import type { KnowledgeBaseScopeItem as _exa_codeium_common_pb_KnowledgeBaseScopeItem, KnowledgeBaseScopeItem__Output as _exa_codeium_common_pb_KnowledgeBaseScopeItem__Output } from '../../exa/codeium_common_pb/KnowledgeBaseScopeItem';
+import type { FileLineRange as _exa_codeium_common_pb_FileLineRange, FileLineRange__Output as _exa_codeium_common_pb_FileLineRange__Output } from '../../exa/codeium_common_pb/FileLineRange';
+import type { TextBlock as _exa_codeium_common_pb_TextBlock, TextBlock__Output as _exa_codeium_common_pb_TextBlock__Output } from '../../exa/codeium_common_pb/TextBlock';
+import type { ConsoleLogScopeItem as _exa_codeium_common_pb_ConsoleLogScopeItem, ConsoleLogScopeItem__Output as _exa_codeium_common_pb_ConsoleLogScopeItem__Output } from '../../exa/codeium_common_pb/ConsoleLogScopeItem';
+import type { DOMElementScopeItem as _exa_codeium_common_pb_DOMElementScopeItem, DOMElementScopeItem__Output as _exa_codeium_common_pb_DOMElementScopeItem__Output } from '../../exa/codeium_common_pb/DOMElementScopeItem';
+import type { RecipeScopeItem as _exa_codeium_common_pb_RecipeScopeItem, RecipeScopeItem__Output as _exa_codeium_common_pb_RecipeScopeItem__Output } from '../../exa/codeium_common_pb/RecipeScopeItem';
+import type { RuleScopeItem as _exa_codeium_common_pb_RuleScopeItem, RuleScopeItem__Output as _exa_codeium_common_pb_RuleScopeItem__Output } from '../../exa/codeium_common_pb/RuleScopeItem';
+import type { McpResourceItem as _exa_codeium_common_pb_McpResourceItem, McpResourceItem__Output as _exa_codeium_common_pb_McpResourceItem__Output } from '../../exa/codeium_common_pb/McpResourceItem';
+import type { BrowserPageScopeItem as _exa_codeium_common_pb_BrowserPageScopeItem, BrowserPageScopeItem__Output as _exa_codeium_common_pb_BrowserPageScopeItem__Output } from '../../exa/codeium_common_pb/BrowserPageScopeItem';
+import type { BrowserCodeBlockScopeItem as _exa_codeium_common_pb_BrowserCodeBlockScopeItem, BrowserCodeBlockScopeItem__Output as _exa_codeium_common_pb_BrowserCodeBlockScopeItem__Output } from '../../exa/codeium_common_pb/BrowserCodeBlockScopeItem';
+import type { BrowserTextScopeItem as _exa_codeium_common_pb_BrowserTextScopeItem, BrowserTextScopeItem__Output as _exa_codeium_common_pb_BrowserTextScopeItem__Output } from '../../exa/codeium_common_pb/BrowserTextScopeItem';
+import type { ConversationScopeItem as _exa_codeium_common_pb_ConversationScopeItem, ConversationScopeItem__Output as _exa_codeium_common_pb_ConversationScopeItem__Output } from '../../exa/codeium_common_pb/ConversationScopeItem';
+import type { UserActivityScopeItem as _exa_codeium_common_pb_UserActivityScopeItem, UserActivityScopeItem__Output as _exa_codeium_common_pb_UserActivityScopeItem__Output } from '../../exa/codeium_common_pb/UserActivityScopeItem';
+import type { TerminalScopeItem as _exa_codeium_common_pb_TerminalScopeItem, TerminalScopeItem__Output as _exa_codeium_common_pb_TerminalScopeItem__Output } from '../../exa/codeium_common_pb/TerminalScopeItem';
+import type { GithubPullRequestItem as _exa_codeium_common_pb_GithubPullRequestItem, GithubPullRequestItem__Output as _exa_codeium_common_pb_GithubPullRequestItem__Output } from '../../exa/codeium_common_pb/GithubPullRequestItem';
+import type { CodeMapScopeItem as _exa_codeium_common_pb_CodeMapScopeItem, CodeMapScopeItem__Output as _exa_codeium_common_pb_CodeMapScopeItem__Output } from '../../exa/codeium_common_pb/CodeMapScopeItem';
+import type { McpPromptScopeItem as _exa_codeium_common_pb_McpPromptScopeItem, McpPromptScopeItem__Output as _exa_codeium_common_pb_McpPromptScopeItem__Output } from '../../exa/codeium_common_pb/McpPromptScopeItem';
+import type { SkillScopeItem as _exa_codeium_common_pb_SkillScopeItem, SkillScopeItem__Output as _exa_codeium_common_pb_SkillScopeItem__Output } from '../../exa/codeium_common_pb/SkillScopeItem';
+import type { PlanFileScopeItem as _exa_codeium_common_pb_PlanFileScopeItem, PlanFileScopeItem__Output as _exa_codeium_common_pb_PlanFileScopeItem__Output } from '../../exa/codeium_common_pb/PlanFileScopeItem';
+import type { GitScopeItem as _exa_codeium_common_pb_GitScopeItem, GitScopeItem__Output as _exa_codeium_common_pb_GitScopeItem__Output } from '../../exa/codeium_common_pb/GitScopeItem';
+
+export interface ContextScopeItem {
+  'file'?: (_exa_codeium_common_pb_PathScopeItem | null);
+  'directory'?: (_exa_codeium_common_pb_PathScopeItem | null);
+  'repository'?: (_exa_codeium_common_pb_RepositoryScopeItem | null);
+  'codeContext'?: (_exa_codeium_common_pb_CodeContextItem | null);
+  'cciWithSubrange'?: (_exa_codeium_common_pb_CciWithSubrange | null);
+  'repositoryPath'?: (_exa_codeium_common_pb_RepositoryPathScopeItem | null);
+  'slack'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem | null);
+  'github'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem | null);
+  'fileLineRange'?: (_exa_codeium_common_pb_FileLineRange | null);
+  'textBlock'?: (_exa_codeium_common_pb_TextBlock | null);
+  'jira'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem | null);
+  'googleDrive'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem | null);
+  'consoleLog'?: (_exa_codeium_common_pb_ConsoleLogScopeItem | null);
+  'domElement'?: (_exa_codeium_common_pb_DOMElementScopeItem | null);
+  'recipe'?: (_exa_codeium_common_pb_RecipeScopeItem | null);
+  'knowledge'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem | null);
+  'rule'?: (_exa_codeium_common_pb_RuleScopeItem | null);
+  'mcpResource'?: (_exa_codeium_common_pb_McpResourceItem | null);
+  'browserPage'?: (_exa_codeium_common_pb_BrowserPageScopeItem | null);
+  'browserCodeBlock'?: (_exa_codeium_common_pb_BrowserCodeBlockScopeItem | null);
+  'browserText'?: (_exa_codeium_common_pb_BrowserTextScopeItem | null);
+  'conversation'?: (_exa_codeium_common_pb_ConversationScopeItem | null);
+  'userActivity'?: (_exa_codeium_common_pb_UserActivityScopeItem | null);
+  'terminal'?: (_exa_codeium_common_pb_TerminalScopeItem | null);
+  'githubPullRequest'?: (_exa_codeium_common_pb_GithubPullRequestItem | null);
+  'codeMap'?: (_exa_codeium_common_pb_CodeMapScopeItem | null);
+  'mcpPrompt'?: (_exa_codeium_common_pb_McpPromptScopeItem | null);
+  'skill'?: (_exa_codeium_common_pb_SkillScopeItem | null);
+  'planFile'?: (_exa_codeium_common_pb_PlanFileScopeItem | null);
+  'git'?: (_exa_codeium_common_pb_GitScopeItem | null);
+  'scopeItem'?: "file"|"directory"|"repository"|"codeContext"|"cciWithSubrange"|"repositoryPath"|"slack"|"github"|"fileLineRange"|"textBlock"|"jira"|"googleDrive"|"consoleLog"|"domElement"|"recipe"|"knowledge"|"rule"|"mcpResource"|"browserPage"|"browserCodeBlock"|"browserText"|"conversation"|"userActivity"|"terminal"|"githubPullRequest"|"codeMap"|"mcpPrompt"|"skill"|"planFile"|"git";
+}
+
+export interface ContextScopeItem__Output {
+  'file'?: (_exa_codeium_common_pb_PathScopeItem__Output | null);
+  'directory'?: (_exa_codeium_common_pb_PathScopeItem__Output | null);
+  'repository'?: (_exa_codeium_common_pb_RepositoryScopeItem__Output | null);
+  'codeContext'?: (_exa_codeium_common_pb_CodeContextItem__Output | null);
+  'cciWithSubrange'?: (_exa_codeium_common_pb_CciWithSubrange__Output | null);
+  'repositoryPath'?: (_exa_codeium_common_pb_RepositoryPathScopeItem__Output | null);
+  'slack'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem__Output | null);
+  'github'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem__Output | null);
+  'fileLineRange'?: (_exa_codeium_common_pb_FileLineRange__Output | null);
+  'textBlock'?: (_exa_codeium_common_pb_TextBlock__Output | null);
+  'jira'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem__Output | null);
+  'googleDrive'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem__Output | null);
+  'consoleLog'?: (_exa_codeium_common_pb_ConsoleLogScopeItem__Output | null);
+  'domElement'?: (_exa_codeium_common_pb_DOMElementScopeItem__Output | null);
+  'recipe'?: (_exa_codeium_common_pb_RecipeScopeItem__Output | null);
+  'knowledge'?: (_exa_codeium_common_pb_KnowledgeBaseScopeItem__Output | null);
+  'rule'?: (_exa_codeium_common_pb_RuleScopeItem__Output | null);
+  'mcpResource'?: (_exa_codeium_common_pb_McpResourceItem__Output | null);
+  'browserPage'?: (_exa_codeium_common_pb_BrowserPageScopeItem__Output | null);
+  'browserCodeBlock'?: (_exa_codeium_common_pb_BrowserCodeBlockScopeItem__Output | null);
+  'browserText'?: (_exa_codeium_common_pb_BrowserTextScopeItem__Output | null);
+  'conversation'?: (_exa_codeium_common_pb_ConversationScopeItem__Output | null);
+  'userActivity'?: (_exa_codeium_common_pb_UserActivityScopeItem__Output | null);
+  'terminal'?: (_exa_codeium_common_pb_TerminalScopeItem__Output | null);
+  'githubPullRequest'?: (_exa_codeium_common_pb_GithubPullRequestItem__Output | null);
+  'codeMap'?: (_exa_codeium_common_pb_CodeMapScopeItem__Output | null);
+  'mcpPrompt'?: (_exa_codeium_common_pb_McpPromptScopeItem__Output | null);
+  'skill'?: (_exa_codeium_common_pb_SkillScopeItem__Output | null);
+  'planFile'?: (_exa_codeium_common_pb_PlanFileScopeItem__Output | null);
+  'git'?: (_exa_codeium_common_pb_GitScopeItem__Output | null);
+  'scopeItem'?: "file"|"directory"|"repository"|"codeContext"|"cciWithSubrange"|"repositoryPath"|"slack"|"github"|"fileLineRange"|"textBlock"|"jira"|"googleDrive"|"consoleLog"|"domElement"|"recipe"|"knowledge"|"rule"|"mcpResource"|"browserPage"|"browserCodeBlock"|"browserText"|"conversation"|"userActivity"|"terminal"|"githubPullRequest"|"codeMap"|"mcpPrompt"|"skill"|"planFile"|"git";
+}

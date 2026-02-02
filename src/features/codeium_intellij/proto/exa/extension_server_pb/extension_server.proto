@@ -1,0 +1,565 @@
+syntax = "proto3";
+
+package exa.extension_server_pb;
+
+import "buf/validate/validate.proto";
+import "exa/codeium_common_pb/codeium_common.proto";
+import "exa/cortex_pb/cortex.proto";
+import "exa/language_server_pb/language_server.proto";
+
+service ExtensionServerService {
+    rpc LanguageServerStarted(LanguageServerStartedRequest) returns (LanguageServerStartedResponse);
+    rpc OpenSetting(OpenSettingRequest) returns (OpenSettingResponse);
+    rpc OpenFilePointer(OpenFilePointerRequest) returns (OpenFilePointerResponse);
+    rpc InsertCodeAtCursor(InsertCodeAtCursorRequest) returns (InsertCodeAtCursorResponse);
+    rpc LogEvent(LogEventRequest) returns (LogEventResponse);
+    rpc CheckTerminalShellSupport(CheckTerminalShellSupportRequest) returns (CheckTerminalShellSupportResponse);
+    rpc ExecuteCommand(ExecuteCommandRequest) returns (stream codeium_common_pb.TerminalShellCommandStreamChunk);
+    rpc ShowTerminal(ShowTerminalRequest) returns (ShowTerminalResponse);
+    rpc OpenVirtualFile(OpenVirtualFileRequest) returns (OpenVirtualFileResponse);
+    rpc SaveDocument(SaveDocumentRequest) returns (SaveDocumentResponse);
+    rpc ReadTerminal(ReadTerminalRequest) returns (ReadTerminalResponse);
+    rpc OpenTerminal(OpenTerminalRequest) returns (OpenTerminalResponse);
+    rpc GetLintErrors(GetLintErrorsRequest) returns (GetLintErrorsResponse);
+    rpc WatchForLints(WatchForLintsRequest) returns (WatchForLintsResponse);
+    rpc GetLintsForAcknowledger(GetLintsForAcknowledgerRequest) returns (GetLintsForAcknowledgerResponse);
+    rpc OpenDiffZones(OpenDiffZonesRequest) returns (OpenDiffZonesResponse);
+    rpc OpenExternalUrl(OpenExternalUrlRequest) returns (OpenExternalUrlResponse);
+    rpc OpenMultiDiff(OpenMultiDiffRequest) returns (OpenMultiDiffResponse);
+    rpc HandleAsyncPostMessage(HandleAsyncPostMessageRequest) returns (HandleAsyncPostMessageResponse);
+    rpc OpenWindsurfRulesFile(OpenWindsurfRulesFileRequest) returns (OpenWindsurfRulesFileResponse);
+    rpc DeleteWindsurfRulesFile(DeleteWindsurfRulesFileRequest) returns (DeleteWindsurfRulesFileResponse);
+    rpc DeleteWindsurfWorkflow(DeleteWindsurfWorkflowRequest) returns (DeleteWindsurfWorkflowResponse);
+    rpc NotifyMcpStateChanged(NotifyMcpStateChangedRequest) returns (NotifyMcpStateChangedResponse);
+    rpc OpenPluginPage(OpenPluginPageRequest) returns (OpenPluginPageResponse);
+    rpc OpenPluginConfigModal(OpenPluginConfigModalRequest) returns (OpenPluginConfigModalResponse);
+    rpc OpenConfigurePluginsPage(OpenConfigurePluginsPageRequest) returns (OpenConfigurePluginsPageResponse);
+    rpc OpenMcpStorePage(OpenMcpStorePageRequest) returns (OpenMcpStorePageResponse);
+    rpc OpenConversationWorkspaceQuickPick(OpenConversationWorkspaceQuickPickRequest) returns (OpenConversationWorkspaceQuickPickResponse);
+    rpc FindAllReferences(FindAllReferencesRequest) returns (FindAllReferencesResponse);
+    rpc GetLSPCompletionItems(GetLSPCompletionItemsRequest) returns (GetLSPCompletionItemsResponse);
+    rpc RefreshURIs(RefreshURIsRequest) returns (RefreshURIsResponse);
+    rpc CheckExperiment(CheckExperimentRequest) returns (CheckExperimentResponse);
+    rpc WriteCascadeEdit(WriteCascadeEditRequest) returns (WriteCascadeEditResponse);
+    rpc StartAudioRecording(StartAudioRecordingRequest) returns (StartAudioRecordingResponse);
+    rpc EndAudioRecording(EndAudioRecordingRequest) returns (EndAudioRecordingResponse);
+    rpc GetCurrentAudioRecording(GetCurrentAudioRecordingRequest) returns (GetCurrentAudioRecordingResponse);
+    rpc UpdateCascadeTrajectorySummaries(UpdateCascadeTrajectorySummariesRequest) returns (UpdateCascadeTrajectorySummariesResponse);
+    rpc LoadCodeMap(LoadCodeMapRequest) returns (LoadCodeMapResponse);
+    rpc AddAnnotation(AddAnnotationRequest) returns (AddAnnotationResponse);
+    rpc RemoveAnnotation(RemoveAnnotationRequest) returns (RemoveAnnotationResponse);
+    rpc ShowAnnotation(ShowAnnotationRequest) returns (ShowAnnotationResponse);
+    rpc GetSecretValue(GetSecretValueRequest) returns (GetSecretValueResponse);
+    rpc StoreSecretValue(StoreSecretValueRequest) returns (StoreSecretValueResponse);
+    rpc GetRedirectUri(GetRedirectUriRequest) returns (GetRedirectUriResponse);
+    rpc CancelVibeAndReplace(CancelVibeAndReplaceRequest) returns (CancelVibeAndReplaceResponse);
+    rpc SearchQuery(SearchQueryRequest) returns (SearchQueryResponse);
+    rpc UnmountChanges(UnmountChangesRequest) returns (UnmountChangesResponse);
+    rpc LogoutWindsurf(LogoutWindsurfRequest) returns (LogoutWindsurfResponse);
+}
+
+message CancelVibeAndReplaceRequest {
+    
+}
+
+message CancelVibeAndReplaceResponse {
+    
+}
+
+message StartAudioRecordingRequest {
+    
+}
+
+message EndAudioRecordingRequest {
+    
+}
+
+message EndAudioRecordingResponse {
+    string transcription = 1;
+}
+
+message StartAudioRecordingResponse {
+    
+}
+
+message GetCurrentAudioRecordingRequest {
+    
+}
+
+message GetCurrentAudioRecordingResponse {
+    float average_volume = 2;
+}
+
+message LanguageServerStartedRequest {
+    int32 language_server_port = 1;
+    int32 lsp_port = 2;
+    int32 chat_client_port = 3;
+    string csrf_token = 4;
+}
+
+message LanguageServerStartedResponse {
+    
+}
+
+message OpenSettingRequest {
+    string setting_id = 1;
+}
+
+message OpenSettingResponse {
+    
+}
+
+message OpenFilePointerRequest {
+    string file_uri = 1;
+    int32 start_line = 2;
+    int32 start_col = 3;
+    int32 end_line = 4;
+    int32 end_col = 5;
+    bool is_cascade_diff = 6;
+    bool is_directory = 7;
+    bool pinned = 8;
+}
+
+message OpenFilePointerResponse {
+    
+}
+
+message InsertCodeAtCursorRequest {
+    string text = 1;
+    ActiveEditorType editor_type = 2;
+}
+
+message InsertCodeAtCursorResponse {
+    
+}
+
+message EventMetadataRecord {
+    string key = 1;
+    string value = 2;
+}
+
+message LogEventRequest {
+    codeium_common_pb.ProductEventType event = 1 [deprecated = true];
+    string event_string = 3;
+    repeated EventMetadataRecord metadata = 2;
+}
+
+message LogEventResponse {
+    
+}
+
+message CheckTerminalShellSupportRequest {
+    
+}
+
+message CheckTerminalShellSupportResponse {
+    bool has_shell_integration = 1;
+    string shell_name = 2;
+    string shell_path = 3;
+    string failure_reason = 4;
+}
+
+message ExecuteCommandRequest {
+    string command_line = 5;
+    string cwd = 3;
+    string terminal_id = 4;
+    
+    reserved 1, 2;
+    
+    reserved "command", "args";
+}
+
+message ShowTerminalRequest {
+    string terminal_id = 1;
+}
+
+message ShowTerminalResponse {
+    
+}
+
+message OpenVirtualFileRequest {
+    string text = 1;
+    bool show_markdown_preview = 2;
+}
+
+message OpenVirtualFileResponse {
+    
+}
+
+message SaveDocumentRequest {
+    string uri = 1;
+}
+
+message SaveDocumentResponse {
+    
+}
+
+message ReadTerminalRequest {
+    string terminal_id = 1;
+}
+
+message ReadTerminalResponse {
+    string contents = 1;
+}
+
+message OpenTerminalRequest {
+    string terminal_id = 1;
+}
+
+message OpenTerminalResponse {
+    
+}
+
+message GetLintErrorsRequest {
+    oneof _await_new_lints_config {
+        AwaitNewLintsConfig await_new_lints_config = 1;
+    }
+    
+    message AwaitNewLintsConfig {
+        string acknowledger_id = 1;
+        int32 timeout_ms = 2;
+        int32 grace_period_ms = 3;
+        bool include_saved = 4;
+    }
+}
+
+message GetLintErrorsResponse {
+    repeated codeium_common_pb.CodeDiagnostic lint_errors = 1;
+    repeated codeium_common_pb.CodeDiagnostic persistent_lint_errors = 2;
+}
+
+message WatchForLintsRequest {
+    string acknowledger_id = 1;
+    int32 duration_ms = 2;
+}
+
+message WatchForLintsResponse {
+    
+}
+
+message GetLintsForAcknowledgerRequest {
+    string acknowledger_id = 1;
+}
+
+message GetLintsForAcknowledgerResponse {
+    repeated codeium_common_pb.CodeDiagnostic lint_errors = 1;
+    repeated codeium_common_pb.CodeDiagnostic persistent_lint_errors = 2;
+}
+
+message OpenDiffZonesRequest {
+    string cascade_id = 1;
+    repeated language_server_pb.ValidationState validation_states = 2;
+    bool write_new_state = 3;
+    
+    oneof _git_worktree_path {
+        string git_worktree_path = 4;
+    }
+}
+
+message OpenDiffZonesResponse {
+    
+}
+
+message OpenMultiDiffRequest {
+    string cascade_id = 1;
+}
+
+message OpenMultiDiffResponse {
+    
+}
+
+message OpenExternalUrlRequest {
+    string url = 1;
+    bool use_ide_browser = 2;
+}
+
+message OpenExternalUrlResponse {
+    
+}
+
+message HandleAsyncPostMessageRequest {
+    string message_type = 1;
+    string message_content = 2;
+}
+
+message HandleAsyncPostMessageResponse {
+    string response_content = 1;
+}
+
+message OpenWindsurfRulesFileRequest {
+    bool is_workspace_rules = 1;
+}
+
+message OpenWindsurfRulesFileResponse {
+    
+}
+
+message DeleteWindsurfRulesFileRequest {
+    bool is_workspace_rules = 1;
+    string file_path = 2;
+}
+
+message DeleteWindsurfRulesFileResponse {
+    
+}
+
+message RefreshURIsRequest {
+    repeated string uris = 1;
+}
+
+message RefreshURIsResponse {
+    
+}
+
+message OpenPluginPageRequest {
+    string plugin_id = 4;
+    
+    reserved 1, 2, 3;
+}
+
+message OpenPluginPageResponse {
+    
+}
+
+message OpenPluginConfigModalRequest {
+    string plugin_id = 3;
+    
+    reserved 1, 2;
+}
+
+message OpenPluginConfigModalResponse {
+    
+}
+
+message OpenConfigurePluginsPageRequest {
+    oneof _server_name {
+        string server_name = 1;
+    }
+}
+
+message OpenConfigurePluginsPageResponse {
+    
+}
+
+message OpenMcpStorePageRequest {
+    
+}
+
+message OpenMcpStorePageResponse {
+    
+}
+
+message NotebookCellEdit {
+    int32 cell_index = 1;
+    bool is_insert = 2;
+    string cell_type = 3;
+}
+
+message WriteCascadeEditRequest {
+    string uri = 1;
+    string target_content = 2;
+    
+    oneof _cascade_id {
+        string cascade_id = 3;
+    }
+    
+    oneof _git_worktree_path {
+        string git_worktree_path = 4;
+    }
+    
+    oneof _notebook_cell {
+        NotebookCellEdit notebook_cell = 5;
+    }
+}
+
+message WriteCascadeEditResponse {
+    
+}
+
+message OpenConversationWorkspaceQuickPickRequest {
+    string cascade_id = 1;
+    repeated string workspace_uris = 2;
+}
+
+message OpenConversationWorkspaceQuickPickResponse {
+    bool open_in_current_window = 1;
+}
+
+message FindAllReferencesRequest {
+    string file_uri = 1;
+    string symbol = 2;
+    uint32 line = 3;
+    uint32 occurrence_index = 4;
+}
+
+message FindAllReferencesResponse {
+    repeated codeium_common_pb.LspReference references = 1;
+}
+
+message GetLSPCompletionItemsRequest {
+    string document_uri = 1;
+    codeium_common_pb.DocumentPosition position = 2;
+}
+
+message GetLSPCompletionItemsResponse {
+    string completion_items_json = 1;
+}
+
+message UpdateCascadeTrajectorySummariesRequest {
+    cortex_pb.CascadeTrajectorySummaries summaries = 1;
+}
+
+message UpdateCascadeTrajectorySummariesResponse {
+    
+}
+
+message LoadCodeMapRequest {
+    string codemap_json = 1;
+}
+
+message LoadCodeMapResponse {
+    
+}
+
+message AddAnnotationRequest {
+    codeium_common_pb.CodeAnnotation annotation = 1;
+}
+
+message AddAnnotationResponse {
+    
+}
+
+message RemoveAnnotationRequest {
+    string annotation_id = 1;
+}
+
+message RemoveAnnotationResponse {
+    
+}
+
+message ShowAnnotationRequest {
+    string annotation_id = 1;
+}
+
+message ShowAnnotationResponse {
+    
+}
+
+message GetSecretValueRequest {
+    string key = 1;
+}
+
+message GetSecretValueResponse {
+    string value = 1;
+}
+
+message StoreSecretValueRequest {
+    string key = 1;
+    string value = 2;
+}
+
+message StoreSecretValueResponse {
+    
+}
+
+message GetRedirectUriRequest {
+    
+}
+
+message GetRedirectUriResponse {
+    string uri = 1;
+}
+
+message CheckExperimentRequest {
+    string experiment_key = 1;
+    map<string, string> context_overrides = 2;
+}
+
+message CheckExperimentResponse {
+    bool enabled = 1;
+    
+    oneof _variant {
+        ExperimentVariant variant = 2;
+    }
+    
+    oneof _error_message {
+        string error_message = 3;
+    }
+}
+
+message ExperimentVariant {
+    string name = 1;
+    ExperimentPayload payload = 2;
+}
+
+message ExperimentPayload {
+    string type = 1;
+    string value = 2;
+}
+
+message SearchQueryRequest {
+    string query = 1;
+    
+    oneof _max_results {
+        int32 max_results = 2;
+    }
+    
+    oneof _cache_key {
+        string cache_key = 3;
+    }
+    
+    oneof _include_ignored_files {
+        bool include_ignored_files = 4 [deprecated = true];
+    }
+}
+
+message SearchQueryResponse {
+    repeated string result_uris = 1;
+}
+
+message UnmountChangesRequest {
+    
+}
+
+message UnmountChangesResponse {
+    bool success = 1;
+    string error_message = 2;
+}
+
+message LogoutWindsurfRequest {
+    string api_key = 1;
+}
+
+message LogoutWindsurfResponse {
+    
+}
+
+message DeleteWindsurfWorkflowRequest {
+    cortex_pb.CortexMemoryScope scope = 1;
+    string file_path = 2;
+}
+
+message DeleteWindsurfWorkflowResponse {
+    
+}
+
+message NotifyMcpStateChangedRequest {
+    repeated cortex_pb.McpServerState states = 1;
+    
+    reserved 2, 3;
+}
+
+message NotifyMcpStateChangedResponse {
+    
+}
+
+enum ActiveEditorType {
+    ACTIVE_EDITOR_TYPE_UNSPECIFIED = 0;
+    ACTIVE_EDITOR_TYPE_TEXT_EDITOR = 1;
+    ACTIVE_EDITOR_TYPE_TERMINAL = 2;
+}
+
+enum SoundType {
+    SOUND_TYPE_UNSPECIFIED = 0;
+    SOUND_TYPE_CASCADE_DONE = 1;
+}

@@ -21,6 +21,10 @@ import {
   uploadAiBlameBuilder,
   uploadAiBlameCommandHandler,
 } from './commands/upload_ai_blame'
+import {
+  windsurfIntellijMonitorBuilder,
+  windsurfIntellijMonitorHandler,
+} from './commands/windsurf_intellij'
 
 export const parseArgs = async (args: readonly string[]) => {
   const yargsInstance = yargs(args)
@@ -104,6 +108,12 @@ export const parseArgs = async (args: readonly string[]) => {
       chalk.bold('Process Claude Code hook data and upload to backend.'),
       claudeCodeProcessHookBuilder,
       claudeCodeProcessHookHandler
+    )
+    .command(
+      mobbCliCommand.windsurfIntellijMonitor,
+      chalk.bold('Monitor Windsurf IntelliJ for AI inference data.'),
+      windsurfIntellijMonitorBuilder,
+      windsurfIntellijMonitorHandler
     )
     .example(
       'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',

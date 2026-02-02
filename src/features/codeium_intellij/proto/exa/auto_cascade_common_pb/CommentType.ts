@@ -1,0 +1,23 @@
+// Original file: exa/auto_cascade_common_pb/auto_cascade_common.proto
+
+export const CommentType = {
+  COMMENT_TYPE_UNSPECIFIED: 'COMMENT_TYPE_UNSPECIFIED',
+  COMMENT_TYPE_MANUAL_REVIEW_TRIGGER: 'COMMENT_TYPE_MANUAL_REVIEW_TRIGGER',
+  COMMENT_TYPE_LGTM: 'COMMENT_TYPE_LGTM',
+  COMMENT_TYPE_REVIEW_BODY: 'COMMENT_TYPE_REVIEW_BODY',
+  COMMENT_TYPE_REVIEW_COMMENT: 'COMMENT_TYPE_REVIEW_COMMENT',
+} as const;
+
+export type CommentType =
+  | 'COMMENT_TYPE_UNSPECIFIED'
+  | 0
+  | 'COMMENT_TYPE_MANUAL_REVIEW_TRIGGER'
+  | 1
+  | 'COMMENT_TYPE_LGTM'
+  | 2
+  | 'COMMENT_TYPE_REVIEW_BODY'
+  | 3
+  | 'COMMENT_TYPE_REVIEW_COMMENT'
+  | 4
+
+export type CommentType__Output = typeof CommentType[keyof typeof CommentType]

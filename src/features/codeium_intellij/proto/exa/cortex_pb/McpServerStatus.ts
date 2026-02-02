@@ -1,0 +1,23 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const McpServerStatus = {
+  MCP_SERVER_STATUS_UNSPECIFIED: 'MCP_SERVER_STATUS_UNSPECIFIED',
+  MCP_SERVER_STATUS_PENDING: 'MCP_SERVER_STATUS_PENDING',
+  MCP_SERVER_STATUS_READY: 'MCP_SERVER_STATUS_READY',
+  MCP_SERVER_STATUS_ERROR: 'MCP_SERVER_STATUS_ERROR',
+  MCP_SERVER_STATUS_NEEDS_OAUTH: 'MCP_SERVER_STATUS_NEEDS_OAUTH',
+} as const;
+
+export type McpServerStatus =
+  | 'MCP_SERVER_STATUS_UNSPECIFIED'
+  | 0
+  | 'MCP_SERVER_STATUS_PENDING'
+  | 1
+  | 'MCP_SERVER_STATUS_READY'
+  | 2
+  | 'MCP_SERVER_STATUS_ERROR'
+  | 3
+  | 'MCP_SERVER_STATUS_NEEDS_OAUTH'
+  | 4
+
+export type McpServerStatus__Output = typeof McpServerStatus[keyof typeof McpServerStatus]

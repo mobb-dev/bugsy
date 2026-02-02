@@ -1,0 +1,17 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const AutoContinueOnMaxGeneratorInvocations = {
+  AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_UNSPECIFIED: 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_UNSPECIFIED',
+  AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_ENABLED: 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_ENABLED',
+  AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_DISABLED: 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_DISABLED',
+} as const;
+
+export type AutoContinueOnMaxGeneratorInvocations =
+  | 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_UNSPECIFIED'
+  | 0
+  | 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_ENABLED'
+  | 1
+  | 'AUTO_CONTINUE_ON_MAX_GENERATOR_INVOCATIONS_DISABLED'
+  | 2
+
+export type AutoContinueOnMaxGeneratorInvocations__Output = typeof AutoContinueOnMaxGeneratorInvocations[keyof typeof AutoContinueOnMaxGeneratorInvocations]

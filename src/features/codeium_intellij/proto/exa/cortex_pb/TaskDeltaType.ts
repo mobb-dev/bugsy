@@ -1,0 +1,26 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const TaskDeltaType = {
+  TASK_DELTA_TYPE_UNSPECIFIED: 'TASK_DELTA_TYPE_UNSPECIFIED',
+  TASK_DELTA_TYPE_ADD: 'TASK_DELTA_TYPE_ADD',
+  TASK_DELTA_TYPE_PRUNE: 'TASK_DELTA_TYPE_PRUNE',
+  TASK_DELTA_TYPE_DELETE: 'TASK_DELTA_TYPE_DELETE',
+  TASK_DELTA_TYPE_UPDATE: 'TASK_DELTA_TYPE_UPDATE',
+  TASK_DELTA_TYPE_MOVE: 'TASK_DELTA_TYPE_MOVE',
+} as const;
+
+export type TaskDeltaType =
+  | 'TASK_DELTA_TYPE_UNSPECIFIED'
+  | 0
+  | 'TASK_DELTA_TYPE_ADD'
+  | 1
+  | 'TASK_DELTA_TYPE_PRUNE'
+  | 2
+  | 'TASK_DELTA_TYPE_DELETE'
+  | 3
+  | 'TASK_DELTA_TYPE_UPDATE'
+  | 4
+  | 'TASK_DELTA_TYPE_MOVE'
+  | 5
+
+export type TaskDeltaType__Output = typeof TaskDeltaType[keyof typeof TaskDeltaType]

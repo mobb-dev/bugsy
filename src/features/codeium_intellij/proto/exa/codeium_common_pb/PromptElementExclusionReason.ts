@@ -1,0 +1,23 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const PromptElementExclusionReason = {
+  EXCLUSION_UNSPECIFIED: 'EXCLUSION_UNSPECIFIED',
+  EXCLUSION_ELEMENT_KIND_DISABLED: 'EXCLUSION_ELEMENT_KIND_DISABLED',
+  EXCLUSION_ELEMENT_MISSING_DEPENDENCY: 'EXCLUSION_ELEMENT_MISSING_DEPENDENCY',
+  EXCLUSION_TOKEN_BUDGET: 'EXCLUSION_TOKEN_BUDGET',
+  EXCLUSION_ACTIVE_SOURCE_OVERLAP: 'EXCLUSION_ACTIVE_SOURCE_OVERLAP',
+} as const;
+
+export type PromptElementExclusionReason =
+  | 'EXCLUSION_UNSPECIFIED'
+  | 0
+  | 'EXCLUSION_ELEMENT_KIND_DISABLED'
+  | 1
+  | 'EXCLUSION_ELEMENT_MISSING_DEPENDENCY'
+  | 2
+  | 'EXCLUSION_TOKEN_BUDGET'
+  | 3
+  | 'EXCLUSION_ACTIVE_SOURCE_OVERLAP'
+  | 4
+
+export type PromptElementExclusionReason__Output = typeof PromptElementExclusionReason[keyof typeof PromptElementExclusionReason]

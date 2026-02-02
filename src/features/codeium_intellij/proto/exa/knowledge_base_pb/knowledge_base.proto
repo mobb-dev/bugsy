@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+package exa.knowledge_base_pb;
+
+import "buf/validate/validate.proto";
+import "exa/auto_cascade_common_pb/auto_cascade_common.proto";
+import "exa/codeium_common_pb/codeium_common.proto";
+import "exa/opensearch_clients_pb/opensearch_clients.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Exafunction/Exafunction/exa/knowledge_base_pb";
+
+service KnowledgeBaseService {
+    rpc CreateKnowledgeBaseItem(CreateKnowledgeBaseItemRequest) returns (CreateKnowledgeBaseItemResponse);
+    rpc EditKnowledgeBaseItem(EditKnowledgeBaseItemRequest) returns (EditKnowledgeBaseItemResponse);
+    rpc DeleteKnowledgeBaseItem(DeleteKnowledgeBaseItemRequest) returns (DeleteKnowledgeBaseItemResponse);
+    rpc ReadKnowledgeBaseItem(ReadKnowledgeBaseItemRequest) returns (ReadKnowledgeBaseItemResponse);
+    rpc GetKnowledgeBaseItems(GetKnowledgeBaseItemsRequest) returns (GetKnowledgeBaseItemsResponse);
+    rpc GetKnowledgeBaseItemsForTeam(GetKnowledgeBaseItemsForTeamRequest) returns (GetKnowledgeBaseItemsForTeamResponse);
+    rpc GetGithubPullRequestSearchInfo(GetGithubPullRequestSearchInfoRequest) returns (GetGithubPullRequestSearchInfoResponse);
+    rpc CreateConnection(CreateConnectionRequest) returns (CreateConnectionResponse);
+    rpc RemoveConnection(RemoveConnectionRequest) returns (RemoveConnectionResponse);
+    rpc GetConnection(GetConnectionRequest) returns (GetConnectionResponse);
+    rpc GetGithubIntegrationStatus(GetGithubIntegrationStatusRequest) returns (GetGithubIntegrationStatusResponse);
+}
+
+message KnowledgeBaseItem {
+    string identifier = 1;
+    opensearch_clients_pb.ConnectorType connector_type = 2;
+    string url = 3;
+    string title = 4;
+    string description = 5;
+    string content = 6;
+    google.protobuf.Timestamp last_crawled_at = 7;
+    string user_name = 8;
+}
+
+message CreateKnowledgeBaseItemRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    opensearch_clients_pb.ConnectorType connector_type = 2;
+    repeated string urls = 6;
+    
+    reserved 3, 4, 5;
+    
+    reserved "title", "url", "description";
+}
+
+message CreateKnowledgeBaseItemResponse {
+    string identifier = 1;
+    string title = 2;
+    string url = 3;
+}
+
+message EditKnowledgeBaseItemRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string identifier = 2;
+    string description = 3;
+}
+
+message EditKnowledgeBaseItemResponse {
+    
+}
+
+message DeleteKnowledgeBaseItemRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string identifier = 2;
+}
+
+message DeleteKnowledgeBaseItemResponse {
+    
+}
+
+message ReadKnowledgeBaseItemRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string identifier = 2;
+}
+
+message ReadKnowledgeBaseItemResponse {
+    KnowledgeBaseItem item = 1;
+}
+
+message GetKnowledgeBaseItemsRequest {
+    codeium_common_pb.Metadata metadata = 1;
+}
+
+message GetKnowledgeBaseItemsResponse {
+    repeated KnowledgeBaseItem items = 1;
+}
+
+message GetKnowledgeBaseItemsForTeamRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    
+    reserved 2;
+}
+
+message GetKnowledgeBaseItemsForTeamResponse {
+    repeated KnowledgeBaseItem items = 1;
+}
+
+message CreateConnectionRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    opensearch_clients_pb.ConnectorType connector_type = 2;
+    string access_token = 3;
+    google.protobuf.Timestamp access_token_expires_at = 4;
+    string refresh_token = 5;
+    google.protobuf.Timestamp refresh_token_expires_at = 6;
+}
+
+message CreateConnectionResponse {
+    
+}
+
+message RemoveConnectionRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    opensearch_clients_pb.ConnectorType connector_type = 2;
+}
+
+message RemoveConnectionResponse {
+    
+}
+
+message GetConnectionRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    opensearch_clients_pb.ConnectorType connector_type = 2;
+}
+
+message GetConnectionResponse {
+    bool enabled = 1;
+    string access_token = 2;
+}
+
+message GetGithubPullRequestSearchInfoRequest {
+    codeium_common_pb.Metadata metadata = 1;
+    string query = 2;
+    int32 limit = 3;
+}
+
+message GetGithubPullRequestSearchInfoResponse {
+    repeated auto_cascade_common_pb.GithubPullRequestInfo pull_request_infos = 1;
+}
+
+message GetGithubIntegrationStatusRequest {
+    codeium_common_pb.Metadata metadata = 1;
+}
+
+message GetGithubIntegrationStatusResponse {
+    string username = 1;
+    repeated auto_cascade_common_pb.GithubInstallationInfo installations = 2;
+}

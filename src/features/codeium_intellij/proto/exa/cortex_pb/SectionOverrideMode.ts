@@ -1,0 +1,20 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const SectionOverrideMode = {
+  SECTION_OVERRIDE_MODE_UNSPECIFIED: 'SECTION_OVERRIDE_MODE_UNSPECIFIED',
+  SECTION_OVERRIDE_MODE_OVERRIDE: 'SECTION_OVERRIDE_MODE_OVERRIDE',
+  SECTION_OVERRIDE_MODE_APPEND: 'SECTION_OVERRIDE_MODE_APPEND',
+  SECTION_OVERRIDE_MODE_PREPEND: 'SECTION_OVERRIDE_MODE_PREPEND',
+} as const;
+
+export type SectionOverrideMode =
+  | 'SECTION_OVERRIDE_MODE_UNSPECIFIED'
+  | 0
+  | 'SECTION_OVERRIDE_MODE_OVERRIDE'
+  | 1
+  | 'SECTION_OVERRIDE_MODE_APPEND'
+  | 2
+  | 'SECTION_OVERRIDE_MODE_PREPEND'
+  | 3
+
+export type SectionOverrideMode__Output = typeof SectionOverrideMode[keyof typeof SectionOverrideMode]

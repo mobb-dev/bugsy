@@ -1,0 +1,20 @@
+// Original file: exa/codeium_common_pb/codeium_common.proto
+
+export const ContextSnippetType = {
+  CONTEXT_SNIPPET_TYPE_UNSPECIFIED: 'CONTEXT_SNIPPET_TYPE_UNSPECIFIED',
+  CONTEXT_SNIPPET_TYPE_RAW_SOURCE: 'CONTEXT_SNIPPET_TYPE_RAW_SOURCE',
+  CONTEXT_SNIPPET_TYPE_SIGNATURE: 'CONTEXT_SNIPPET_TYPE_SIGNATURE',
+  CONTEXT_SNIPPET_TYPE_NODEPATH: 'CONTEXT_SNIPPET_TYPE_NODEPATH',
+} as const;
+
+export type ContextSnippetType =
+  | 'CONTEXT_SNIPPET_TYPE_UNSPECIFIED'
+  | 0
+  | 'CONTEXT_SNIPPET_TYPE_RAW_SOURCE'
+  | 1
+  | 'CONTEXT_SNIPPET_TYPE_SIGNATURE'
+  | 2
+  | 'CONTEXT_SNIPPET_TYPE_NODEPATH'
+  | 3
+
+export type ContextSnippetType__Output = typeof ContextSnippetType[keyof typeof ContextSnippetType]

@@ -1,0 +1,20 @@
+// Original file: exa/cortex_pb/cortex.proto
+
+export const CommandOutputPriority = {
+  COMMAND_OUTPUT_PRIORITY_UNSPECIFIED: 'COMMAND_OUTPUT_PRIORITY_UNSPECIFIED',
+  COMMAND_OUTPUT_PRIORITY_TOP: 'COMMAND_OUTPUT_PRIORITY_TOP',
+  COMMAND_OUTPUT_PRIORITY_BOTTOM: 'COMMAND_OUTPUT_PRIORITY_BOTTOM',
+  COMMAND_OUTPUT_PRIORITY_SPLIT: 'COMMAND_OUTPUT_PRIORITY_SPLIT',
+} as const;
+
+export type CommandOutputPriority =
+  | 'COMMAND_OUTPUT_PRIORITY_UNSPECIFIED'
+  | 0
+  | 'COMMAND_OUTPUT_PRIORITY_TOP'
+  | 1
+  | 'COMMAND_OUTPUT_PRIORITY_BOTTOM'
+  | 2
+  | 'COMMAND_OUTPUT_PRIORITY_SPLIT'
+  | 3
+
+export type CommandOutputPriority__Output = typeof CommandOutputPriority[keyof typeof CommandOutputPriority]

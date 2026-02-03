@@ -1,29 +1,68 @@
 import { Argv } from 'yargs'
 
-import { startMonitoring } from '../../features/codeium_intellij/data_collector_monitor'
+import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
+import { processAndUploadHookData } from '../../features/codeium_intellij/data_collector'
+import { installWindsurfHooks } from '../../features/codeium_intellij/install_hook'
 
-export const windsurfIntellijMonitorBuilder = (yargs: Argv) => {
+export const windsurfIntellijInstallHookBuilder = (yargs: Argv) => {
+  return yargs
+    .option('save-env', {
+      type: 'boolean',
+      description:
+        'Save WEB_APP_URL, and API_URL environment variables to hooks config',
+      default: false,
+    })
+    .example(
+      '$0 windsurf-intellij-install-hook',
+      'Install Windsurf IntelliJ hooks for data collection'
+    )
+    .example(
+      '$0 windsurf-intellij-install-hook --save-env',
+      'Install hooks and save environment variables to config'
+    )
+    .strict()
+}
+
+export const windsurfIntellijProcessHookBuilder = (yargs: Argv) => {
   return yargs
     .example(
-      '$0 windsurf-intellij-monitor',
-      'Start monitoring Windsurf IntelliJ for AI inference data'
+      '$0 windsurf-intellij-process-hook',
+      'Process Windsurf IntelliJ hook data and upload to backend'
     )
     .strict()
 }
 
 /**
- * Handler for the windsurf-intellij-monitor command - starts monitoring Windsurf IntelliJ
- * for AI inference data and uploads traces to the backend
+ * Handler for the windsurf-intellij-install-hook command - installs hooks in Codeium hooks.json
  */
-export const windsurfIntellijMonitorHandler = async () => {
+export const windsurfIntellijInstallHookHandler = async (argv: {
+  'save-env': boolean
+}) => {
   try {
-    console.log('Starting Windsurf IntelliJ monitor...')
-    console.log('Polling for AI inference data from running IDE instances.')
-    console.log('Press Ctrl+C to stop.\n')
+    // Authenticate user using existing CLI auth flow
+    await getAuthenticatedGQLClient({ isSkipPrompts: false })
 
-    await startMonitoring()
+    // Install the hooks
+    await installWindsurfHooks({ saveEnv: argv['save-env'] })
+
+    process.exit(0)
   } catch (error) {
-    console.error('Windsurf IntelliJ monitor failed:', error)
+    console.error('Failed to install Windsurf IntelliJ hooks:', error)
+    process.exit(1)
+  }
+}
+
+/**
+ * Handler for the windsurf-intellij-process-hook command - processes stdin hook data and uploads traces
+ */
+export const windsurfIntellijProcessHookHandler = async () => {
+  try {
+    // Process hook data and upload to backend
+    await processAndUploadHookData()
+
+    process.exit(0)
+  } catch (error) {
+    console.error('Failed to process Windsurf IntelliJ hook data:', error)
     process.exit(1)
   }
 }

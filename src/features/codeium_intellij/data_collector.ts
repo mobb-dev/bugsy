@@ -1,8 +1,15 @@
-import type { PromptItem } from '../../args/commands/upload_ai_blame'
+import { z } from 'zod'
+
+import {
+  PromptItem,
+  uploadAiBlameHandlerFromExtension,
+} from '../../args/commands/upload_ai_blame'
+import { AiBlameInferenceType } from '../analysis/scm/generates/client_generates'
 import {
   isGitHubUrl,
   normalizeGitUrl,
 } from '../analysis/scm/services/GitService'
+import { readStdinData } from '../claude_code/data_collector'
 import {
   getGrpcClient,
   PromisifiedClient,
@@ -26,11 +33,56 @@ type StepResult = {
   inferences: string[]
 }
 
-export async function getLatestInferences(
-  startFrom: Date
-): Promise<TraceData[]> {
+const HookDataSchema = z.object({
+  trajectory_id: z.string(),
+})
+type HookData = z.infer<typeof HookDataSchema>
+
+export async function processAndUploadHookData() {
+  const tracePayload = await getTraceDataForHook()
+
+  if (!tracePayload) {
+    console.warn('Warning: Failed to retrieve chat data.')
+    return
+  }
+
+  try {
+    const uploadSuccess = await uploadAiBlameHandlerFromExtension({
+      prompts: tracePayload.prompts,
+      inference: tracePayload.inference,
+      model: tracePayload.model,
+      tool: tracePayload.tool,
+      responseTime: tracePayload.responseTime,
+      blameType: AiBlameInferenceType.Chat,
+      sessionId: tracePayload.sessionId,
+      repositoryUrl: tracePayload.repositoryUrl,
+    })
+
+    if (uploadSuccess) {
+      console.log('Uploaded trace data.')
+    } else {
+      console.warn('Failed to upload trace data.')
+    }
+  } catch (e) {
+    console.warn('Failed to upload trace data:', e)
+  }
+}
+
+function validateHookData(data: unknown): HookData {
+  return HookDataSchema.parse(data)
+}
+
+async function getTraceDataForHook(): Promise<TraceData | null> {
+  const rawData = await readStdinData()
+  const hookData = validateHookData(rawData)
+
+  return await getTraceDataForTrajectory(hookData.trajectory_id)
+}
+
+async function getTraceDataForTrajectory(
+  trajectoryId: string
+): Promise<TraceData | null> {
   const instances = findRunningCodeiumLanguageServers()
-  const results: TraceData[] = []
 
   for (const instance of instances) {
     const client = await getGrpcClient(instance.port, instance.csrf)
@@ -44,24 +96,15 @@ export async function getLatestInferences(
     for (const [cascadeId, chatSummary] of Object.entries(
       chats.trajectorySummaries
     )) {
-      const chatLastModifiedSecStr = chatSummary.lastModifiedTime?.seconds
-
-      if (!chatLastModifiedSecStr) {
+      if (chatSummary.trajectoryId !== trajectoryId) {
         continue
       }
 
-      const chatLastModifiedSec = Number(chatLastModifiedSecStr)
-
-      if (chatLastModifiedSec >= Math.floor(startFrom.getTime() / 1000)) {
-        const traceData = await processChat(client, cascadeId)
-        if (traceData) {
-          results.push(traceData)
-        }
-      }
+      return await processChat(client, cascadeId)
     }
   }
 
-  return results
+  return null
 }
 
 async function processChat(
@@ -196,7 +239,13 @@ function processChatStepCodeAction(
   step: CortexTrajectoryStep__Output
 ): StepResult {
   const inferences: string[] = []
+  const toolCallName = step.metadata?.toolCall?.name
   const unifiedDiff = step.codeAction?.actionResult?.edit?.diff?.unifiedDiff
+
+  // This is the way to distinguish between Windsurf and user edits.
+  if (!toolCallName) {
+    return { prompts: [], inferences }
+  }
 
   if (!unifiedDiff) {
     return { prompts: [], inferences }

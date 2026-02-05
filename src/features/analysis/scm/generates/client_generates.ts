@@ -58,7 +58,7 @@ export type AiBlameInferenceFinalizeInput = {
   promptKey: Scalars['String']['input'];
   /**
    * Normalized GitHub repository URL for filtering inferences.
-   * Should be normalized using normalizeGitUrl() and checked with isGitHubUrl() before sending.
+   * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
    * Only GitHub URLs are supported; non-GitHub repos should send null.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
@@ -77,7 +77,7 @@ export type AiBlameInferenceInitInput = {
   promptFileName: Scalars['String']['input'];
   /**
    * Normalized GitHub repository URL for filtering inferences.
-   * Should be normalized using normalizeGitUrl() and checked with isGitHubUrl() before sending.
+   * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
    * Only GitHub URLs are supported; non-GitHub repos should send null.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;

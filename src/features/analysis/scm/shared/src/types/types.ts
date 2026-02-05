@@ -520,6 +520,8 @@ type BaseParseScmURLRes = {
   repoName: string
   protocol: string
   pathElements: string[]
+  /** Canonical HTTPS URL (normalized: no credentials, no .git suffix, lowercase hostname) */
+  canonicalUrl: string
 }
 
 export type ParseScmURLRes =

@@ -5,6 +5,7 @@ import * as path from 'path'
 import { SimpleGit, simpleGit, StatusResult } from 'simple-git'
 
 import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../../../mcp/core/configs'
+import { parseScmURL } from '../shared/src/urlParser'
 import { FileUtils } from './FileUtils'
 
 /** Maximum diff size in bytes for local commit data (3MB) */
@@ -43,90 +44,6 @@ export type LocalCommitData = {
   timestamp: Date
   /** Parent commits with timestamps (for time window calculation) */
   parentCommits?: { sha: string; timestamp: Date }[]
-}
-
-/**
- * Normalizes a Git URL to HTTPS format for various Git hosting platforms.
- * Handles SSH, git://, and HTTPS URLs. Strips credentials and .git suffix.
- * @param url The Git URL to normalize
- * @returns The normalized HTTPS URL
- */
-export function normalizeGitUrl(url: string): string {
-  let normalizedUrl = url
-
-  // Remove .git suffix if present
-  if (normalizedUrl.endsWith('.git')) {
-    normalizedUrl = normalizedUrl.slice(0, -'.git'.length)
-  }
-
-  // Convert SSH URLs to HTTPS for various platforms
-  const sshToHttpsMappings = [
-    // GitHub
-    { pattern: 'git@github.com:', replacement: 'https://github.com/' },
-    // GitLab
-    { pattern: 'git@gitlab.com:', replacement: 'https://gitlab.com/' },
-    // Bitbucket
-    { pattern: 'git@bitbucket.org:', replacement: 'https://bitbucket.org/' },
-    // Azure DevOps (SSH format)
-    {
-      pattern: 'git@ssh.dev.azure.com:',
-      replacement: 'https://dev.azure.com/',
-    },
-    // Azure DevOps (alternative SSH format)
-    {
-      pattern: /git@([^:]+):v3\/([^/]+)\/([^/]+)\/([^/]+)/,
-      replacement: 'https://$1/$2/_git/$4',
-    },
-  ]
-
-  for (const mapping of sshToHttpsMappings) {
-    if (typeof mapping.pattern === 'string') {
-      if (normalizedUrl.startsWith(mapping.pattern)) {
-        normalizedUrl = normalizedUrl.replace(
-          mapping.pattern,
-          mapping.replacement
-        )
-        break
-      }
-    } else {
-      // Handle regex patterns
-      const match = normalizedUrl.match(mapping.pattern)
-      if (match) {
-        normalizedUrl = normalizedUrl.replace(
-          mapping.pattern,
-          mapping.replacement
-        )
-        break
-      }
-    }
-  }
-
-  // Strip credentials from HTTPS URLs (e.g. https://token@github.com/org/repo).
-  // This is common in CI environments where checkout injects an access token.
-  if (
-    normalizedUrl.startsWith('https://') ||
-    normalizedUrl.startsWith('http://')
-  ) {
-    // Remove any "userinfo@" segment after the protocol.
-    normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)([^@/]+@)/, '$1')
-  }
-
-  return normalizedUrl
-}
-
-/**
- * Checks if a normalized Git URL is a GitHub URL.
- * @param normalizedUrl The normalized Git URL (from normalizeGitUrl)
- * @returns True if the URL is a GitHub URL
- */
-export function isGitHubUrl(normalizedUrl: string): boolean {
-  try {
-    const url = new URL(normalizedUrl)
-    const host = url.host.toLowerCase()
-    return host === 'github.com' || host.endsWith('.github.com')
-  } catch {
-    return false
-  }
 }
 
 export class GitService {
@@ -285,7 +202,7 @@ export class GitService {
       ])
 
       const normalizedRepoUrl = repoUrl.value
-        ? normalizeGitUrl(repoUrl.value)
+        ? (parseScmURL(repoUrl.value)?.canonicalUrl ?? '')
         : ''
 
       this.log('[GitService] Git repository information retrieved', 'debug', {
@@ -408,7 +325,7 @@ export class GitService {
     try {
       const remoteUrl = await this.git.getConfig('remote.origin.url')
       const url = remoteUrl.value || ''
-      const normalizedUrl = normalizeGitUrl(url)
+      const normalizedUrl = parseScmURL(url)?.canonicalUrl ?? url
 
       this.log('[GitService] Remote repository URL retrieved', 'debug', {
         url: normalizedUrl,

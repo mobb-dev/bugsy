@@ -5,10 +5,7 @@ import {
   uploadAiBlameHandlerFromExtension,
 } from '../../args/commands/upload_ai_blame'
 import { AiBlameInferenceType } from '../analysis/scm/generates/client_generates'
-import {
-  isGitHubUrl,
-  normalizeGitUrl,
-} from '../analysis/scm/services/GitService'
+import { parseScmURL, ScmType } from '../analysis/scm/shared/src/urlParser'
 import { readStdinData } from '../claude_code/data_collector'
 import {
   getGrpcClient,
@@ -147,10 +144,9 @@ async function processChat(
   let repositoryUrl: string | undefined
 
   if (repoOrigin) {
-    const normalizedUrl = normalizeGitUrl(repoOrigin)
-
-    if (isGitHubUrl(normalizedUrl)) {
-      repositoryUrl = normalizedUrl
+    const parsed = parseScmURL(repoOrigin)
+    if (parsed?.scmType === ScmType.GitHub) {
+      repositoryUrl = parsed.canonicalUrl
     }
   }
 

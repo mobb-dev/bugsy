@@ -4,6 +4,55 @@ import { ParseScmURLRes, scmCloudUrl, ScmType } from '../types'
 
 export const ADO_PREFIX_PATH = 'tfs'
 
+/**
+ * Computes the canonical HTTPS URL from parsed SCM URL data.
+ * Used internally to add canonicalUrl to ParseScmURLRes.
+ */
+function computeCanonicalUrl(data: {
+  scmType: ScmType | 'Unknown'
+  hostname: string
+  organization: string
+  repoName: string
+  projectPath: string
+  projectName?: string
+}): string {
+  const {
+    scmType,
+    hostname,
+    organization,
+    repoName,
+    projectPath,
+    projectName,
+  } = data
+
+  switch (scmType) {
+    case ScmType.GitHub:
+      return `https://${hostname}/${organization}/${repoName}`
+
+    case ScmType.GitLab:
+      // GitLab supports subgroups, so use projectPath to preserve full path
+      return `https://${hostname}/${projectPath}`
+
+    case ScmType.Bitbucket:
+      return `https://${hostname}/${organization}/${repoName}`
+
+    case ScmType.Ado: {
+      // ADO canonical format: https://{hostname}/{org}/{project}/_git/{repo}
+      // Normalize ssh.dev.azure.com to dev.azure.com for canonical URL
+      const adoHostname =
+        hostname === 'ssh.dev.azure.com' ? 'dev.azure.com' : hostname
+      if (projectName) {
+        return `https://${adoHostname}/${organization}/${projectName}/_git/${repoName}`
+      }
+      return `https://${adoHostname}/${organization}/_git/${repoName}`
+    }
+
+    default:
+      // Unknown SCM type - use hostname and projectPath
+      return `https://${hostname}/${projectPath}`
+  }
+}
+
 const NAME_REGEX = /[a-z0-9\-_.+]+/i
 
 type BaseRepo = {
@@ -216,16 +265,25 @@ function parseSshUrl(scmURL: string, scmType?: ScmType): ParseScmURLRes {
         projectName &&
         repoName?.match(NAME_REGEX)
       ) {
+        const parsedProjectName = z.string().parse(projectName)
         return {
           scmType: ScmType.Ado,
           hostname: normalizedHostname,
           organization,
-          projectName: z.string().parse(projectName),
+          projectName: parsedProjectName,
           repoName,
           projectPath,
           protocol: 'ssh:',
           pathElements,
           prefixPath: '',
+          canonicalUrl: computeCanonicalUrl({
+            scmType: ScmType.Ado,
+            hostname: normalizedHostname,
+            organization,
+            repoName,
+            projectPath,
+            projectName: parsedProjectName,
+          }),
         }
       }
     }
@@ -266,6 +324,13 @@ function parseSshUrl(scmURL: string, scmType?: ScmType): ParseScmURLRes {
       repoName,
       protocol: 'ssh:',
       pathElements: filteredPathElements,
+      canonicalUrl: computeCanonicalUrl({
+        scmType: 'Unknown',
+        hostname: normalizedHostname,
+        organization,
+        repoName,
+        projectPath,
+      }),
     }
   }
 
@@ -290,12 +355,27 @@ function parseSshUrl(scmURL: string, scmType?: ScmType): ParseScmURLRes {
       prefixPath: repo.prefixPath,
       scmType: repo.scmType,
       ...res,
+      canonicalUrl: computeCanonicalUrl({
+        scmType: repo.scmType,
+        hostname: normalizedHostname,
+        organization,
+        repoName,
+        projectPath,
+        projectName: repo.projectName,
+      }),
     }
   }
 
   return {
     scmType: repo.scmType,
     ...res,
+    canonicalUrl: computeCanonicalUrl({
+      scmType: repo.scmType,
+      hostname: normalizedHostname,
+      organization,
+      repoName,
+      projectPath,
+    }),
   }
 }
 
@@ -303,13 +383,16 @@ export const parseScmURL = (
   scmURL: string,
   scmType?: ScmType
 ): ParseScmURLRes => {
+  // Trim whitespace and trailing slashes
+  const cleanedURL = scmURL.trim().replace(/\/+$/, '')
+
   // Try SSH format first
-  const sshResult = parseSshUrl(scmURL, scmType)
+  const sshResult = parseSshUrl(cleanedURL, scmType)
   if (sshResult) return sshResult
 
   // Fall back to HTTPS/HTTP format
   try {
-    const url = new URL(scmURL)
+    const url = new URL(cleanedURL)
     const hostname = url.hostname.toLowerCase()
     const projectPath = url.pathname.substring(1).replace(/.git$/i, '')
 
@@ -346,6 +429,13 @@ export const parseScmURL = (
         repoName,
         protocol: url.protocol,
         pathElements,
+        canonicalUrl: computeCanonicalUrl({
+          scmType: 'Unknown',
+          hostname,
+          organization,
+          repoName,
+          projectPath,
+        }),
       }
     }
 
@@ -368,11 +458,26 @@ export const parseScmURL = (
         prefixPath: repo.prefixPath,
         scmType: repo.scmType,
         ...res,
+        canonicalUrl: computeCanonicalUrl({
+          scmType: repo.scmType,
+          hostname,
+          organization,
+          repoName,
+          projectPath,
+          projectName: repo.projectName,
+        }),
       }
     }
     return {
       scmType: repo.scmType,
       ...res,
+      canonicalUrl: computeCanonicalUrl({
+        scmType: repo.scmType,
+        hostname,
+        organization,
+        repoName,
+        projectPath,
+      }),
     }
   } catch (e) {
     return null

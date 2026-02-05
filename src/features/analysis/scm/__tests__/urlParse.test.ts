@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import { ADO_PREFIX_PATH, parseScmURL, ScmType } from '../shared/src'
 
+// Helper to get canonical URL from parseScmURL
+const getCanonicalUrl = (url: string) => parseScmURL(url)?.canonicalUrl ?? null
+
 const ALLOWED_URLS = {
   [ScmType.GitLab]: [
     'https://gitlab.com/gitlab-org/security-products/tests/webgoat',
@@ -341,6 +344,155 @@ describe('parseScmURL', () => {
       expect(result).not.toBe(null)
       expect(result?.scmType).toBe(ScmType.GitHub)
       expect(result?.protocol).toBe('ssh:')
+    })
+  })
+})
+
+describe('parseScmURL canonicalUrl', () => {
+  describe('GitHub URLs', () => {
+    it('should normalize HTTPS URLs', () => {
+      expect(getCanonicalUrl('https://github.com/org/repo')).toBe(
+        'https://github.com/org/repo'
+      )
+      expect(getCanonicalUrl('https://github.com/org/repo.git')).toBe(
+        'https://github.com/org/repo'
+      )
+    })
+
+    it('should normalize SSH URLs to HTTPS', () => {
+      expect(getCanonicalUrl('git@github.com:org/repo.git')).toBe(
+        'https://github.com/org/repo'
+      )
+      expect(getCanonicalUrl('git@github.com:org/repo')).toBe(
+        'https://github.com/org/repo'
+      )
+    })
+
+    it('should preserve path casing', () => {
+      expect(getCanonicalUrl('https://github.com/MyOrg/MyRepo')).toBe(
+        'https://github.com/MyOrg/MyRepo'
+      )
+      expect(getCanonicalUrl('git@github.com:MyOrg/MyRepo.git')).toBe(
+        'https://github.com/MyOrg/MyRepo'
+      )
+    })
+
+    it('should lowercase hostname', () => {
+      expect(getCanonicalUrl('https://GITHUB.COM/a/b')).toBe(
+        'https://github.com/a/b'
+      )
+    })
+
+    it('should strip credentials from URLs', () => {
+      expect(getCanonicalUrl('https://token@github.com/org/repo.git')).toBe(
+        'https://github.com/org/repo'
+      )
+      expect(getCanonicalUrl('https://user:pass@github.com/a/b')).toBe(
+        'https://github.com/a/b'
+      )
+    })
+
+    it('should handle trailing slashes and whitespace', () => {
+      expect(getCanonicalUrl('https://github.com/org/repo/')).toBe(
+        'https://github.com/org/repo'
+      )
+      expect(getCanonicalUrl('  https://github.com/org/repo  ')).toBe(
+        'https://github.com/org/repo'
+      )
+      expect(getCanonicalUrl('https://github.com/org/repo///')).toBe(
+        'https://github.com/org/repo'
+      )
+    })
+  })
+
+  describe('GitLab URLs', () => {
+    it('should normalize HTTPS URLs and preserve subgroups', () => {
+      expect(
+        getCanonicalUrl('https://gitlab.com/group/subgroup/repo.git')
+      ).toBe('https://gitlab.com/group/subgroup/repo')
+    })
+
+    it('should normalize SSH URLs to HTTPS', () => {
+      expect(getCanonicalUrl('git@gitlab.com:group/subgroup/repo.git')).toBe(
+        'https://gitlab.com/group/subgroup/repo'
+      )
+    })
+  })
+
+  describe('Bitbucket URLs', () => {
+    it('should normalize HTTPS URLs', () => {
+      expect(getCanonicalUrl('https://bitbucket.org/workspace/repo')).toBe(
+        'https://bitbucket.org/workspace/repo'
+      )
+    })
+
+    it('should normalize SSH URLs to HTTPS', () => {
+      expect(getCanonicalUrl('git@bitbucket.org:workspace/repo.git')).toBe(
+        'https://bitbucket.org/workspace/repo'
+      )
+    })
+
+    it('should strip credentials from URLs', () => {
+      expect(
+        getCanonicalUrl('https://user@bitbucket.org/workspace/repo.git')
+      ).toBe('https://bitbucket.org/workspace/repo')
+    })
+  })
+
+  describe('Azure DevOps URLs', () => {
+    it('should normalize HTTPS URLs to canonical format', () => {
+      expect(
+        getCanonicalUrl('https://dev.azure.com/org/project/_git/repo')
+      ).toBe('https://dev.azure.com/org/project/_git/repo')
+    })
+
+    it('should normalize SSH URLs to canonical HTTPS format', () => {
+      expect(getCanonicalUrl('git@ssh.dev.azure.com:v3/org/project/repo')).toBe(
+        'https://dev.azure.com/org/project/_git/repo'
+      )
+    })
+  })
+
+  describe('Unknown hosts', () => {
+    it('should normalize unknown host URLs', () => {
+      expect(getCanonicalUrl('https://custom.host.com/org/repo')).toBe(
+        'https://custom.host.com/org/repo'
+      )
+    })
+
+    it('should normalize SSH URLs with unknown hosts', () => {
+      expect(getCanonicalUrl('git@custom.host.com:org/repo.git')).toBe(
+        'https://custom.host.com/org/repo'
+      )
+    })
+  })
+
+  describe('Self-hosted instances', () => {
+    it('should preserve self-hosted GitHub Enterprise hostname', () => {
+      expect(getCanonicalUrl('https://github.mycompany.com/org/repo')).toBe(
+        'https://github.mycompany.com/org/repo'
+      )
+    })
+
+    it('should preserve self-hosted GitLab hostname', () => {
+      expect(
+        getCanonicalUrl('https://gitlab.company.com/group/subgroup/repo')
+      ).toBe('https://gitlab.company.com/group/subgroup/repo')
+    })
+
+    it('should preserve self-hosted Bitbucket hostname', () => {
+      expect(
+        getCanonicalUrl('https://bitbucket.mycompany.com/workspace/repo')
+      ).toBe('https://bitbucket.mycompany.com/workspace/repo')
+    })
+  })
+
+  describe('invalid URLs', () => {
+    it('should return null for invalid URLs', () => {
+      expect(getCanonicalUrl('not-a-url')).toBe(null)
+      expect(getCanonicalUrl('')).toBe(null)
+      expect(getCanonicalUrl('https://github.com')).toBe(null)
+      expect(getCanonicalUrl('https://github.com/only-org')).toBe(null)
     })
   })
 })

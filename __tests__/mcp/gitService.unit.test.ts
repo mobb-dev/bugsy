@@ -5,10 +5,7 @@ import { SimpleGit, StatusResult } from 'simple-git'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { FileUtils } from '../../src/features/analysis/scm/services/FileUtils'
-import {
-  GitService,
-  normalizeGitUrl,
-} from '../../src/features/analysis/scm/services/GitService'
+import { GitService } from '../../src/features/analysis/scm/services/GitService'
 import {
   ActiveGitRepo,
   EmptyGitRepo,
@@ -758,16 +755,6 @@ describe('GitService', () => {
 
   // Additional edge-case tests to improve coverage
   describe('edge-case coverage', () => {
-    it('normalizeGitUrl should handle Azure DevOps SSH formats', () => {
-      expect(normalizeGitUrl('git@ssh.dev.azure.com:v3/org/proj/repo')).toBe(
-        'https://dev.azure.com/v3/org/proj/repo'
-      )
-
-      expect(normalizeGitUrl('git@contoso.com:v3/org/proj/repo')).toBe(
-        'https://contoso.com/org/_git/repo'
-      )
-    })
-
     it('getGitignoreContent should still succeed when git root cannot be resolved', async () => {
       const repo = new EmptyGitRepo()
       const repoPath = repo.getRepoPath()!

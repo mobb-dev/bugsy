@@ -119,6 +119,13 @@ export type AcceptanceRateStats = {
   rejectedInferences: InferenceStats;
 };
 
+export type ActiveDevelopersData = {
+  __typename?: 'ActiveDevelopersData';
+  activeAiDevelopers: Scalars['Int']['output'];
+  previousActiveAiDevelopers: Scalars['Int']['output'];
+  trendChange: Scalars['Int']['output'];
+};
+
 export type AddUserToOrganizationResponse = {
   __typename?: 'AddUserToOrganizationResponse';
   userId: Scalars['String']['output'];
@@ -129,6 +136,13 @@ export type AddUsersToProjectResponse = AddUsersToProjectSuccess | UserAlreadyIn
 export type AddUsersToProjectSuccess = {
   __typename?: 'AddUsersToProjectSuccess';
   status: Status;
+};
+
+export type AdoptionTrendsTimeSeriesPoint = {
+  __typename?: 'AdoptionTrendsTimeSeriesPoint';
+  activeDevelopersCount?: Maybe<Scalars['Float']['output']>;
+  aiCodeUsagePercentage?: Maybe<Scalars['Float']['output']>;
+  date: Scalars['String']['output'];
 };
 
 export type AiToolDailyUsage = {
@@ -489,6 +503,34 @@ export type GetAiBlameInferencePromptResponse = {
   __typename?: 'GetAIBlameInferencePromptResponse';
   error?: Maybe<Scalars['String']['output']>;
   promptUrl?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetActiveDevelopersError = {
+  __typename?: 'GetActiveDevelopersError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetActiveDevelopersResponse = GetActiveDevelopersError | GetActiveDevelopersSuccess;
+
+export type GetActiveDevelopersSuccess = {
+  __typename?: 'GetActiveDevelopersSuccess';
+  data: ActiveDevelopersData;
+  status: Status;
+};
+
+export type GetAdoptionTrendsTimeSeriesError = {
+  __typename?: 'GetAdoptionTrendsTimeSeriesError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetAdoptionTrendsTimeSeriesResponse = GetAdoptionTrendsTimeSeriesError | GetAdoptionTrendsTimeSeriesSuccess;
+
+export type GetAdoptionTrendsTimeSeriesSuccess = {
+  __typename?: 'GetAdoptionTrendsTimeSeriesSuccess';
+  dataPoints: Array<AdoptionTrendsTimeSeriesPoint>;
   status: Status;
 };
 
@@ -1664,16 +1706,6 @@ export type VulnerabilityReportIssueV5 = {
 };
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
-
-export type ActiveDevelopers_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
-};
-
-export type AdoptionTrendsTimeSeries_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
-};
 
 export type AggregatedUnexpiredVulnerabilitiesState_Organization_Args = {
   linear_vul_count_limit?: InputMaybe<Scalars['Int']['input']>;
@@ -9625,17 +9657,7 @@ export type Blame_Ai_Analysis_Request = {
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: Maybe<Scalars['jsonb']['output']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: Maybe<Scalars['String']['output']>;
   state: Blame_Ai_Analysis_Request_State_Enum;
-};
-
-
-/** columns and relationships of "blame_ai_analysis_request" */
-export type Blame_Ai_Analysis_RequestProgressMetadataArgs = {
-  path?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregated selection of "blame_ai_analysis_request" */
@@ -9694,12 +9716,6 @@ export type Blame_Ai_Analysis_Request_Aggregate_Order_By = {
   variance?: InputMaybe<Blame_Ai_Analysis_Request_Variance_Order_By>;
 };
 
-/** append existing jsonb value of filtered columns with new jsonb value */
-export type Blame_Ai_Analysis_Request_Append_Input = {
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
-};
-
 /** input type for inserting array relation for remote table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input = {
   data: Array<Blame_Ai_Analysis_Request_Insert_Input>;
@@ -9736,8 +9752,6 @@ export type Blame_Ai_Analysis_Request_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
-  progressMetadata?: InputMaybe<Jsonb_Comparison_Exp>;
-  progressStage?: InputMaybe<String_Comparison_Exp>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum_Comparison_Exp>;
 };
 
@@ -9746,24 +9760,6 @@ export enum Blame_Ai_Analysis_Request_Constraint {
   /** unique or primary key constraint on columns "id" */
   BlameAiAnalysisRequestPkey = 'blame_ai_analysis_request_pkey'
 }
-
-/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-export type Blame_Ai_Analysis_Request_Delete_At_Path_Input = {
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Array<Scalars['String']['input']>>;
-};
-
-/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-export type Blame_Ai_Analysis_Request_Delete_Elem_Input = {
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['Int']['input']>;
-};
-
-/** delete key/value pair or string element. key/value pairs are matched based on their key value */
-export type Blame_Ai_Analysis_Request_Delete_Key_Input = {
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['String']['input']>;
-};
 
 /** input type for incrementing numeric columns in table "blame_ai_analysis_request" */
 export type Blame_Ai_Analysis_Request_Inc_Input = {
@@ -9784,10 +9780,6 @@ export type Blame_Ai_Analysis_Request_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -9802,8 +9794,6 @@ export type Blame_Ai_Analysis_Request_Max_Fields = {
   error?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "blame_ai_analysis_request" */
@@ -9816,8 +9806,6 @@ export type Blame_Ai_Analysis_Request_Max_Order_By = {
   error?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -9831,8 +9819,6 @@ export type Blame_Ai_Analysis_Request_Min_Fields = {
   error?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "blame_ai_analysis_request" */
@@ -9845,8 +9831,6 @@ export type Blame_Ai_Analysis_Request_Min_Order_By = {
   error?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "blame_ai_analysis_request" */
@@ -9878,20 +9862,12 @@ export type Blame_Ai_Analysis_Request_Order_By = {
   id?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
-  progressMetadata?: InputMaybe<Order_By>;
-  progressStage?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: blame_ai_analysis_request */
 export type Blame_Ai_Analysis_Request_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
-};
-
-/** prepend existing jsonb value of filtered columns with new jsonb value */
-export type Blame_Ai_Analysis_Request_Prepend_Input = {
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** select columns of table "blame_ai_analysis_request" */
@@ -9913,10 +9889,6 @@ export enum Blame_Ai_Analysis_Request_Select_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
-  ProgressMetadata = 'progressMetadata',
-  /** column name */
-  ProgressStage = 'progressStage',
-  /** column name */
   State = 'state'
 }
 
@@ -9930,10 +9902,6 @@ export type Blame_Ai_Analysis_Request_Set_Input = {
   error?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -10146,10 +10114,6 @@ export type Blame_Ai_Analysis_Request_Stream_Cursor_Value_Input = {
   error?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  /** JSON metadata for progress tracking (e.g., {"commitsProcessed": 4, "totalCommits": 6}) */
-  progressMetadata?: InputMaybe<Scalars['jsonb']['input']>;
-  /** Current processing stage: INITIALIZING, FETCHING_DIFF, PROCESSING_COMMITS, ENRICHING, COMPLETED */
-  progressStage?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<Blame_Ai_Analysis_Request_State_Enum>;
 };
 
@@ -10185,26 +10149,12 @@ export enum Blame_Ai_Analysis_Request_Update_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
-  ProgressMetadata = 'progressMetadata',
-  /** column name */
-  ProgressStage = 'progressStage',
-  /** column name */
   State = 'state'
 }
 
 export type Blame_Ai_Analysis_Request_Updates = {
-  /** append existing jsonb value of filtered columns with new jsonb value */
-  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
-  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
-  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
-  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
-  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   /** increments the numeric columns with given value of the filtered values */
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
-  /** prepend existing jsonb value of filtered columns with new jsonb value */
-  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   /** filter the rows which have to be updated */
@@ -22700,12 +22650,7 @@ export type Mutation_RootUpdate_Api_Token_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
-  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
-  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
-  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
-  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
-  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   where: Blame_Ai_Analysis_Request_Bool_Exp;
 };
@@ -22713,12 +22658,7 @@ export type Mutation_RootUpdate_Blame_Ai_Analysis_RequestArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Blame_Ai_Analysis_Request_By_PkArgs = {
-  _append?: InputMaybe<Blame_Ai_Analysis_Request_Append_Input>;
-  _delete_at_path?: InputMaybe<Blame_Ai_Analysis_Request_Delete_At_Path_Input>;
-  _delete_elem?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Elem_Input>;
-  _delete_key?: InputMaybe<Blame_Ai_Analysis_Request_Delete_Key_Input>;
   _inc?: InputMaybe<Blame_Ai_Analysis_Request_Inc_Input>;
-  _prepend?: InputMaybe<Blame_Ai_Analysis_Request_Prepend_Input>;
   _set?: InputMaybe<Blame_Ai_Analysis_Request_Set_Input>;
   pk_columns: Blame_Ai_Analysis_Request_Pk_Columns_Input;
 };
@@ -24494,10 +24434,8 @@ export enum Order_By {
 /** columns and relationships of "organization" */
 export type Organization = {
   __typename?: 'organization';
-  /** A computed field, executes function "organization_active_developers_stats" */
-  activeDevelopers?: Maybe<Array<View_Types_Active_Developers_Stats>>;
-  /** A computed field, executes function "organization_adoption_trends_time_series" */
-  adoptionTrendsTimeSeries?: Maybe<Array<View_Types_Adoption_Trends_Time_Series>>;
+  activeDevelopers: GetActiveDevelopersResponse;
+  adoptionTrendsTimeSeries: GetAdoptionTrendsTimeSeriesResponse;
   /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v3" */
   aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
@@ -24605,23 +24543,15 @@ export type Organization = {
 
 /** columns and relationships of "organization" */
 export type OrganizationActiveDevelopersArgs = {
-  args: ActiveDevelopers_Organization_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Active_Developers_Stats_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Active_Developers_Stats_Order_By>>;
-  where?: InputMaybe<View_Types_Active_Developers_Stats_Bool_Exp>;
+  endDate: Scalars['Timestamp']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
 /** columns and relationships of "organization" */
 export type OrganizationAdoptionTrendsTimeSeriesArgs = {
-  args?: InputMaybe<AdoptionTrendsTimeSeries_Organization_Args>;
-  distinct_on?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Adoption_Trends_Time_Series_Order_By>>;
-  where?: InputMaybe<View_Types_Adoption_Trends_Time_Series_Bool_Exp>;
+  endDate: Scalars['Timestamp']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -29650,6 +29580,16 @@ export type Query_Root = {
    * Takes an AI Blame attribution ID and checks user access via organization.
    */
   getAIBlameInferenceData: GetAiBlameInferencePromptResponse;
+  /**
+   * Get active AI developers count for current and previous periods with trend change.
+   * Returns developer activity statistics based on AI code attribution data.
+   */
+  getActiveDevelopers: GetActiveDevelopersResponse;
+  /**
+   * Get daily adoption trends time series with 7-day rolling averages.
+   * Returns AI code usage percentage and active developer count over time.
+   */
+  getAdoptionTrendsTimeSeries: GetAdoptionTrendsTimeSeriesResponse;
   getAiToolTokens?: Maybe<GetAiToolTokensResponse>;
   getAiToolUsageStatistics?: Maybe<GetAiToolUsageStatisticsResponse>;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
@@ -31245,6 +31185,20 @@ export type Query_RootFix_To_Submit_Fix_Request_By_PkArgs = {
 
 export type Query_RootGetAiBlameInferenceDataArgs = {
   aiBlameAttributionId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetActiveDevelopersArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetAdoptionTrendsTimeSeriesArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 

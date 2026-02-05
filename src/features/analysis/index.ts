@@ -175,6 +175,7 @@ export type AnalysisParams = {
   autoPr?: boolean
   createOnePr?: boolean
   commitDirectly?: boolean
+  polling?: boolean
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -354,6 +355,7 @@ export async function _scan(
     createOnePr,
     commitDirectly,
     pullRequest,
+    polling,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -492,6 +494,7 @@ export async function _scan(
     sha,
     reference,
     shouldScan,
+    polling,
   })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
@@ -514,6 +517,7 @@ export async function _scan(
       scanSource: _getScanSource(command, ci),
       scanContext: ScanContext.BUGSY,
     },
+    polling,
   })
   if (
     sendReportRes.submitVulnerabilityReport.__typename !== 'VulnerabilityReport'
@@ -533,6 +537,7 @@ export async function _scan(
       prId: pullRequest,
       createSpinner,
       createOnePr,
+      polling,
     })
   }
 
@@ -544,6 +549,7 @@ export async function _scan(
       analysisId: reportUploadInfo.fixReportId,
       scanner,
       gqlClient,
+      polling,
     })
   }
   return reportUploadInfo.fixReportId
@@ -671,6 +677,7 @@ export async function _scan(
         command,
         ci,
         shouldScan,
+        polling,
       })
 
       const res = await _zipAndUploadRepo({
@@ -696,6 +703,7 @@ export async function _scan(
         command,
         ci,
         shouldScan,
+        polling,
       })
     }
 
@@ -716,6 +724,7 @@ export async function _scan(
           experimentalEnabled: !!experimentalEnabled,
           scanContext: ScanContext.BUGSY,
         },
+        polling,
       })
 
       if (command === 'review') {
@@ -725,6 +734,7 @@ export async function _scan(
           analysisId: reportUploadInfo.fixReportId,
           scanner,
           gqlClient,
+          polling,
         })
       }
     } catch (e) {
@@ -743,6 +753,7 @@ export async function _scan(
         prId: pullRequest,
         createSpinner,
         createOnePr,
+        polling,
       })
     }
 
@@ -815,6 +826,7 @@ export async function _digestReport({
   sha,
   reference,
   shouldScan,
+  polling,
 }: {
   gqlClient: GQLClient
   fixReportId: string
@@ -825,6 +837,7 @@ export async function _digestReport({
   sha?: string
   reference?: string
   shouldScan?: boolean
+  polling?: boolean
 }) {
   const digestSpinner = createSpinner(
     progressMassages.processingVulnerabilityReport
@@ -841,21 +854,50 @@ export async function _digestReport({
         shouldScan,
       }
     )
-    await gqlClient.subscribeToAnalysis({
-      subscribeToAnalysisParams: {
-        analysisId: fixReportId,
-      },
-      callback: () =>
-        digestSpinner.update({
-          text: progressMassages.processingVulnerabilityReportSuccess,
-        }),
 
-      callbackStates: [
-        Fix_Report_State_Enum.Digested,
-        Fix_Report_State_Enum.Finished,
-      ],
-      timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
-    })
+    const callbackStates = [
+      Fix_Report_State_Enum.Digested,
+      Fix_Report_State_Enum.Finished,
+    ]
+    const callback = (_analysisId: string) =>
+      digestSpinner.update({
+        text: progressMassages.processingVulnerabilityReportSuccess,
+      })
+
+    if (polling) {
+      debug(
+        '[_digestReport] Using POLLING mode for analysis state updates (--polling flag enabled)'
+      )
+      console.log(
+        chalk.cyan(
+          '🔄 [Polling Mode] Using HTTP polling instead of WebSocket for status updates'
+        )
+      )
+      await gqlClient.pollForAnalysisState({
+        analysisId: fixReportId,
+        callback,
+        callbackStates,
+        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+      })
+    } else {
+      debug(
+        '[_digestReport] Using WEBSOCKET mode for analysis state updates (default)'
+      )
+      console.log(
+        chalk.cyan(
+          '🔌 [WebSocket Mode] Using WebSocket subscription for status updates'
+        )
+      )
+      await gqlClient.subscribeToAnalysis({
+        subscribeToAnalysisParams: {
+          analysisId: fixReportId,
+        },
+        callback,
+        callbackStates,
+        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+      })
+    }
+
     const vulnFiles = await gqlClient.getVulnerabilityReportPaths(
       vulnerabilityReportId
     )
@@ -881,12 +923,14 @@ async function waitForAnaysisAndReviewPr({
   analysisId,
   scanner,
   gqlClient,
+  polling,
 }: {
   repo?: string
   githubActionToken?: string
   analysisId: string
   scanner?: string
   gqlClient: GQLClient
+  polling?: boolean
 }) {
   const params = z
     .object({
@@ -907,18 +951,44 @@ async function waitForAnaysisAndReviewPr({
     }
   )
 
-  await gqlClient.subscribeToAnalysis({
-    subscribeToAnalysisParams: {
+  const callback = (analysisId: string) => {
+    return addFixCommentsForPr({
       analysisId,
-    },
-    callback: (analysisId) => {
-      return addFixCommentsForPr({
+      gqlClient,
+      scm,
+      scanner: z.nativeEnum(SCANNERS).parse(scanner),
+    })
+  }
+
+  if (polling) {
+    debug(
+      '[waitForAnaysisAndReviewPr] Using POLLING mode for analysis state updates'
+    )
+    console.log(
+      chalk.cyan(
+        '🔄 [Polling Mode] Waiting for analysis completion using HTTP polling'
+      )
+    )
+    await gqlClient.pollForAnalysisState({
+      analysisId,
+      callback,
+      callbackStates: [Fix_Report_State_Enum.Finished],
+    })
+  } else {
+    debug(
+      '[waitForAnaysisAndReviewPr] Using WEBSOCKET mode for analysis state updates'
+    )
+    console.log(
+      chalk.cyan(
+        '🔌 [WebSocket Mode] Waiting for analysis completion using WebSocket'
+      )
+    )
+    await gqlClient.subscribeToAnalysis({
+      subscribeToAnalysisParams: {
         analysisId,
-        gqlClient,
-        scm,
-        scanner: z.nativeEnum(SCANNERS).parse(scanner),
-      })
-    },
-    callbackStates: [Fix_Report_State_Enum.Finished],
-  })
+      },
+      callback,
+      callbackStates: [Fix_Report_State_Enum.Finished],
+    })
+  }
 }

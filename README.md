@@ -175,6 +175,24 @@ Here is a simple example of a command line that will run Bugsy in your pipeline:
 npx mobbdev analyze --ci --scan-file $SAST_RESULTS_FILENAME --repo $CI_PROJECT_URL --ref $CI_COMMIT_REF_NAME --api-key $MOBB_API_KEY
 ```
 
+### Polling Mode
+
+By default, Bugsy uses WebSocket connections for real-time status updates during analysis. However, some proxy environments or firewalls may block WebSocket connections. In these cases, you can use the `--polling` flag to use HTTP polling instead:
+
+```shell
+npx mobbdev analyze --scan-file report.json --repo https://github.com/org/repo --polling
+```
+
+**When to use `--polling`:**
+- Your network blocks WebSocket connections (ws:// or wss://)
+- You're behind a corporate proxy that doesn't support WebSocket
+- You experience connection timeouts with the default WebSocket mode
+
+**Polling characteristics:**
+- Polling interval: 5 seconds
+- Timeout: 30 minutes
+- Slightly higher latency compared to WebSocket mode, but works in restricted environments
+
 ## Contribution
 
 Install the dependencies and run the tests:

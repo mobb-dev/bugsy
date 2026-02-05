@@ -144,3 +144,11 @@ export const convertToSarifCodePathPatternsOption = {
   type: 'string',
   array: true,
 } as const
+
+export const pollingOption = {
+  describe: chalk.bold(
+    'Use HTTP polling instead of WebSocket for status updates. Useful for proxy environments or firewalls that block WebSocket connections. Polling interval: 5 seconds, timeout: 30 minutes.'
+  ),
+  type: 'boolean',
+  default: false,
+} as const

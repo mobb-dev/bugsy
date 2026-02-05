@@ -10,6 +10,7 @@ import {
   ciOption,
   mobbProjectNameOption,
   organizationIdOptions,
+  pollingOption,
   projectNameOption,
   refOption,
   repoOption,
@@ -37,6 +38,7 @@ export function scanBuilder(
       .option('api-key', apiKeyOption)
       .option('cx-project-name', projectNameOption)
       .option('auto-pr', autoPrOption)
+      .option('polling', pollingOption)
       .example(
         'npx mobbdev@latest scan -r https://github.com/WebGoat/WebGoat',
         'Scan an existing repository'

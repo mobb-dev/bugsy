@@ -30,6 +30,7 @@ export type BaseAnalyzeOptions = {
   'commit-directly'?: boolean
   commitDirectly?: boolean
   pullRequest?: number
+  polling?: boolean
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>
@@ -51,6 +52,7 @@ export type BaseReviewOptions = {
   pullRequest?: number
   p?: string
   srcPath?: string
+  polling?: boolean
 }
 
 export type ScanOptions = Yargs.ArgumentsCamelCase<BaseScanOptions>
@@ -70,6 +72,7 @@ export type BaseScanOptions = {
   organizationId?: string
   autoPr?: boolean
   'auto-pr': boolean
+  polling?: boolean
 }
 
 export type AddScmTokenOptions =

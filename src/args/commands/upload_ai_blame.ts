@@ -49,7 +49,13 @@ const defaultLogger: Logger = {
 }
 
 const PromptItemZ = z.object({
-  type: z.enum(['USER_PROMPT', 'AI_RESPONSE', 'TOOL_EXECUTION', 'AI_THINKING']),
+  type: z.enum([
+    'USER_PROMPT',
+    'AI_RESPONSE',
+    'TOOL_EXECUTION',
+    'AI_THINKING',
+    'MCP_TOOL_CALL', // MCP (Model Context Protocol) tool invocation
+  ]),
   attachedFiles: z
     .array(
       z.object({
@@ -73,6 +79,9 @@ const PromptItemZ = z.object({
       result: z.string(),
       rawArguments: z.string().optional(),
       accepted: z.boolean().optional(),
+      // MCP-specific fields (only populated for MCP_TOOL_CALL type)
+      mcpServer: z.string().optional(), // MCP server name (e.g., "datadog", "mobb-mcp")
+      mcpToolName: z.string().optional(), // MCP tool name without prefix (e.g., "scan_and_fix_vulnerabilities")
     })
     .optional(),
 })

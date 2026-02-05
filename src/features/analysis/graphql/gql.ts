@@ -557,6 +557,80 @@ export class GQLClient {
     )
   }
 
+  async pollForAnalysisState(params: {
+    analysisId: string
+    callback: (analysisId: string) => void
+    callbackStates: Fix_Report_State_Enum[]
+    timeoutInMs?: number
+  }): Promise<GetAnalysisSubscriptionSubscription> {
+    const { analysisId, callbackStates, callback, timeoutInMs } = params
+    const startTime = Date.now()
+    const maxDuration = timeoutInMs ?? 30 * 60 * 1000 // Default 30 minutes
+    const pollingIntervalSec = REPORT_STATE_CHECK_DELAY / 1000
+
+    debug(
+      `[pollForAnalysisState] Starting polling for analysis ${analysisId}, target states: ${callbackStates.join(', ')}, interval: ${pollingIntervalSec}s`
+    )
+
+    let isPolling = true
+    let pollCount = 0
+    while (isPolling) {
+      pollCount++
+      const elapsedSec = Math.round((Date.now() - startTime) / 1000)
+
+      // Check timeout
+      if (Date.now() - startTime > maxDuration) {
+        debug(
+          `[pollForAnalysisState] Timeout expired after ${pollCount} polls (${elapsedSec}s)`
+        )
+        throw new ReportDigestError(
+          `Polling timeout expired for analysis: ${analysisId} with timeout: ${maxDuration}ms`,
+          `Analysis timed out after ${Math.round(maxDuration / 60000)} minutes. Please try again or check the Mobb platform for status.`
+        )
+      }
+
+      debug(
+        `[pollForAnalysisState] Poll #${pollCount} (elapsed: ${elapsedSec}s) - fetching analysis state...`
+      )
+      const analysis = await this.getAnalysis(analysisId)
+      debug(
+        `[pollForAnalysisState] Poll #${pollCount} - current state: ${analysis.state}`
+      )
+
+      // Check for failure
+      if (!analysis.state || analysis.state === Fix_Report_State_Enum.Failed) {
+        const errorMessage =
+          analysis.failReason || `Analysis failed with id: ${analysis.id}`
+        debug(`[pollForAnalysisState] Analysis failed: ${errorMessage}`)
+        throw new ReportDigestError(errorMessage, analysis.failReason ?? '')
+      }
+
+      // Check for target states
+      if (callbackStates.includes(analysis.state)) {
+        debug(
+          `[pollForAnalysisState] Target state reached: ${analysis.state} after ${pollCount} polls (${elapsedSec}s)`
+        )
+        await callback(analysis.id)
+        isPolling = false
+        return {
+          analysis: {
+            id: analysis.id,
+            state: analysis.state,
+            failReason: analysis.failReason,
+          },
+        }
+      }
+
+      debug(
+        `[pollForAnalysisState] State ${analysis.state} not in target states, waiting ${pollingIntervalSec}s before next poll...`
+      )
+      await sleep(REPORT_STATE_CHECK_DELAY)
+    }
+
+    // This should never be reached, but TypeScript needs it
+    throw new Error(`Unexpected end of polling for analysis: ${analysisId}`)
+  }
+
   async getFixReportsByRepoUrl({ repoUrl }: { repoUrl: string }) {
     const res = await this._clientSdk.GetFixReportsByRepoUrl({
       repoUrl,

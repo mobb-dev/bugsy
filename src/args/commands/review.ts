@@ -9,6 +9,7 @@ import {
   apiKeyOption,
   commitHashOption,
   mobbProjectNameOption,
+  pollingOption,
   refOption,
   repoOption,
   scannerOptions,
@@ -60,6 +61,7 @@ export function reviewBuilder(
       type: 'string',
       demandOption: false,
     })
+    .option('polling', pollingOption)
     .example(
       'npx mobbdev@latest review -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>  --ch <pr_last_commit>   --pr <pr_number> --ref <pr_branch_name>  --api-key <api_key> --src-path <your_repo_path>',
       'add fixes to your pr'

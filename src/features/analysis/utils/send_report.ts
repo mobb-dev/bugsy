@@ -17,10 +17,12 @@ export async function sendReport({
   spinner,
   submitVulnerabilityReportVariables,
   gqlClient,
+  polling,
 }: {
   spinner: ReturnType<typeof createSpinner>
   submitVulnerabilityReportVariables: SubmitVulnerabilityReportMutationVariables
   gqlClient: GQLClient
+  polling?: boolean
 }) {
   try {
     const submitRes = await gqlClient.submitVulnerabilityReport(
@@ -34,21 +36,35 @@ export async function sendReport({
     }
     spinner.update({ text: progressMassages.processingVulnerabilityReport })
 
-    await gqlClient.subscribeToAnalysis({
-      subscribeToAnalysisParams: {
-        analysisId: submitRes.submitVulnerabilityReport.fixReportId,
-      },
-      callback: () =>
-        spinner.update({
-          text: '⚙️ Vulnerability report processed successfully',
-        }),
+    const callback = (_analysisId: string) =>
+      spinner.update({
+        text: '⚙️ Vulnerability report processed successfully',
+      })
 
-      callbackStates: [
-        Fix_Report_State_Enum.Digested,
-        Fix_Report_State_Enum.Finished,
-      ],
-      timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
-    })
+    const callbackStates = [
+      Fix_Report_State_Enum.Digested,
+      Fix_Report_State_Enum.Finished,
+    ]
+
+    if (polling) {
+      debug('[sendReport] Using POLLING mode for analysis state updates')
+      await gqlClient.pollForAnalysisState({
+        analysisId: submitRes.submitVulnerabilityReport.fixReportId,
+        callback,
+        callbackStates,
+        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+      })
+    } else {
+      debug('[sendReport] Using WEBSOCKET mode for analysis state updates')
+      await gqlClient.subscribeToAnalysis({
+        subscribeToAnalysisParams: {
+          analysisId: submitRes.submitVulnerabilityReport.fixReportId,
+        },
+        callback,
+        callbackStates,
+        timeoutInMs: VUL_REPORT_DIGEST_TIMEOUT_MS,
+      })
+    }
 
     return submitRes
   } catch (e) {

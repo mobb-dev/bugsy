@@ -28,6 +28,7 @@ export async function review(
     githubToken,
     scanner,
     srcPath,
+    polling,
   } = params
   await runAnalysis(
     {
@@ -44,6 +45,7 @@ export async function review(
       scanner,
       command: 'review',
       srcPath,
+      polling,
     },
     { skipPrompts }
   )
@@ -64,6 +66,7 @@ export async function analyze(
     createOnePr,
     commitDirectly,
     pullRequest,
+    polling,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -85,6 +88,7 @@ export async function analyze(
       commitDirectly,
       pullRequest,
       createOnePr,
+      polling,
     },
     { skipPrompts }
   )

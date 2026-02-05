@@ -14,6 +14,7 @@ import {
   createOnePrOption,
   mobbProjectNameOption,
   organizationIdOptions,
+  pollingOption,
   refOption,
   repoOption,
   yesOption,
@@ -65,6 +66,7 @@ export function analyzeBuilder(
       type: 'number',
       demandOption: false,
     })
+    .option('polling', pollingOption)
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'

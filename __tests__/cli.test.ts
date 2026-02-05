@@ -68,6 +68,7 @@ describe('cli commands', () => {
         experimentalEnabled: false,
         githubToken: TEST_GITHUB_TOKEN,
         mobbProjectName: 'My first project',
+        polling: false,
         pullRequest: TEST_REPO.PR_NUMBER,
         ref: TEST_REPO.REF,
         repo: TEST_REPO.URL,
@@ -102,6 +103,86 @@ describe('cli commands', () => {
       expect.objectContaining({
         createOnePr: true,
         autoPr: true,
+        command: 'analyze',
+      }),
+      expect.any(Object)
+    )
+  })
+
+  it('should pass polling parameter to runAnalysis when --polling is used', async () => {
+    const baseAnalyzeOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      scanFile: reportPath,
+      polling: true,
+    }
+    const rawArgs = Object.entries(baseAnalyzeOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.analyze, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        polling: true,
+        command: 'analyze',
+      }),
+      expect.any(Object)
+    )
+  })
+
+  it('should pass polling parameter to runAnalysis when --polling is used with review', async () => {
+    const srcPath = path.join(__dirname, 'assets')
+    const baseReviewOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      commitHash: TEST_REPO.COMMIT_HASH,
+      scanner: SCANNERS.Snyk,
+      pullRequest: TEST_REPO.PR_NUMBER,
+      githubToken: TEST_GITHUB_TOKEN,
+      scanFile: reportPath,
+      srcPath,
+      polling: true,
+    }
+    const rawArgs = Object.entries(baseReviewOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.review, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        polling: true,
+        command: 'review',
+      }),
+      expect.any(Object)
+    )
+  })
+
+  it('should default polling to false when --polling is not specified', async () => {
+    const baseAnalyzeOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      scanFile: reportPath,
+    }
+    const rawArgs = Object.entries(baseAnalyzeOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.analyze, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        polling: false,
         command: 'analyze',
       }),
       expect.any(Object)

@@ -345,9 +345,11 @@ export type DeleteIntegrationResponseSuccess = {
 export type DeveloperStatistic = {
   __typename?: 'DeveloperStatistic';
   aiLinesCount: Scalars['Int']['output'];
+  aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
   computerName?: Maybe<Scalars['String']['output']>;
   humanLinesCount: Scalars['Int']['output'];
+  humanLinesInMergedPrs: Scalars['Int']['output'];
   lastSeenDate?: Maybe<Scalars['String']['output']>;
   mainModel?: Maybe<Scalars['String']['output']>;
   mainTool?: Maybe<Scalars['String']['output']>;
@@ -1454,6 +1456,12 @@ export type TracyDiffUploadInfo = {
   uploadFieldsJSON: Scalars['String']['output'];
   uploadKey: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type TriggerBackfillResult = {
+  __typename?: 'TriggerBackfillResult';
+  message: Scalars['String']['output'];
+  status: Status;
 };
 
 export type UnstructuredFixExtraContext = {
@@ -18656,6 +18664,16 @@ export type Mutation_Root = {
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
   submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
+  /**
+   * Admin-only: Manually trigger ClickHouse backfill to sync data from PostgreSQL.
+   * Used for testing and maintenance purposes.
+   */
+  triggerClickHouseBackfill: TriggerBackfillResult;
+  /**
+   * Admin-only: Truncate all ClickHouse tables to clear data.
+   * Used for testing and maintenance purposes. WARNING: This will delete all data!
+   */
+  truncateClickHouseTables: TriggerBackfillResult;
   tryNow: VulnerabilityReportResponse;
   updateAdoToken: ScmAccessToken;
   updateAiToolToken?: Maybe<UpdateAiToolTokenResponse>;
@@ -22068,6 +22086,12 @@ export type Mutation_RootSubmitVulnerabilityReportArgs = {
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootTriggerClickHouseBackfillArgs = {
+  sync?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -46416,6 +46440,7 @@ export type Vulnerability_Report_Issue_Set_Input = {
 /** columns and relationships of "vulnerability_report_issue_shared_state" */
 export type Vulnerability_Report_Issue_Shared_State = {
   __typename?: 'vulnerability_report_issue_shared_state';
+  createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   isArchived: Scalars['Boolean']['output'];
   issueFingerprintHash: Scalars['String']['output'];
@@ -46501,6 +46526,7 @@ export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
   _and?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Bool_Exp>>;
   _not?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
   issueFingerprintHash?: InputMaybe<String_Comparison_Exp>;
@@ -46524,6 +46550,7 @@ export enum Vulnerability_Report_Issue_Shared_State_Constraint {
 
 /** input type for inserting data into table "vulnerability_report_issue_shared_state" */
 export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -46538,6 +46565,7 @@ export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
 /** aggregate max on columns */
 export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
   __typename?: 'vulnerability_report_issue_shared_state_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -46548,6 +46576,7 @@ export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
 /** aggregate min on columns */
 export type Vulnerability_Report_Issue_Shared_State_Min_Fields = {
   __typename?: 'vulnerability_report_issue_shared_state_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -46580,6 +46609,7 @@ export type Vulnerability_Report_Issue_Shared_State_On_Conflict = {
 
 /** Ordering options when selecting data from "vulnerability_report_issue_shared_state". */
 export type Vulnerability_Report_Issue_Shared_State_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
   issueFingerprintHash?: InputMaybe<Order_By>;
@@ -46599,6 +46629,8 @@ export type Vulnerability_Report_Issue_Shared_State_Pk_Columns_Input = {
 /** select columns of table "vulnerability_report_issue_shared_state" */
 export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
   /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
   Id = 'id',
   /** column name */
   IsArchived = 'isArchived',
@@ -46614,6 +46646,7 @@ export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
 
 /** input type for updating data in table "vulnerability_report_issue_shared_state" */
 export type Vulnerability_Report_Issue_Shared_State_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -46632,6 +46665,7 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -46642,6 +46676,8 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = 
 
 /** update columns of table "vulnerability_report_issue_shared_state" */
 export enum Vulnerability_Report_Issue_Shared_State_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */

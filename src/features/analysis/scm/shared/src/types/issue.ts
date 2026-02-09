@@ -13,6 +13,7 @@ export const MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES = 100_000 // 100kB
 export const VulnerabilityReportIssueSharedStateZ = z
   .object({
     id: z.string().uuid(),
+    createdAt: z.string(),
     isArchived: z.boolean(),
     ticketIntegrationId: z.string().uuid().nullable(),
     ticketIntegrations: z.array(

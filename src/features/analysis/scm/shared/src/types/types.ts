@@ -77,6 +77,7 @@ export const AnalysisReportDigestedZ = z.object({
 const IssueSharedStateZ = z
   .object({
     id: z.string().uuid(),
+    createdAt: z.string(),
     isArchived: z.boolean(),
     ticketIntegrationId: z.string().uuid().nullable(),
     ticketIntegrations: z.array(

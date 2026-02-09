@@ -11,8 +11,8 @@
     "adm-zip": "0.5.16",
     "dotenv": "16.6.1",
     "node-pty": "1.1.0-beta38",
-    "npm": "10.9.0",
-    "verdaccio": "6.1.6",
+    "npm": "11.6.1",
+    "verdaccio": "6.2.5",
     "expect": "29.7.0",
     "jest-snapshot": "29.7.0"
   },

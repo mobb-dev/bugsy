@@ -4,7 +4,7 @@ import axios from 'axios'
 import { existsSync, mkdirSync } from 'fs'
 import { arch as _arch, type as _type } from 'os'
 import { join } from 'path'
-import tar from 'tar'
+import * as tar from 'tar'
 
 /**
  * Options for showing a installParams.

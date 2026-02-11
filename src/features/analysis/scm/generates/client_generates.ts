@@ -57,9 +57,9 @@ export type AiBlameInferenceFinalizeInput = {
   model?: InputMaybe<Scalars['String']['input']>;
   promptKey: Scalars['String']['input'];
   /**
-   * Normalized GitHub repository URL for filtering inferences.
+   * Normalized repository URL for filtering inferences.
    * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
-   * Only GitHub URLs are supported; non-GitHub repos should send null.
+   * GitHub and GitLab URLs are supported; other SCM providers should send null.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
@@ -76,9 +76,9 @@ export type AiBlameInferenceInitInput = {
   model?: InputMaybe<Scalars['String']['input']>;
   promptFileName: Scalars['String']['input'];
   /**
-   * Normalized GitHub repository URL for filtering inferences.
+   * Normalized repository URL for filtering inferences.
    * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
-   * Only GitHub URLs are supported; non-GitHub repos should send null.
+   * GitHub and GitLab URLs are supported; other SCM providers should send null.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
@@ -885,15 +885,6 @@ export type PackageInfoResponse = {
   envName?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   version: Scalars['String']['output'];
-};
-
-/**
- * Input type for parent commit information, used for time window calculation.
- * Mirrors the existing parentCommits structure in the codebase.
- */
-export type ParentCommitInput = {
-  sha: Scalars['String']['input'];
-  timestamp: Scalars['Timestamp']['input'];
 };
 
 export type ProcessAiBlameErrorResult = {
@@ -19290,7 +19281,6 @@ export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
   commitSha: Scalars['String']['input'];
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
   organizationId: Scalars['String']['input'];
-  parentCommits?: InputMaybe<Array<ParentCommitInput>>;
   repositoryURL: Scalars['String']['input'];
 };
 
@@ -48298,7 +48288,6 @@ export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
   commitSha: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
-  parentCommits?: InputMaybe<Array<ParentCommitInput> | ParentCommitInput>;
 }>;
 
 
@@ -48917,13 +48906,12 @@ export const GetTracyDiffUploadUrlDocument = `
 }
     `;
 export const AnalyzeCommitForExtensionAiBlameDocument = `
-    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitTimestamp: Timestamp, $parentCommits: [ParentCommitInput!]) {
+    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitTimestamp: Timestamp) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
     commitTimestamp: $commitTimestamp
-    parentCommits: $parentCommits
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {

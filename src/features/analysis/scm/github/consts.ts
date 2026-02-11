@@ -39,36 +39,6 @@ export const GET_USER_REPOS = 'GET /user/repos'
 
 export const GET_REPO_BRANCHES = 'GET /repos/{owner}/{repo}/branches'
 
-export const GET_BLAME_DOCUMENT = `
-      query GetBlame(
-        $owner: String!
-        $repo: String!
-        $ref: String!
-        $path: String!
-      ) {
-        repository(name: $repo, owner: $owner) {
-          # branch name
-          object(expression: $ref) {
-            # cast Target to a Commit
-            ... on Commit {
-              # full repo-relative path to blame file
-              blame(path: $path) {
-                ranges {
-                  commit {
-                    oid
-                  }
-                  startingLine
-                  endingLine
-                  age
-                }
-              }
-            }
-
-          }
-        }
-      }
-    `
-
 /**
  * GraphQL fragments for batch operations on GitHub's GraphQL API.
  * These are used with executeBatchGraphQL to fetch data for multiple items in a single request.
@@ -97,32 +67,6 @@ export const GITHUB_GRAPHQL_FRAGMENTS = {
         body
       }
     }
-  `,
-
-  /**
-   * Fragment for fetching blame data.
-   * Use with object(expression: $ref) on Commit type.
-   * Note: $path placeholder must be replaced with actual file path.
-   */
-  BLAME_RANGES: `
-    blame(path: "$path") {
-      ranges {
-        startingLine
-        endingLine
-        commit {
-          oid
-        }
-      }
-    }
-  `,
-
-  /**
-   * Fragment for fetching commit timestamp.
-   * Use with object(oid: $sha) on Commit type.
-   */
-  COMMIT_TIMESTAMP: `
-    oid
-    committedDate
   `,
 } as const
 export const GET_PR_METRICS_QUERY = `

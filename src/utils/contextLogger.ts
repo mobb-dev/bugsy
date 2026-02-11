@@ -8,6 +8,7 @@ const debug = debugModule('mobb:shared')
  */
 type Logger = {
   info: (message: string, data?: object) => void
+  warn: (message: string, data?: object) => void
   debug: (message: string, data?: object) => void
   error: (message: string, data?: object) => void
 }
@@ -42,6 +43,8 @@ const createContextLogger = async () => {
       _contextLogger = {
         info: (message: string, data?: object) =>
           data ? logger.info(data, message) : logger.info(message),
+        warn: (message: string, data?: object) =>
+          data ? logger.warn(data, message) : logger.warn(message),
         debug: (message: string, data?: object) =>
           data ? logger.debug(data, message) : logger.debug(message),
         error: (message: string, data?: object) =>
@@ -56,6 +59,7 @@ const createContextLogger = async () => {
   // Fallback to debug logger (when running in CLI)
   _contextLogger = {
     info: (message: string, data?: object) => debug(message, data),
+    warn: (message: string, data?: object) => debug(message, data),
     debug: (message: string, data?: object) => debug(message, data),
     error: (message: string, data?: object) => debug(message, data),
   }
@@ -70,6 +74,10 @@ export const contextLogger = {
   debug: async (message: string, data?: object) => {
     const logger = await createContextLogger()
     return logger.debug(message, data)
+  },
+  warn: async (message: string, data?: object) => {
+    const logger = await createContextLogger()
+    return logger.warn(message, data)
   },
   error: async (message: string, data?: object) => {
     const logger = await createContextLogger()

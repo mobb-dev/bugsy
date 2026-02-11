@@ -9,10 +9,10 @@ import { parseScmURL, ScmType } from '../shared/src'
 import { CreateSubmitRequestParams, GetReferenceResult } from '../types'
 import {
   GetCommitDiffResult,
-  GetGitBlameResponse,
   GetSubmitRequestDiffResult,
-  GetSubmitRequestInfo,
   PullRequestMetrics,
+  RateLimitStatus,
+  RecentCommitsResult,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -251,14 +251,6 @@ export class BitbucketSCMLib extends SCMLib {
     }
   }
 
-  async getRepoBlameRanges(
-    _ref: string,
-    _path: string
-  ): Promise<GetGitBlameResponse> {
-    // note: bitbucket does not have blame ranges support
-    return []
-  }
-
   async getReferenceData(ref: string): Promise<GetReferenceResult> {
     this._validateUrl()
     return this.bitbucketSdk.getReferenceData({ url: this.url, ref })
@@ -318,10 +310,6 @@ export class BitbucketSCMLib extends SCMLib {
     throw new Error('getSubmitRequestDiff not implemented for Bitbucket')
   }
 
-  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
-    throw new Error('getSubmitRequests not implemented for Bitbucket')
-  }
-
   override async searchSubmitRequests(
     _params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {
@@ -338,6 +326,15 @@ export class BitbucketSCMLib extends SCMLib {
   // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
   async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
     throw new Error('getPullRequestMetrics not implemented for Bitbucket')
+  }
+
+  async getRecentCommits(_since: string): Promise<RecentCommitsResult> {
+    throw new Error('getRecentCommits not implemented for Bitbucket')
+  }
+
+  async getRateLimitStatus(): Promise<RateLimitStatus | null> {
+    // Bitbucket doesn't expose a dedicated rate limit API
+    return null
   }
 }
 

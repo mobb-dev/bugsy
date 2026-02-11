@@ -1,12 +1,15 @@
+import { contextLogger } from '../../../../utils/contextLogger'
+import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameResponse,
   GetReferenceResult,
   GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
   PullRequestMetrics,
+  RateLimitStatus,
+  RecentCommitsResult,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -15,22 +18,31 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from '../types'
+import { extractLinearTicketsFromBody } from '../utils'
+import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   createMarkdownCommentOnPullRequest,
   createMergeRequest,
-  getGitlabBlameRanges,
   getGitlabBranchList,
+  getGitlabCommitDiff,
   getGitlabCommitUrl,
   getGitlabIsRemoteBranch,
   getGitlabIsUserCollaborator,
   getGitlabMergeRequest,
+  getGitlabMergeRequestDiff,
+  getGitlabMergeRequestMetrics,
   getGitlabMergeRequestStatus,
+  getGitlabMrCommitsBatch,
+  getGitlabMrDataBatch,
+  getGitlabRateLimitStatus,
+  getGitlabRecentCommits,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
   getGitlabRepoList,
   getGitlabUsername,
   gitlabMergeRequestStatus,
   gitlabValidateParams,
+  searchGitlabMergeRequests,
 } from './gitlab'
 
 export class GitlabSCMLib extends SCMLib {
@@ -68,7 +80,7 @@ export class GitlabSCMLib extends SCMLib {
 
   async getRepoList(_scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     if (!this.accessToken) {
-      console.error('no access token')
+      contextLogger.warn('[GitlabSCMLib.getRepoList] No access token provided')
       throw new Error('no access token')
     }
     return getGitlabRepoList(this.url, this.accessToken)
@@ -182,20 +194,6 @@ export class GitlabSCMLib extends SCMLib {
     })
   }
 
-  async getRepoBlameRanges(
-    ref: string,
-    path: string
-  ): Promise<GetGitBlameResponse> {
-    this._validateUrl()
-    return await getGitlabBlameRanges(
-      { ref, path, gitlabUrl: this.url },
-      {
-        url: this.url,
-        gitlabAuthToken: this.accessToken,
-      }
-    )
-  }
-
   async getReferenceData(ref: string): Promise<GetReferenceResult> {
     this._validateUrl()
     return await getGitlabReferenceData(
@@ -245,24 +243,151 @@ export class GitlabSCMLib extends SCMLib {
     return `${this.url}/-/commits/${branchName}`
   }
 
-  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
-    throw new Error('getCommitDiff not implemented for GitLab')
+  async getCommitDiff(commitSha: string): Promise<GetCommitDiffResult> {
+    this._validateAccessTokenAndUrl()
+    const result = await getGitlabCommitDiff({
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+      commitSha,
+    })
+    return {
+      diff: result.diff,
+      commitTimestamp: result.commitTimestamp,
+      commitSha: result.commitSha,
+      authorName: result.authorName,
+      authorEmail: result.authorEmail,
+      message: result.message,
+    }
   }
 
   async getSubmitRequestDiff(
-    _submitRequestId: string
+    submitRequestId: string
   ): Promise<GetSubmitRequestDiffResult> {
-    throw new Error('getSubmitRequestDiff not implemented for GitLab')
-  }
-
-  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
-    throw new Error('getSubmitRequests not implemented for GitLab')
+    this._validateAccessTokenAndUrl()
+    const mrNumber = parseInt(submitRequestId, 10)
+    if (isNaN(mrNumber) || mrNumber <= 0) {
+      throw new Error(`Invalid merge request ID: ${submitRequestId}`)
+    }
+    return getGitlabMergeRequestDiff({
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+      mrNumber,
+    })
   }
 
   override async searchSubmitRequests(
-    _params: SearchSubmitRequestsParams
+    params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {
-    throw new Error('searchSubmitRequests not implemented for GitLab')
+    this._validateAccessTokenAndUrl()
+
+    const page = parseCursorSafe(params.cursor, 1)
+    const perPage = params.limit || 10
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    // Map our sort field to GitLab's orderBy
+    const orderBy: 'updated_at' | 'created_at' =
+      sort.field === 'created' ? 'created_at' : 'updated_at'
+
+    // Map our state filter to GitLab's state
+    let gitlabState: 'opened' | 'closed' | 'merged' | 'all' | undefined
+    if (params.filters?.state === 'open') {
+      gitlabState = 'opened'
+    } else if (params.filters?.state === 'closed') {
+      gitlabState = 'closed'
+    } else {
+      gitlabState = 'all'
+    }
+
+    const searchResult = await searchGitlabMergeRequests({
+      repoUrl: this.url!,
+      accessToken: this.accessToken!,
+      state: gitlabState,
+      updatedAfter: params.filters?.updatedAfter,
+      orderBy,
+      sort: sort.order,
+      perPage,
+      page,
+    })
+
+    const results: GetSubmitRequestInfo[] = searchResult.items.map((mr) => {
+      let status: ScmSubmitRequestStatus = 'open'
+      if (mr.state === 'merged') {
+        status = 'merged'
+      } else if (mr.state === 'closed') {
+        status = 'closed'
+      }
+
+      return {
+        submitRequestId: String(mr.iid),
+        submitRequestNumber: mr.iid,
+        title: mr.title,
+        status,
+        sourceBranch: mr.sourceBranch,
+        targetBranch: mr.targetBranch,
+        authorName: mr.authorUsername,
+        authorEmail: undefined,
+        createdAt: new Date(mr.createdAt),
+        updatedAt: new Date(mr.updatedAt),
+        description: mr.description || undefined,
+        tickets: [],
+        changedLines: { added: 0, removed: 0 },
+      }
+    })
+
+    // Cap at 1024 total results to prevent excessive API calls
+    const MAX_TOTAL_RESULTS = 1024
+    const totalFetchedSoFar = page * perPage
+    const reachedLimit = totalFetchedSoFar >= MAX_TOTAL_RESULTS
+    if (reachedLimit && searchResult.hasMore) {
+      contextLogger.warn(
+        '[searchSubmitRequests] Hit limit of merge requests for GitLab repo',
+        {
+          limit: MAX_TOTAL_RESULTS,
+        }
+      )
+    }
+
+    return {
+      results,
+      nextCursor:
+        searchResult.hasMore && !reachedLimit ? String(page + 1) : undefined,
+      hasMore: searchResult.hasMore && !reachedLimit,
+    }
+  }
+
+  override async getPrCommitsBatch(
+    _repoUrl: string,
+    prNumbers: number[]
+  ): Promise<Map<number, string[]>> {
+    this._validateAccessTokenAndUrl()
+    return getGitlabMrCommitsBatch({
+      repoUrl: this.url!,
+      accessToken: this.accessToken!,
+      mrNumbers: prNumbers,
+    })
+  }
+
+  override async getPrDataBatch(
+    _repoUrl: string,
+    prNumbers: number[]
+  ): Promise<
+    Map<
+      number,
+      {
+        changedLines: { additions: number; deletions: number }
+        comments: {
+          author: { login: string; type: string } | null
+          body: string
+        }[]
+      }
+    >
+  > {
+    this._validateAccessTokenAndUrl()
+    return getGitlabMrDataBatch({
+      repoUrl: this.url!,
+      accessToken: this.accessToken!,
+      mrNumbers: prNumbers,
+    })
   }
 
   override async searchRepos(
@@ -271,9 +396,86 @@ export class GitlabSCMLib extends SCMLib {
     throw new Error('searchRepos not implemented for GitLab')
   }
 
-  // TODO: Add comprehensive tests for getPullRequestMetrics (GitLab)
-  // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
-  async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
-    throw new Error('getPullRequestMetrics not implemented for GitLab')
+  async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {
+    this._validateAccessTokenAndUrl()
+
+    const metrics = await getGitlabMergeRequestMetrics({
+      url: this.url,
+      prNumber,
+      accessToken: this.accessToken,
+    })
+
+    // Map GitLab MR state to Pr_Status_Enum
+    let prStatus: Pr_Status_Enum
+    switch (metrics.state) {
+      case 'merged':
+        prStatus = Pr_Status_Enum.Merged
+        break
+      case 'closed':
+        prStatus = Pr_Status_Enum.Closed
+        break
+      default:
+        prStatus = metrics.isDraft
+          ? Pr_Status_Enum.Draft
+          : Pr_Status_Enum.Active
+    }
+
+    return {
+      prId: String(prNumber),
+      repositoryUrl: this.url!,
+      prCreatedAt: new Date(metrics.createdAt),
+      prMergedAt: metrics.mergedAt ? new Date(metrics.mergedAt) : null,
+      firstCommitDate: metrics.firstCommitDate
+        ? new Date(metrics.firstCommitDate)
+        : null,
+      linesAdded: metrics.linesAdded,
+      commitsCount: metrics.commitsCount,
+      commitShas: metrics.commitShas,
+      prStatus,
+      commentIds: metrics.commentIds,
+    }
+  }
+
+  async getRecentCommits(since: string): Promise<RecentCommitsResult> {
+    this._validateAccessTokenAndUrl()
+    const commits = await getGitlabRecentCommits({
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+      since,
+    })
+    return { data: commits }
+  }
+
+  async getRateLimitStatus(): Promise<RateLimitStatus | null> {
+    this._validateAccessTokenAndUrl()
+    return getGitlabRateLimitStatus({
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+    })
+  }
+
+  /**
+   * Extract Linear ticket links from pre-fetched comments (pure function, no API calls).
+   * Linear bot uses the same comment format on GitLab as on GitHub.
+   * Bot username may be 'linear' or 'linear[bot]' on GitLab.
+   */
+  override extractLinearTicketsFromComments(
+    comments: { author: { login: string; type: string } | null; body: string }[]
+  ): { name: string; title: string; url: string }[] {
+    const tickets: { name: string; title: string; url: string }[] = []
+    const seen = new Set<string>()
+
+    for (const comment of comments) {
+      const authorLogin = comment.author?.login?.toLowerCase() || ''
+      const isLinearBot =
+        authorLogin === 'linear' ||
+        authorLogin === 'linear[bot]' ||
+        (comment.author?.type === 'Bot' && authorLogin.includes('linear'))
+
+      if (isLinearBot) {
+        tickets.push(...extractLinearTicketsFromBody(comment.body || '', seen))
+      }
+    }
+    return tickets
   }
 }

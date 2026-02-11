@@ -89,37 +89,8 @@ export type GetARepositoryPublicKeyResponse =
   Endpoints[typeof GET_A_REPOSITORY_PUBLIC_KEY]['response']
 
 export type GetUserResponse = Endpoints[typeof GET_USER]['response']
-export type GithubBlameResponse = {
-  repository: {
-    object: {
-      blame: {
-        ranges: {
-          age: number
-          endingLine: number
-          startingLine: number
-          commit: {
-            oid: string
-          }
-        }[]
-      }
-    }
-  }
-}
 
 // Shared types for batch GraphQL operations
-
-// Shared type for blame range data used across batch operations
-export type BlameRangeData = {
-  startingLine: number
-  endingLine: number
-  commitSha: string
-}
-
-// Shared type for commit timestamp data
-export type CommitTimestampData = {
-  sha: string
-  timestamp: Date
-}
 
 // Shared type for PR comment data
 export type PrCommentData = {
@@ -155,24 +126,6 @@ export type PrCommentsGraphQLResponse = {
   }
 }
 
-/** Raw response shape for blame ranges query */
-export type BlameRangesGraphQLResponse = {
-  blame?: {
-    ranges?: {
-      startingLine: number
-      endingLine: number
-      commit: {
-        oid: string
-      }
-    }[]
-  }
-}
-
-/** Raw response shape for commit timestamp query */
-export type CommitTimestampGraphQLResponse = {
-  oid?: string
-  committedDate?: string
-}
 export type GetPRMetricsResponse = {
   repository: {
     pullRequest: {

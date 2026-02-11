@@ -42,8 +42,6 @@ export type LocalCommitData = {
   diff: string
   /** Commit timestamp */
   timestamp: Date
-  /** Parent commits with timestamps (for time window calculation) */
-  parentCommits?: { sha: string; timestamp: Date }[]
 }
 
 export class GitService {
@@ -667,49 +665,6 @@ export class GitService {
   }
 
   /**
-   * Gets timestamps for parent commits in a single git call.
-   * @param parentShas Array of parent commit SHAs
-   * @returns Array of parent commits with timestamps, or undefined if unavailable
-   */
-  private async getParentCommitTimestamps(
-    parentShas: string[]
-  ): Promise<{ sha: string; timestamp: Date }[] | undefined> {
-    if (parentShas.length === 0) {
-      return undefined
-    }
-
-    try {
-      // Get all parent timestamps in one call using git log --no-walk
-      // Format: %H = full commit hash, %cI = committer date in ISO 8601 format
-      // Output: "sha timestamp" per line
-      const output = await this.git.raw([
-        'log',
-        '--format=%H %cI',
-        '--no-walk',
-        ...parentShas,
-      ])
-
-      const parentCommits = output
-        .trim()
-        .split('\n')
-        .filter(Boolean)
-        .map((line: string) => {
-          const [sha, ts] = line.split(' ')
-          return { sha: sha ?? '', timestamp: new Date(ts ?? '') }
-        })
-        .filter((p) => p.sha !== '')
-
-      return parentCommits.length > 0 ? parentCommits : undefined
-    } catch {
-      // Parents might not be available in shallow clone
-      this.log('[GitService] Could not get parent commit timestamps', 'debug', {
-        parentShas,
-      })
-      return undefined
-    }
-  }
-
-  /**
    * Gets local commit data including diff, timestamp, and parent commits.
    * Used by Tracy extension to send commit data directly without requiring SCM token.
    * @param commitSha The commit SHA to get data for
@@ -767,25 +722,15 @@ export class GitService {
       }
       const timestampStr = metadataLines[0]
       const timestamp = new Date(timestampStr)
-      const parentShas = (metadataLines[1] ?? '')
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-
-      // Get parent commits with timestamps
-      const parentCommits = await this.getParentCommitTimestamps(parentShas)
-
       this.log('[GitService] Local commit data retrieved', 'debug', {
         commitSha,
         diffSizeBytes,
         timestamp: timestamp.toISOString(),
-        parentCommitCount: parentCommits?.length ?? 0,
       })
 
       return {
         diff,
         timestamp,
-        parentCommits,
       }
     } catch (error) {
       const errorMessage = `Failed to get local commit data: ${(error as Error).message}`

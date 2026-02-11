@@ -20,12 +20,6 @@ export type GetReferenceDataResponse = {
   date: Date | undefined
 }
 
-export type GetGitBlameResponse = {
-  startingLine: number
-  endingLine: number
-  commitSha: string
-}[]
-
 export type GetCommitDiffResult = {
   diff: string
   commitTimestamp: Date
@@ -33,17 +27,12 @@ export type GetCommitDiffResult = {
   authorName?: string
   authorEmail?: string
   message?: string
-  parentCommits?: {
-    sha: string
-    timestamp: Date
-  }[]
   repositoryCreatedAt?: Date
 }
 
 export type DiffLineAttribution = {
   file: string
   line: number
-  commitSha: string
 }
 
 export type GetSubmitRequestDiffResult = {
@@ -239,4 +228,24 @@ export type ScmConfig = {
   tokenLastUpdate?: string | null
   userId?: string | null
   isTokenAvailable: boolean
+}
+
+export type RateLimitStatus = {
+  remaining: number
+  reset: Date
+  limit?: number
+}
+
+export type CommitLite = {
+  sha: string
+  commit: {
+    committer?: { date?: string }
+    author?: { email?: string; name?: string }
+    message?: string
+  }
+  parents?: { sha: string }[]
+}
+
+export type RecentCommitsResult = {
+  data: CommitLite[]
 }

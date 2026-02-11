@@ -330,9 +330,6 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       }
       throw new RefNotFoundError(`ref: ${ref} does not exist`)
     },
-    getAdoBlameRanges() {
-      return []
-    },
   }
 }
 

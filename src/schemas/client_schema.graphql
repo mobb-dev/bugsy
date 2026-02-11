@@ -349,11 +349,6 @@ input AIBlameInferenceFinalizeInput {
   repositoryUrl: String
 }
 
-input ParentCommitInput {
-  sha: String!
-  timestamp: Timestamp!
-}
-
 mutation GetTracyDiffUploadUrl($commitSha: String!) {
   getTracyDiffUploadUrl(commitSha: $commitSha) {
     status
@@ -371,14 +366,12 @@ mutation AnalyzeCommitForExtensionAIBlame(
   $commitSha: String!
   $organizationId: String!
   $commitTimestamp: Timestamp
-  $parentCommits: [ParentCommitInput!]
 ) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
     commitTimestamp: $commitTimestamp
-    parentCommits: $parentCommits
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {

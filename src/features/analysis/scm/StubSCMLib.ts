@@ -2,11 +2,11 @@ import { SCMLib } from './scm'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameResponse,
   GetReferenceResult,
   GetSubmitRequestDiffResult,
-  GetSubmitRequestInfo,
   PullRequestMetrics,
+  RateLimitStatus,
+  RecentCommitsResult,
   ReferenceType,
   ScmLibScmType,
   ScmRepoInfo,
@@ -83,14 +83,6 @@ export class StubSCMLib extends SCMLib {
   async getUserHasAccessToRepo(): Promise<boolean> {
     console.warn('getUserHasAccessToRepo() returning false')
     return false
-  }
-
-  async getRepoBlameRanges(
-    _ref: string,
-    _path: string
-  ): Promise<GetGitBlameResponse> {
-    console.warn('getRepoBlameRanges() returning empty array')
-    return []
   }
 
   async getReferenceData(_ref: string): Promise<GetReferenceResult> {
@@ -172,12 +164,18 @@ export class StubSCMLib extends SCMLib {
     }
   }
 
-  async getSubmitRequests(_repoUrl: string): Promise<GetSubmitRequestInfo[]> {
-    console.warn('getSubmitRequests() returning empty array')
-    return []
-  }
   async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
     console.warn('getPullRequestMetrics() returning empty object')
     throw new Error('getPullRequestMetrics() not implemented')
+  }
+
+  async getRecentCommits(_since: string): Promise<RecentCommitsResult> {
+    console.warn('getRecentCommits() returning empty array')
+    return { data: [] }
+  }
+
+  async getRateLimitStatus(): Promise<RateLimitStatus | null> {
+    console.warn('getRateLimitStatus() returning null')
+    return null
   }
 }

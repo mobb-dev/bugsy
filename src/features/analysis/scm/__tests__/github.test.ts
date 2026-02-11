@@ -238,7 +238,8 @@ describe('GithubSCMLib wrappers for rate limit and recent commits', () => {
     })
     // Expect wrappers to work
     const status = await (scmLib as GithubSCMLib).getRateLimitStatus()
-    expect(typeof status.remaining).toBe('number')
+    expect(status).not.toBeNull()
+    expect(typeof status!.remaining).toBe('number')
     const since = new Date('2020-01-01T00:00:00Z').toISOString()
     const commits = await (scmLib as GithubSCMLib).getRecentCommits(since)
     expect(Array.isArray(commits.data)).toBe(true)
@@ -413,136 +414,6 @@ describe('getPrAdditionsDeletionsBatch - batch fetch PR changedLines', () => {
 // These tests verify existing behavior before optimizations are applied
 // ============================================================================
 
-describe('getSubmitRequests - PR list with metadata', () => {
-  let scmLib: GithubSCMLib
-
-  beforeAll(async () => {
-    scmLib = (await createScmLib({
-      url: GITHUB_URL,
-      scmType: ScmLibScmType.GITHUB,
-      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      scmOrg: undefined,
-    })) as GithubSCMLib
-  })
-
-  it('returns PR list with all required fields', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-
-    expect(Array.isArray(submitRequests)).toBe(true)
-    expect(submitRequests.length).toBeGreaterThan(0)
-
-    // Verify structure of first PR
-    const pr = submitRequests[0]
-    expect(pr).toHaveProperty('submitRequestId')
-    expect(pr).toHaveProperty('submitRequestNumber')
-    expect(pr).toHaveProperty('title')
-    expect(pr).toHaveProperty('status')
-    expect(pr).toHaveProperty('sourceBranch')
-    expect(pr).toHaveProperty('targetBranch')
-    expect(pr).toHaveProperty('createdAt')
-    expect(pr).toHaveProperty('updatedAt')
-    expect(pr).toHaveProperty('changedLines')
-    expect(pr).toHaveProperty('tickets')
-  })
-
-  it('returns correct changedLines with added and removed as non-negative numbers', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const pr = submitRequests[0]!
-
-    expect(pr.changedLines).toHaveProperty('added')
-    expect(pr.changedLines).toHaveProperty('removed')
-    expect(typeof pr.changedLines.added).toBe('number')
-    expect(typeof pr.changedLines.removed).toBe('number')
-    expect(pr.changedLines.added).toBeGreaterThanOrEqual(0)
-    expect(pr.changedLines.removed).toBeGreaterThanOrEqual(0)
-  })
-
-  it('returns valid status values', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-
-    const validStatuses = ['open', 'closed', 'merged', 'draft']
-    for (const pr of submitRequests) {
-      expect(validStatuses).toContain(pr.status)
-    }
-  })
-
-  it('parses dates correctly as Date objects', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const pr = submitRequests[0]!
-
-    expect(pr.createdAt).toBeInstanceOf(Date)
-    expect(pr.updatedAt).toBeInstanceOf(Date)
-    expect(isNaN(pr.createdAt.getTime())).toBe(false)
-    expect(isNaN(pr.updatedAt.getTime())).toBe(false)
-  })
-
-  it('returns tickets as an array (may be empty)', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const pr = submitRequests[0]!
-
-    expect(Array.isArray(pr.tickets)).toBe(true)
-    // If tickets exist, verify structure
-    if (pr.tickets.length > 0) {
-      expect(pr.tickets[0]).toHaveProperty('name')
-      expect(pr.tickets[0]).toHaveProperty('title')
-      expect(pr.tickets[0]).toHaveProperty('url')
-    }
-  })
-
-  it('returns submitRequestId as string and submitRequestNumber as number', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const pr = submitRequests[0]!
-
-    expect(typeof pr.submitRequestId).toBe('string')
-    expect(typeof pr.submitRequestNumber).toBe('number')
-    expect(pr.submitRequestId).toBe(String(pr.submitRequestNumber))
-  })
-})
-
-describe('changedLines accuracy validation', () => {
-  let scmLib: GithubSCMLib
-
-  beforeAll(async () => {
-    scmLib = (await createScmLib({
-      url: GITHUB_URL,
-      scmType: ScmLibScmType.GITHUB,
-      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      scmOrg: undefined,
-    })) as GithubSCMLib
-  })
-
-  // Note: REST API pulls.list does NOT return additions/deletions fields
-  // Those are only available from pulls.get (single PR endpoint)
-  // The current implementation fetches diff for each PR to calculate changedLines
-
-  it('changedLines values are consistent across multiple calls', async () => {
-    // Call getSubmitRequests twice and verify consistency
-    const submitRequests1 = await scmLib.getSubmitRequests(GITHUB_URL)
-    const submitRequests2 = await scmLib.getSubmitRequests(GITHUB_URL)
-
-    // Find the same PR in both responses
-    const pr1 = submitRequests1[0]!
-    const pr2 = submitRequests2.find(
-      (p) => p.submitRequestNumber === pr1.submitRequestNumber
-    )
-
-    expect(pr2).toBeDefined()
-    expect(pr1.changedLines.added).toBe(pr2!.changedLines.added)
-    expect(pr1.changedLines.removed).toBe(pr2!.changedLines.removed)
-  })
-
-  it('changedLines values are reasonable for PRs', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-
-    // At least some PRs should have changes
-    const prsWithChanges = submitRequests.filter(
-      (pr) => pr.changedLines.added > 0 || pr.changedLines.removed > 0
-    )
-
-    expect(prsWithChanges.length).toBeGreaterThan(0)
-  })
-})
-
 describe('getSubmitRequestDiff - PR diff with commits', () => {
   let scmLib: GithubSCMLib
 
@@ -557,8 +428,12 @@ describe('getSubmitRequestDiff - PR diff with commits', () => {
 
   it('returns diff result with all required fields', async () => {
     // First get a PR number from the list
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const openPr = submitRequests.find((pr) => pr.status === 'open')
+    const searchResult = await scmLib.searchSubmitRequests({
+      repoUrl: GITHUB_URL,
+      filters: { state: 'open' },
+      limit: 1,
+    })
+    const openPr = searchResult.results[0]
 
     if (!openPr) {
       console.log('No open PRs found, skipping test')
@@ -585,8 +460,12 @@ describe('getSubmitRequestDiff - PR diff with commits', () => {
   })
 
   it('returns commit details with timestamps', async () => {
-    const submitRequests = await scmLib.getSubmitRequests(GITHUB_URL)
-    const openPr = submitRequests.find((pr) => pr.status === 'open')
+    const searchResult = await scmLib.searchSubmitRequests({
+      repoUrl: GITHUB_URL,
+      filters: { state: 'open' },
+      limit: 1,
+    })
+    const openPr = searchResult.results[0]
 
     if (!openPr) {
       console.log('No open PRs found, skipping test')
@@ -644,256 +523,63 @@ describe('getCommitDiff - individual commit diff', () => {
     }
   })
 
-  it('includes parentCommits in result', async () => {
-    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
+  describe('getPullRequestMetrics', () => {
+    const TEST_REPO_URL = 'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
+    const TEST_PR_NUMBER = 2303
 
-    const result = await scmLib.getCommitDiff(commitSha)
+    it('returns comprehensive PR metrics for closed PR', async () => {
+      const scmLib = await createScmLib({
+        url: TEST_REPO_URL,
+        scmType: ScmLibScmType.GITHUB,
+        accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
+        scmOrg: undefined,
+      })
 
-    // parentCommits should be present for non-root commits
-    expect(result).toHaveProperty('parentCommits')
-    if (result.parentCommits && result.parentCommits.length > 0) {
-      const parent = result.parentCommits[0]!
-      expect(parent).toHaveProperty('sha')
-      expect(parent).toHaveProperty('timestamp')
-      expect(typeof parent.sha).toBe('string')
-      expect(parent.timestamp).toBeInstanceOf(Date)
-    }
-    describe('getPullRequestMetrics', () => {
-      const TEST_REPO_URL =
-        'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
-      const TEST_PR_NUMBER = 2303
+      const metrics = await (scmLib as GithubSCMLib).getPullRequestMetrics(
+        TEST_PR_NUMBER
+      )
 
-      it('returns comprehensive PR metrics for closed PR', async () => {
-        const scmLib = await createScmLib({
-          url: TEST_REPO_URL,
-          scmType: ScmLibScmType.GITHUB,
-          accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
-          scmOrg: undefined,
-        })
+      // Verify basic fields
+      expect(metrics.prId).toBe(String(TEST_PR_NUMBER))
+      expect(metrics.repositoryUrl).toBe(TEST_REPO_URL)
 
-        const metrics = await (scmLib as GithubSCMLib).getPullRequestMetrics(
-          TEST_PR_NUMBER
-        )
+      // Verify PR status is one of the valid types
+      expect(['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']).toContain(
+        metrics.prStatus
+      )
 
-        // Verify basic fields
-        expect(metrics.prId).toBe(String(TEST_PR_NUMBER))
-        expect(metrics.repositoryUrl).toBe(TEST_REPO_URL)
+      // Verify dates are valid Date objects
+      expect(metrics.prCreatedAt).toBeInstanceOf(Date)
+      expect(metrics.prCreatedAt.getTime()).toBeGreaterThan(0)
 
-        // Verify PR status is one of the valid types
-        expect(['open', 'closed', 'merged', 'draft']).toContain(
-          metrics.prStatus
-        )
+      // prMergedAt can be null for unmerged PRs
+      if (metrics.prMergedAt !== null) {
+        expect(metrics.prMergedAt).toBeInstanceOf(Date)
+      }
 
-        // Verify dates are valid Date objects
-        expect(metrics.prCreatedAt).toBeInstanceOf(Date)
-        expect(metrics.prCreatedAt.getTime()).toBeGreaterThan(0)
+      // firstCommitDate can be null but usually isn't
+      if (metrics.firstCommitDate !== null) {
+        expect(metrics.firstCommitDate).toBeInstanceOf(Date)
+      }
 
-        // prMergedAt can be null for unmerged PRs
-        if (metrics.prMergedAt !== null) {
-          expect(metrics.prMergedAt).toBeInstanceOf(Date)
-        }
+      // Verify numeric fields are valid
+      expect(typeof metrics.linesAdded).toBe('number')
+      expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
 
-        // firstCommitDate can be null but usually isn't
-        if (metrics.firstCommitDate !== null) {
-          expect(metrics.firstCommitDate).toBeInstanceOf(Date)
-        }
+      expect(typeof metrics.commitsCount).toBe('number')
+      expect(metrics.commitsCount).toBeGreaterThan(0)
 
-        // Verify numeric fields are valid
-        expect(typeof metrics.linesAdded).toBe('number')
-        expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
+      expect(Array.isArray(metrics.commentIds)).toBe(true)
+      expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
 
-        expect(typeof metrics.commitsCount).toBe('number')
-        expect(metrics.commitsCount).toBeGreaterThan(0)
-
-        expect(Array.isArray(metrics.commentIds)).toBe(true)
-        expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
-
-        // Verify commit SHAs array
-        expect(Array.isArray(metrics.commitShas)).toBe(true)
-        expect(metrics.commitShas.length).toBe(metrics.commitsCount)
-        metrics.commitShas.forEach((sha: string) => {
-          expect(typeof sha).toBe('string')
-          expect(sha.length).toBeGreaterThan(0)
-        })
+      // Verify commit SHAs array
+      expect(Array.isArray(metrics.commitShas)).toBe(true)
+      expect(metrics.commitShas.length).toBe(metrics.commitsCount)
+      metrics.commitShas.forEach((sha: string) => {
+        expect(typeof sha).toBe('string')
+        expect(sha.length).toBeGreaterThan(0)
       })
     })
-  })
-})
-
-// ============================================================================
-// Blob Size and Blame Batch Tests
-// Tests for size-based blame batching optimization to prevent GitHub API timeouts
-// ============================================================================
-
-describe('getBlobSizesBatch - batch fetch blob sizes via GraphQL', () => {
-  it('fetches blob sizes for multiple files in a single request', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    // Use known blob SHAs from facebook/react
-    // These are from the package.json and README.md files
-    const blobShas = [
-      '8d39df22a26fd24d26cef2c07e65f7ce7dd1fd08', // package.json blob SHA
-      'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0', // Non-existent blob SHA
-    ]
-
-    const result = await sdk.getBlobSizesBatch({
-      owner: OWNER,
-      repo: REPO,
-      blobShas,
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    // Only the existing blob should be in the map
-    // The result size depends on which blobs exist
-    expect(result.size).toBeGreaterThanOrEqual(0)
-
-    // If the known blob exists, verify its size is a positive number
-    const firstBlobSha = blobShas[0]
-    if (firstBlobSha) {
-      const knownBlobSize = result.get(firstBlobSha)
-      if (knownBlobSize !== undefined) {
-        expect(typeof knownBlobSize).toBe('number')
-        expect(knownBlobSize).toBeGreaterThan(0)
-      }
-    }
-  })
-
-  it('returns empty map for empty input', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    const result = await sdk.getBlobSizesBatch({
-      owner: OWNER,
-      repo: REPO,
-      blobShas: [],
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(0)
-  })
-})
-
-describe('getBlameBatch - size-based blame batching', () => {
-  it('handles files with blob SHAs for size-based optimization', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    // Use known files from a commit in facebook/react
-    // These should be small files that won't timeout
-    const files = [
-      {
-        path: 'package.json',
-        blobSha: '8d39df22a26fd24d26cef2c07e65f7ce7dd1fd08',
-      },
-    ]
-
-    const result = await sdk.getBlameBatch({
-      owner: OWNER,
-      repo: REPO,
-      ref: 'main',
-      files,
-      concurrency: 2,
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    // The file should have blame data if it exists
-    // Note: The exact result depends on whether the blob SHA is valid for this ref
-  })
-
-  it('returns empty map for empty input', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    const result = await sdk.getBlameBatch({
-      owner: OWNER,
-      repo: REPO,
-      ref: 'main',
-      files: [],
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(0)
-  })
-
-  it('respects concurrency parameter for large files', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    // Test with concurrency=1 to verify the parameter is used
-    const result = await sdk.getBlameBatch({
-      owner: OWNER,
-      repo: REPO,
-      ref: 'main',
-      files: [],
-      concurrency: 1,
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(0)
-  })
-})
-
-describe('getBlameBatchByPaths - legacy interface without size optimization', () => {
-  it('fetches blame data using file paths only', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    const result = await sdk.getBlameBatchByPaths({
-      owner: OWNER,
-      repo: REPO,
-      ref: 'main',
-      filePaths: ['package.json'],
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    // package.json should have blame data
-    const blameData = result.get('package.json')
-    if (blameData) {
-      expect(Array.isArray(blameData)).toBe(true)
-      // Each blame range should have startingLine, endingLine, and commitSha
-      if (blameData.length > 0) {
-        expect(blameData[0]).toHaveProperty('startingLine')
-        expect(blameData[0]).toHaveProperty('endingLine')
-        expect(blameData[0]).toHaveProperty('commitSha')
-      }
-    }
-  })
-
-  it('returns empty map for empty input', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    const result = await sdk.getBlameBatchByPaths({
-      owner: OWNER,
-      repo: REPO,
-      ref: 'main',
-      filePaths: [],
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(0)
   })
 })
 

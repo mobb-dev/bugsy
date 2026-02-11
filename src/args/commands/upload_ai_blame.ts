@@ -119,7 +119,10 @@ async function getRepositoryUrl(): Promise<string | null> {
     }
     const remoteUrl = await gitService.getRemoteUrl()
     const parsed = parseScmURL(remoteUrl)
-    return parsed?.scmType === ScmType.GitHub ? remoteUrl : null
+    return parsed?.scmType === ScmType.GitHub ||
+      parsed?.scmType === ScmType.GitLab
+      ? remoteUrl
+      : null
   } catch {
     return null
   }

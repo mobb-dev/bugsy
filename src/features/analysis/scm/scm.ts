@@ -3,11 +3,11 @@ import { isValidBranchName } from './scmSubmit'
 import {
   CreateSubmitRequestParams,
   GetCommitDiffResult,
-  GetGitBlameResponse,
   GetReferenceResult,
   GetSubmitRequestDiffResult,
-  GetSubmitRequestInfo,
   PullRequestMetrics,
+  RateLimitStatus,
+  RecentCommitsResult,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -98,11 +98,6 @@ export abstract class SCMLib {
 
   abstract createSubmitRequest(args: CreateSubmitRequestParams): Promise<string>
 
-  abstract getRepoBlameRanges(
-    ref: string,
-    path: string
-  ): Promise<GetGitBlameResponse>
-
   abstract getReferenceData(ref: string): Promise<GetReferenceResult>
   abstract getSubmitRequestUrl(submitRequestIdNumber: number): Promise<string>
   abstract getSubmitRequestId(submitRequestIdUrl: string): Promise<string>
@@ -114,14 +109,11 @@ export abstract class SCMLib {
     submitRequestId: string
   ): Promise<GetSubmitRequestDiffResult>
 
-  abstract getSubmitRequests(repoUrl: string): Promise<GetSubmitRequestInfo[]>
-
   /**
    * Search for PRs with optional filters and sorting.
    * IMPORTANT: Sort order must remain consistent across paginated requests
    * for cursor-based pagination to work correctly.
    *
-   * Default implementation uses getSubmitRequests and applies filters/sorting in-memory.
    * Override in subclasses for provider-specific optimizations (e.g., GitHub Search API).
    *
    * @param params - Search parameters including filters, sort, and pagination
@@ -211,6 +203,24 @@ export abstract class SCMLib {
 
   abstract getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics>
 
+  /**
+   * Fetches recent commits since the given date.
+   * Used by AI Blame periodic analysis to find new commits to process.
+   *
+   * @param since - ISO 8601 date string to filter commits
+   * @returns Promise with array of commits
+   */
+  abstract getRecentCommits(since: string): Promise<RecentCommitsResult>
+
+  /**
+   * Gets rate limit status for the SCM API.
+   * Returns null for providers that don't expose a dedicated rate limit API
+   * (like GitLab which uses response headers instead).
+   *
+   * @returns Promise with rate limit info or null if not available
+   */
+  abstract getRateLimitStatus(): Promise<RateLimitStatus | null>
+
   public getAccessToken(): string {
     return this.accessToken || ''
   }
@@ -238,6 +248,20 @@ export abstract class SCMLib {
     branchName: string
   ): Promise<boolean> {
     return isValidBranchName(branchName)
+  }
+
+  /**
+   * Extract Linear ticket links from PR/MR comments.
+   * Default implementation returns empty array - subclasses can override.
+   * Public so it can be reused by backend services.
+   */
+  public extractLinearTicketsFromComments(
+    _comments: {
+      author: { login: string; type: string } | null
+      body: string
+    }[]
+  ): { name: string; title: string; url: string }[] {
+    return []
   }
 
   protected _validateAccessTokenAndUrl(): asserts this is this & {

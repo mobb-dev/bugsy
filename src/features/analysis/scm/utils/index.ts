@@ -11,6 +11,7 @@ import {
 } from '../types'
 
 export * from './broker'
+export * from './diffUtils'
 export * from './scm'
 
 type GetFixUrlParam = {
@@ -126,6 +127,48 @@ export function getCommitIssueUrl(params: GetIssueCommitUrlParam) {
     organizationId,
     analysisId,
   })}/commit?${searchParams.toString()}`
+}
+
+export function extractLinearTicketsFromBody(
+  body: string,
+  seen: Set<string>
+): { name: string; title: string; url: string }[] {
+  const tickets: { name: string; title: string; url: string }[] = []
+
+  const htmlPattern =
+    /<a href="(https:\/\/linear\.app\/[^"]+)">([A-Z]+-\d+)<\/a>/g
+  let match
+  while ((match = htmlPattern.exec(body)) !== null) {
+    const ticket = parseLinearTicket(match[1], match[2])
+    if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
+      seen.add(`${ticket.name}|${ticket.url}`)
+      tickets.push(ticket)
+    }
+  }
+
+  const markdownPattern = /\[([A-Z]+-\d+)\]\((https:\/\/linear\.app\/[^)]+)\)/g
+  while ((match = markdownPattern.exec(body)) !== null) {
+    const ticket = parseLinearTicket(match[2], match[1])
+    if (ticket && !seen.has(`${ticket.name}|${ticket.url}`)) {
+      seen.add(`${ticket.name}|${ticket.url}`)
+      tickets.push(ticket)
+    }
+  }
+
+  return tickets
+}
+
+export function parseLinearTicket(
+  url: string | undefined,
+  name: string | undefined
+): { name: string; title: string; url: string } | null {
+  if (!name || !url) {
+    return null
+  }
+  const urlParts = url.split('/')
+  const titleSlug = urlParts[urlParts.length - 1] || ''
+  const title = titleSlug.replace(/-/g, ' ')
+  return { name, title, url }
 }
 
 // username patteren such as 'https://haggai-mobb@bitbucket.org/workspace/repo_slug.git'

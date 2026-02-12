@@ -78,6 +78,7 @@ export const FixRatingZ = z.object({
 const IssueSharedStateZ = z
   .object({
     id: z.string(),
+    createdAt: z.string(),
     isArchived: z.boolean(),
     ticketIntegrationId: z.string().nullable(),
     ticketIntegrations: z.array(

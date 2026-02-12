@@ -344,6 +344,7 @@ export type DeleteIntegrationResponseSuccess = {
 
 export type DeveloperStatistic = {
   __typename?: 'DeveloperStatistic';
+  acceptanceRate?: Maybe<Scalars['Float']['output']>;
   aiLinesCount: Scalars['Int']['output'];
   aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
@@ -17529,6 +17530,8 @@ export enum IssueType_Enum {
   MissingUser = 'MISSING_USER',
   /** MISSING_WHITESPACE */
   MissingWhitespace = 'MISSING_WHITESPACE',
+  /** MISSING_WORKFLOW_PERMISSIONS */
+  MissingWorkflowPermissions = 'MISSING_WORKFLOW_PERMISSIONS',
   /** MODIFIED_DEFAULT_PARAM */
   ModifiedDefaultParam = 'MODIFIED_DEFAULT_PARAM',
   /** Non-final public static field */

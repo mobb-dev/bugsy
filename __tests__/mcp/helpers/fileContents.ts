@@ -3,12 +3,14 @@
  * used across the test suite.
  */
 
-// Simple benign Python snippet used as placeholder content
-export const benignFileContent = `import subprocess
+// Simple benign Python snippet used as placeholder content.
+// Keep this intentionally free of patterns that trigger security analyzers/LLM fix generation
+// so tests that rely on "no fixes" remain fast and deterministic.
+export const benignFileContent = `def add(a, b):
+    return a + b
 
-def run_admin_command():
-    subprocess.run(default_admin_action, shell=True)
-    `
+print(add(1, 2))
+`
 
 // Internal helper to generate vulnerable Python functions dynamically
 const vulnerablePyFunction = (name: string) => `

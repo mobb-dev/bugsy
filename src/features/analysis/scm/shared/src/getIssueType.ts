@@ -165,6 +165,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.DjangoBlankFieldNeedsNullOrDefault]:
     'Django Blank Field Needs Null or Default',
   [IssueType_Enum.RedundantNilErrorCheck]: 'Redundant Nil Error Check',
+  [IssueType_Enum.MissingWorkflowPermissions]: 'Missing Workflow Permissions',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

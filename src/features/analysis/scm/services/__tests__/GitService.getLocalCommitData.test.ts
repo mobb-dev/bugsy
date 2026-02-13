@@ -41,7 +41,7 @@ describe('GitService.getLocalCommitData', () => {
     }
   })
 
-  it('should return commit data with diff, timestamp, and parent commits', async () => {
+  it('should return commit data with diff and timestamp', async () => {
     // Create initial commit
     writeFileSync(join(repoPath, 'file1.txt'), 'initial content')
     execSync('git add .', { cwd: repoPath, stdio: 'ignore' })

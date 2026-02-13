@@ -31,6 +31,7 @@ import {
   GetTracyDiffUploadUrlMutationVariables,
   GitReferenceQueryVariables,
   PrStrategy,
+  ScanSkillMutationVariables,
   Sdk,
   SubmitVulnerabilityReportMutationVariables,
   UploadAiBlameInferencesInitMutation,
@@ -715,5 +716,9 @@ export class GQLClient {
     variables: GetTracyDiffUploadUrlMutationVariables
   ): Promise<GetTracyDiffUploadUrlMutation> {
     return await this._clientSdk.GetTracyDiffUploadUrl(variables)
+  }
+
+  async scanSkill(variables: ScanSkillMutationVariables) {
+    return await this._clientSdk.ScanSkill(variables)
   }
 }

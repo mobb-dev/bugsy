@@ -920,3 +920,28 @@ subscription streamCommitBlameRequests($requestIds: [uuid!]!) {
     error
   }
 }
+
+mutation ScanSkill($skillUrl: String!) {
+  scanSkill(skillUrl: $skillUrl) {
+    skillName
+    skillHash
+    skillVersion
+    verdict
+    findingsCount
+    findings {
+      category
+      severity
+      ruleId
+      explanation
+      evidence
+      filePath
+      lineNumber
+      confidence
+      layer
+    }
+    scanDurationMs
+    layersExecuted
+    cached
+    summary
+  }
+}

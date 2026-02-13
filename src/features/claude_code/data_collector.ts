@@ -2,6 +2,11 @@ import { z } from 'zod'
 
 import { uploadAiBlameHandlerFromExtension } from '../../args/commands/upload_ai_blame'
 import { AiBlameInferenceType } from '../../features/analysis/scm/generates/client_generates'
+import { GitService } from '../../features/analysis/scm/services/GitService'
+import {
+  parseScmURL,
+  ScmType,
+} from '../../features/analysis/scm/shared/src/urlParser'
 import {
   parseTranscriptAndCreateTrace,
   type TraceData,
@@ -188,6 +193,28 @@ export async function collectHookData(): Promise<{
 }
 
 /**
+ * Gets the normalized repository URL from a directory path.
+ * Returns null if not a git repo or not a supported SCM type.
+ */
+async function getRepositoryUrl(cwd: string): Promise<string | null> {
+  try {
+    const gitService = new GitService(cwd)
+    const isRepo = await gitService.isGitRepository()
+    if (!isRepo) {
+      return null
+    }
+    const remoteUrl = await gitService.getRemoteUrl()
+    const parsed = parseScmURL(remoteUrl)
+    return parsed?.scmType === ScmType.GitHub ||
+      parsed?.scmType === ScmType.GitLab
+      ? remoteUrl
+      : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Processes hook data and uploads to backend
  */
 export async function processAndUploadHookData(): Promise<{
@@ -198,6 +225,9 @@ export async function processAndUploadHookData(): Promise<{
 }> {
   // Collect and format the data
   const result = await collectHookData()
+
+  // Resolve repository URL from the hook's working directory
+  const repositoryUrl = await getRepositoryUrl(result.hookData.cwd)
 
   // Attempt to upload the trace data
   let uploadSuccess
@@ -210,6 +240,7 @@ export async function processAndUploadHookData(): Promise<{
       responseTime: result.tracePayload.responseTime,
       blameType: AiBlameInferenceType.Chat,
       sessionId: result.hookData.session_id,
+      repositoryUrl,
     })
     uploadSuccess = true
   } catch (error) {

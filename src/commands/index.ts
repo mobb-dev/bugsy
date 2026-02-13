@@ -1,3 +1,4 @@
+import chalk from 'chalk'
 import chalkAnimation from 'chalk-animation'
 
 import {
@@ -5,6 +6,7 @@ import {
   AnalyzeOptions,
   ReviewOptions,
   ScanOptions,
+  ScanSkillOptions,
 } from '../args'
 import { errorMessages, mobbAscii, SCANNERS } from '../constants'
 import { runAnalysis } from '../features/analysis'
@@ -12,6 +14,7 @@ import { choseScanner } from '../features/analysis/prompts'
 import { validateCheckmarxInstallation } from '../features/analysis/scanners/checkmarx'
 import { CliError, sleep } from '../utils'
 import { getAuthenticatedGQLClient } from './handleMobbLogin'
+import { resolveSkillScanInput } from './scan_skill_input'
 
 export async function review(
   params: ReviewOptions,
@@ -161,4 +164,85 @@ async function showWelcomeMessage(skipPrompts = false) {
   const welcome = chalkAnimation.rainbow('\n\t\t\tWelcome to Bugsy\n')
   skipPrompts ? await sleep(100) : await sleep(2000)
   welcome.stop()
+}
+
+const VERDICT_COLORS: Record<string, string> = {
+  BENIGN: 'green',
+  WARNING: 'yellow',
+  SUSPICIOUS: 'magenta',
+  MALICIOUS: 'red',
+} as const
+
+const SEVERITY_COLORS: Record<string, string> = {
+  CRITICAL: 'red',
+  HIGH: 'magenta',
+  MEDIUM: 'yellow',
+  LOW: 'cyan',
+} as const
+
+export async function scanSkill(options: ScanSkillOptions) {
+  const { url, apiKey, ci } = options
+
+  const gqlClient = await getAuthenticatedGQLClient({
+    inputApiKey: apiKey,
+    isSkipPrompts: ci,
+  })
+
+  console.log(chalk.dim(`Scanning skill: ${url}`))
+  console.log()
+
+  const skillUrl = await resolveSkillScanInput(url)
+  const result = await gqlClient.scanSkill({ skillUrl })
+  const scan = result.scanSkill
+
+  const verdictColor = VERDICT_COLORS[scan.verdict] ?? 'white'
+  console.log(
+    chalk.bold(`Verdict: `) +
+      chalk[verdictColor as 'green' | 'yellow' | 'magenta' | 'red'](
+        scan.verdict
+      )
+  )
+  console.log(`Skill: ${scan.skillName}`)
+  if (scan.skillVersion) {
+    console.log(`Version: ${scan.skillVersion}`)
+  }
+  console.log(`Hash: ${scan.skillHash ?? 'N/A'}`)
+  console.log(`Findings: ${scan.findingsCount}`)
+  console.log(`Duration: ${scan.scanDurationMs}ms`)
+  if (scan.cached) {
+    console.log(chalk.dim('(cached result)'))
+  }
+  console.log()
+
+  if (scan.findings.length > 0) {
+    console.log(chalk.bold('Findings:'))
+    console.log()
+    for (const f of scan.findings) {
+      const sevColor = SEVERITY_COLORS[f.severity] ?? 'white'
+      const location = [f.filePath, f.lineNumber].filter(Boolean).join(':')
+      console.log(
+        `  ${chalk[sevColor as 'red' | 'magenta' | 'yellow' | 'cyan'](f.severity)} [${f.layer}] ${f.category}${f.ruleId ? ` (${f.ruleId})` : ''}`
+      )
+      if (location) {
+        console.log(`    ${chalk.dim(location)}`)
+      }
+      console.log(`    ${f.explanation}`)
+      if (f.evidence) {
+        console.log(
+          `    ${String(chalk.dim('Evidence: ' + f.evidence.slice(0, 120))).replace(/\n|\r/g, '')}`
+        )
+      }
+      console.log()
+    }
+  }
+
+  if (scan.summary) {
+    console.log(chalk.bold('Analysis:'))
+    console.log(`  ${scan.summary}`)
+    console.log()
+  }
+
+  if (scan.verdict === 'MALICIOUS' || scan.verdict === 'SUSPICIOUS') {
+    process.exit(2)
+  }
 }

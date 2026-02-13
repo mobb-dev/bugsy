@@ -236,7 +236,7 @@ export function getGithubSdk(
           if (res.status === 204) {
             return true
           }
-        } catch (collaboratorError) {
+        } catch (_collaboratorError) {
           // If not a direct collaborator, check if user has any permission level
           try {
             const permissionRes =
@@ -250,19 +250,19 @@ export function getGithubSdk(
             if (permissionRes.data.permission !== 'none') {
               return true
             }
-          } catch (permissionError) {
+          } catch (_permissionError) {
             // If permission check fails, try to get repository to verify token has access
             try {
               await octokit.rest.repos.get({ owner, repo })
               // If we can read the repository, assume the user has access
               return true
-            } catch (repoError) {
+            } catch (_repoError) {
               // Cannot access repository at all
               return false
             }
           }
         }
-      } catch (e) {
+      } catch (_e) {
         return false
       }
       return false
@@ -310,7 +310,7 @@ export function getGithubSdk(
           branch,
         })
         return branch === res.data.name
-      } catch (e) {
+      } catch (_e) {
         return false
       }
     },
@@ -545,7 +545,7 @@ export function getGithubSdk(
       const sourceFileContentResponse = await octokit.rest.repos.getContent({
         owner: sourceOwner,
         repo: sourceRepo,
-        path: '/' + sourceFilePath,
+        path: `/${sourceFilePath}`,
       })
 
       const { data: repository } = await octokit.rest.repos.get({ owner, repo })
@@ -585,7 +585,7 @@ export function getGithubSdk(
         const secondFileContentResponse = await octokit.rest.repos.getContent({
           owner: sourceOwner,
           repo: sourceRepo,
-          path: '/' + secondFilePath,
+          path: `/${secondFilePath}`,
         })
         const secondDecodedContent = Buffer.from(
           // Check if file content exists and handle different response types

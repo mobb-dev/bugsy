@@ -47,6 +47,7 @@ export type GetSubmitRequestDiffResult = {
   authorEmail?: string
   title?: string
   description?: string
+  headCommitSha?: string
   commits: GetCommitDiffResult[]
   diffLines: DiffLineAttribution[]
 }

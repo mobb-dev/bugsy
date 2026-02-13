@@ -1328,6 +1328,7 @@ export async function getGitlabMergeRequestDiff({
     title: mr.title,
     description: mr.description || undefined,
     commits,
+    headCommitSha: mr.sha,
     diffLines,
   }
 }

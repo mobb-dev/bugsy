@@ -665,7 +665,7 @@ export class GitService {
   }
 
   /**
-   * Gets local commit data including diff, timestamp, and parent commits.
+   * Gets local commit data including diff and timestamp.
    * Used by Tracy extension to send commit data directly without requiring SCM token.
    * @param commitSha The commit SHA to get data for
    * @param maxDiffSizeBytes Maximum diff size in bytes (default 3MB). Returns null if exceeded.
@@ -679,12 +679,12 @@ export class GitService {
 
     try {
       // Get commit metadata and diff in a single call
-      // Format: %cI = committer date ISO 8601, %P = parent SHAs (space-separated)
-      // Output: "timestamp\nparentShas\n<DIFF_DELIMITER>\ndiff..."
+      // Format: %cI = committer date ISO 8601
+      // Output: "timestamp\n<DIFF_DELIMITER>\ndiff..."
       const DIFF_DELIMITER = '---MOBB_DIFF_START---'
       const output = await this.git.show([
         commitSha,
-        `--format=%cI%n%P%n${DIFF_DELIMITER}`,
+        `--format=%cI%n${DIFF_DELIMITER}`,
         '--patch',
       ])
 
@@ -710,8 +710,7 @@ export class GitService {
         return null
       }
 
-      // Parse metadata: first line is timestamp, second line (if present) is space-separated parent SHAs
-      // Note: Initial commits have no parents, so the second line may be empty or missing
+      // Parse metadata: first line is timestamp
       const metadataLines = metadataOutput.trim().split('\n')
       if (metadataLines.length < 1 || !metadataLines[0]) {
         this.log('[GitService] Unexpected metadata format', 'warning', {
@@ -722,6 +721,7 @@ export class GitService {
       }
       const timestampStr = metadataLines[0]
       const timestamp = new Date(timestampStr)
+
       this.log('[GitService] Local commit data retrieved', 'debug', {
         commitSha,
         diffSizeBytes,

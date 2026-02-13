@@ -89,6 +89,14 @@ export type BaseAddScmTokenOptions = {
   apiKey?: string
 }
 
+export type ScanSkillOptions = Yargs.ArgumentsCamelCase<BaseScanSkillOptions>
+
+export type BaseScanSkillOptions = {
+  url: string
+  apiKey?: string
+  ci: boolean
+}
+
 export type ConvertToSarifOptions =
   Yargs.ArgumentsCamelCase<BaseConvertToSarifOptions>
 

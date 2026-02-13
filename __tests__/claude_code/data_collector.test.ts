@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -27,6 +28,7 @@ describe('processAndUploadHookData', () => {
   })
 
   afterEach(async () => {
+    vi.unstubAllGlobals()
     // Clean up all temp directories created during tests
     for (const tmpDir of tmpDirs) {
       await tmpDir.cleanup()
@@ -73,9 +75,15 @@ describe('processAndUploadHookData', () => {
       }),
     }
 
-    vi.stubGlobal('process', {
-      stdin: mockStdin,
-    })
+    vi.stubGlobal(
+      'process',
+      new Proxy(process, {
+        get(target, prop) {
+          if (prop === 'stdin') return mockStdin
+          return Reflect.get(target, prop, target)
+        },
+      })
+    )
 
     mockUpload.mockResolvedValue(undefined)
 
@@ -144,9 +152,15 @@ describe('processAndUploadHookData', () => {
         }
       }),
     }
-    vi.stubGlobal('process', {
-      stdin: mockStdin,
-    })
+    vi.stubGlobal(
+      'process',
+      new Proxy(process, {
+        get(target, prop) {
+          if (prop === 'stdin') return mockStdin
+          return Reflect.get(target, prop, target)
+        },
+      })
+    )
 
     mockUpload.mockResolvedValue(undefined)
 
@@ -162,6 +176,80 @@ describe('processAndUploadHookData', () => {
     expect(mockUpload).toHaveBeenCalledWith(
       expect.objectContaining({
         inference: expect.stringContaining('THE SOFTWARE IS PROVIDED "AS IS"'),
+      })
+    )
+  })
+
+  it('should pass repositoryUrl resolved from cwd to upload', async () => {
+    const { uploadAiBlameHandlerFromExtension } = await vi.importMock(
+      '../../src/args/commands/upload_ai_blame'
+    )
+    const mockUpload = vi.mocked(uploadAiBlameHandlerFromExtension as any)
+
+    // Create temp git repo with an origin remote
+    const tmpDir = await tmp.dir({ unsafeCleanup: true })
+    tmpDirs.push(tmpDir)
+
+    const execOpts = { cwd: tmpDir.path }
+    execSync('git init', execOpts)
+    execSync('git config user.email "test@test.com"', execOpts)
+    execSync('git config user.name "Test"', execOpts)
+    execSync(
+      'git remote add origin https://github.com/test-org/test-repo.git',
+      execOpts
+    )
+
+    // Copy transcript file to temp directory
+    const transcriptFileName = 'dcc484f5-c9f4-4c34-b5c0-791b746026b4.jsonl'
+    const srcTranscriptPath = path.join(__dirname, 'assets', transcriptFileName)
+    const tmpTranscriptPath = path.join(tmpDir.path, transcriptFileName)
+    await fs.copyFile(srcTranscriptPath, tmpTranscriptPath)
+
+    // Read edit test data and point cwd + transcript_path to temp repo
+    const editDataRaw = await fs.readFile(
+      path.join(__dirname, 'assets', '_edit.txt'),
+      'utf-8'
+    )
+    const editData = editDataRaw
+      .replace(
+        /("transcript_path":\s*")[^"]*(")/,
+        `$1${tmpTranscriptPath.replace(/\\/g, '\\\\')}$2`
+      )
+      .replace(
+        /("cwd":\s*")[^"]*(")/,
+        `$1${tmpDir.path.replace(/\\/g, '\\\\')}$2`
+      )
+
+    const mockStdin = {
+      setEncoding: vi.fn(),
+      on: vi.fn((event: string, callback: (data?: string) => void) => {
+        if (event === 'data') {
+          callback(editData)
+        } else if (event === 'end') {
+          callback()
+        }
+      }),
+    }
+    vi.stubGlobal(
+      'process',
+      new Proxy(process, {
+        get(target, prop) {
+          if (prop === 'stdin') return mockStdin
+          return Reflect.get(target, prop, target)
+        },
+      })
+    )
+
+    mockUpload.mockResolvedValue(undefined)
+
+    // Act
+    const result = await processAndUploadHookData()
+
+    // Assert
+    expect(result.uploadSuccess).toBe(true)
+    expect(mockUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        repositoryUrl: 'https://github.com/test-org/test-repo',
       })
     )
   })

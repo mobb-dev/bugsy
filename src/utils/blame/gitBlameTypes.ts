@@ -236,6 +236,16 @@ export const CommitBlameDataZ = z.record(
 export type CommitBlameData = z.infer<typeof CommitBlameDataZ>
 
 /**
+ * Info about a commit referenced in blame data.
+ */
+export const CommitInfoZ = z.object({
+  /** Number of parent commits (1 = normal commit, 2+ = merge commit, null = failed to determine) */
+  parentCount: z.number().nullable(),
+})
+
+export type CommitInfo = z.infer<typeof CommitInfoZ>
+
+/**
  * Response message from commit blame line mapping consumer.
  *
  * On success: Contains blame data for all processed files/chunks
@@ -260,6 +270,12 @@ export const PrepareCommitBlameResponseMessageZ = z.object({
    * Contains line mappings as arrays if status is 'success'.
    */
   blameData: CommitBlameDataZ,
+  /**
+   * Info about each commit referenced in the blame data plus the head commit.
+   * Keyed by commit SHA, deduplicated.
+   * Empty dictionary if status is 'failure'.
+   */
+  commits: z.record(z.string(), CommitInfoZ).default({}),
 })
 // Preferred: Use Schema suffix for new code
 export const PrepareCommitBlameResponseMessageSchema =

@@ -1053,6 +1053,33 @@ export type SaveUsageMcpResponse = {
   status: Status;
 };
 
+export type ScanFinding = {
+  __typename?: 'ScanFinding';
+  category: Scalars['String']['output'];
+  confidence: Scalars['Float']['output'];
+  evidence?: Maybe<Scalars['String']['output']>;
+  explanation: Scalars['String']['output'];
+  filePath?: Maybe<Scalars['String']['output']>;
+  layer: Scalars['String']['output'];
+  lineNumber?: Maybe<Scalars['Int']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  severity: Scalars['String']['output'];
+};
+
+export type ScanSkillResult = {
+  __typename?: 'ScanSkillResult';
+  cached: Scalars['Boolean']['output'];
+  findings: Array<ScanFinding>;
+  findingsCount: Scalars['Int']['output'];
+  layersExecuted: Array<Scalars['String']['output']>;
+  scanDurationMs: Scalars['Int']['output'];
+  skillHash?: Maybe<Scalars['String']['output']>;
+  skillName: Scalars['String']['output'];
+  skillVersion?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  verdict: Scalars['String']['output'];
+};
+
 export type ScmAccessTokenUpdateResponse = BadScmCredentials | InvalidScmTypeError | RepoUnreachableError | ScmAccessTokenUpdateSuccess;
 
 export type ScmAccessTokenUpdateSuccess = {
@@ -18653,6 +18680,7 @@ export type Mutation_Root = {
   resetAnswers?: Maybe<Scalars['Void']['output']>;
   saveCheckmarxIntegration?: Maybe<SaveCheckmarxIntegrationResponse>;
   saveUsageMcp?: Maybe<SaveUsageMcpResponse>;
+  scanSkill: ScanSkillResult;
   sendInvitation?: Maybe<SendInvitationResponse>;
   setAnswers: SetAnswersResponse;
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
@@ -22028,6 +22056,12 @@ export type Mutation_RootSaveUsageMcpArgs = {
   status: Scalars['String']['input'];
   userEmail?: InputMaybe<Scalars['String']['input']>;
   userFullName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootScanSkillArgs = {
+  skillUrl: Scalars['String']['input'];
 };
 
 
@@ -29858,6 +29892,7 @@ export type Query_Root = {
   scm_submit_fix_request_aggregate: Scm_Submit_Fix_Request_Aggregate;
   /** fetch data from the table: "scm_submit_fix_request" using primary key columns */
   scm_submit_fix_request_by_pk?: Maybe<Scm_Submit_Fix_Request>;
+  skillScanHealth?: Maybe<Scalars['String']['output']>;
   /** fetch data from the table: "submit_fix_request" */
   submit_fix_request: Array<Submit_Fix_Request>;
   /** fetch aggregated fields from the table: "submit_fix_request" */
@@ -48476,6 +48511,13 @@ export type StreamCommitBlameRequestsSubscriptionVariables = Exact<{
 
 export type StreamCommitBlameRequestsSubscription = { __typename?: 'subscription_root', commit_blame_request: Array<{ __typename?: 'commit_blame_request', id: any, state: Blame_Ai_Analysis_Request_State_Enum, organizationId: any, repositoryUrl: string, commitSha: string, createdOn: any, completedOn?: any | null, error?: string | null }> };
 
+export type ScanSkillMutationVariables = Exact<{
+  skillUrl: Scalars['String']['input'];
+}>;
+
+
+export type ScanSkillMutation = { __typename?: 'mutation_root', scanSkill: { __typename?: 'ScanSkillResult', skillName: string, skillHash?: string | null, skillVersion?: string | null, verdict: string, findingsCount: number, scanDurationMs: number, layersExecuted: Array<string>, cached: boolean, summary?: string | null, findings: Array<{ __typename?: 'ScanFinding', category: string, severity: string, ruleId?: string | null, explanation: string, evidence?: string | null, filePath?: string | null, lineNumber?: number | null, confidence: number, layer: string }> } };
+
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
   id
@@ -49261,6 +49303,32 @@ export const StreamCommitBlameRequestsDocument = `
   }
 }
     `;
+export const ScanSkillDocument = `
+    mutation ScanSkill($skillUrl: String!) {
+  scanSkill(skillUrl: $skillUrl) {
+    skillName
+    skillHash
+    skillVersion
+    verdict
+    findingsCount
+    findings {
+      category
+      severity
+      ruleId
+      explanation
+      evidence
+      filePath
+      lineNumber
+      confidence
+      layer
+    }
+    scanDurationMs
+    layersExecuted
+    cached
+    summary
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -49376,6 +49444,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     streamCommitBlameRequests(variables: StreamCommitBlameRequestsSubscriptionVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<StreamCommitBlameRequestsSubscription> {
       return withWrapper((wrappedRequestHeaders) => client.request<StreamCommitBlameRequestsSubscription>({ document: StreamCommitBlameRequestsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'streamCommitBlameRequests', 'subscription', variables);
+    },
+    ScanSkill(variables: ScanSkillMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ScanSkillMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ScanSkillMutation>({ document: ScanSkillDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ScanSkill', 'mutation', variables);
     }
   };
 }

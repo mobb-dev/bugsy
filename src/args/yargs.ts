@@ -16,6 +16,7 @@ import {
 import { mcpBuilder, mcpHandler } from './commands/mcp'
 import { reviewBuilder, reviewHandler } from './commands/review'
 import { scanBuilder, scanHandler } from './commands/scan'
+import { scanSkillBuilder, scanSkillHandler } from './commands/scan_skill'
 import { addScmTokenBuilder, addScmTokenHandler } from './commands/token'
 import {
   uploadAiBlameBuilder,
@@ -78,6 +79,12 @@ export const parseArgs = async (args: readonly string[]) => {
       ),
       addScmTokenBuilder,
       addScmTokenHandler
+    )
+    .command(
+      mobbCliCommand.scanSkill,
+      chalk.bold('Scan an OpenClaw/ClawHub skill for security threats.'),
+      scanSkillBuilder,
+      scanSkillHandler
     )
     .command(
       mobbCliCommand.convertToSarif,

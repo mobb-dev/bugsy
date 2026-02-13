@@ -10,6 +10,7 @@ export const mobbCliCommand = {
   claudeCodeProcessHook: 'claude-code-process-hook',
   windsurfIntellijInstallHook: 'windsurf-intellij-install-hook',
   windsurfIntellijProcessHook: 'windsurf-intellij-process-hook',
+  scanSkill: 'scan-skill',
 } as const
 
 type MobbCliCommandType = typeof mobbCliCommand

@@ -502,6 +502,19 @@ export type ForkRepoSuccess = {
   url: Scalars['String']['output'];
 };
 
+export type FpSummaryError = {
+  __typename?: 'FpSummaryError';
+  error: Scalars['String']['output'];
+};
+
+export type FpSummaryResponse = FpSummaryError | FpSummarySuccess;
+
+export type FpSummarySuccess = {
+  __typename?: 'FpSummarySuccess';
+  fpDescriptionShort: Scalars['String']['output'];
+  fpId: Scalars['String']['output'];
+};
+
 export type GetAiBlameInferencePromptResponse = {
   __typename?: 'GetAIBlameInferencePromptResponse';
   error?: Maybe<Scalars['String']['output']>;
@@ -1679,6 +1692,30 @@ export type VulnReportUser = {
   id: Scalars['String']['output'];
 };
 
+export type VulnerabilityAttribution = {
+  __typename?: 'VulnerabilityAttribution';
+  attributionId: Scalars['String']['output'];
+  commitSha: Scalars['String']['output'];
+  filePath: Scalars['String']['output'];
+  inferenceType: AiBlameInferenceType;
+  lineNumber: Scalars['Int']['output'];
+  originalLineNumber?: Maybe<Scalars['Int']['output']>;
+};
+
+export type VulnerabilityAttributionError = {
+  __typename?: 'VulnerabilityAttributionError';
+  error: Scalars['String']['output'];
+  status: BlameStatus;
+};
+
+export type VulnerabilityAttributionSuccess = {
+  __typename?: 'VulnerabilityAttributionSuccess';
+  attributions: Array<VulnerabilityAttribution>;
+  status: BlameStatus;
+};
+
+export type VulnerabilityAttributionsResponse = VulnerabilityAttributionError | VulnerabilityAttributionSuccess;
+
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
   fixReport: FixReportSubmitReport;
@@ -1722,6 +1759,7 @@ export type VulnerabilityReportIssueV5 = {
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fix?: Maybe<VulnReportFix>;
   fpDescription?: Maybe<Scalars['String']['output']>;
+  fpId?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
@@ -29653,6 +29691,7 @@ export type Query_Root = {
   getFalsePositive: GetFalsePositiveResponseUnion;
   getFile?: Maybe<FilePayload>;
   getFix: RegisterUserResponse;
+  getFpSummary: FpSummaryResponse;
   getInvitationLink?: Maybe<GetInvitationLinkResponse>;
   getIssuesApiV4: GetIssuesV4Response;
   getIssuesApiV5: GetIssuesV5Response;
@@ -29676,6 +29715,8 @@ export type Query_Root = {
    * Default sort: updated desc (most recently updated first)
    */
   getSubmitRequests: SubmitRequestsResponse;
+  /** Get attributions related to a specific vulnerability report. */
+  getVulnerabilityAttributions: VulnerabilityAttributionsResponse;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -31298,6 +31339,11 @@ export type Query_RootGetFixArgs = {
 };
 
 
+export type Query_RootGetFpSummaryArgs = {
+  fpId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetInvitationLinkArgs = {
   id: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
@@ -31365,6 +31411,11 @@ export type Query_RootGetSubmitRequestsArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
   repoUrl: Scalars['String']['input'];
   sort?: InputMaybe<SubmitRequestSort>;
+};
+
+
+export type Query_RootGetVulnerabilityAttributionsArgs = {
+  fixReportId: Scalars['String']['input'];
 };
 
 

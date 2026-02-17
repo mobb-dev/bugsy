@@ -268,37 +268,107 @@ export async function getGitlabIsRemoteBranch({
   }
 }
 
-export async function getGitlabRepoList(
-  url: string | undefined,
+/**
+ * Fetch paginated GitLab projects using gitbeaker with showExpanded for pagination info.
+ * Uses `membership=true`, sorted by `last_activity_at desc` for most-recently-updated-first.
+ */
+export async function searchGitlabProjects({
+  url,
+  accessToken,
+  perPage = 20,
+  page = 1,
+}: {
+  url: string | undefined
   accessToken: string
-) {
+  perPage?: number
+  page?: number
+}): Promise<{
+  projects: {
+    id: number
+    path: string
+    web_url: string
+    namespace_name: string
+    visibility: string
+    last_activity_at: string
+  }[]
+  hasMore: boolean
+}> {
+  if (perPage > GITLAB_MAX_PER_PAGE) {
+    throw new Error(
+      `perPage ${perPage} exceeds GitLab maximum of ${GITLAB_MAX_PER_PAGE}`
+    )
+  }
+
   const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
-  const res = await api.Projects.all({
-    membership: true,
-    //TODO: a bug in the sorting mechanism of this api call
-    //disallows us to sort by updated_at in descending order
-    //so we have to sort by updated_at in ascending order.
-    //We can wait for the bug to be fixed or call the api
-    //directly with fetch()
-    sort: 'asc',
-    orderBy: 'updated_at',
-    perPage: 100,
-  })
-  return Promise.all(
-    res.map(async (project) => {
-      const proj = await api.Projects.show(project.id)
-      const owner = proj.namespace.name
-      const repoLanguages = await api.Projects.showLanguages(project.id)
-      return {
-        repoName: project.path,
-        repoUrl: project.web_url,
-        repoOwner: owner,
-        repoLanguages: Object.keys(repoLanguages),
-        repoIsPublic: project.visibility === 'public',
-        repoUpdatedAt: project.last_activity_at,
-      }
+
+  // Try last_activity_at first (most relevant sort), fall back to created_at
+  // if GitLab returns 500 (known issue on some accounts/instances)
+  let response
+  try {
+    response = await api.Projects.all({
+      membership: true,
+      orderBy: 'last_activity_at',
+      sort: 'desc',
+      pagination: 'offset',
+      perPage,
+      page,
+      showExpanded: true,
     })
-  )
+  } catch (e) {
+    debug(
+      '[searchGitlabProjects] order_by=last_activity_at failed, falling back to created_at: %s',
+      e instanceof Error ? e.message : String(e)
+    )
+    response = await api.Projects.all({
+      membership: true,
+      orderBy: 'created_at',
+      sort: 'desc',
+      pagination: 'offset',
+      perPage,
+      page,
+      showExpanded: true,
+    })
+  }
+
+  const projects = response.data.map((p) => ({
+    id: p.id,
+    path: p.path,
+    web_url: p.web_url,
+    namespace_name: (p.namespace as { name: string })?.name ?? '',
+    visibility: p.visibility,
+    last_activity_at: p.last_activity_at,
+  }))
+
+  return {
+    projects,
+    hasMore: response.paginationInfo.next !== null,
+  }
+}
+
+/**
+ * Fetch languages for a single GitLab project. Returns empty array on failure.
+ */
+export async function getGitlabProjectLanguages({
+  url,
+  accessToken,
+  projectId,
+}: {
+  url: string | undefined
+  accessToken: string
+  projectId: number
+}): Promise<string[]> {
+  try {
+    const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
+    const languages = await api.Projects.showLanguages(projectId)
+    return Object.keys(languages)
+  } catch (e) {
+    debug(
+      '[getGitlabProjectLanguages] Failed for project %d: %s',
+      projectId,
+      e instanceof Error ? e.message : String(e)
+    )
+    return []
+  }
 }
 
 export async function getGitlabBranchList({
@@ -385,7 +455,7 @@ export async function getGitlabMergeRequest({
 /**
  * Search merge requests with pagination, sorting, and filtering.
  * Used by the AI Blame flow for paginated MR listing.
- * Per-page is capped at GITLAB_PER_PAGE (128) to prevent oversized requests.
+ * Per-page defaults to GITLAB_PER_PAGE (100, the GitLab API maximum).
  */
 export async function searchGitlabMergeRequests({
   repoUrl,
@@ -419,6 +489,11 @@ export async function searchGitlabMergeRequests({
   }[]
   hasMore: boolean
 }> {
+  if (perPage > GITLAB_MAX_PER_PAGE) {
+    throw new Error(
+      `perPage ${perPage} exceeds GitLab maximum of ${GITLAB_MAX_PER_PAGE}`
+    )
+  }
   const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   debug(
     '[searchGitlabMergeRequests] Fetching MRs for %s (page=%d, perPage=%d)',
@@ -431,7 +506,7 @@ export async function searchGitlabMergeRequests({
     gitlabAuthToken: accessToken,
   })
 
-  const mergeRequests = await api.MergeRequests.all({
+  const response = await api.MergeRequests.all({
     projectId: projectPath,
     state: state === 'all' ? undefined : state,
     updatedAfter: updatedAfter?.toISOString(),
@@ -439,9 +514,10 @@ export async function searchGitlabMergeRequests({
     sort,
     perPage,
     page,
+    showExpanded: true,
   })
 
-  const items = mergeRequests.map((mr) => ({
+  const items = response.data.map((mr) => ({
     iid: mr.iid,
     title: mr.title,
     state: mr.state,
@@ -461,7 +537,7 @@ export async function searchGitlabMergeRequests({
 
   return {
     items,
-    hasMore: mergeRequests.length === perPage,
+    hasMore: response.paginationInfo.next !== null,
   }
 }
 
@@ -767,7 +843,8 @@ export function parseGitlabOwnerAndRepo(gitlabUrl: string) {
 
 // Constants for GitLab pagination limits
 const GITLAB_MAX_RESULTS_LIMIT = 1024
-const GITLAB_PER_PAGE = 128
+const GITLAB_MAX_PER_PAGE = 100 // GitLab API hard limit for all REST endpoints
+const GITLAB_PER_PAGE = GITLAB_MAX_PER_PAGE
 
 /**
  * Fetches recent commits from a GitLab repository since a given date.
@@ -798,15 +875,19 @@ export async function getGitlabRecentCommits({
     parents: { sha: string }[]
   }[] = []
 
+  const perPage = GITLAB_PER_PAGE
   let page = 1
   let hasMore = true
 
   while (hasMore && allCommits.length < GITLAB_MAX_RESULTS_LIMIT) {
-    const commits = await api.Commits.all(projectPath, {
+    const response = await api.Commits.all(projectPath, {
       since,
-      perPage: GITLAB_PER_PAGE,
+      perPage,
       page,
+      showExpanded: true,
     })
+
+    const commits = response.data
 
     if (commits.length === 0) {
       hasMore = false
@@ -833,11 +914,8 @@ export async function getGitlabRecentCommits({
       })
     }
 
-    if (commits.length < GITLAB_PER_PAGE) {
-      hasMore = false
-    } else {
-      page++
-    }
+    hasMore = response.paginationInfo.next !== null
+    page++
   }
 
   if (allCommits.length >= GITLAB_MAX_RESULTS_LIMIT) {

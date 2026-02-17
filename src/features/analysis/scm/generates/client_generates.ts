@@ -1003,17 +1003,6 @@ export type ReferenceNotFoundError = BaseError & {
 
 export type RegisterUserResponse = FixData | GetFixNoFixError;
 
-export type RepoSort = {
-  field: RepoSortField;
-  order: SortOrder;
-};
-
-export enum RepoSortField {
-  Created = 'CREATED',
-  Name = 'NAME',
-  Updated = 'UPDATED'
-}
-
 export type RepoSubmitReport = {
   __typename?: 'RepoSubmitReport';
   originalUrl: Scalars['String']['output'];
@@ -17571,6 +17560,8 @@ export enum IssueType_Enum {
   ErroneousStringCompare = 'ERRONEOUS_STRING_COMPARE',
   /** Error Condition Without Action */
   ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
+  /** EXCESSIVE_SECRETS_EXPOSURE */
+  ExcessiveSecretsExposure = 'EXCESSIVE_SECRETS_EXPOSURE',
   /** frameable_login_page */
   FrameableLoginPage = 'FRAMEABLE_LOGIN_PAGE',
   /** FUNCTION_CALL_WITHOUT_PARENTHESES */
@@ -31654,10 +31645,10 @@ export type Query_RootGetReportsApiV2Args = {
 
 export type Query_RootGetScmReposArgs = {
   cursor?: InputMaybe<Scalars['String']['input']>;
+  includeLanguages?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   onlyWithAttributions?: InputMaybe<Scalars['Boolean']['input']>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
-  sort?: InputMaybe<RepoSort>;
   url: Scalars['String']['input'];
 };
 

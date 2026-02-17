@@ -31,15 +31,16 @@ import {
   getGitlabMergeRequestStatus,
   getGitlabMrCommitsBatch,
   getGitlabMrDataBatch,
+  getGitlabProjectLanguages,
   getGitlabRateLimitStatus,
   getGitlabRecentCommits,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
-  getGitlabRepoList,
   getGitlabUsername,
   gitlabMergeRequestStatus,
   gitlabValidateParams,
   searchGitlabMergeRequests,
+  searchGitlabProjects,
 } from './gitlab'
 
 export class GitlabSCMLib extends SCMLib {
@@ -80,7 +81,23 @@ export class GitlabSCMLib extends SCMLib {
       contextLogger.warn('[GitlabSCMLib.getRepoList] No access token provided')
       throw new Error('no access token')
     }
-    return getGitlabRepoList(this.url, this.accessToken)
+    // Delegate to searchRepos, fetching all pages
+    const allRepos: ScmRepoInfo[] = []
+    let cursor: string | undefined
+    let hasMore = true
+
+    while (hasMore) {
+      const page = await this.searchRepos({
+        scmOrg: _scmOrg,
+        limit: 100,
+        cursor,
+      })
+      allRepos.push(...page.results)
+      hasMore = page.hasMore
+      cursor = page.nextCursor
+    }
+
+    return allRepos
   }
 
   async getBranchList(): Promise<string[]> {
@@ -380,9 +397,55 @@ export class GitlabSCMLib extends SCMLib {
   }
 
   override async searchRepos(
-    _params: SearchReposParams
+    params: SearchReposParams
   ): Promise<SearchReposResult> {
-    throw new Error('searchRepos not implemented for GitLab')
+    if (!this.accessToken) {
+      throw new Error('no access token')
+    }
+
+    const page = parseCursorSafe(params.cursor, 1)
+    const perPage = params.limit || 10
+
+    const { projects, hasMore } = await searchGitlabProjects({
+      url: this.url,
+      accessToken: this.accessToken,
+      perPage,
+      page,
+    })
+
+    // Fetch languages for the current page only (unless opted out)
+    const includeLanguages = params.includeLanguages !== false
+    const languageMap = new Map<number, string[]>()
+
+    if (includeLanguages && projects.length > 0) {
+      const languageResults = await Promise.all(
+        projects.map((p) =>
+          getGitlabProjectLanguages({
+            url: this.url,
+            accessToken: this.accessToken!,
+            projectId: p.id,
+          }).then((langs) => [p.id, langs] as const)
+        )
+      )
+      for (const [id, langs] of languageResults) {
+        languageMap.set(id, langs)
+      }
+    }
+
+    const results: ScmRepoInfo[] = projects.map((p) => ({
+      repoName: p.path,
+      repoUrl: p.web_url,
+      repoOwner: p.namespace_name,
+      repoLanguages: languageMap.get(p.id) || [],
+      repoIsPublic: p.visibility === 'public',
+      repoUpdatedAt: p.last_activity_at,
+    }))
+
+    return {
+      results,
+      nextCursor: hasMore ? String(page + 1) : undefined,
+      hasMore,
+    }
   }
 
   async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {

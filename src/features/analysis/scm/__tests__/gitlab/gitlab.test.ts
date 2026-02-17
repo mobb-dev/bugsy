@@ -15,12 +15,12 @@ import {
   getGitlabRecentCommits,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
-  getGitlabRepoList,
   getGitlabToken,
   getGitlabUsername,
   gitlabValidateParams,
   parseGitlabOwnerAndRepo,
   searchGitlabMergeRequests,
+  searchGitlabProjects,
 } from '../../gitlab/gitlab'
 import { GitlabSCMLib } from '../../gitlab/GitlabSCMLib'
 import { createScmLib } from '../../scmFactory'
@@ -272,10 +272,14 @@ describe('GitlabSCMLib - getRecentCommits and getRateLimitStatus', () => {
     const status = await scmLib.getRateLimitStatus()
     // GitLab returns rate limit info via response headers
     if (status) {
-      expect(status).toHaveProperty('remaining')
-      expect(status).toHaveProperty('reset')
-      expect(typeof status.remaining).toBe('number')
+      expect(status.remaining).toBeGreaterThanOrEqual(0)
       expect(status.reset).toBeInstanceOf(Date)
+      expect(isNaN(status.reset.getTime())).toBe(false)
+      expect(Object.keys(status).sort()).toEqual([
+        'limit',
+        'remaining',
+        'reset',
+      ])
     }
     // Note: Some GitLab instances may not return rate limit headers
   })
@@ -285,17 +289,19 @@ describe('GitlabSCMLib - getRecentCommits and getRateLimitStatus', () => {
     const since = new Date('2019-01-01T00:00:00Z').toISOString()
     const result = await scmLib.getRecentCommits(since)
 
-    expect(result).toHaveProperty('data')
     expect(Array.isArray(result.data)).toBe(true)
+    expect(result.data.length).toBeGreaterThan(0)
 
-    // The repo should have commits since 2019
-    if (result.data.length > 0) {
-      const commit = result.data[0]!
-      expect(commit).toHaveProperty('sha')
-      expect(typeof commit.sha).toBe('string')
-      expect(commit).toHaveProperty('commit')
-      expect(commit.commit).toHaveProperty('author')
-    }
+    // Most recent commit on main branch is known and stable
+    const firstCommit = result.data[0]!
+    expect(firstCommit.sha).toBe('737a5344cbfaccde78d109329d15c1f3123c992b')
+    expect(firstCommit.commit.author!.email).toBe('kirill@mobb.dev')
+    expect(firstCommit.commit.committer!.date).toBeDefined()
+    expect(firstCommit.commit.message).toContain('Revert')
+    expect(firstCommit.parents!.length).toBe(1)
+    expect(firstCommit.parents![0]).toEqual({
+      sha: '06ef2737f86a87f52ecb8378ef92704c8680c64f',
+    })
   })
 })
 
@@ -317,17 +323,22 @@ describe('getGitlabRecentCommits - helper function', () => {
     })
 
     expect(Array.isArray(commits)).toBe(true)
+    expect(commits.length).toBeGreaterThan(0)
 
-    if (commits.length > 0) {
-      const commit = commits[0]!
-      expect(commit).toHaveProperty('sha')
-      expect(commit).toHaveProperty('commit')
-      expect(commit.commit).toHaveProperty('committer')
-      expect(commit.commit).toHaveProperty('author')
-      expect(commit.commit).toHaveProperty('message')
-      expect(commit).toHaveProperty('parents')
-      expect(Array.isArray(commit.parents)).toBe(true)
-    }
+    // Most recent commit on main is known and stable
+    const first = commits[0]!
+    expect(first.sha).toBe('737a5344cbfaccde78d109329d15c1f3123c992b')
+    expect(first.commit.author.email).toBe('kirill@mobb.dev')
+    expect(first.commit.committer!.date).toContain('2024-11-18')
+    expect(first.commit.message).toContain(
+      'Revert "SQL Injection vulnerability fix (powered by Mobb)-6aec560d-81f4-47e9-a7ce-0fac8467da80"'
+    )
+    expect(first.commit.message).toContain(
+      'This reverts commit 6844339e38b532016f705806bac4c80b2999185f.'
+    )
+    expect(first.parents).toEqual([
+      { sha: '06ef2737f86a87f52ecb8378ef92704c8680c64f' },
+    ])
   })
 })
 
@@ -601,7 +612,7 @@ describe('getGitlabIsRemoteBranch', () => {
   })
 })
 
-describe('getGitlabRepoList', () => {
+describe('searchGitlabProjects', () => {
   beforeAll(() => {
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
   })
@@ -609,20 +620,26 @@ describe('getGitlabRepoList', () => {
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
   })
 
-  it('returns a non-empty list of repos', async () => {
-    const repos = await getGitlabRepoList(
-      env.PLAYWRIGHT_GL_CLOUD_REPO_URL,
-      env.PLAYWRIGHT_GL_CLOUD_PAT
-    )
-    expect(Array.isArray(repos)).toBe(true)
-    expect(repos.length).toBeGreaterThan(0)
+  it('returns a paginated list of projects with correct data', async () => {
+    const result = await searchGitlabProjects({
+      url: env.PLAYWRIGHT_GL_CLOUD_REPO_URL,
+      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
+      perPage: 5,
+      page: 1,
+    })
 
-    const repo = repos[0]!
-    expect(repo).toHaveProperty('repoName')
-    expect(repo).toHaveProperty('repoUrl')
-    expect(repo).toHaveProperty('repoOwner')
-    expect(typeof repo.repoName).toBe('string')
-    expect(typeof repo.repoUrl).toBe('string')
+    // Test account (mobbcitestjob) has exactly 1 project
+    expect(result.projects.length).toBe(1)
+    expect(result.hasMore).toBe(false)
+
+    const project = result.projects[0]!
+    expect(project.id).toBe(63143892)
+    expect(project.path).toBe('webgoat')
+    expect(project.web_url).toBe('https://gitlab.com/mobbcitestjob/webgoat')
+    expect(project.namespace_name).toBe('mobb citest')
+    expect(project.visibility).toBe('private')
+    // last_activity_at changes with each test run, verify it's a valid ISO date
+    expect(new Date(project.last_activity_at).getTime()).not.toBeNaN()
   })
 })
 
@@ -657,12 +674,12 @@ describe('getGitlabMergeRequest', () => {
       accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
     })
 
-    expect(mr).toHaveProperty('iid', testMrNumber)
-    expect(mr).toHaveProperty('title')
-    expect(mr).toHaveProperty('state')
-    expect(mr).toHaveProperty('created_at')
-    expect(mr).toHaveProperty('source_branch')
-    expect(mr).toHaveProperty('target_branch')
+    expect(mr.iid).toBe(testMrNumber)
+    expect(mr.title.length).toBeGreaterThan(0)
+    expect(['opened', 'closed', 'merged']).toContain(mr.state)
+    expect(new Date(mr.created_at).getTime()).not.toBeNaN()
+    expect(mr.source_branch.length).toBeGreaterThan(0)
+    expect(mr.target_branch).toBe('main')
   })
 })
 
@@ -681,9 +698,9 @@ describe('getGitlabCommitUrl', () => {
       accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
     })
 
-    expect(result).toHaveProperty('web_url')
-    expect(typeof result.web_url).toBe('string')
-    expect(result.web_url).toContain(GITLAB_TEST_COMMIT_SHA)
+    expect(result.web_url).toBe(
+      'https://gitlab.com/mobbcitestjob/webgoat/-/commit/5357a65e054976cd7d79b81ef3906ded050ed921'
+    )
   })
 })
 
@@ -703,20 +720,17 @@ describe('searchGitlabMergeRequests', () => {
       perPage: 5,
     })
 
-    expect(result).toHaveProperty('items')
-    expect(result).toHaveProperty('hasMore')
-    expect(Array.isArray(result.items)).toBe(true)
     expect(result.items.length).toBeGreaterThan(0)
     expect(result.items.length).toBeLessThanOrEqual(5)
 
     const mr = result.items[0]!
-    expect(mr).toHaveProperty('iid')
-    expect(mr).toHaveProperty('title')
-    expect(mr).toHaveProperty('state')
-    expect(mr).toHaveProperty('sourceBranch')
-    expect(mr).toHaveProperty('targetBranch')
-    expect(mr).toHaveProperty('createdAt')
-    expect(mr).toHaveProperty('updatedAt')
+    expect(mr.iid).toBeGreaterThan(0)
+    expect(mr.title.length).toBeGreaterThan(0)
+    expect(['opened', 'closed', 'merged']).toContain(mr.state)
+    expect(mr.sourceBranch.length).toBeGreaterThan(0)
+    expect(mr.targetBranch).toBe('main')
+    expect(new Date(mr.createdAt).getTime()).not.toBeNaN()
+    expect(new Date(mr.updatedAt).getTime()).not.toBeNaN()
   })
 
   it('respects state filter', async () => {
@@ -763,14 +777,14 @@ describe('getGitlabMrCommitsBatch', () => {
     })
 
     expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(testMrNumbers.length)
     for (const mrNumber of testMrNumbers) {
       expect(result.has(mrNumber)).toBe(true)
       const shas = result.get(mrNumber)!
       expect(Array.isArray(shas)).toBe(true)
-      if (shas.length > 0) {
-        expect(typeof shas[0]).toBe('string')
-        expect(shas[0]!.length).toBeGreaterThan(0)
-      }
+      expect(shas.length).toBeGreaterThan(0)
+      // Commit SHAs are 40-char hex strings
+      expect(shas[0]).toMatch(/^[0-9a-f]{40}$/)
     }
   })
 
@@ -815,16 +829,17 @@ describe('getGitlabMrDataBatch', () => {
     })
 
     expect(result).toBeInstanceOf(Map)
+    expect(result.size).toBe(testMrNumbers.length)
     for (const mrNumber of testMrNumbers) {
       expect(result.has(mrNumber)).toBe(true)
       const data = result.get(mrNumber)!
-      expect(data).toHaveProperty('changedLines')
-      expect(data.changedLines).toHaveProperty('additions')
-      expect(data.changedLines).toHaveProperty('deletions')
-      expect(typeof data.changedLines.additions).toBe('number')
-      expect(typeof data.changedLines.deletions).toBe('number')
-      expect(data).toHaveProperty('comments')
+      expect(data.changedLines.additions).toBeGreaterThanOrEqual(0)
+      expect(data.changedLines.deletions).toBeGreaterThanOrEqual(0)
       expect(Array.isArray(data.comments)).toBe(true)
+      expect(Object.keys(data.changedLines).sort()).toEqual([
+        'additions',
+        'deletions',
+      ])
     }
   })
 })
@@ -860,20 +875,17 @@ describe('getGitlabMergeRequestMetrics', () => {
       accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
     })
 
-    expect(metrics).toHaveProperty('state')
-    expect(metrics).toHaveProperty('isDraft')
-    expect(metrics).toHaveProperty('createdAt')
-    expect(metrics).toHaveProperty('mergedAt')
-    expect(metrics).toHaveProperty('linesAdded')
-    expect(metrics).toHaveProperty('commentIds')
-
-    expect(typeof metrics.state).toBe('string')
-    expect(typeof metrics.isDraft).toBe('boolean')
-    expect(typeof metrics.createdAt).toBe('string')
-    expect(typeof metrics.linesAdded).toBe('number')
+    expect(['opened', 'closed', 'merged']).toContain(metrics.state)
+    expect(metrics.isDraft).toBe(false)
+    expect(new Date(metrics.createdAt).getTime()).not.toBeNaN()
     expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
-
     expect(Array.isArray(metrics.commentIds)).toBe(true)
+    // mergedAt is null for non-merged MRs, or a valid date string for merged ones
+    if (metrics.mergedAt !== null) {
+      expect(new Date(metrics.mergedAt).getTime()).not.toBeNaN()
+    } else {
+      expect(metrics.mergedAt).toBeNull()
+    }
   })
 })
 
@@ -912,28 +924,21 @@ describe('GitlabSCMLib - getPullRequestMetrics', () => {
 
     const metrics = await scmLib.getPullRequestMetrics(testMrNumber)
 
-    expect(metrics).toHaveProperty('prId', String(testMrNumber))
-    expect(metrics).toHaveProperty('repositoryUrl')
-    expect(metrics).toHaveProperty('prCreatedAt')
-    expect(metrics).toHaveProperty('prMergedAt')
-    expect(metrics).toHaveProperty('linesAdded')
-    expect(metrics).toHaveProperty('prStatus')
-    expect(metrics).toHaveProperty('commentIds')
-
+    expect(metrics.prId).toBe(String(testMrNumber))
+    expect(metrics.repositoryUrl).toBe(
+      'https://gitlab.com/mobbcitestjob/webgoat'
+    )
     expect(metrics.prCreatedAt).toBeInstanceOf(Date)
     expect(isNaN(metrics.prCreatedAt.getTime())).toBe(false)
-    expect(typeof metrics.linesAdded).toBe('number')
     expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
-
     expect(Array.isArray(metrics.commentIds)).toBe(true)
-
-    // prStatus should be a valid enum value
-    const validStatuses = ['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']
-    expect(validStatuses).toContain(metrics.prStatus)
+    expect(['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']).toContain(metrics.prStatus)
 
     if (metrics.prMergedAt !== null) {
       expect(metrics.prMergedAt).toBeInstanceOf(Date)
       expect(isNaN(metrics.prMergedAt.getTime())).toBe(false)
+    } else {
+      expect(metrics.prMergedAt).toBeNull()
     }
   })
 })
@@ -961,20 +966,17 @@ describe('GitlabSCMLib - searchSubmitRequests', () => {
       limit: 3,
     })
 
-    expect(result).toHaveProperty('results')
-    expect(result).toHaveProperty('hasMore')
-    expect(Array.isArray(result.results)).toBe(true)
     expect(result.results.length).toBeGreaterThan(0)
     expect(result.results.length).toBeLessThanOrEqual(3)
 
     const pr = result.results[0]!
-    expect(pr).toHaveProperty('submitRequestId')
-    expect(pr).toHaveProperty('title')
-    expect(pr).toHaveProperty('status')
-    expect(pr).toHaveProperty('sourceBranch')
-    expect(pr).toHaveProperty('targetBranch')
-    expect(pr).toHaveProperty('createdAt')
+    expect(Number(pr.submitRequestId)).toBeGreaterThan(0)
+    expect(pr.title.length).toBeGreaterThan(0)
+    expect(['open', 'closed', 'merged']).toContain(pr.status)
+    expect(pr.sourceBranch.length).toBeGreaterThan(0)
+    expect(pr.targetBranch).toBe('main')
     expect(pr.createdAt).toBeInstanceOf(Date)
+    expect(isNaN(pr.createdAt.getTime())).toBe(false)
   })
 })
 

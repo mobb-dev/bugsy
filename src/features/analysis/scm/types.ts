@@ -73,6 +73,7 @@ export type SearchReposParams = {
   sort?: RepoSort
   limit?: number
   cursor?: string
+  includeLanguages?: boolean
 }
 
 export type SearchReposResult = {

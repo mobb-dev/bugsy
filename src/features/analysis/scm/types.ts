@@ -20,38 +20,6 @@ export type GetReferenceDataResponse = {
   date: Date | undefined
 }
 
-export type GetCommitDiffResult = {
-  diff: string
-  commitTimestamp: Date
-  commitSha: string
-  authorName?: string
-  authorEmail?: string
-  message?: string
-  repositoryCreatedAt?: Date
-}
-
-export type DiffLineAttribution = {
-  file: string
-  line: number
-}
-
-export type GetSubmitRequestDiffResult = {
-  diff: string
-  createdAt: Date
-  updatedAt: Date
-  submitRequestId: string
-  submitRequestNumber: number
-  sourceBranch: string
-  targetBranch: string
-  authorName?: string
-  authorEmail?: string
-  title?: string
-  description?: string
-  headCommitSha?: string
-  commits: GetCommitDiffResult[]
-  diffLines: DiffLineAttribution[]
-}
-
 export type GetSubmitRequestInfo = {
   submitRequestId: string
   submitRequestNumber: number
@@ -118,10 +86,7 @@ export type PullRequestMetrics = {
   repositoryUrl: string
   prCreatedAt: Date
   prMergedAt: Date | null
-  firstCommitDate: Date | null
   linesAdded: number
-  commitsCount: number
-  commitShas: string[]
   prStatus: Pr_Status_Enum
   commentIds: string[]
 }
@@ -235,6 +200,17 @@ export type RateLimitStatus = {
   remaining: number
   reset: Date
   limit?: number
+}
+
+/**
+ * Lightweight PR metadata result.
+ * Only requires a single API call (getPr for GitHub, MR show for GitLab).
+ */
+export type GetSubmitRequestMetadataResult = {
+  title?: string
+  targetBranch: string
+  sourceBranch: string
+  headCommitSha: string
 }
 
 export type CommitLite = {

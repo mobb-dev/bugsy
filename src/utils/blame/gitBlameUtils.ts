@@ -1,7 +1,81 @@
-import type { FileBlameData, LineRange } from './gitBlameTypes'
+import type {
+  BlameInfo,
+  CommitMetadata,
+  CommitMetadataMap,
+  FileBlameData,
+  LineRange,
+  LineToCommitMap,
+} from './gitBlameTypes'
 
-/** Chunk size for large file splitting (1,000 lines per chunk) */
-export const BLAME_CHUNK_SIZE = 1000
+// ---------------------------------------------------------------------------
+// Core porcelain parser (private)
+// ---------------------------------------------------------------------------
+
+type PorcelainEntry = {
+  commitSha: string
+  originalLine: number
+  finalLine: number
+}
+
+type PorcelainParseResult = {
+  entries: PorcelainEntry[]
+  commitMetadata: Record<string, Record<string, string>>
+}
+
+function parsePorcelainCore(output: string): PorcelainParseResult {
+  const entries: PorcelainEntry[] = []
+  const commitMetadata: Record<string, Record<string, string>> = {}
+
+  if (!output?.trim()) return { entries, commitMetadata }
+
+  const lines = output.split('\n')
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+    if (!line?.trim()) {
+      i++
+      continue
+    }
+
+    const match = line.match(/^([0-9a-f]{40})\s+(\d+)\s+(\d+)/)
+    if (!match) {
+      i++
+      continue
+    }
+
+    const commitSha = match[1]!
+    const originalLine = parseInt(match[2]!, 10)
+    const finalLine = parseInt(match[3]!, 10)
+
+    // Parse all metadata key-value lines until tab-prefixed content line
+    i++
+    if (!commitMetadata[commitSha]) {
+      commitMetadata[commitSha] = {}
+    }
+    while (i < lines.length && !lines[i]!.startsWith('\t')) {
+      const metaLine = lines[i]!
+      const spaceIdx = metaLine.indexOf(' ')
+      if (spaceIdx > 0) {
+        const key = metaLine.slice(0, spaceIdx)
+        const value = metaLine.slice(spaceIdx + 1)
+        commitMetadata[commitSha][key] = value
+      }
+      i++
+    }
+
+    // Skip content line
+    if (i < lines.length) i++
+
+    entries.push({ commitSha, originalLine, finalLine })
+  }
+
+  return { entries, commitMetadata }
+}
+
+// ---------------------------------------------------------------------------
+// Public parsers (thin wrappers over parsePorcelainCore)
+// ---------------------------------------------------------------------------
 
 /**
  * Parses git blame --porcelain output and builds a 1-indexed array of blame info.
@@ -15,64 +89,14 @@ export const BLAME_CHUNK_SIZE = 1000
  * @returns 1-indexed array of blame info (FileBlameData)
  */
 export function parseGitBlamePorcelain(output: string): FileBlameData {
-  // Initialize 1-indexed array (index 0 is always null)
+  const { entries } = parsePorcelainCore(output)
   const blameData: FileBlameData = [null]
-
-  if (!output || output.trim().length === 0) {
-    return blameData
-  }
-
-  const lines = output.split('\n')
-  let i = 0
-
-  while (i < lines.length) {
-    const line = lines[i]
-
-    // Skip empty lines
-    if (!line || line.trim().length === 0) {
-      i++
-      continue
-    }
-
-    // Parse header line: <40-hex-sha> <orig-line> <final-line> <num-lines-in-group>
-    // Example: "a1b2c3d4... 10 42 1"
-    const headerMatch = line.match(
-      /^([0-9a-f]{40})\s+(\d+)\s+(\d+)(?:\s+(\d+))?/
-    )
-
-    if (!headerMatch) {
-      // Not a header line, skip to next
-      i++
-      continue
-    }
-
-    const commitSha = headerMatch[1]
-    const originalLine = parseInt(headerMatch[2]!, 10)
-
-    // Validate parsed numbers
-    if (isNaN(originalLine) || originalLine < 1) {
-      i++
-      continue
-    }
-
-    // Skip metadata lines until we find the content line (starts with tab)
-    i++
-    while (i < lines.length && !lines[i]!.startsWith('\t')) {
-      i++
-    }
-
-    // Append blame info (array is 1-indexed, so push gives us indices 1, 2, 3...)
+  for (const entry of entries) {
     blameData.push({
-      originalLineNumber: originalLine,
-      commitSha: commitSha!,
+      originalLineNumber: entry.originalLine,
+      commitSha: entry.commitSha,
     })
-
-    // Skip the content line (tab-prefixed line that while loop stopped at)
-    if (i < lines.length) {
-      i++
-    }
   }
-
   return blameData
 }
 
@@ -83,6 +107,7 @@ export type BlameLineInfo = {
   authorEmail?: string
   authorTime?: number
 }
+
 /**
  * Parses git blame --porcelain output into a map keyed by final line number.
  * Useful for looking up blame info for specific lines in the current file version.
@@ -93,88 +118,52 @@ export type BlameLineInfo = {
 export function parseGitBlamePorcelainByLine(
   output: string
 ): Record<number, BlameLineInfo> {
+  const { entries, commitMetadata } = parsePorcelainCore(output)
   const result: Record<number, BlameLineInfo> = {}
-
-  if (!output || output.trim().length === 0) {
-    return result
-  }
-
-  const lines = output.split('\n')
-  let i = 0
-
-  // Store author info by commit hash - git blame only shows full metadata once per commit
-  const commitMetaInfo: Record<
-    string,
-    {
-      authorName?: string
-      authorEmail?: string
-      authorTime?: number
-      authorTz?: number
+  for (const entry of entries) {
+    const meta = commitMetadata[entry.commitSha]
+    result[entry.finalLine] = {
+      commit: entry.commitSha,
+      originalLine: entry.originalLine,
+      authorName: meta?.['author'],
+      authorEmail: meta?.['author-mail']?.replace(/^<|>$/g, ''),
+      authorTime: meta?.['author-time']
+        ? parseInt(meta['author-time'], 10)
+        : undefined,
     }
-  > = {}
-
-  while (i < lines.length) {
-    const line = lines[i]
-    if (!line?.trim()) {
-      i++
-      continue
-    }
-
-    // Header line: <hash> <orig_lineno> <final_lineno> <num_lines>
-    const match = line.match(/^([a-f0-9]+)\s+(\d+)\s+(\d+)/)
-    if (match) {
-      const commit = match[1]!
-      const originalLine = parseInt(match[2]!, 10)
-      const finalLine = parseInt(match[3]!, 10)
-
-      let authorName: string | undefined
-      let authorEmail: string | undefined
-      let authorTime: number | undefined
-
-      // Parse metadata lines until tab-prefixed content line
-      i++
-      while (i < lines.length && !lines[i]!.startsWith('\t')) {
-        const l = lines[i]!
-        if (l.startsWith('author ')) authorName = l.slice('author '.length)
-        else if (l.startsWith('author-mail '))
-          authorEmail = l.slice('author-mail '.length).replace(/^<|>$/g, '')
-        else if (l.startsWith('author-time '))
-          authorTime = parseInt(l.slice('author-time '.length), 10)
-        i++
-      }
-
-      // Store author info for this commit if we found any
-      if (authorName || authorEmail) {
-        commitMetaInfo[commit] = { authorName, authorEmail, authorTime }
-      }
-
-      // Use stored author info for this commit (either just parsed or from previous occurrence)
-      const storedInfo = commitMetaInfo[commit]
-
-      // Skip content line
-      i++
-
-      result[finalLine] = {
-        commit,
-        originalLine,
-        authorName: storedInfo?.authorName,
-        authorEmail: storedInfo?.authorEmail,
-        authorTime: storedInfo?.authorTime,
-      }
-      continue
-    }
-    i++
   }
   return result
 }
 
 /**
- * Calculate chunk index for a given line number.
- * @param lineNumber - 1-indexed line number
- * @returns Chunk index (0 for lines 1-1000, 1 for lines 1001-2000, etc.)
+ * Parses git blame --porcelain output into a BlameInfo structure
+ * containing lineToCommit and commitMetadata maps.
+ *
+ * Used by scm_agent's full-file blame flow.
+ *
+ * @param output - Raw output from `git blame --porcelain` command
+ * @returns BlameInfo with lineToCommit mapping and commit metadata
  */
-export function getChunkIndexForLine(lineNumber: number): number {
-  return Math.floor((lineNumber - 1) / BLAME_CHUNK_SIZE)
+export function parseGitBlamePorcelainToBlameInfo(output: string): BlameInfo {
+  const { entries, commitMetadata } = parsePorcelainCore(output)
+  const lineToCommit: LineToCommitMap = {}
+  for (const entry of entries) {
+    lineToCommit[entry.finalLine] = entry.commitSha
+  }
+
+  // Git blame skips final empty lines; mirror the last real line's blame
+  const maxLine = Math.max(0, ...Object.keys(lineToCommit).map(Number))
+  if (maxLine > 0 && lineToCommit[maxLine]) {
+    lineToCommit[maxLine + 1] = lineToCommit[maxLine]
+  }
+
+  // Cast generic metadata to CommitMetadataMap
+  const typedMetadata: CommitMetadataMap = {}
+  for (const [sha, meta] of Object.entries(commitMetadata)) {
+    typedMetadata[sha] = meta as CommitMetadata
+  }
+
+  return { lineToCommit, commitMetadata: typedMetadata }
 }
 
 /**
@@ -183,19 +172,19 @@ export function getChunkIndexForLine(lineNumber: number): number {
 export type GitBlameArgsOptions = {
   /** Relative path to file within repository */
   filePath: string
-  /** Optional line range for chunked processing (1-indexed, inclusive) */
-  lineRange?: LineRange
+  /** Optional line ranges for processing (1-indexed, inclusive). Multiple ranges produce multiple -L flags. */
+  lineRanges?: LineRange[]
 } & (
   | {
       /**
-       * Mode for blaming committed code at specific commit range.
-       * Used by scm_agent for PR analysis.
+       * Mode for blaming a diff range between two refs.
+       * Used by scm_agent for PR analysis (computeTargetedBlame).
        */
-      mode: 'commitRange'
-      /** First relevant commit SHA (for commit context) */
-      firstRelevantCommitSha: string
-      /** Commit SHA to blame at (e.g., PR head commit) */
-      commitSha: string
+      mode: 'diffRange'
+      /** Base ref for the diff range (e.g., merge-base SHA) */
+      baseRef: string
+      /** Head ref (e.g., 'HEAD') */
+      headRef: string
     }
   | {
       /**
@@ -212,21 +201,22 @@ export type GitBlameArgsOptions = {
  * Builds git blame command arguments for different use cases.
  *
  * Supports two modes:
- * - `commitRange`: For analyzing committed code at specific commits (scm_agent)
+ * - `diffRange`: For analyzing a diff range between two refs (scm_agent)
  * - `workingTree`: For analyzing working tree files, optionally with dirty content (VS Code extension)
  *
  * @param options - Options for building the blame command
  * @returns Array of git blame arguments (without 'git' itself)
  *
  * @example
- * // For scm_agent (commit range analysis)
+ * // For scm_agent (diff range analysis)
  * buildGitBlameArgs({
- *   mode: 'commitRange',
+ *   mode: 'diffRange',
  *   filePath: 'src/index.ts',
- *   firstRelevantCommitSha: 'abc123',
- *   commitSha: 'def456',
+ *   baseRef: 'abc123',
+ *   headRef: 'HEAD',
+ *   lineRanges: [{ start: 10, end: 20 }],
  * })
- * // Returns: ['blame', '--porcelain', '-l', 'abc123^..def456', 'src/index.ts']
+ * // Returns: ['blame', '--porcelain', '-L', '10,20', 'abc123..HEAD', '--', 'src/index.ts']
  *
  * @example
  * // For VS Code extension (dirty file)
@@ -248,20 +238,16 @@ export type GitBlameArgsOptions = {
 export function buildGitBlameArgs(options: GitBlameArgsOptions): string[] {
   const args: string[] = ['blame', '--porcelain']
 
-  if (options.mode === 'commitRange') {
-    // Add -l flag for long commit hashes (used by scm_agent)
-    args.push('-l')
-
-    // Add line range if specified
-    if (options.lineRange) {
-      args.push('-L', `${options.lineRange.start},${options.lineRange.end}`)
+  if (options.mode === 'diffRange') {
+    // Add line ranges if specified
+    if (options.lineRanges) {
+      for (const range of options.lineRanges) {
+        args.push('-L', `${range.start},${range.end}`)
+      }
     }
 
-    // Add commit range and file path
-    args.push(
-      `${options.firstRelevantCommitSha}^..${options.commitSha}`,
-      options.filePath
-    )
+    // Add diff range and file path
+    args.push(`${options.baseRef}..${options.headRef}`, '--', options.filePath)
   } else {
     // workingTree mode
     // Add contents flag for dirty files
@@ -269,9 +255,11 @@ export function buildGitBlameArgs(options: GitBlameArgsOptions): string[] {
       args.push('--contents', options.contentsPath)
     }
 
-    // Add line range if specified
-    if (options.lineRange) {
-      args.push('-L', `${options.lineRange.start},${options.lineRange.end}`)
+    // Add line ranges if specified
+    if (options.lineRanges) {
+      for (const range of options.lineRanges) {
+        args.push('-L', `${range.start},${range.end}`)
+      }
     }
 
     // Add separator and file path
@@ -279,22 +267,4 @@ export function buildGitBlameArgs(options: GitBlameArgsOptions): string[] {
   }
 
   return args
-}
-
-/**
- * Calculate line range for a given chunk index.
- * @param chunkIndex - Chunk index (0, 1, 2...) or undefined
- * @returns Line range for that chunk (1-indexed, inclusive), or undefined when chunking is disabled
- */
-export function getLineRangeForChunk(
-  chunkIndex: number | undefined
-): LineRange | undefined {
-  // `undefined` means "no chunking"; chunk index `0` is the first chunk.
-  if (chunkIndex === undefined || chunkIndex < 0) {
-    return undefined
-  }
-  return {
-    start: chunkIndex * BLAME_CHUNK_SIZE + 1,
-    end: (chunkIndex + 1) * BLAME_CHUNK_SIZE,
-  }
 }

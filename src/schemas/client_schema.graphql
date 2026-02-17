@@ -397,6 +397,7 @@ mutation AnalyzeCommitForExtensionAIBlame(
     ... on ProcessAIBlameRequestedResult {
       status
       requestIds
+      commitBlameRequestIds
     }
   }
 }

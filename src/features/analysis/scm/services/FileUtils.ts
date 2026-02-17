@@ -15,6 +15,7 @@ import {
   IMPORTANT_PROJECT_FILES,
   SUPPORTED_EXTENSIONS,
 } from './FilePatterns'
+import type { GitService as GitServiceClass } from './GitService'
 
 export class FileUtils {
   // Important project configuration files that should always be included
@@ -224,7 +225,7 @@ export class FileUtils {
     let gitMatcher: ReturnType<typeof ignore> | null = null
     try {
       const { GitService } = (await import('./GitService')) as {
-        GitService: typeof import('./GitService').GitService
+        GitService: typeof GitServiceClass
       }
       const gitService = new GitService(dir)
       gitMatcher = await gitService.getGitignoreMatcher()

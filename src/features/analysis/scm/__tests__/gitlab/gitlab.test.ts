@@ -5,13 +5,10 @@ import { GetGitlabTokenParams, GitlabTokenRequestTypeEnum } from '../../gitlab'
 import {
   createMarkdownCommentOnPullRequest,
   getGitlabBranchList,
-  getGitlabCommitDiff,
   getGitlabCommitUrl,
   getGitlabIsRemoteBranch,
   getGitlabIsUserCollaborator,
   getGitlabMergeRequest,
-  getGitlabMergeRequestDiff,
-  getGitlabMergeRequestLinesAdded,
   getGitlabMergeRequestMetrics,
   getGitlabMrCommitsBatch,
   getGitlabMrDataBatch,
@@ -332,254 +329,6 @@ describe('getGitlabRecentCommits - helper function', () => {
       expect(Array.isArray(commit.parents)).toBe(true)
     }
   })
-})
-
-describe('getGitlabCommitDiff - helper function', () => {
-  beforeAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-  })
-
-  afterAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-  })
-
-  it('returns commit diff with all required fields', async () => {
-    const result = await getGitlabCommitDiff({
-      repoUrl: GITLAB_TEST_URL,
-      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT!,
-      commitSha: GITLAB_TEST_COMMIT_SHA,
-    })
-
-    expect(result).toHaveProperty('diff')
-    expect(result).toHaveProperty('commitTimestamp')
-    expect(result).toHaveProperty('commitSha')
-    expect(result).toHaveProperty('authorName')
-    expect(result).toHaveProperty('authorEmail')
-    expect(result).toHaveProperty('message')
-    expect(typeof result.diff).toBe('string')
-    expect(result.commitTimestamp).toBeInstanceOf(Date)
-    expect(result.commitSha).toBe(GITLAB_TEST_COMMIT_SHA)
-  })
-
-  it('diff contains expected unified diff format elements', async () => {
-    const result = await getGitlabCommitDiff({
-      repoUrl: GITLAB_TEST_URL,
-      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT!,
-      commitSha: GITLAB_TEST_COMMIT_SHA,
-    })
-
-    // The diff should contain standard unified diff elements
-    // (diff header, file paths, or hunk markers)
-    const hasGitDiffHeader = result.diff.includes('diff --git')
-    const hasFilePaths =
-      result.diff.includes('---') || result.diff.includes('+++')
-    const hasHunkMarkers = result.diff.includes('@@')
-
-    // At least one of these should be present for a valid diff
-    expect(hasGitDiffHeader || hasFilePaths || hasHunkMarkers).toBe(true)
-  })
-})
-
-describe('GitlabSCMLib - getCommitDiff method', () => {
-  let scmLib: GitlabSCMLib
-
-  beforeAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-    scmLib = (await createScmLib({
-      url: GITLAB_TEST_URL,
-      scmType: ScmLibScmType.GITLAB,
-      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
-      scmOrg: undefined,
-    })) as GitlabSCMLib
-  })
-
-  afterAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-  })
-
-  it('returns commit diff with required GetCommitDiffResult fields', async () => {
-    const result = await scmLib.getCommitDiff(GITLAB_TEST_COMMIT_SHA)
-
-    expect(result).toHaveProperty('diff')
-    expect(result).toHaveProperty('commitTimestamp')
-    expect(result).toHaveProperty('commitSha')
-    expect(typeof result.diff).toBe('string')
-    expect(result.commitTimestamp).toBeInstanceOf(Date)
-    expect(result.commitSha).toBe(GITLAB_TEST_COMMIT_SHA)
-  })
-})
-
-describe('getGitlabMergeRequestDiff - helper function', () => {
-  // Use the same test repo that works for other GitLab tests
-  const testRepoUrl = GITLAB_TEST_URL
-  const testAccessToken = env.PLAYWRIGHT_GL_CLOUD_PAT
-  let testMrNumber: number | null = null
-
-  beforeAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-
-    try {
-      const result = await searchGitlabMergeRequests({
-        repoUrl: testRepoUrl,
-        accessToken: testAccessToken,
-        state: 'all',
-        perPage: 1,
-      })
-
-      if (result.items.length > 0) {
-        testMrNumber = result.items[0]!.iid
-      }
-    } catch (error) {
-      console.log('Failed to fetch MRs:', error)
-    }
-  }, 60000)
-
-  afterAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-  })
-
-  it('returns MR diff with all required fields', async () => {
-    if (testMrNumber === null) {
-      console.log('No merge requests found in test repo, skipping test')
-      return
-    }
-
-    const result = await getGitlabMergeRequestDiff({
-      repoUrl: testRepoUrl,
-      accessToken: testAccessToken,
-      mrNumber: testMrNumber,
-    })
-
-    expect(result).toHaveProperty('diff')
-    expect(result).toHaveProperty('createdAt')
-    expect(result).toHaveProperty('updatedAt')
-    expect(result).toHaveProperty('submitRequestId')
-    expect(result).toHaveProperty('submitRequestNumber')
-    expect(result).toHaveProperty('sourceBranch')
-    expect(result).toHaveProperty('targetBranch')
-    expect(result).toHaveProperty('title')
-    expect(result).toHaveProperty('commits')
-    expect(result).toHaveProperty('diffLines')
-
-    expect(typeof result.diff).toBe('string')
-    expect(result.diff).toContain('diff --git')
-    expect(result.createdAt).toBeInstanceOf(Date)
-    expect(result.updatedAt).toBeInstanceOf(Date)
-    expect(result.submitRequestNumber).toBe(testMrNumber)
-    expect(Array.isArray(result.commits)).toBe(true)
-    expect(Array.isArray(result.diffLines)).toBe(true)
-  }, 60000)
-
-  it('returns commits with correct structure', async () => {
-    if (testMrNumber === null) {
-      console.log('No merge requests found in test repo, skipping test')
-      return
-    }
-
-    const result = await getGitlabMergeRequestDiff({
-      repoUrl: testRepoUrl,
-      accessToken: testAccessToken,
-      mrNumber: testMrNumber,
-    })
-
-    if (result.commits.length > 0) {
-      const commit = result.commits[0]!
-      expect(commit).toHaveProperty('diff')
-      expect(commit).toHaveProperty('commitTimestamp')
-      expect(commit).toHaveProperty('commitSha')
-      expect(commit).toHaveProperty('authorName')
-      expect(commit).toHaveProperty('message')
-      expect(typeof commit.diff).toBe('string')
-      expect(commit.commitTimestamp).toBeInstanceOf(Date)
-      expect(typeof commit.commitSha).toBe('string')
-    }
-  }, 60000)
-
-  it('returns diffLines attribution for added lines', async () => {
-    if (testMrNumber === null) {
-      console.log('No merge requests found in test repo, skipping test')
-      return
-    }
-
-    const result = await getGitlabMergeRequestDiff({
-      repoUrl: testRepoUrl,
-      accessToken: testAccessToken,
-      mrNumber: testMrNumber,
-    })
-
-    // diffLines should be an array (may be empty if MR has no additions)
-    expect(Array.isArray(result.diffLines)).toBe(true)
-
-    if (result.diffLines.length > 0) {
-      const diffLine = result.diffLines[0]!
-      expect(diffLine).toHaveProperty('file')
-      expect(diffLine).toHaveProperty('line')
-
-      expect(typeof diffLine.file).toBe('string')
-      expect(typeof diffLine.line).toBe('number')
-    }
-  }, 60000)
-})
-
-describe('GitlabSCMLib - getSubmitRequestDiff method', () => {
-  let scmLib: GitlabSCMLib | null = null
-  // Use the same test repo that works for other GitLab tests
-  const testRepoUrl = GITLAB_TEST_URL
-  const testAccessToken = env.PLAYWRIGHT_GL_CLOUD_PAT
-  let testMrNumber: number | null = null
-
-  beforeAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-
-    try {
-      const result = await searchGitlabMergeRequests({
-        repoUrl: testRepoUrl,
-        accessToken: testAccessToken,
-        state: 'all',
-        perPage: 1,
-      })
-
-      if (result.items.length > 0) {
-        testMrNumber = result.items[0]!.iid
-      }
-
-      scmLib = (await createScmLib({
-        url: testRepoUrl,
-        scmType: ScmLibScmType.GITLAB,
-        accessToken: testAccessToken,
-        scmOrg: undefined,
-      })) as GitlabSCMLib
-    } catch (error) {
-      console.log('Failed to setup SCMLib:', error)
-    }
-  }, 60000)
-
-  afterAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-  })
-
-  it('returns MR diff via SCMLib interface', async () => {
-    if (testMrNumber === null || scmLib === null) {
-      console.log(
-        'No merge requests found or SCMLib not initialized, skipping test'
-      )
-      return
-    }
-
-    const result = await scmLib.getSubmitRequestDiff(String(testMrNumber))
-
-    expect(result).toHaveProperty('diff')
-    expect(result).toHaveProperty('createdAt')
-    expect(result).toHaveProperty('updatedAt')
-    expect(result).toHaveProperty('submitRequestId')
-    expect(result).toHaveProperty('submitRequestNumber')
-    expect(result).toHaveProperty('sourceBranch')
-    expect(result).toHaveProperty('targetBranch')
-    expect(result).toHaveProperty('commits')
-    expect(result).toHaveProperty('diffLines')
-
-    expect(result.submitRequestNumber).toBe(testMrNumber)
-  }, 60000)
 })
 
 describe('GitlabSCMLib - extractLinearTicketsFromComments', () => {
@@ -1080,42 +829,6 @@ describe('getGitlabMrDataBatch', () => {
   })
 })
 
-describe('getGitlabMergeRequestLinesAdded', () => {
-  let testMrNumber: number | null = null
-
-  beforeAll(async () => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-    const result = await searchGitlabMergeRequests({
-      repoUrl: env.PLAYWRIGHT_GL_CLOUD_REPO_URL,
-      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
-      state: 'all',
-      perPage: 1,
-    })
-    if (result.items.length > 0) {
-      testMrNumber = result.items[0]!.iid
-    }
-  })
-  afterAll(() => {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1'
-  })
-
-  it('returns a non-negative number of lines added', async () => {
-    if (testMrNumber === null) {
-      console.log('No MRs found, skipping test')
-      return
-    }
-
-    const linesAdded = await getGitlabMergeRequestLinesAdded({
-      url: env.PLAYWRIGHT_GL_CLOUD_REPO_URL,
-      prNumber: testMrNumber,
-      accessToken: env.PLAYWRIGHT_GL_CLOUD_PAT,
-    })
-
-    expect(typeof linesAdded).toBe('number')
-    expect(linesAdded).toBeGreaterThanOrEqual(0)
-  })
-})
-
 describe('getGitlabMergeRequestMetrics', () => {
   let testMrNumber: number | null = null
 
@@ -1152,9 +865,6 @@ describe('getGitlabMergeRequestMetrics', () => {
     expect(metrics).toHaveProperty('createdAt')
     expect(metrics).toHaveProperty('mergedAt')
     expect(metrics).toHaveProperty('linesAdded')
-    expect(metrics).toHaveProperty('commitsCount')
-    expect(metrics).toHaveProperty('commitShas')
-    expect(metrics).toHaveProperty('firstCommitDate')
     expect(metrics).toHaveProperty('commentIds')
 
     expect(typeof metrics.state).toBe('string')
@@ -1162,17 +872,8 @@ describe('getGitlabMergeRequestMetrics', () => {
     expect(typeof metrics.createdAt).toBe('string')
     expect(typeof metrics.linesAdded).toBe('number')
     expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
-    expect(typeof metrics.commitsCount).toBe('number')
-    expect(metrics.commitsCount).toBeGreaterThan(0)
-    expect(Array.isArray(metrics.commitShas)).toBe(true)
-    expect(metrics.commitShas.length).toBe(metrics.commitsCount)
-    expect(Array.isArray(metrics.commentIds)).toBe(true)
 
-    // firstCommitDate should be a string (ISO date) or null
-    if (metrics.firstCommitDate !== null) {
-      expect(typeof metrics.firstCommitDate).toBe('string')
-      expect(new Date(metrics.firstCommitDate).getTime()).not.toBeNaN()
-    }
+    expect(Array.isArray(metrics.commentIds)).toBe(true)
   })
 })
 
@@ -1215,10 +916,7 @@ describe('GitlabSCMLib - getPullRequestMetrics', () => {
     expect(metrics).toHaveProperty('repositoryUrl')
     expect(metrics).toHaveProperty('prCreatedAt')
     expect(metrics).toHaveProperty('prMergedAt')
-    expect(metrics).toHaveProperty('firstCommitDate')
     expect(metrics).toHaveProperty('linesAdded')
-    expect(metrics).toHaveProperty('commitsCount')
-    expect(metrics).toHaveProperty('commitShas')
     expect(metrics).toHaveProperty('prStatus')
     expect(metrics).toHaveProperty('commentIds')
 
@@ -1226,20 +924,12 @@ describe('GitlabSCMLib - getPullRequestMetrics', () => {
     expect(isNaN(metrics.prCreatedAt.getTime())).toBe(false)
     expect(typeof metrics.linesAdded).toBe('number')
     expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
-    expect(typeof metrics.commitsCount).toBe('number')
-    expect(metrics.commitsCount).toBeGreaterThan(0)
-    expect(Array.isArray(metrics.commitShas)).toBe(true)
-    expect(metrics.commitShas.length).toBe(metrics.commitsCount)
+
     expect(Array.isArray(metrics.commentIds)).toBe(true)
 
     // prStatus should be a valid enum value
     const validStatuses = ['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']
     expect(validStatuses).toContain(metrics.prStatus)
-
-    if (metrics.firstCommitDate !== null) {
-      expect(metrics.firstCommitDate).toBeInstanceOf(Date)
-      expect(isNaN(metrics.firstCommitDate.getTime())).toBe(false)
-    }
 
     if (metrics.prMergedAt !== null) {
       expect(metrics.prMergedAt).toBeInstanceOf(Date)

@@ -366,6 +366,11 @@ export type DiffLineAttribution = {
   originalLine?: Maybe<Scalars['Int']['output']>;
 };
 
+export enum EditType {
+  HumanEdit = 'HUMAN_EDIT',
+  TabAutocomplete = 'TAB_AUTOCOMPLETE'
+}
+
 export type ExplainFixResponse = {
   __typename?: 'ExplainFixResponse';
   errorMessage?: Maybe<Scalars['String']['output']>;
@@ -725,6 +730,13 @@ export type GithubWebhookSuccess = {
   message?: Maybe<Scalars['String']['output']>;
   status: Status;
 };
+
+export enum InferencePlatform {
+  ClaudeCode = 'CLAUDE_CODE',
+  Copilot = 'COPILOT',
+  Cursor = 'CURSOR',
+  Windsurf = 'WINDSURF'
+}
 
 export type InferenceStats = {
   __typename?: 'InferenceStats';
@@ -1490,6 +1502,29 @@ export type TracyDiffUploadInfo = {
   url: Scalars['String']['output'];
 };
 
+export type TracyRecordInput = {
+  additions?: InputMaybe<Scalars['String']['input']>;
+  /** Raw inference fields (required when uploading a raw inference record) */
+  blameType?: InputMaybe<AiBlameInferenceType>;
+  clientVersion: Scalars['String']['input'];
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  /** Edit fields (required when uploading an edit record) */
+  editType?: InputMaybe<EditType>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  platform: InferencePlatform;
+  rawData?: InputMaybe<Scalars['String']['input']>;
+  recordId: Scalars['String']['input'];
+  recordTimestamp: Scalars['Timestamp']['input'];
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TracyUploadResponse = {
+  __typename?: 'TracyUploadResponse';
+  accepted: Scalars['Boolean']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+};
+
 export type TriggerBackfillResult = {
   __typename?: 'TriggerBackfillResult';
   message: Scalars['String']['output'];
@@ -2224,6 +2259,9 @@ export type Ai_Blame_Attribution = {
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  tracyEvent?: Maybe<Tracy_Tracy_Event>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** aggregated selection of "ai_blame_attribution" */
@@ -2322,6 +2360,8 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   model?: InputMaybe<String_Comparison_Exp>;
   promptSummary?: InputMaybe<String_Comparison_Exp>;
   toolName?: InputMaybe<String_Comparison_Exp>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+  tracyEventId?: InputMaybe<Uuid_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "ai_blame_attribution" */
@@ -2354,6 +2394,8 @@ export type Ai_Blame_Attribution_Insert_Input = {
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Obj_Rel_Insert_Input>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** aggregate max on columns */
@@ -2370,6 +2412,7 @@ export type Ai_Blame_Attribution_Max_Fields = {
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by max() on columns of table "ai_blame_attribution" */
@@ -2385,6 +2428,7 @@ export type Ai_Blame_Attribution_Max_Order_By = {
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
+  tracyEventId?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -2401,6 +2445,7 @@ export type Ai_Blame_Attribution_Min_Fields = {
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
   toolName?: Maybe<Scalars['String']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by min() on columns of table "ai_blame_attribution" */
@@ -2416,6 +2461,7 @@ export type Ai_Blame_Attribution_Min_Order_By = {
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
+  tracyEventId?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "ai_blame_attribution" */
@@ -2449,6 +2495,8 @@ export type Ai_Blame_Attribution_Order_By = {
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
   toolName?: InputMaybe<Order_By>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Order_By>;
+  tracyEventId?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: ai_blame_attribution */
@@ -2479,7 +2527,9 @@ export enum Ai_Blame_Attribution_Select_Column {
   /** column name */
   PromptSummary = 'promptSummary',
   /** column name */
-  ToolName = 'toolName'
+  ToolName = 'toolName',
+  /** column name */
+  TracyEventId = 'tracyEventId'
 }
 
 /** input type for updating data in table "ai_blame_attribution" */
@@ -2495,6 +2545,7 @@ export type Ai_Blame_Attribution_Set_Input = {
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -2563,6 +2614,7 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -2603,7 +2655,9 @@ export enum Ai_Blame_Attribution_Update_Column {
   /** column name */
   PromptSummary = 'promptSummary',
   /** column name */
-  ToolName = 'toolName'
+  ToolName = 'toolName',
+  /** column name */
+  TracyEventId = 'tracyEventId'
 }
 
 export type Ai_Blame_Attribution_Updates = {
@@ -2680,6 +2734,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference = {
   prompt_summary?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
+  tracy_event_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -2743,6 +2798,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp = {
   prompt_summary?: InputMaybe<String_Comparison_Exp>;
   repository_url?: InputMaybe<String_Comparison_Exp>;
   tool_name?: InputMaybe<String_Comparison_Exp>;
+  tracy_event_id?: InputMaybe<Uuid_Comparison_Exp>;
   user_name?: InputMaybe<String_Comparison_Exp>;
 };
 
@@ -2766,6 +2822,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Max_Fields = {
   prompt_summary?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
+  tracy_event_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -2789,6 +2846,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Min_Fields = {
   prompt_summary?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
+  tracy_event_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -2811,6 +2869,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Order_By = {
   prompt_summary?: InputMaybe<Order_By>;
   repository_url?: InputMaybe<Order_By>;
   tool_name?: InputMaybe<Order_By>;
+  tracy_event_id?: InputMaybe<Order_By>;
   user_name?: InputMaybe<Order_By>;
 };
 
@@ -2850,6 +2909,8 @@ export enum Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column {
   RepositoryUrl = 'repository_url',
   /** column name */
   ToolName = 'tool_name',
+  /** column name */
+  TracyEventId = 'tracy_event_id',
   /** column name */
   UserName = 'user_name'
 }
@@ -2905,6 +2966,7 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Value_I
   prompt_summary?: InputMaybe<Scalars['String']['input']>;
   repository_url?: InputMaybe<Scalars['String']['input']>;
   tool_name?: InputMaybe<Scalars['String']['input']>;
+  tracy_event_id?: InputMaybe<Scalars['uuid']['input']>;
   user_name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -18249,6 +18311,18 @@ export type Mutation_Root = {
   delete_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
   /** delete single row from the table: "tracy.ai_blame_pr" */
   delete_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** delete data from the table: "tracy.tracy_edit_event" */
+  delete_tracy_tracy_edit_event?: Maybe<Tracy_Tracy_Edit_Event_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_edit_event" */
+  delete_tracy_tracy_edit_event_by_pk?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** delete data from the table: "tracy.tracy_event" */
+  delete_tracy_tracy_event?: Maybe<Tracy_Tracy_Event_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_event" */
+  delete_tracy_tracy_event_by_pk?: Maybe<Tracy_Tracy_Event>;
+  /** delete data from the table: "tracy.tracy_inference_event" */
+  delete_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_inference_event" */
+  delete_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** delete data from the table: "unfixable" */
   delete_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** delete single row from the table: "unfixable" */
@@ -18653,6 +18727,18 @@ export type Mutation_Root = {
   insert_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
   /** insert a single row into the table: "tracy.ai_blame_pr" */
   insert_tracy_ai_blame_pr_one?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** insert data into the table: "tracy.tracy_edit_event" */
+  insert_tracy_tracy_edit_event?: Maybe<Tracy_Tracy_Edit_Event_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_edit_event" */
+  insert_tracy_tracy_edit_event_one?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** insert data into the table: "tracy.tracy_event" */
+  insert_tracy_tracy_event?: Maybe<Tracy_Tracy_Event_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_event" */
+  insert_tracy_tracy_event_one?: Maybe<Tracy_Tracy_Event>;
+  /** insert data into the table: "tracy.tracy_inference_event" */
+  insert_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_inference_event" */
+  insert_tracy_tracy_inference_event_one?: Maybe<Tracy_Tracy_Inference_Event>;
   /** insert data into the table: "unfixable" */
   insert_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** insert a single row into the table: "unfixable" */
@@ -19233,6 +19319,24 @@ export type Mutation_Root = {
   update_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** update multiples rows of table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_edit_event" */
+  update_tracy_tracy_edit_event?: Maybe<Tracy_Tracy_Edit_Event_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_edit_event" */
+  update_tracy_tracy_edit_event_by_pk?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** update multiples rows of table: "tracy.tracy_edit_event" */
+  update_tracy_tracy_edit_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Edit_Event_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_event" */
+  update_tracy_tracy_event?: Maybe<Tracy_Tracy_Event_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_event" */
+  update_tracy_tracy_event_by_pk?: Maybe<Tracy_Tracy_Event>;
+  /** update multiples rows of table: "tracy.tracy_event" */
+  update_tracy_tracy_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Event_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_inference_event" */
+  update_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_inference_event" */
+  update_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** update multiples rows of table: "tracy.tracy_inference_event" */
+  update_tracy_tracy_inference_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>>>;
   /** update data of the table: "unfixable" */
   update_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** update single row of the table: "unfixable" */
@@ -19323,6 +19427,11 @@ export type Mutation_Root = {
    */
   uploadAIBlameInferencesInit: UploadAiBlameInferencesResponse;
   uploadS3BucketInfo: UploadResponse;
+  /**
+   * Upload a Tracy record (raw inference or edit). Processing is async via RabbitMQ.
+   * Returns accepted:true immediately if queued successfully.
+   */
+  uploadTracyRecord: TracyUploadResponse;
   userSignedUp?: Maybe<StatusQueryResponse>;
   voteOnFix?: Maybe<VoteOnFixResponse>;
 };
@@ -20462,6 +20571,42 @@ export type Mutation_RootDelete_Tracy_Ai_Blame_PrArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Edit_EventArgs = {
+  where: Tracy_Tracy_Edit_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Edit_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_EventArgs = {
+  where: Tracy_Tracy_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Inference_EventArgs = {
+  where: Tracy_Tracy_Inference_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Inference_Event_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -21829,6 +21974,48 @@ export type Mutation_RootInsert_Tracy_Ai_Blame_PrArgs = {
 export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_OneArgs = {
   object: Tracy_Ai_Blame_Pr_Insert_Input;
   on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Edit_EventArgs = {
+  objects: Array<Tracy_Tracy_Edit_Event_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Edit_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Edit_Event_OneArgs = {
+  object: Tracy_Tracy_Edit_Event_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Edit_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_EventArgs = {
+  objects: Array<Tracy_Tracy_Event_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Event_OneArgs = {
+  object: Tracy_Tracy_Event_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Inference_EventArgs = {
+  objects: Array<Tracy_Tracy_Inference_Event_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Inference_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Inference_Event_OneArgs = {
+  object: Tracy_Tracy_Inference_Event_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Inference_Event_On_Conflict>;
 };
 
 
@@ -23948,6 +24135,66 @@ export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Edit_EventArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Edit_Event_Set_Input>;
+  where: Tracy_Tracy_Edit_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Edit_Event_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Edit_Event_Set_Input>;
+  pk_columns: Tracy_Tracy_Edit_Event_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Edit_Event_ManyArgs = {
+  updates: Array<Tracy_Tracy_Edit_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_EventArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Event_Set_Input>;
+  where: Tracy_Tracy_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Event_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Event_Set_Input>;
+  pk_columns: Tracy_Tracy_Event_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Event_ManyArgs = {
+  updates: Array<Tracy_Tracy_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Inference_EventArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
+  where: Tracy_Tracy_Inference_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
+  pk_columns: Tracy_Tracy_Inference_Event_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_ManyArgs = {
+  updates: Array<Tracy_Tracy_Inference_Event_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_UnfixableArgs = {
   _set?: InputMaybe<Unfixable_Set_Input>;
   where: Unfixable_Bool_Exp;
@@ -24250,6 +24497,12 @@ export type Mutation_RootUploadAiBlameInferencesInitArgs = {
 /** mutation root */
 export type Mutation_RootUploadS3BucketInfoArgs = {
   fileName: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUploadTracyRecordArgs = {
+  record: TracyRecordInput;
 };
 
 
@@ -29970,6 +30223,24 @@ export type Query_Root = {
   tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table: "tracy.tracy_edit_event" */
+  tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
+  tracy_tracy_edit_event_aggregate: Tracy_Tracy_Edit_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_edit_event" using primary key columns */
+  tracy_tracy_edit_event_by_pk?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** fetch data from the table: "tracy.tracy_event" */
+  tracy_tracy_event: Array<Tracy_Tracy_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_event" */
+  tracy_tracy_event_aggregate: Tracy_Tracy_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_event" using primary key columns */
+  tracy_tracy_event_by_pk?: Maybe<Tracy_Tracy_Event>;
+  /** fetch data from the table: "tracy.tracy_inference_event" */
+  tracy_tracy_inference_event: Array<Tracy_Tracy_Inference_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_inference_event" */
+  tracy_tracy_inference_event_aggregate: Tracy_Tracy_Inference_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_inference_event" using primary key columns */
+  tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -32407,6 +32678,75 @@ export type Query_RootTracy_Ai_Blame_Pr_AggregateArgs = {
 
 
 export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Edit_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Edit_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Edit_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Inference_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Inference_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Inference_Event_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -36318,6 +36658,30 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table: "tracy.tracy_edit_event" */
+  tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
+  tracy_tracy_edit_event_aggregate: Tracy_Tracy_Edit_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_edit_event" using primary key columns */
+  tracy_tracy_edit_event_by_pk?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_edit_event" */
+  tracy_tracy_edit_event_stream: Array<Tracy_Tracy_Edit_Event>;
+  /** fetch data from the table: "tracy.tracy_event" */
+  tracy_tracy_event: Array<Tracy_Tracy_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_event" */
+  tracy_tracy_event_aggregate: Tracy_Tracy_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_event" using primary key columns */
+  tracy_tracy_event_by_pk?: Maybe<Tracy_Tracy_Event>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_event" */
+  tracy_tracy_event_stream: Array<Tracy_Tracy_Event>;
+  /** fetch data from the table: "tracy.tracy_inference_event" */
+  tracy_tracy_inference_event: Array<Tracy_Tracy_Inference_Event>;
+  /** fetch aggregated fields from the table: "tracy.tracy_inference_event" */
+  tracy_tracy_inference_event_aggregate: Tracy_Tracy_Inference_Event_Aggregate;
+  /** fetch data from the table: "tracy.tracy_inference_event" using primary key columns */
+  tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_inference_event" */
+  tracy_tracy_inference_event_stream: Array<Tracy_Tracy_Inference_Event>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -39217,6 +39581,96 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Tracy_Edit_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Edit_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Edit_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Edit_Event_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Edit_Event_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Event_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Event_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Inference_EventArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Inference_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Inference_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Inference_Event_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Inference_Event_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
 export type Subscription_RootUnfixableArgs = {
   distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -40926,6 +41380,652 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event = {
+  __typename?: 'tracy_tracy_edit_event';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  editType: Scalars['String']['output'];
+  filePath?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  tracyEvent: Tracy_Tracy_Event;
+  tracyEventId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Aggregate = {
+  __typename?: 'tracy_tracy_edit_event_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Edit_Event_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Edit_Event>;
+};
+
+/** aggregate fields of "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_edit_event_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Edit_Event_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Edit_Event_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_edit_event". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Edit_Event_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Bool_Exp>>;
+  additionsS3Path?: InputMaybe<String_Comparison_Exp>;
+  editType?: InputMaybe<String_Comparison_Exp>;
+  filePath?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+  tracyEventId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_edit_event" */
+export enum Tracy_Tracy_Edit_Event_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  TracyEditEventPkey = 'tracy_edit_event_pkey',
+  /** unique or primary key constraint on columns "tracy_event_id" */
+  TracyEditEventTracyEventIdKey = 'tracy_edit_event_tracy_event_id_key'
+}
+
+/** input type for inserting data into table "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Insert_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  editType?: InputMaybe<Scalars['String']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Obj_Rel_Insert_Input>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Edit_Event_Max_Fields = {
+  __typename?: 'tracy_tracy_edit_event_max_fields';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  editType?: Maybe<Scalars['String']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Edit_Event_Min_Fields = {
+  __typename?: 'tracy_tracy_edit_event_min_fields';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  editType?: Maybe<Scalars['String']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Mutation_Response = {
+  __typename?: 'tracy_tracy_edit_event_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Edit_Event>;
+};
+
+/** input type for inserting object relation for remote table "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Obj_Rel_Insert_Input = {
+  data: Tracy_Tracy_Edit_Event_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Edit_Event_On_Conflict>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_On_Conflict = {
+  constraint: Tracy_Tracy_Edit_Event_Constraint;
+  update_columns?: Array<Tracy_Tracy_Edit_Event_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_edit_event". */
+export type Tracy_Tracy_Edit_Event_Order_By = {
+  additionsS3Path?: InputMaybe<Order_By>;
+  editType?: InputMaybe<Order_By>;
+  filePath?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Order_By>;
+  tracyEventId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_edit_event */
+export type Tracy_Tracy_Edit_Event_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.tracy_edit_event" */
+export enum Tracy_Tracy_Edit_Event_Select_Column {
+  /** column name */
+  AdditionsS3Path = 'additionsS3Path',
+  /** column name */
+  EditType = 'editType',
+  /** column name */
+  FilePath = 'filePath',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  TracyEventId = 'tracyEventId'
+}
+
+/** input type for updating data in table "tracy.tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Set_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  editType?: InputMaybe<Scalars['String']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_edit_event" */
+export type Tracy_Tracy_Edit_Event_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Edit_Event_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Edit_Event_Stream_Cursor_Value_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  editType?: InputMaybe<Scalars['String']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "tracy.tracy_edit_event" */
+export enum Tracy_Tracy_Edit_Event_Update_Column {
+  /** column name */
+  AdditionsS3Path = 'additionsS3Path',
+  /** column name */
+  EditType = 'editType',
+  /** column name */
+  FilePath = 'filePath',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  TracyEventId = 'tracyEventId'
+}
+
+export type Tracy_Tracy_Edit_Event_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Edit_Event_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Edit_Event_Bool_Exp;
+};
+
+/** columns and relationships of "tracy.tracy_event" */
+export type Tracy_Tracy_Event = {
+  __typename?: 'tracy_tracy_event';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  platform: Scalars['String']['output'];
+  recordId: Scalars['String']['output'];
+  recordTimestamp: Scalars['timestamptz']['output'];
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  tracyEditEvent?: Maybe<Tracy_Tracy_Edit_Event>;
+  /** An object relationship */
+  tracyInferenceEvent?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Aggregate = {
+  __typename?: 'tracy_tracy_event_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Event_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Event>;
+};
+
+/** aggregate fields of "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_event_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Event_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Event_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Event_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_event". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Event_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Event_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Event_Bool_Exp>>;
+  clientVersion?: InputMaybe<String_Comparison_Exp>;
+  computerName?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  platform?: InputMaybe<String_Comparison_Exp>;
+  recordId?: InputMaybe<String_Comparison_Exp>;
+  recordTimestamp?: InputMaybe<Timestamptz_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  tracyEditEvent?: InputMaybe<Tracy_Tracy_Edit_Event_Bool_Exp>;
+  tracyInferenceEvent?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+  userName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_event" */
+export enum Tracy_Tracy_Event_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  TracyEventPkey = 'tracy_event_pkey',
+  /** unique or primary key constraint on columns "platform", "record_id" */
+  TracyEventPlatformRecordIdKey = 'tracy_event_platform_record_id_key'
+}
+
+/** input type for inserting data into table "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Insert_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  recordId?: InputMaybe<Scalars['String']['input']>;
+  recordTimestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  tracyEditEvent?: InputMaybe<Tracy_Tracy_Edit_Event_Obj_Rel_Insert_Input>;
+  tracyInferenceEvent?: InputMaybe<Tracy_Tracy_Inference_Event_Obj_Rel_Insert_Input>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Event_Max_Fields = {
+  __typename?: 'tracy_tracy_event_max_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
+  recordId?: Maybe<Scalars['String']['output']>;
+  recordTimestamp?: Maybe<Scalars['timestamptz']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Event_Min_Fields = {
+  __typename?: 'tracy_tracy_event_min_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
+  recordId?: Maybe<Scalars['String']['output']>;
+  recordTimestamp?: Maybe<Scalars['timestamptz']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Mutation_Response = {
+  __typename?: 'tracy_tracy_event_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Event>;
+};
+
+/** input type for inserting object relation for remote table "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Obj_Rel_Insert_Input = {
+  data: Tracy_Tracy_Event_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Event_On_Conflict>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_event" */
+export type Tracy_Tracy_Event_On_Conflict = {
+  constraint: Tracy_Tracy_Event_Constraint;
+  update_columns?: Array<Tracy_Tracy_Event_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_event". */
+export type Tracy_Tracy_Event_Order_By = {
+  clientVersion?: InputMaybe<Order_By>;
+  computerName?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  platform?: InputMaybe<Order_By>;
+  recordId?: InputMaybe<Order_By>;
+  recordTimestamp?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  tracyEditEvent?: InputMaybe<Tracy_Tracy_Edit_Event_Order_By>;
+  tracyInferenceEvent?: InputMaybe<Tracy_Tracy_Inference_Event_Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_event */
+export type Tracy_Tracy_Event_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.tracy_event" */
+export enum Tracy_Tracy_Event_Select_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  ComputerName = 'computerName',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Platform = 'platform',
+  /** column name */
+  RecordId = 'recordId',
+  /** column name */
+  RecordTimestamp = 'recordTimestamp',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  UserId = 'userId',
+  /** column name */
+  UserName = 'userName'
+}
+
+/** input type for updating data in table "tracy.tracy_event" */
+export type Tracy_Tracy_Event_Set_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  recordId?: InputMaybe<Scalars['String']['input']>;
+  recordTimestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_event" */
+export type Tracy_Tracy_Event_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Event_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Event_Stream_Cursor_Value_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  recordId?: InputMaybe<Scalars['String']['input']>;
+  recordTimestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.tracy_event" */
+export enum Tracy_Tracy_Event_Update_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  ComputerName = 'computerName',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Platform = 'platform',
+  /** column name */
+  RecordId = 'recordId',
+  /** column name */
+  RecordTimestamp = 'recordTimestamp',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  UserId = 'userId',
+  /** column name */
+  UserName = 'userName'
+}
+
+export type Tracy_Tracy_Event_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Event_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Event_Bool_Exp;
+};
+
+/** columns and relationships of "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event = {
+  __typename?: 'tracy_tracy_inference_event';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  model?: Maybe<Scalars['String']['output']>;
+  rawDataS3Path?: Maybe<Scalars['String']['output']>;
+  recordType: Scalars['String']['output'];
+  sessionId?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  tracyEvent: Tracy_Tracy_Event;
+  tracyEventId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Aggregate = {
+  __typename?: 'tracy_tracy_inference_event_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Inference_Event_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Inference_Event>;
+};
+
+/** aggregate fields of "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_inference_event_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Inference_Event_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Inference_Event_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_inference_event". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Inference_Event_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
+  additionsS3Path?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  model?: InputMaybe<String_Comparison_Exp>;
+  rawDataS3Path?: InputMaybe<String_Comparison_Exp>;
+  recordType?: InputMaybe<String_Comparison_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
+  tracyEventId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_inference_event" */
+export enum Tracy_Tracy_Inference_Event_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  TracyInferenceEventPkey = 'tracy_inference_event_pkey',
+  /** unique or primary key constraint on columns "tracy_event_id" */
+  TracyInferenceEventTracyEventIdKey = 'tracy_inference_event_tracy_event_id_key'
+}
+
+/** input type for inserting data into table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Insert_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
+  recordType?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Obj_Rel_Insert_Input>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Inference_Event_Max_Fields = {
+  __typename?: 'tracy_tracy_inference_event_max_fields';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  rawDataS3Path?: Maybe<Scalars['String']['output']>;
+  recordType?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Inference_Event_Min_Fields = {
+  __typename?: 'tracy_tracy_inference_event_min_fields';
+  additionsS3Path?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  rawDataS3Path?: Maybe<Scalars['String']['output']>;
+  recordType?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  tracyEventId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Mutation_Response = {
+  __typename?: 'tracy_tracy_inference_event_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Inference_Event>;
+};
+
+/** input type for inserting object relation for remote table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Obj_Rel_Insert_Input = {
+  data: Tracy_Tracy_Inference_Event_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Inference_Event_On_Conflict>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_On_Conflict = {
+  constraint: Tracy_Tracy_Inference_Event_Constraint;
+  update_columns?: Array<Tracy_Tracy_Inference_Event_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_inference_event". */
+export type Tracy_Tracy_Inference_Event_Order_By = {
+  additionsS3Path?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  model?: InputMaybe<Order_By>;
+  rawDataS3Path?: InputMaybe<Order_By>;
+  recordType?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  tracyEvent?: InputMaybe<Tracy_Tracy_Event_Order_By>;
+  tracyEventId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_inference_event */
+export type Tracy_Tracy_Inference_Event_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.tracy_inference_event" */
+export enum Tracy_Tracy_Inference_Event_Select_Column {
+  /** column name */
+  AdditionsS3Path = 'additionsS3Path',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  RawDataS3Path = 'rawDataS3Path',
+  /** column name */
+  RecordType = 'recordType',
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  TracyEventId = 'tracyEventId'
+}
+
+/** input type for updating data in table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Set_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
+  recordType?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
+  additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
+  recordType?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "tracy.tracy_inference_event" */
+export enum Tracy_Tracy_Inference_Event_Update_Column {
+  /** column name */
+  AdditionsS3Path = 'additionsS3Path',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Model = 'model',
+  /** column name */
+  RawDataS3Path = 'rawDataS3Path',
+  /** column name */
+  RecordType = 'recordType',
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  TracyEventId = 'tracyEventId'
+}
+
+export type Tracy_Tracy_Inference_Event_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Inference_Event_Bool_Exp;
 };
 
 /** a table which stores the un-fixable info where we have fix info object */
@@ -48380,7 +49480,7 @@ export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
 }>;
 
 
-export type AnalyzeCommitForExtensionAiBlameMutation = { __typename?: 'mutation_root', analyzeCommitForAIBlame: { __typename: 'ProcessAIBlameErrorResult', status: BlameStatus, error: string } | { __typename: 'ProcessAIBlameFinalResult', status: BlameStatus, inferencesProcessed: number, attributionsCreated: number, attributions: Array<{ __typename?: 'AIBlameAttribution', id: string, aiBlameCommitId: string, aiBlameInferenceId: string, filePath: string, lineNumber: number, model?: string | null, toolName?: string | null, commitSha: string, inferenceType: AiBlameInferenceType }> } | { __typename: 'ProcessAIBlameRequestedResult', status: BlameStatus, requestIds: Array<string> } };
+export type AnalyzeCommitForExtensionAiBlameMutation = { __typename?: 'mutation_root', analyzeCommitForAIBlame: { __typename: 'ProcessAIBlameErrorResult', status: BlameStatus, error: string } | { __typename: 'ProcessAIBlameFinalResult', status: BlameStatus, inferencesProcessed: number, attributionsCreated: number, attributions: Array<{ __typename?: 'AIBlameAttribution', id: string, aiBlameCommitId: string, aiBlameInferenceId: string, filePath: string, lineNumber: number, model?: string | null, toolName?: string | null, commitSha: string, inferenceType: AiBlameInferenceType }> } | { __typename: 'ProcessAIBlameRequestedResult', status: BlameStatus, requestIds: Array<string>, commitBlameRequestIds: Array<string> } };
 
 export type GetAiBlameInferenceQueryVariables = Exact<{
   aiBlameInferenceIds?: InputMaybe<Array<Scalars['uuid']['input']> | Scalars['uuid']['input']>;
@@ -49033,6 +50133,7 @@ export const AnalyzeCommitForExtensionAiBlameDocument = `
     ... on ProcessAIBlameRequestedResult {
       status
       requestIds
+      commitBlameRequestIds
     }
   }
 }

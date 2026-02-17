@@ -308,38 +308,3 @@ export function subscribeToBlameRequests<
     }
   }
 }
-
-/**
- * Simplified subscription function for only blame_ai_analysis_request table.
- * This is a convenience wrapper around the main function for cases that only need AI analysis.
- */
-export function subscribeToBlameAiAnalysisRequests<
-  TBlameAi = BlameAiAnalysisRequest[],
->(args: {
-  requestIds: string[]
-  config: BlameSubscriptionConfig
-  callbacks: {
-    onSuccess?: () => void
-    onError?: (error: string) => void
-    onUpdate?: (requests: TBlameAi) => void
-  }
-  blameAiDocument: string
-  commitBlameDocument: string
-  requestedState: string
-  errorState: string
-}): () => void {
-  return subscribeToBlameRequests({
-    blameAiRequestIds: args.requestIds,
-    commitBlameRequestIds: [], // Empty array for commit requests
-    config: args.config,
-    callbacks: {
-      onSuccess: args.callbacks.onSuccess,
-      onError: args.callbacks.onError,
-      onBlameAiUpdate: args.callbacks.onUpdate,
-    },
-    blameAiDocument: args.blameAiDocument,
-    commitBlameDocument: args.commitBlameDocument,
-    requestedState: args.requestedState,
-    errorState: args.errorState,
-  })
-}

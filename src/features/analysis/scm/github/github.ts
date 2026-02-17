@@ -419,39 +419,6 @@ export function getGithubSdk(
         commit_sha: commitSha,
       })
     },
-    async getCommitWithDiff({
-      commitSha,
-      owner,
-      repo,
-    }: {
-      commitSha: string
-      owner: string
-      repo: string
-    }) {
-      // Get commit details including diff
-      const [commitData, diffData] = await Promise.all([
-        // Get commit metadata
-        octokit.rest.repos.getCommit({
-          repo,
-          owner,
-          ref: commitSha,
-        }),
-        // Get commit diff
-        octokit.request('GET /repos/{owner}/{repo}/commits/{ref}', {
-          owner,
-          repo,
-          ref: commitSha,
-          headers: {
-            Accept: 'application/vnd.github.v3.diff',
-          },
-        }),
-      ])
-
-      return {
-        commit: commitData.data,
-        diff: diffData.data as unknown as string,
-      }
-    },
     async getTagDate({
       tag,
       owner,
@@ -693,19 +660,6 @@ export function getGithubSdk(
     async getUserInfo(): Promise<GetUserResponse> {
       return octokit.request(GET_USER)
     },
-    async getPrCommits(params: {
-      owner: string
-      repo: string
-      pull_number: number
-    }) {
-      // Use paginate to fetch all commits (default per_page is 30)
-      const data = await octokit.paginate(octokit.rest.pulls.listCommits, {
-        owner: params.owner,
-        repo: params.repo,
-        pull_number: params.pull_number,
-      })
-      return { data }
-    },
     async getUserRepos() {
       return octokit.rest.repos.listForAuthenticatedUser({
         visibility: 'all',
@@ -760,38 +714,6 @@ export function getGithubSdk(
     },
 
     /**
-     * Batch fetch additions/deletions for multiple PRs via GraphQL.
-     * Uses GITHUB_GRAPHQL_FRAGMENTS.PR_CHANGES for the field selection.
-     */
-    async getPrAdditionsDeletionsBatch(params: {
-      owner: string
-      repo: string
-      prNumbers: number[]
-    }): Promise<Map<number, ChangedLinesData>> {
-      return executeBatchGraphQL(octokit, params.owner, params.repo, {
-        items: params.prNumbers,
-        aliasPrefix: 'pr',
-        buildFragment: (prNumber, index) => `
-          pr${index}: pullRequest(number: ${prNumber}) {
-            ${GITHUB_GRAPHQL_FRAGMENTS.PR_CHANGES}
-          }`,
-        extractResult: (data) => {
-          const prData = data as PrChangesGraphQLResponse
-          if (
-            prData.additions !== undefined &&
-            prData.deletions !== undefined
-          ) {
-            return {
-              additions: prData.additions,
-              deletions: prData.deletions,
-            }
-          }
-          return undefined
-        },
-      })
-    },
-
-    /**
      * Batch fetch comments for multiple PRs via GraphQL.
      * Uses GITHUB_GRAPHQL_FRAGMENTS.PR_COMMENTS for the field selection.
      */
@@ -825,7 +747,7 @@ export function getGithubSdk(
     /**
      * Batch fetch PR data (additions/deletions + comments) for multiple PRs via GraphQL.
      * Combines PR_CHANGES and PR_COMMENTS fragments into a single API call for efficiency.
-     * This is more efficient than calling getPrAdditionsDeletionsBatch and getPrCommentsBatch separately.
+     * This is more efficient than calling separate batch methods.
      */
     async getPrDataBatch(params: {
       owner: string

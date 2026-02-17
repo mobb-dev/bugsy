@@ -1,18 +1,14 @@
-import pLimit from 'p-limit'
 import { z } from 'zod'
 
-import { GITHUB_API_CONCURRENCY } from '../env'
 import { InvalidRepoUrlError } from '../errors'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
 import {
   CreateSubmitRequestParams,
-  DiffLineAttribution,
-  GetCommitDiffResult,
   GetReferenceResult,
-  GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  GetSubmitRequestMetadataResult,
   PostPRReviewCommentParams,
   PullRequestMetrics,
   RateLimitStatus,
@@ -32,7 +28,6 @@ import {
 } from '../types'
 import { extractLinearTicketsFromBody } from '../utils'
 import { parseCursorSafe } from '../utils/cursorValidation'
-import { parseAddedLinesByFile } from '../utils/diffUtils'
 import {
   getGithubSdk,
   githubValidateParams,
@@ -407,115 +402,26 @@ export class GithubSCMLib extends SCMLib {
     })
   }
 
-  async getCommitDiff(
-    commitSha: string,
-    options?: {
-      repositoryCreatedAt?: Date
-    }
-  ): Promise<GetCommitDiffResult> {
-    this._validateAccessTokenAndUrl()
-    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
-
-    const { commit, diff } = await this.githubSdk.getCommitWithDiff({
-      owner,
-      repo,
-      commitSha,
-    })
-
-    // Parse the commit timestamp (always in UTC from GitHub API)
-    const commitTimestamp = commit.commit.committer?.date
-      ? new Date(commit.commit.committer.date)
-      : new Date(commit.commit.author?.date || Date.now())
-
-    // Use provided repositoryCreatedAt or fetch it
-    let repositoryCreatedAt = options?.repositoryCreatedAt
-    if (repositoryCreatedAt === undefined) {
-      try {
-        const repoData = await this.githubSdk.getRepository({ owner, repo })
-        repositoryCreatedAt = repoData.data.created_at
-          ? new Date(repoData.data.created_at)
-          : undefined
-      } catch (error) {
-        // Log error but don't fail - we'll fall back to default lookback window
-        console.error('Failed to fetch repository creation date', {
-          error,
-          owner,
-          repo,
-        })
-        repositoryCreatedAt = undefined
-      }
-    }
-
-    return {
-      diff,
-      commitTimestamp,
-      commitSha: commit.sha,
-      authorName: commit.commit.author?.name,
-      authorEmail: commit.commit.author?.email,
-      message: commit.commit.message,
-      repositoryCreatedAt,
-    }
-  }
-
-  async getSubmitRequestDiff(
+  async getSubmitRequestMetadata(
     submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult> {
+  ): Promise<GetSubmitRequestMetadataResult> {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
     const prNumber = Number(submitRequestId)
 
-    // Fetch PR details, commits, and repo data in parallel for optimization
-    const [prRes, commitsRes, repoData, prDiff] = await Promise.all([
-      this.githubSdk.getPr({ owner, repo, pull_number: prNumber }),
-      this.githubSdk.getPrCommits({ owner, repo, pull_number: prNumber }),
-      this.githubSdk.getRepository({ owner, repo }),
-      this.getPrDiff({ pull_number: prNumber }),
-    ])
+    // Single API call - only fetches PR metadata
+    const prRes = await this.githubSdk.getPr({
+      owner,
+      repo,
+      pull_number: prNumber,
+    })
 
     const pr = prRes.data
-
-    // Cache repositoryCreatedAt to avoid fetching it for each commit
-    const repositoryCreatedAt = repoData.data.created_at
-      ? new Date(repoData.data.created_at)
-      : undefined
-
-    // Rate limit concurrent commit diff fetches to avoid GitHub API rate limits
-    const limit = pLimit(GITHUB_API_CONCURRENCY)
-
-    // Get detailed commit data with diffs for each commit with controlled concurrency
-    const commits: GetCommitDiffResult[] = await Promise.all(
-      commitsRes.data.map((commit) =>
-        limit(() =>
-          this.getCommitDiff(commit.sha, {
-            repositoryCreatedAt,
-          })
-        )
-      )
-    )
-
-    // Build diff lines from parsed diff (file + line number for each added line)
-    const addedLinesByFile = parseAddedLinesByFile(prDiff)
-    const diffLines: DiffLineAttribution[] = []
-    for (const [file, lines] of addedLinesByFile) {
-      for (const line of lines) {
-        diffLines.push({ file, line })
-      }
-    }
-
     return {
-      diff: prDiff,
-      createdAt: new Date(pr.created_at),
-      updatedAt: new Date(pr.updated_at),
-      submitRequestId: submitRequestId,
-      submitRequestNumber: prNumber,
-      sourceBranch: pr.head.ref,
-      targetBranch: pr.base.ref,
-      authorName: pr.user?.name || pr.user?.login,
-      authorEmail: pr.user?.email || undefined,
       title: pr.title,
-      description: pr.body || undefined,
-      commits,
-      diffLines,
+      targetBranch: pr.base.ref,
+      sourceBranch: pr.head.ref,
+      headCommitSha: pr.head.sha,
     }
   }
 
@@ -580,7 +486,7 @@ export class GithubSCMLib extends SCMLib {
 
   /**
    * Fetches commits for multiple PRs in a single GraphQL request.
-   * Much more efficient than calling getSubmitRequestDiff for each PR.
+   * Much more efficient than fetching commits for each PR individually.
    *
    * @param repoUrl - Repository URL
    * @param prNumbers - Array of PR numbers to fetch commits for
@@ -593,27 +499,6 @@ export class GithubSCMLib extends SCMLib {
     this._validateAccessToken()
     const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
     return this.githubSdk.getPrCommitsBatch({ owner, repo, prNumbers })
-  }
-
-  /**
-   * Fetches additions and deletions counts for multiple PRs in a single GraphQL request.
-   * Used to enrich search results with changed lines data.
-   *
-   * @param repoUrl - Repository URL
-   * @param prNumbers - Array of PR numbers to fetch metrics for
-   * @returns Map of PR number to additions/deletions count
-   */
-  override async getPrAdditionsDeletionsBatch(
-    repoUrl: string,
-    prNumbers: number[]
-  ): Promise<Map<number, { additions: number; deletions: number }>> {
-    this._validateAccessToken()
-    const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
-    return this.githubSdk.getPrAdditionsDeletionsBatch({
-      owner,
-      repo,
-      prNumbers,
-    })
   }
 
   /**
@@ -762,29 +647,6 @@ export class GithubSCMLib extends SCMLib {
     // Determine PR status
     const prStatus = determinePrStatus(pr.state, pr.isDraft)
 
-    // Get first commit date
-    const firstCommit = pr.commits.nodes[0]
-    const firstCommitDate = firstCommit
-      ? new Date(
-          firstCommit.commit.author?.date ||
-            firstCommit.commit.committedDate ||
-            pr.createdAt
-        )
-      : null
-
-    // Extract commit SHAs
-    let commitShas = pr.commits.nodes.map((node) => node.commit.oid)
-
-    // If commits exceed GraphQL limit, fall back to REST pagination
-    if (pr.commits.totalCount > 100) {
-      const commitsRes = await this.githubSdk.getPrCommits({
-        owner,
-        repo,
-        pull_number: prNumber,
-      })
-      commitShas = commitsRes.data.map((c) => c.sha)
-    }
-
     // Extract comment IDs
     let commentIds = pr.comments.nodes.map((node) => node.id)
 
@@ -803,10 +665,7 @@ export class GithubSCMLib extends SCMLib {
       repositoryUrl: this.url,
       prCreatedAt: new Date(pr.createdAt),
       prMergedAt: pr.mergedAt ? new Date(pr.mergedAt) : null,
-      firstCommitDate,
       linesAdded: pr.additions,
-      commitsCount: pr.commits.totalCount,
-      commitShas,
       prStatus,
       commentIds,
     }

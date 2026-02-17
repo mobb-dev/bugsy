@@ -337,249 +337,44 @@ describe('getPrCommitsBatch - batch fetch PR commits via GraphQL', () => {
   })
 })
 
-describe('getPrAdditionsDeletionsBatch - batch fetch PR changedLines', () => {
-  it('fetches additions and deletions for multiple PRs', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
+describe('getPullRequestMetrics', () => {
+  const TEST_REPO_URL = 'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
+  const TEST_PR_NUMBER = 2303
 
-    const prNumbers = [28379, 28378, 28377]
-
-    const result = await sdk.getPrAdditionsDeletionsBatch({
-      owner: OWNER,
-      repo: REPO,
-      prNumbers,
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(prNumbers.length)
-
-    // Each PR should have additions and deletions as non-negative numbers
-    for (const prNumber of prNumbers) {
-      const stats = result.get(prNumber)
-      expect(stats).toBeDefined()
-      expect(typeof stats?.additions).toBe('number')
-      expect(typeof stats?.deletions).toBe('number')
-      expect(stats?.additions).toBeGreaterThanOrEqual(0)
-      expect(stats?.deletions).toBeGreaterThanOrEqual(0)
-    }
-  })
-
-  it('handles non-existent PR numbers gracefully', async () => {
-    const sdk = getGithubSdk({
-      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      url: GITHUB_URL,
-      isEnableRetries: true,
-    })
-
-    const prNumbers = [28379, 999999999]
-
-    const result = await sdk.getPrAdditionsDeletionsBatch({
-      owner: OWNER,
-      repo: REPO,
-      prNumbers,
-    })
-
-    expect(result).toBeInstanceOf(Map)
-    // Existing PR should have stats
-    expect(result.get(28379)).toBeDefined()
-    // Non-existing PR should not be in map
-    expect(result.has(999999999)).toBe(false)
-  })
-
-  it('works via GithubSCMLib wrapper', async () => {
-    const scmLib = new GithubSCMLib(
-      GITHUB_URL,
-      env.PLAYWRIGHT_GH_CLOUD_PAT,
-      undefined
-    )
-
-    const prNumbers = [28379, 28378]
-    const result = await scmLib.getPrAdditionsDeletionsBatch(
-      GITHUB_URL,
-      prNumbers
-    )
-
-    expect(result).toBeInstanceOf(Map)
-    expect(result.size).toBe(2)
-    expect(result.get(28379)).toBeDefined()
-    expect(result.get(28379)?.additions).toBeGreaterThanOrEqual(0)
-  })
-})
-
-// ============================================================================
-// Regression Tests for GitHub SCM Optimizations
-// These tests verify existing behavior before optimizations are applied
-// ============================================================================
-
-describe('getSubmitRequestDiff - PR diff with commits', () => {
-  let scmLib: GithubSCMLib
-
-  beforeAll(async () => {
-    scmLib = (await createScmLib({
-      url: GITHUB_URL,
+  it('returns comprehensive PR metrics for closed PR', async () => {
+    const scmLib = await createScmLib({
+      url: TEST_REPO_URL,
       scmType: ScmLibScmType.GITHUB,
       accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
       scmOrg: undefined,
-    })) as GithubSCMLib
-  })
-
-  it('returns diff result with all required fields', async () => {
-    // First get a PR number from the list
-    const searchResult = await scmLib.searchSubmitRequests({
-      repoUrl: GITHUB_URL,
-      filters: { state: 'open' },
-      limit: 1,
     })
-    const openPr = searchResult.results[0]
 
-    if (!openPr) {
-      console.log('No open PRs found, skipping test')
-      return
+    const metrics = await (scmLib as GithubSCMLib).getPullRequestMetrics(
+      TEST_PR_NUMBER
+    )
+
+    // Verify basic fields
+    expect(metrics.prId).toBe(String(TEST_PR_NUMBER))
+    expect(metrics.repositoryUrl).toBe(TEST_REPO_URL)
+
+    // Verify PR status is one of the valid types
+    expect(['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']).toContain(metrics.prStatus)
+
+    // Verify dates are valid Date objects
+    expect(metrics.prCreatedAt).toBeInstanceOf(Date)
+    expect(metrics.prCreatedAt.getTime()).toBeGreaterThan(0)
+
+    // prMergedAt can be null for unmerged PRs
+    if (metrics.prMergedAt !== null) {
+      expect(metrics.prMergedAt).toBeInstanceOf(Date)
     }
 
-    const diffResult = await scmLib.getSubmitRequestDiff(openPr.submitRequestId)
+    // Verify numeric fields are valid
+    expect(typeof metrics.linesAdded).toBe('number')
+    expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
 
-    expect(diffResult).toHaveProperty('diff')
-    expect(diffResult).toHaveProperty('createdAt')
-    expect(diffResult).toHaveProperty('updatedAt')
-    expect(diffResult).toHaveProperty('submitRequestId')
-    expect(diffResult).toHaveProperty('submitRequestNumber')
-    expect(diffResult).toHaveProperty('sourceBranch')
-    expect(diffResult).toHaveProperty('targetBranch')
-    expect(diffResult).toHaveProperty('commits')
-    expect(diffResult).toHaveProperty('diffLines')
-
-    expect(typeof diffResult.diff).toBe('string')
-    expect(diffResult.createdAt).toBeInstanceOf(Date)
-    expect(diffResult.updatedAt).toBeInstanceOf(Date)
-    expect(Array.isArray(diffResult.commits)).toBe(true)
-    expect(Array.isArray(diffResult.diffLines)).toBe(true)
-  })
-
-  it('returns commit details with timestamps', async () => {
-    const searchResult = await scmLib.searchSubmitRequests({
-      repoUrl: GITHUB_URL,
-      filters: { state: 'open' },
-      limit: 1,
-    })
-    const openPr = searchResult.results[0]
-
-    if (!openPr) {
-      console.log('No open PRs found, skipping test')
-      return
-    }
-
-    const diffResult = await scmLib.getSubmitRequestDiff(openPr.submitRequestId)
-
-    if (diffResult.commits.length > 0) {
-      const commit = diffResult.commits[0]!
-      expect(commit).toHaveProperty('diff')
-      expect(commit).toHaveProperty('commitTimestamp')
-      expect(commit).toHaveProperty('commitSha')
-      expect(commit.commitTimestamp).toBeInstanceOf(Date)
-      expect(typeof commit.commitSha).toBe('string')
-    }
-  })
-})
-
-describe('getCommitDiff - individual commit diff', () => {
-  let scmLib: GithubSCMLib
-
-  beforeAll(async () => {
-    scmLib = (await createScmLib({
-      url: GITHUB_URL,
-      scmType: ScmLibScmType.GITHUB,
-      accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
-      scmOrg: undefined,
-    })) as GithubSCMLib
-  })
-
-  it('returns commit diff with all required fields', async () => {
-    // Use a known commit SHA from facebook/react
-    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
-
-    const result = await scmLib.getCommitDiff(commitSha)
-
-    expect(result).toHaveProperty('diff')
-    expect(result).toHaveProperty('commitTimestamp')
-    expect(result).toHaveProperty('commitSha')
-    expect(typeof result.diff).toBe('string')
-    expect(result.commitTimestamp).toBeInstanceOf(Date)
-    expect(result.commitSha).toBe(commitSha)
-  })
-
-  it('includes repositoryCreatedAt in result', async () => {
-    const commitSha = 'c7967b194b41cb16907eed718b78d89120089f6a'
-
-    const result = await scmLib.getCommitDiff(commitSha)
-
-    // repositoryCreatedAt should be present (may be undefined if fetch fails)
-    expect(result).toHaveProperty('repositoryCreatedAt')
-    if (result.repositoryCreatedAt) {
-      expect(result.repositoryCreatedAt).toBeInstanceOf(Date)
-    }
-  })
-
-  describe('getPullRequestMetrics', () => {
-    const TEST_REPO_URL = 'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
-    const TEST_PR_NUMBER = 2303
-
-    it('returns comprehensive PR metrics for closed PR', async () => {
-      const scmLib = await createScmLib({
-        url: TEST_REPO_URL,
-        scmType: ScmLibScmType.GITHUB,
-        accessToken: env.PLAYWRIGHT_GH_CLOUD_PAT,
-        scmOrg: undefined,
-      })
-
-      const metrics = await (scmLib as GithubSCMLib).getPullRequestMetrics(
-        TEST_PR_NUMBER
-      )
-
-      // Verify basic fields
-      expect(metrics.prId).toBe(String(TEST_PR_NUMBER))
-      expect(metrics.repositoryUrl).toBe(TEST_REPO_URL)
-
-      // Verify PR status is one of the valid types
-      expect(['ACTIVE', 'CLOSED', 'MERGED', 'DRAFT']).toContain(
-        metrics.prStatus
-      )
-
-      // Verify dates are valid Date objects
-      expect(metrics.prCreatedAt).toBeInstanceOf(Date)
-      expect(metrics.prCreatedAt.getTime()).toBeGreaterThan(0)
-
-      // prMergedAt can be null for unmerged PRs
-      if (metrics.prMergedAt !== null) {
-        expect(metrics.prMergedAt).toBeInstanceOf(Date)
-      }
-
-      // firstCommitDate can be null but usually isn't
-      if (metrics.firstCommitDate !== null) {
-        expect(metrics.firstCommitDate).toBeInstanceOf(Date)
-      }
-
-      // Verify numeric fields are valid
-      expect(typeof metrics.linesAdded).toBe('number')
-      expect(metrics.linesAdded).toBeGreaterThanOrEqual(0)
-
-      expect(typeof metrics.commitsCount).toBe('number')
-      expect(metrics.commitsCount).toBeGreaterThan(0)
-
-      expect(Array.isArray(metrics.commentIds)).toBe(true)
-      expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
-
-      // Verify commit SHAs array
-      expect(Array.isArray(metrics.commitShas)).toBe(true)
-      expect(metrics.commitShas.length).toBe(metrics.commitsCount)
-      metrics.commitShas.forEach((sha: string) => {
-        expect(typeof sha).toBe('string')
-        expect(sha.length).toBeGreaterThan(0)
-      })
-    })
+    expect(Array.isArray(metrics.commentIds)).toBe(true)
+    expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
   })
 })
 

@@ -3,10 +3,10 @@ import { setTimeout } from 'node:timers/promises'
 import { InvalidAccessTokenError } from '../errors'
 import { SCMLib } from '../scm'
 import { scmCloudUrl } from '../shared/src'
-import { CreateSubmitRequestParams, GetReferenceResult } from '../types'
 import {
-  GetCommitDiffResult,
-  GetSubmitRequestDiffResult,
+  CreateSubmitRequestParams,
+  GetReferenceResult,
+  GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -251,14 +251,10 @@ export class AdoSCMLib extends SCMLib {
     })
   }
 
-  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
-    throw new Error('getCommitDiff not implemented for ADO')
-  }
-
-  async getSubmitRequestDiff(
+  async getSubmitRequestMetadata(
     _submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult> {
-    throw new Error('getSubmitRequestDiff not implemented for ADO')
+  ): Promise<GetSubmitRequestMetadataResult> {
+    throw new Error('getSubmitRequestMetadata not implemented for ADO')
   }
 
   override async searchSubmitRequests(

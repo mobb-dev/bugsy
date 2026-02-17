@@ -1,9 +1,8 @@
 import { SCMLib } from './scm'
 import {
   CreateSubmitRequestParams,
-  GetCommitDiffResult,
   GetReferenceResult,
-  GetSubmitRequestDiffResult,
+  GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -131,37 +130,10 @@ export class StubSCMLib extends SCMLib {
     console.warn('addCommentToSubmitRequest() no-op')
   }
 
-  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
-    console.warn('getCommitDiff() returning stub diff')
-    return {
-      diff: '',
-      commitTimestamp: new Date(),
-      commitSha: _commitSha,
-      authorName: undefined,
-      authorEmail: undefined,
-      message: undefined,
-    }
-  }
-
-  async getSubmitRequestDiff(
+  async getSubmitRequestMetadata(
     _submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult> {
-    console.warn('getSubmitRequestDiff() returning stub diff')
-    return {
-      diff: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      submitRequestId: _submitRequestId,
-      submitRequestNumber: parseInt(_submitRequestId) || 0,
-      sourceBranch: '',
-      targetBranch: '',
-      authorName: undefined,
-      authorEmail: undefined,
-      title: undefined,
-      description: undefined,
-      commits: [],
-      diffLines: [],
-    }
+  ): Promise<GetSubmitRequestMetadataResult> {
+    throw new Error('getSubmitRequestMetadata() not implemented')
   }
 
   async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {

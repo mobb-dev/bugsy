@@ -5,7 +5,6 @@ import {
   DELETE_COMMENT_PATH,
   DELETE_GENERAL_PR_COMMENT,
   GET_A_REPOSITORY_PUBLIC_KEY,
-  GET_COMMENT_PATH,
   GET_GENERAL_PR_COMMENTS,
   GET_PR,
   GET_PR_COMMENT_PATH,
@@ -16,8 +15,6 @@ import {
   REPLY_TO_CODE_REVIEW_COMMENT_PATH,
   UPDATE_COMMENT_PATH,
 } from './consts'
-
-export type GetCommentResponse = Endpoints[typeof GET_COMMENT_PATH]['response']
 
 export type PostCommentParams =
   Endpoints[typeof POST_COMMENT_PATH]['parameters']
@@ -137,18 +134,6 @@ export type GetPRMetricsResponse = {
       mergedAt: string | null
       additions: number
       deletions: number
-      commits: {
-        totalCount: number
-        nodes: {
-          commit: {
-            oid: string
-            committedDate: string
-            author: {
-              date: string | null
-            } | null
-          }
-        }[]
-      }
       comments: {
         totalCount: number
         nodes: {

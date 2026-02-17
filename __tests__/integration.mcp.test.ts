@@ -854,7 +854,8 @@ describe('mcp tests', () => {
       await expectNoFreshFixes()
     }, 200000)
 
-    it('should return 3 initial fixes in 1 batch', async () => {
+    // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+    it.skip('should return 3 initial fixes in 1 batch', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
       await replaceMcpClient(new InlineMCPClient(createMcpServer()))
       activeRepo.updateFileContent(0, vulnerableFileContent)
@@ -872,7 +873,8 @@ describe('mcp tests', () => {
       await expectNoFreshFixes()
     }, 200000)
 
-    it('should return 4 initial fixes in 2 batches', async () => {
+    // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+    it.skip('should return 4 initial fixes in 2 batches', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
       await replaceMcpClient(new InlineMCPClient(createMcpServer()))
       activeRepo.updateFileContent(0, vulnerableFileContent)
@@ -993,7 +995,8 @@ describe('mcp tests', () => {
         delete process.env['MVS_AUTO_FIX']
       })
 
-      it('should apply fixes to multiple files with different comment styles', async () => {
+      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+      it.skip('should apply fixes to multiple files with different comment styles', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1098,7 +1101,8 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      it('should NOT auto-apply fixes when files are modified after scan starts', async () => {
+      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+      it.skip('should NOT auto-apply fixes when files are modified after scan starts', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1154,7 +1158,8 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      it('should NOT auto-apply fixes when files have already been patched', async () => {
+      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+      it.skip('should NOT auto-apply fixes when files have already been patched', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1254,7 +1259,8 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      it('should apply only one fix when multiple fixes target the same file', async () => {
+      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
+      it.skip('should apply only one fix when multiple fixes target the same file', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()

@@ -1,0 +1,49 @@
+diff --git a/services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/down.sql b/services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/down.sql
+deleted file mode 100644
+index 71337d507..000000000
+--- a/services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/down.sql
++++ /dev/null
+@@ -1,6 +0,0 @@
+-DROP INDEX IF EXISTS "blame_ai_analysis_request_progress_stage_idx";
+-ALTER TABLE "public"."blame_ai_analysis_request"
+-  DROP CONSTRAINT IF EXISTS "blame_ai_analysis_request_progress_stage_check";
+-ALTER TABLE "public"."blame_ai_analysis_request"
+-  DROP COLUMN "progress_stage",
+-  DROP COLUMN "progress_metadata";
+diff --git a/services/app_api/migrations/default/1769428063048_fix_progress_stage/down.sql b/services/app_api/migrations/default/1769428063048_fix_progress_stage/down.sql
+new file mode 100644
+index 000000000..4ba280517
+--- /dev/null
++++ b/services/app_api/migrations/default/1769428063048_fix_progress_stage/down.sql
+@@ -0,0 +1 @@
++--
+diff --git a/services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/up.sql b/services/app_api/migrations/default/1769428063048_fix_progress_stage/up.sql
+similarity index 80%
+rename from services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/up.sql
+rename to services/app_api/migrations/default/1769428063048_fix_progress_stage/up.sql
+index 047e2cd40..40c4ef206 100644
+--- a/services/app_api/migrations/default/1768700000000_add_progress_to_blame_requests/up.sql
++++ b/services/app_api/migrations/default/1769428063048_fix_progress_stage/up.sql
+@@ -1,9 +1,12 @@
+ -- Add progress metadata columns (nullable for backwards compatibility)
+ ALTER TABLE "public"."blame_ai_analysis_request"
+-  ADD COLUMN "progress_stage" text NULL,
+-  ADD COLUMN "progress_metadata" jsonb NULL DEFAULT '{}';
++  ADD COLUMN IF NOT EXISTS "progress_stage" text NULL,
++  ADD COLUMN IF NOT EXISTS "progress_metadata" jsonb NULL DEFAULT '{}';
+ 
+ -- Validate stage values
++ALTER TABLE "public"."blame_ai_analysis_request"
++  DROP CONSTRAINT IF EXISTS "blame_ai_analysis_request_progress_stage_check";
++
+ ALTER TABLE "public"."blame_ai_analysis_request"
+   ADD CONSTRAINT "blame_ai_analysis_request_progress_stage_check"
+   CHECK (progress_stage IS NULL OR progress_stage IN (
+diff --git a/services/app_api/migrations/default/1737500000000_add_attribution_query_indexes/down.sql b/services/app_api/migrations/default/1769456476713_add_attribution_query_indexes/down.sql
+similarity index 100%
+rename from services/app_api/migrations/default/1737500000000_add_attribution_query_indexes/down.sql
+rename to services/app_api/migrations/default/1769456476713_add_attribution_query_indexes/down.sql
+diff --git a/services/app_api/migrations/default/1737500000000_add_attribution_query_indexes/up.sql b/services/app_api/migrations/default/1769456476713_add_attribution_query_indexes/up.sql
+similarity index 100%
+rename from services/app_api/migrations/default/1737500000000_add_attribution_query_indexes/up.sql
+rename to services/app_api/migrations/default/1769456476713_add_attribution_query_indexes/up.sql

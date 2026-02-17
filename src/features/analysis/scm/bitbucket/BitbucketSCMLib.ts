@@ -6,10 +6,10 @@ import { buildAuthorizedRepoUrl } from '../'
 import { InvalidRepoUrlError } from '../errors'
 import { SCMLib } from '../scm'
 import { parseScmURL, ScmType } from '../shared/src'
-import { CreateSubmitRequestParams, GetReferenceResult } from '../types'
 import {
-  GetCommitDiffResult,
-  GetSubmitRequestDiffResult,
+  CreateSubmitRequestParams,
+  GetReferenceResult,
+  GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -300,14 +300,10 @@ export class BitbucketSCMLib extends SCMLib {
     })
   }
 
-  async getCommitDiff(_commitSha: string): Promise<GetCommitDiffResult> {
-    throw new Error('getCommitDiff not implemented for Bitbucket')
-  }
-
-  async getSubmitRequestDiff(
+  async getSubmitRequestMetadata(
     _submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult> {
-    throw new Error('getSubmitRequestDiff not implemented for Bitbucket')
+  ): Promise<GetSubmitRequestMetadataResult> {
+    throw new Error('getSubmitRequestMetadata not implemented for Bitbucket')
   }
 
   override async searchSubmitRequests(

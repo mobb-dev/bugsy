@@ -25,9 +25,6 @@ export const GET_GENERAL_PR_COMMENTS =
 export const DELETE_GENERAL_PR_COMMENT =
   'DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}'
 
-export const GET_COMMENT_PATH =
-  'GET /repos/{owner}/{repo}/pulls/comments/{comment_id}'
-
 export const CREATE_OR_UPDATE_A_REPOSITORY_SECRET =
   'PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}'
 
@@ -81,18 +78,6 @@ export const GET_PR_METRICS_QUERY = `
         mergedAt
         additions
         deletions
-        commits(first: 100) {
-          totalCount
-          nodes {
-            commit {
-              oid
-              committedDate
-              author {
-                date
-              }
-            }
-          }
-        }
         comments(first: 100) {
           totalCount
           nodes {

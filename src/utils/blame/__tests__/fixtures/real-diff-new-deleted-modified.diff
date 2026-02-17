@@ -1,0 +1,187 @@
+diff --git a/.github/workflows/_reusable-code-review.yml b/.github/workflows/_reusable-code-review.yml
+new file mode 100644
+index 000000000..7ae37c591
+--- /dev/null
++++ b/.github/workflows/_reusable-code-review.yml
+@@ -0,0 +1,75 @@
++name: Reusable Code Review
++
++on:
++  workflow_call:
++    inputs:
++      model_name:
++        description: 'Claude model to use (e.g., claude-haiku-4-5, claude-opus-4-5)'
++        required: true
++        type: string
++      with_tracy_context:
++        description: 'Whether to include Tracy session context in the review'
++        required: false
++        type: boolean
++        default: false
++    secrets:
++      ANTHROPIC_REVIEW_API_KEY:
++        required: true
++
++jobs:
++  review:
++    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
++    timeout-minutes: 45
++    permissions:
++      contents: write
++      pull-requests: write
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
++
++      - name: Find Tracy comment
++        if: inputs.with_tracy_context
++        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
++        id: find-comment
++        with:
++          issue-number: ${{ github.event.pull_request.number }}
++          body-includes: "View results in Tracy →"
++
++      - name: Fail if Tracy comment not found
++        if: inputs.with_tracy_context && steps.find-comment.outputs.comment-id == ''
++        run: |
++          echo "::error::Tracy comment not found on this PR. Please ensure the PR has a Tracy session summary comment."
++          exit 1
++
++      - name: Write AI session context file
++        if: inputs.with_tracy_context
++        env:
++          COMMENT_BODY: ${{ steps.find-comment.outputs.comment-body }}
++        run: |
++          echo "The following is a summary of user interactions with an AI coding agent (such as Claude Code, Cursor, or similar tools) that was used to produce the changes in this PR. Use this context to better understand the intent and decisions behind the code changes." > "$GITHUB_WORKSPACE/.ai-session-context.md"
++          echo "" >> "$GITHUB_WORKSPACE/.ai-session-context.md"
++          echo "---" >> "$GITHUB_WORKSPACE/.ai-session-context.md"
++          echo "" >> "$GITHUB_WORKSPACE/.ai-session-context.md"
++          echo "$COMMENT_BODY" >> "$GITHUB_WORKSPACE/.ai-session-context.md"
++
++      - name: Run code review (with Tracy context)
++        if: inputs.with_tracy_context
++        uses: Kirill89/reviewcerberus/action@v1
++        with:
++          model_provider: "anthropic"
++          anthropic_api_key: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
++          model_name: ${{ inputs.model_name }}
++          verify: "true"
++          min_confidence: "6"
++          instructions: "/repo/.ai-session-context.md"
++
++      - name: Run code review
++        if: ${{ !inputs.with_tracy_context }}
++        uses: Kirill89/reviewcerberus/action@v1
++        with:
++          model_provider: "anthropic"
++          anthropic_api_key: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
++          model_name: ${{ inputs.model_name }}
++          verify: "true"
++          min_confidence: "6"
+diff --git a/.github/workflows/code-review-opus.yml b/.github/workflows/code-review-opus.yml
+deleted file mode 100644
+index a2f324410..000000000
+--- a/.github/workflows/code-review-opus.yml
++++ /dev/null
+@@ -1,28 +0,0 @@
+-name: Code Review (Claude Opus 4.5)
+-
+-on:
+-  pull_request:
+-    types: [ labeled ]
+-
+-jobs:
+-  review-opus:
+-    if: github.event.label.name == 'AI Review Opus'
+-    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
+-    timeout-minutes: 45
+-
+-    permissions:
+-      contents: write
+-      pull-requests: write
+-
+-    steps:
+-      - uses: actions/checkout@v4
+-        with:
+-          fetch-depth: 0
+-
+-      - uses: Kirill89/reviewcerberus/action@v1
+-        with:
+-          model_provider: "anthropic"
+-          anthropic_api_key: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
+-          model_name: "claude-opus-4-5"
+-          verify: "true"
+-          min_confidence: "6"
+diff --git a/.github/workflows/code-review.yml b/.github/workflows/code-review.yml
+index 7a1388085..761666e17 100644
+--- a/.github/workflows/code-review.yml
++++ b/.github/workflows/code-review.yml
+@@ -1,4 +1,4 @@
+-name: Code Review (Claude Haiku 4.5)
++name: Code Review
+ 
+ on:
+   pull_request:
+@@ -7,22 +7,48 @@ on:
+ jobs:
+   review-haiku:
+     if: github.event.label.name == 'AI Review Haiku'
+-    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
+-    timeout-minutes: 45
++    permissions:
++      contents: write
++      pull-requests: write
++    uses: ./.github/workflows/_reusable-code-review.yml
++    with:
++      model_name: "claude-haiku-4-5"
++      with_tracy_context: false
++    secrets:
++      ANTHROPIC_REVIEW_API_KEY: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
+ 
++  review-opus:
++    if: github.event.label.name == 'AI Review Opus'
+     permissions:
+       contents: write
+       pull-requests: write
++    uses: ./.github/workflows/_reusable-code-review.yml
++    with:
++      model_name: "claude-opus-4-5"
++      with_tracy_context: false
++    secrets:
++      ANTHROPIC_REVIEW_API_KEY: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
+ 
+-    steps:
+-      - uses: actions/checkout@v4
+-        with:
+-          fetch-depth: 0
++  tracy-review-haiku:
++    if: github.event.label.name == 'Tracy Comment + AI Review Haiku'
++    permissions:
++      contents: write
++      pull-requests: write
++    uses: ./.github/workflows/_reusable-code-review.yml
++    with:
++      model_name: "claude-haiku-4-5"
++      with_tracy_context: true
++    secrets:
++      ANTHROPIC_REVIEW_API_KEY: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
+ 
+-      - uses: Kirill89/reviewcerberus/action@v1
+-        with:
+-          model_provider: "anthropic"
+-          anthropic_api_key: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}
+-          model_name: "claude-haiku-4-5"
+-          verify: "true"
+-          min_confidence: "6"
++  tracy-review-opus:
++    if: github.event.label.name == 'Tracy Comment + AI Review Opus'
++    permissions:
++      contents: write
++      pull-requests: write
++    uses: ./.github/workflows/_reusable-code-review.yml
++    with:
++      model_name: "claude-opus-4-5"
++      with_tracy_context: true
++    secrets:
++      ANTHROPIC_REVIEW_API_KEY: ${{ secrets.ANTHROPIC_REVIEW_API_KEY }}

@@ -11,7 +11,6 @@ import {
 } from '../types'
 
 export * from './broker'
-export * from './diffUtils'
 export * from './scm'
 
 type GetFixUrlParam = {

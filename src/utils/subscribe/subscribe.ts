@@ -119,7 +119,13 @@ export function subscribeStream<T, TV extends Record<string, unknown>>(
         finalizeError(error)
       },
       complete: () => {
-        return
+        // If the server closes the subscription before we've settled
+        // (via onSuccess/onError/unsubscribe), treat it as an error.
+        // In the normal flow, settled is already true by the time
+        // complete fires (because onSuccess/onError called unsubscribe).
+        finalizeError(
+          new Error('Subscription completed by server before resolving')
+        )
       },
     }
   )

@@ -61,51 +61,6 @@ export type BlameInfo = z.infer<typeof BlameInfoZ>
 // in the introducing commit via git blame analysis.
 
 /**
- * Represents a file chunk for blame data storage.
- * Files are split into chunks of 10,000 lines for efficient S3 storage.
- */
-export const ChunkZ = z.object({
-  filePath: z.string(),
-  chunkIndex: z.number(),
-})
-
-export type Chunk = z.infer<typeof ChunkZ>
-
-/**
- * Represents a changed file with its modified line numbers.
- * Used for tracking which lines in a diff need blame data.
- */
-export const ChangedFileZ = z.object({
-  filePath: z.string(),
-  changedLines: z.array(z.number()),
-})
-
-export type ChangedFile = z.infer<typeof ChangedFileZ>
-
-/**
- * Request for fetching blame data for a specific line.
- */
-export const LineBlameRequestZ = z.object({
-  filePath: z.string(),
-  lineNumber: z.number(),
-})
-
-export type LineBlameRequest = z.infer<typeof LineBlameRequestZ>
-
-/**
- * Chunk group for batch fetching blame data.
- */
-export const ChunkGroupZ = z.object({
-  filePath: z.string(),
-  chunkIndex: z.number(),
-  lines: z.array(z.number()),
-})
-
-export type ChunkGroup = z.infer<typeof ChunkGroupZ>
-
-// Utility functions are in gitBlameUtils.ts
-
-/**
  * Line range for chunked file processing.
  */
 export const LineRangeZ = z.object({
@@ -118,14 +73,26 @@ export const LineRangeZ = z.object({
 export type LineRange = z.infer<typeof LineRangeZ>
 
 /**
- * Changed files for commit blame request.
- * Record format: { [filePath]: chunkIndices[] }
- * - Empty array [] = entire file (small files, no chunking)
- * - [0, 1, 2] = specific chunks to process (large files)
+ * Context for triggering blame attribution analysis after SCM agent completes PR diff computation.
+ * Passed through the message so the response handler has enough context
+ * to call processCommitsForAIAttribution.
  */
-export const ChangedFilesZ = z.record(z.string(), z.array(z.number()))
+export const PrContextZ = z.object({
+  prNumber: z.number(),
+  repositoryUrl: z.string(),
+  organizationId: z.string(),
+  userEmail: z.string(),
+  source: z.enum(['pr', 'github']),
+  githubContext: z
+    .object({
+      prNumber: z.number(),
+      installationId: z.number(),
+      repositoryURL: z.string(),
+    })
+    .optional(),
+})
 
-export type ChangedFiles = z.infer<typeof ChangedFilesZ>
+export type PrContext = z.infer<typeof PrContextZ>
 
 /**
  * Request message for commit blame line mapping consumer.
@@ -135,8 +102,9 @@ export type ChangedFiles = z.infer<typeof ChangedFilesZ>
  * - Current line numbers (as they appear in the PR head)
  * - Commit SHAs (which commit introduced each line)
  *
- * For large files (> 1k lines), files are split into chunks.
- * Each chunk is processed separately and stored with its chunk index.
+ * When `targetBranch` is provided, the SCM agent enters PR analysis mode:
+ * discovers commits via merge-base and computes diffs from the clone.
+ * Without `targetBranch`, enters single commit mode.
  */
 export const PrepareCommitBlameMessageZ = z.object({
   /** Commit blame request ID from database (for tracking and updating status) */
@@ -147,17 +115,16 @@ export const PrepareCommitBlameMessageZ = z.object({
   repositoryUrl: z.string(),
   /** Commit SHA to analyze (typically PR head commit) */
   commitSha: z.string(),
-  /**
-   * Files to analyze as record: { [filePath]: chunkIndices[] }
-   * - Empty array [] = blame entire file
-   * - [0, 1] = blame specific chunks
-   */
-  changedFiles: ChangedFilesZ,
   /** Authentication headers for repository access (e.g., GitHub token) */
   extraHeaders: z.record(z.string(), z.string()).default({}),
-  /** First relevant commit SHA in the PR (for commit context) */
-  firstRelevantCommitSha: z.string(),
-  fetchCommitCount: z.number(),
+
+  // --- PR analysis fields ---
+  /** Target branch name (from getPr() base.ref). When set, enables PR analysis mode. */
+  targetBranch: z.string().optional(),
+  /** Context for triggering blame attribution analysis after SCM agent completes. */
+  prContext: PrContextZ.optional(),
+  /** User email for blame attribution analysis trigger context (used for both PR and single commit flows). */
+  userEmail: z.string().optional(),
 })
 // Preferred: Use Schema suffix for new code
 export const PrepareCommitBlameMessageSchema = PrepareCommitBlameMessageZ
@@ -246,6 +213,72 @@ export const CommitInfoZ = z.object({
 export type CommitInfo = z.infer<typeof CommitInfoZ>
 
 /**
+ * Commit-level data stored in S3 at commits/{commitSha}.json.
+ * Shared across PR and single-commit analyses.
+ */
+export const CommitDataZ = z.object({
+  diff: z.string(),
+  authorEmail: z.string().optional(),
+  authorName: z.string().optional(),
+  timestamp: z.number(), // Unix timestamp in seconds
+  message: z.string().optional(),
+  parentCount: z.number().nullable(),
+})
+
+export type CommitData = z.infer<typeof CommitDataZ>
+
+/**
+ * PR-level diff data stored in S3 at {headCommitSha}/pr-diff.json.
+ */
+export const PrDiffDataZ = z.object({
+  diff: z.string(),
+})
+
+export type PrDiffData = z.infer<typeof PrDiffDataZ>
+
+/**
+ * PR-level stats stored in S3 at {headCommitSha}/pr-stats.json.
+ * Pre-computed additions/deletions so consumers don't need to re-parse the diff.
+ */
+export const PrStatsZ = z.object({
+  additions: z.number(),
+  deletions: z.number(),
+})
+
+export type PrStats = z.infer<typeof PrStatsZ>
+
+/**
+ * Commits manifest stored in S3 at {headCommitSha}/commits-manifest.json.
+ */
+export const CommitsManifestZ = z.object({
+  commits: z.array(z.string()), // Array of commit SHAs in order
+})
+
+export type CommitsManifest = z.infer<typeof CommitsManifestZ>
+
+/**
+ * A single blame line entry for targeted blame data.
+ */
+export const BlameLineEntryZ = z.object({
+  file: z.string(),
+  line: z.number(),
+  originalCommitSha: z.string(),
+  originalLineNumber: z.number(),
+})
+
+export type BlameLineEntry = z.infer<typeof BlameLineEntryZ>
+
+/**
+ * Targeted blame data stored in S3 at {headCommitSha}/blame-lines.json.
+ * Contains per-line blame info for added lines in the PR diff.
+ */
+export const BlameLinesDataZ = z.object({
+  lines: z.array(BlameLineEntryZ),
+})
+
+export type BlameLinesData = z.infer<typeof BlameLinesDataZ>
+
+/**
  * Response message from commit blame line mapping consumer.
  *
  * On success: Contains blame data for all processed files/chunks
@@ -276,6 +309,24 @@ export const PrepareCommitBlameResponseMessageZ = z.object({
    * Empty dictionary if status is 'failure'.
    */
   commits: z.record(z.string(), CommitInfoZ).default({}),
+
+  // --- New PR diff computation response fields ---
+  /** S3 paths for commit-level data (commitSha → S3 key). Present in PR analysis mode and single commit mode. */
+  commitDataS3Paths: z.record(z.string(), z.string()).optional(),
+  /** S3 key for PR diff JSON. Present in PR analysis mode. */
+  prDiffS3Path: z.string().optional(),
+  /** S3 key for commits manifest. Present in PR analysis mode. */
+  commitsManifestS3Path: z.string().optional(),
+  /** S3 key for per-line targeted blame data. Present in PR analysis mode. */
+  blameLinesS3Path: z.string().optional(),
+  /** S3 key for PR stats (additions/deletions). Present in PR analysis mode. */
+  prStatsS3Path: z.string().optional(),
+  /** PR context passed through from request for response handler. */
+  prContext: PrContextZ.optional(),
+  /** PR title from the request metadata (passed through). */
+  prTitle: z.string().optional(),
+  /** User email passed through from request for single commit blame attribution analysis trigger. */
+  userEmail: z.string().optional(),
 })
 // Preferred: Use Schema suffix for new code
 export const PrepareCommitBlameResponseMessageSchema =

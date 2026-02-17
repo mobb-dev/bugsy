@@ -2,9 +2,8 @@ import { InvalidRepoUrlError } from './errors'
 import { isValidBranchName } from './scmSubmit'
 import {
   CreateSubmitRequestParams,
-  GetCommitDiffResult,
   GetReferenceResult,
-  GetSubmitRequestDiffResult,
+  GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -104,10 +103,15 @@ export abstract class SCMLib {
   abstract getCommitUrl(commitId: string): Promise<string>
   abstract getBranchCommitsUrl(branchName: string): Promise<string>
   abstract getRepoDefaultBranch(): Promise<string>
-  abstract getCommitDiff(commitSha: string): Promise<GetCommitDiffResult>
-  abstract getSubmitRequestDiff(
+
+  /**
+   * Fetches lightweight PR/MR metadata with a single API call.
+   * Returns only the title, branch names, and head commit SHA.
+   * Used by the optimized blame analysis flow to avoid fetching full diffs via SCM API.
+   */
+  abstract getSubmitRequestMetadata(
     submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult>
+  ): Promise<GetSubmitRequestMetadataResult>
 
   /**
    * Search for PRs with optional filters and sorting.
@@ -148,7 +152,8 @@ export abstract class SCMLib {
    *
    * @param repoUrl - Repository URL
    * @param prNumbers - Array of PR numbers to fetch commits for
-   * @returns Map of PR number to array of commit SHAs
+   * @returns Map of PR number to array of commit SHAs in chronological order
+   *          (oldest first, HEAD commit last)
    */
   async getPrCommitsBatch(
     _repoUrl: string,
@@ -158,26 +163,9 @@ export abstract class SCMLib {
   }
 
   /**
-   * Fetches additions and deletions counts for multiple PRs in batch.
-   * More efficient than fetching individual PR details.
-   *
-   * @param repoUrl - Repository URL
-   * @param prNumbers - Array of PR numbers to fetch metrics for
-   * @returns Map of PR number to additions/deletions count
-   */
-  async getPrAdditionsDeletionsBatch(
-    _repoUrl: string,
-    _prNumbers: number[]
-  ): Promise<Map<number, { additions: number; deletions: number }>> {
-    throw new Error(
-      'getPrAdditionsDeletionsBatch not implemented for this SCM provider'
-    )
-  }
-
-  /**
    * Batch fetch PR data (additions/deletions + comments) for multiple PRs.
    * Only implemented for GitHub (via GraphQL). Other providers should override if supported.
-   * This is more efficient than calling getPrAdditionsDeletionsBatch separately.
+   * This is more efficient than calling separate batch methods.
    *
    * @param _repoUrl - Repository URL
    * @param _prNumbers - Array of PR numbers to fetch data for

@@ -34,7 +34,6 @@ import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { RateLimitStatus, ReferenceType } from '../types'
 import { isBrokerUrl, safeBody, shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
-import { parseAddedLinesByFile } from '../utils/diffUtils'
 import {
   GetGitlabTokenParams,
   GitlabAuthResult,
@@ -54,25 +53,6 @@ type ApiAuthOptions = {
 }
 
 const MAX_GITLAB_PR_BODY_LENGTH = 1048576
-
-/**
- * Builds a unified diff string from GitLab's structured diff response.
- * With `unidiff: true`, the API already includes `---`/`+++` headers in
- * each file's diff field. We only need to prepend the `diff --git` line
- * that parseDiff uses to identify file boundaries.
- */
-function buildUnifiedDiff(
-  diffs: { old_path?: string; new_path?: string; diff?: string }[]
-): string {
-  return diffs
-    .filter((d) => d.diff)
-    .map((d) => {
-      const oldPath = d.old_path || d.new_path || ''
-      const newPath = d.new_path || d.old_path || ''
-      return `diff --git a/${oldPath} b/${newPath}\n${d.diff}`
-    })
-    .join('\n')
-}
 
 //we choose a random token to increase the rate limit for anonymous requests to gitlab.com API so that we can exhaust the rate limit
 //of several different pre-generated tokens instead of just one.
@@ -520,7 +500,11 @@ export async function getGitlabMrCommitsBatch({
             projectPath,
             mrNumber
           )
-          return [mrNumber, commits.map((c) => c.id)] as const
+          // GitLab returns commits newest-first; reverse to chronological
+          // order (oldest-first) to match GitHub's convention. This ensures
+          // commits[length-1] is the HEAD commit for S3 key lookups in
+          // enrichZeroChangedLinesFromS3.
+          return [mrNumber, commits.map((c) => c.id).reverse()] as const
         } catch (error) {
           contextLogger.warn(
             '[getGitlabMrCommitsBatch] Failed to fetch commits for MR',
@@ -578,25 +562,8 @@ export async function getGitlabMrDataBatch({
     mrNumbers.map((mrNumber) =>
       limit(async () => {
         try {
-          const [diffs, notes] = await Promise.all([
-            api.MergeRequests.allDiffs(projectPath, mrNumber),
-            api.MergeRequestNotes.all(projectPath, mrNumber),
-          ])
-
-          // Count additions and deletions from diff text
-          let additions = 0
-          let deletions = 0
-          for (const diff of diffs) {
-            if (diff.diff) {
-              for (const line of diff.diff.split('\n')) {
-                if (line.startsWith('+') && !line.startsWith('+++')) {
-                  additions++
-                } else if (line.startsWith('-') && !line.startsWith('---')) {
-                  deletions++
-                }
-              }
-            }
-          }
+          // Only fetch notes (comments) — changedLines will be enriched from S3 later
+          const notes = await api.MergeRequestNotes.all(projectPath, mrNumber)
 
           // Map notes to comment format expected by extractLinearTicketsFromComments
           // GitLab API doesn't expose a 'bot' property on author objects,
@@ -615,9 +582,14 @@ export async function getGitlabMrDataBatch({
             body: note.body,
           }))
 
+          // GitLab's batch MR endpoint doesn't expose line-level stats.
+          // Downstream enrichment (enrichZeroChangedLinesFromS3) fills in
+          // real values once AI blame analysis has run.
+          // TODO: return null instead of 0 to distinguish "unknown" from
+          // "actually zero" (requires type changes across consumers).
           return [
             mrNumber,
-            { changedLines: { additions, deletions }, comments },
+            { changedLines: { additions: 0, deletions: 0 }, comments },
           ] as const
         } catch (error) {
           contextLogger.warn(
@@ -646,62 +618,12 @@ export async function getGitlabMrDataBatch({
   return new Map(results)
 }
 
-type GetGitlabMergeRequestLinesAddedParams = {
-  url: string
-  prNumber: number
-  accessToken?: string
-}
-
-/**
- * Calculate lines added from merge request diffs.
- * GitLab's changes_count represents files changed, not lines added.
- * This function fetches the diffs and counts actual lines added.
- */
-export async function getGitlabMergeRequestLinesAdded({
-  url,
-  prNumber,
-  accessToken,
-}: GetGitlabMergeRequestLinesAddedParams): Promise<number> {
-  try {
-    const { projectPath } = parseGitlabOwnerAndRepo(url)
-    const api = getGitBeaker({
-      url,
-      gitlabAuthToken: accessToken,
-    })
-    const diffs = await api.MergeRequests.allDiffs(projectPath, prNumber)
-
-    // Sum up additions from all file diffs
-    let linesAdded = 0
-    for (const diff of diffs) {
-      if (diff.diff) {
-        // Count lines starting with '+' that are actual code (not metadata)
-        const addedLines = diff.diff
-          .split('\n')
-          .filter(
-            (line: string) => line.startsWith('+') && !line.startsWith('+++')
-          ).length
-        linesAdded += addedLines
-      }
-    }
-    return linesAdded
-  } catch (error) {
-    // If diff fetch fails, fall back to 0
-    // Log error but don't throw - metrics can still be useful without line count
-    contextLogger.warn(
-      '[getGitlabMergeRequestLinesAdded] Failed to fetch diffs for MR',
-      {
-        prNumber,
-        error,
-      }
-    )
-    return 0
-  }
-}
-
 /**
  * Fetch pull request metrics for a GitLab merge request.
- * Fetches MR details, commits, lines added, and notes in parallel for efficiency.
- * Reuses getGitlabMergeRequestLinesAdded for accurate line counting from diffs.
+ * Fetches MR details and notes in parallel.
+ * Commit data (commitShas, commitsCount, firstCommitDate) is no longer fetched here —
+ * callers enrich from S3 cached data instead.
+ * linesAdded is returned as 0 — callers enrich it from S3 cached diffs.
  */
 export async function getGitlabMergeRequestMetrics({
   url,
@@ -713,9 +635,6 @@ export async function getGitlabMergeRequestMetrics({
   createdAt: string
   mergedAt: string | null
   linesAdded: number
-  commitsCount: number
-  commitShas: string[]
-  firstCommitDate: string | null
   commentIds: string[]
 }> {
   const { projectPath } = parseGitlabOwnerAndRepo(url)
@@ -724,20 +643,10 @@ export async function getGitlabMergeRequestMetrics({
     gitlabAuthToken: accessToken,
   })
 
-  const [mr, commits, linesAdded, notes] = await Promise.all([
+  const [mr, notes] = await Promise.all([
     api.MergeRequests.show(projectPath, prNumber),
-    api.MergeRequests.allCommits(projectPath, prNumber),
-    getGitlabMergeRequestLinesAdded({ url, prNumber, accessToken }),
     api.MergeRequestNotes.all(projectPath, prNumber),
   ])
-
-  // Sort commits chronologically (oldest first) — GitLab returns newest-first
-  const sortedCommits = [...commits].sort(
-    (a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  )
-
-  const firstCommitDate = sortedCommits[0]?.created_at ?? null
 
   // Filter to only user-visible notes (not system notes)
   const commentIds = notes
@@ -749,10 +658,7 @@ export async function getGitlabMergeRequestMetrics({
     isDraft: mr.draft ?? false,
     createdAt: mr.created_at,
     mergedAt: mr.merged_at ?? null,
-    linesAdded,
-    commitsCount: commits.length,
-    commitShas: commits.map((c) => c.id),
-    firstCommitDate,
+    linesAdded: 0,
     commentIds,
   }
 }
@@ -944,45 +850,6 @@ export async function getGitlabRecentCommits({
   }
 
   return allCommits
-}
-
-/**
- * Fetches a commit with its diff from GitLab.
- * Also fetches parent commit timestamps via separate API calls.
- */
-export async function getGitlabCommitDiff({
-  repoUrl,
-  accessToken,
-  commitSha,
-}: {
-  repoUrl: string
-  accessToken: string
-  commitSha: string
-}) {
-  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
-
-  const [commit, diffs] = await Promise.all([
-    api.Commits.show(projectPath, commitSha),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    api.Commits.showDiff(projectPath, commitSha, { unidiff: true } as any),
-  ])
-
-  // Build unified diff with proper file headers for frontend parseDiff
-  const diffString = buildUnifiedDiff(diffs)
-
-  const commitTimestamp = commit.committed_date
-    ? new Date(commit.committed_date)
-    : new Date()
-
-  return {
-    diff: diffString,
-    commitTimestamp,
-    commitSha: commit.id,
-    authorName: commit.author_name,
-    authorEmail: commit.author_email,
-    message: commit.message,
-  }
 }
 
 export async function getGitlabRateLimitStatus({
@@ -1227,108 +1094,4 @@ async function brokerRequestHandler(
     }
 
   throw new Error(`gitbeaker: ${response.statusText}`)
-}
-
-/**
- * Fetches a merge request with its diff and commits from GitLab.
- * Used for AI blame attribution on MRs.
- */
-export async function getGitlabMergeRequestDiff({
-  repoUrl,
-  accessToken,
-  mrNumber,
-}: {
-  repoUrl: string
-  accessToken: string
-  mrNumber: number
-}) {
-  debug('[getGitlabMergeRequestDiff] Starting for MR #%d', mrNumber)
-  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
-
-  // Fetch MR details, structured diffs, and commits in parallel
-  debug(
-    '[getGitlabMergeRequestDiff] Fetching MR details, diffs, and commits...'
-  )
-  const startMrFetch = Date.now()
-  const [mr, mrDiffs, mrCommitsRaw] = await Promise.all([
-    api.MergeRequests.show(projectPath, mrNumber),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    api.MergeRequests.allDiffs(projectPath, mrNumber, { unidiff: true } as any),
-    api.MergeRequests.allCommits(projectPath, mrNumber),
-  ])
-  debug(
-    '[getGitlabMergeRequestDiff] MR fetch took %dms. Diffs: %d, Commits: %d',
-    Date.now() - startMrFetch,
-    mrDiffs.length,
-    mrCommitsRaw.length
-  )
-
-  // Build unified diff with proper file headers for frontend parseDiff
-  const diffString = buildUnifiedDiff(mrDiffs)
-
-  // Fetch commit diffs for each commit in the MR
-  debug(
-    '[getGitlabMergeRequestDiff] Fetching commit diffs for %d commits...',
-    mrCommitsRaw.length
-  )
-  const startCommitFetch = Date.now()
-  const commitDiffLimit = pLimit(GITLAB_API_CONCURRENCY)
-  const commits = await Promise.all(
-    mrCommitsRaw.map((commit) =>
-      commitDiffLimit(async () => {
-        const commitDiff = await getGitlabCommitDiff({
-          repoUrl,
-          accessToken,
-          commitSha: commit.id,
-        })
-        return {
-          diff: commitDiff.diff,
-          commitTimestamp: commitDiff.commitTimestamp,
-          commitSha: commitDiff.commitSha,
-          authorName: commitDiff.authorName,
-          authorEmail: commitDiff.authorEmail,
-          message: commitDiff.message,
-        }
-      })
-    )
-  )
-  // Sort commits chronologically (oldest first) — GitLab's allCommits API
-  // returns newest-first, but downstream blame logic expects oldest-first
-  // (commits[0] = first commit, commits[last] = head commit).
-  commits.sort(
-    (a, b) =>
-      new Date(a.commitTimestamp).getTime() -
-      new Date(b.commitTimestamp).getTime()
-  )
-  debug(
-    '[getGitlabMergeRequestDiff] Commit diffs fetch took %dms',
-    Date.now() - startCommitFetch
-  )
-
-  // Build diff lines from parsed diff (file + line number for each added line)
-  const addedLinesByFile = parseAddedLinesByFile(diffString)
-  const diffLines: { file: string; line: number }[] = []
-  for (const [file, lines] of addedLinesByFile) {
-    for (const line of lines) {
-      diffLines.push({ file, line })
-    }
-  }
-
-  return {
-    diff: diffString,
-    createdAt: new Date(mr.created_at),
-    updatedAt: new Date(mr.updated_at),
-    submitRequestId: String(mrNumber),
-    submitRequestNumber: mrNumber,
-    sourceBranch: mr.source_branch,
-    targetBranch: mr.target_branch,
-    authorName: mr.author?.name || mr.author?.username,
-    authorEmail: undefined, // GitLab MR API doesn't expose author email directly
-    title: mr.title,
-    description: mr.description || undefined,
-    commits,
-    headCommitSha: mr.sha,
-    diffLines,
-  }
 }

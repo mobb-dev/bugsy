@@ -3,10 +3,9 @@ import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
 import {
   CreateSubmitRequestParams,
-  GetCommitDiffResult,
   GetReferenceResult,
-  GetSubmitRequestDiffResult,
   GetSubmitRequestInfo,
+  GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -24,12 +23,10 @@ import {
   createMarkdownCommentOnPullRequest,
   createMergeRequest,
   getGitlabBranchList,
-  getGitlabCommitDiff,
   getGitlabCommitUrl,
   getGitlabIsRemoteBranch,
   getGitlabIsUserCollaborator,
   getGitlabMergeRequest,
-  getGitlabMergeRequestDiff,
   getGitlabMergeRequestMetrics,
   getGitlabMergeRequestStatus,
   getGitlabMrCommitsBatch,
@@ -243,36 +240,28 @@ export class GitlabSCMLib extends SCMLib {
     return `${this.url}/-/commits/${branchName}`
   }
 
-  async getCommitDiff(commitSha: string): Promise<GetCommitDiffResult> {
-    this._validateAccessTokenAndUrl()
-    const result = await getGitlabCommitDiff({
-      repoUrl: this.url,
-      accessToken: this.accessToken,
-      commitSha,
-    })
-    return {
-      diff: result.diff,
-      commitTimestamp: result.commitTimestamp,
-      commitSha: result.commitSha,
-      authorName: result.authorName,
-      authorEmail: result.authorEmail,
-      message: result.message,
-    }
-  }
-
-  async getSubmitRequestDiff(
+  async getSubmitRequestMetadata(
     submitRequestId: string
-  ): Promise<GetSubmitRequestDiffResult> {
+  ): Promise<GetSubmitRequestMetadataResult> {
     this._validateAccessTokenAndUrl()
     const mrNumber = parseInt(submitRequestId, 10)
     if (isNaN(mrNumber) || mrNumber <= 0) {
       throw new Error(`Invalid merge request ID: ${submitRequestId}`)
     }
-    return getGitlabMergeRequestDiff({
-      repoUrl: this.url,
+
+    // Single API call - only fetches MR metadata
+    const mr = await getGitlabMergeRequest({
+      url: this.url,
+      prNumber: mrNumber,
       accessToken: this.accessToken,
-      mrNumber,
     })
+
+    return {
+      title: mr.title,
+      targetBranch: mr.target_branch,
+      sourceBranch: mr.source_branch,
+      headCommitSha: mr.sha,
+    }
   }
 
   override async searchSubmitRequests(
@@ -425,12 +414,7 @@ export class GitlabSCMLib extends SCMLib {
       repositoryUrl: this.url!,
       prCreatedAt: new Date(metrics.createdAt),
       prMergedAt: metrics.mergedAt ? new Date(metrics.mergedAt) : null,
-      firstCommitDate: metrics.firstCommitDate
-        ? new Date(metrics.firstCommitDate)
-        : null,
       linesAdded: metrics.linesAdded,
-      commitsCount: metrics.commitsCount,
-      commitShas: metrics.commitShas,
       prStatus,
       commentIds: metrics.commentIds,
     }

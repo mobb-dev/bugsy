@@ -19,7 +19,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     // Localhost should always bypass proxy to avoid blocking local mock servers
     const agent = getProxyAgent('http://localhost:8080/v1/graphql')
@@ -30,7 +30,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('http://api.example.com/v1/graphql')
     expect(agent).toBeInstanceOf(HttpsProxyAgent)
@@ -40,7 +40,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: '', HTTPS_PROXY: 'http://proxy.local:3128' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('https://api.example.com/v1/graphql')
     expect(agent).toBeInstanceOf(HttpsProxyAgent)
@@ -50,7 +50,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('https://api.example.com/v1/graphql')
     expect(agent).toBeInstanceOf(HttpsProxyAgent)
@@ -60,7 +60,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: '', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('http://localhost:8080/v1/graphql')
     expect(agent).toBeUndefined()
@@ -70,7 +70,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('http://127.0.0.1:8080/v1/graphql')
     expect(agent).toBeUndefined()
@@ -80,7 +80,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('http://[::1]:8080/v1/graphql')
     expect(agent).toBeUndefined()
@@ -90,7 +90,7 @@ describe('getProxyAgent', () => {
     vi.resetModules()
     resetEnv({ HTTP_PROXY: 'http://proxy.local:3128', HTTPS_PROXY: '' })
 
-    const { getProxyAgent } = await import('../gql')
+    const { getProxyAgent } = await import('../../../../utils/proxy')
 
     const agent = getProxyAgent('not a url')
     expect(agent).toBeUndefined()

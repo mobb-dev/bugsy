@@ -3,9 +3,10 @@
 import { createClient } from 'graphql-ws'
 import WebsocketNode from 'isomorphic-ws'
 
+import { httpToWsUrl } from '../url'
 import { getGraphQlHeaders, GetGraphQlHeadersOptions } from './graphql'
 
-const DEFAULT_API_URL = 'https://api.mobb.ai/v1/graphql'
+const DEFAULT_API_URL = 'wss://api.mobb.ai/v1/graphql'
 const SUBSCRIPTION_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes in ms
 
 export type WsOptions = GetGraphQlHeadersOptions & {
@@ -19,10 +20,10 @@ export type WsOptions = GetGraphQlHeadersOptions & {
 export function createWSClient(options: WsOptions) {
   const url =
     options.url ||
-    (process.env['API_URL'] || DEFAULT_API_URL).replace('http', 'ws')
-  const websocketImpl =
-    options.websocket ||
-    (typeof WebSocket !== 'undefined' ? WebSocket : WebsocketNode)
+    (process.env['API_URL']
+      ? httpToWsUrl(process.env['API_URL'])
+      : DEFAULT_API_URL)
+  const websocketImpl = options.websocket || WebsocketNode
 
   // Create custom WebSocket with proxy support if proxy agent is provided
   const CustomWebSocket = options.proxyAgent

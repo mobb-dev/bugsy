@@ -648,11 +648,7 @@ export async function getGitlabMrDataBatch({
             author: note.author
               ? {
                   login: note.author.username,
-                  type:
-                    note.author.username.endsWith('[bot]') ||
-                    note.author.username.toLowerCase() === 'linear'
-                      ? 'Bot'
-                      : 'User',
+                  type: note.author.username.endsWith('[bot]') ? 'Bot' : 'User',
                 }
               : null,
             body: note.body,

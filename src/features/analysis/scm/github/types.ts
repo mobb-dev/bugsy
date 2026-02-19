@@ -88,18 +88,7 @@ export type GetARepositoryPublicKeyResponse =
 export type GetUserResponse = Endpoints[typeof GET_USER]['response']
 
 // Shared types for batch GraphQL operations
-
-// Shared type for PR comment data
-export type PrCommentData = {
-  author: { login: string; type: string } | null
-  body: string
-}
-
-// Shared type for changed lines data
-export type ChangedLinesData = {
-  additions: number
-  deletions: number
-}
+// PrCommentData and ChangedLinesData are now in ../types.ts
 
 /**
  * Raw GraphQL response types for batch operations.

@@ -116,7 +116,7 @@ export type AiBlameValidationResponse = {
 export type AcceptanceRateStats = {
   __typename?: 'AcceptanceRateStats';
   acceptedInferences: InferenceStats;
-  rejectedInferences: InferenceStats;
+  totalInferenceLines: Scalars['Int']['output'];
 };
 
 export type ActiveDevelopersData = {
@@ -740,7 +740,6 @@ export enum InferencePlatform {
 
 export type InferenceStats = {
   __typename?: 'InferenceStats';
-  count: Scalars['Int']['output'];
   totalLines: Scalars['Int']['output'];
 };
 
@@ -40946,6 +40945,7 @@ export type Tracy_Ai_Blame_Pr = {
   commitShas?: Maybe<Array<Scalars['String']['output']>>;
   commitsCount?: Maybe<Scalars['Int']['output']>;
   firstCommitDate?: Maybe<Scalars['timestamptz']['output']>;
+  hasAcceptanceRate: Scalars['Boolean']['output'];
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
   linesAdded?: Maybe<Scalars['Int']['output']>;
@@ -40958,6 +40958,7 @@ export type Tracy_Ai_Blame_Pr = {
   repositoryUrl: Scalars['String']['output'];
   rowCreatedAt: Scalars['timestamptz']['output'];
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -41005,6 +41006,7 @@ export type Tracy_Ai_Blame_Pr_Avg_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Boolean expression to filter rows from the table "tracy.ai_blame_pr". All fields are combined with a logical 'AND'. */
@@ -41018,6 +41020,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   commitShas?: InputMaybe<String_Array_Comparison_Exp>;
   commitsCount?: InputMaybe<Int_Comparison_Exp>;
   firstCommitDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  hasAcceptanceRate?: InputMaybe<Boolean_Comparison_Exp>;
   humanLinesAdded?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   linesAdded?: InputMaybe<Int_Comparison_Exp>;
@@ -41030,6 +41033,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   rowCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tabAutocompleteLinesAdded?: InputMaybe<Int_Comparison_Exp>;
+  totalInferenceLines?: InputMaybe<Int_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "tracy.ai_blame_pr" */
@@ -41046,6 +41050,7 @@ export type Tracy_Ai_Blame_Pr_Inc_Input = {
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "tracy.ai_blame_pr" */
@@ -41056,6 +41061,7 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  hasAcceptanceRate?: InputMaybe<Scalars['Boolean']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -41068,6 +41074,7 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate max on columns */
@@ -41089,6 +41096,7 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 /** aggregate min on columns */
@@ -41110,6 +41118,7 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 /** response of any mutation on the table "tracy.ai_blame_pr" */
@@ -41136,6 +41145,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   commitShas?: InputMaybe<Order_By>;
   commitsCount?: InputMaybe<Order_By>;
   firstCommitDate?: InputMaybe<Order_By>;
+  hasAcceptanceRate?: InputMaybe<Order_By>;
   humanLinesAdded?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   linesAdded?: InputMaybe<Order_By>;
@@ -41148,6 +41158,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   repositoryUrl?: InputMaybe<Order_By>;
   rowCreatedAt?: InputMaybe<Order_By>;
   tabAutocompleteLinesAdded?: InputMaybe<Order_By>;
+  totalInferenceLines?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: tracy.ai_blame_pr */
@@ -41170,6 +41181,8 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   FirstCommitDate = 'firstCommitDate',
   /** column name */
+  HasAcceptanceRate = 'hasAcceptanceRate',
+  /** column name */
   HumanLinesAdded = 'humanLinesAdded',
   /** column name */
   Id = 'id',
@@ -41192,7 +41205,9 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   RowCreatedAt = 'rowCreatedAt',
   /** column name */
-  TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded'
+  TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
+  /** column name */
+  TotalInferenceLines = 'totalInferenceLines'
 }
 
 /** input type for updating data in table "tracy.ai_blame_pr" */
@@ -41203,6 +41218,7 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  hasAcceptanceRate?: InputMaybe<Scalars['Boolean']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -41215,6 +41231,7 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -41226,6 +41243,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_pop on columns */
@@ -41237,6 +41255,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Pop_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_samp on columns */
@@ -41248,6 +41267,7 @@ export type Tracy_Ai_Blame_Pr_Stddev_Samp_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "tracy_ai_blame_pr" */
@@ -41266,6 +41286,7 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   commitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   firstCommitDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  hasAcceptanceRate?: InputMaybe<Scalars['Boolean']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -41278,6 +41299,7 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -41289,6 +41311,7 @@ export type Tracy_Ai_Blame_Pr_Sum_Fields = {
   linesAdded?: Maybe<Scalars['Int']['output']>;
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 /** update columns of table "tracy.ai_blame_pr" */
@@ -41305,6 +41328,8 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   CommitsCount = 'commitsCount',
   /** column name */
   FirstCommitDate = 'firstCommitDate',
+  /** column name */
+  HasAcceptanceRate = 'hasAcceptanceRate',
   /** column name */
   HumanLinesAdded = 'humanLinesAdded',
   /** column name */
@@ -41328,7 +41353,9 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   /** column name */
   RowCreatedAt = 'rowCreatedAt',
   /** column name */
-  TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded'
+  TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
+  /** column name */
+  TotalInferenceLines = 'totalInferenceLines'
 }
 
 export type Tracy_Ai_Blame_Pr_Updates = {
@@ -41349,6 +41376,7 @@ export type Tracy_Ai_Blame_Pr_Var_Pop_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate var_samp on columns */
@@ -41360,6 +41388,7 @@ export type Tracy_Ai_Blame_Pr_Var_Samp_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate variance on columns */
@@ -41371,6 +41400,7 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   linesAdded?: Maybe<Scalars['Float']['output']>;
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "tracy.tracy_edit_event" */

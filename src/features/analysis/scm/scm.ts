@@ -4,6 +4,7 @@ import {
   CreateSubmitRequestParams,
   GetReferenceResult,
   GetSubmitRequestMetadataResult,
+  PrCommentData,
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
@@ -15,7 +16,10 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from './types'
-import { buildAuthorizedRepoUrl } from './utils'
+import {
+  buildAuthorizedRepoUrl,
+  extractLinearTicketsFromComments,
+} from './utils'
 
 // todo: scmOrg is only relevant for ADO
 // we should covert this to union type
@@ -240,16 +244,13 @@ export abstract class SCMLib {
 
   /**
    * Extract Linear ticket links from PR/MR comments.
-   * Default implementation returns empty array - subclasses can override.
+   * Uses shared isLinearBotComment() for unified bot detection across all providers.
    * Public so it can be reused by backend services.
    */
   public extractLinearTicketsFromComments(
-    _comments: {
-      author: { login: string; type: string } | null
-      body: string
-    }[]
+    comments: PrCommentData[]
   ): { name: string; title: string; url: string }[] {
-    return []
+    return extractLinearTicketsFromComments(comments)
   }
 
   protected _validateAccessTokenAndUrl(): asserts this is this & {

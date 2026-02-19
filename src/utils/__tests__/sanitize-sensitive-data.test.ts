@@ -650,6 +650,99 @@ public class MortgageProduct {
       })
     })
 
+    // === FALSE POSITIVE REGRESSION: MR branches, client-* packages, decimal scores ===
+    describe('False Positive Regression: MEDICAL_RECORD_NUMBER, CLIENT_ID, CREDIT_CARD', () => {
+      it('should NOT flag "MR branches" (MEDICAL_RECORD_NUMBER false positive)', async () => {
+        const input = 'MR branches'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag "MR branch" in sentences (MEDICAL_RECORD_NUMBER false positive)', async () => {
+        const input =
+          "let's create a new MR branch and add a random file in the repo root"
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag npm packages with "client" in path (CLIENT_ID false positive)', async () => {
+        const input = "import '@acme/client-sdk-client-analytics';"
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag client-display-manager package (CLIENT_ID false positive)', async () => {
+        const input =
+          "import {DisplayManager} from '@acme/client-display-manager';"
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag ClientSdkOptions (CLIENT_ID false positive)', async () => {
+        const input =
+          "import {ClientSdkOptions} from '@acme/client-sdk';\nimport {ClientSdkFactory, toRuntimeNetworkSettings}"
+        const result = (await sanitizeData(input)) as string
+        expect(result).toContain('ClientSdkOptions')
+        expect(result).toContain('ClientSdkFactory')
+        expect(result).not.toContain('******')
+      })
+
+      it('should NOT flag ClientSdkOptions in code context (CLIENT_ID false positive)', async () => {
+        const input =
+          'ClientSdkOptions<typeof KnowledgeAssistConversationService>\n      > => isType(msg, actionSdkOptionsUpdate)'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toContain('ClientSdkOptions')
+        expect(result).toContain('actionSdkOptionsUpdate')
+        expect(result).not.toContain('******')
+      })
+
+      it('should NOT flag decimal score values (CREDIT_CARD false positive on Luhn-passing decimals)', async () => {
+        // 0.3609268882098645 has 16 digits after the decimal that happen to pass Luhn
+        const input = '{"score":0.3609268882098645}'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag decimal with leading non-zero digit', async () => {
+        const input = '1.4111111111111111'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag credit card digits embedded in a larger number', async () => {
+        // A 16-digit Luhn-valid sequence surrounded by more digits is not a credit card
+        const input = '99941111111111111199'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag number with leading zero', async () => {
+        const input = '04111111111111111'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should handle mixed decimal and standalone credit card', async () => {
+        const input = 'Score: 0.3609268882098645, Card: 4111 1111 1111 1111'
+        const result = (await sanitizeData(input)) as string
+        // Decimal should be preserved, credit card should be masked
+        expect(result).toContain('0.3609268882098645')
+        expect(result).not.toContain('4111')
+      })
+
+      it('should still flag standalone credit card numbers', async () => {
+        const input = 'Card: 4111 1111 1111 1111'
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain('4111')
+      })
+
+      it('should mask credit card with dashes', async () => {
+        const input = 'Card: 4111-1111-1111-1111'
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain('4111')
+      })
+    })
+
     // === SIMPLE PATTERN VERIFICATION ===
     describe('Pattern Verification', () => {
       it('COMPREHENSIVE FALSE POSITIVE ANALYSIS - Show all problematic patterns', async () => {

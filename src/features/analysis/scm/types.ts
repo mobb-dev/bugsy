@@ -227,3 +227,15 @@ export type CommitLite = {
 export type RecentCommitsResult = {
   data: CommitLite[]
 }
+
+// Shared type for PR comment data
+export type PrCommentData = {
+  author: { login: string; type: string } | null
+  body: string
+}
+
+// Shared type for changed lines data
+export type ChangedLinesData = {
+  additions: number
+  deletions: number
+}

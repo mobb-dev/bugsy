@@ -17,7 +17,6 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from '../types'
-import { extractLinearTicketsFromBody } from '../utils'
 import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   createMarkdownCommentOnPullRequest,
@@ -499,30 +498,5 @@ export class GitlabSCMLib extends SCMLib {
       repoUrl: this.url,
       accessToken: this.accessToken,
     })
-  }
-
-  /**
-   * Extract Linear ticket links from pre-fetched comments (pure function, no API calls).
-   * Linear bot uses the same comment format on GitLab as on GitHub.
-   * Bot username may be 'linear' or 'linear[bot]' on GitLab.
-   */
-  override extractLinearTicketsFromComments(
-    comments: { author: { login: string; type: string } | null; body: string }[]
-  ): { name: string; title: string; url: string }[] {
-    const tickets: { name: string; title: string; url: string }[] = []
-    const seen = new Set<string>()
-
-    for (const comment of comments) {
-      const authorLogin = comment.author?.login?.toLowerCase() || ''
-      const isLinearBot =
-        authorLogin === 'linear' ||
-        authorLogin === 'linear[bot]' ||
-        (comment.author?.type === 'Bot' && authorLogin.includes('linear'))
-
-      if (isLinearBot) {
-        tickets.push(...extractLinearTicketsFromBody(comment.body || '', seen))
-      }
-    }
-    return tickets
   }
 }

@@ -26,7 +26,6 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from '../types'
-import { extractLinearTicketsFromBody } from '../utils'
 import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   getGithubSdk,
@@ -41,7 +40,6 @@ import {
   GetPRMetricsResponse,
   GetPrParams,
   PostCommentParams,
-  PrCommentData,
   UpdateCommentParams,
   UpdateCommentResponse,
 } from './types'
@@ -669,38 +667,6 @@ export class GithubSCMLib extends SCMLib {
       prStatus,
       commentIds,
     }
-  }
-
-  /**
-   * Extract Linear ticket links from pre-fetched comments (pure function, no API calls)
-   * Instance method that overrides base class - can also be called statically for backwards compatibility.
-   */
-  override extractLinearTicketsFromComments(
-    comments: PrCommentData[]
-  ): { name: string; title: string; url: string }[] {
-    return GithubSCMLib._extractLinearTicketsFromCommentsImpl(comments)
-  }
-
-  /**
-   * Static implementation for backwards compatibility and reuse.
-   * Called by both the instance method and direct static calls.
-   */
-  private static _extractLinearTicketsFromCommentsImpl(
-    comments: PrCommentData[]
-  ): { name: string; title: string; url: string }[] {
-    const tickets: { name: string; title: string; url: string }[] = []
-    const seen = new Set<string>()
-
-    for (const comment of comments) {
-      if (
-        comment.author?.login === 'linear[bot]' ||
-        comment.author?.type === 'Bot'
-      ) {
-        tickets.push(...extractLinearTicketsFromBody(comment.body || '', seen))
-      }
-    }
-
-    return tickets
   }
 }
 

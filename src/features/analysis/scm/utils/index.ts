@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { getFixUrl, getIssueUrl } from '../shared/src'
 import { ScmType } from '../shared/src'
-import { ScmConfig } from '../types'
+import { PrCommentData, ScmConfig } from '../types'
 import {
   scmCloudHostname,
   ScmLibScmType,
@@ -168,6 +168,27 @@ export function parseLinearTicket(
   const titleSlug = urlParts[urlParts.length - 1] || ''
   const title = titleSlug.replace(/-/g, ' ')
   return { name, title, url }
+}
+
+export function isLinearBotComment(comment: PrCommentData): boolean {
+  if (!comment.author) return false
+  const login = comment.author.login.toLowerCase()
+  if (login === 'linear[bot]' || login === 'linear') return true
+  if (comment.author.type === 'Bot' && login.includes('linear')) return true
+  return false
+}
+
+export function extractLinearTicketsFromComments(
+  comments: PrCommentData[]
+): { name: string; title: string; url: string }[] {
+  const tickets: { name: string; title: string; url: string }[] = []
+  const seen = new Set<string>()
+  for (const comment of comments) {
+    if (isLinearBotComment(comment)) {
+      tickets.push(...extractLinearTicketsFromBody(comment.body || '', seen))
+    }
+  }
+  return tickets
 }
 
 // username patteren such as 'https://haggai-mobb@bitbucket.org/workspace/repo_slug.git'

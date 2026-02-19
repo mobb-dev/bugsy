@@ -3,7 +3,12 @@ import { RequestError } from '@octokit/request-error'
 
 import { MAX_BRANCHES_FETCH } from '../constants'
 import { RefNotFoundError } from '../errors'
-import { ReferenceType, ScmRepoInfo } from '../types'
+import {
+  ChangedLinesData,
+  PrCommentData,
+  ReferenceType,
+  ScmRepoInfo,
+} from '../types'
 import { safeBody } from '../utils'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,
@@ -24,7 +29,6 @@ import {
   UPDATE_COMMENT_PATH,
 } from './consts'
 import {
-  ChangedLinesData,
   CreateOrUpdateRepositorySecretParams,
   CreateOrUpdateRepositorySecretResponse,
   DeleteCommentParams,
@@ -48,7 +52,6 @@ import {
   PostGeneralPrCommentParams,
   PostGeneralPrCommentResponse,
   PrChangesGraphQLResponse,
-  PrCommentData,
   PrCommentsGraphQLResponse,
   ReplyToCodeReviewCommentPathParams,
   ReplyToCodeReviewCommentPathResponse,

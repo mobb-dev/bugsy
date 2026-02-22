@@ -366,12 +366,18 @@ mutation AnalyzeCommitForExtensionAIBlame(
   $commitSha: String!
   $organizationId: String!
   $commitTimestamp: Timestamp
+  $commitAuthor: GitIdentityInput
+  $commitCommitter: GitIdentityInput
+  $commitCoAuthors: [GitIdentityInput!]
 ) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
     commitTimestamp: $commitTimestamp
+    commitAuthor: $commitAuthor
+    commitCommitter: $commitCommitter
+    commitCoAuthors: $commitCoAuthors
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {

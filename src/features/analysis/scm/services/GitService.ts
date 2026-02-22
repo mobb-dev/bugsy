@@ -5,6 +5,11 @@ import * as path from 'path'
 import { SimpleGit, simpleGit, StatusResult } from 'simple-git'
 
 import { MCP_DEFAULT_MAX_FILES_TO_SCAN } from '../../../../mcp/core/configs'
+import type { GitIdentity } from '../../../../utils/blame/gitBlameTypes'
+import {
+  COMMIT_LOG_FORMAT,
+  parseCommitLine,
+} from '../../../../utils/blame/gitBlameTypes'
 import { parseScmURL } from '../shared/src/urlParser'
 import { FileUtils } from './FileUtils'
 
@@ -42,6 +47,12 @@ export type LocalCommitData = {
   diff: string
   /** Commit timestamp */
   timestamp: Date
+  /** Commit author */
+  author: GitIdentity
+  /** Commit committer */
+  committer: GitIdentity
+  /** Co-authors from commit trailers */
+  coAuthors: GitIdentity[]
 }
 
 export class GitService {
@@ -678,13 +689,12 @@ export class GitService {
     this.log('[GitService] Getting local commit data', 'debug', { commitSha })
 
     try {
-      // Get commit metadata and diff in a single call
-      // Format: %cI = committer date ISO 8601
-      // Output: "timestamp\n<DIFF_DELIMITER>\ndiff..."
+      // Get commit metadata and diff in a single call using the shared format.
+      // COMMIT_LOG_FORMAT produces a NUL-separated metadata line parsed by parseCommitLine().
       const DIFF_DELIMITER = '---MOBB_DIFF_START---'
       const output = await this.git.show([
         commitSha,
-        `--format=%cI%n${DIFF_DELIMITER}`,
+        `--format=${COMMIT_LOG_FORMAT}%n${DIFF_DELIMITER}`,
         '--patch',
       ])
 
@@ -710,17 +720,18 @@ export class GitService {
         return null
       }
 
-      // Parse metadata: first line is timestamp
-      const metadataLines = metadataOutput.trim().split('\n')
-      if (metadataLines.length < 1 || !metadataLines[0]) {
+      // Parse metadata using shared parser
+      const metadataLine = metadataOutput.trim()
+      const parsed = parseCommitLine(metadataLine)
+      if (!parsed) {
         this.log('[GitService] Unexpected metadata format', 'warning', {
           commitSha,
-          metadataLines,
+          metadataLine,
         })
         return null
       }
-      const timestampStr = metadataLines[0]
-      const timestamp = new Date(timestampStr)
+
+      const timestamp = new Date(parsed.timestamp * 1000)
 
       this.log('[GitService] Local commit data retrieved', 'debug', {
         commitSha,
@@ -731,6 +742,9 @@ export class GitService {
       return {
         diff,
         timestamp,
+        author: parsed.author,
+        committer: parsed.committer,
+        coAuthors: parsed.coAuthors,
       }
     } catch (error) {
       const errorMessage = `Failed to get local commit data: ${(error as Error).message}`

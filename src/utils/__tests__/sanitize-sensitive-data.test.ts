@@ -5,11 +5,12 @@ import { sanitizeData } from '../sanitize-sensitive-data'
 
 describe('sanitize-sensitive-data', async () => {
   describe('sanitizeData', async () => {
-    it('should mask email addresses', async () => {
+    // ACCEPTED FALSE NEGATIVE: EMAIL pattern removed to fix false positives
+    // in code/test snippets (e.g. --author="Eve Author <eve@example.com>").
+    it('should NOT mask email addresses (accepted FN - EMAIL pattern removed)', async () => {
       const input = 'Contact me at john.doe@example.com'
       const result = (await sanitizeData(input)) as string
-      expect(result).not.toContain('john.doe@example.com')
-      expect(result).toContain('***')
+      expect(result).toBe(input)
     })
 
     it('should mask phone numbers', async () => {
@@ -28,10 +29,12 @@ describe('sanitize-sensitive-data', async () => {
       expect(result).not.toContain('123-45-6789')
     })
 
-    it('should mask credit card numbers', async () => {
+    // ACCEPTED FALSE NEGATIVE: CREDIT_CARD pattern removed to fix false positives
+    // on zero-filled UUIDs (e.g. '00000000-0000-0000-0000-000000000000').
+    it('should NOT mask credit card numbers (accepted FN - CREDIT_CARD pattern removed)', async () => {
       const input = 'Card: 4111 1111 1111 1111'
       const result = (await sanitizeData(input)) as string
-      expect(result).not.toContain('4111')
+      expect(result).toBe(input)
     })
 
     it('should mask GitHub tokens', async () => {
@@ -73,7 +76,7 @@ describe('sanitize-sensitive-data', async () => {
       const result = (await sanitizeData(input)) as any
       expect(result.username).toBe('john')
       expect(result.password).toBe('secretPassword123')
-      expect(result.email).toContain('***')
+      expect(result.email).toBe('john@example.com') // EMAIL pattern removed - accepted FN
       expect(result.token).toBe('gh**************************************12')
     })
 
@@ -81,7 +84,7 @@ describe('sanitize-sensitive-data', async () => {
       const input = ['normal text', 'email@example.com', 'AKIAIOSFODNN7EXAMPLE']
       const result = (await sanitizeData(input)) as string[]
       expect(result[0]).toBe('normal text')
-      expect(result[1]).toContain('***')
+      expect(result[1]).toBe('email@example.com') // EMAIL pattern removed - accepted FN
       expect(result[2]).not.toContain('AKIAIOSFODNN7EXAMPLE')
     })
 
@@ -130,7 +133,7 @@ Line 3 with token: ghp_1234567890abcdefghijklmnopqrstuvwxyz12
 Line 4 with normal text again`
       const result = (await sanitizeData(input)) as string
       expect(result).toContain('Line 1 with normal text')
-      expect(result).not.toContain('john@example.com')
+      expect(result).toContain('john@example.com') // EMAIL pattern removed - accepted FN
       expect(result).not.toContain('ghp_1234567890abcdefghijklmnopqrstuvwxyz12')
       expect(result).toContain('Line 4 with normal text again')
       expect(result).toContain('\n') // Ensure newlines are preserved
@@ -186,7 +189,7 @@ Some text after`
       `
       const result = (await sanitizeData(input)) as string
       expect(result).not.toContain('sk_test_1234567890abcdefghijklmnop')
-      expect(result).not.toContain('admin@company.com')
+      expect(result).toContain('admin@company.com') // EMAIL pattern removed - accepted FN
       expect(result).toContain('function test()')
       expect(result).toContain('return')
       // Check that indentation is preserved
@@ -287,8 +290,9 @@ public class MortgageProduct {
       expect(result).toContain('String')
       expect(result).toContain('class')
 
+      // EMAIL pattern removed - accepted FN
+      expect(result).toContain('admin@company.com')
       // But should sanitize actual sensitive data
-      expect(result).not.toContain('admin@company.com')
       expect(result).not.toContain('sk_live_4eC39HqLyjWDarjtT1zdp7dc')
     })
 
@@ -454,15 +458,9 @@ public class MortgageProduct {
           if (code.includes('if')) {
             expect(result).toContain('if')
           }
-          // Legitimate sensitive data like emails should be properly sanitized
-          // We're mainly checking that programming structure isn't destroyed
-          if (code.includes('test@example.com')) {
-            // This email should be sanitized, so asterisks are expected
-            expect(result).toContain('***')
-          } else {
-            // For non-sensitive code, should not have excessive asterisks
-            expect(result).not.toMatch(/\*{10,}/)
-          }
+          // EMAIL pattern removed - emails are no longer sanitized (accepted FN)
+          // For non-sensitive code, should not have excessive asterisks
+          expect(result).not.toMatch(/\*{10,}/)
         }
       })
 
@@ -696,50 +694,59 @@ public class MortgageProduct {
         expect(result).not.toContain('******')
       })
 
-      it('should NOT flag decimal score values (CREDIT_CARD false positive on Luhn-passing decimals)', async () => {
-        // 0.3609268882098645 has 16 digits after the decimal that happen to pass Luhn
+      // CREDIT_CARD pattern has been removed entirely (accepted FN).
+      // These tests now verify that nothing is falsely flagged.
+      it('should NOT flag decimal score values (CREDIT_CARD pattern removed)', async () => {
         const input = '{"score":0.3609268882098645}'
         const result = (await sanitizeData(input)) as string
         expect(result).toBe(input)
       })
 
-      it('should NOT flag decimal with leading non-zero digit', async () => {
+      it('should NOT flag decimal with leading non-zero digit (CREDIT_CARD pattern removed)', async () => {
         const input = '1.4111111111111111'
         const result = (await sanitizeData(input)) as string
         expect(result).toBe(input)
       })
 
-      it('should NOT flag credit card digits embedded in a larger number', async () => {
-        // A 16-digit Luhn-valid sequence surrounded by more digits is not a credit card
+      it('should NOT flag credit card digits embedded in a larger number (CREDIT_CARD pattern removed)', async () => {
         const input = '99941111111111111199'
         const result = (await sanitizeData(input)) as string
         expect(result).toBe(input)
       })
 
-      it('should NOT flag number with leading zero', async () => {
+      it('should NOT flag number with leading zero (CREDIT_CARD pattern removed)', async () => {
         const input = '04111111111111111'
         const result = (await sanitizeData(input)) as string
         expect(result).toBe(input)
       })
 
-      it('should handle mixed decimal and standalone credit card', async () => {
-        const input = 'Score: 0.3609268882098645, Card: 4111 1111 1111 1111'
-        const result = (await sanitizeData(input)) as string
-        // Decimal should be preserved, credit card should be masked
-        expect(result).toContain('0.3609268882098645')
-        expect(result).not.toContain('4111')
-      })
-
-      it('should still flag standalone credit card numbers', async () => {
+      it('should NOT flag standalone credit card numbers (accepted FN - CREDIT_CARD pattern removed)', async () => {
         const input = 'Card: 4111 1111 1111 1111'
         const result = (await sanitizeData(input)) as string
-        expect(result).not.toContain('4111')
+        expect(result).toBe(input)
       })
 
-      it('should mask credit card with dashes', async () => {
+      it('should NOT flag credit card with dashes (accepted FN - CREDIT_CARD pattern removed)', async () => {
         const input = 'Card: 4111-1111-1111-1111'
         const result = (await sanitizeData(input)) as string
-        expect(result).not.toContain('4111')
+        expect(result).toBe(input)
+      })
+    })
+
+    // === FALSE POSITIVE REGRESSION: EMAIL and CREDIT_CARD removal ===
+    describe('False Positive Regression: EMAIL and CREDIT_CARD removal', () => {
+      it('should NOT flag zero-filled UUIDs (was CREDIT_CARD FP)', async () => {
+        const input = '00000000-0000-0000-0000-000000000000'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+        expect(result).not.toContain('***')
+      })
+
+      it('should NOT flag emails in code/test snippets (was EMAIL FP)', async () => {
+        const input = '--author="Eve Author <eve@example.com>"'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+        expect(result).not.toContain('***')
       })
     })
 

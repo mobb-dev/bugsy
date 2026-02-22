@@ -703,6 +703,11 @@ export type GetTracyDiffUploadUrlResponse = {
   uploadInfo?: Maybe<TracyDiffUploadInfo>;
 };
 
+export type GitIdentityInput = {
+  email: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
 export type GitReferenceData = {
   __typename?: 'GitReferenceData';
   date: Scalars['String']['output'];
@@ -2997,11 +3002,21 @@ export type Ai_Blame_Commit = {
   aiBlameAttributions: Array<Ai_Blame_Attribution>;
   /** An aggregate relationship */
   aiBlameAttributions_aggregate: Ai_Blame_Attribution_Aggregate;
+  /** An object relationship */
+  author?: Maybe<Git_Identity>;
+  authorId?: Maybe<Scalars['uuid']['output']>;
   /** An array relationship */
   blameAiAnalysisRequests: Array<Blame_Ai_Analysis_Request>;
   /** An aggregate relationship */
   blameAiAnalysisRequests_aggregate: Blame_Ai_Analysis_Request_Aggregate;
+  /** An array relationship */
+  coAuthors: Array<Ai_Blame_Commit_Co_Author>;
+  /** An aggregate relationship */
+  coAuthors_aggregate: Ai_Blame_Commit_Co_Author_Aggregate;
   commitSha: Scalars['String']['output'];
+  /** An object relationship */
+  committer?: Maybe<Git_Identity>;
+  committerId?: Maybe<Scalars['uuid']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   inferenceCount: Scalars['Int']['output'];
@@ -3051,11 +3066,42 @@ export type Ai_Blame_CommitBlameAiAnalysisRequests_AggregateArgs = {
   where?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
 };
 
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitCoAuthorsArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+/** columns and relationships of "ai_blame_commit" */
+export type Ai_Blame_CommitCoAuthors_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
 /** aggregated selection of "ai_blame_commit" */
 export type Ai_Blame_Commit_Aggregate = {
   __typename?: 'ai_blame_commit_aggregate';
   aggregate?: Maybe<Ai_Blame_Commit_Aggregate_Fields>;
   nodes: Array<Ai_Blame_Commit>;
+};
+
+export type Ai_Blame_Commit_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ai_Blame_Commit_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ai_Blame_Commit_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
 };
 
 /** aggregate fields of "ai_blame_commit" */
@@ -3081,10 +3127,37 @@ export type Ai_Blame_Commit_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** order by aggregate values of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Aggregate_Order_By = {
+  avg?: InputMaybe<Ai_Blame_Commit_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ai_Blame_Commit_Max_Order_By>;
+  min?: InputMaybe<Ai_Blame_Commit_Min_Order_By>;
+  stddev?: InputMaybe<Ai_Blame_Commit_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Ai_Blame_Commit_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Ai_Blame_Commit_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Ai_Blame_Commit_Sum_Order_By>;
+  var_pop?: InputMaybe<Ai_Blame_Commit_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Ai_Blame_Commit_Var_Samp_Order_By>;
+  variance?: InputMaybe<Ai_Blame_Commit_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "ai_blame_commit" */
+export type Ai_Blame_Commit_Arr_Rel_Insert_Input = {
+  data: Array<Ai_Blame_Commit_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
+};
+
 /** aggregate avg on columns */
 export type Ai_Blame_Commit_Avg_Fields = {
   __typename?: 'ai_blame_commit_avg_fields';
   inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Avg_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "ai_blame_commit". All fields are combined with a logical 'AND'. */
@@ -3094,15 +3167,203 @@ export type Ai_Blame_Commit_Bool_Exp = {
   _or?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Bool_Exp>;
+  author?: InputMaybe<Git_Identity_Bool_Exp>;
+  authorId?: InputMaybe<Uuid_Comparison_Exp>;
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
   blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Bool_Exp>;
+  coAuthors?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+  coAuthors_aggregate?: InputMaybe<Ai_Blame_Commit_Co_Author_Aggregate_Bool_Exp>;
   commitSha?: InputMaybe<String_Comparison_Exp>;
+  committer?: InputMaybe<Git_Identity_Bool_Exp>;
+  committerId?: InputMaybe<Uuid_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   inferenceCount?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** columns and relationships of "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author = {
+  __typename?: 'ai_blame_commit_co_author';
+  aiBlameCommitId: Scalars['uuid']['output'];
+  /** An object relationship */
+  commit: Ai_Blame_Commit;
+  gitIdentityId: Scalars['uuid']['output'];
+  /** An object relationship */
+  identity: Git_Identity;
+};
+
+/** aggregated selection of "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Aggregate = {
+  __typename?: 'ai_blame_commit_co_author_aggregate';
+  aggregate?: Maybe<Ai_Blame_Commit_Co_Author_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Commit_Co_Author>;
+};
+
+export type Ai_Blame_Commit_Co_Author_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Ai_Blame_Commit_Co_Author_Aggregate_Bool_Exp_Count>;
+};
+
+export type Ai_Blame_Commit_Co_Author_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Aggregate_Fields = {
+  __typename?: 'ai_blame_commit_co_author_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Commit_Co_Author_Max_Fields>;
+  min?: Maybe<Ai_Blame_Commit_Co_Author_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Ai_Blame_Commit_Co_Author_Max_Order_By>;
+  min?: InputMaybe<Ai_Blame_Commit_Co_Author_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Arr_Rel_Insert_Input = {
+  data: Array<Ai_Blame_Commit_Co_Author_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Commit_Co_Author_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_commit_co_author". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Commit_Co_Author_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Bool_Exp>>;
+  aiBlameCommitId?: InputMaybe<Uuid_Comparison_Exp>;
+  commit?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  gitIdentityId?: InputMaybe<Uuid_Comparison_Exp>;
+  identity?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_blame_commit_co_author" */
+export enum Ai_Blame_Commit_Co_Author_Constraint {
+  /** unique or primary key constraint on columns "ai_blame_commit_id", "git_identity_id" */
+  AiBlameCommitCoAuthorPkey = 'ai_blame_commit_co_author_pkey'
+}
+
+/** input type for inserting data into table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Insert_Input = {
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  commit?: InputMaybe<Ai_Blame_Commit_Obj_Rel_Insert_Input>;
+  gitIdentityId?: InputMaybe<Scalars['uuid']['input']>;
+  identity?: InputMaybe<Git_Identity_Obj_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Commit_Co_Author_Max_Fields = {
+  __typename?: 'ai_blame_commit_co_author_max_fields';
+  aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
+  gitIdentityId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Max_Order_By = {
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  gitIdentityId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Commit_Co_Author_Min_Fields = {
+  __typename?: 'ai_blame_commit_co_author_min_fields';
+  aiBlameCommitId?: Maybe<Scalars['uuid']['output']>;
+  gitIdentityId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Min_Order_By = {
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  gitIdentityId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Mutation_Response = {
+  __typename?: 'ai_blame_commit_co_author_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Blame_Commit_Co_Author>;
+};
+
+/** on_conflict condition type for table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_On_Conflict = {
+  constraint: Ai_Blame_Commit_Co_Author_Constraint;
+  update_columns?: Array<Ai_Blame_Commit_Co_Author_Update_Column>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_blame_commit_co_author". */
+export type Ai_Blame_Commit_Co_Author_Order_By = {
+  aiBlameCommitId?: InputMaybe<Order_By>;
+  commit?: InputMaybe<Ai_Blame_Commit_Order_By>;
+  gitIdentityId?: InputMaybe<Order_By>;
+  identity?: InputMaybe<Git_Identity_Order_By>;
+};
+
+/** primary key columns input for table: ai_blame_commit_co_author */
+export type Ai_Blame_Commit_Co_Author_Pk_Columns_Input = {
+  aiBlameCommitId: Scalars['uuid']['input'];
+  gitIdentityId: Scalars['uuid']['input'];
+};
+
+/** select columns of table "ai_blame_commit_co_author" */
+export enum Ai_Blame_Commit_Co_Author_Select_Column {
+  /** column name */
+  AiBlameCommitId = 'aiBlameCommitId',
+  /** column name */
+  GitIdentityId = 'gitIdentityId'
+}
+
+/** input type for updating data in table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Set_Input = {
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  gitIdentityId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "ai_blame_commit_co_author" */
+export type Ai_Blame_Commit_Co_Author_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Commit_Co_Author_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Commit_Co_Author_Stream_Cursor_Value_Input = {
+  aiBlameCommitId?: InputMaybe<Scalars['uuid']['input']>;
+  gitIdentityId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "ai_blame_commit_co_author" */
+export enum Ai_Blame_Commit_Co_Author_Update_Column {
+  /** column name */
+  AiBlameCommitId = 'aiBlameCommitId',
+  /** column name */
+  GitIdentityId = 'gitIdentityId'
+}
+
+export type Ai_Blame_Commit_Co_Author_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Blame_Commit_Co_Author_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Blame_Commit_Co_Author_Bool_Exp;
 };
 
 /** unique or primary key constraints on table "ai_blame_commit" */
@@ -3121,8 +3382,13 @@ export type Ai_Blame_Commit_Inc_Input = {
 /** input type for inserting data into table "ai_blame_commit" */
 export type Ai_Blame_Commit_Insert_Input = {
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Arr_Rel_Insert_Input>;
+  author?: InputMaybe<Git_Identity_Obj_Rel_Insert_Input>;
+  authorId?: InputMaybe<Scalars['uuid']['input']>;
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input>;
+  coAuthors?: InputMaybe<Ai_Blame_Commit_Co_Author_Arr_Rel_Insert_Input>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
+  committer?: InputMaybe<Git_Identity_Obj_Rel_Insert_Input>;
+  committerId?: InputMaybe<Scalars['uuid']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
@@ -3134,7 +3400,9 @@ export type Ai_Blame_Commit_Insert_Input = {
 /** aggregate max on columns */
 export type Ai_Blame_Commit_Max_Fields = {
   __typename?: 'ai_blame_commit_max_fields';
+  authorId?: Maybe<Scalars['uuid']['output']>;
   commitSha?: Maybe<Scalars['String']['output']>;
+  committerId?: Maybe<Scalars['uuid']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferenceCount?: Maybe<Scalars['Int']['output']>;
@@ -3142,15 +3410,41 @@ export type Ai_Blame_Commit_Max_Fields = {
   repositoryUrl?: Maybe<Scalars['String']['output']>;
 };
 
+/** order by max() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Max_Order_By = {
+  authorId?: InputMaybe<Order_By>;
+  commitSha?: InputMaybe<Order_By>;
+  committerId?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  inferenceCount?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
 /** aggregate min on columns */
 export type Ai_Blame_Commit_Min_Fields = {
   __typename?: 'ai_blame_commit_min_fields';
+  authorId?: Maybe<Scalars['uuid']['output']>;
   commitSha?: Maybe<Scalars['String']['output']>;
+  committerId?: Maybe<Scalars['uuid']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   inferenceCount?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Min_Order_By = {
+  authorId?: InputMaybe<Order_By>;
+  commitSha?: InputMaybe<Order_By>;
+  committerId?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  inferenceCount?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "ai_blame_commit" */
@@ -3179,8 +3473,13 @@ export type Ai_Blame_Commit_On_Conflict = {
 /** Ordering options when selecting data from "ai_blame_commit". */
 export type Ai_Blame_Commit_Order_By = {
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Order_By>;
+  author?: InputMaybe<Git_Identity_Order_By>;
+  authorId?: InputMaybe<Order_By>;
   blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Order_By>;
+  coAuthors_aggregate?: InputMaybe<Ai_Blame_Commit_Co_Author_Aggregate_Order_By>;
   commitSha?: InputMaybe<Order_By>;
+  committer?: InputMaybe<Git_Identity_Order_By>;
+  committerId?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
@@ -3197,7 +3496,11 @@ export type Ai_Blame_Commit_Pk_Columns_Input = {
 /** select columns of table "ai_blame_commit" */
 export enum Ai_Blame_Commit_Select_Column {
   /** column name */
+  AuthorId = 'authorId',
+  /** column name */
   CommitSha = 'commitSha',
+  /** column name */
+  CommitterId = 'committerId',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -3212,7 +3515,9 @@ export enum Ai_Blame_Commit_Select_Column {
 
 /** input type for updating data in table "ai_blame_commit" */
 export type Ai_Blame_Commit_Set_Input = {
+  authorId?: InputMaybe<Scalars['uuid']['input']>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
+  committerId?: InputMaybe<Scalars['uuid']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
@@ -3226,16 +3531,31 @@ export type Ai_Blame_Commit_Stddev_Fields = {
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by stddev() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Stddev_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
+};
+
 /** aggregate stddev_pop on columns */
 export type Ai_Blame_Commit_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_commit_stddev_pop_fields';
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by stddev_pop() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Stddev_Pop_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
+};
+
 /** aggregate stddev_samp on columns */
 export type Ai_Blame_Commit_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_commit_stddev_samp_fields';
   inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Stddev_Samp_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "ai_blame_commit" */
@@ -3248,7 +3568,9 @@ export type Ai_Blame_Commit_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
+  authorId?: InputMaybe<Scalars['uuid']['input']>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
+  committerId?: InputMaybe<Scalars['uuid']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
@@ -3262,10 +3584,19 @@ export type Ai_Blame_Commit_Sum_Fields = {
   inferenceCount?: Maybe<Scalars['Int']['output']>;
 };
 
+/** order by sum() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Sum_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
+};
+
 /** update columns of table "ai_blame_commit" */
 export enum Ai_Blame_Commit_Update_Column {
   /** column name */
+  AuthorId = 'authorId',
+  /** column name */
   CommitSha = 'commitSha',
+  /** column name */
+  CommitterId = 'committerId',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -3293,16 +3624,31 @@ export type Ai_Blame_Commit_Var_Pop_Fields = {
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by var_pop() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Var_Pop_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
+};
+
 /** aggregate var_samp on columns */
 export type Ai_Blame_Commit_Var_Samp_Fields = {
   __typename?: 'ai_blame_commit_var_samp_fields';
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by var_samp() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Var_Samp_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
+};
+
 /** aggregate variance on columns */
 export type Ai_Blame_Commit_Variance_Fields = {
   __typename?: 'ai_blame_commit_variance_fields';
   inferenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "ai_blame_commit" */
+export type Ai_Blame_Commit_Variance_Order_By = {
+  inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "ai_blame_inference" */
@@ -15931,6 +16277,245 @@ export type Get_Vulnerability_Report_Issues_For_User_Args = {
   user_email?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** columns and relationships of "git_identity" */
+export type Git_Identity = {
+  __typename?: 'git_identity';
+  /** An array relationship */
+  authoredCommits: Array<Ai_Blame_Commit>;
+  /** An aggregate relationship */
+  authoredCommits_aggregate: Ai_Blame_Commit_Aggregate;
+  /** An array relationship */
+  coAuthoredCommits: Array<Ai_Blame_Commit_Co_Author>;
+  /** An aggregate relationship */
+  coAuthoredCommits_aggregate: Ai_Blame_Commit_Co_Author_Aggregate;
+  /** An array relationship */
+  committedCommits: Array<Ai_Blame_Commit>;
+  /** An aggregate relationship */
+  committedCommits_aggregate: Ai_Blame_Commit_Aggregate;
+  email: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+  name: Scalars['String']['output'];
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityAuthoredCommitsArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityAuthoredCommits_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityCoAuthoredCommitsArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityCoAuthoredCommits_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityCommittedCommitsArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+/** columns and relationships of "git_identity" */
+export type Git_IdentityCommittedCommits_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+/** aggregated selection of "git_identity" */
+export type Git_Identity_Aggregate = {
+  __typename?: 'git_identity_aggregate';
+  aggregate?: Maybe<Git_Identity_Aggregate_Fields>;
+  nodes: Array<Git_Identity>;
+};
+
+/** aggregate fields of "git_identity" */
+export type Git_Identity_Aggregate_Fields = {
+  __typename?: 'git_identity_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Git_Identity_Max_Fields>;
+  min?: Maybe<Git_Identity_Min_Fields>;
+};
+
+
+/** aggregate fields of "git_identity" */
+export type Git_Identity_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Git_Identity_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "git_identity". All fields are combined with a logical 'AND'. */
+export type Git_Identity_Bool_Exp = {
+  _and?: InputMaybe<Array<Git_Identity_Bool_Exp>>;
+  _not?: InputMaybe<Git_Identity_Bool_Exp>;
+  _or?: InputMaybe<Array<Git_Identity_Bool_Exp>>;
+  authoredCommits?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  authoredCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Aggregate_Bool_Exp>;
+  coAuthoredCommits?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+  coAuthoredCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Co_Author_Aggregate_Bool_Exp>;
+  committedCommits?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+  committedCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Aggregate_Bool_Exp>;
+  email?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "git_identity" */
+export enum Git_Identity_Constraint {
+  /** unique or primary key constraint on columns "email", "name" */
+  GitIdentityNameEmailKey = 'git_identity_name_email_key',
+  /** unique or primary key constraint on columns "id" */
+  GitIdentityPkey = 'git_identity_pkey'
+}
+
+/** input type for inserting data into table "git_identity" */
+export type Git_Identity_Insert_Input = {
+  authoredCommits?: InputMaybe<Ai_Blame_Commit_Arr_Rel_Insert_Input>;
+  coAuthoredCommits?: InputMaybe<Ai_Blame_Commit_Co_Author_Arr_Rel_Insert_Input>;
+  committedCommits?: InputMaybe<Ai_Blame_Commit_Arr_Rel_Insert_Input>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Git_Identity_Max_Fields = {
+  __typename?: 'git_identity_max_fields';
+  email?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Git_Identity_Min_Fields = {
+  __typename?: 'git_identity_min_fields';
+  email?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "git_identity" */
+export type Git_Identity_Mutation_Response = {
+  __typename?: 'git_identity_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Git_Identity>;
+};
+
+/** input type for inserting object relation for remote table "git_identity" */
+export type Git_Identity_Obj_Rel_Insert_Input = {
+  data: Git_Identity_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Git_Identity_On_Conflict>;
+};
+
+/** on_conflict condition type for table "git_identity" */
+export type Git_Identity_On_Conflict = {
+  constraint: Git_Identity_Constraint;
+  update_columns?: Array<Git_Identity_Update_Column>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "git_identity". */
+export type Git_Identity_Order_By = {
+  authoredCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Aggregate_Order_By>;
+  coAuthoredCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Co_Author_Aggregate_Order_By>;
+  committedCommits_aggregate?: InputMaybe<Ai_Blame_Commit_Aggregate_Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: git_identity */
+export type Git_Identity_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "git_identity" */
+export enum Git_Identity_Select_Column {
+  /** column name */
+  Email = 'email',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name'
+}
+
+/** input type for updating data in table "git_identity" */
+export type Git_Identity_Set_Input = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "git_identity" */
+export type Git_Identity_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Git_Identity_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Git_Identity_Stream_Cursor_Value_Input = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "git_identity" */
+export enum Git_Identity_Update_Column {
+  /** column name */
+  Email = 'email',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name'
+}
+
+export type Git_Identity_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Git_Identity_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Git_Identity_Bool_Exp;
+};
+
 /** This table represent the meta for each installation associated to our app  */
 export type Github_App = {
   __typename?: 'github_app';
@@ -17985,6 +18570,10 @@ export type Mutation_Root = {
   delete_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
   /** delete single row from the table: "ai_blame_commit" */
   delete_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** delete data from the table: "ai_blame_commit_co_author" */
+  delete_ai_blame_commit_co_author?: Maybe<Ai_Blame_Commit_Co_Author_Mutation_Response>;
+  /** delete single row from the table: "ai_blame_commit_co_author" */
+  delete_ai_blame_commit_co_author_by_pk?: Maybe<Ai_Blame_Commit_Co_Author>;
   /** delete data from the table: "ai_blame_inference" */
   delete_ai_blame_inference?: Maybe<Ai_Blame_Inference_Mutation_Response>;
   /** delete single row from the table: "ai_blame_inference" */
@@ -18157,6 +18746,10 @@ export type Mutation_Root = {
   delete_fix_to_submit_fix_request?: Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>;
   /** delete single row from the table: "fix_to_submit_fix_request" */
   delete_fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
+  /** delete data from the table: "git_identity" */
+  delete_git_identity?: Maybe<Git_Identity_Mutation_Response>;
+  /** delete single row from the table: "git_identity" */
+  delete_git_identity_by_pk?: Maybe<Git_Identity>;
   /** delete data from the table: "github_app" */
   delete_github_app?: Maybe<Github_App_Mutation_Response>;
   /** delete single row from the table: "github_app" */
@@ -18399,6 +18992,10 @@ export type Mutation_Root = {
   insert_ai_blame_attribution_one?: Maybe<Ai_Blame_Attribution>;
   /** insert data into the table: "ai_blame_commit" */
   insert_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** insert data into the table: "ai_blame_commit_co_author" */
+  insert_ai_blame_commit_co_author?: Maybe<Ai_Blame_Commit_Co_Author_Mutation_Response>;
+  /** insert a single row into the table: "ai_blame_commit_co_author" */
+  insert_ai_blame_commit_co_author_one?: Maybe<Ai_Blame_Commit_Co_Author>;
   /** insert a single row into the table: "ai_blame_commit" */
   insert_ai_blame_commit_one?: Maybe<Ai_Blame_Commit>;
   /** insert data into the table: "ai_blame_inference" */
@@ -18573,6 +19170,10 @@ export type Mutation_Root = {
   insert_fix_to_submit_fix_request?: Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>;
   /** insert a single row into the table: "fix_to_submit_fix_request" */
   insert_fix_to_submit_fix_request_one?: Maybe<Fix_To_Submit_Fix_Request>;
+  /** insert data into the table: "git_identity" */
+  insert_git_identity?: Maybe<Git_Identity_Mutation_Response>;
+  /** insert a single row into the table: "git_identity" */
+  insert_git_identity_one?: Maybe<Git_Identity>;
   /** insert data into the table: "github_app" */
   insert_github_app?: Maybe<Github_App_Mutation_Response>;
   /** insert a single row into the table: "github_app" */
@@ -18833,6 +19434,12 @@ export type Mutation_Root = {
   update_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
   /** update single row of the table: "ai_blame_commit" */
   update_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** update data of the table: "ai_blame_commit_co_author" */
+  update_ai_blame_commit_co_author?: Maybe<Ai_Blame_Commit_Co_Author_Mutation_Response>;
+  /** update single row of the table: "ai_blame_commit_co_author" */
+  update_ai_blame_commit_co_author_by_pk?: Maybe<Ai_Blame_Commit_Co_Author>;
+  /** update multiples rows of table: "ai_blame_commit_co_author" */
+  update_ai_blame_commit_co_author_many?: Maybe<Array<Maybe<Ai_Blame_Commit_Co_Author_Mutation_Response>>>;
   /** update multiples rows of table: "ai_blame_commit" */
   update_ai_blame_commit_many?: Maybe<Array<Maybe<Ai_Blame_Commit_Mutation_Response>>>;
   /** update data of the table: "ai_blame_inference" */
@@ -19093,6 +19700,12 @@ export type Mutation_Root = {
   update_fix_to_submit_fix_request_by_pk?: Maybe<Fix_To_Submit_Fix_Request>;
   /** update multiples rows of table: "fix_to_submit_fix_request" */
   update_fix_to_submit_fix_request_many?: Maybe<Array<Maybe<Fix_To_Submit_Fix_Request_Mutation_Response>>>;
+  /** update data of the table: "git_identity" */
+  update_git_identity?: Maybe<Git_Identity_Mutation_Response>;
+  /** update single row of the table: "git_identity" */
+  update_git_identity_by_pk?: Maybe<Git_Identity>;
+  /** update multiples rows of table: "git_identity" */
+  update_git_identity_many?: Maybe<Array<Maybe<Git_Identity_Mutation_Response>>>;
   /** update data of the table: "github_app" */
   update_github_app?: Maybe<Github_App_Mutation_Response>;
   /** update single row of the table: "github_app" */
@@ -19446,6 +20059,9 @@ export type Mutation_RootAddUsersToProjectArgs = {
 
 /** mutation root */
 export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
+  commitAuthor?: InputMaybe<GitIdentityInput>;
+  commitCoAuthors?: InputMaybe<Array<GitIdentityInput>>;
+  commitCommitter?: InputMaybe<GitIdentityInput>;
   commitSha: Scalars['String']['input'];
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
   organizationId: Scalars['String']['input'];
@@ -19613,6 +20229,19 @@ export type Mutation_RootDelete_Ai_Blame_CommitArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Ai_Blame_Commit_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Commit_Co_AuthorArgs = {
+  where: Ai_Blame_Commit_Co_Author_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Commit_Co_Author_By_PkArgs = {
+  aiBlameCommitId: Scalars['uuid']['input'];
+  gitIdentityId: Scalars['uuid']['input'];
 };
 
 
@@ -20128,6 +20757,18 @@ export type Mutation_RootDelete_Fix_To_Submit_Fix_RequestArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Fix_To_Submit_Fix_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Git_IdentityArgs = {
+  where: Git_Identity_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Git_Identity_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -20855,6 +21496,20 @@ export type Mutation_RootInsert_Ai_Blame_CommitArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Commit_Co_AuthorArgs = {
+  objects: Array<Ai_Blame_Commit_Co_Author_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_Co_Author_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Commit_Co_Author_OneArgs = {
+  object: Ai_Blame_Commit_Co_Author_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_Co_Author_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Ai_Blame_Commit_OneArgs = {
   object: Ai_Blame_Commit_Insert_Input;
   on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
@@ -21460,6 +22115,20 @@ export type Mutation_RootInsert_Fix_To_Submit_Fix_RequestArgs = {
 export type Mutation_RootInsert_Fix_To_Submit_Fix_Request_OneArgs = {
   object: Fix_To_Submit_Fix_Request_Insert_Input;
   on_conflict?: InputMaybe<Fix_To_Submit_Fix_Request_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Git_IdentityArgs = {
+  objects: Array<Git_Identity_Insert_Input>;
+  on_conflict?: InputMaybe<Git_Identity_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Git_Identity_OneArgs = {
+  object: Git_Identity_Insert_Input;
+  on_conflict?: InputMaybe<Git_Identity_On_Conflict>;
 };
 
 
@@ -22459,6 +23128,26 @@ export type Mutation_RootUpdate_Ai_Blame_Commit_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Co_AuthorArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Co_Author_Set_Input>;
+  where: Ai_Blame_Commit_Co_Author_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Co_Author_By_PkArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Co_Author_Set_Input>;
+  pk_columns: Ai_Blame_Commit_Co_Author_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Co_Author_ManyArgs = {
+  updates: Array<Ai_Blame_Commit_Co_Author_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Ai_Blame_Commit_ManyArgs = {
   updates: Array<Ai_Blame_Commit_Updates>;
 };
@@ -23359,6 +24048,26 @@ export type Mutation_RootUpdate_Fix_To_Submit_Fix_Request_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Fix_To_Submit_Fix_Request_ManyArgs = {
   updates: Array<Fix_To_Submit_Fix_Request_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Git_IdentityArgs = {
+  _set?: InputMaybe<Git_Identity_Set_Input>;
+  where: Git_Identity_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Git_Identity_By_PkArgs = {
+  _set?: InputMaybe<Git_Identity_Set_Input>;
+  pk_columns: Git_Identity_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Git_Identity_ManyArgs = {
+  updates: Array<Git_Identity_Updates>;
 };
 
 
@@ -24793,6 +25502,7 @@ export type Organization = {
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
   developersStats: GetDeveloperStatisticsResponse;
+  disablePrSessionSummary: Scalars['Boolean']['output'];
   /** This is a deprecated field it should be deleted */
   enableIssueFilter: Scalars['Boolean']['output'];
   /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
@@ -25361,6 +26071,7 @@ export type Organization_Bool_Exp = {
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Bool_Exp>;
   brokerTokenExpiryInDays?: InputMaybe<Int_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  disablePrSessionSummary?: InputMaybe<Boolean_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
   ghFixerNoFixComments?: InputMaybe<Boolean_Comparison_Exp>;
   githubApps?: InputMaybe<Github_App_Bool_Exp>;
@@ -25825,6 +26536,7 @@ export type Organization_Insert_Input = {
   brokerHosts?: InputMaybe<Broker_Host_Arr_Rel_Insert_Input>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
@@ -26190,6 +26902,7 @@ export type Organization_Order_By = {
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Order_By>;
   brokerTokenExpiryInDays?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
+  disablePrSessionSummary?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
   ghFixerNoFixComments?: InputMaybe<Order_By>;
   githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Order_By>;
@@ -26813,6 +27526,8 @@ export enum Organization_Select_Column {
   /** column name */
   CreatedOn = 'createdOn',
   /** column name */
+  DisablePrSessionSummary = 'disablePrSessionSummary',
+  /** column name */
   EnableIssueFilter = 'enableIssueFilter',
   /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
@@ -26858,6 +27573,7 @@ export type Organization_Set_Input = {
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
@@ -26979,6 +27695,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
@@ -27500,6 +28217,8 @@ export enum Organization_Update_Column {
   BrokerTokenExpiryInDays = 'brokerTokenExpiryInDays',
   /** column name */
   CreatedOn = 'createdOn',
+  /** column name */
+  DisablePrSessionSummary = 'disablePrSessionSummary',
   /** column name */
   EnableIssueFilter = 'enableIssueFilter',
   /** column name */
@@ -29641,6 +30360,12 @@ export type Query_Root = {
   ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
   /** fetch data from the table: "ai_blame_commit" using primary key columns */
   ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** fetch data from the table: "ai_blame_commit_co_author" */
+  ai_blame_commit_co_author: Array<Ai_Blame_Commit_Co_Author>;
+  /** fetch aggregated fields from the table: "ai_blame_commit_co_author" */
+  ai_blame_commit_co_author_aggregate: Ai_Blame_Commit_Co_Author_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_co_author" using primary key columns */
+  ai_blame_commit_co_author_by_pk?: Maybe<Ai_Blame_Commit_Co_Author>;
   /** fetch data from the table: "ai_blame_inference" */
   ai_blame_inference: Array<Ai_Blame_Inference>;
   /** fetch aggregated fields from the table: "ai_blame_inference" */
@@ -29977,6 +30702,12 @@ export type Query_Root = {
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
   gitReference?: Maybe<GitReferenceResponse>;
+  /** fetch data from the table: "git_identity" */
+  git_identity: Array<Git_Identity>;
+  /** fetch aggregated fields from the table: "git_identity" */
+  git_identity_aggregate: Git_Identity_Aggregate;
+  /** fetch data from the table: "git_identity" using primary key columns */
+  git_identity_by_pk?: Maybe<Git_Identity>;
   githubWebhookHealth: Scalars['String']['output'];
   /** fetch data from the table: "github_app" */
   github_app: Array<Github_App>;
@@ -30510,6 +31241,30 @@ export type Query_RootAi_Blame_Commit_AggregateArgs = {
 
 export type Query_RootAi_Blame_Commit_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAi_Blame_Commit_Co_AuthorArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_Co_Author_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_Co_Author_By_PkArgs = {
+  aiBlameCommitId: Scalars['uuid']['input'];
+  gitIdentityId: Scalars['uuid']['input'];
 };
 
 
@@ -31763,6 +32518,29 @@ export type Query_RootGet_Vulnerability_Report_Issues_For_User_AggregateArgs = {
 export type Query_RootGitReferenceArgs = {
   reference: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
+};
+
+
+export type Query_RootGit_IdentityArgs = {
+  distinct_on?: InputMaybe<Array<Git_Identity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Git_Identity_Order_By>>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+
+export type Query_RootGit_Identity_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Git_Identity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Git_Identity_Order_By>>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+
+export type Query_RootGit_Identity_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -35984,6 +36762,14 @@ export type Subscription_Root = {
   ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
   /** fetch data from the table: "ai_blame_commit" using primary key columns */
   ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
+  /** fetch data from the table: "ai_blame_commit_co_author" */
+  ai_blame_commit_co_author: Array<Ai_Blame_Commit_Co_Author>;
+  /** fetch aggregated fields from the table: "ai_blame_commit_co_author" */
+  ai_blame_commit_co_author_aggregate: Ai_Blame_Commit_Co_Author_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_co_author" using primary key columns */
+  ai_blame_commit_co_author_by_pk?: Maybe<Ai_Blame_Commit_Co_Author>;
+  /** fetch data from the table in a streaming manner: "ai_blame_commit_co_author" */
+  ai_blame_commit_co_author_stream: Array<Ai_Blame_Commit_Co_Author>;
   /** fetch data from the table in a streaming manner: "ai_blame_commit" */
   ai_blame_commit_stream: Array<Ai_Blame_Commit>;
   /** fetch data from the table: "ai_blame_inference" */
@@ -36352,6 +37138,14 @@ export type Subscription_Root = {
   get_vulnerability_report_issues_for_user: Array<Vulnerability_Report_Issue>;
   /** execute function "get_vulnerability_report_issues_for_user" and query aggregates on result of table type "vulnerability_report_issue" */
   get_vulnerability_report_issues_for_user_aggregate: Vulnerability_Report_Issue_Aggregate;
+  /** fetch data from the table: "git_identity" */
+  git_identity: Array<Git_Identity>;
+  /** fetch aggregated fields from the table: "git_identity" */
+  git_identity_aggregate: Git_Identity_Aggregate;
+  /** fetch data from the table: "git_identity" using primary key columns */
+  git_identity_by_pk?: Maybe<Git_Identity>;
+  /** fetch data from the table in a streaming manner: "git_identity" */
+  git_identity_stream: Array<Git_Identity>;
   /** fetch data from the table: "github_app" */
   github_app: Array<Github_App>;
   /** fetch aggregated fields from the table: "github_app" */
@@ -37045,6 +37839,37 @@ export type Subscription_RootAi_Blame_Commit_AggregateArgs = {
 
 export type Subscription_RootAi_Blame_Commit_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Co_AuthorArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Co_Author_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Co_Author_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Co_Author_By_PkArgs = {
+  aiBlameCommitId: Scalars['uuid']['input'];
+  gitIdentityId: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Co_Author_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Commit_Co_Author_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Commit_Co_Author_Bool_Exp>;
 };
 
 
@@ -38447,6 +39272,36 @@ export type Subscription_RootGet_Vulnerability_Report_Issues_For_User_AggregateA
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Order_By>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+};
+
+
+export type Subscription_RootGit_IdentityArgs = {
+  distinct_on?: InputMaybe<Array<Git_Identity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Git_Identity_Order_By>>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+
+export type Subscription_RootGit_Identity_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Git_Identity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Git_Identity_Order_By>>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
+};
+
+
+export type Subscription_RootGit_Identity_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootGit_Identity_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Git_Identity_Stream_Cursor_Input>>;
+  where?: InputMaybe<Git_Identity_Bool_Exp>;
 };
 
 
@@ -49498,6 +50353,9 @@ export type AnalyzeCommitForExtensionAiBlameMutationVariables = Exact<{
   commitSha: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
   commitTimestamp?: InputMaybe<Scalars['Timestamp']['input']>;
+  commitAuthor?: InputMaybe<GitIdentityInput>;
+  commitCommitter?: InputMaybe<GitIdentityInput>;
+  commitCoAuthors?: InputMaybe<Array<GitIdentityInput> | GitIdentityInput>;
 }>;
 
 
@@ -50123,12 +50981,15 @@ export const GetTracyDiffUploadUrlDocument = `
 }
     `;
 export const AnalyzeCommitForExtensionAiBlameDocument = `
-    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitTimestamp: Timestamp) {
+    mutation AnalyzeCommitForExtensionAIBlame($repositoryURL: String!, $commitSha: String!, $organizationId: String!, $commitTimestamp: Timestamp, $commitAuthor: GitIdentityInput, $commitCommitter: GitIdentityInput, $commitCoAuthors: [GitIdentityInput!]) {
   analyzeCommitForAIBlame(
     repositoryURL: $repositoryURL
     commitSha: $commitSha
     organizationId: $organizationId
     commitTimestamp: $commitTimestamp
+    commitAuthor: $commitAuthor
+    commitCommitter: $commitCommitter
+    commitCoAuthors: $commitCoAuthors
   ) {
     __typename
     ... on ProcessAIBlameFinalResult {

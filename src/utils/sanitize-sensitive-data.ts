@@ -4,7 +4,8 @@ import { OpenRedaction } from '@openredaction/openredaction'
 const openRedaction = new OpenRedaction({
   patterns: [
     // Core Personal Data
-    'EMAIL',
+    // Removed EMAIL - causes false positives in code/test snippets (e.g. --author="Eve Author <eve@example.com>")
+    // Prefer false negatives over false positives for this use case.
     'SSN',
     'NATIONAL_INSURANCE_UK',
     'DATE_OF_BIRTH',
@@ -21,7 +22,8 @@ const openRedaction = new OpenRedaction({
     'TAX_ID',
 
     // Financial Data (removed SWIFT_BIC, CARD_AUTH_CODE - too broad, causing false positives with authentication words)
-    'CREDIT_CARD',
+    // Removed CREDIT_CARD - causes false positives on zero-filled UUIDs (e.g. '00000000-0000-0000-0000-000000000000')
+    // Prefer false negatives over false positives for this use case.
     'IBAN',
     'BANK_ACCOUNT_UK',
     'ROUTING_NUMBER_US',
@@ -141,25 +143,6 @@ export async function sanitizeDataWithCounts(
 
       // Count PII and secrets by severity and sanitize
       for (const detection of allDetections) {
-        // Skip CREDIT_CARD detections that are part of a larger numeric sequence.
-        // Digits after a decimal point (e.g. 0.3609268882098645) or embedded in
-        // longer numbers can pass Luhn validation and get incorrectly flagged.
-        // Uses detection.position from OpenRedaction for exact location instead of
-        // indexOf(), which would only find the first occurrence.
-        if (detection.type === 'CREDIT_CARD') {
-          const start = detection.position[0]
-          const end = detection.position[1]
-          const charBefore = (start > 0 ? str[start - 1] : '') ?? ''
-          const charAfter = str[end] ?? ''
-          if (
-            charBefore === '.' ||
-            (charBefore >= '0' && charBefore <= '9') ||
-            (charAfter >= '0' && charAfter <= '9')
-          ) {
-            continue
-          }
-        }
-
         counts.detections.total++
         if (detection.severity === 'high') counts.detections.high++
         else if (detection.severity === 'medium') counts.detections.medium++

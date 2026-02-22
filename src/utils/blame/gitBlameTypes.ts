@@ -213,13 +213,90 @@ export const CommitInfoZ = z.object({
 export type CommitInfo = z.infer<typeof CommitInfoZ>
 
 /**
+ * Git identity: name + email pair.
+ * Used for author, committer, and co-authors.
+ */
+export const GitIdentityZ = z.object({
+  name: z.string(),
+  email: z.string(),
+})
+
+export type GitIdentity = z.infer<typeof GitIdentityZ>
+
+/** Well-known UUID for the "unknown" git identity (no author/committer metadata). */
+export const UNKNOWN_GIT_IDENTITY_ID = '00000000-0000-0000-0000-000000000000'
+
+/** Placeholder identity used when author/committer metadata is unavailable. */
+export const UNKNOWN_GIT_IDENTITY: GitIdentity = {
+  name: 'unknown',
+  email: 'unknown',
+}
+
+/**
+ * Parses a "Name <email>" co-author value into a GitIdentity.
+ * Returns null if the format is invalid.
+ */
+export function parseCoAuthorValue(raw: string): GitIdentity | null {
+  const trimmed = raw.trim()
+  if (!trimmed) {
+    return null
+  }
+  const openBracket = trimmed.lastIndexOf('<')
+  const closeBracket = trimmed.lastIndexOf('>')
+  if (openBracket === -1 || closeBracket === -1 || closeBracket < openBracket) {
+    return null
+  }
+  const name = trimmed.slice(0, openBracket).trim()
+  const email = trimmed.slice(openBracket + 1, closeBracket).trim()
+  if (!name || !email) {
+    return null
+  }
+  return { name, email }
+}
+
+export type DiscoveredCommit = {
+  sha: string
+  author: GitIdentity
+  committer: GitIdentity
+  coAuthors: GitIdentity[]
+  timestamp: number
+  message: string
+}
+
+// NUL (%x00) is used as the universal field separator — it cannot appear
+// in any git metadata.  Co-author trailers also use NUL as their separator,
+// so they naturally extend the parts array after the fixed fields.
+// Indices: 0=SHA, 1=ae, 2=an, 3=ce, 4=cn, 5=at, 6=subject, 7+=co-authors
+export const COMMIT_LOG_FORMAT =
+  '%H%x00%ae%x00%an%x00%ce%x00%cn%x00%at%x00%s%x00%(trailers:key=Co-authored-by,valueonly,separator=%x00)'
+
+export function parseCommitLine(line: string): DiscoveredCommit | null {
+  const parts = line.split('\0')
+  if (parts.length < 7) {
+    return null
+  }
+  return {
+    sha: parts[0]!,
+    author: { name: parts[2]!, email: parts[1]! },
+    committer: { name: parts[4]!, email: parts[3]! },
+    coAuthors: parts
+      .slice(7)
+      .map(parseCoAuthorValue)
+      .filter((v): v is GitIdentity => v !== null),
+    timestamp: parseInt(parts[5]!, 10),
+    message: parts[6]!,
+  }
+}
+
+/**
  * Commit-level data stored in S3 at commits/{commitSha}.json.
  * Shared across PR and single-commit analyses.
  */
 export const CommitDataZ = z.object({
   diff: z.string(),
-  authorEmail: z.string().optional(),
-  authorName: z.string().optional(),
+  author: GitIdentityZ,
+  committer: GitIdentityZ,
+  coAuthors: z.array(GitIdentityZ),
   timestamp: z.number(), // Unix timestamp in seconds
   message: z.string().optional(),
   parentCount: z.number().nullable(),

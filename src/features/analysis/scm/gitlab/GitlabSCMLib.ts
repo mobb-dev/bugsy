@@ -280,6 +280,10 @@ export class GitlabSCMLib extends SCMLib {
     }
   }
 
+  async getPrFiles(_prNumber: number): Promise<string[]> {
+    throw new Error('getPrFiles not implemented for GitLab')
+  }
+
   override async searchSubmitRequests(
     params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {

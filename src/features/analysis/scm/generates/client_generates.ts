@@ -22994,6 +22994,7 @@ export type Mutation_RootSubmitVulnerabilityReportArgs = {
   reference: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
   scanContext?: InputMaybe<Scalars['String']['input']>;
+  scanOnlyPrFiles?: InputMaybe<Scalars['Boolean']['input']>;
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;

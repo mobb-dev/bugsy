@@ -306,6 +306,10 @@ export class BitbucketSCMLib extends SCMLib {
     throw new Error('getSubmitRequestMetadata not implemented for Bitbucket')
   }
 
+  async getPrFiles(_prNumber: number): Promise<string[]> {
+    throw new Error('getPrFiles not implemented for Bitbucket')
+  }
+
   override async searchSubmitRequests(
     _params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {

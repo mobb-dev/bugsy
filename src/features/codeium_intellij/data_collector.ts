@@ -145,7 +145,10 @@ async function processChat(
 
   if (repoOrigin) {
     const parsed = parseScmURL(repoOrigin)
-    if (parsed?.scmType === ScmType.GitHub) {
+    if (
+      parsed?.scmType === ScmType.GitHub ||
+      parsed?.scmType === ScmType.GitLab
+    ) {
       repositoryUrl = parsed.canonicalUrl
     }
   }

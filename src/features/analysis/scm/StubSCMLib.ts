@@ -136,6 +136,11 @@ export class StubSCMLib extends SCMLib {
     throw new Error('getSubmitRequestMetadata() not implemented')
   }
 
+  async getPrFiles(_prNumber: number): Promise<string[]> {
+    console.warn('getPrFiles() returning empty array')
+    return []
+  }
+
   async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
     console.warn('getPullRequestMetrics() returning empty object')
     throw new Error('getPullRequestMetrics() not implemented')

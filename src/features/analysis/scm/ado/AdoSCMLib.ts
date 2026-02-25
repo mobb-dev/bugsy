@@ -257,6 +257,10 @@ export class AdoSCMLib extends SCMLib {
     throw new Error('getSubmitRequestMetadata not implemented for ADO')
   }
 
+  async getPrFiles(_prNumber: number): Promise<string[]> {
+    throw new Error('getPrFiles not implemented for ADO')
+  }
+
   override async searchSubmitRequests(
     _params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {

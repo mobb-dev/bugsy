@@ -423,6 +423,33 @@ export class GithubSCMLib extends SCMLib {
     }
   }
 
+  async getPrFiles(prNumber: number): Promise<string[]> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+
+    // Fetch files changed in the PR using GitHub API
+    const filesRes = await this.githubSdk.listPRFiles({
+      owner,
+      repo,
+      pull_number: prNumber,
+    })
+
+    // Filter to only include files that were modified, added, or changed
+    // Exclude files that were only removed or renamed without content changes
+    return filesRes.data
+      .filter((file) => {
+        const status = file.status
+        // Include added, modified files, and renamed files that have changes
+        return (
+          status === 'added' ||
+          status === 'modified' ||
+          (status === 'renamed' && file.changes > 0) ||
+          (status === 'copied' && file.changes > 0)
+        )
+      })
+      .map((file) => file.filename)
+  }
+
   /**
    * Override searchSubmitRequests to use GitHub's Search API for efficient pagination.
    * This is much faster than fetching all PRs and filtering in-memory.

@@ -109,6 +109,15 @@ export abstract class SCMLib {
   abstract getRepoDefaultBranch(): Promise<string>
 
   /**
+   * Fetches the list of files changed in a PR/MR.
+   * Used to enable PR-specific scanning that only analyzes changed/new files.
+   *
+   * @param prNumber - Pull request/merge request number
+   * @returns Promise with array of file paths relative to repository root
+   */
+  abstract getPrFiles(prNumber: number): Promise<string[]>
+
+  /**
    * Fetches lightweight PR/MR metadata with a single API call.
    * Returns only the title, branch names, and head commit SHA.
    * Used by the optimized blame analysis flow to avoid fetching full diffs via SCM API.

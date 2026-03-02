@@ -32,6 +32,8 @@ import {
   getSdk,
   GetTracyDiffUploadUrlMutation,
   GetTracyDiffUploadUrlMutationVariables,
+  GetTracyRawDataUploadUrlsMutation,
+  GetTracyRawDataUploadUrlsMutationVariables,
   GitReferenceQueryVariables,
   PrStrategy,
   ScanSkillMutationVariables,
@@ -39,6 +41,8 @@ import {
   SubmitVulnerabilityReportMutationVariables,
   UploadAiBlameInferencesInitMutation,
   UploadAiBlameInferencesInitMutationVariables,
+  UploadTracyRecordsMutation,
+  UploadTracyRecordsMutationVariables,
   ValidateRepoUrlQueryVariables,
 } from '../scm/generates/client_generates'
 import {
@@ -67,12 +71,6 @@ type GQLClientArgs = GQLClientAuthArgs & {
   /** Optional API URL. If not provided, uses DEFAULT_API_URL from constants or process.env */
   apiUrl?: string
 }
-
-export {
-  fetchWithProxy,
-  getProxyAgent,
-  httpToWsUrl,
-} from '../../../utils/proxy'
 
 export class GQLClient {
   _client: GraphQLClient
@@ -630,6 +628,18 @@ export class GQLClient {
     variables: FinalizeAiBlameInferencesUploadMutationVariables
   ): Promise<FinalizeAiBlameInferencesUploadMutation> {
     return await this._clientSdk.FinalizeAIBlameInferencesUpload(variables)
+  }
+
+  async uploadTracyRecords(
+    variables: UploadTracyRecordsMutationVariables
+  ): Promise<UploadTracyRecordsMutation> {
+    return await this._clientSdk.UploadTracyRecords(variables)
+  }
+
+  async getTracyRawDataUploadUrls(
+    variables: GetTracyRawDataUploadUrlsMutationVariables
+  ): Promise<GetTracyRawDataUploadUrlsMutation> {
+    return await this._clientSdk.GetTracyRawDataUploadUrls(variables)
   }
 
   async analyzeCommitForExtensionAIBlame(

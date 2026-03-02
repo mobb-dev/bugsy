@@ -49,8 +49,7 @@ export function getProxyAgent(url: string) {
     const proxy = isHttps ? getHttpProxy() : isHttp ? getHttpProxyOnly() : null
 
     if (proxy) {
-      debug('Using proxy %s', proxy)
-      debug('Proxy agent %o', proxy)
+      debug('Using proxy %s for %s', proxy, url)
       // IMPORTANT:
       // Use HttpsProxyAgent for both HTTP and HTTPS targets.
       // HttpProxyAgent does not tunnel via CONNECT, which breaks WebSocket upgrades

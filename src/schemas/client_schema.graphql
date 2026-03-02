@@ -334,6 +334,18 @@ enum AIBlameInferenceType {
   HUMAN_EDIT
 }
 
+enum InferencePlatform {
+  CURSOR
+  COPILOT
+  CLAUDE_CODE
+  WINDSURF
+}
+
+enum EditType {
+  HUMAN_EDIT
+  TAB_AUTOCOMPLETE
+}
+
 input AIBlameInferenceFinalizeInput {
   aiBlameInferenceId: String!
   promptKey: String!
@@ -476,6 +488,60 @@ mutation FinalizeAIBlameInferencesUpload(
   finalizeAIBlameInferencesUpload(sessions: $sessions) {
     status
     error
+  }
+}
+
+input TracyRecordInput {
+  platform: InferencePlatform!
+  recordId: String!
+  recordTimestamp: Timestamp!
+  clientVersion: String!
+  repositoryUrl: String
+  computerName: String
+  userName: String
+  blameType: AIBlameInferenceType
+  rawData: String
+  rawDataS3Key: String
+  editType: EditType
+  filePath: String
+  additions: String
+}
+
+type TracyBatchUploadResponse {
+  status: Status!
+  error: String
+}
+
+type TracyRawDataUploadInfo {
+  recordId: String!
+  url: String!
+  uploadFieldsJSON: String!
+  uploadKey: String!
+}
+
+type TracyRawDataUploadResponse {
+  status: Status!
+  error: String
+  uploads: [TracyRawDataUploadInfo!]!
+}
+
+mutation UploadTracyRecords($records: [TracyRecordInput!]!) {
+  uploadTracyRecords(records: $records) {
+    status
+    error
+  }
+}
+
+mutation GetTracyRawDataUploadUrls($recordIds: [String!]!) {
+  getTracyRawDataUploadUrls(recordIds: $recordIds) {
+    status
+    error
+    uploads {
+      recordId
+      url
+      uploadFieldsJSON
+      uploadKey
+    }
   }
 }
 

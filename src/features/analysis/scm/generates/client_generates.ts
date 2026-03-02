@@ -1488,11 +1488,32 @@ export type TicketAccessToken = {
   accessToken: Scalars['String']['output'];
 };
 
+export type TracyBatchUploadResponse = {
+  __typename?: 'TracyBatchUploadResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
 export type TracyDiffUploadInfo = {
   __typename?: 'TracyDiffUploadInfo';
   uploadFieldsJSON: Scalars['String']['output'];
   uploadKey: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type TracyRawDataUploadInfo = {
+  __typename?: 'TracyRawDataUploadInfo';
+  recordId: Scalars['String']['output'];
+  uploadFieldsJSON: Scalars['String']['output'];
+  uploadKey: Scalars['String']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type TracyRawDataUploadResponse = {
+  __typename?: 'TracyRawDataUploadResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+  uploads: Array<TracyRawDataUploadInfo>;
 };
 
 export type TracyRecordInput = {
@@ -1506,16 +1527,15 @@ export type TracyRecordInput = {
   filePath?: InputMaybe<Scalars['String']['input']>;
   platform: InferencePlatform;
   rawData?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * S3 key for large rawData blobs. Mutually exclusive with rawData.
+   * Used when rawData exceeds the payload size limit (~4MB).
+   */
+  rawDataS3Key?: InputMaybe<Scalars['String']['input']>;
   recordId: Scalars['String']['input'];
   recordTimestamp: Scalars['Timestamp']['input'];
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type TracyUploadResponse = {
-  __typename?: 'TracyUploadResponse';
-  accepted: Scalars['Boolean']['output'];
-  error?: Maybe<Scalars['String']['output']>;
 };
 
 export type TriggerBackfillResult = {
@@ -18982,6 +19002,11 @@ export type Mutation_Root = {
    * This avoids sending large diffs through the GraphQL payload.
    */
   getTracyDiffUploadUrl: GetTracyDiffUploadUrlResponse;
+  /**
+   * Get presigned S3 URLs for uploading large rawData blobs.
+   * Call this before uploadTracyRecords when any record's rawData exceeds ~3MB.
+   */
+  getTracyRawDataUploadUrls: TracyRawDataUploadResponse;
   handleGithubAppCallback: BaseResponseWithMessage;
   handleGithubWebhook: GithubWebhookResponse;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
@@ -20031,10 +20056,10 @@ export type Mutation_Root = {
   uploadAIBlameInferencesInit: UploadAiBlameInferencesResponse;
   uploadS3BucketInfo: UploadResponse;
   /**
-   * Upload a Tracy record (raw inference or edit). Processing is async via RabbitMQ.
-   * Returns accepted:true immediately if queued successfully.
+   * Upload Tracy records (raw inference or edit) in batch. Processing is async via RabbitMQ.
+   * Returns status OK if all records were enqueued, or ERROR with details of failed records.
    */
-  uploadTracyRecord: TracyUploadResponse;
+  uploadTracyRecords: TracyBatchUploadResponse;
   userSignedUp?: Maybe<StatusQueryResponse>;
   voteOnFix?: Maybe<VoteOnFixResponse>;
 };
@@ -21451,6 +21476,12 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 /** mutation root */
 export type Mutation_RootGetTracyDiffUploadUrlArgs = {
   commitSha: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootGetTracyRawDataUploadUrlsArgs = {
+  recordIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -25201,8 +25232,8 @@ export type Mutation_RootUploadS3BucketInfoArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUploadTracyRecordArgs = {
-  record: TracyRecordInput;
+export type Mutation_RootUploadTracyRecordsArgs = {
+  records: Array<TracyRecordInput>;
 };
 
 
@@ -50397,6 +50428,20 @@ export type FinalizeAiBlameInferencesUploadMutationVariables = Exact<{
 
 export type FinalizeAiBlameInferencesUploadMutation = { __typename?: 'mutation_root', finalizeAIBlameInferencesUpload: { __typename?: 'AIBlameValidationResponse', status: Status, error?: string | null } };
 
+export type UploadTracyRecordsMutationVariables = Exact<{
+  records: Array<TracyRecordInput> | TracyRecordInput;
+}>;
+
+
+export type UploadTracyRecordsMutation = { __typename?: 'mutation_root', uploadTracyRecords: { __typename?: 'TracyBatchUploadResponse', status: Status, error?: string | null } };
+
+export type GetTracyRawDataUploadUrlsMutationVariables = Exact<{
+  recordIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GetTracyRawDataUploadUrlsMutation = { __typename?: 'mutation_root', getTracyRawDataUploadUrls: { __typename?: 'TracyRawDataUploadResponse', status: Status, error?: string | null, uploads: Array<{ __typename?: 'TracyRawDataUploadInfo', recordId: string, url: string, uploadFieldsJSON: string, uploadKey: string }> } };
+
 export type DigestVulnerabilityReportMutationVariables = Exact<{
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
@@ -51095,6 +51140,28 @@ export const FinalizeAiBlameInferencesUploadDocument = `
   }
 }
     `;
+export const UploadTracyRecordsDocument = `
+    mutation UploadTracyRecords($records: [TracyRecordInput!]!) {
+  uploadTracyRecords(records: $records) {
+    status
+    error
+  }
+}
+    `;
+export const GetTracyRawDataUploadUrlsDocument = `
+    mutation GetTracyRawDataUploadUrls($recordIds: [String!]!) {
+  getTracyRawDataUploadUrls(recordIds: $recordIds) {
+    status
+    error
+    uploads {
+      recordId
+      url
+      uploadFieldsJSON
+      uploadKey
+    }
+  }
+}
+    `;
 export const DigestVulnerabilityReportDocument = `
     mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String) {
   digestVulnerabilityReport(
@@ -51431,6 +51498,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     FinalizeAIBlameInferencesUpload(variables: FinalizeAiBlameInferencesUploadMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<FinalizeAiBlameInferencesUploadMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<FinalizeAiBlameInferencesUploadMutation>({ document: FinalizeAiBlameInferencesUploadDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'FinalizeAIBlameInferencesUpload', 'mutation', variables);
+    },
+    UploadTracyRecords(variables: UploadTracyRecordsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadTracyRecordsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UploadTracyRecordsMutation>({ document: UploadTracyRecordsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UploadTracyRecords', 'mutation', variables);
+    },
+    GetTracyRawDataUploadUrls(variables: GetTracyRawDataUploadUrlsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTracyRawDataUploadUrlsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTracyRawDataUploadUrlsMutation>({ document: GetTracyRawDataUploadUrlsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTracyRawDataUploadUrls', 'mutation', variables);
     },
     DigestVulnerabilityReport(variables: DigestVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DigestVulnerabilityReportMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DigestVulnerabilityReportMutation>({ document: DigestVulnerabilityReportDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DigestVulnerabilityReport', 'mutation', variables);

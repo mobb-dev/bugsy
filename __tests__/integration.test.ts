@@ -17,8 +17,7 @@ import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import * as openExport from 'open'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as commandsExports from '../src/commands'
 import { PROJECT_PAGE_REGEX } from '../src/constants'
@@ -27,6 +26,8 @@ import * as ourPackModule from '../src/features/analysis/pack'
 import { pack } from '../src/features/analysis/pack'
 import {
   analysisRegex,
+  createOpenMockImplementation,
+  createSnykMockImplementation,
   fixMessageContent,
   GITHUB_FIXER_REPO_FIXABLE_IRRELEVANT_AUTO_GENERATED_CODE_ISSUE,
   GITHUB_FIXER_REPO_FIXABLE_IRRELEVANT_AUXILIARY_CODE_ISSUE,
@@ -45,7 +46,6 @@ vi.useFakeTimers({
   shouldAdvanceTime: true,
 })
 
-const mockedOpen = vi.spyOn(openExport, 'default')
 const expectAnalysisUrlLogged = (consoleMock: {
   mock: { calls: unknown[][] }
 }) => {
@@ -55,23 +55,36 @@ const expectAnalysisUrlLogged = (consoleMock: {
   expect(hasMatch).toBe(true)
 }
 
-vi.mock('open', async () => {
-  const { createOpenMockImplementation } =
-    await import('./integration-test-utils')
+// NOTE: Do NOT use `await import('./integration-test-utils')` inside vi.mock()
+// factories. vitest hoists vi.mock() calls above all imports, so a dynamic
+// import of a module that is also statically imported creates a circular
+// module-resolution deadlock that causes vitest to hang silently.
+const { _createOpenMock, _createSnykMock } = vi.hoisted(() => {
   return {
-    default: vi.fn().mockImplementation(createOpenMockImplementation()),
+    _createOpenMock: vi.fn(),
+    _createSnykMock: vi.fn(),
   }
 })
 
-vi.mock('../src/features/analysis/scanners/snyk', async () => {
-  const { createSnykMockImplementation } =
-    await import('./integration-test-utils')
-  return {
-    getSnykReport: vi.fn().mockImplementation(createSnykMockImplementation()),
-  }
-})
+vi.mock('open', () => ({
+  default: _createOpenMock,
+}))
+
+vi.mock('../src/features/analysis/scanners/snyk', () => ({
+  getSnykReport: _createSnykMock,
+}))
 
 setupCommonBeforeEach()
+
+// Re-apply mock implementations in beforeEach AFTER clearAllMocks().
+// vi.clearAllMocks() resets all mock state including implementations,
+// so we must re-wire them each test.
+const _openMockImpl = createOpenMockImplementation()
+const _snykMockImpl = createSnykMockImplementation()
+beforeEach(() => {
+  _createOpenMock.mockImplementation(_openMockImpl)
+  _createSnykMock.mockImplementation(_snykMockImpl)
+})
 
 it('test manifest files are included in zip upload', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mobb-cli-test-pack'))
@@ -105,7 +118,7 @@ it('test manifest files are included in zip upload', async () => {
 
 describe('Basic Analyze tests', () => {
   it('Full analyze flow', async () => {
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
     const httpsProxyAgentConnectSpy = vi.spyOn(
       HttpsProxyAgent.prototype,
       'connect'
@@ -142,12 +155,14 @@ describe('Basic Analyze tests', () => {
         prStrategy: 'SPREAD',
       })
     )
-    expect(mockedOpen).toHaveBeenCalledTimes(2)
-    expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+    expect(_createOpenMock).toHaveBeenCalledTimes(2)
+    expect(_createOpenMock).toBeCalledWith(
+      expect.stringMatching(PROJECT_PAGE_REGEX)
+    )
   })
 
   it('add-scm-token good token', async () => {
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
     const addScmTokenSpy = vi.spyOn(commandsExports, 'addScmToken')
     await commandsExports.addScmToken({
       token: TEST_GITHUB_TOKEN,
@@ -164,7 +179,7 @@ describe('Basic Analyze tests', () => {
   })
 
   it('add-scm-token bad token', async () => {
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
     await expect(
       commandsExports.addScmToken({
         token: 'bad-token',
@@ -179,7 +194,7 @@ describe('Basic Analyze tests', () => {
   })
 
   it('add-scm-token bad cloud url', async () => {
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
     await expect(
       commandsExports.addScmToken({
         token: TEST_GITHUB_TOKEN,
@@ -198,7 +213,7 @@ describe('Basic Analyze tests', () => {
     async (srcPath) => {
       const packSpy = vi.spyOn(ourPackModule, 'pack')
       const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
-      mockedOpen.mockClear()
+      _createOpenMock.mockClear()
       await analysisExports.runAnalysis(
         {
           repo: 'https://bitbucket.com/a/b',
@@ -212,9 +227,9 @@ describe('Basic Analyze tests', () => {
         },
         { skipPrompts: true }
       )
-      expect(mockedOpen).toHaveBeenCalledTimes(2)
+      expect(_createOpenMock).toHaveBeenCalledTimes(2)
       expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
-      expect(mockedOpen).toBeCalledWith(
+      expect(_createOpenMock).toBeCalledWith(
         expect.stringMatching(PROJECT_PAGE_REGEX)
       )
       // ensure that we filter only relevant files
@@ -227,7 +242,7 @@ describe('Basic Analyze tests', () => {
   it('Direct repo upload from FPR file', async () => {
     const packSpy = vi.spyOn(ourPackModule, 'repackFpr')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
     await analysisExports.runAnalysis(
       {
         repo: 'https://bitbucket.com/a/b',
@@ -241,9 +256,11 @@ describe('Basic Analyze tests', () => {
       },
       { skipPrompts: true }
     )
-    expect(mockedOpen).toHaveBeenCalledTimes(2)
+    expect(_createOpenMock).toHaveBeenCalledTimes(2)
     expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
-    expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+    expect(_createOpenMock).toBeCalledWith(
+      expect.stringMatching(PROJECT_PAGE_REGEX)
+    )
     // ensure that we filter only relevant files
     const packedResult = await packSpy.mock.results[0]?.value
     const uploadedRepoZip = new AdmZip(Buffer.from(packedResult))
@@ -1018,7 +1035,6 @@ describe('create-one-pr flag tests', () => {
   it('should successfully run analysis with create-one-pr and auto-pr in non-CI mode', async () => {
     const consoleMock = vi.spyOn(console, 'log')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')
-    const mockedOpen = vi.spyOn(openExport, 'default')
     await analysisExports.runAnalysis(
       {
         repo: 'https://bitbucket.com/a/b',
@@ -1043,9 +1059,11 @@ describe('create-one-pr flag tests', () => {
         prStrategy: 'CONDENSE',
       })
     )
-    expect(mockedOpen).toHaveBeenCalledTimes(2)
-    expect(mockedOpen).toBeCalledWith(expect.stringMatching(PROJECT_PAGE_REGEX))
+    expect(_createOpenMock).toHaveBeenCalledTimes(2)
+    expect(_createOpenMock).toBeCalledWith(
+      expect.stringMatching(PROJECT_PAGE_REGEX)
+    )
     consoleMock.mockClear()
-    mockedOpen.mockClear()
+    _createOpenMock.mockClear()
   })
 })

@@ -3,7 +3,7 @@ import { Agent } from 'node:http'
 import Debug from 'debug'
 import fetch, { File, fileFrom, FormData } from 'node-fetch'
 
-import { getProxyAgent } from './graphql/gql'
+import { getProxyAgent } from '../../utils/proxy'
 
 const debug = Debug('mobbdev:upload-file')
 

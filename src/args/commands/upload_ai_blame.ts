@@ -110,7 +110,7 @@ type SessionInput = {
  * Gets the normalized GitHub repository URL from the current working directory.
  * Returns null if not in a git repository or if not a GitHub repository.
  */
-async function getRepositoryUrl(): Promise<string | null> {
+export async function getRepositoryUrl(): Promise<string | null> {
   try {
     const gitService = new GitService(process.cwd())
     const isRepo = await gitService.isGitRepository()
@@ -133,7 +133,7 @@ async function getRepositoryUrl(): Promise<string | null> {
  * Works cross-platform (Windows, macOS, Linux).
  * Handles errors gracefully for containerized environments where user info may not be available.
  */
-function getSystemInfo(): {
+export function getSystemInfo(): {
   computerName: string
   userName: string | undefined
 } {

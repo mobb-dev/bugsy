@@ -1,26 +1,28 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { API_URL } from '@mobb/bugsy/constants'
-import {
-  fetchWithProxy,
-  GQLClient,
-} from '@mobb/bugsy/features/analysis/graphql'
+import { GQLClient } from '@mobb/bugsy/features/analysis/graphql'
 import {
   MOBB_ICON_IMG,
   REPORT_DEFAULT_FILE_NAME,
   scmCloudUrl,
   ScmType,
 } from '@mobb/bugsy/features/analysis/scm'
-import { PerformCliLoginDocument } from '@mobb/bugsy/features/analysis/scm/generates/client_generates'
 import * as dotenv from 'dotenv'
-import { beforeEach, expect } from 'vitest'
+import { beforeEach } from 'vitest'
 import { z } from 'zod'
+
+import { AuthManager } from '../src/commands/AuthManager'
 
 // Configure dotenv
 dotenv.config({
   path: path.join(__dirname, '../../../__tests__/.env'),
 })
+
+// Reduce login timeout for integration tests: 30s instead of 10 minutes.
+// This lets each test attempt login but fail fast when the backend is unavailable,
+// instead of hanging for 10 minutes per test in the waitForAuthentication polling loop.
+AuthManager.loginMaxWait = 2 * 60 * 1000
 
 // Fake timers configuration (to be imported by test files)
 
@@ -38,27 +40,18 @@ export const token = z.string().parse(process.env['TOKEN'])
 export const createOpenMockImplementation = () => {
   return async (url: string) => {
     const match = url.match(/\/(cli-login|mvs-login)\/(.*?)\?.*$/)
-    if (match && match.length == 3) {
-      const loginId = match[2]
+    if (!match || match.length !== 3) {
+      return
+    }
+    const loginId = match[2] as string
+    try {
       const gqlClient = new GQLClient({
         token,
         type: 'token',
       })
       await gqlClient.createCommunityUser()
       // Emulate "Authenticate" button click in the Web UI.
-      const performLoginRes = await fetchWithProxy(API_URL, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: PerformCliLoginDocument,
-          variables: {
-            loginId,
-          },
-        }),
-        method: 'POST',
-      })
-      expect(performLoginRes.status).toStrictEqual(200)
+      await gqlClient._clientSdk.performCliLogin({ loginId })
       await gqlClient.updateScmToken({
         scmType: ScmType.GitHub,
         url: scmCloudUrl.GitHub,
@@ -66,6 +59,11 @@ export const createOpenMockImplementation = () => {
         refreshToken: undefined,
         token: TEST_GITHUB_TOKEN,
       })
+    } catch (error) {
+      console.error(
+        '[open mock] login failed:',
+        error instanceof Error ? error.message : String(error)
+      )
     }
   }
 }

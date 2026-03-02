@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import os from 'node:os'
 
+import Debug from 'debug'
 import open from 'open'
 
 import { API_URL, WEB_APP_URL } from '../constants'
@@ -8,6 +9,8 @@ import { GQLClient } from '../features/analysis/graphql'
 import { buildLoginUrl, LoginContext } from '../mcp/services/types'
 import { sleep } from '../utils'
 import { configStore } from '../utils/ConfigStoreService'
+
+const debug = Debug('mobbdev:auth')
 
 export const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
 export const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
@@ -21,6 +24,8 @@ export class AuthManager {
   private authenticated: boolean | null = null
   private resolvedWebAppUrl: string
   private resolvedApiUrl: string
+  /** Maximum time (ms) to wait for login authentication. Override in tests for faster failures. */
+  static loginMaxWait: number = LOGIN_MAX_WAIT
 
   constructor(webAppUrl?: string, apiUrl?: string) {
     this.resolvedWebAppUrl = webAppUrl || WEB_APP_URL
@@ -37,7 +42,7 @@ export class AuthManager {
 
   async waitForAuthentication(): Promise<boolean> {
     let newApiToken = null
-    for (let i = 0; i < LOGIN_MAX_WAIT / LOGIN_CHECK_DELAY; i++) {
+    for (let i = 0; i < AuthManager.loginMaxWait / LOGIN_CHECK_DELAY; i++) {
       newApiToken = await this.getApiToken()
       if (newApiToken) {
         break
@@ -70,6 +75,9 @@ export class AuthManager {
     if (this.authenticated === null) {
       const result = await this.checkAuthentication()
       this.authenticated = result.isAuthenticated
+      if (!result.isAuthenticated) {
+        debug('isAuthenticated: false — %s', result.message)
+      }
     }
     return this.authenticated
   }
@@ -172,6 +180,15 @@ export class AuthManager {
         .toString('utf-8')
     }
     return null
+  }
+
+  /**
+   * Returns true if a non-empty API token is stored in the configStore.
+   * Used for diagnostics — does NOT validate the token.
+   */
+  hasStoredToken(): boolean {
+    const token = configStore.get('apiToken')
+    return typeof token === 'string' && token.length > 0
   }
 
   /**

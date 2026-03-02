@@ -25,7 +25,12 @@ import {
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
 } from '../src/mcp/tools/toolNames'
-import { setupCommonBeforeEach, token } from './integration-test-utils'
+import {
+  createOpenMockImplementation,
+  createSnykMockImplementation,
+  setupCommonBeforeEach,
+  token,
+} from './integration-test-utils'
 import {
   benignFileContent,
   htmlVulnerableFileContent,
@@ -73,21 +78,26 @@ vi.useFakeTimers({
   shouldAdvanceTime: true,
 })
 
-vi.mock('open', async () => {
-  const { createOpenMockImplementation } =
-    await import('./integration-test-utils')
+// NOTE: Do NOT use `await import('./integration-test-utils')` inside vi.mock()
+// factories. vitest hoists vi.mock() calls above all imports, so a dynamic
+// import of a module that is also statically imported creates a circular
+// module-resolution deadlock that causes vitest to hang silently.
+// Instead, use vi.hoisted() to lift helpers that the mock factories can
+// reference synchronously.
+const { _createOpenMock, _createSnykMock } = vi.hoisted(() => {
   return {
-    default: vi.fn().mockImplementation(createOpenMockImplementation()),
+    _createOpenMock: vi.fn(),
+    _createSnykMock: vi.fn(),
   }
 })
 
-vi.mock('../src/features/analysis/scanners/snyk', async () => {
-  const { createSnykMockImplementation } =
-    await import('./integration-test-utils')
-  return {
-    getSnykReport: vi.fn().mockImplementation(createSnykMockImplementation()),
-  }
-})
+vi.mock('open', () => ({
+  default: _createOpenMock,
+}))
+
+vi.mock('../src/features/analysis/scanners/snyk', () => ({
+  getSnykReport: _createSnykMock,
+}))
 
 setupCommonBeforeEach()
 
@@ -133,6 +143,10 @@ describe('mcp tests', () => {
   }
 
   beforeAll(async () => {
+    // Wire up mock implementations now that static imports are resolved
+    _createOpenMock.mockImplementation(createOpenMockImplementation())
+    _createSnykMock.mockImplementation(createSnykMockImplementation())
+
     const server = createMcpServer()
 
     nonExistentPath = join(tmpdir(), 'mcp-test-non-existent-' + Date.now())

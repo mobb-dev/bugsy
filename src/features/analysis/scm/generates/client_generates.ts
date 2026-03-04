@@ -1048,6 +1048,13 @@ export type ResendInvitationResponse = {
   id: Scalars['String']['output'];
 };
 
+export type S3FileContentResponse = {
+  __typename?: 'S3FileContentResponse';
+  bucket: Scalars['String']['output'];
+  content: Scalars['String']['output'];
+  key: Scalars['String']['output'];
+};
+
 export type ScmAccessToken = {
   __typename?: 'SCMAccessToken';
   accessToken: Scalars['String']['output'];
@@ -30706,6 +30713,13 @@ export type Query_Root = {
    */
   getPromptSummary: GetPromptSummaryResponse;
   getReportsApiV2: GetReportsV2Response;
+  /**
+   * Fetches the content of an S3 file.
+   * Accepts either a full S3 URI (s3://bucket/key) or a plain key.
+   * When a plain key is used and no bucket is specified, searches all known buckets.
+   * Restricted to admin users.
+   */
+  getS3FileContent: S3FileContentResponse;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
@@ -32426,6 +32440,12 @@ export type Query_RootGetPromptSummaryArgs = {
 
 export type Query_RootGetReportsApiV2Args = {
   reportId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type Query_RootGetS3FileContentArgs = {
+  bucket?: InputMaybe<Scalars['String']['input']>;
+  s3Address: Scalars['String']['input'];
 };
 
 

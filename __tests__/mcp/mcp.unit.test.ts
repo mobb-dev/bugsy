@@ -406,7 +406,8 @@ describe('MCP Server', () => {
 
         // Create the tool and execute it
         const tool = new FixVulnerabilitiesTool()
-        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
+        const result = await tool.execute({ path: activeRepoPath })
+        expect(result.content[0]?.text).toContain(
           'Error: failed to reach Mobb GraphQL endpoint'
         )
       }) // Set a higher timeout for this test
@@ -423,10 +424,11 @@ describe('MCP Server', () => {
           .getEncryptedApiToken()
           .failsWithError('authentication failed')
 
-        // Create the tool and execute it
+        // Create the tool and execute it — error is returned as tool response
         const tool = new FixVulnerabilitiesTool()
-        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
-          'Error: failed to get encrypted api token'
+        const result = await tool.execute({ path: activeRepoPath })
+        expect(result.content[0]?.text).toContain(
+          'failed to get encrypted api token'
         )
       })
 
@@ -887,9 +889,11 @@ describe('MCP Server', () => {
         // Configure GraphQL mock to simulate connection error
         mockGraphQL().me().failsWithConnectionError()
 
+        // Error is returned as tool response (not thrown)
         const tool = new FixVulnerabilitiesTool()
-        await expect(tool.execute({ path: activeRepoPath })).rejects.toThrow(
-          'Invalid API token'
+        const result = await tool.execute({ path: activeRepoPath })
+        expect(result.content[0]?.text).toContain(
+          'Failed to connect to the API'
         )
       })
 

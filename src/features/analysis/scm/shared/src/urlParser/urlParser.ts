@@ -27,29 +27,31 @@ function computeCanonicalUrl(data: {
 
   switch (scmType) {
     case ScmType.GitHub:
-      return `https://${hostname}/${organization}/${repoName}`
+      return `https://${hostname}/${organization.toLowerCase()}/${repoName.toLowerCase()}`
 
     case ScmType.GitLab:
       // GitLab supports subgroups, so use projectPath to preserve full path
-      return `https://${hostname}/${projectPath}`
+      return `https://${hostname}/${projectPath.toLowerCase()}`
 
     case ScmType.Bitbucket:
-      return `https://${hostname}/${organization}/${repoName}`
+      // Bitbucket is case-insensitive for org/repo — normalize to lowercase
+      return `https://${hostname}/${organization.toLowerCase()}/${repoName.toLowerCase()}`
 
     case ScmType.Ado: {
       // ADO canonical format: https://{hostname}/{org}/{project}/_git/{repo}
+      // ADO is case-insensitive for org/project/repo — normalize to lowercase
       // Normalize ssh.dev.azure.com to dev.azure.com for canonical URL
       const adoHostname =
         hostname === 'ssh.dev.azure.com' ? 'dev.azure.com' : hostname
       if (projectName) {
-        return `https://${adoHostname}/${organization}/${projectName}/_git/${repoName}`
+        return `https://${adoHostname}/${organization.toLowerCase()}/${projectName.toLowerCase()}/_git/${repoName.toLowerCase()}`
       }
-      return `https://${adoHostname}/${organization}/_git/${repoName}`
+      return `https://${adoHostname}/${organization.toLowerCase()}/_git/${repoName.toLowerCase()}`
     }
 
     default:
-      // Unknown SCM type - use hostname and projectPath
-      return `https://${hostname}/${projectPath}`
+      // Unknown SCM type - lowercase for consistency
+      return `https://${hostname}/${projectPath.toLowerCase()}`
   }
 }
 

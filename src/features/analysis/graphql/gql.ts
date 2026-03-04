@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { GraphQLClient } from 'graphql-request'
+import { ClientError, GraphQLClient } from 'graphql-request'
 import { v4 as uuidv4 } from 'uuid'
 
 import { API_URL } from '../../../constants'
@@ -53,6 +53,41 @@ import {
 } from './types'
 
 const debug = Debug('mobbdev:gql')
+
+/**
+ * Determines if an error represents a definitive authentication failure
+ * from the Hasura GraphQL endpoint. Hasura returns HTTP 200 for auth errors,
+ * so we must inspect the GraphQL error extensions.
+ */
+function isAuthError(error: unknown): boolean {
+  if (error instanceof ClientError) {
+    const gqlErrors = error.response?.errors
+    return (
+      gqlErrors?.some(
+        (e) =>
+          e.extensions?.['code'] === 'access-denied' ||
+          e.message?.includes('Authentication hook unauthorized')
+      ) ?? false
+    )
+  }
+  return false
+}
+
+/**
+ * Determines if an error is a network-level failure (endpoint unreachable,
+ * DNS failure, timeout, etc.) as opposed to a server-side response.
+ */
+function isNetworkError(error: unknown): boolean {
+  const errorString = error?.toString() ?? ''
+  return (
+    errorString.includes('FetchError') ||
+    errorString.includes('TypeError') ||
+    errorString.includes('ECONNREFUSED') ||
+    errorString.includes('ENOTFOUND') ||
+    errorString.includes('ETIMEDOUT') ||
+    errorString.includes('UND_ERR')
+  )
+}
 
 export const API_KEY_HEADER_NAME = 'x-mobb-key'
 const REPORT_STATE_CHECK_DELAY = 5 * 1000 // 5 sec
@@ -142,25 +177,43 @@ export class GQLClient {
     try {
       await this.getUserInfo()
     } catch (e) {
-      if (e?.toString().startsWith('FetchError')) {
-        debug('verify connection failed %o', e)
+      if (isNetworkError(e)) {
+        debug('verify connection failed (network error) %o', e)
         return false
       }
+      // Non-network error (e.g., auth error) — endpoint is reachable
+      debug('verify connection: endpoint reachable but request failed %o', e)
     }
     return true
   }
 
   async validateUserToken() {
-    await this.createCommunityUser()
-
-    let info
     try {
-      info = await this.getUserInfo()
+      await this.createCommunityUser()
+      const info = await this.getUserInfo()
+      if (!info) {
+        debug('verify token failed - no user info returned')
+        return false
+      }
+      return info.email || true
     } catch (e) {
-      debug('verify token failed %o', e)
-      return false
+      if (isAuthError(e)) {
+        // Hasura returned access-denied — the token is definitively invalid.
+        debug('verify token failed - auth error %o', e)
+        return false
+      }
+      if (isNetworkError(e)) {
+        // Network unreachable — can't determine token validity. Throw so
+        // callers don't open browser or overwrite a valid token.
+        debug('verify token failed - network error, rethrowing %o', e)
+        throw e
+      }
+      // Non-auth, non-network error (e.g. backend resolver bug, data issue).
+      // We can't determine token validity — don't invalidate it, but don't
+      // claim success either. Throw so callers skip browser auth.
+      debug('verify token failed - unexpected error, rethrowing %o', e)
+      throw e
     }
-    return info?.email || true
   }
 
   async getLastOrgAndNamedProject(params: {

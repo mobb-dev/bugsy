@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { GraphQLClient } from 'graphql-request'
+import { ClientError, GraphQLClient } from 'graphql-request'
 import { v4 as uuidv4 } from 'uuid'
 
 import { DEFAULT_API_URL } from '../../constants'
@@ -41,6 +41,44 @@ type GQLClientArgs =
       token: string
       type: 'token'
     }
+
+/**
+ * Determines if an error represents a definitive authentication failure
+ * from the Hasura GraphQL endpoint. Hasura returns HTTP 200 for auth errors,
+ * so we must inspect the GraphQL error extensions.
+ *
+ * Returns true ONLY for access-denied errors. Network errors, timeouts,
+ * and other transient failures return false.
+ */
+export function isAuthError(error: unknown): boolean {
+  if (error instanceof ClientError) {
+    const gqlErrors = error.response?.errors
+    return (
+      gqlErrors?.some(
+        (e) =>
+          e.extensions?.['code'] === 'access-denied' ||
+          e.message?.includes('Authentication hook unauthorized')
+      ) ?? false
+    )
+  }
+  return false
+}
+
+/**
+ * Determines if an error is a network-level failure (endpoint unreachable,
+ * DNS failure, timeout, etc.) as opposed to a server-side response.
+ */
+export function isNetworkError(error: unknown): boolean {
+  const errorString = error?.toString() ?? ''
+  return (
+    errorString.includes('FetchError') ||
+    errorString.includes('TypeError') ||
+    errorString.includes('ECONNREFUSED') ||
+    errorString.includes('ENOTFOUND') ||
+    errorString.includes('ETIMEDOUT') ||
+    errorString.includes('UND_ERR')
+  )
+}
 
 // Simple GQLClient for the fixVulnerabilities tool
 export class McpGQLClient {
@@ -107,19 +145,21 @@ export class McpGQLClient {
   async isApiEndpointReachable(): Promise<boolean> {
     try {
       logDebug('[GraphQL] Calling Me query for API connection verification')
-      // Use the getUserInfo method for consistency
       const result = await this.getUserInfo()
       logDebug('[GraphQL] Me query successful', { result })
       return true
     } catch (e: unknown) {
-      const error = e as Error
-      logDebug(`[GraphQL] API connection verification failed`, { error })
-      if (error?.toString().includes('FetchError')) {
-        logError('[GraphQL] API connection verification failed', { error })
+      logDebug('[GraphQL] API connection verification failed', { error: e })
+      if (isNetworkError(e)) {
+        logError('[GraphQL] API endpoint unreachable (network error)', {
+          error: e,
+        })
         return false
       }
+      // Auth errors or other GraphQL errors mean the endpoint IS reachable
+      logDebug('[GraphQL] API endpoint is reachable (non-network error)')
+      return true
     }
-    return true
   }
 
   /**
@@ -456,11 +496,33 @@ export class McpGQLClient {
     try {
       await this.clientSdk.CreateCommunityUser()
       const info = await this.getUserInfo()
+      if (!info) {
+        logDebug('[GraphQL] User token is invalid (no user info returned)')
+        return false
+      }
       logDebug('[GraphQL] User token validated successfully')
-      return info?.email || true
+      return info.email || true
     } catch (e) {
-      logError('[GraphQL] User token validation failed')
-      return false
+      if (isAuthError(e)) {
+        // Hasura returned access-denied — the token is definitively invalid.
+        logDebug('[GraphQL] User token is invalid (auth error from server)')
+        return false
+      }
+      if (isNetworkError(e)) {
+        // Network unreachable — we can't determine token validity.
+        // Throw so callers don't open browser or overwrite a valid token.
+        logError('[GraphQL] Token validation failed due to network error', {
+          error: e,
+        })
+        throw e
+      }
+      // Non-auth, non-network error (e.g. backend resolver bug, data issue).
+      // We can't determine token validity — don't invalidate it, but don't
+      // claim success either. Throw so callers skip browser auth.
+      logError('[GraphQL] Token validation failed with unexpected error', {
+        error: e,
+      })
+      throw e
     }
   }
 
@@ -875,7 +937,18 @@ export async function createAuthenticatedMcpGQLClient({
   }
 
   logDebug('[GraphQL] Validating user token')
-  const userVerify = await initialClient.validateUserToken()
+  let userVerify: string | boolean
+  try {
+    userVerify = await initialClient.validateUserToken()
+  } catch (e) {
+    // validateUserToken() throws on transient errors (network, timeout).
+    // Do NOT fall through to browser auth — the token may be perfectly valid.
+    logError('[GraphQL] Token validation failed due to transient error', {
+      error: e,
+    })
+    throw e
+  }
+
   if (userVerify) {
     return initialClient
   }

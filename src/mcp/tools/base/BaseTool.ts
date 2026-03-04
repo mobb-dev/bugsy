@@ -1,8 +1,6 @@
 import { z } from 'zod'
 
 import { logDebug, logInfo } from '../../Logger'
-import { createAuthenticatedMcpGQLClient } from '../../services/McpGQLClient'
-import { createMcpLoginContext } from '../../services/types'
 
 export type ToolResponse = {
   content: {
@@ -39,14 +37,11 @@ export abstract class BaseTool {
   }
 
   public async execute(args: unknown): Promise<ToolResponse> {
+    // Authentication is handled by each service's initializeGqlClient().
+    // We no longer pre-authenticate here to avoid opening duplicate
+    // browser windows when the token is invalid.
     if (this.hasAuthentication) {
-      logDebug(`Authenticating tool: ${this.name}`, { args })
-      const loginContext = createMcpLoginContext(this.name)
-      const mcpGqlClient = await createAuthenticatedMcpGQLClient({
-        loginContext,
-      })
-      const userInfo = await mcpGqlClient.getUserInfo()
-      logDebug('User authenticated successfully', { userInfo })
+      logDebug(`Tool ${this.name} requires authentication (handled by service)`)
     }
 
     // Validate input arguments - let validation errors bubble up as MCP errors

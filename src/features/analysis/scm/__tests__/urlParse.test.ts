@@ -368,12 +368,28 @@ describe('parseScmURL canonicalUrl', () => {
       )
     })
 
-    it('should preserve path casing', () => {
+    it('should lowercase path components', () => {
       expect(getCanonicalUrl('https://github.com/MyOrg/MyRepo')).toBe(
-        'https://github.com/MyOrg/MyRepo'
+        'https://github.com/myorg/myrepo'
       )
       expect(getCanonicalUrl('git@github.com:MyOrg/MyRepo.git')).toBe(
-        'https://github.com/MyOrg/MyRepo'
+        'https://github.com/myorg/myrepo'
+      )
+    })
+
+    it('should produce the same canonicalUrl regardless of input casing', () => {
+      const expected = 'https://github.com/augerengineering/bolt'
+      expect(getCanonicalUrl('https://github.com/augerengineering/bolt')).toBe(
+        expected
+      )
+      expect(getCanonicalUrl('https://github.com/AugerEngineering/Bolt')).toBe(
+        expected
+      )
+      expect(getCanonicalUrl('https://github.com/AUGERENGINEERING/BOLT')).toBe(
+        expected
+      )
+      expect(getCanonicalUrl('git@github.com:AugerEngineering/Bolt.git')).toBe(
+        expected
       )
     })
 
@@ -417,6 +433,15 @@ describe('parseScmURL canonicalUrl', () => {
         'https://gitlab.com/group/subgroup/repo'
       )
     })
+
+    it('should lowercase path components including subgroups', () => {
+      expect(
+        getCanonicalUrl('https://gitlab.com/MyGroup/MySubGroup/MyRepo')
+      ).toBe('https://gitlab.com/mygroup/mysubgroup/myrepo')
+      expect(
+        getCanonicalUrl('git@gitlab.com:MyGroup/MySubGroup/MyRepo.git')
+      ).toBe('https://gitlab.com/mygroup/mysubgroup/myrepo')
+    })
   })
 
   describe('Bitbucket URLs', () => {
@@ -437,6 +462,12 @@ describe('parseScmURL canonicalUrl', () => {
         getCanonicalUrl('https://user@bitbucket.org/workspace/repo.git')
       ).toBe('https://bitbucket.org/workspace/repo')
     })
+
+    it('should lowercase org and repo in canonical URL', () => {
+      expect(getCanonicalUrl('https://bitbucket.org/MyWorkspace/MyRepo')).toBe(
+        'https://bitbucket.org/myworkspace/myrepo'
+      )
+    })
   })
 
   describe('Azure DevOps URLs', () => {
@@ -450,6 +481,12 @@ describe('parseScmURL canonicalUrl', () => {
       expect(getCanonicalUrl('git@ssh.dev.azure.com:v3/org/project/repo')).toBe(
         'https://dev.azure.com/org/project/_git/repo'
       )
+    })
+
+    it('should lowercase casing for ADO URLs', () => {
+      expect(
+        getCanonicalUrl('https://dev.azure.com/MyOrg/MyProject/_git/MyRepo')
+      ).toBe('https://dev.azure.com/myorg/myproject/_git/myrepo')
     })
   })
 

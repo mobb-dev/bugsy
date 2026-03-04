@@ -24,10 +24,16 @@ import { buildLoginUrl, LoginContext } from './types'
  */
 export class McpAuthService {
   private client: McpGQLClient
-  private lastBrowserOpenTime = 0
+  // Static so cooldown persists across McpAuthService instances
+  private static lastBrowserOpenTime = 0
 
   constructor(client: McpGQLClient) {
     this.client = client
+  }
+
+  /** Reset cooldown state. Used by tests to ensure isolation. */
+  static resetCooldown() {
+    McpAuthService.lastBrowserOpenTime = 0
   }
 
   /**
@@ -35,17 +41,21 @@ export class McpAuthService {
    * @param url URL to open in browser
    * @param isBackgoundCall Whether this is called from tools context
    */
-  async openBrowser(url: string, isBackgoundCall: boolean): Promise<void> {
+  async openBrowser(url: string, isBackgoundCall: boolean): Promise<boolean> {
     if (isBackgoundCall) {
       const now = Date.now()
-      if (now - this.lastBrowserOpenTime < MCP_TOOLS_BROWSER_COOLDOWN_MS) {
+      if (
+        now - McpAuthService.lastBrowserOpenTime <
+        MCP_TOOLS_BROWSER_COOLDOWN_MS
+      ) {
         logDebug(`browser cooldown active, skipping open for ${url}`)
-        return
+        return false
       }
     }
     logDebug(`opening browser url ${url}`)
     await open(url)
-    this.lastBrowserOpenTime = Date.now()
+    McpAuthService.lastBrowserOpenTime = Date.now()
+    return true
   }
 
   /**
@@ -79,7 +89,12 @@ export class McpAuthService {
       ? buildLoginUrl(webLoginUrl, loginId, os.hostname(), loginContext)
       : `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
 
-    await this.openBrowser(browserUrl, isBackgoundCall)
+    const browserOpened = await this.openBrowser(browserUrl, isBackgoundCall)
+    if (!browserOpened) {
+      throw new AuthenticationError(
+        'Authentication required but browser cooldown is active'
+      )
+    }
 
     logDebug(`waiting for login to complete`)
     let newApiToken = null

@@ -521,7 +521,7 @@ type BaseParseScmURLRes = {
   repoName: string
   protocol: string
   pathElements: string[]
-  /** Canonical HTTPS URL (normalized: no credentials, no .git suffix, lowercase hostname) */
+  /** Canonical HTTPS URL (normalized: no credentials, no .git suffix, lowercase hostname, lowercase path for GitHub/GitLab/Bitbucket/ADO) */
   canonicalUrl: string
 }
 

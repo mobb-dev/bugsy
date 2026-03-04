@@ -227,10 +227,16 @@ export const graphqlHandlers = [
     CreateCommunityUserMutationVariables
   >('CreateCommunityUser', ({ request }) => {
     if (request.headers.get('x-mobb-key') === BAD_API_KEY) {
-      return HttpResponse.json(
-        mockCreateCommunityUserError('Invalid API key'),
-        { status: 401 }
-      )
+      // Match real Hasura behavior: HTTP 200 with access-denied in GraphQL errors
+      return HttpResponse.json({
+        data: null,
+        errors: [
+          {
+            message: 'Authentication hook unauthorized this request',
+            extensions: { code: 'access-denied' },
+          },
+        ],
+      })
     }
     if (mockState.createCommunityUser === 'error') {
       return HttpResponse.json(

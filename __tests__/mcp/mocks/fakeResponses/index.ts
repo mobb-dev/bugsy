@@ -23,6 +23,7 @@ export {
 } from './getUserMvsAutoFix'
 export {
   mockMe,
+  mockMeAccessDenied,
   mockMeConnectionError,
   mockMeError,
   mockMeFetchError,

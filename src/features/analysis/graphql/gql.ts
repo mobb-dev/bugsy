@@ -59,7 +59,7 @@ const debug = Debug('mobbdev:gql')
  * from the Hasura GraphQL endpoint. Hasura returns HTTP 200 for auth errors,
  * so we must inspect the GraphQL error extensions.
  */
-function isAuthError(error: unknown): boolean {
+export function isAuthError(error: unknown): boolean {
   if (error instanceof ClientError) {
     const gqlErrors = error.response?.errors
     return (
@@ -74,19 +74,42 @@ function isAuthError(error: unknown): boolean {
 }
 
 /**
- * Determines if an error is a network-level failure (endpoint unreachable,
- * DNS failure, timeout, etc.) as opposed to a server-side response.
+ * Determines if an error is a transient failure that does NOT indicate
+ * the auth token is invalid. Covers:
+ * - Network-level failures (DNS, connection refused, timeouts)
+ * - Server-side errors (502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout)
+ * - Proxy errors (HTTP 200 with HTML error body from load balancers)
  */
-function isNetworkError(error: unknown): boolean {
+export function isTransientError(error: unknown): boolean {
+  // Network-level failures
   const errorString = error?.toString() ?? ''
-  return (
+  if (
     errorString.includes('FetchError') ||
     errorString.includes('TypeError') ||
     errorString.includes('ECONNREFUSED') ||
     errorString.includes('ENOTFOUND') ||
     errorString.includes('ETIMEDOUT') ||
     errorString.includes('UND_ERR')
-  )
+  ) {
+    return true
+  }
+
+  // Server-side transient errors (502/503/504)
+  if (error instanceof ClientError) {
+    const status = error.response?.status
+    if (status && status >= 502 && status <= 504) return true
+  }
+
+  // Proxy/LB returning HTTP 200 with HTML error body instead of JSON
+  if (
+    errorString.includes('Gateway Time-out') ||
+    errorString.includes('Bad Gateway') ||
+    errorString.includes('Service Unavailable')
+  ) {
+    return true
+  }
+
+  return false
 }
 
 export const API_KEY_HEADER_NAME = 'x-mobb-key'
@@ -177,17 +200,17 @@ export class GQLClient {
     try {
       await this.getUserInfo()
     } catch (e) {
-      if (isNetworkError(e)) {
-        debug('verify connection failed (network error) %o', e)
+      if (isTransientError(e)) {
+        debug('verify connection failed (transient error) %o', e)
         return false
       }
-      // Non-network error (e.g., auth error) — endpoint is reachable
+      // Non-transient error (e.g., auth error) — endpoint is reachable
       debug('verify connection: endpoint reachable but request failed %o', e)
     }
     return true
   }
 
-  async validateUserToken() {
+  async validateUserToken(): Promise<string | boolean> {
     try {
       await this.createCommunityUser()
       const info = await this.getUserInfo()
@@ -202,16 +225,9 @@ export class GQLClient {
         debug('verify token failed - auth error %o', e)
         return false
       }
-      if (isNetworkError(e)) {
-        // Network unreachable — can't determine token validity. Throw so
-        // callers don't open browser or overwrite a valid token.
-        debug('verify token failed - network error, rethrowing %o', e)
-        throw e
-      }
-      // Non-auth, non-network error (e.g. backend resolver bug, data issue).
-      // We can't determine token validity — don't invalidate it, but don't
-      // claim success either. Throw so callers skip browser auth.
-      debug('verify token failed - unexpected error, rethrowing %o', e)
+      // Transient or unknown: can't determine token validity. Throw so
+      // callers don't incorrectly trigger login.
+      debug('verify token failed - transient/unknown error, rethrowing %o', e)
       throw e
     }
   }
@@ -285,12 +301,7 @@ export class GQLClient {
   }
 
   async createCommunityUser() {
-    try {
-      await this._clientSdk.CreateCommunityUser()
-    } catch (e) {
-      debug('create community user failed %o', e)
-      // Ignore errors
-    }
+    await this._clientSdk.CreateCommunityUser()
   }
 
   async updateScmToken(args: {

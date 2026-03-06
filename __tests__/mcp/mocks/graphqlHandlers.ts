@@ -41,6 +41,7 @@ import {
   mockGetUserMvsAutoFixError,
   mockGetUserMvsAutoFixNoSettings,
   mockMe,
+  mockMeAccessDenied,
   mockMeConnectionError,
   mockMeError,
   mockMeFetchError,
@@ -66,7 +67,7 @@ export const BAD_API_KEY = 'bad-api-key'
 
 // Mock control state
 type MockState = {
-  me: 'success' | 'connectionError' | 'error' | 'fetchError'
+  me: 'success' | 'connectionError' | 'error' | 'fetchError' | 'accessDenied'
   uploadS3BucketInfo: 'success' | 'error'
   getLastOrgAndNamedProject: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
@@ -111,6 +112,9 @@ export const graphqlHandlers = [
     }
     if (mockState.me === 'fetchError') {
       throw mockMeFetchError()
+    }
+    if (mockState.me === 'accessDenied') {
+      return HttpResponse.json(mockMeAccessDenied)
     }
     if (mockState.me === 'error') {
       return HttpResponse.json(
@@ -337,6 +341,10 @@ export const mockGraphQL = (
       },
       failsWithFetchError() {
         mockState.me = 'fetchError'
+        return this
+      },
+      failsWithAccessDenied() {
+        mockState.me = 'accessDenied'
         return this
       },
     }

@@ -954,6 +954,19 @@ export type ProcessAiBlameRequestedResult = {
 
 export type ProcessAiBlameResult = ProcessAiBlameErrorResult | ProcessAiBlameFinalResult | ProcessAiBlameRequestedResult;
 
+export type ProcessVulnerabilityAttributionsError = {
+  __typename?: 'ProcessVulnerabilityAttributionsError';
+  error: Scalars['String']['output'];
+  status: BlameStatus;
+};
+
+export type ProcessVulnerabilityAttributionsResponse = ProcessVulnerabilityAttributionsError | ProcessVulnerabilityAttributionsSuccess;
+
+export type ProcessVulnerabilityAttributionsSuccess = {
+  __typename?: 'ProcessVulnerabilityAttributionsSuccess';
+  status: BlameStatus;
+};
+
 export type ProjectIssueStats = {
   __typename?: 'ProjectIssueStats';
   issue_types: Array<IssueTypeStats>;
@@ -1747,30 +1760,6 @@ export type VulnReportUser = {
   id: Scalars['String']['output'];
 };
 
-export type VulnerabilityAttribution = {
-  __typename?: 'VulnerabilityAttribution';
-  attributionId: Scalars['String']['output'];
-  commitSha: Scalars['String']['output'];
-  filePath: Scalars['String']['output'];
-  inferenceType: AiBlameInferenceType;
-  lineNumber: Scalars['Int']['output'];
-  originalLineNumber?: Maybe<Scalars['Int']['output']>;
-};
-
-export type VulnerabilityAttributionError = {
-  __typename?: 'VulnerabilityAttributionError';
-  error: Scalars['String']['output'];
-  status: BlameStatus;
-};
-
-export type VulnerabilityAttributionSuccess = {
-  __typename?: 'VulnerabilityAttributionSuccess';
-  attributions: Array<VulnerabilityAttribution>;
-  status: BlameStatus;
-};
-
-export type VulnerabilityAttributionsResponse = VulnerabilityAttributionError | VulnerabilityAttributionSuccess;
-
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
   fixReport: FixReportSubmitReport;
@@ -2282,6 +2271,30 @@ export type Ai_Blame_Attribution = {
   /** An object relationship */
   tracyEvent?: Maybe<Tracy_Tracy_Event>;
   tracyEventId?: Maybe<Scalars['uuid']['output']>;
+  /** An array relationship */
+  vulnerabilityIssueAttributions: Array<Vulnerability_Issue_Attribution>;
+  /** An aggregate relationship */
+  vulnerabilityIssueAttributions_aggregate: Vulnerability_Issue_Attribution_Aggregate;
+};
+
+
+/** columns and relationships of "ai_blame_attribution" */
+export type Ai_Blame_AttributionVulnerabilityIssueAttributionsArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+/** columns and relationships of "ai_blame_attribution" */
+export type Ai_Blame_AttributionVulnerabilityIssueAttributions_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
 };
 
 /** aggregated selection of "ai_blame_attribution" */
@@ -2382,6 +2395,8 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   toolName?: InputMaybe<String_Comparison_Exp>;
   tracyEvent?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
   tracyEventId?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerabilityIssueAttributions?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+  vulnerabilityIssueAttributions_aggregate?: InputMaybe<Vulnerability_Issue_Attribution_Aggregate_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "ai_blame_attribution" */
@@ -2416,6 +2431,7 @@ export type Ai_Blame_Attribution_Insert_Input = {
   toolName?: InputMaybe<Scalars['String']['input']>;
   tracyEvent?: InputMaybe<Tracy_Tracy_Event_Obj_Rel_Insert_Input>;
   tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityIssueAttributions?: InputMaybe<Vulnerability_Issue_Attribution_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -2493,6 +2509,13 @@ export type Ai_Blame_Attribution_Mutation_Response = {
   returning: Array<Ai_Blame_Attribution>;
 };
 
+/** input type for inserting object relation for remote table "ai_blame_attribution" */
+export type Ai_Blame_Attribution_Obj_Rel_Insert_Input = {
+  data: Ai_Blame_Attribution_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Ai_Blame_Attribution_On_Conflict>;
+};
+
 /** on_conflict condition type for table "ai_blame_attribution" */
 export type Ai_Blame_Attribution_On_Conflict = {
   constraint: Ai_Blame_Attribution_Constraint;
@@ -2517,6 +2540,7 @@ export type Ai_Blame_Attribution_Order_By = {
   toolName?: InputMaybe<Order_By>;
   tracyEvent?: InputMaybe<Tracy_Tracy_Event_Order_By>;
   tracyEventId?: InputMaybe<Order_By>;
+  vulnerabilityIssueAttributions_aggregate?: InputMaybe<Vulnerability_Issue_Attribution_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: ai_blame_attribution */
@@ -13048,6 +13072,7 @@ export type FixFile_Updates = {
 /** columns and relationships of "fix_report" */
 export type FixReport = {
   __typename?: 'fixReport';
+  aiBlameProcessed?: Maybe<Scalars['Boolean']['output']>;
   /** A computed field, executes function "analysis_url_path" */
   analysisUrl?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_git_blame_logins" */
@@ -13258,6 +13283,7 @@ export type FixReport_Bool_Exp = {
   _and?: InputMaybe<Array<FixReport_Bool_Exp>>;
   _not?: InputMaybe<FixReport_Bool_Exp>;
   _or?: InputMaybe<Array<FixReport_Bool_Exp>>;
+  aiBlameProcessed?: InputMaybe<Boolean_Comparison_Exp>;
   analysisUrl?: InputMaybe<String_Comparison_Exp>;
   assignedTo?: InputMaybe<Json_Comparison_Exp>;
   confidences?: InputMaybe<Json_Comparison_Exp>;
@@ -13307,6 +13333,7 @@ export type FixReport_Inc_Input = {
 
 /** input type for inserting data into table "fix_report" */
 export type FixReport_Insert_Input = {
+  aiBlameProcessed?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -13401,6 +13428,7 @@ export type FixReport_On_Conflict = {
 
 /** Ordering options when selecting data from "fix_report". */
 export type FixReport_Order_By = {
+  aiBlameProcessed?: InputMaybe<Order_By>;
   analysisUrl?: InputMaybe<Order_By>;
   assignedTo?: InputMaybe<Order_By>;
   confidences?: InputMaybe<Order_By>;
@@ -13440,6 +13468,8 @@ export type FixReport_Pk_Columns_Input = {
 /** select columns of table "fix_report" */
 export enum FixReport_Select_Column {
   /** column name */
+  AiBlameProcessed = 'aiBlameProcessed',
+  /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
   CreatedOn = 'createdOn',
@@ -13467,6 +13497,7 @@ export enum FixReport_Select_Column {
 
 /** input type for updating data in table "fix_report" */
 export type FixReport_Set_Input = {
+  aiBlameProcessed?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -13534,6 +13565,7 @@ export type FixReport_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type FixReport_Stream_Cursor_Value_Input = {
+  aiBlameProcessed?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -13565,6 +13597,8 @@ export type FixReport_Sum_Fields = {
 
 /** update columns of table "fix_report" */
 export enum FixReport_Update_Column {
+  /** column name */
+  AiBlameProcessed = 'aiBlameProcessed',
   /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
@@ -18945,6 +18979,10 @@ export type Mutation_Root = {
   delete_user_email_notification_settings?: Maybe<User_Email_Notification_Settings_Mutation_Response>;
   /** delete single row from the table: "user_email_notification_settings" */
   delete_user_email_notification_settings_by_pk?: Maybe<User_Email_Notification_Settings>;
+  /** delete data from the table: "vulnerability_issue_attribution" */
+  delete_vulnerability_issue_attribution?: Maybe<Vulnerability_Issue_Attribution_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_issue_attribution" */
+  delete_vulnerability_issue_attribution_by_pk?: Maybe<Vulnerability_Issue_Attribution>;
   /** delete data from the table: "vulnerability_report" */
   delete_vulnerability_report?: Maybe<Vulnerability_Report_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report" */
@@ -19374,6 +19412,10 @@ export type Mutation_Root = {
   insert_user_email_notification_settings_one?: Maybe<User_Email_Notification_Settings>;
   /** insert a single row into the table: "user" */
   insert_user_one?: Maybe<User>;
+  /** insert data into the table: "vulnerability_issue_attribution" */
+  insert_vulnerability_issue_attribution?: Maybe<Vulnerability_Issue_Attribution_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_issue_attribution" */
+  insert_vulnerability_issue_attribution_one?: Maybe<Vulnerability_Issue_Attribution>;
   /** insert data into the table: "vulnerability_report" */
   insert_vulnerability_report?: Maybe<Vulnerability_Report_Mutation_Response>;
   /** insert data into the table: "vulnerability_report_issue" */
@@ -19420,6 +19462,8 @@ export type Mutation_Root = {
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
   openFixTicket?: Maybe<OpenFixTicketResponse>;
   performCliLogin?: Maybe<StatusQueryResponse>;
+  /** Get attributions related to a specific vulnerability report. */
+  processVulnerabilityAttributions: ProcessVulnerabilityAttributionsResponse;
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
   rerunAnalysis: VulnerabilityReportResponse;
@@ -19990,6 +20034,12 @@ export type Mutation_Root = {
   update_user_email_notification_settings_many?: Maybe<Array<Maybe<User_Email_Notification_Settings_Mutation_Response>>>;
   /** update multiples rows of table: "user" */
   update_user_many?: Maybe<Array<Maybe<User_Mutation_Response>>>;
+  /** update data of the table: "vulnerability_issue_attribution" */
+  update_vulnerability_issue_attribution?: Maybe<Vulnerability_Issue_Attribution_Mutation_Response>;
+  /** update single row of the table: "vulnerability_issue_attribution" */
+  update_vulnerability_issue_attribution_by_pk?: Maybe<Vulnerability_Issue_Attribution>;
+  /** update multiples rows of table: "vulnerability_issue_attribution" */
+  update_vulnerability_issue_attribution_many?: Maybe<Array<Maybe<Vulnerability_Issue_Attribution_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report" */
   update_vulnerability_report?: Maybe<Vulnerability_Report_Mutation_Response>;
   /** update single row of the table: "vulnerability_report" */
@@ -21306,6 +21356,18 @@ export type Mutation_RootDelete_User_Email_Notification_SettingsArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_User_Email_Notification_Settings_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Issue_AttributionArgs = {
+  where: Vulnerability_Issue_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Issue_Attribution_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -22759,6 +22821,20 @@ export type Mutation_RootInsert_User_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Vulnerability_Issue_AttributionArgs = {
+  objects: Array<Vulnerability_Issue_Attribution_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Issue_Attribution_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Issue_Attribution_OneArgs = {
+  object: Vulnerability_Issue_Attribution_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Issue_Attribution_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Vulnerability_ReportArgs = {
   objects: Array<Vulnerability_Report_Insert_Input>;
   on_conflict?: InputMaybe<Vulnerability_Report_On_Conflict>;
@@ -22925,6 +23001,12 @@ export type Mutation_RootOpenFixTicketArgs = {
 export type Mutation_RootPerformCliLoginArgs = {
   hostname?: InputMaybe<Scalars['String']['input']>;
   loginId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootProcessVulnerabilityAttributionsArgs = {
+  fixReportId: Scalars['String']['input'];
 };
 
 
@@ -24989,6 +25071,26 @@ export type Mutation_RootUpdate_User_Email_Notification_Settings_ManyArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_User_ManyArgs = {
   updates: Array<User_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Issue_AttributionArgs = {
+  _set?: InputMaybe<Vulnerability_Issue_Attribution_Set_Input>;
+  where: Vulnerability_Issue_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Issue_Attribution_By_PkArgs = {
+  _set?: InputMaybe<Vulnerability_Issue_Attribution_Set_Input>;
+  pk_columns: Vulnerability_Issue_Attribution_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Issue_Attribution_ManyArgs = {
+  updates: Array<Vulnerability_Issue_Attribution_Updates>;
 };
 
 
@@ -30729,8 +30831,6 @@ export type Query_Root = {
    * Default sort: updated desc (most recently updated first)
    */
   getSubmitRequests: SubmitRequestsResponse;
-  /** Get attributions related to a specific vulnerability report. */
-  getVulnerabilityAttributions: VulnerabilityAttributionsResponse;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -31103,6 +31203,12 @@ export type Query_Root = {
   view_types_tag_count: Array<View_Types_Tag_Count>;
   /** fetch aggregated fields from the table: "view_types.tag_count" */
   view_types_tag_count_aggregate: View_Types_Tag_Count_Aggregate;
+  /** fetch data from the table: "vulnerability_issue_attribution" */
+  vulnerability_issue_attribution: Array<Vulnerability_Issue_Attribution>;
+  /** fetch aggregated fields from the table: "vulnerability_issue_attribution" */
+  vulnerability_issue_attribution_aggregate: Vulnerability_Issue_Attribution_Aggregate;
+  /** fetch data from the table: "vulnerability_issue_attribution" using primary key columns */
+  vulnerability_issue_attribution_by_pk?: Maybe<Vulnerability_Issue_Attribution>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -32479,11 +32585,6 @@ export type Query_RootGetSubmitRequestsArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
   repoUrl: Scalars['String']['input'];
   sort?: InputMaybe<SubmitRequestSort>;
-};
-
-
-export type Query_RootGetVulnerabilityAttributionsArgs = {
-  fixReportId: Scalars['String']['input'];
 };
 
 
@@ -33992,6 +34093,29 @@ export type Query_RootView_Types_Tag_Count_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Tag_Count_Order_By>>;
   where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Issue_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Issue_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Issue_Attribution_By_PkArgs = {
+  id: Scalars['uuid']['input'];
 };
 
 
@@ -37650,6 +37774,14 @@ export type Subscription_Root = {
   view_types_tag_count_aggregate: View_Types_Tag_Count_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.tag_count" */
   view_types_tag_count_stream: Array<View_Types_Tag_Count>;
+  /** fetch data from the table: "vulnerability_issue_attribution" */
+  vulnerability_issue_attribution: Array<Vulnerability_Issue_Attribution>;
+  /** fetch aggregated fields from the table: "vulnerability_issue_attribution" */
+  vulnerability_issue_attribution_aggregate: Vulnerability_Issue_Attribution_Aggregate;
+  /** fetch data from the table: "vulnerability_issue_attribution" using primary key columns */
+  vulnerability_issue_attribution_by_pk?: Maybe<Vulnerability_Issue_Attribution>;
+  /** fetch data from the table in a streaming manner: "vulnerability_issue_attribution" */
+  vulnerability_issue_attribution_stream: Array<Vulnerability_Issue_Attribution>;
   /** fetch data from the table: "vulnerability_report" */
   vulnerability_report: Array<Vulnerability_Report>;
   /** fetch aggregated fields from the table: "vulnerability_report" */
@@ -41105,6 +41237,36 @@ export type Subscription_RootView_Types_Tag_Count_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Tag_Count_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Tag_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Issue_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Issue_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Issue_Attribution_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Issue_Attribution_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Issue_Attribution_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
 };
 
 
@@ -47038,6 +47200,203 @@ export type View_Types_Tag_Count_Variance_Fields = {
   count?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution = {
+  __typename?: 'vulnerability_issue_attribution';
+  /** An object relationship */
+  aiBlameAttribution: Ai_Blame_Attribution;
+  aiBlameAttributionId: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  vulnerabilityReportIssue: Vulnerability_Report_Issue;
+  vulnerabilityReportIssueId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Aggregate = {
+  __typename?: 'vulnerability_issue_attribution_aggregate';
+  aggregate?: Maybe<Vulnerability_Issue_Attribution_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Issue_Attribution>;
+};
+
+export type Vulnerability_Issue_Attribution_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Vulnerability_Issue_Attribution_Aggregate_Bool_Exp_Count>;
+};
+
+export type Vulnerability_Issue_Attribution_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Aggregate_Fields = {
+  __typename?: 'vulnerability_issue_attribution_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Issue_Attribution_Max_Fields>;
+  min?: Maybe<Vulnerability_Issue_Attribution_Min_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Vulnerability_Issue_Attribution_Max_Order_By>;
+  min?: InputMaybe<Vulnerability_Issue_Attribution_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Arr_Rel_Insert_Input = {
+  data: Array<Vulnerability_Issue_Attribution_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Vulnerability_Issue_Attribution_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_issue_attribution". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Issue_Attribution_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Issue_Attribution_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Issue_Attribution_Bool_Exp>>;
+  aiBlameAttribution?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+  aiBlameAttributionId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
+  vulnerabilityReportIssueId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_issue_attribution" */
+export enum Vulnerability_Issue_Attribution_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  VulnerabilityIssueAttributionPkey = 'vulnerability_issue_attribution_pkey',
+  /** unique or primary key constraint on columns "ai_blame_attribution_id", "vulnerability_report_issue_id" */
+  VulnerabilityIssueAttributionVulnerabilityReportIssueIdA = 'vulnerability_issue_attribution_vulnerability_report_issue_id_a'
+}
+
+/** input type for inserting data into table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Insert_Input = {
+  aiBlameAttribution?: InputMaybe<Ai_Blame_Attribution_Obj_Rel_Insert_Input>;
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Obj_Rel_Insert_Input>;
+  vulnerabilityReportIssueId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Issue_Attribution_Max_Fields = {
+  __typename?: 'vulnerability_issue_attribution_max_fields';
+  aiBlameAttributionId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  vulnerabilityReportIssueId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Max_Order_By = {
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Issue_Attribution_Min_Fields = {
+  __typename?: 'vulnerability_issue_attribution_min_fields';
+  aiBlameAttributionId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  vulnerabilityReportIssueId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Min_Order_By = {
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Mutation_Response = {
+  __typename?: 'vulnerability_issue_attribution_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Issue_Attribution>;
+};
+
+/** on_conflict condition type for table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_On_Conflict = {
+  constraint: Vulnerability_Issue_Attribution_Constraint;
+  update_columns?: Array<Vulnerability_Issue_Attribution_Update_Column>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_issue_attribution". */
+export type Vulnerability_Issue_Attribution_Order_By = {
+  aiBlameAttribution?: InputMaybe<Ai_Blame_Attribution_Order_By>;
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Order_By>;
+  vulnerabilityReportIssueId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_issue_attribution */
+export type Vulnerability_Issue_Attribution_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "vulnerability_issue_attribution" */
+export enum Vulnerability_Issue_Attribution_Select_Column {
+  /** column name */
+  AiBlameAttributionId = 'aiBlameAttributionId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  VulnerabilityReportIssueId = 'vulnerabilityReportIssueId'
+}
+
+/** input type for updating data in table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Set_Input = {
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssueId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "vulnerability_issue_attribution" */
+export type Vulnerability_Issue_Attribution_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Issue_Attribution_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Issue_Attribution_Stream_Cursor_Value_Input = {
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssueId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "vulnerability_issue_attribution" */
+export enum Vulnerability_Issue_Attribution_Update_Column {
+  /** column name */
+  AiBlameAttributionId = 'aiBlameAttributionId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  VulnerabilityReportIssueId = 'vulnerabilityReportIssueId'
+}
+
+export type Vulnerability_Issue_Attribution_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Issue_Attribution_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Issue_Attribution_Bool_Exp;
+};
+
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_Report = {
   __typename?: 'vulnerability_report';
@@ -47367,6 +47726,10 @@ export type Vulnerability_Report_Issue = {
   unfixableId?: Maybe<Scalars['uuid']['output']>;
   vendorInstanceId?: Maybe<Scalars['String']['output']>;
   vendorIssueId: Scalars['String']['output'];
+  /** An array relationship */
+  vulnerabilityIssueAttributions: Array<Vulnerability_Issue_Attribution>;
+  /** An aggregate relationship */
+  vulnerabilityIssueAttributions_aggregate: Vulnerability_Issue_Attribution_Aggregate;
   /** An object relationship */
   vulnerabilityReport: Vulnerability_Report;
   vulnerabilityReportId: Scalars['uuid']['output'];
@@ -47404,6 +47767,26 @@ export type Vulnerability_Report_IssueCodeNodes_AggregateArgs = {
 /** columns and relationships of "vulnerability_report_issue" */
 export type Vulnerability_Report_IssueExtraDataArgs = {
   path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue" */
+export type Vulnerability_Report_IssueVulnerabilityIssueAttributionsArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue" */
+export type Vulnerability_Report_IssueVulnerabilityIssueAttributions_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Issue_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Issue_Attribution_Order_By>>;
+  where?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
 };
 
 
@@ -47543,6 +47926,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   unfixableId?: InputMaybe<Uuid_Comparison_Exp>;
   vendorInstanceId?: InputMaybe<String_Comparison_Exp>;
   vendorIssueId?: InputMaybe<String_Comparison_Exp>;
+  vulnerabilityIssueAttributions?: InputMaybe<Vulnerability_Issue_Attribution_Bool_Exp>;
+  vulnerabilityIssueAttributions_aggregate?: InputMaybe<Vulnerability_Issue_Attribution_Aggregate_Bool_Exp>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReportId?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Bool_Exp>;
@@ -48281,6 +48666,7 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   unfixableId?: InputMaybe<Scalars['uuid']['input']>;
   vendorInstanceId?: InputMaybe<Scalars['String']['input']>;
   vendorIssueId?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityIssueAttributions?: InputMaybe<Vulnerability_Issue_Attribution_Arr_Rel_Insert_Input>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Obj_Rel_Insert_Input>;
   vulnerabilityReportId?: InputMaybe<Scalars['uuid']['input']>;
   vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
@@ -48440,6 +48826,7 @@ export type Vulnerability_Report_Issue_Order_By = {
   unfixableId?: InputMaybe<Order_By>;
   vendorInstanceId?: InputMaybe<Order_By>;
   vendorIssueId?: InputMaybe<Order_By>;
+  vulnerabilityIssueAttributions_aggregate?: InputMaybe<Vulnerability_Issue_Attribution_Aggregate_Order_By>;
   vulnerabilityReport?: InputMaybe<Vulnerability_Report_Order_By>;
   vulnerabilityReportId?: InputMaybe<Order_By>;
   vulnerabilityReportIssueNodeDiffFile?: InputMaybe<File_Order_By>;

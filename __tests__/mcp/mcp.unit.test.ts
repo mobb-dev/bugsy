@@ -408,7 +408,7 @@ describe('MCP Server', () => {
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
         expect(result.content[0]?.text).toContain(
-          'Error: failed to reach Mobb GraphQL endpoint'
+          'Cannot verify authentication: Failed to connect to Mobb server'
         )
       }) // Set a higher timeout for this test
 
@@ -416,7 +416,7 @@ describe('MCP Server', () => {
         process.env['MOBB_API_KEY'] = BAD_API_KEY
         mockGraphQL().uploadS3BucketInfo().succeeds()
         mockGraphQL().getLastOrgAndNamedProject().succeeds()
-        mockGraphQL().me().failsWithConnectionError()
+        mockGraphQL().me().failsWithAccessDenied()
         mockGraphQL().createCliLogin().succeeds()
         mockGraphQL().createCommunityUser().failsWithBadApiKey()
         // Mock getEncryptedApiToken to simulate authentication failure by returning empty data
@@ -427,9 +427,7 @@ describe('MCP Server', () => {
         // Create the tool and execute it — error is returned as tool response
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
-        expect(result.content[0]?.text).toContain(
-          'failed to get encrypted api token'
-        )
+        expect(result.content[0]?.text).toContain('Login timeout')
       })
 
       it('should complete the authentication flow', async () => {

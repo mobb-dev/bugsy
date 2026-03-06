@@ -8,9 +8,6 @@ import { AuthManager } from './AuthManager'
 
 const debug = Debug('mobbdev:commands')
 
-export const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
-export const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
-
 const MOBB_LOGIN_REQUIRED_MSG = `🔓 Login to Mobb is Required, you will be redirected to our login page, once the authorization is complete return to this prompt, ${chalk.bgBlue(
   'press any key to continue'
 )};`
@@ -63,6 +60,7 @@ export async function handleMobbLogin({
   apiUrl,
   webAppUrl,
   loginContext,
+  loginPath,
 }: {
   inGqlClient: GQLClient
   apiKey?: string
@@ -70,6 +68,7 @@ export async function handleMobbLogin({
   apiUrl?: string
   webAppUrl?: string
   loginContext?: LoginContext
+  loginPath?: string
 }): Promise<GQLClient> {
   debug(
     'handleMobbLogin: resolved URLs - apiUrl=%s (from param: %s), webAppUrl=%s (from param: %s)',
@@ -85,18 +84,22 @@ export async function handleMobbLogin({
   // Use the provided GQL client
   authManager.setGQLClient(inGqlClient)
 
-  // Check if already authenticated
-  try {
-    const isAuthenticated = await authManager.isAuthenticated()
-    if (isAuthenticated) {
-      createSpinner().start().success({
-        text: `🔓 Login to Mobb succeeded. Already authenticated`,
-      })
-      return authManager.getGQLClient()
-    }
-  } catch (error) {
-    debug('Authentication check failed:', error)
+  // Check if already authenticated — use 3-state result
+  const authResult = await authManager.checkAuthentication()
+  if (authResult.isAuthenticated) {
+    createSpinner().start().success({
+      text: `🔓 Login to Mobb succeeded. Already authenticated`,
+    })
+    return authManager.getGQLClient()
   }
+
+  // Transient error (504, network failure, etc.) — do NOT open browser
+  if (authResult.reason === 'unknown') {
+    debug('Auth check returned unknown: %s', authResult.message)
+    throw new CliError(`Cannot verify authentication: ${authResult.message}`)
+  }
+
+  // reason === 'invalid' — token is definitively bad, proceed to login
 
   // If API key provided but authentication failed
   if (apiKey) {
@@ -121,7 +124,7 @@ export async function handleMobbLogin({
 
   try {
     // Generate login URL and open browser
-    const loginUrl = await authManager.generateLoginUrl(loginContext)
+    const loginUrl = await authManager.generateLoginUrl(loginPath, loginContext)
 
     if (!loginUrl) {
       loginSpinner.error({

@@ -14,11 +14,8 @@ import tmp from 'tmp'
 import { z } from 'zod'
 
 import { type CommandOptions } from '../../commands'
-import {
-  getAuthenticatedGQLClient,
-  LOGIN_CHECK_DELAY,
-  LOGIN_MAX_WAIT,
-} from '../../commands/handleMobbLogin'
+import { LOGIN_CHECK_DELAY, LOGIN_MAX_WAIT } from '../../commands/AuthManager'
+import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import {
   progressMassages,
   Scanner,

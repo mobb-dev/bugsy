@@ -13,7 +13,6 @@ import { beforeEach } from 'vitest'
 import { z } from 'zod'
 
 import { AuthManager } from '../src/commands/AuthManager'
-import { McpAuthService } from '../src/mcp/services/McpAuthService'
 
 // Configure dotenv — load monorepo-level .env first, then local cli .env
 // (later calls don't overwrite existing vars, so cli/.env fills in gaps)
@@ -86,7 +85,7 @@ export function setupCommonBeforeEach() {
     // Import vi at runtime to avoid hoisting issues
     const { vi } = await import('vitest')
     vi.clearAllMocks() // Clear all spy calls
-    McpAuthService.resetCooldown() // Prevent browser cooldown leaking between tests
+    AuthManager.resetCooldown() // Prevent browser cooldown leaking between tests
   })
 }
 

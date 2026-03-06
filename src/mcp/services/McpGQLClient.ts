@@ -1,193 +1,85 @@
 import crypto from 'crypto'
-import { ClientError, GraphQLClient } from 'graphql-request'
-import { v4 as uuidv4 } from 'uuid'
 
-import { DEFAULT_API_URL } from '../../constants'
+import { AuthManager } from '../../commands/AuthManager'
 import {
-  CreateCliLoginMutationVariables,
-  FinalizeAiBlameInferencesUploadMutation,
-  FinalizeAiBlameInferencesUploadMutationVariables,
+  GQLClient,
+  isAuthError,
+  isTransientError,
+} from '../../features/analysis/graphql'
+import {
   Fix_Report_State_Enum,
   FixDownloadSource,
   GetAnalysisQuery,
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
   GetAnalysisSubscriptionSubscriptionVariables,
-  GetEncryptedApiTokenQueryVariables,
-  getSdk,
   MeQuery,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
-  UploadAiBlameInferencesInitMutation,
-  UploadAiBlameInferencesInitMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { configStore } from '../../utils/ConfigStoreService'
-import { fetchWithProxy, getProxyAgent, httpToWsUrl } from '../../utils/proxy'
+import { getProxyAgent, httpToWsUrl } from '../../utils/proxy'
 import { subscribeStream } from '../../utils/subscribe/subscribe'
-import { MCP_API_KEY_HEADER_NAME, MCP_DEFAULT_LIMIT } from '../core/configs'
-import { ApiConnectionError } from '../core/Errors'
+import {
+  MCP_DEFAULT_LIMIT,
+  MCP_TOOLS_BROWSER_COOLDOWN_MS,
+} from '../core/configs'
+import {
+  ApiConnectionError,
+  AuthenticationError,
+  FailedToGetApiTokenError,
+} from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
-import { McpAuthService } from './McpAuthService'
 import { LoginContext } from './types'
 
-type GQLClientArgs =
-  | {
-      apiKey: string
-      type: 'apiKey'
-    }
-  | {
-      token: string
-      type: 'token'
-    }
+// Re-export for existing consumers
+export { isAuthError, isTransientError }
+// Backwards-compatible alias
+export const isNetworkError = isTransientError
 
-/**
- * Determines if an error represents a definitive authentication failure
- * from the Hasura GraphQL endpoint. Hasura returns HTTP 200 for auth errors,
- * so we must inspect the GraphQL error extensions.
- *
- * Returns true ONLY for access-denied errors. Network errors, timeouts,
- * and other transient failures return false.
- */
-export function isAuthError(error: unknown): boolean {
-  if (error instanceof ClientError) {
-    const gqlErrors = error.response?.errors
-    return (
-      gqlErrors?.some(
-        (e) =>
-          e.extensions?.['code'] === 'access-denied' ||
-          e.message?.includes('Authentication hook unauthorized')
-      ) ?? false
-    )
-  }
-  return false
-}
+type McpGQLClientArgs =
+  | { apiKey: string; type: 'apiKey' }
+  | { token: string; type: 'token' }
 
-/**
- * Determines if an error is a network-level failure (endpoint unreachable,
- * DNS failure, timeout, etc.) as opposed to a server-side response.
- */
-export function isNetworkError(error: unknown): boolean {
-  const errorString = error?.toString() ?? ''
-  return (
-    errorString.includes('FetchError') ||
-    errorString.includes('TypeError') ||
-    errorString.includes('ECONNREFUSED') ||
-    errorString.includes('ENOTFOUND') ||
-    errorString.includes('ETIMEDOUT') ||
-    errorString.includes('UND_ERR')
-  )
-}
-
-// Simple GQLClient for the fixVulnerabilities tool
-export class McpGQLClient {
-  private client: GraphQLClient
-  private clientSdk: ReturnType<typeof getSdk>
-  _auth: GQLClientArgs
+export class McpGQLClient extends GQLClient {
   private currentUser: MeQuery['me'] | null = null
-  private readonly apiUrl: string
 
-  constructor(args: GQLClientArgs) {
-    this._auth = args
-    this.apiUrl = process.env['API_URL'] || DEFAULT_API_URL
-
-    logDebug(`[GraphQL] Creating graphql client with api url ${this.apiUrl}`, {
-      args,
+  constructor(args: McpGQLClientArgs) {
+    // Resolve API URL at construction time from env (matching old behavior)
+    // so tests can set process.env['API_URL'] before creating a client.
+    super({
+      ...args,
+      apiUrl: process.env['API_URL'] || undefined,
     })
-    this.client = new GraphQLClient(this.apiUrl, {
-      headers:
-        args.type === 'apiKey'
-          ? { [MCP_API_KEY_HEADER_NAME]: args.apiKey || '' }
-          : {
-              Authorization: `Bearer ${args.token}`,
-            },
-      fetch: fetchWithProxy,
-      requestMiddleware: (request) => {
-        const requestId = uuidv4()
-        return {
-          ...request,
-          headers: {
-            ...request.headers,
-            'x-hasura-request-id': requestId,
-          },
-        }
-      },
-    })
-
-    this.clientSdk = getSdk(this.client)
   }
 
   private getErrorContext() {
     return {
-      endpoint: this.apiUrl,
+      endpoint: this._apiUrl,
       apiKey: this._auth.type === 'apiKey' ? this._auth.apiKey : '',
       headers: {
-        [MCP_API_KEY_HEADER_NAME]:
-          this._auth.type === 'apiKey' ? '[REDACTED]' : 'undefined',
+        'x-mobb-key': this._auth.type === 'apiKey' ? '[REDACTED]' : 'undefined',
         'x-hasura-request-id': '[DYNAMIC]',
       },
     }
   }
 
-  async uploadAIBlameInferencesInitRaw(
-    variables: UploadAiBlameInferencesInitMutationVariables
-  ): Promise<UploadAiBlameInferencesInitMutation> {
-    return await this.clientSdk.UploadAIBlameInferencesInit(variables)
+  override async getUserInfo() {
+    const me = await super.getUserInfo()
+    this.currentUser = me
+    return me
   }
 
-  async finalizeAIBlameInferencesUploadRaw(
-    variables: FinalizeAiBlameInferencesUploadMutationVariables
-  ): Promise<FinalizeAiBlameInferencesUploadMutation> {
-    return await this.clientSdk.FinalizeAIBlameInferencesUpload(variables)
+  getCurrentUser(): MeQuery['me'] | null {
+    return this.currentUser
   }
 
-  async isApiEndpointReachable(): Promise<boolean> {
-    try {
-      logDebug('[GraphQL] Calling Me query for API connection verification')
-      const result = await this.getUserInfo()
-      logDebug('[GraphQL] Me query successful', { result })
-      return true
-    } catch (e: unknown) {
-      logDebug('[GraphQL] API connection verification failed', { error: e })
-      if (isNetworkError(e)) {
-        logError('[GraphQL] API endpoint unreachable (network error)', {
-          error: e,
-        })
-        return false
-      }
-      // Auth errors or other GraphQL errors mean the endpoint IS reachable
-      logDebug('[GraphQL] API endpoint is reachable (non-network error)')
-      return true
-    }
-  }
-
-  /**
-   * Verifies both API endpoint reachability and user authentication
-   * @returns true if both API is reachable and user is authenticated
-   */
-  async verifyApiConnection(): Promise<boolean> {
-    // First check if API endpoint is reachable
-    const isReachable = await this.isApiEndpointReachable()
-    if (!isReachable) {
-      return false
-    }
-
-    // Then validate user token
-    try {
-      await this.validateUserToken()
-      return true
-    } catch (e) {
-      logError('User token validation failed', { error: e })
-      return false
-    }
-  }
-
-  async uploadS3BucketInfo(): Promise<UploadS3BucketInfoMutation> {
+  override async uploadS3BucketInfo(): Promise<UploadS3BucketInfoMutation> {
     try {
       logDebug('[GraphQL] Calling uploadS3BucketInfo mutation')
-      // Use the SDK's uploadS3BucketInfo method
-      const result = await this.clientSdk.uploadS3BucketInfo({
+      const result = await this._clientSdk.uploadS3BucketInfo({
         fileName: 'report.json',
       })
       logDebug('[GraphQL] uploadS3BucketInfo successful', { result })
@@ -201,10 +93,12 @@ export class McpGQLClient {
     }
   }
 
-  async getAnalysis(analysisId: string): Promise<GetAnalysisQuery['analysis']> {
+  override async getAnalysis(
+    analysisId: string
+  ): Promise<NonNullable<GetAnalysisQuery['analysis']>> {
     try {
       logDebug('[GraphQL] Calling getAnalysis query', { analysisId })
-      const res = await this.clientSdk.getAnalysis({
+      const res = await this._clientSdk.getAnalysis({
         analysisId,
       })
       logDebug('[GraphQL] getAnalysis successful', { result: res })
@@ -222,14 +116,14 @@ export class McpGQLClient {
     }
   }
 
-  async submitVulnerabilityReport(
+  override async submitVulnerabilityReport(
     variables: SubmitVulnerabilityReportMutationVariables
   ): Promise<SubmitVulnerabilityReportMutation> {
     try {
       logDebug('[GraphQL] Calling SubmitVulnerabilityReport mutation', {
         variables,
       })
-      const result = await this.clientSdk.SubmitVulnerabilityReport(variables)
+      const result = await this._clientSdk.SubmitVulnerabilityReport(variables)
       logDebug('[GraphQL] SubmitVulnerabilityReport successful', { result })
       return result
     } catch (e) {
@@ -324,16 +218,16 @@ export class McpGQLClient {
               ? {
                   apiKey: this._auth.apiKey,
                   type: 'apiKey',
-                  url: httpToWsUrl(this.apiUrl),
+                  url: httpToWsUrl(this._apiUrl),
                   timeoutInMs: params.timeoutInMs,
-                  proxyAgent: getProxyAgent(this.apiUrl),
+                  proxyAgent: getProxyAgent(this._apiUrl),
                 }
               : {
                   token: this._auth.token,
                   type: 'token',
-                  url: httpToWsUrl(this.apiUrl),
+                  url: httpToWsUrl(this._apiUrl),
                   timeoutInMs: params.timeoutInMs,
-                  proxyAgent: getProxyAgent(this.apiUrl),
+                  proxyAgent: getProxyAgent(this._apiUrl),
                 }
           )
         }
@@ -370,7 +264,7 @@ export class McpGQLClient {
       logDebug('[GraphQL] Calling getLastOrgAndNamedProject query', {
         projectName,
       })
-      const orgAndProjectRes = await this.clientSdk.getLastOrgAndNamedProject({
+      const orgAndProjectRes = await this._clientSdk.getLastOrgAndNamedProject({
         email: userEmail,
         projectName,
       })
@@ -405,7 +299,7 @@ export class McpGQLClient {
       })
 
       try {
-        const createdProject = await this.clientSdk.CreateProject({
+        const createdProject = await this._clientSdk.CreateProject({
           organizationId: organization.id,
           projectName: projectName,
         })
@@ -436,7 +330,7 @@ export class McpGQLClient {
 
           // Retry fetching the project that was created by another process
           const retryOrgAndProjectRes =
-            await this.clientSdk.getLastOrgAndNamedProject({
+            await this._clientSdk.getLastOrgAndNamedProject({
               email: userEmail,
               projectName,
             })
@@ -480,88 +374,6 @@ export class McpGQLClient {
     }
   }
 
-  async getUserInfo() {
-    const { me } = await this.clientSdk.Me()
-    this.currentUser = me
-    return me
-  }
-
-  getCurrentUser(): MeQuery['me'] | null {
-    return this.currentUser
-  }
-
-  async validateUserToken() {
-    logDebug('[GraphQL] Validating user token')
-
-    try {
-      await this.clientSdk.CreateCommunityUser()
-      const info = await this.getUserInfo()
-      if (!info) {
-        logDebug('[GraphQL] User token is invalid (no user info returned)')
-        return false
-      }
-      logDebug('[GraphQL] User token validated successfully')
-      return info.email || true
-    } catch (e) {
-      if (isAuthError(e)) {
-        // Hasura returned access-denied — the token is definitively invalid.
-        logDebug('[GraphQL] User token is invalid (auth error from server)')
-        return false
-      }
-      if (isNetworkError(e)) {
-        // Network unreachable — we can't determine token validity.
-        // Throw so callers don't open browser or overwrite a valid token.
-        logError('[GraphQL] Token validation failed due to network error', {
-          error: e,
-        })
-        throw e
-      }
-      // Non-auth, non-network error (e.g. backend resolver bug, data issue).
-      // We can't determine token validity — don't invalidate it, but don't
-      // claim success either. Throw so callers skip browser auth.
-      logError('[GraphQL] Token validation failed with unexpected error', {
-        error: e,
-      })
-      throw e
-    }
-  }
-
-  async createCliLogin(
-    variables: CreateCliLoginMutationVariables
-  ): Promise<string> {
-    try {
-      const res = await this.clientSdk.CreateCliLogin(variables, {
-        // We may have outdated API key in the config storage. Avoid using it for the login request.
-        [MCP_API_KEY_HEADER_NAME]: '',
-      })
-
-      const loginId = res.insert_cli_login_one?.id || ''
-      if (!loginId) {
-        logError('[GraphQL] Create cli login failed - no login ID returned')
-        return ''
-      }
-      return loginId
-    } catch (e) {
-      logError('[GraphQL] Create cli login failed', { error: e })
-      return ''
-    }
-  }
-
-  async getEncryptedApiToken(
-    variables: GetEncryptedApiTokenQueryVariables
-  ): Promise<string | null> {
-    try {
-      const res = await this.clientSdk.GetEncryptedApiToken(variables, {
-        // We may have outdated API key in the config storage. Avoid using it for the login request.
-        [MCP_API_KEY_HEADER_NAME]: '',
-      })
-      return res?.cli_login_by_pk?.encryptedApiToken || null
-    } catch (e) {
-      logError('[GraphQL] Get encrypted api token failed', { error: e })
-      return null
-    }
-  }
-
   private generateFixUrl({
     fixId,
     organizationId,
@@ -577,7 +389,7 @@ export class McpGQLClient {
       return undefined
     }
 
-    const appBaseUrl = this.apiUrl
+    const appBaseUrl = this._apiUrl
       .replace('/v1/graphql', '')
       .replace('api.', '')
     return `${appBaseUrl}/organization/${organizationId}/project/${projectId}/report/${reportId}/fix/${fixId}`
@@ -641,7 +453,7 @@ export class McpGQLClient {
 
   async updateFixesDownloadStatus(fixIds: string[]) {
     if (fixIds.length > 0) {
-      const resUpdate = await this.clientSdk.updateDownloadedFixData({
+      const resUpdate = await this._clientSdk.updateDownloadedFixData({
         fixIds,
         source: FixDownloadSource.Mcp,
       })
@@ -656,7 +468,7 @@ export class McpGQLClient {
 
   async updateAutoAppliedFixesStatus(fixIds: string[]) {
     if (fixIds.length > 0) {
-      const resUpdate = await this.clientSdk.updateDownloadedFixData({
+      const resUpdate = await this._clientSdk.updateDownloadedFixData({
         fixIds,
         source: FixDownloadSource.AutoMvs,
       })
@@ -692,7 +504,7 @@ export class McpGQLClient {
         userEmail: userInfo.email,
       })
 
-      const result = await this.clientSdk.GetUserMvsAutoFix({
+      const result = await this._clientSdk.GetUserMvsAutoFix({
         userEmail: userInfo.email,
       })
 
@@ -753,7 +565,7 @@ export class McpGQLClient {
         }
       }
 
-      const resp = await this.clientSdk.GetLatestReportByRepoUrl({
+      const resp = await this._clientSdk.GetLatestReportByRepoUrl({
         repoUrl,
         limit,
         offset,
@@ -858,7 +670,7 @@ export class McpGQLClient {
         })
       }
 
-      const res = await this.clientSdk.GetReportFixes({
+      const res = await this._clientSdk.GetReportFixes({
         reportId,
         limit,
         offset,
@@ -918,51 +730,80 @@ export async function createAuthenticatedMcpGQLClient({
   isBackgroundCall?: boolean
   loginContext?: LoginContext
 } = {}): Promise<McpGQLClient> {
+  // Set MCP-specific browser cooldown
+  if (isBackgroundCall) {
+    AuthManager.setBrowserCooldown(MCP_TOOLS_BROWSER_COOLDOWN_MS)
+  }
+
   logDebug('[GraphQL] Getting config', {
     apiToken: configStore.get('apiToken'),
   })
-  const initialClient = new McpGQLClient({
-    apiKey:
-      process.env['MOBB_API_KEY'] ||
-      process.env['API_KEY'] || // fallback for backward compatibility
-      configStore.get('apiToken') ||
-      '',
-    type: 'apiKey',
-  })
 
-  const isApiEndpointReachable = await initialClient.isApiEndpointReachable()
-  logDebug('[GraphQL] API connection status', { isApiEndpointReachable })
-  if (!isApiEndpointReachable) {
-    throw new ApiConnectionError('Error: failed to reach Mobb GraphQL endpoint')
-  }
+  const apiKey =
+    process.env['MOBB_API_KEY'] ||
+    process.env['API_KEY'] || // fallback for backward compatibility
+    configStore.get('apiToken') ||
+    ''
 
-  logDebug('[GraphQL] Validating user token')
-  let userVerify: string | boolean
-  try {
-    userVerify = await initialClient.validateUserToken()
-  } catch (e) {
-    // validateUserToken() throws on transient errors (network, timeout).
-    // Do NOT fall through to browser auth — the token may be perfectly valid.
-    logError('[GraphQL] Token validation failed due to transient error', {
-      error: e,
-    })
-    throw e
-  }
+  // Use the same resolved API URL for both McpGQLClient and AuthManager
+  // to avoid subtle mismatches between process.env reads at different times.
+  const resolvedApiUrl = process.env['API_URL'] || undefined
+  const authManager = new AuthManager(undefined, resolvedApiUrl)
+  const initialClient = new McpGQLClient({ apiKey, type: 'apiKey' })
+  authManager.setGQLClient(initialClient)
 
-  if (userVerify) {
+  const authResult = await authManager.checkAuthentication()
+
+  if (authResult.isAuthenticated) {
     return initialClient
   }
 
-  // Token verification failed, authenticate using the auth service
-  const authService = new McpAuthService(initialClient)
-  const newApiToken = await authService.authenticate(
-    isBackgroundCall,
+  if (authResult.reason === 'unknown') {
+    // Transient error — do NOT open browser
+    logError('[GraphQL] Auth check failed with transient error', {
+      message: authResult.message,
+    })
+    throw new ApiConnectionError(
+      `Cannot verify authentication: ${authResult.message}`
+    )
+  }
+
+  // Token invalid -> login flow
+  const loginUrl = await authManager.generateLoginUrl(
+    '/mvs-login',
     loginContext
   )
+  if (!loginUrl) {
+    throw new AuthenticationError('Failed to generate login URL')
+  }
 
-  // Store the new token for future use
+  const opened = authManager.openUrlInBrowser()
+  if (!opened) {
+    throw new AuthenticationError(
+      'Authentication required but browser cooldown is active'
+    )
+  }
+
+  // Use waitForApiToken (not waitForAuthentication) to avoid a redundant
+  // validateUserToken call on a plain GQLClient. We validate below on
+  // the McpGQLClient which overrides createCommunityUser to propagate
+  // errors — ensuring the user is properly registered.
+  const newApiToken = await authManager.waitForApiToken()
+  if (!newApiToken) {
+    throw new FailedToGetApiTokenError(
+      `Login timeout: authentication not completed within ${AuthManager.loginMaxWait / 1000 / 60} minutes`
+    )
+  }
+
+  const authenticatedClient = new McpGQLClient({
+    apiKey: newApiToken,
+    type: 'apiKey',
+  })
+  const loginSuccess = await authenticatedClient.validateUserToken()
+  if (!loginSuccess) {
+    throw new AuthenticationError('Login failed: token validation failed')
+  }
   configStore.set('apiToken', newApiToken)
 
-  // Return a client with the new token
-  return new McpGQLClient({ apiKey: newApiToken, type: 'apiKey' })
+  return authenticatedClient
 }

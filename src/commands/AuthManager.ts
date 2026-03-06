@@ -5,15 +5,33 @@ import Debug from 'debug'
 import open from 'open'
 
 import { API_URL, WEB_APP_URL } from '../constants'
-import { GQLClient } from '../features/analysis/graphql'
+import { GQLClient, isTransientError } from '../features/analysis/graphql'
 import { buildLoginUrl, LoginContext } from '../mcp/services/types'
 import { sleep } from '../utils'
 import { configStore } from '../utils/ConfigStoreService'
 
 const debug = Debug('mobbdev:auth')
 
-export const LOGIN_MAX_WAIT = 10 * 60 * 1000 // 10 minutes
-export const LOGIN_CHECK_DELAY = 5 * 1000 // 5 sec
+export const LOGIN_MAX_WAIT = 2 * 60 * 1000 // 2 minutes
+export const LOGIN_CHECK_DELAY = 2 * 1000 // 2 sec
+
+/**
+ * Result of an authentication check with 3-state outcome.
+ *
+ * - `isAuthenticated: true` — User is authenticated, proceed normally.
+ * - `isAuthenticated: false, reason: 'invalid'` — Token is definitively invalid
+ *   (access-denied from server). Callers should trigger the login flow.
+ * - `isAuthenticated: false, reason: 'unknown'` — Cannot determine auth status due
+ *   to a transient error (network failure, 504, etc.). Callers should NOT trigger
+ *   login; instead, propagate the error.
+ */
+export type AuthResult =
+  | { isAuthenticated: true }
+  | {
+      isAuthenticated: false
+      reason: 'invalid' | 'unknown'
+      message: string
+    }
 
 export class AuthManager {
   private publicKey?: crypto.KeyObject
@@ -27,28 +45,49 @@ export class AuthManager {
   /** Maximum time (ms) to wait for login authentication. Override in tests for faster failures. */
   static loginMaxWait: number = LOGIN_MAX_WAIT
 
+  /** Browser cooldown: minimum ms between browser opens (0 = no cooldown) */
+  private static browserCooldownMs = 0
+  private static lastBrowserOpenTime = 0
+
   constructor(webAppUrl?: string, apiUrl?: string) {
     this.resolvedWebAppUrl = webAppUrl || WEB_APP_URL
     this.resolvedApiUrl = apiUrl || API_URL
   }
 
-  openUrlInBrowser(): boolean {
-    if (this.currentBrowserUrl) {
-      open(this.currentBrowserUrl)
-      return true
-    }
-    return false
+  /** Set the minimum interval between browser opens (MCP sets this to 24h) */
+  static setBrowserCooldown(ms: number): void {
+    AuthManager.browserCooldownMs = ms
   }
 
-  async waitForAuthentication(): Promise<boolean> {
-    let newApiToken = null
-    for (let i = 0; i < AuthManager.loginMaxWait / LOGIN_CHECK_DELAY; i++) {
-      newApiToken = await this.getApiToken()
-      if (newApiToken) {
-        break
-      }
-      await sleep(LOGIN_CHECK_DELAY)
+  /** Reset cooldown state. Used by tests to ensure isolation. */
+  static resetCooldown(): void {
+    AuthManager.lastBrowserOpenTime = 0
+    AuthManager.browserCooldownMs = 0
+  }
+
+  openUrlInBrowser(): boolean {
+    if (!this.currentBrowserUrl) {
+      return false
     }
+    if (
+      AuthManager.browserCooldownMs > 0 &&
+      Date.now() - AuthManager.lastBrowserOpenTime <
+        AuthManager.browserCooldownMs
+    ) {
+      debug('browser cooldown active, skipping open')
+      return false
+    }
+    open(this.currentBrowserUrl)
+    AuthManager.lastBrowserOpenTime = Date.now()
+    return true
+  }
+
+  /**
+   * Polls for the encrypted API token, decrypts it, validates it, and stores it.
+   * Returns true if login succeeded.
+   */
+  async waitForAuthentication(): Promise<boolean> {
+    const newApiToken = await this.waitForApiToken()
     if (!newApiToken) {
       return false
     }
@@ -69,63 +108,89 @@ export class AuthManager {
   }
 
   /**
-   * Checks if the user is already authenticated
+   * Polls for the encrypted API token and decrypts it.
+   * Does NOT validate or store the token — use this when the caller
+   * needs to validate on a specific client type (e.g. McpGQLClient).
+   */
+  async waitForApiToken(): Promise<string | null> {
+    for (let i = 0; i < AuthManager.loginMaxWait / LOGIN_CHECK_DELAY; i++) {
+      const token = await this.getApiToken()
+      if (token) {
+        return token
+      }
+      await sleep(LOGIN_CHECK_DELAY)
+    }
+    return null
+  }
+
+  /**
+   * Checks if the user is already authenticated.
+   * Returns the full AuthResult so callers can distinguish 'invalid' from 'unknown'.
    */
   async isAuthenticated(): Promise<boolean> {
     if (this.authenticated === null) {
       const result = await this.checkAuthentication()
       this.authenticated = result.isAuthenticated
       if (!result.isAuthenticated) {
-        debug('isAuthenticated: false — %s', result.message)
+        debug('isAuthenticated: false — %s (%s)', result.message, result.reason)
       }
     }
     return this.authenticated
   }
 
   /**
-   * Private function to check if the user is authenticated with the server
+   * Full 3-state auth check returning an {@link AuthResult}.
+   *
+   * - `isAuthenticated: true` — token is valid.
+   * - `reason: 'invalid'` — definitive auth failure (access-denied). Caller should trigger login.
+   * - `reason: 'unknown'` — transient/network error. Caller should NOT trigger login.
    */
-  private async checkAuthentication(
-    apiKey?: string
-  ): Promise<{ isAuthenticated: boolean; message: string }> {
+  async checkAuthentication(apiKey?: string): Promise<AuthResult> {
+    if (!this.gqlClient) {
+      this.gqlClient = this.getGQLClient(apiKey)
+    }
+
+    // Verify connection to server
+    const isConnected = await this.gqlClient.verifyApiConnection()
+    if (!isConnected) {
+      return {
+        isAuthenticated: false,
+        reason: 'unknown',
+        message: 'Failed to connect to Mobb server',
+      }
+    }
+
+    // Check if user is already authenticated
     try {
-      if (!this.gqlClient) {
-        this.gqlClient = this.getGQLClient(apiKey)
-      }
-
-      // Verify connection to server
-      const isConnected = await this.gqlClient.verifyApiConnection()
-      if (!isConnected) {
-        return {
-          isAuthenticated: false,
-          message: 'Failed to connect to Mobb server',
-        }
-      }
-
-      // Check if user is already authenticated
       const userVerify = await this.gqlClient.validateUserToken()
       if (!userVerify) {
         return {
           isAuthenticated: false,
+          reason: 'invalid',
           message: 'User token validation failed',
         }
       }
     } catch (error) {
+      // validateUserToken() throws on transient/unknown errors
       return {
         isAuthenticated: false,
+        reason: 'unknown',
         message:
           error instanceof Error
             ? error.message
             : 'Unknown authentication error',
       }
     }
-    return { isAuthenticated: true, message: 'Successfully authenticated' }
+    return { isAuthenticated: true }
   }
 
   /**
    * Generates a login URL for manual authentication
    */
-  async generateLoginUrl(loginContext?: LoginContext): Promise<string | null> {
+  async generateLoginUrl(
+    loginPath?: string,
+    loginContext?: LoginContext
+  ): Promise<string | null> {
     try {
       if (!this.gqlClient) {
         this.gqlClient = this.getGQLClient()
@@ -147,7 +212,7 @@ export class AuthManager {
       })
 
       // Build the login URL
-      const webLoginUrl = `${this.resolvedWebAppUrl}/cli-login`
+      const webLoginUrl = `${this.resolvedWebAppUrl}${loginPath || '/cli-login'}`
       const browserUrl = loginContext
         ? buildLoginUrl(webLoginUrl, this.loginId, os.hostname(), loginContext)
         : `${webLoginUrl}/${this.loginId}?hostname=${os.hostname()}`
@@ -162,24 +227,34 @@ export class AuthManager {
   }
 
   /**
-   * Retrieves and decrypts the API token after authentication
+   * Retrieves and decrypts the API token after authentication.
+   * Returns null if the token is not yet available or on transient errors.
    */
   async getApiToken(): Promise<string | null> {
     if (!this.gqlClient || !this.loginId || !this.privateKey) {
       return null
     }
-    const encryptedApiToken = await this.gqlClient.getEncryptedApiToken({
-      loginId: this.loginId,
-    })
-    if (encryptedApiToken) {
-      return crypto
-        .privateDecrypt(
-          this.privateKey,
-          Buffer.from(encryptedApiToken, 'base64')
-        )
-        .toString('utf-8')
+    try {
+      const encryptedApiToken = await this.gqlClient.getEncryptedApiToken({
+        loginId: this.loginId,
+      })
+      if (encryptedApiToken) {
+        return crypto
+          .privateDecrypt(
+            this.privateKey,
+            Buffer.from(encryptedApiToken, 'base64')
+          )
+          .toString('utf-8')
+      }
+      return null
+    } catch (error) {
+      if (isTransientError(error)) {
+        debug('getApiToken: transient error, will retry')
+      } else {
+        debug('getApiToken: unexpected error: %O', error)
+      }
+      return null
     }
-    return null
   }
 
   /**

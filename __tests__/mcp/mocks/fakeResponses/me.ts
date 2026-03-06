@@ -48,6 +48,17 @@ export const mockMeFetchError = () => {
   return error
 }
 
+export const mockMeAccessDenied = {
+  errors: [
+    {
+      message: 'Authentication hook unauthorized',
+      extensions: {
+        code: 'access-denied',
+      },
+    },
+  ],
+}
+
 export const mockMeError = (message: string) => ({
   errors: [
     {

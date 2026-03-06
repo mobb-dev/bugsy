@@ -29,18 +29,25 @@ export function createGitWithLogging(
 
     logger.info({ callID, bin }, 'Start git CLI call')
 
-    const errChunks: string[] = []
-    const outChunks: string[] = []
-    let isStdoutClosed = false
-    let isStderrClosed = false
+    let errChunks: string[] = []
+    let outChunks: string[] = []
+    let isStdoutDone = false
+    let isStderrDone = false
 
-    stderr.on('data', (data) => errChunks.push(data.toString('utf8')))
-    stdout.on('data', (data) => outChunks.push(data.toString('utf8')))
+    const onStderrData = (data: Buffer) => errChunks.push(data.toString('utf8'))
+    const onStdoutData = (data: Buffer) => outChunks.push(data.toString('utf8'))
 
-    function logData() {
-      if (!isStderrClosed || !isStdoutClosed) {
+    stderr.on('data', onStderrData)
+    stdout.on('data', onStdoutData)
+
+    let finalized = false
+
+    function finalizeAndCleanup() {
+      if (finalized || !isStderrDone || !isStdoutDone) {
         return
       }
+      finalized = true
+
       const logObj = {
         callID,
         bin,
@@ -48,15 +55,31 @@ export function createGitWithLogging(
         out: `${outChunks.join('').slice(0, 200)}...`,
       }
       logger.info(logObj, 'git log output')
+
+      // Remove listeners and free chunk arrays to prevent FD/memory leaks
+      stderr.removeListener('data', onStderrData)
+      stdout.removeListener('data', onStdoutData)
+      errChunks = []
+      outChunks = []
     }
 
-    stderr.on('close', () => {
-      isStderrClosed = true
-      logData()
+    function markDone(stream: 'stderr' | 'stdout') {
+      if (stream === 'stderr') isStderrDone = true
+      else isStdoutDone = true
+      finalizeAndCleanup()
+    }
+
+    stderr.on('close', () => markDone('stderr'))
+    stdout.on('close', () => markDone('stdout'))
+
+    // Handle stream errors to prevent unhandled error events and ensure cleanup
+    stderr.on('error', (error) => {
+      logger.info({ callID, error: String(error) }, 'git stderr stream error')
+      markDone('stderr')
     })
-    stdout.on('close', () => {
-      isStdoutClosed = true
-      logData()
+    stdout.on('error', (error) => {
+      logger.info({ callID, error: String(error) }, 'git stdout stream error')
+      markDone('stdout')
     })
   })
 }

@@ -1,6 +1,21 @@
 import { parseScmURL } from './urlParser'
 
 /**
+ * Normalizes a repository URL to its canonical (lowercased) form.
+ * Throws if the URL cannot be parsed — callers must supply valid repo URLs.
+ *
+ * Use this anywhere a repo URL needs to be normalized for consistent
+ * DB queries, S3 key generation, or string comparisons.
+ */
+export function normalizeRepoUrl(repoUrl: string): string {
+  const parsed = parseScmURL(repoUrl)
+  if (parsed) {
+    return parsed.canonicalUrl
+  }
+  throw new Error(`[normalizeRepoUrl] failed to parse repo URL: ${repoUrl}`)
+}
+
+/**
  * Gets a standardized repository slug from a repository URL.
  * Uses parseScmURL which handles both known SCM providers and unknown hosts.
  * Converts URL format to: hostname-projectPath (with dots/slashes replaced by dashes)

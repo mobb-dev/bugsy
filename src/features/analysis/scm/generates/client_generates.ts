@@ -1521,24 +1521,23 @@ export type TracyDiffUploadInfo = {
   url: Scalars['String']['output'];
 };
 
-export type TracyRawDataUploadInfo = {
-  __typename?: 'TracyRawDataUploadInfo';
-  recordId: Scalars['String']['output'];
-  uploadFieldsJSON: Scalars['String']['output'];
-  uploadKey: Scalars['String']['output'];
-  url: Scalars['String']['output'];
-};
-
-export type TracyRawDataUploadResponse = {
-  __typename?: 'TracyRawDataUploadResponse';
+export type TracyRawDataUploadUrlResponse = {
+  __typename?: 'TracyRawDataUploadUrlResponse';
   error?: Maybe<Scalars['String']['output']>;
+  keyPrefix?: Maybe<Scalars['String']['output']>;
   status: Status;
-  uploads: Array<TracyRawDataUploadInfo>;
+  uploadFieldsJSON?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type TracyRecordInput = {
   additions?: InputMaybe<Scalars['String']['input']>;
-  /** Raw inference fields (required when uploading a raw inference record) */
+  /**
+   * Raw inference fields — required together when uploading a raw inference record.
+   * Upload rawData to S3 first via getTracyRawDataUploadUrl, then pass the key here.
+   * Both blameType and rawDataS3Key must be set for raw inference records.
+   * For edit records, these fields should be omitted.
+   */
   blameType?: InputMaybe<AiBlameInferenceType>;
   clientVersion: Scalars['String']['input'];
   computerName?: InputMaybe<Scalars['String']['input']>;
@@ -1546,11 +1545,6 @@ export type TracyRecordInput = {
   editType?: InputMaybe<EditType>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   platform: InferencePlatform;
-  rawData?: InputMaybe<Scalars['String']['input']>;
-  /**
-   * S3 key for large rawData blobs. Mutually exclusive with rawData.
-   * Used when rawData exceeds the payload size limit (~4MB).
-   */
   rawDataS3Key?: InputMaybe<Scalars['String']['input']>;
   recordId: Scalars['String']['input'];
   recordTimestamp: Scalars['Timestamp']['input'];
@@ -19048,10 +19042,11 @@ export type Mutation_Root = {
    */
   getTracyDiffUploadUrl: GetTracyDiffUploadUrlResponse;
   /**
-   * Get presigned S3 URLs for uploading large rawData blobs.
-   * Call this before uploadTracyRecords when any record's rawData exceeds ~3MB.
+   * Get a single presigned S3 URL for uploading rawData blobs in batch.
+   * Call this before uploadTracyRecords. Use the returned keyPrefix to construct
+   * per-record S3 keys as ${keyPrefix}${recordId}.json.
    */
-  getTracyRawDataUploadUrls: TracyRawDataUploadResponse;
+  getTracyRawDataUploadUrl: TracyRawDataUploadUrlResponse;
   handleGithubAppCallback: BaseResponseWithMessage;
   handleGithubWebhook: GithubWebhookResponse;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
@@ -21545,12 +21540,6 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 /** mutation root */
 export type Mutation_RootGetTracyDiffUploadUrlArgs = {
   commitSha: Scalars['String']['input'];
-};
-
-
-/** mutation root */
-export type Mutation_RootGetTracyRawDataUploadUrlsArgs = {
-  recordIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -31090,6 +31079,10 @@ export type Query_Root = {
   tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** execute function "tracy.get_session_first_attributed_ai_response_at" which returns "view_types.session_first_attributed_ai_response" */
+  tracy_get_session_first_attributed_ai_response_at: Array<View_Types_Session_First_Attributed_Ai_Response>;
+  /** execute function "tracy.get_session_first_attributed_ai_response_at" and query aggregates on result of table type "view_types.session_first_attributed_ai_response" */
+  tracy_get_session_first_attributed_ai_response_at_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -31191,6 +31184,10 @@ export type Query_Root = {
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
+  /** fetch data from the table: "view_types.session_first_attributed_ai_response" */
+  view_types_session_first_attributed_ai_response: Array<View_Types_Session_First_Attributed_Ai_Response>;
+  /** fetch aggregated fields from the table: "view_types.session_first_attributed_ai_response" */
+  view_types_session_first_attributed_ai_response_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -33603,6 +33600,26 @@ export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
 };
 
 
+export type Query_RootTracy_Get_Session_First_Attributed_Ai_Response_AtArgs = {
+  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Get_Session_First_Attributed_Ai_Response_At_AggregateArgs = {
+  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
 export type Query_RootTracy_Tracy_Edit_EventArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -34039,6 +34056,24 @@ export type Query_RootView_Types_Roi_Trends_Time_Series_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
   where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Session_First_Attributed_Ai_ResponseArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Session_First_Attributed_Ai_Response_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
 };
 
 
@@ -37618,6 +37653,10 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
+  /** execute function "tracy.get_session_first_attributed_ai_response_at" which returns "view_types.session_first_attributed_ai_response" */
+  tracy_get_session_first_attributed_ai_response_at: Array<View_Types_Session_First_Attributed_Ai_Response>;
+  /** execute function "tracy.get_session_first_attributed_ai_response_at" and query aggregates on result of table type "view_types.session_first_attributed_ai_response" */
+  tracy_get_session_first_attributed_ai_response_at_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -37756,6 +37795,12 @@ export type Subscription_Root = {
   view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series_stream: Array<View_Types_Roi_Trends_Time_Series>;
+  /** fetch data from the table: "view_types.session_first_attributed_ai_response" */
+  view_types_session_first_attributed_ai_response: Array<View_Types_Session_First_Attributed_Ai_Response>;
+  /** fetch aggregated fields from the table: "view_types.session_first_attributed_ai_response" */
+  view_types_session_first_attributed_ai_response_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.session_first_attributed_ai_response" */
+  view_types_session_first_attributed_ai_response_stream: Array<View_Types_Session_First_Attributed_Ai_Response>;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -40610,6 +40655,26 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Get_Session_First_Attributed_Ai_Response_AtArgs = {
+  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Get_Session_First_Attributed_Ai_Response_At_AggregateArgs = {
+  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Tracy_Edit_EventArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -41162,6 +41227,31 @@ export type Subscription_RootView_Types_Roi_Trends_Time_Series_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Roi_Trends_Time_Series_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Session_First_Attributed_Ai_ResponseArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Session_First_Attributed_Ai_Response_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Session_First_Attributed_Ai_Response_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
 };
 
 
@@ -42470,6 +42560,10 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
+};
+
+export type Tracy_Get_Session_First_Attributed_Ai_Response_At_Args = {
+  session_ids?: InputMaybe<Scalars['_text']['input']>;
 };
 
 /** columns and relationships of "tracy.tracy_edit_event" */
@@ -46792,6 +46886,85 @@ export type View_Types_Roi_Trends_Time_Series_Variance_Fields = {
   humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.session_first_attributed_ai_response" */
+export type View_Types_Session_First_Attributed_Ai_Response = {
+  __typename?: 'view_types_session_first_attributed_ai_response';
+  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+export type View_Types_Session_First_Attributed_Ai_Response_Aggregate = {
+  __typename?: 'view_types_session_first_attributed_ai_response_aggregate';
+  aggregate?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Aggregate_Fields>;
+  nodes: Array<View_Types_Session_First_Attributed_Ai_Response>;
+};
+
+/** aggregate fields of "view_types.session_first_attributed_ai_response" */
+export type View_Types_Session_First_Attributed_Ai_Response_Aggregate_Fields = {
+  __typename?: 'view_types_session_first_attributed_ai_response_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Max_Fields>;
+  min?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Min_Fields>;
+};
+
+
+/** aggregate fields of "view_types.session_first_attributed_ai_response" */
+export type View_Types_Session_First_Attributed_Ai_Response_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.session_first_attributed_ai_response". All fields are combined with a logical 'AND'. */
+export type View_Types_Session_First_Attributed_Ai_Response_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>>;
+  minAiResponseAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Session_First_Attributed_Ai_Response_Max_Fields = {
+  __typename?: 'view_types_session_first_attributed_ai_response_max_fields';
+  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Session_First_Attributed_Ai_Response_Min_Fields = {
+  __typename?: 'view_types_session_first_attributed_ai_response_min_fields';
+  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.session_first_attributed_ai_response". */
+export type View_Types_Session_First_Attributed_Ai_Response_Order_By = {
+  minAiResponseAt?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.session_first_attributed_ai_response" */
+export enum View_Types_Session_First_Attributed_Ai_Response_Select_Column {
+  /** column name */
+  MinAiResponseAt = 'minAiResponseAt',
+  /** column name */
+  SessionId = 'sessionId'
+}
+
+/** Streaming cursor of the table "view_types_session_first_attributed_ai_response" */
+export type View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Value_Input = {
+  minAiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** columns and relationships of "view_types.severity_count" */
 export type View_Types_Severity_Count = {
   __typename?: 'view_types_severity_count';
@@ -50842,12 +51015,10 @@ export type UploadTracyRecordsMutationVariables = Exact<{
 
 export type UploadTracyRecordsMutation = { __typename?: 'mutation_root', uploadTracyRecords: { __typename?: 'TracyBatchUploadResponse', status: Status, error?: string | null } };
 
-export type GetTracyRawDataUploadUrlsMutationVariables = Exact<{
-  recordIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
+export type GetTracyRawDataUploadUrlMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTracyRawDataUploadUrlsMutation = { __typename?: 'mutation_root', getTracyRawDataUploadUrls: { __typename?: 'TracyRawDataUploadResponse', status: Status, error?: string | null, uploads: Array<{ __typename?: 'TracyRawDataUploadInfo', recordId: string, url: string, uploadFieldsJSON: string, uploadKey: string }> } };
+export type GetTracyRawDataUploadUrlMutation = { __typename?: 'mutation_root', getTracyRawDataUploadUrl: { __typename?: 'TracyRawDataUploadUrlResponse', status: Status, error?: string | null, url?: string | null, uploadFieldsJSON?: string | null, keyPrefix?: string | null } };
 
 export type DigestVulnerabilityReportMutationVariables = Exact<{
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
@@ -51555,17 +51726,14 @@ export const UploadTracyRecordsDocument = `
   }
 }
     `;
-export const GetTracyRawDataUploadUrlsDocument = `
-    mutation GetTracyRawDataUploadUrls($recordIds: [String!]!) {
-  getTracyRawDataUploadUrls(recordIds: $recordIds) {
+export const GetTracyRawDataUploadUrlDocument = `
+    mutation GetTracyRawDataUploadUrl {
+  getTracyRawDataUploadUrl {
     status
     error
-    uploads {
-      recordId
-      url
-      uploadFieldsJSON
-      uploadKey
-    }
+    url
+    uploadFieldsJSON
+    keyPrefix
   }
 }
     `;
@@ -51909,8 +52077,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     UploadTracyRecords(variables: UploadTracyRecordsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<UploadTracyRecordsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UploadTracyRecordsMutation>({ document: UploadTracyRecordsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UploadTracyRecords', 'mutation', variables);
     },
-    GetTracyRawDataUploadUrls(variables: GetTracyRawDataUploadUrlsMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTracyRawDataUploadUrlsMutation> {
-      return withWrapper((wrappedRequestHeaders) => client.request<GetTracyRawDataUploadUrlsMutation>({ document: GetTracyRawDataUploadUrlsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTracyRawDataUploadUrls', 'mutation', variables);
+    GetTracyRawDataUploadUrl(variables?: GetTracyRawDataUploadUrlMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetTracyRawDataUploadUrlMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetTracyRawDataUploadUrlMutation>({ document: GetTracyRawDataUploadUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetTracyRawDataUploadUrl', 'mutation', variables);
     },
     DigestVulnerabilityReport(variables: DigestVulnerabilityReportMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<DigestVulnerabilityReportMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DigestVulnerabilityReportMutation>({ document: DigestVulnerabilityReportDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DigestVulnerabilityReport', 'mutation', variables);

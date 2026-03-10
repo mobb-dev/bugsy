@@ -1,6 +1,3 @@
-import { promisify } from 'node:util'
-import { gzip } from 'node:zlib'
-
 import Debug from 'debug'
 
 import {
@@ -13,14 +10,10 @@ import type { TracyRecordInput } from '../scm/generates/client_generates'
 import { uploadFile } from '../upload-file'
 import type { GQLClient } from './gql'
 
-const gzipAsync = promisify(gzip)
 const debug = Debug('mobbdev:tracy-batch-upload')
-
-const MAX_BATCH_PAYLOAD_BYTES = 3 * 1024 * 1024 // 3MB safety margin (Express limit is 4MB)
 
 export type TracyRecordClientInput = Omit<
   TracyRecordInput,
-  | 'rawData'
   | 'rawDataS3Key'
   | 'repositoryUrl'
   | 'computerName'
@@ -35,113 +28,18 @@ export type TracyBatchUploadResult = {
   errors: string[] | null
 }
 
-async function sanitizeAndSerializeRawData(rawData: unknown): Promise<string> {
-  const original = JSON.stringify(rawData)
-
+async function sanitizeRawData(rawData: unknown): Promise<string> {
   try {
     const sanitized = await sanitizeData(rawData)
-    const serialized = JSON.stringify(sanitized)
-    const compressed = await gzipAsync(Buffer.from(serialized, 'utf-8'))
-    return compressed.toString('base64')
+    return JSON.stringify(sanitized)
   } catch (err) {
     // Sanitization should never break JSON when operating on parsed objects,
-    // but if it does: log warning and fall back to gzipped unsanitized data.
+    // but if it does: log warning and fall back to unsanitized data.
     console.warn(
-      '[tracy] sanitizeAndSerializeRawData failed, falling back to unsanitized:',
+      '[tracy] sanitizeRawData failed, falling back to unsanitized:',
       (err as Error).message
     )
-    const compressed = await gzipAsync(Buffer.from(original, 'utf-8'))
-    return compressed.toString('base64')
-  }
-}
-
-function chunkByPayloadSize<T>(items: T[], maxBytes: number): T[][] {
-  const chunks: T[][] = []
-  let currentChunk: T[] = []
-  let currentSize = 0
-
-  for (const item of items) {
-    const itemSize = Buffer.byteLength(JSON.stringify(item), 'utf-8')
-    if (currentChunk.length > 0 && currentSize + itemSize > maxBytes) {
-      chunks.push(currentChunk)
-      currentChunk = [item]
-      currentSize = itemSize
-    } else {
-      currentChunk.push(item)
-      currentSize += itemSize
-    }
-  }
-  if (currentChunk.length > 0) {
-    chunks.push(currentChunk)
-  }
-  return chunks
-}
-
-function is413Error(err: unknown): boolean {
-  if (err instanceof Error) {
-    const message = err.message.toLowerCase()
-    return message.includes('413') || message.includes('payload too large')
-  }
-  return false
-}
-
-async function sendChunkWithS3Fallback(
-  client: GQLClient,
-  records: TracyRecordInput[]
-) {
-  try {
-    return await client.uploadTracyRecords({ records })
-  } catch (err) {
-    if (!is413Error(err)) {
-      throw err
-    }
-
-    debug('Batch rejected (413). Uploading large rawData to S3...')
-
-    const recordsWithLargeData = records.filter(
-      (r) => r.rawData && r.rawData.length > 1_000_000 // 1MB+ likely culprits for 413
-    )
-
-    if (recordsWithLargeData.length === 0) {
-      throw err
-    }
-
-    const uploadUrlsResult = await client.getTracyRawDataUploadUrls({
-      recordIds: recordsWithLargeData.map((r) => r.recordId),
-    })
-
-    const uploads = uploadUrlsResult.getTracyRawDataUploadUrls.uploads
-    if (!uploads || uploads.length === 0) {
-      throw err
-    }
-
-    const s3KeyByRecordId = new Map<string, string>()
-
-    for (const upload of uploads) {
-      const record = records.find((r) => r.recordId === upload.recordId)
-      if (!record?.rawData) {
-        continue
-      }
-
-      await uploadFile({
-        file: Buffer.from(record.rawData, 'utf-8'),
-        url: upload.url,
-        uploadKey: upload.uploadKey,
-        uploadFields: JSON.parse(upload.uploadFieldsJSON),
-      })
-
-      s3KeyByRecordId.set(upload.recordId, upload.uploadKey)
-    }
-
-    const updatedRecords = records.map((r) => {
-      const s3Key = s3KeyByRecordId.get(r.recordId)
-      if (s3Key) {
-        return { ...r, rawDataS3Key: s3Key, rawData: undefined }
-      }
-      return r
-    })
-
-    return await client.uploadTracyRecords({ records: updatedRecords })
+    return JSON.stringify(rawData)
   }
 }
 
@@ -153,46 +51,117 @@ export async function prepareAndSendTracyRecords(
   const { computerName, userName } = getSystemInfo()
   const clientVersion = packageJson.version
 
+  // 1. Enrich records and sanitize rawData
+  const serializedRawDataByIndex = new Map<number, string>()
+
   const records: TracyRecordInput[] = await Promise.all(
-    rawRecords.map(async (record) => ({
-      ...record,
-      repositoryUrl: repositoryUrl ?? undefined,
-      computerName,
-      userName,
-      clientVersion,
-      rawData:
-        record.rawData != null
-          ? await sanitizeAndSerializeRawData(record.rawData)
-          : undefined,
-    }))
+    rawRecords.map(async (record, index) => {
+      if (record.rawData != null) {
+        const serialized = await sanitizeRawData(record.rawData)
+        serializedRawDataByIndex.set(index, serialized)
+      }
+      const { rawData: _rawData, ...rest } = record
+      return {
+        ...rest,
+        repositoryUrl: repositoryUrl ?? undefined,
+        computerName,
+        userName,
+        clientVersion,
+      }
+    })
   )
 
-  const chunks = chunkByPayloadSize(records, MAX_BATCH_PAYLOAD_BYTES)
+  // 2. Upload rawData to S3 for records that have it
+  const recordsWithRawData = rawRecords
+    .map((r, i) => ({ recordId: r.recordId, index: i }))
+    .filter((entry) => serializedRawDataByIndex.has(entry.index))
 
-  const allErrors: string[] = []
+  if (recordsWithRawData.length > 0) {
+    debug('Uploading %d rawData files to S3...', recordsWithRawData.length)
 
-  for (const chunk of chunks) {
-    try {
-      const result = await sendChunkWithS3Fallback(client, chunk)
-      if (result.uploadTracyRecords.status !== 'OK') {
-        allErrors.push(
-          result.uploadTracyRecords.error ?? 'Unknown server error'
-        )
+    const uploadUrlResult = await client.getTracyRawDataUploadUrl()
+    const { url, uploadFieldsJSON, keyPrefix } =
+      uploadUrlResult.getTracyRawDataUploadUrl
+
+    if (!url || !uploadFieldsJSON || !keyPrefix) {
+      return {
+        ok: false,
+        errors: ['Failed to get S3 upload URL for rawData'],
       }
-    } catch (err) {
-      debug(
-        'Chunk upload failed (%d records): %s',
-        chunk.length,
-        (err as Error).message
-      )
-      allErrors.push(
-        `Chunk of ${chunk.length} records failed: ${(err as Error).message}`
-      )
+    }
+
+    let uploadFields: Record<string, string>
+    try {
+      uploadFields = JSON.parse(uploadFieldsJSON)
+    } catch {
+      return { ok: false, errors: ['Malformed uploadFieldsJSON from server'] }
+    }
+
+    // Upload all rawData files to S3 concurrently using a single presigned URL
+    const uploadResults = await Promise.allSettled(
+      recordsWithRawData.map(async (entry) => {
+        const rawDataJson = serializedRawDataByIndex.get(entry.index)
+        if (!rawDataJson) {
+          debug('No serialized rawData for recordId=%s', entry.recordId)
+          return
+        }
+
+        const uploadKey = `${keyPrefix}${entry.recordId}.json`
+
+        await uploadFile({
+          file: Buffer.from(rawDataJson, 'utf-8'),
+          url,
+          uploadKey,
+          uploadFields,
+        })
+
+        records[entry.index]!.rawDataS3Key = uploadKey
+      })
+    )
+
+    const uploadErrors = uploadResults
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .map((r) => (r.reason as Error).message)
+
+    if (uploadErrors.length > 0) {
+      debug('S3 upload errors: %O', uploadErrors)
+    }
+
+    // Verify all records that need S3 keys actually got them
+    const missingS3Keys = recordsWithRawData.filter(
+      (entry) => !records[entry.index]!.rawDataS3Key
+    )
+    if (missingS3Keys.length > 0) {
+      const missingIds = missingS3Keys.map((e) => e.recordId)
+      debug('Records missing S3 keys after upload: %O', missingIds)
+      return {
+        ok: false,
+        errors: [
+          `Failed to upload rawData to S3 for ${missingS3Keys.length} record(s): ${missingIds.join(', ')}`,
+          ...uploadErrors,
+        ],
+      }
+    }
+
+    debug('S3 uploads complete')
+  }
+
+  // 3. Submit all records in a single call
+  try {
+    const result = await client.uploadTracyRecords({ records })
+    if (result.uploadTracyRecords.status !== 'OK') {
+      return {
+        ok: false,
+        errors: [result.uploadTracyRecords.error ?? 'Unknown server error'],
+      }
+    }
+  } catch (err) {
+    debug('Upload failed: %s', (err as Error).message)
+    return {
+      ok: false,
+      errors: [(err as Error).message],
     }
   }
 
-  return {
-    ok: allErrors.length === 0,
-    errors: allErrors.length ? allErrors : null,
-  }
+  return { ok: true, errors: null }
 }

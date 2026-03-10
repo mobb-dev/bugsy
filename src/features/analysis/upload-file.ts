@@ -38,10 +38,9 @@ export async function uploadFile({
     form.append(key, value)
   })
 
-  //minio needs to add the key specifically here and it is not included in the uploadFields as it is for AWS
-  if (!form.has('key')) {
-    form.append('key', uploadKey)
-  }
+  // Always set the key explicitly — required for MinIO and for starts-with presigned URLs
+  // where the presigned fields may contain a placeholder key that must be overridden.
+  form.set('key', uploadKey)
   if (typeof file === 'string') {
     debug('upload file from path %s', file)
     logInfo(`FileUpload: upload file from path ${file}`)

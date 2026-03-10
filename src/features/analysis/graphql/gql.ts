@@ -32,8 +32,7 @@ import {
   getSdk,
   GetTracyDiffUploadUrlMutation,
   GetTracyDiffUploadUrlMutationVariables,
-  GetTracyRawDataUploadUrlsMutation,
-  GetTracyRawDataUploadUrlsMutationVariables,
+  GetTracyRawDataUploadUrlMutation,
   GitReferenceQueryVariables,
   PrStrategy,
   ScanSkillMutationVariables,
@@ -700,10 +699,8 @@ export class GQLClient {
     return await this._clientSdk.UploadTracyRecords(variables)
   }
 
-  async getTracyRawDataUploadUrls(
-    variables: GetTracyRawDataUploadUrlsMutationVariables
-  ): Promise<GetTracyRawDataUploadUrlsMutation> {
-    return await this._clientSdk.GetTracyRawDataUploadUrls(variables)
+  async getTracyRawDataUploadUrl(): Promise<GetTracyRawDataUploadUrlMutation> {
+    return await this._clientSdk.GetTracyRawDataUploadUrl()
   }
 
   async analyzeCommitForExtensionAIBlame(

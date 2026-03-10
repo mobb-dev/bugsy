@@ -500,7 +500,6 @@ input TracyRecordInput {
   computerName: String
   userName: String
   blameType: AIBlameInferenceType
-  rawData: String
   rawDataS3Key: String
   editType: EditType
   filePath: String
@@ -512,17 +511,12 @@ type TracyBatchUploadResponse {
   error: String
 }
 
-type TracyRawDataUploadInfo {
-  recordId: String!
-  url: String!
-  uploadFieldsJSON: String!
-  uploadKey: String!
-}
-
-type TracyRawDataUploadResponse {
+type TracyRawDataUploadUrlResponse {
   status: Status!
   error: String
-  uploads: [TracyRawDataUploadInfo!]!
+  url: String
+  uploadFieldsJSON: String
+  keyPrefix: String
 }
 
 mutation UploadTracyRecords($records: [TracyRecordInput!]!) {
@@ -532,16 +526,13 @@ mutation UploadTracyRecords($records: [TracyRecordInput!]!) {
   }
 }
 
-mutation GetTracyRawDataUploadUrls($recordIds: [String!]!) {
-  getTracyRawDataUploadUrls(recordIds: $recordIds) {
+mutation GetTracyRawDataUploadUrl {
+  getTracyRawDataUploadUrl {
     status
     error
-    uploads {
-      recordId
-      url
-      uploadFieldsJSON
-      uploadKey
-    }
+    url
+    uploadFieldsJSON
+    keyPrefix
   }
 }
 

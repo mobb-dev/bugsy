@@ -44,31 +44,31 @@ export async function getAuthenticatedGQLClient({
   let gqlClient = authManager.getGQLClient(inputApiKey)
 
   gqlClient = await handleMobbLogin({
-    inGqlClient: gqlClient,
     skipPrompts: isSkipPrompts,
     apiUrl,
     webAppUrl,
+    authManager,
   })
 
   return gqlClient
 }
 
 export async function handleMobbLogin({
-  inGqlClient,
   apiKey,
   skipPrompts,
   apiUrl,
   webAppUrl,
   loginContext,
   loginPath,
+  authManager,
 }: {
-  inGqlClient: GQLClient
   apiKey?: string
   skipPrompts?: boolean
   apiUrl?: string
   webAppUrl?: string
   loginContext?: LoginContext
   loginPath?: string
+  authManager: AuthManager
 }): Promise<GQLClient> {
   debug(
     'handleMobbLogin: resolved URLs - apiUrl=%s (from param: %s), webAppUrl=%s (from param: %s)',
@@ -79,10 +79,6 @@ export async function handleMobbLogin({
   )
 
   const { createSpinner } = Spinner({ ci: skipPrompts })
-  const authManager = new AuthManager(webAppUrl, apiUrl)
-
-  // Use the provided GQL client
-  authManager.setGQLClient(inGqlClient)
 
   // Check if already authenticated — use 3-state result
   const authResult = await authManager.checkAuthentication()

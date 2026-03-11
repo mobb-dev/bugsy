@@ -1508,6 +1508,19 @@ export type TicketAccessToken = {
   accessToken: Scalars['String']['output'];
 };
 
+export type TracyAppliedConfig = {
+  __typename?: 'TracyAppliedConfig';
+  category: Scalars['String']['output'];
+  content?: Maybe<Scalars['String']['output']>;
+  identifier: Scalars['String']['output'];
+};
+
+export type TracyBackAndForthLevel = {
+  __typename?: 'TracyBackAndForthLevel';
+  justification: Scalars['String']['output'];
+  level: Scalars['Int']['output'];
+};
+
 export type TracyBatchUploadResponse = {
   __typename?: 'TracyBatchUploadResponse';
   error?: Maybe<Scalars['String']['output']>;
@@ -1519,6 +1532,31 @@ export type TracyDiffUploadInfo = {
   uploadFieldsJSON: Scalars['String']['output'];
   uploadKey: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type TracyMcpCall = {
+  __typename?: 'TracyMcpCall';
+  mcpServer: Scalars['String']['output'];
+  mcpTool: Scalars['String']['output'];
+};
+
+export type TracyPlanningPhase = {
+  __typename?: 'TracyPlanningPhase';
+  duration: Scalars['Int']['output'];
+  endIndex: Scalars['Int']['output'];
+  eventCount: Scalars['Int']['output'];
+  planText?: Maybe<Scalars['String']['output']>;
+  startIndex: Scalars['Int']['output'];
+};
+
+export type TracyPromptSummary = {
+  __typename?: 'TracyPromptSummary';
+  aiImplementationDetails: Array<Scalars['String']['output']>;
+  backAndForthLevel: TracyBackAndForthLevel;
+  developersPlan: Array<Scalars['String']['output']>;
+  developersPushbacks: Array<Scalars['String']['output']>;
+  goal: Scalars['String']['output'];
+  importantInstructionsAndDecisions: Array<Scalars['String']['output']>;
 };
 
 export type TracyRawDataUploadUrlResponse = {
@@ -1550,6 +1588,35 @@ export type TracyRecordInput = {
   recordTimestamp: Scalars['Timestamp']['input'];
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TracySessionEventEntry = {
+  __typename?: 'TracySessionEventEntry';
+  content?: Maybe<Scalars['String']['output']>;
+  conversationType?: Maybe<Scalars['String']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
+  inputTokens: Scalars['Int']['output'];
+  outputTokens: Scalars['Int']['output'];
+  recordType: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type TracySessionResponse = {
+  __typename?: 'TracySessionResponse';
+  appliedConfigs: Array<TracyAppliedConfig>;
+  appliedSkills: Array<Scalars['String']['output']>;
+  computerName: Scalars['String']['output'];
+  duration: Scalars['Int']['output'];
+  events: Array<TracySessionEventEntry>;
+  inputTokens: Scalars['Int']['output'];
+  mcpCalls: Array<TracyMcpCall>;
+  models: Array<Scalars['String']['output']>;
+  outputTokens: Scalars['Int']['output'];
+  planningPhases: Array<TracyPlanningPhase>;
+  readFiles: Array<Scalars['String']['output']>;
+  sessionId: Scalars['String']['output'];
+  summary?: Maybe<TracyPromptSummary>;
+  userName: Scalars['String']['output'];
 };
 
 export type TriggerBackfillResult = {
@@ -30820,6 +30887,13 @@ export type Query_Root = {
    * Default sort: updated desc (most recently updated first)
    */
   getSubmitRequests: SubmitRequestsResponse;
+  /**
+   * Reconstructs a tracy session from stored events.
+   * Downloads raw events from S3, parses them, and aggregates into a session.
+   * Optionally generates an LLM summary (cached).
+   * Restricted to admin users.
+   */
+  getTracySession: TracySessionResponse;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -32582,6 +32656,12 @@ export type Query_RootGetSubmitRequestsArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
   repoUrl: Scalars['String']['input'];
   sort?: InputMaybe<SubmitRequestSort>;
+};
+
+
+export type Query_RootGetTracySessionArgs = {
+  includeSummary?: InputMaybe<Scalars['Boolean']['input']>;
+  sessionId: Scalars['String']['input'];
 };
 
 

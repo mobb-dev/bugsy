@@ -60,7 +60,7 @@ vi.mock('@mobb/bugsy/features/analysis/graphql', () => ({
 
 // Mock handleMobbLogin
 vi.mock('@mobb/bugsy/commands/handleMobbLogin', () => ({
-  handleMobbLogin: vi.fn(async ({ inGqlClient }) => inGqlClient),
+  handleMobbLogin: vi.fn(async ({ authManager }) => authManager.getGQLClient()),
   getAuthenticatedGQLClient: vi.fn(async () => createMockGQLClient()),
 }))
 

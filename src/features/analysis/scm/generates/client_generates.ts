@@ -116,7 +116,7 @@ export type AiBlameValidationResponse = {
 export type AcceptanceRateStats = {
   __typename?: 'AcceptanceRateStats';
   acceptedInferences: InferenceStats;
-  totalInferenceLines: Scalars['Int']['output'];
+  totalInferenceChars: Scalars['Int']['output'];
 };
 
 export type ActiveDevelopersData = {
@@ -745,7 +745,7 @@ export enum InferencePlatform {
 
 export type InferenceStats = {
   __typename?: 'InferenceStats';
-  totalLines: Scalars['Int']['output'];
+  totalChars: Scalars['Int']['output'];
 };
 
 export type InitOrganizationAndProjectGoodResponse = {
@@ -2322,6 +2322,8 @@ export type Ai_Blame_Attribution = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines: Scalars['Int']['output'];
   change_matched_lines: Scalars['Int']['output'];
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
@@ -2426,6 +2428,8 @@ export type Ai_Blame_Attribution_Avg_Fields = {
   __typename?: 'ai_blame_attribution_avg_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2433,6 +2437,8 @@ export type Ai_Blame_Attribution_Avg_Fields = {
 export type Ai_Blame_Attribution_Avg_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2447,6 +2453,7 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   aiBlameInferenceId?: InputMaybe<Uuid_Comparison_Exp>;
   change_lines?: InputMaybe<Int_Comparison_Exp>;
   change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
+  charCount?: InputMaybe<Int_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -2472,6 +2479,8 @@ export enum Ai_Blame_Attribution_Constraint {
 export type Ai_Blame_Attribution_Inc_Input = {
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -2483,6 +2492,8 @@ export type Ai_Blame_Attribution_Insert_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2502,6 +2513,8 @@ export type Ai_Blame_Attribution_Max_Fields = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -2518,6 +2531,8 @@ export type Ai_Blame_Attribution_Max_Order_By = {
   aiBlameInferenceId?: InputMaybe<Order_By>;
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2535,6 +2550,8 @@ export type Ai_Blame_Attribution_Min_Fields = {
   aiBlameInferenceId?: Maybe<Scalars['uuid']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -2551,6 +2568,8 @@ export type Ai_Blame_Attribution_Min_Order_By = {
   aiBlameInferenceId?: InputMaybe<Order_By>;
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2592,6 +2611,7 @@ export type Ai_Blame_Attribution_Order_By = {
   aiBlameInferenceId?: InputMaybe<Order_By>;
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  charCount?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2620,6 +2640,8 @@ export enum Ai_Blame_Attribution_Select_Column {
   /** column name */
   ChangeMatchedLines = 'change_matched_lines',
   /** column name */
+  CharCount = 'charCount',
+  /** column name */
   CreatedAt = 'createdAt',
   /** column name */
   FilePath = 'filePath',
@@ -2643,6 +2665,8 @@ export type Ai_Blame_Attribution_Set_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2658,6 +2682,8 @@ export type Ai_Blame_Attribution_Stddev_Fields = {
   __typename?: 'ai_blame_attribution_stddev_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2665,6 +2691,8 @@ export type Ai_Blame_Attribution_Stddev_Fields = {
 export type Ai_Blame_Attribution_Stddev_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2673,6 +2701,8 @@ export type Ai_Blame_Attribution_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_attribution_stddev_pop_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2680,6 +2710,8 @@ export type Ai_Blame_Attribution_Stddev_Pop_Fields = {
 export type Ai_Blame_Attribution_Stddev_Pop_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2688,6 +2720,8 @@ export type Ai_Blame_Attribution_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_attribution_stddev_samp_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2695,6 +2729,8 @@ export type Ai_Blame_Attribution_Stddev_Samp_Fields = {
 export type Ai_Blame_Attribution_Stddev_Samp_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2712,6 +2748,8 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   aiBlameInferenceId?: InputMaybe<Scalars['uuid']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2727,6 +2765,8 @@ export type Ai_Blame_Attribution_Sum_Fields = {
   __typename?: 'ai_blame_attribution_sum_fields';
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -2734,6 +2774,8 @@ export type Ai_Blame_Attribution_Sum_Fields = {
 export type Ai_Blame_Attribution_Sum_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2747,6 +2789,8 @@ export enum Ai_Blame_Attribution_Update_Column {
   ChangeLines = 'change_lines',
   /** column name */
   ChangeMatchedLines = 'change_matched_lines',
+  /** column name */
+  CharCount = 'charCount',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -2779,6 +2823,8 @@ export type Ai_Blame_Attribution_Var_Pop_Fields = {
   __typename?: 'ai_blame_attribution_var_pop_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2786,6 +2832,8 @@ export type Ai_Blame_Attribution_Var_Pop_Fields = {
 export type Ai_Blame_Attribution_Var_Pop_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2794,6 +2842,8 @@ export type Ai_Blame_Attribution_Var_Samp_Fields = {
   __typename?: 'ai_blame_attribution_var_samp_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2801,6 +2851,8 @@ export type Ai_Blame_Attribution_Var_Samp_Fields = {
 export type Ai_Blame_Attribution_Var_Samp_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2809,6 +2861,8 @@ export type Ai_Blame_Attribution_Variance_Fields = {
   __typename?: 'ai_blame_attribution_variance_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2816,6 +2870,8 @@ export type Ai_Blame_Attribution_Variance_Fields = {
 export type Ai_Blame_Attribution_Variance_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the matched diff line content */
+  charCount?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -3769,6 +3825,8 @@ export type Ai_Blame_Inference = {
   /** An object relationship */
   aiBlameInferenceTypeByType: Ai_Blame_Inference_Type;
   aiResponseAt: Scalars['timestamptz']['output'];
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
@@ -3856,6 +3914,8 @@ export type Ai_Blame_Inference_Arr_Rel_Insert_Input = {
 /** aggregate avg on columns */
 export type Ai_Blame_Inference_Avg_Fields = {
   __typename?: 'ai_blame_inference_avg_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -3864,6 +3924,8 @@ export type Ai_Blame_Inference_Avg_Fields = {
 
 /** order by avg() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Avg_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -3877,6 +3939,7 @@ export type Ai_Blame_Inference_Bool_Exp = {
   _or?: InputMaybe<Array<Ai_Blame_Inference_Bool_Exp>>;
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Bool_Exp>;
   aiResponseAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  charCount?: InputMaybe<Int_Comparison_Exp>;
   computerName?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -3903,6 +3966,8 @@ export enum Ai_Blame_Inference_Constraint {
 
 /** input type for incrementing numeric columns in table "ai_blame_inference" */
 export type Ai_Blame_Inference_Inc_Input = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Scalars['Int']['input']>;
   /** number of lines in the inference file */
@@ -3913,6 +3978,8 @@ export type Ai_Blame_Inference_Inc_Input = {
 export type Ai_Blame_Inference_Insert_Input = {
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Obj_Rel_Insert_Input>;
   aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -3937,6 +4004,8 @@ export type Ai_Blame_Inference_Insert_Input = {
 export type Ai_Blame_Inference_Max_Fields = {
   __typename?: 'ai_blame_inference_max_fields';
   aiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -3958,6 +4027,8 @@ export type Ai_Blame_Inference_Max_Fields = {
 /** order by max() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Max_Order_By = {
   aiResponseAt?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -3980,6 +4051,8 @@ export type Ai_Blame_Inference_Max_Order_By = {
 export type Ai_Blame_Inference_Min_Fields = {
   __typename?: 'ai_blame_inference_min_fields';
   aiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -4001,6 +4074,8 @@ export type Ai_Blame_Inference_Min_Fields = {
 /** order by min() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Min_Order_By = {
   aiResponseAt?: InputMaybe<Order_By>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -4046,6 +4121,7 @@ export type Ai_Blame_Inference_On_Conflict = {
 export type Ai_Blame_Inference_Order_By = {
   aiBlameInferenceTypeByType?: InputMaybe<Ai_Blame_Inference_Type_Order_By>;
   aiResponseAt?: InputMaybe<Order_By>;
+  charCount?: InputMaybe<Order_By>;
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -4073,6 +4149,8 @@ export type Ai_Blame_Inference_Pk_Columns_Input = {
 export enum Ai_Blame_Inference_Select_Column {
   /** column name */
   AiResponseAt = 'aiResponseAt',
+  /** column name */
+  CharCount = 'charCount',
   /** column name */
   ComputerName = 'computerName',
   /** column name */
@@ -4108,6 +4186,8 @@ export enum Ai_Blame_Inference_Select_Column {
 /** input type for updating data in table "ai_blame_inference" */
 export type Ai_Blame_Inference_Set_Input = {
   aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -4130,6 +4210,8 @@ export type Ai_Blame_Inference_Set_Input = {
 /** aggregate stddev on columns */
 export type Ai_Blame_Inference_Stddev_Fields = {
   __typename?: 'ai_blame_inference_stddev_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4138,6 +4220,8 @@ export type Ai_Blame_Inference_Stddev_Fields = {
 
 /** order by stddev() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4147,6 +4231,8 @@ export type Ai_Blame_Inference_Stddev_Order_By = {
 /** aggregate stddev_pop on columns */
 export type Ai_Blame_Inference_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_inference_stddev_pop_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4155,6 +4241,8 @@ export type Ai_Blame_Inference_Stddev_Pop_Fields = {
 
 /** order by stddev_pop() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Pop_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4164,6 +4252,8 @@ export type Ai_Blame_Inference_Stddev_Pop_Order_By = {
 /** aggregate stddev_samp on columns */
 export type Ai_Blame_Inference_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_inference_stddev_samp_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4172,6 +4262,8 @@ export type Ai_Blame_Inference_Stddev_Samp_Fields = {
 
 /** order by stddev_samp() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Stddev_Samp_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4189,6 +4281,8 @@ export type Ai_Blame_Inference_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
   aiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -4211,6 +4305,8 @@ export type Ai_Blame_Inference_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Ai_Blame_Inference_Sum_Fields = {
   __typename?: 'ai_blame_inference_sum_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Int']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Int']['output']>;
   /** number of lines in the inference file */
@@ -4219,6 +4315,8 @@ export type Ai_Blame_Inference_Sum_Fields = {
 
 /** order by sum() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Sum_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4417,6 +4515,8 @@ export enum Ai_Blame_Inference_Update_Column {
   /** column name */
   AiResponseAt = 'aiResponseAt',
   /** column name */
+  CharCount = 'charCount',
+  /** column name */
   ComputerName = 'computerName',
   /** column name */
   CreatedAt = 'createdAt',
@@ -4460,6 +4560,8 @@ export type Ai_Blame_Inference_Updates = {
 /** aggregate var_pop on columns */
 export type Ai_Blame_Inference_Var_Pop_Fields = {
   __typename?: 'ai_blame_inference_var_pop_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4468,6 +4570,8 @@ export type Ai_Blame_Inference_Var_Pop_Fields = {
 
 /** order by var_pop() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Var_Pop_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4477,6 +4581,8 @@ export type Ai_Blame_Inference_Var_Pop_Order_By = {
 /** aggregate var_samp on columns */
 export type Ai_Blame_Inference_Var_Samp_Fields = {
   __typename?: 'ai_blame_inference_var_samp_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4485,6 +4591,8 @@ export type Ai_Blame_Inference_Var_Samp_Fields = {
 
 /** order by var_samp() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Var_Samp_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -4494,6 +4602,8 @@ export type Ai_Blame_Inference_Var_Samp_Order_By = {
 /** aggregate variance on columns */
 export type Ai_Blame_Inference_Variance_Fields = {
   __typename?: 'ai_blame_inference_variance_fields';
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: Maybe<Scalars['Float']['output']>;
   /** file size in bytes */
   inferenceFileSize?: Maybe<Scalars['Float']['output']>;
   /** number of lines in the inference file */
@@ -4502,6 +4612,8 @@ export type Ai_Blame_Inference_Variance_Fields = {
 
 /** order by variance() on columns of table "ai_blame_inference" */
 export type Ai_Blame_Inference_Variance_Order_By = {
+  /** whitespace-normalized char count of the inference file content */
+  charCount?: InputMaybe<Order_By>;
   /** file size in bytes */
   inferenceFileSize?: InputMaybe<Order_By>;
   /** number of lines in the inference file */
@@ -31153,10 +31265,6 @@ export type Query_Root = {
   tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
-  /** execute function "tracy.get_session_first_attributed_ai_response_at" which returns "view_types.session_first_attributed_ai_response" */
-  tracy_get_session_first_attributed_ai_response_at: Array<View_Types_Session_First_Attributed_Ai_Response>;
-  /** execute function "tracy.get_session_first_attributed_ai_response_at" and query aggregates on result of table type "view_types.session_first_attributed_ai_response" */
-  tracy_get_session_first_attributed_ai_response_at_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -31258,10 +31366,6 @@ export type Query_Root = {
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
-  /** fetch data from the table: "view_types.session_first_attributed_ai_response" */
-  view_types_session_first_attributed_ai_response: Array<View_Types_Session_First_Attributed_Ai_Response>;
-  /** fetch aggregated fields from the table: "view_types.session_first_attributed_ai_response" */
-  view_types_session_first_attributed_ai_response_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -33680,26 +33784,6 @@ export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
 };
 
 
-export type Query_RootTracy_Get_Session_First_Attributed_Ai_Response_AtArgs = {
-  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
-export type Query_RootTracy_Get_Session_First_Attributed_Ai_Response_At_AggregateArgs = {
-  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
 export type Query_RootTracy_Tracy_Edit_EventArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -34136,24 +34220,6 @@ export type Query_RootView_Types_Roi_Trends_Time_Series_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
   where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
-};
-
-
-export type Query_RootView_Types_Session_First_Attributed_Ai_ResponseArgs = {
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
-export type Query_RootView_Types_Session_First_Attributed_Ai_Response_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
 };
 
 
@@ -37733,10 +37799,6 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
-  /** execute function "tracy.get_session_first_attributed_ai_response_at" which returns "view_types.session_first_attributed_ai_response" */
-  tracy_get_session_first_attributed_ai_response_at: Array<View_Types_Session_First_Attributed_Ai_Response>;
-  /** execute function "tracy.get_session_first_attributed_ai_response_at" and query aggregates on result of table type "view_types.session_first_attributed_ai_response" */
-  tracy_get_session_first_attributed_ai_response_at_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -37875,12 +37937,6 @@ export type Subscription_Root = {
   view_types_roi_trends_time_series_aggregate: View_Types_Roi_Trends_Time_Series_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series_stream: Array<View_Types_Roi_Trends_Time_Series>;
-  /** fetch data from the table: "view_types.session_first_attributed_ai_response" */
-  view_types_session_first_attributed_ai_response: Array<View_Types_Session_First_Attributed_Ai_Response>;
-  /** fetch aggregated fields from the table: "view_types.session_first_attributed_ai_response" */
-  view_types_session_first_attributed_ai_response_aggregate: View_Types_Session_First_Attributed_Ai_Response_Aggregate;
-  /** fetch data from the table in a streaming manner: "view_types.session_first_attributed_ai_response" */
-  view_types_session_first_attributed_ai_response_stream: Array<View_Types_Session_First_Attributed_Ai_Response>;
   /** fetch data from the table: "view_types.severity_count" */
   view_types_severity_count: Array<View_Types_Severity_Count>;
   /** fetch aggregated fields from the table: "view_types.severity_count" */
@@ -40735,26 +40791,6 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
 };
 
 
-export type Subscription_RootTracy_Get_Session_First_Attributed_Ai_Response_AtArgs = {
-  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
-export type Subscription_RootTracy_Get_Session_First_Attributed_Ai_Response_At_AggregateArgs = {
-  args: Tracy_Get_Session_First_Attributed_Ai_Response_At_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
 export type Subscription_RootTracy_Tracy_Edit_EventArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Edit_Event_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -41307,31 +41343,6 @@ export type Subscription_RootView_Types_Roi_Trends_Time_Series_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Roi_Trends_Time_Series_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
-};
-
-
-export type Subscription_RootView_Types_Session_First_Attributed_Ai_ResponseArgs = {
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
-export type Subscription_RootView_Types_Session_First_Attributed_Ai_Response_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Order_By>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-};
-
-
-export type Subscription_RootView_Types_Session_First_Attributed_Ai_Response_StreamArgs = {
-  batch_size: Scalars['Int']['input'];
-  cursor: Array<InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Input>>;
-  where?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
 };
 
 
@@ -42178,6 +42189,8 @@ export type Timestamptz_Comparison_Exp = {
 /** columns and relationships of "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_Pr = {
   __typename?: 'tracy_ai_blame_pr';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Int']['output']>;
   additionalData?: Maybe<Scalars['json']['output']>;
   aiLinesAdded?: Maybe<Scalars['Int']['output']>;
   commentIds?: Maybe<Array<Scalars['String']['output']>>;
@@ -42193,10 +42206,14 @@ export type Tracy_Ai_Blame_Pr = {
   prId: Scalars['String']['output'];
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
   prStatus: Pr_Status_Enum;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl: Scalars['String']['output'];
   rowCreatedAt: Scalars['timestamptz']['output'];
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -42239,12 +42256,18 @@ export type Tracy_Ai_Blame_Pr_Aggregate_FieldsCountArgs = {
 /** aggregate avg on columns */
 export type Tracy_Ai_Blame_Pr_Avg_Fields = {
   __typename?: 'tracy_ai_blame_pr_avg_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42253,6 +42276,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   _and?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Bool_Exp>>;
   _not?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
   _or?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Bool_Exp>>;
+  acceptedCharCount?: InputMaybe<Int_Comparison_Exp>;
   additionalData?: InputMaybe<Json_Comparison_Exp>;
   aiLinesAdded?: InputMaybe<Int_Comparison_Exp>;
   commentIds?: InputMaybe<String_Array_Comparison_Exp>;
@@ -42272,6 +42296,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   rowCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tabAutocompleteLinesAdded?: InputMaybe<Int_Comparison_Exp>;
+  totalInferenceCharCount?: InputMaybe<Int_Comparison_Exp>;
   totalInferenceLines?: InputMaybe<Int_Comparison_Exp>;
 };
 
@@ -42283,17 +42308,25 @@ export enum Tracy_Ai_Blame_Pr_Constraint {
 
 /** input type for incrementing numeric columns in table "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_Pr_Inc_Input = {
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: InputMaybe<Scalars['Int']['input']>;
   aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_Pr_Insert_Input = {
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: InputMaybe<Scalars['Int']['input']>;
   additionalData?: InputMaybe<Scalars['json']['input']>;
   aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -42309,16 +42342,22 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate max on columns */
 export type Tracy_Ai_Blame_Pr_Max_Fields = {
   __typename?: 'tracy_ai_blame_pr_max_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Int']['output']>;
   aiLinesAdded?: Maybe<Scalars['Int']['output']>;
   commentIds?: Maybe<Array<Scalars['String']['output']>>;
   commitShas?: Maybe<Array<Scalars['String']['output']>>;
@@ -42331,16 +42370,22 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 /** aggregate min on columns */
 export type Tracy_Ai_Blame_Pr_Min_Fields = {
   __typename?: 'tracy_ai_blame_pr_min_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Int']['output']>;
   aiLinesAdded?: Maybe<Scalars['Int']['output']>;
   commentIds?: Maybe<Array<Scalars['String']['output']>>;
   commitShas?: Maybe<Array<Scalars['String']['output']>>;
@@ -42353,10 +42398,14 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -42378,6 +42427,7 @@ export type Tracy_Ai_Blame_Pr_On_Conflict = {
 
 /** Ordering options when selecting data from "tracy.ai_blame_pr". */
 export type Tracy_Ai_Blame_Pr_Order_By = {
+  acceptedCharCount?: InputMaybe<Order_By>;
   additionalData?: InputMaybe<Order_By>;
   aiLinesAdded?: InputMaybe<Order_By>;
   commentIds?: InputMaybe<Order_By>;
@@ -42397,6 +42447,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   repositoryUrl?: InputMaybe<Order_By>;
   rowCreatedAt?: InputMaybe<Order_By>;
   tabAutocompleteLinesAdded?: InputMaybe<Order_By>;
+  totalInferenceCharCount?: InputMaybe<Order_By>;
   totalInferenceLines?: InputMaybe<Order_By>;
 };
 
@@ -42407,6 +42458,8 @@ export type Tracy_Ai_Blame_Pr_Pk_Columns_Input = {
 
 /** select columns of table "tracy.ai_blame_pr" */
 export enum Tracy_Ai_Blame_Pr_Select_Column {
+  /** column name */
+  AcceptedCharCount = 'acceptedCharCount',
   /** column name */
   AdditionalData = 'additionalData',
   /** column name */
@@ -42446,11 +42499,15 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
   /** column name */
+  TotalInferenceCharCount = 'totalInferenceCharCount',
+  /** column name */
   TotalInferenceLines = 'totalInferenceLines'
 }
 
 /** input type for updating data in table "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_Pr_Set_Input = {
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: InputMaybe<Scalars['Int']['input']>;
   additionalData?: InputMaybe<Scalars['json']['input']>;
   aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -42466,46 +42523,68 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate stddev on columns */
 export type Tracy_Ai_Blame_Pr_Stddev_Fields = {
   __typename?: 'tracy_ai_blame_pr_stddev_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Tracy_Ai_Blame_Pr_Stddev_Pop_Fields = {
   __typename?: 'tracy_ai_blame_pr_stddev_pop_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_samp on columns */
 export type Tracy_Ai_Blame_Pr_Stddev_Samp_Fields = {
   __typename?: 'tracy_ai_blame_pr_stddev_samp_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -42519,6 +42598,8 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: InputMaybe<Scalars['Int']['input']>;
   additionalData?: InputMaybe<Scalars['json']['input']>;
   aiLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   commentIds?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -42534,27 +42615,39 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prStatus?: InputMaybe<Pr_Status_Enum>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** aggregate sum on columns */
 export type Tracy_Ai_Blame_Pr_Sum_Fields = {
   __typename?: 'tracy_ai_blame_pr_sum_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Int']['output']>;
   aiLinesAdded?: Maybe<Scalars['Int']['output']>;
   commitsCount?: Maybe<Scalars['Int']['output']>;
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Int']['output']>;
 };
 
 /** update columns of table "tracy.ai_blame_pr" */
 export enum Tracy_Ai_Blame_Pr_Update_Column {
+  /** column name */
+  AcceptedCharCount = 'acceptedCharCount',
   /** column name */
   AdditionalData = 'additionalData',
   /** column name */
@@ -42593,6 +42686,8 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   RowCreatedAt = 'rowCreatedAt',
   /** column name */
   TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
+  /** column name */
+  TotalInferenceCharCount = 'totalInferenceCharCount',
   /** column name */
   TotalInferenceLines = 'totalInferenceLines'
 }
@@ -42609,41 +42704,55 @@ export type Tracy_Ai_Blame_Pr_Updates = {
 /** aggregate var_pop on columns */
 export type Tracy_Ai_Blame_Pr_Var_Pop_Fields = {
   __typename?: 'tracy_ai_blame_pr_var_pop_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate var_samp on columns */
 export type Tracy_Ai_Blame_Pr_Var_Samp_Fields = {
   __typename?: 'tracy_ai_blame_pr_var_samp_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate variance on columns */
 export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   __typename?: 'tracy_ai_blame_pr_variance_fields';
+  /** sum of char_count from attributions in final PR diff (accepted AI chars) */
+  acceptedCharCount?: Maybe<Scalars['Float']['output']>;
   aiLinesAdded?: Maybe<Scalars['Float']['output']>;
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
+  /** sum of char_count from all post-planning CHAT inferences in the session */
+  totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
+  /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
-};
-
-export type Tracy_Get_Session_First_Attributed_Ai_Response_At_Args = {
-  session_ids?: InputMaybe<Scalars['_text']['input']>;
 };
 
 /** columns and relationships of "tracy.tracy_edit_event" */
@@ -46964,85 +47073,6 @@ export type View_Types_Roi_Trends_Time_Series_Variance_Fields = {
   humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
   humanCycleDays?: Maybe<Scalars['Float']['output']>;
   humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
-};
-
-/** columns and relationships of "view_types.session_first_attributed_ai_response" */
-export type View_Types_Session_First_Attributed_Ai_Response = {
-  __typename?: 'view_types_session_first_attributed_ai_response';
-  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
-  sessionId?: Maybe<Scalars['String']['output']>;
-};
-
-export type View_Types_Session_First_Attributed_Ai_Response_Aggregate = {
-  __typename?: 'view_types_session_first_attributed_ai_response_aggregate';
-  aggregate?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Aggregate_Fields>;
-  nodes: Array<View_Types_Session_First_Attributed_Ai_Response>;
-};
-
-/** aggregate fields of "view_types.session_first_attributed_ai_response" */
-export type View_Types_Session_First_Attributed_Ai_Response_Aggregate_Fields = {
-  __typename?: 'view_types_session_first_attributed_ai_response_aggregate_fields';
-  count: Scalars['Int']['output'];
-  max?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Max_Fields>;
-  min?: Maybe<View_Types_Session_First_Attributed_Ai_Response_Min_Fields>;
-};
-
-
-/** aggregate fields of "view_types.session_first_attributed_ai_response" */
-export type View_Types_Session_First_Attributed_Ai_Response_Aggregate_FieldsCountArgs = {
-  columns?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Select_Column>>;
-  distinct?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-/** Boolean expression to filter rows from the table "view_types.session_first_attributed_ai_response". All fields are combined with a logical 'AND'. */
-export type View_Types_Session_First_Attributed_Ai_Response_Bool_Exp = {
-  _and?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>>;
-  _not?: InputMaybe<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>;
-  _or?: InputMaybe<Array<View_Types_Session_First_Attributed_Ai_Response_Bool_Exp>>;
-  minAiResponseAt?: InputMaybe<Timestamptz_Comparison_Exp>;
-  sessionId?: InputMaybe<String_Comparison_Exp>;
-};
-
-/** aggregate max on columns */
-export type View_Types_Session_First_Attributed_Ai_Response_Max_Fields = {
-  __typename?: 'view_types_session_first_attributed_ai_response_max_fields';
-  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
-  sessionId?: Maybe<Scalars['String']['output']>;
-};
-
-/** aggregate min on columns */
-export type View_Types_Session_First_Attributed_Ai_Response_Min_Fields = {
-  __typename?: 'view_types_session_first_attributed_ai_response_min_fields';
-  minAiResponseAt?: Maybe<Scalars['timestamptz']['output']>;
-  sessionId?: Maybe<Scalars['String']['output']>;
-};
-
-/** Ordering options when selecting data from "view_types.session_first_attributed_ai_response". */
-export type View_Types_Session_First_Attributed_Ai_Response_Order_By = {
-  minAiResponseAt?: InputMaybe<Order_By>;
-  sessionId?: InputMaybe<Order_By>;
-};
-
-/** select columns of table "view_types.session_first_attributed_ai_response" */
-export enum View_Types_Session_First_Attributed_Ai_Response_Select_Column {
-  /** column name */
-  MinAiResponseAt = 'minAiResponseAt',
-  /** column name */
-  SessionId = 'sessionId'
-}
-
-/** Streaming cursor of the table "view_types_session_first_attributed_ai_response" */
-export type View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Input = {
-  /** Stream column input with initial value */
-  initial_value: View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Value_Input;
-  /** cursor ordering */
-  ordering?: InputMaybe<Cursor_Ordering>;
-};
-
-/** Initial value of the column from where the streaming should start */
-export type View_Types_Session_First_Attributed_Ai_Response_Stream_Cursor_Value_Input = {
-  minAiResponseAt?: InputMaybe<Scalars['timestamptz']['input']>;
-  sessionId?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "view_types.severity_count" */

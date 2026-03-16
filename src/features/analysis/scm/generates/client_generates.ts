@@ -668,7 +668,7 @@ export type GetLinearIntegrationDataSuccess = {
   teamId?: Maybe<Scalars['String']['output']>;
 };
 
-export type GetPromptSummaryResponse = PromptSummaryError | PromptSummarySuccess;
+export type GetPromptSummaryResponse = PromptSummaryError | PromptSummaryProcessing | PromptSummarySuccess;
 
 export type GetReportsResponseError = {
   __typename?: 'GetReportsResponseError';
@@ -992,6 +992,11 @@ export type PromptSummaryData = {
 export type PromptSummaryError = {
   __typename?: 'PromptSummaryError';
   error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type PromptSummaryProcessing = {
+  __typename?: 'PromptSummaryProcessing';
   status: Status;
 };
 
@@ -51102,7 +51107,7 @@ export type GetPromptSummaryQueryVariables = Exact<{
 }>;
 
 
-export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: Array<string>, developersPushbacks: Array<string>, importantInstructionsAndDecisions: Array<string>, backAndForthLevel: { __typename?: 'BackAndForthLevel', level: number, justification: string } } } };
+export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummaryProcessing', status: Status } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: Array<string>, developersPushbacks: Array<string>, importantInstructionsAndDecisions: Array<string>, backAndForthLevel: { __typename?: 'BackAndForthLevel', level: number, justification: string } } } };
 
 export type UploadAiBlameInferencesInitMutationVariables = Exact<{
   sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
@@ -51787,6 +51792,9 @@ export const GetPromptSummaryDocument = `
           justification
         }
       }
+    }
+    ... on PromptSummaryProcessing {
+      status
     }
     ... on PromptSummaryError {
       status

@@ -451,6 +451,9 @@ query GetPromptSummary($aiBlameAttributionId: String!) {
         }
       }
     }
+    ... on PromptSummaryProcessing {
+      status
+    }
     ... on PromptSummaryError {
       status
       error

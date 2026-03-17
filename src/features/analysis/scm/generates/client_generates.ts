@@ -278,6 +278,14 @@ export type ClaimInvitationSuccess = {
   status: Status;
 };
 
+export type CodingTimeStatsResponse = {
+  __typename?: 'CodingTimeStatsResponse';
+  aiAvgDays?: Maybe<Scalars['Float']['output']>;
+  humanAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
+  previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
 export type CommitToSameBranchFixInput = {
   commitDescription?: InputMaybe<Scalars['String']['input']>;
   commitMessage: Scalars['String']['input'];
@@ -607,6 +615,20 @@ export type GetCheckmarxProjectsError = {
 
 export type GetCheckmarxProjectsResponse = GetCheckmarxProjectsError | ListOfProjectsSuccess;
 
+export type GetCodingTimeStatsError = {
+  __typename?: 'GetCodingTimeStatsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetCodingTimeStatsResponse = GetCodingTimeStatsError | GetCodingTimeStatsSuccess;
+
+export type GetCodingTimeStatsSuccess = {
+  __typename?: 'GetCodingTimeStatsSuccess';
+  stats: CodingTimeStatsResponse;
+  status: Status;
+};
+
 export type GetDeveloperStatisticsError = {
   __typename?: 'GetDeveloperStatisticsError';
   error?: Maybe<Scalars['String']['output']>;
@@ -690,6 +712,20 @@ export type GetReposSuccess = {
   repos: Array<ScmRepo>;
   status: Status;
   totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type GetRoiTrendsTimeSeriesError = {
+  __typename?: 'GetRoiTrendsTimeSeriesError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRoiTrendsTimeSeriesResponse = GetRoiTrendsTimeSeriesError | GetRoiTrendsTimeSeriesSuccess;
+
+export type GetRoiTrendsTimeSeriesSuccess = {
+  __typename?: 'GetRoiTrendsTimeSeriesSuccess';
+  dataPoints: Array<RoiTrendsTimeSeriesPoint>;
+  status: Status;
 };
 
 export type GetScmReposResponse = GetReposSuccess | ScmAdminError | ScmError | ScmNoProjectPermissionsError | ScmNoScmTokenError | ScmRepoNoTokenAccessError | ScmUnsupportedScmTypeError;
@@ -1064,6 +1100,17 @@ export type ReportValidationError = BaseError & {
 export type ResendInvitationResponse = {
   __typename?: 'ResendInvitationResponse';
   id: Scalars['String']['output'];
+};
+
+export type RoiTrendsTimeSeriesPoint = {
+  __typename?: 'RoiTrendsTimeSeriesPoint';
+  aiCodingTimeDays?: Maybe<Scalars['Float']['output']>;
+  aiCycleDays?: Maybe<Scalars['Float']['output']>;
+  aiReviewTimeDays?: Maybe<Scalars['Float']['output']>;
+  date: Scalars['String']['output'];
+  humanCodingTimeDays?: Maybe<Scalars['Float']['output']>;
+  humanCycleDays?: Maybe<Scalars['Float']['output']>;
+  humanReviewTimeDays?: Maybe<Scalars['Float']['output']>;
 };
 
 export type S3FileContentResponse = {
@@ -11521,11 +11568,6 @@ export type Cli_Login_Updates = {
   _set?: InputMaybe<Cli_Login_Set_Input>;
   /** filter the rows which have to be updated */
   where: Cli_Login_Bool_Exp;
-};
-
-export type CodingTimeStats_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 /** columns and relationships of "commit_blame_request" */
@@ -25808,8 +25850,7 @@ export type Organization = {
   /** An aggregate relationship */
   brokerHosts_aggregate: Broker_Host_Aggregate;
   brokerTokenExpiryInDays: Scalars['Int']['output'];
-  /** A computed field, executes function "organization_coding_time_stats" */
-  codingTimeStats?: Maybe<Array<View_Types_Ai_Human_Days_Stats>>;
+  codingTimeStats: GetCodingTimeStatsResponse;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   /** A computed field, executes function "organization_deployed_fixes_count" */
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
@@ -25885,8 +25926,7 @@ export type Organization = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
-  /** A computed field, executes function "organization_roi_trends_time_series" */
-  roiTrendsTimeSeries?: Maybe<Array<View_Types_Roi_Trends_Time_Series>>;
+  roiTrendsTimeSeries: GetRoiTrendsTimeSeriesResponse;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** An array relationship */
   scmConfigs: Array<Scm_Config>;
@@ -25991,12 +26031,8 @@ export type OrganizationBrokerHosts_AggregateArgs = {
 
 /** columns and relationships of "organization" */
 export type OrganizationCodingTimeStatsArgs = {
-  args: CodingTimeStats_Organization_Args;
-  distinct_on?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
-  where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+  endDate: Scalars['Timestamp']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -26264,12 +26300,8 @@ export type OrganizationReviewTimeStatsArgs = {
 
 /** columns and relationships of "organization" */
 export type OrganizationRoiTrendsTimeSeriesArgs = {
-  args?: InputMaybe<RoiTrendsTimeSeries_Organization_Args>;
-  distinct_on?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<View_Types_Roi_Trends_Time_Series_Order_By>>;
-  where?: InputMaybe<View_Types_Roi_Trends_Time_Series_Bool_Exp>;
+  endDate: Scalars['Timestamp']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -30966,6 +30998,11 @@ export type Query_Root = {
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
   getCheckmarxProjects?: Maybe<GetCheckmarxProjectsResponse>;
   /**
+   * Get coding time statistics (first_inference_date to pr_created_at) for AI vs Human PRs.
+   * Returns average coding time with previous period comparison for trend analysis.
+   */
+  getCodingTimeStats: GetCodingTimeStatsResponse;
+  /**
    * Get developer statistics aggregated from AI blame attribution data.
    * Returns usage counts grouped by developer (userName + computerName).
    */
@@ -30988,6 +31025,12 @@ export type Query_Root = {
    */
   getPromptSummary: GetPromptSummaryResponse;
   getReportsApiV2: GetReportsV2Response;
+  /**
+   * Get ROI trends time series data with cumulative avg cycle/coding/review time per date.
+   * Uses first_inference_date for time calculations. Returns one data point per date with
+   * cumulative running averages for AI and Human PRs.
+   */
+  getRoiTrendsTimeSeries: GetRoiTrendsTimeSeriesResponse;
   /**
    * Fetches the content of an S3 file.
    * Accepts either a full S3 URI (s3://bucket/key) or a plain key.
@@ -32664,6 +32707,13 @@ export type Query_RootGetCheckmarxProjectsArgs = {
 };
 
 
+export type Query_RootGetCodingTimeStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
 export type Query_RootGetDeveloperStatisticsArgs = {
   days?: InputMaybe<Scalars['Int']['input']>;
   organizationId: Scalars['String']['input'];
@@ -32726,6 +32776,13 @@ export type Query_RootGetPromptSummaryArgs = {
 
 export type Query_RootGetReportsApiV2Args = {
   reportId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type Query_RootGetRoiTrendsTimeSeriesArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -34858,11 +34915,6 @@ export type ResolvedAggregatedVulnerabilitySeverities_Organization_Args = {
 };
 
 export type ReviewTimeStats_Organization_Args = {
-  end_date?: InputMaybe<Scalars['timestamptz']['input']>;
-  start_date?: InputMaybe<Scalars['timestamptz']['input']>;
-};
-
-export type RoiTrendsTimeSeries_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };

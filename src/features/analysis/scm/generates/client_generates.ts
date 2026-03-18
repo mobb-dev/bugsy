@@ -25877,6 +25877,8 @@ export type Organization = {
   isMobbSastEnabled: Scalars['Boolean']['output'];
   isPrivateRepoEnabled: Scalars['Boolean']['output'];
   isSendInvitationEnabled: Scalars['Boolean']['output'];
+  /** Enable Tracy vulnerability attribution processing for this organization */
+  isTracyAttributionEnabled: Scalars['Boolean']['output'];
   /** An array relationship */
   issueTypeSettings: Array<Organization_Issue_Type_Settings>;
   /** An aggregate relationship */
@@ -26431,6 +26433,7 @@ export type Organization_Bool_Exp = {
   isMobbSastEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isPrivateRepoEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isSendInvitationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
+  isTracyAttributionEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
@@ -26897,6 +26900,8 @@ export type Organization_Insert_Input = {
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Enable Tracy vulnerability attribution processing for this organization */
+  isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
@@ -27261,6 +27266,7 @@ export type Organization_Order_By = {
   isMobbSastEnabled?: InputMaybe<Order_By>;
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   isSendInvitationEnabled?: InputMaybe<Order_By>;
+  isTracyAttributionEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
@@ -27896,6 +27902,8 @@ export enum Organization_Select_Column {
   /** column name */
   IsSendInvitationEnabled = 'isSendInvitationEnabled',
   /** column name */
+  IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
+  /** column name */
   Name = 'name',
   /** column name */
   OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
@@ -27933,6 +27941,8 @@ export type Organization_Set_Input = {
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Enable Tracy vulnerability attribution processing for this organization */
+  isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
@@ -28055,6 +28065,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Enable Tracy vulnerability attribution processing for this organization */
+  isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
@@ -28587,6 +28599,8 @@ export enum Organization_Update_Column {
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
   /** column name */
   IsSendInvitationEnabled = 'isSendInvitationEnabled',
+  /** column name */
+  IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
   /** column name */
   Name = 'name',
   /** column name */

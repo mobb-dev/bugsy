@@ -7,6 +7,7 @@ import {
   parseScmURL,
   ScmType,
 } from '../../features/analysis/scm/shared/src/urlParser'
+import { computeGitDiffAdditions } from '../../utils/computeGitDiffAdditions'
 import {
   parseTranscriptAndCreateTrace,
   type TraceData,
@@ -102,9 +103,27 @@ export function validateHookData(data: unknown): HookData {
 }
 
 /**
+ * Extract additions from structuredPatch (fallback when git is unavailable).
+ */
+function extractStructuredPatchAdditions(hookData: HookData): string {
+  const editResponse = hookData.tool_response as EditToolResponse
+  const additions: string[] = []
+
+  for (const patch of editResponse.structuredPatch) {
+    for (const line of patch.lines) {
+      if (line.startsWith('+')) {
+        additions.push(line.slice(1))
+      }
+    }
+  }
+
+  return additions.join('\n')
+}
+
+/**
  * Extracts the inference (code additions only) from hook data
  */
-export function extractInference(hookData: HookData): string {
+export async function extractInference(hookData: HookData): Promise<string> {
   if (hookData.tool_name === 'Write') {
     // For Write operations, the entire content is an addition (from tool_input, not tool_response)
     const writeInput = hookData.tool_input as { content?: string }
@@ -112,20 +131,21 @@ export function extractInference(hookData: HookData): string {
   }
 
   if (hookData.tool_name === 'Edit') {
-    const editResponse = hookData.tool_response as EditToolResponse
-    const additions: string[] = []
-
-    // Extract lines that start with "+" from structured patch
-    for (const patch of editResponse.structuredPatch) {
-      for (const line of patch.lines) {
-        if (line.startsWith('+')) {
-          // Remove the "+" prefix and add to additions
-          additions.push(line.slice(1))
-        }
-      }
+    const editInput = hookData.tool_input as {
+      old_string: string
+      new_string: string
     }
 
-    return additions.join('\n')
+    // Prefer git diff for correct token alignment
+    try {
+      return await computeGitDiffAdditions(
+        editInput.old_string,
+        editInput.new_string
+      )
+    } catch {
+      // Fallback to structuredPatch if git is not available
+      return extractStructuredPatchAdditions(hookData)
+    }
   }
 
   return ''
@@ -146,7 +166,7 @@ export async function collectHookData(): Promise<{
   const hookData = validateHookData(rawData)
 
   // Extract inference (code additions only)
-  const inference = extractInference(hookData)
+  const inference = await extractInference(hookData)
 
   // Parse transcript and create trace data
   let tracePayload: TraceData

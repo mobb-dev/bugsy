@@ -14,10 +14,7 @@ import {
   type UploadAiBlameInferencesInitMutation,
 } from '../../features/analysis/scm/generates/client_generates'
 import { GitService } from '../../features/analysis/scm/services/GitService'
-import {
-  parseScmURL,
-  ScmType,
-} from '../../features/analysis/scm/shared/src/urlParser'
+import { parseScmURL } from '../../features/analysis/scm/shared/src/urlParser'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { getStableComputerName } from '../../utils/computerName'
 import {
@@ -119,10 +116,7 @@ export async function getRepositoryUrl(): Promise<string | null> {
     }
     const remoteUrl = await gitService.getRemoteUrl()
     const parsed = parseScmURL(remoteUrl)
-    return parsed?.scmType === ScmType.GitHub ||
-      parsed?.scmType === ScmType.GitLab
-      ? remoteUrl
-      : null
+    return parsed?.scmType && parsed.scmType !== 'Unknown' ? remoteUrl : null
   } catch {
     return null
   }

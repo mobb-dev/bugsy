@@ -59,7 +59,7 @@ export type AiBlameInferenceFinalizeInput = {
   /**
    * Normalized repository URL for filtering inferences.
    * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
-   * GitHub and GitLab URLs are supported; other SCM providers should send null.
+   * All recognized SCM providers (GitHub, GitLab, ADO, Bitbucket) are supported.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
@@ -78,7 +78,7 @@ export type AiBlameInferenceInitInput = {
   /**
    * Normalized repository URL for filtering inferences.
    * Should be normalized using parseScmURL(url)?.canonicalUrl before sending.
-   * GitHub and GitLab URLs are supported; other SCM providers should send null.
+   * All recognized SCM providers (GitHub, GitLab, ADO, Bitbucket) are supported.
    */
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   toolName?: InputMaybe<Scalars['String']['input']>;

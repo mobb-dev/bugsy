@@ -1,11 +1,15 @@
 import { setTimeout } from 'node:timers/promises'
 
+import pLimit from 'p-limit'
+
 import { InvalidAccessTokenError } from '../errors'
+import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
 import { scmCloudUrl } from '../shared/src'
 import {
   CreateSubmitRequestParams,
   GetReferenceResult,
+  GetSubmitRequestInfo,
   GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
@@ -18,6 +22,7 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from '../types'
+import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   AdoPullRequestStatus,
   adoValidateParams,
@@ -252,40 +257,255 @@ export class AdoSCMLib extends SCMLib {
   }
 
   async getSubmitRequestMetadata(
-    _submitRequestId: string
+    submitRequestId: string
   ): Promise<GetSubmitRequestMetadataResult> {
-    throw new Error('getSubmitRequestMetadata not implemented for ADO')
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoPullRequestMetadata({
+      repoUrl: this.url,
+      prNumber: Number(submitRequestId),
+    })
   }
 
-  async getPrFiles(_prNumber: number): Promise<string[]> {
-    throw new Error('getPrFiles not implemented for ADO')
+  async getPrFiles(prNumber: number): Promise<string[]> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoPrFiles({
+      repoUrl: this.url,
+      prNumber,
+    })
   }
 
   override async searchSubmitRequests(
-    _params: SearchSubmitRequestsParams
+    params: SearchSubmitRequestsParams
   ): Promise<SearchSubmitRequestsResult> {
-    throw new Error('searchSubmitRequests not implemented for ADO')
+    this._validateAccessToken()
+    const adoSdk = await this.getAdoSdk()
+
+    const skip = parseCursorSafe(params.cursor, 0)
+    const top = params.limit || 10
+
+    // Map state filter to ADO PullRequestStatus
+    let status: AdoPullRequestStatus = AdoPullRequestStatus.All
+    if (params.filters?.state === 'open') {
+      status = AdoPullRequestStatus.Active
+    } else if (params.filters?.state === 'closed') {
+      // ADO doesn't have a single "closed" — fetch all and filter
+      status = AdoPullRequestStatus.All
+    }
+
+    const prs = await adoSdk.searchAdoPullRequests({
+      repoUrl: params.repoUrl,
+      status,
+      skip,
+      top: top + 1, // Fetch one extra to determine hasMore
+    })
+
+    // hasMore based on API response, not filtered results
+    const apiHasMore = prs.length > top
+    const prsPage = prs.slice(0, top)
+
+    // ADO PRs don't have a direct updatedAt field. Best approximation:
+    // - For closed/merged PRs: closedDate
+    // - For open PRs: lastMergeSourceCommit date (last push to source branch)
+    // - Fallback: creationDate
+    const getAdoPrUpdatedDate = (pr: (typeof prsPage)[0]): Date =>
+      pr.closedDate ||
+      pr.lastMergeSourceCommit?.committer?.date ||
+      pr.creationDate ||
+      new Date()
+
+    // Filter by updatedAfter if specified
+    let filtered = prsPage
+    if (params.filters?.updatedAfter) {
+      const afterDate = params.filters.updatedAfter
+      filtered = prsPage.filter((pr) => getAdoPrUpdatedDate(pr) > afterDate)
+    }
+
+    // Filter closed state (abandoned + completed) if requested
+    if (params.filters?.state === 'closed') {
+      filtered = filtered.filter(
+        (pr) =>
+          pr.status === (AdoPullRequestStatus.Completed as number) ||
+          pr.status === (AdoPullRequestStatus.Abandoned as number)
+      )
+    }
+
+    // Note: ADO API doesn't support server-side sorting, and sorting a single
+    // page in-memory doesn't produce globally sorted results across pages.
+    // All current callers use state: 'all' so client-side filtering is rarely
+    // triggered, and the API's default order (newest first) is acceptable.
+
+    const results: GetSubmitRequestInfo[] = filtered.map((pr) => {
+      let prStatus: ScmSubmitRequestStatus = 'open'
+      if (pr.status === (AdoPullRequestStatus.Completed as number)) {
+        prStatus = 'merged'
+      } else if (pr.status === (AdoPullRequestStatus.Abandoned as number)) {
+        prStatus = 'closed'
+      }
+
+      return {
+        submitRequestId: String(pr.pullRequestId),
+        submitRequestNumber: pr.pullRequestId || 0,
+        title: pr.title || '',
+        status: prStatus,
+        sourceBranch: (pr.sourceRefName || '').replace('refs/heads/', ''),
+        targetBranch: (pr.targetRefName || '').replace('refs/heads/', ''),
+        authorName: pr.createdBy?.displayName,
+        authorEmail: pr.createdBy?.uniqueName,
+        createdAt: pr.creationDate || new Date(),
+        updatedAt: getAdoPrUpdatedDate(pr),
+        description: pr.description,
+        tickets: [],
+        changedLines: { added: 0, removed: 0 },
+      }
+    })
+
+    return {
+      results,
+      nextCursor: apiHasMore ? String(skip + top) : undefined,
+      hasMore: apiHasMore,
+    }
   }
 
+  // TODO: Performance — this fetches ALL repositories on every call, then paginates
+  // in-memory. For orgs with thousands of repos this can be slow and wasteful,
+  // especially when the UI pages through results (each page triggers a full re-fetch).
+  // Consider caching the fetched list with a short TTL, or using ADO's
+  // getRepositoriesPaged() API per-project for true server-side pagination.
   override async searchRepos(
-    _params: SearchReposParams
+    params: SearchReposParams
   ): Promise<SearchReposResult> {
-    throw new Error('searchRepos not implemented for ADO')
+    this._validateAccessToken()
+    if (this.url && new URL(this.url).origin !== scmCloudUrl.Ado) {
+      throw new Error(
+        `Oauth token is not supported for ADO on prem - ${this.url}`
+      )
+    }
+    const allRepos = await getAdoRepoList({
+      orgName: params.scmOrg,
+      accessToken: this.accessToken,
+      tokenOrg: this.scmOrg,
+    })
+
+    // Sort by repoUpdatedAt descending (most recently updated first)
+    allRepos.sort((a, b) => {
+      const dateA = a.repoUpdatedAt ? new Date(a.repoUpdatedAt).getTime() : 0
+      const dateB = b.repoUpdatedAt ? new Date(b.repoUpdatedAt).getTime() : 0
+      return dateB - dateA
+    })
+
+    const page = parseCursorSafe(params.cursor, 0)
+    const limit = params.limit || 100
+    const start = page
+    const pageResults = allRepos.slice(start, start + limit)
+    const hasMore = start + limit < allRepos.length
+
+    return {
+      results: pageResults,
+      nextCursor: hasMore ? String(start + limit) : undefined,
+      hasMore,
+    }
   }
 
-  // TODO: Add comprehensive tests for getPullRequestMetrics (ADO)
-  // See clients/cli/src/features/analysis/scm/__tests__/github.test.ts:589-648 for reference
-  async getPullRequestMetrics(_prNumber: number): Promise<PullRequestMetrics> {
-    throw new Error('getPullRequestMetrics not implemented for ADO')
+  override async getPrCommitsBatch(
+    repoUrl: string,
+    prNumbers: number[]
+  ): Promise<Map<number, string[]>> {
+    this._validateAccessToken()
+    const adoSdk = await this.getAdoSdk()
+    const result = new Map<number, string[]>()
+    const limit = pLimit(5)
+    await Promise.all(
+      prNumbers.map((prNumber) =>
+        limit(async () => {
+          try {
+            const commits = await adoSdk.getAdoPrCommits({
+              repoUrl,
+              prNumber,
+            })
+            result.set(prNumber, commits)
+          } catch (error) {
+            console.warn(
+              `[AdoSCMLib.getPrCommitsBatch] Failed to fetch commits for PR #${prNumber}:`,
+              error instanceof Error ? error.message : String(error)
+            )
+            result.set(prNumber, [])
+          }
+        })
+      )
+    )
+    return result
   }
 
-  async getRecentCommits(_since: string): Promise<RecentCommitsResult> {
-    throw new Error('getRecentCommits not implemented for ADO')
+  async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    const { pr, commentIds, linesAdded } =
+      await adoSdk.getAdoPullRequestMetrics({
+        repoUrl: this.url,
+        prNumber,
+      })
+
+    // Map ADO PR status to Pr_Status_Enum
+    let prStatus: Pr_Status_Enum = Pr_Status_Enum.Active
+    if (pr.status === 3) {
+      // Completed
+      prStatus = Pr_Status_Enum.Merged
+    } else if (pr.status === 2) {
+      // Abandoned
+      prStatus = Pr_Status_Enum.Closed
+    } else if (pr.isDraft) {
+      prStatus = Pr_Status_Enum.Draft
+    }
+
+    return {
+      prId: String(prNumber),
+      repositoryUrl: this.url,
+      prCreatedAt: pr.creationDate || new Date(),
+      prMergedAt: pr.closedDate && pr.status === 3 ? pr.closedDate : null,
+      linesAdded,
+      prStatus,
+      commentIds,
+    }
+  }
+
+  async getRecentCommits(since: string): Promise<RecentCommitsResult> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    const commits = await adoSdk.getAdoRecentCommits({
+      repoUrl: this.url,
+      since,
+    })
+
+    return {
+      data: commits.map((c) => ({
+        sha: c.commitId || '',
+        commit: {
+          committer: c.committer?.date
+            ? { date: c.committer.date.toISOString() }
+            : undefined,
+          author: c.author
+            ? { email: c.author.email, name: c.author.name }
+            : undefined,
+          message: c.comment,
+        },
+        parents: c.parents?.map((sha) => ({ sha })),
+      })),
+    }
   }
 
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
-    // ADO doesn't expose a dedicated rate limit API
-    return null
+    // ADO doesn't expose a rate limit API, so we can't track actual usage.
+    // Unlike GitHub/GitLab which return real remaining counts from response
+    // headers, this is a static value that never decreases — it only prevents
+    // callers (like the maintenance service's checkRateLimit) from throwing
+    // on null. Actual ADO rate limiting (~200 req/min for cloud) would
+    // surface as 429 errors at the HTTP level.
+    return {
+      remaining: 10000,
+      reset: new Date(Date.now() + 3600000),
+    }
   }
 }
 

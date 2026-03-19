@@ -1,3 +1,5 @@
+import pLimit from 'p-limit'
+
 import { MAX_BRANCHES_FETCH, ReferenceType, ScmRepoInfo } from '..'
 import {
   InvalidRepoUrlError,
@@ -7,6 +9,7 @@ import {
 import { safeBody } from '../utils'
 import { AdoTokenTypeEnum, DEFUALT_ADO_ORIGIN } from './constants'
 import {
+  AdoPullRequestStatus,
   GetAdoApiClientParams,
   ProjectVisibility,
   ValidAdoPullRequestStatus,
@@ -217,6 +220,174 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       )
       return res.pullRequestId
     },
+    async getAdoPullRequestMetadata({
+      repoUrl,
+      prNumber,
+    }: {
+      repoUrl: string
+      prNumber: number
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const pr = await git.getPullRequest(repo, prNumber, projectName)
+      if (!pr) {
+        throw new Error(`Pull request #${prNumber} not found`)
+      }
+      return {
+        title: pr.title,
+        targetBranch: (pr.targetRefName || '').replace('refs/heads/', ''),
+        sourceBranch: (pr.sourceRefName || '').replace('refs/heads/', ''),
+        headCommitSha:
+          pr.lastMergeSourceCommit?.commitId ||
+          pr.lastMergeCommit?.commitId ||
+          '',
+      }
+    },
+    async getAdoPrFiles({
+      repoUrl,
+      prNumber,
+    }: {
+      repoUrl: string
+      prNumber: number
+    }): Promise<string[]> {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const iterations = await git.getPullRequestIterations(
+        repo,
+        prNumber,
+        projectName
+      )
+      if (!iterations || iterations.length === 0) {
+        return []
+      }
+      const lastIteration = iterations[iterations.length - 1]
+      if (!lastIteration?.id) {
+        return []
+      }
+      const iterationId = lastIteration.id
+      const changes = await git.getPullRequestIterationChanges(
+        repo,
+        prNumber,
+        iterationId,
+        projectName
+      )
+      if (!changes?.changeEntries) {
+        return []
+      }
+      return changes.changeEntries
+        .filter((entry) => {
+          // Include added, modified, renamed files (exclude deletes)
+          const changeType = entry.changeType
+          // ADO VersionControlChangeType: Add=1, Edit=2, Rename=8, SourceRename=1024
+          // Delete=16 should be excluded
+          return changeType !== 16 && entry.item?.path
+        })
+        .map((entry) => {
+          // Remove leading slash from ADO paths
+          const path = entry.item!.path!
+          return path.startsWith('/') ? path.slice(1) : path
+        })
+    },
+    async searchAdoPullRequests({
+      repoUrl,
+      status,
+      skip,
+      top,
+    }: {
+      repoUrl: string
+      status?: AdoPullRequestStatus
+      skip?: number
+      top?: number
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const searchCriteria = {
+        // Cast to number to avoid TypeScript enum compatibility issues between
+        // our AdoPullRequestStatus and azure-devops-node-api's PullRequestStatus
+        status: (status ?? AdoPullRequestStatus.All) as number,
+      }
+      const prs = await git.getPullRequests(
+        repo,
+        searchCriteria,
+        projectName,
+        undefined, // maxCommentLength
+        skip,
+        top
+      )
+      return prs
+    },
+    async getAdoPullRequestMetrics({
+      repoUrl,
+      prNumber,
+    }: {
+      repoUrl: string
+      prNumber: number
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const pr = await git.getPullRequest(repo, prNumber, projectName)
+      if (!pr) {
+        throw new Error(`Pull request #${prNumber} not found`)
+      }
+
+      // Get PR threads (comments)
+      const threads = await git.getThreads(repo, prNumber, projectName)
+      const commentIds = (threads || [])
+        .filter((t) => t.id && t.comments && t.comments.length > 0)
+        .map((t) => String(t.id))
+
+      // ADO doesn't expose line counts via its API without fetching individual file diffs.
+      // Return 0 and let the consumer enrich from S3 (same approach as GitLab).
+      return {
+        pr,
+        commentIds,
+        linesAdded: 0,
+      }
+    },
+    async getAdoRecentCommits({
+      repoUrl,
+      since,
+    }: {
+      repoUrl: string
+      since: string
+    }) {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+
+      // Get the default branch to fetch commits from
+      const repository = await git.getRepository(
+        decodeURI(repo),
+        projectName ? decodeURI(projectName) : undefined
+      )
+      const defaultBranch = repository.defaultBranch?.replace('refs/heads/', '')
+
+      const commits = await git.getCommits(
+        repo,
+        {
+          fromDate: since,
+          itemVersion: defaultBranch ? { version: defaultBranch } : undefined,
+          $top: 100,
+        },
+        projectName
+      )
+      return commits
+    },
+    async getAdoPrCommits({
+      repoUrl,
+      prNumber,
+    }: {
+      repoUrl: string
+      prNumber: number
+    }): Promise<string[]> {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const commits = await git.getPullRequestCommits(
+        repo,
+        prNumber,
+        projectName
+      )
+      return (commits || []).filter((c) => c.commitId).map((c) => c.commitId!)
+    },
     async getAdoRepoDefaultBranch({
       repoUrl,
     }: {
@@ -369,33 +540,41 @@ export async function getAdoRepoList({
         })
         const gitOrg = await orgApi.getGitApi()
         const orgRepos = await gitOrg.getRepositories()
+        const repoLimit = pLimit(5)
         const repoInfoList = (
           await Promise.allSettled(
-            orgRepos.map(async (repo) => {
-              if (!repo.name || !repo.remoteUrl || !repo.defaultBranch) {
-                throw new InvalidRepoUrlError('bad repo')
-              }
-              const branch = await gitOrg.getBranch(
-                repo.name,
-                repo.defaultBranch.replace(/^refs\/heads\//, ''),
-                repo.project?.name
-              )
-              return {
-                repoName: repo.name,
-                repoUrl: repo.remoteUrl.replace(
-                  /^[hH][tT][tT][pP][sS]:\/\/[^/]+@/,
-                  'https://'
-                ),
-                repoOwner: org,
-                repoIsPublic:
-                  repo.project?.visibility === ProjectVisibility.Public,
-                repoLanguages: [],
-                repoUpdatedAt:
-                  branch.commit?.committer?.date?.toDateString() ||
-                  repo.project?.lastUpdateTime?.toDateString() ||
-                  new Date().toDateString(),
-              }
-            })
+            orgRepos.map((repo) =>
+              repoLimit(async () => {
+                if (!repo.name || !repo.remoteUrl || !repo.defaultBranch) {
+                  throw new InvalidRepoUrlError('bad repo')
+                }
+                const branch = await gitOrg.getBranch(
+                  repo.name,
+                  repo.defaultBranch.replace(/^refs\/heads\//, ''),
+                  repo.project?.name
+                )
+                return {
+                  repoName: repo.name,
+                  repoUrl: repo.remoteUrl.replace(
+                    /^[hH][tT][tT][pP][sS]:\/\/[^/]+@/,
+                    'https://'
+                  ),
+                  repoOwner: org,
+                  repoIsPublic:
+                    repo.project?.visibility === ProjectVisibility.Public,
+                  repoLanguages: [],
+                  repoUpdatedAt:
+                    // Use the latest available timestamp.
+                    // branch.commit.committer.date = last commit on default branch.
+                    // project.lastUpdateTime = last project-level change (may be stale).
+                    // ADO doesn't expose a per-repo "last pushed" date like GitHub does,
+                    // so feature branch pushes won't be reflected until merged.
+                    branch.commit?.committer?.date?.toISOString() ||
+                    repo.project?.lastUpdateTime?.toISOString() ||
+                    new Date().toISOString(),
+                }
+              })
+            )
           )
         ).reduce((acc, res) => {
           if (res.status === 'fulfilled') {

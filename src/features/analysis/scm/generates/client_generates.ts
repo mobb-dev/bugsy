@@ -297,6 +297,11 @@ export type CreateBrokerApiTokenResponse = {
   token: Scalars['String']['output'];
 };
 
+export type CreateDeveloperGroupInput = {
+  name: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+};
+
 export type CreateOrUpdateRepositorySecretResponse = CreateOrUpdateRepositorySecretSuccess | ScmError;
 
 export type CreateOrUpdateRepositorySecretSuccess = {
@@ -348,6 +353,27 @@ export type DeleteIntegrationResponseError = {
 export type DeleteIntegrationResponseSuccess = {
   __typename?: 'DeleteIntegrationResponseSuccess';
   status: Status;
+};
+
+export type DeveloperGroupResult = {
+  __typename?: 'DeveloperGroupResult';
+  groupId?: Maybe<Scalars['String']['output']>;
+  groupName?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
+  status: Status;
+};
+
+export type DeveloperGroupStatistic = {
+  __typename?: 'DeveloperGroupStatistic';
+  acceptanceRate?: Maybe<Scalars['Float']['output']>;
+  aiLinesCount: Scalars['Int']['output'];
+  aiLinesInMergedPrs: Scalars['Int']['output'];
+  autocompleteLinesCount: Scalars['Int']['output'];
+  groupName: Scalars['String']['output'];
+  humanLinesCount: Scalars['Int']['output'];
+  humanLinesInMergedPrs: Scalars['Int']['output'];
+  mainModel?: Maybe<Scalars['String']['output']>;
+  mainTool?: Maybe<Scalars['String']['output']>;
 };
 
 export type DeveloperStatistic = {
@@ -626,6 +652,20 @@ export type GetCodingTimeStatsResponse = GetCodingTimeStatsError | GetCodingTime
 export type GetCodingTimeStatsSuccess = {
   __typename?: 'GetCodingTimeStatsSuccess';
   stats: CodingTimeStatsResponse;
+  status: Status;
+};
+
+export type GetDeveloperGroupStatisticsError = {
+  __typename?: 'GetDeveloperGroupStatisticsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetDeveloperGroupStatisticsResponse = GetDeveloperGroupStatisticsError | GetDeveloperGroupStatisticsSuccess;
+
+export type GetDeveloperGroupStatisticsSuccess = {
+  __typename?: 'GetDeveloperGroupStatisticsSuccess';
+  groups: Array<DeveloperGroupStatistic>;
   status: Status;
 };
 
@@ -1381,6 +1421,11 @@ export type SendInvitationSuccess = {
 export type SetAnswersResponse = {
   __typename?: 'SetAnswersResponse';
   status: FixerStatus;
+};
+
+export type SetDeveloperGroupMembersInput = {
+  developerGroupId: Scalars['String']['input'];
+  userNames: Array<Scalars['String']['input']>;
 };
 
 export enum SortOrder {
@@ -18835,11 +18880,15 @@ export type Mutation_Root = {
   commitToDifferentBranch?: Maybe<SubmitToScmResponse>;
   commitToSameBranch?: Maybe<SubmitToScmResponse>;
   createBrokerApiToken?: Maybe<CreateBrokerApiTokenResponse>;
+  /** Create a new developer group for an organization and sync to ClickHouse. */
+  createDeveloperGroup: DeveloperGroupResult;
   createOrUpdateRepositorySecret?: Maybe<CreateOrUpdateRepositorySecretResponse>;
   createPr?: Maybe<CreatePrResponse>;
   createProject: CreateProjectResponse;
   createToken?: Maybe<CreateTokenResponse>;
   deleteAiToolToken?: Maybe<DeleteAiToolTokenResponse>;
+  /** Delete a developer group by ID (cascades to members) and sync to ClickHouse. */
+  deleteDeveloperGroup: DeveloperGroupResult;
   deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
@@ -18963,6 +19012,14 @@ export type Mutation_Root = {
   delete_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
   /** delete single row from the table: "commit_blame_request" */
   delete_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** delete data from the table: "tracy.developer_group" */
+  delete_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
+  /** delete single row from the table: "tracy.developer_group" */
+  delete_developer_group_by_pk?: Maybe<Tracy_Developer_Group>;
+  /** delete data from the table: "tracy.developer_group_member" */
+  delete_developer_group_member?: Maybe<Tracy_Developer_Group_Member_Mutation_Response>;
+  /** delete single row from the table: "tracy.developer_group_member" */
+  delete_developer_group_member_by_pk?: Maybe<Tracy_Developer_Group_Member>;
   /** delete data from the table: "effort_to_apply_fix" */
   delete_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** delete single row from the table: "effort_to_apply_fix" */
@@ -19397,6 +19454,14 @@ export type Mutation_Root = {
   insert_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
   /** insert a single row into the table: "commit_blame_request" */
   insert_commit_blame_request_one?: Maybe<Commit_Blame_Request>;
+  /** insert data into the table: "tracy.developer_group" */
+  insert_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
+  /** insert data into the table: "tracy.developer_group_member" */
+  insert_developer_group_member?: Maybe<Tracy_Developer_Group_Member_Mutation_Response>;
+  /** insert a single row into the table: "tracy.developer_group_member" */
+  insert_developer_group_member_one?: Maybe<Tracy_Developer_Group_Member>;
+  /** insert a single row into the table: "tracy.developer_group" */
+  insert_developer_group_one?: Maybe<Tracy_Developer_Group>;
   /** insert data into the table: "effort_to_apply_fix" */
   insert_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** insert a single row into the table: "effort_to_apply_fix" */
@@ -19695,6 +19760,8 @@ export type Mutation_Root = {
   scanSkill: ScanSkillResult;
   sendInvitation?: Maybe<SendInvitationResponse>;
   setAnswers: SetAnswersResponse;
+  /** Replace all members of a developer group and sync to ClickHouse. */
+  setDeveloperGroupMembers: DeveloperGroupResult;
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
   submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
@@ -19713,6 +19780,8 @@ export type Mutation_Root = {
   updateAiToolToken?: Maybe<UpdateAiToolTokenResponse>;
   updateBitbucketToken: ScmAccessToken;
   updateBitbucketTokenFromAuth0: UpdateGithubTokenFromAuth0;
+  /** Rename a developer group and sync to ClickHouse. */
+  updateDeveloperGroup: DeveloperGroupResult;
   updateDownloadedFixData?: Maybe<StatusQueryResponse>;
   updateFixesArchiveState?: Maybe<UpdateFixesArchiveStateResponse>;
   updateGithubToken: ScmAccessToken;
@@ -19901,6 +19970,14 @@ export type Mutation_Root = {
   update_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** update multiples rows of table: "commit_blame_request" */
   update_commit_blame_request_many?: Maybe<Array<Maybe<Commit_Blame_Request_Mutation_Response>>>;
+  /** update data of the table: "tracy.developer_group" */
+  update_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
+  /** update single row of the table: "tracy.developer_group" */
+  update_developer_group_by_pk?: Maybe<Tracy_Developer_Group>;
+  /** update data of the table: "tracy.developer_group_member" */
+  update_developer_group_member?: Maybe<Tracy_Developer_Group_Member_Mutation_Response>;
+  /** update single row of the table: "tracy.developer_group_member" */
+  update_developer_group_member_by_pk?: Maybe<Tracy_Developer_Group_Member>;
   /** update data of the table: "effort_to_apply_fix" */
   update_effort_to_apply_fix?: Maybe<Effort_To_Apply_Fix_Mutation_Response>;
   /** update single row of the table: "effort_to_apply_fix" */
@@ -20219,6 +20296,10 @@ export type Mutation_Root = {
   update_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** update multiples rows of table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>>>;
+  /** update multiples rows of table: "tracy.developer_group" */
+  update_tracy_developer_group_many?: Maybe<Array<Maybe<Tracy_Developer_Group_Mutation_Response>>>;
+  /** update multiples rows of table: "tracy.developer_group_member" */
+  update_tracy_developer_group_member_many?: Maybe<Array<Maybe<Tracy_Developer_Group_Member_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_edit_event" */
   update_tracy_tracy_edit_event?: Maybe<Tracy_Tracy_Edit_Event_Mutation_Response>;
   /** update single row of the table: "tracy.tracy_edit_event" */
@@ -20456,6 +20537,12 @@ export type Mutation_RootCreateBrokerApiTokenArgs = {
 
 
 /** mutation root */
+export type Mutation_RootCreateDeveloperGroupArgs = {
+  input: CreateDeveloperGroupInput;
+};
+
+
+/** mutation root */
 export type Mutation_RootCreateOrUpdateRepositorySecretArgs = {
   encryptedValue: Scalars['String']['input'];
   repoUrl: Scalars['String']['input'];
@@ -20488,6 +20575,12 @@ export type Mutation_RootCreateTokenArgs = {
 
 /** mutation root */
 export type Mutation_RootDeleteAiToolTokenArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDeleteDeveloperGroupArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -20868,6 +20961,30 @@ export type Mutation_RootDelete_Commit_Blame_RequestArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Commit_Blame_Request_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Developer_GroupArgs = {
+  where: Tracy_Developer_Group_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Developer_Group_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Developer_Group_MemberArgs = {
+  where: Tracy_Developer_Group_Member_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Developer_Group_Member_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -22210,6 +22327,34 @@ export type Mutation_RootInsert_Commit_Blame_Request_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Developer_GroupArgs = {
+  objects: Array<Tracy_Developer_Group_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Developer_Group_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Developer_Group_MemberArgs = {
+  objects: Array<Tracy_Developer_Group_Member_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Developer_Group_Member_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Developer_Group_Member_OneArgs = {
+  object: Tracy_Developer_Group_Member_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Developer_Group_Member_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Developer_Group_OneArgs = {
+  object: Tracy_Developer_Group_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Developer_Group_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Effort_To_Apply_FixArgs = {
   objects: Array<Effort_To_Apply_Fix_Insert_Input>;
   on_conflict?: InputMaybe<Effort_To_Apply_Fix_On_Conflict>;
@@ -23301,6 +23446,12 @@ export type Mutation_RootSetAnswersArgs = {
 
 
 /** mutation root */
+export type Mutation_RootSetDeveloperGroupMembersArgs = {
+  input: SetDeveloperGroupMembersInput;
+};
+
+
+/** mutation root */
 export type Mutation_RootSubmitCheckmarxVulnerabilityReportArgs = {
   checkmarxProjectId: Scalars['String']['input'];
   checkmarxProjectName: Scalars['String']['input'];
@@ -23370,6 +23521,13 @@ export type Mutation_RootUpdateAiToolTokenArgs = {
 export type Mutation_RootUpdateBitbucketTokenArgs = {
   code: Scalars['String']['input'];
   oauthConfId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdateDeveloperGroupArgs = {
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 
@@ -24058,6 +24216,34 @@ export type Mutation_RootUpdate_Commit_Blame_Request_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Commit_Blame_Request_ManyArgs = {
   updates: Array<Commit_Blame_Request_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Developer_GroupArgs = {
+  _set?: InputMaybe<Tracy_Developer_Group_Set_Input>;
+  where: Tracy_Developer_Group_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Developer_Group_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Developer_Group_Set_Input>;
+  pk_columns: Tracy_Developer_Group_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Developer_Group_MemberArgs = {
+  _set?: InputMaybe<Tracy_Developer_Group_Member_Set_Input>;
+  where: Tracy_Developer_Group_Member_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Developer_Group_Member_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Developer_Group_Member_Set_Input>;
+  pk_columns: Tracy_Developer_Group_Member_Pk_Columns_Input;
 };
 
 
@@ -25166,6 +25352,18 @@ export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_ManyArgs = {
   updates: Array<Tracy_Ai_Blame_Pr_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Developer_Group_ManyArgs = {
+  updates: Array<Tracy_Developer_Group_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Developer_Group_Member_ManyArgs = {
+  updates: Array<Tracy_Developer_Group_Member_Updates>;
 };
 
 
@@ -30692,6 +30890,7 @@ export type Query_Root = {
   __typename?: 'query_root';
   /** Placeholder query - GraphQL requires at least one query */
   _empty?: Maybe<Scalars['String']['output']>;
+  _tracyManagementEmpty?: Maybe<Scalars['String']['output']>;
   /** fetch data from the table: "aggregated_fix_state" */
   aggregated_fix_state: Array<Aggregated_Fix_State>;
   /** fetch aggregated fields from the table: "aggregated_fix_state" */
@@ -30890,6 +31089,22 @@ export type Query_Root = {
   commit_blame_request_aggregate: Commit_Blame_Request_Aggregate;
   /** fetch data from the table: "commit_blame_request" using primary key columns */
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** fetch data from the table: "tracy.developer_group" */
+  developer_group: Array<Tracy_Developer_Group>;
+  /** fetch aggregated fields from the table: "tracy.developer_group" */
+  developer_group_aggregate: Tracy_Developer_Group_Aggregate;
+  /** fetch data from the table: "tracy.developer_group" using primary key columns */
+  developer_group_by_pk?: Maybe<Tracy_Developer_Group>;
+  /** fetch data from the table: "tracy.developer_group_member" */
+  developer_group_member: Array<Tracy_Developer_Group_Member>;
+  /** fetch aggregated fields from the table: "tracy.developer_group_member" */
+  developer_group_member_aggregate: Tracy_Developer_Group_Member_Aggregate;
+  /** fetch data from the table: "tracy.developer_group_member" using primary key columns */
+  developer_group_member_by_pk?: Maybe<Tracy_Developer_Group_Member>;
+  /** fetch data from the table: "tracy.developer_groups_flat" */
+  developer_groups_flat: Array<Tracy_Developer_Groups_Flat>;
+  /** fetch aggregated fields from the table: "tracy.developer_groups_flat" */
+  developer_groups_flat_aggregate: Tracy_Developer_Groups_Flat_Aggregate;
   /** fetch data from the table: "developer_statistics_row" */
   developer_statistics_row: Array<Developer_Statistics_Row>;
   /** fetch aggregated fields from the table: "developer_statistics_row" */
@@ -31016,6 +31231,11 @@ export type Query_Root = {
    * Returns average coding time with previous period comparison for trend analysis.
    */
   getCodingTimeStats: GetCodingTimeStatsResponse;
+  /**
+   * Get developer statistics aggregated by developer group.
+   * Returns summed line counts, most-used tool/model, and averaged acceptance rate per group.
+   */
+  getDeveloperGroupStatistics: GetDeveloperGroupStatisticsResponse;
   /**
    * Get developer statistics aggregated from AI blame attribution data.
    * Returns usage counts grouped by developer (userName + computerName).
@@ -32288,6 +32508,70 @@ export type Query_RootCommit_Blame_Request_By_PkArgs = {
 };
 
 
+export type Query_RootDeveloper_GroupArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Group_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Group_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootDeveloper_Group_MemberArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Group_Member_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Group_Member_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootDeveloper_Groups_FlatArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
+};
+
+
+export type Query_RootDeveloper_Groups_Flat_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
+};
+
+
 export type Query_RootDeveloper_Statistics_RowArgs = {
   distinct_on?: InputMaybe<Array<Developer_Statistics_Row_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -32725,6 +33009,12 @@ export type Query_RootGetCodingTimeStatsArgs = {
   endDate: Scalars['Timestamp']['input'];
   organizationId: Scalars['String']['input'];
   startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetDeveloperGroupStatisticsArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -37416,6 +37706,22 @@ export type Subscription_Root = {
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** fetch data from the table in a streaming manner: "commit_blame_request" */
   commit_blame_request_stream: Array<Commit_Blame_Request>;
+  /** fetch data from the table: "tracy.developer_group" */
+  developer_group: Array<Tracy_Developer_Group>;
+  /** fetch aggregated fields from the table: "tracy.developer_group" */
+  developer_group_aggregate: Tracy_Developer_Group_Aggregate;
+  /** fetch data from the table: "tracy.developer_group" using primary key columns */
+  developer_group_by_pk?: Maybe<Tracy_Developer_Group>;
+  /** fetch data from the table: "tracy.developer_group_member" */
+  developer_group_member: Array<Tracy_Developer_Group_Member>;
+  /** fetch aggregated fields from the table: "tracy.developer_group_member" */
+  developer_group_member_aggregate: Tracy_Developer_Group_Member_Aggregate;
+  /** fetch data from the table: "tracy.developer_group_member" using primary key columns */
+  developer_group_member_by_pk?: Maybe<Tracy_Developer_Group_Member>;
+  /** fetch data from the table: "tracy.developer_groups_flat" */
+  developer_groups_flat: Array<Tracy_Developer_Groups_Flat>;
+  /** fetch aggregated fields from the table: "tracy.developer_groups_flat" */
+  developer_groups_flat_aggregate: Tracy_Developer_Groups_Flat_Aggregate;
   /** fetch data from the table: "developer_statistics_row" */
   developer_statistics_row: Array<Developer_Statistics_Row>;
   /** fetch aggregated fields from the table: "developer_statistics_row" */
@@ -37870,6 +38176,12 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table in a streaming manner: "tracy.developer_group_member" */
+  tracy_developer_group_member_stream: Array<Tracy_Developer_Group_Member>;
+  /** fetch data from the table in a streaming manner: "tracy.developer_group" */
+  tracy_developer_group_stream: Array<Tracy_Developer_Group>;
+  /** fetch data from the table in a streaming manner: "tracy.developer_groups_flat" */
+  tracy_developer_groups_flat_stream: Array<Tracy_Developer_Groups_Flat>;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -39123,6 +39435,70 @@ export type Subscription_RootCommit_Blame_Request_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Commit_Blame_Request_Stream_Cursor_Input>>;
   where?: InputMaybe<Commit_Blame_Request_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_GroupArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Group_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Group_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootDeveloper_Group_MemberArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Group_Member_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Group_Member_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootDeveloper_Groups_FlatArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
+};
+
+
+export type Subscription_RootDeveloper_Groups_Flat_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
 };
 
 
@@ -40859,6 +41235,27 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Stream_Cursor_Input>>;
   where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Developer_Group_Member_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Developer_Group_Member_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Developer_Group_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Developer_Group_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Developer_Groups_Flat_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Developer_Groups_Flat_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
 };
 
 
@@ -42824,6 +43221,534 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.developer_group" */
+export type Tracy_Developer_Group = {
+  __typename?: 'tracy_developer_group';
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  /** An array relationship */
+  members: Array<Tracy_Developer_Group_Member>;
+  /** An aggregate relationship */
+  members_aggregate: Tracy_Developer_Group_Member_Aggregate;
+  name: Scalars['String']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "tracy.developer_group" */
+export type Tracy_Developer_GroupMembersArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.developer_group" */
+export type Tracy_Developer_GroupMembers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Developer_Group_Member_Order_By>>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+/** aggregated selection of "tracy.developer_group" */
+export type Tracy_Developer_Group_Aggregate = {
+  __typename?: 'tracy_developer_group_aggregate';
+  aggregate?: Maybe<Tracy_Developer_Group_Aggregate_Fields>;
+  nodes: Array<Tracy_Developer_Group>;
+};
+
+/** aggregate fields of "tracy.developer_group" */
+export type Tracy_Developer_Group_Aggregate_Fields = {
+  __typename?: 'tracy_developer_group_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Developer_Group_Max_Fields>;
+  min?: Maybe<Tracy_Developer_Group_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.developer_group" */
+export type Tracy_Developer_Group_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.developer_group". All fields are combined with a logical 'AND'. */
+export type Tracy_Developer_Group_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Developer_Group_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Developer_Group_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  members?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+  members_aggregate?: InputMaybe<Tracy_Developer_Group_Member_Aggregate_Bool_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.developer_group" */
+export enum Tracy_Developer_Group_Constraint {
+  /** unique or primary key constraint on columns "organization_id", "name" */
+  DeveloperGroupOrganizationIdNameKey = 'developer_group_organization_id_name_key',
+  /** unique or primary key constraint on columns "id" */
+  DeveloperGroupPkey = 'developer_group_pkey'
+}
+
+/** input type for inserting data into table "tracy.developer_group" */
+export type Tracy_Developer_Group_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  members?: InputMaybe<Tracy_Developer_Group_Member_Arr_Rel_Insert_Input>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Developer_Group_Max_Fields = {
+  __typename?: 'tracy_developer_group_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** columns and relationships of "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member = {
+  __typename?: 'tracy_developer_group_member';
+  createdAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  developerGroup: Tracy_Developer_Group;
+  developerGroupId: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+  userName: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Aggregate = {
+  __typename?: 'tracy_developer_group_member_aggregate';
+  aggregate?: Maybe<Tracy_Developer_Group_Member_Aggregate_Fields>;
+  nodes: Array<Tracy_Developer_Group_Member>;
+};
+
+export type Tracy_Developer_Group_Member_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Developer_Group_Member_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Developer_Group_Member_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Aggregate_Fields = {
+  __typename?: 'tracy_developer_group_member_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Developer_Group_Member_Max_Fields>;
+  min?: Maybe<Tracy_Developer_Group_Member_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Developer_Group_Member_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Developer_Group_Member_Max_Order_By>;
+  min?: InputMaybe<Tracy_Developer_Group_Member_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Developer_Group_Member_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Developer_Group_Member_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.developer_group_member". All fields are combined with a logical 'AND'. */
+export type Tracy_Developer_Group_Member_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Developer_Group_Member_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Developer_Group_Member_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  developerGroup?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+  developerGroupId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  userName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.developer_group_member" */
+export enum Tracy_Developer_Group_Member_Constraint {
+  /** unique or primary key constraint on columns "user_name", "developer_group_id" */
+  DeveloperGroupMemberDeveloperGroupIdUserNameKey = 'developer_group_member_developer_group_id_user_name_key',
+  /** unique or primary key constraint on columns "id" */
+  DeveloperGroupMemberPkey = 'developer_group_member_pkey'
+}
+
+/** input type for inserting data into table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  developerGroup?: InputMaybe<Tracy_Developer_Group_Obj_Rel_Insert_Input>;
+  developerGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Developer_Group_Member_Max_Fields = {
+  __typename?: 'tracy_developer_group_member_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  developerGroupId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Max_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  developerGroupId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Developer_Group_Member_Min_Fields = {
+  __typename?: 'tracy_developer_group_member_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  developerGroupId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Min_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  developerGroupId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Mutation_Response = {
+  __typename?: 'tracy_developer_group_member_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Developer_Group_Member>;
+};
+
+/** on_conflict condition type for table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_On_Conflict = {
+  constraint: Tracy_Developer_Group_Member_Constraint;
+  update_columns?: Array<Tracy_Developer_Group_Member_Update_Column>;
+  where?: InputMaybe<Tracy_Developer_Group_Member_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.developer_group_member". */
+export type Tracy_Developer_Group_Member_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  developerGroup?: InputMaybe<Tracy_Developer_Group_Order_By>;
+  developerGroupId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.developer_group_member */
+export type Tracy_Developer_Group_Member_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.developer_group_member" */
+export enum Tracy_Developer_Group_Member_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DeveloperGroupId = 'developerGroupId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  UserName = 'userName'
+}
+
+/** input type for updating data in table "tracy.developer_group_member" */
+export type Tracy_Developer_Group_Member_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  developerGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_developer_group_member" */
+export type Tracy_Developer_Group_Member_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Developer_Group_Member_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Developer_Group_Member_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  developerGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.developer_group_member" */
+export enum Tracy_Developer_Group_Member_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DeveloperGroupId = 'developerGroupId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  UserName = 'userName'
+}
+
+export type Tracy_Developer_Group_Member_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Developer_Group_Member_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Developer_Group_Member_Bool_Exp;
+};
+
+/** aggregate min on columns */
+export type Tracy_Developer_Group_Min_Fields = {
+  __typename?: 'tracy_developer_group_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "tracy.developer_group" */
+export type Tracy_Developer_Group_Mutation_Response = {
+  __typename?: 'tracy_developer_group_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Developer_Group>;
+};
+
+/** input type for inserting object relation for remote table "tracy.developer_group" */
+export type Tracy_Developer_Group_Obj_Rel_Insert_Input = {
+  data: Tracy_Developer_Group_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Developer_Group_On_Conflict>;
+};
+
+/** on_conflict condition type for table "tracy.developer_group" */
+export type Tracy_Developer_Group_On_Conflict = {
+  constraint: Tracy_Developer_Group_Constraint;
+  update_columns?: Array<Tracy_Developer_Group_Update_Column>;
+  where?: InputMaybe<Tracy_Developer_Group_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.developer_group". */
+export type Tracy_Developer_Group_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  members_aggregate?: InputMaybe<Tracy_Developer_Group_Member_Aggregate_Order_By>;
+  name?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.developer_group */
+export type Tracy_Developer_Group_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.developer_group" */
+export enum Tracy_Developer_Group_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "tracy.developer_group" */
+export type Tracy_Developer_Group_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_developer_group" */
+export type Tracy_Developer_Group_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Developer_Group_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Developer_Group_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** update columns of table "tracy.developer_group" */
+export enum Tracy_Developer_Group_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Tracy_Developer_Group_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Developer_Group_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Developer_Group_Bool_Exp;
+};
+
+/** columns and relationships of "tracy.developer_groups_flat" */
+export type Tracy_Developer_Groups_Flat = {
+  __typename?: 'tracy_developer_groups_flat';
+  developerGroupId?: Maybe<Scalars['uuid']['output']>;
+  groupName?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "tracy.developer_groups_flat" */
+export type Tracy_Developer_Groups_Flat_Aggregate = {
+  __typename?: 'tracy_developer_groups_flat_aggregate';
+  aggregate?: Maybe<Tracy_Developer_Groups_Flat_Aggregate_Fields>;
+  nodes: Array<Tracy_Developer_Groups_Flat>;
+};
+
+/** aggregate fields of "tracy.developer_groups_flat" */
+export type Tracy_Developer_Groups_Flat_Aggregate_Fields = {
+  __typename?: 'tracy_developer_groups_flat_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Developer_Groups_Flat_Max_Fields>;
+  min?: Maybe<Tracy_Developer_Groups_Flat_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.developer_groups_flat" */
+export type Tracy_Developer_Groups_Flat_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.developer_groups_flat". All fields are combined with a logical 'AND'. */
+export type Tracy_Developer_Groups_Flat_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Developer_Groups_Flat_Bool_Exp>>;
+  developerGroupId?: InputMaybe<Uuid_Comparison_Exp>;
+  groupName?: InputMaybe<String_Comparison_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  userName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Developer_Groups_Flat_Max_Fields = {
+  __typename?: 'tracy_developer_groups_flat_max_fields';
+  developerGroupId?: Maybe<Scalars['uuid']['output']>;
+  groupName?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Developer_Groups_Flat_Min_Fields = {
+  __typename?: 'tracy_developer_groups_flat_min_fields';
+  developerGroupId?: Maybe<Scalars['uuid']['output']>;
+  groupName?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "tracy.developer_groups_flat". */
+export type Tracy_Developer_Groups_Flat_Order_By = {
+  developerGroupId?: InputMaybe<Order_By>;
+  groupName?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "tracy.developer_groups_flat" */
+export enum Tracy_Developer_Groups_Flat_Select_Column {
+  /** column name */
+  DeveloperGroupId = 'developerGroupId',
+  /** column name */
+  GroupName = 'groupName',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  UserName = 'userName'
+}
+
+/** Streaming cursor of the table "tracy_developer_groups_flat" */
+export type Tracy_Developer_Groups_Flat_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Developer_Groups_Flat_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Developer_Groups_Flat_Stream_Cursor_Value_Input = {
+  developerGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  groupName?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "tracy.tracy_edit_event" */

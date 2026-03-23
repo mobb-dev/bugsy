@@ -211,6 +211,7 @@ export type UploadAiBlameResult = {
   inferenceCounts: SanitizationCounts
   promptsUUID?: string
   inferenceUUID?: string
+  sanitizationDurationMs?: number
 }
 
 export async function uploadAiBlameHandlerFromExtension(args: {
@@ -224,7 +225,9 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   apiUrl?: string
   webAppUrl?: string
   repositoryUrl?: string | null
+  sanitize?: boolean
 }): Promise<UploadAiBlameResult> {
+  const shouldSanitize = args.sanitize ?? true
   const uploadArgs: UploadAiBlameOptions = {
     prompt: [],
     inference: [],
@@ -240,33 +243,55 @@ export async function uploadAiBlameHandlerFromExtension(args: {
   let promptsUUID: string | undefined
   let inferenceUUID: string | undefined
 
+  const zeroCounts: SanitizationCounts = {
+    detections: { total: 0, high: 0, medium: 0, low: 0 },
+  }
+  let sanitizationDurationMs: number | undefined
+
   await withFile(async (promptFile) => {
-    // Sanitize prompts data and get counts
-    const promptsResult = await sanitizeDataWithCounts(args.prompts)
-    promptsCounts = promptsResult.counts
     promptsUUID = path.basename(promptFile.path, path.extname(promptFile.path))
 
-    await fsPromises.writeFile(
-      promptFile.path,
-      JSON.stringify(promptsResult.sanitizedData, null, 2),
-      'utf-8'
-    )
+    if (shouldSanitize) {
+      const sanitizeStart = performance.now()
+      const promptsResult = await sanitizeDataWithCounts(args.prompts)
+      promptsCounts = promptsResult.counts
+      await fsPromises.writeFile(
+        promptFile.path,
+        JSON.stringify(promptsResult.sanitizedData, null, 2),
+        'utf-8'
+      )
+      sanitizationDurationMs = performance.now() - sanitizeStart
+    } else {
+      promptsCounts = zeroCounts
+      await fsPromises.writeFile(
+        promptFile.path,
+        JSON.stringify(args.prompts, null, 2),
+        'utf-8'
+      )
+    }
     uploadArgs.prompt!.push(promptFile.path)
 
     await withFile(async (inferenceFile) => {
-      // Sanitize inference data and get counts
-      const inferenceResult = await sanitizeDataWithCounts(args.inference)
-      inferenceCounts = inferenceResult.counts
       inferenceUUID = path.basename(
         inferenceFile.path,
         path.extname(inferenceFile.path)
       )
 
-      await fsPromises.writeFile(
-        inferenceFile.path,
-        inferenceResult.sanitizedData as string,
-        'utf-8'
-      )
+      if (shouldSanitize) {
+        const inferenceStart = performance.now()
+        const inferenceResult = await sanitizeDataWithCounts(args.inference)
+        inferenceCounts = inferenceResult.counts
+        await fsPromises.writeFile(
+          inferenceFile.path,
+          inferenceResult.sanitizedData as string,
+          'utf-8'
+        )
+        sanitizationDurationMs =
+          (sanitizationDurationMs ?? 0) + (performance.now() - inferenceStart)
+      } else {
+        inferenceCounts = zeroCounts
+        await fsPromises.writeFile(inferenceFile.path, args.inference, 'utf-8')
+      }
       uploadArgs.inference!.push(inferenceFile.path)
       uploadArgs.model!.push(args.model)
       uploadArgs.toolName!.push(args.tool)
@@ -291,6 +316,7 @@ export async function uploadAiBlameHandlerFromExtension(args: {
     inferenceCounts: inferenceCounts!,
     promptsUUID,
     inferenceUUID,
+    sanitizationDurationMs,
   }
 }
 

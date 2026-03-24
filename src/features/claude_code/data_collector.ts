@@ -1,74 +1,68 @@
+import { createHash } from 'node:crypto'
+import { open, readdir, readFile, unlink } from 'node:fs/promises'
+import path from 'node:path'
+
+import Configstore from 'configstore'
 import { z } from 'zod'
 
-import { uploadAiBlameHandlerFromExtension } from '../../args/commands/upload_ai_blame'
-import { AiBlameInferenceType } from '../../features/analysis/scm/generates/client_generates'
-import { GitService } from '../../features/analysis/scm/services/GitService'
+import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
+import { prepareAndSendTracyRecords } from '../../features/analysis/graphql/tracy-batch-upload'
 import {
-  parseScmURL,
-  ScmType,
-} from '../../features/analysis/scm/shared/src/urlParser'
-import { computeGitDiffAdditions } from '../../utils/computeGitDiffAdditions'
+  AiBlameInferenceType,
+  InferencePlatform,
+} from '../../features/analysis/scm/generates/client_generates'
 import {
-  parseTranscriptAndCreateTrace,
-  type TraceData,
-} from './transcript_parser'
+  configStore,
+  createSessionConfigStore,
+  getSessionFilePrefix,
+} from '../../utils/ConfigStoreService'
+import type { Logger } from '../../utils/shared-logger'
+import { createScopedHookLog, hookLog } from './hook_logger'
 
-const StructuredPatchItemSchema = z.object({
-  oldStart: z.number(),
-  oldLines: z.number(),
-  newStart: z.number(),
-  newLines: z.number(),
-  lines: z.array(z.string()),
-})
+const HOOK_COOLDOWN_MS = 10_000 // 10 seconds — skip invocations within cooldown
+const STALE_KEY_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000 // 14 days
+const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000 // Run cleanup at most once per day
 
-const EditToolInputSchema = z.object({
-  file_path: z.string(),
-  old_string: z.string(),
-  new_string: z.string(),
-})
-
-const WriteToolInputSchema = z.object({
-  file_path: z.string(),
-  content: z.string(),
-})
-
-const EditToolResponseSchema = z.object({
-  filePath: z.string(),
-  oldString: z.string().optional(),
-  newString: z.string().optional(),
-  originalFile: z.string().optional(),
-  structuredPatch: z.array(StructuredPatchItemSchema),
-  userModified: z.boolean().optional(),
-  replaceAll: z.boolean().optional(),
-})
-
-const WriteToolResponseSchema = z.object({
-  type: z.string().optional(),
-  filePath: z.string(),
-  content: z.string().optional(),
-  structuredPatch: z.array(z.any()).optional(),
-})
+const COOLDOWN_KEY = 'lastHookRunAt'
 
 const HookDataSchema = z.object({
   session_id: z.string(),
   transcript_path: z.string(),
   cwd: z.string(),
-  permission_mode: z.string().optional(),
-  hook_event_name: z.literal('PostToolUse'),
-  tool_name: z.enum(['Edit', 'Write']),
-  tool_input: z.union([EditToolInputSchema, WriteToolInputSchema]),
-  tool_response: z.union([EditToolResponseSchema, WriteToolResponseSchema]),
+  hook_event_name: z.string(),
+  tool_name: z.string(),
+  tool_input: z.unknown(),
+  tool_response: z.unknown(),
 })
 
 export type HookData = z.infer<typeof HookDataSchema>
-type EditToolResponse = z.infer<typeof EditToolResponseSchema>
+
+type TranscriptEntry = {
+  type?: string
+  uuid?: string
+  sessionId?: string
+  timestamp?: string
+  [key: string]: unknown
+}
 
 /**
  * Reads and parses JSON data from stdin
  */
+const STDIN_TIMEOUT_MS = 10_000 // 10 seconds
+
 export async function readStdinData(): Promise<unknown> {
+  hookLog.debug('Reading stdin data')
   return new Promise((resolve, reject) => {
     let inputData = ''
+    let settled = false
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true
+        process.stdin.destroy()
+        reject(new Error('Timed out reading from stdin'))
+      }
+    }, STDIN_TIMEOUT_MS)
 
     process.stdin.setEncoding('utf-8')
 
@@ -77,19 +71,27 @@ export async function readStdinData(): Promise<unknown> {
     })
 
     process.stdin.on('end', () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
       try {
         const parsedData = JSON.parse(inputData)
+        hookLog.debug('Parsed stdin data', {
+          keys: Object.keys(parsedData as Record<string, unknown>),
+        })
         resolve(parsedData)
       } catch (error) {
-        reject(
-          new Error(
-            `Failed to parse JSON from stdin: ${(error as Error).message}`
-          )
-        )
+        const msg = `Failed to parse JSON from stdin: ${(error as Error).message}`
+        hookLog.error(msg)
+        reject(new Error(msg))
       }
     })
 
     process.stdin.on('error', (error) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      hookLog.error('Error reading from stdin', { error: error.message })
       reject(new Error(`Error reading from stdin: ${error.message}`))
     })
   })
@@ -103,177 +105,470 @@ export function validateHookData(data: unknown): HookData {
 }
 
 /**
- * Extract additions from structuredPatch (fallback when git is unavailable).
+ * Generates a deterministic synthetic ID for entries without a uuid.
+ * Uses a hash of sessionId + timestamp + type + line index to produce
+ * a stable ID that's consistent across invocations.
  */
-function extractStructuredPatchAdditions(hookData: HookData): string {
-  const editResponse = hookData.tool_response as EditToolResponse
-  const additions: string[] = []
+function generateSyntheticId(
+  sessionId: string | undefined,
+  timestamp: string | undefined,
+  type: string | undefined,
+  lineIndex: number
+): string {
+  const input = `${sessionId ?? ''}:${timestamp ?? ''}:${type ?? ''}:${lineIndex}`
+  const hash = createHash('sha256').update(input).digest('hex').slice(0, 16)
+  return `synth:${hash}`
+}
 
-  for (const patch of editResponse.structuredPatch) {
-    for (const line of patch.lines) {
-      if (line.startsWith('+')) {
-        additions.push(line.slice(1))
+/**
+ * Returns the key for storing the upload cursor for a transcript file
+ * within the per-session configstore.
+ */
+function getCursorKey(transcriptPath: string): string {
+  const hash = createHash('sha256')
+    .update(transcriptPath)
+    .digest('hex')
+    .slice(0, 12)
+  return `cursor.${hash}`
+}
+
+type CursorValue = {
+  id: string
+  byteOffset: number
+  updatedAt: number
+  lastModel?: string
+}
+
+/**
+ * Reads the transcript JSONL file and returns entries that haven't been
+ * uploaded yet (everything after the stored cursor position).
+ * Uses a byte offset to avoid re-reading/parsing the entire file on each invocation.
+ * Each entry gets an `_recordId` (from uuid or synthetic) assigned.
+ *
+ * Returns the entries and the total file size (used to save the cursor byte offset).
+ */
+export async function readNewTranscriptEntries(
+  transcriptPath: string,
+  sessionId: string,
+  sessionStore: Configstore
+): Promise<{
+  entries: (TranscriptEntry & { _recordId: string })[]
+  fileSize: number
+}> {
+  const cursor = sessionStore.get(getCursorKey(transcriptPath)) as
+    | CursorValue
+    | undefined
+
+  let content: string
+  let fileSize: number
+  let lineIndexOffset: number
+
+  if (cursor?.byteOffset) {
+    // Read only the new portion of the file from the cursor byte offset.
+    // The offset always points to a line boundary (after a '\n'),
+    // so the first line in the read portion is always a complete JSONL entry.
+    const fh = await open(transcriptPath, 'r')
+    try {
+      const stat = await fh.stat()
+      fileSize = stat.size
+      if (cursor.byteOffset >= stat.size) {
+        hookLog.info('No new data in transcript file', { sessionId })
+        return { entries: [], fileSize }
+      }
+      const buf = Buffer.alloc(stat.size - cursor.byteOffset)
+      await fh.read(buf, 0, buf.length, cursor.byteOffset)
+      content = buf.toString('utf-8')
+    } finally {
+      await fh.close()
+    }
+    // Line index offset is not known precisely without reading the head,
+    // but synthetic IDs only need to be unique within the file, so we use
+    // the byte offset as a proxy (different from any real line index).
+    lineIndexOffset = cursor.byteOffset
+    hookLog.debug('Read transcript file from offset', {
+      transcriptPath,
+      byteOffset: cursor.byteOffset,
+      bytesRead: content.length,
+    })
+  } else {
+    content = await readFile(transcriptPath, 'utf-8')
+    fileSize = Buffer.byteLength(content, 'utf-8')
+    lineIndexOffset = 0
+    hookLog.debug('Read full transcript file', {
+      transcriptPath,
+      totalBytes: fileSize,
+    })
+  }
+
+  const lines = content.split('\n').filter((line) => line.trim().length > 0)
+
+  const parsed: (TranscriptEntry & { _recordId: string })[] = []
+  let malformedLines = 0
+  for (let i = 0; i < lines.length; i++) {
+    try {
+      const entry = JSON.parse(lines[i]!) as TranscriptEntry
+      const recordId =
+        entry.uuid ??
+        generateSyntheticId(
+          entry.sessionId,
+          entry.timestamp,
+          entry.type,
+          lineIndexOffset + i
+        )
+      parsed.push({ ...entry, _recordId: recordId })
+    } catch {
+      malformedLines++
+    }
+  }
+
+  if (malformedLines > 0) {
+    hookLog.warn('Skipped malformed lines', { malformedLines, transcriptPath })
+  }
+
+  if (!cursor) {
+    hookLog.info('First invocation for session — uploading all entries', {
+      sessionId,
+      totalEntries: parsed.length,
+    })
+  } else {
+    hookLog.info('Resuming from byte offset', {
+      sessionId,
+      byteOffset: cursor.byteOffset,
+      newEntries: parsed.length,
+    })
+  }
+
+  return { entries: parsed, fileSize }
+}
+
+/**
+ * Progress subtypes that carry no unique session data and should be
+ * filtered out before upload. Each entry here has a comment explaining
+ * why it is safe to drop.
+ */
+const FILTERED_PROGRESS_SUBTYPES = new Set([
+  // Incremental streaming output from running bash commands, emitted every
+  // ~1 second. The final complete output is already captured in the "user"
+  // tool_result entry when the command finishes.
+  'bash_progress',
+
+  // Records that the hook itself fired. Pure meta-noise — the hook
+  // recording the fact that the hook ran.
+  'hook_progress',
+
+  // UI-only "waiting" indicator for background tasks (TaskOutput polling).
+  // Contains only a task description and type — no session-relevant data.
+  'waiting_for_task',
+
+  // MCP tool start/completed timing events. Only unique data is elapsedTimeMs
+  // which can be derived from tool_use/tool_result timestamps.
+  'mcp_progress',
+])
+
+/**
+ * Top-level transcript entry types that carry no useful session data.
+ */
+const FILTERED_ENTRY_TYPES = new Set([
+  // Claude Code's internal undo/restore bookkeeping — tracks which files
+  // have backups. No sessionId, no message, no model or tool data.
+  'file-history-snapshot',
+
+  // Internal task queue management (enqueue/remove/popAll). Duplicates data
+  // already captured in user messages, agent_progress, and Task tool_use entries.
+  'queue-operation',
+
+  // Records the last user prompt text before a compaction or session restart.
+  // Redundant — the actual user prompt is already captured in the 'user' entry.
+  'last-prompt',
+])
+
+/**
+ * Assistant tool_use entries that are pure plumbing — their meaningful data
+ * is already captured in the corresponding user:tool_result entry.
+ */
+const FILTERED_ASSISTANT_TOOLS = new Set([
+  // Polls for a sub-agent result. The input is just task_id + boilerplate
+  // (block, timeout). The actual result is captured in the user:tool_result.
+  'TaskOutput',
+
+  // Discovers available deferred/MCP tools. The input is just a search query.
+  // The discovered tools are captured in the user:tool_result.
+  'ToolSearch',
+])
+
+/**
+ * Filters out transcript entries that carry no unique session data.
+ * Returns the filtered list and the count of entries removed.
+ */
+export function filterEntries(
+  entries: (TranscriptEntry & { _recordId: string })[]
+): {
+  filtered: (TranscriptEntry & { _recordId: string })[]
+  filteredOut: number
+} {
+  const filtered = entries.filter((entry) => {
+    const entryType = entry.type ?? ''
+
+    // Filter out entire entry types that carry no useful session data
+    if (FILTERED_ENTRY_TYPES.has(entryType)) {
+      return false
+    }
+
+    // Filter out specific progress subtypes
+    if (entryType === 'progress') {
+      const data = entry['data'] as Record<string, unknown> | undefined
+      const subtype = typeof data?.['type'] === 'string' ? data['type'] : ''
+      return !FILTERED_PROGRESS_SUBTYPES.has(subtype)
+    }
+
+    // Filter out assistant tool_use entries that are pure plumbing
+    if (entryType === 'assistant') {
+      const message = entry['message'] as Record<string, unknown> | undefined
+      const content = message?.['content']
+      if (Array.isArray(content) && content.length > 0) {
+        const block = content[0] as Record<string, unknown>
+        if (
+          block['type'] === 'tool_use' &&
+          typeof block['name'] === 'string' &&
+          FILTERED_ASSISTANT_TOOLS.has(block['name'])
+        ) {
+          return false
+        }
       }
     }
-  }
 
-  return additions.join('\n')
+    return true
+  })
+
+  return { filtered, filteredOut: entries.length - filtered.length }
 }
 
 /**
- * Extracts the inference (code additions only) from hook data
+ * Removes stale per-session configstore files that haven't been updated
+ * in STALE_KEY_MAX_AGE_MS. Runs at most once per day.
+ * Uses the global configStore only for the cleanup-throttle timestamp.
  */
-export async function extractInference(hookData: HookData): Promise<string> {
-  if (hookData.tool_name === 'Write') {
-    // For Write operations, the entire content is an addition (from tool_input, not tool_response)
-    const writeInput = hookData.tool_input as { content?: string }
-    return writeInput.content || ''
+async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
+  const lastCleanup = configStore.get('claudeCode.lastCleanupAt') as
+    | number
+    | undefined
+  if (lastCleanup && Date.now() - lastCleanup < CLEANUP_INTERVAL_MS) {
+    return
   }
 
-  if (hookData.tool_name === 'Edit') {
-    const editInput = hookData.tool_input as {
-      old_string: string
-      new_string: string
+  const now = Date.now()
+  const prefix = getSessionFilePrefix()
+  const configDir = path.dirname(sessionStore.path)
+
+  try {
+    const files = await readdir(configDir)
+    let deletedCount = 0
+
+    for (const file of files) {
+      if (!file.startsWith(prefix) || !file.endsWith('.json')) continue
+
+      const filePath = path.join(configDir, file)
+      try {
+        const content = JSON.parse(await readFile(filePath, 'utf-8')) as Record<
+          string,
+          unknown
+        >
+
+        // Find the most recent updatedAt across all cursor entries + cooldown
+        let newest = 0
+        const cooldown = content[COOLDOWN_KEY] as number | undefined
+        if (cooldown && cooldown > newest) newest = cooldown
+
+        const cursors = content['cursor'] as Record<string, unknown> | undefined
+        if (cursors && typeof cursors === 'object') {
+          for (const val of Object.values(cursors)) {
+            const c = val as CursorValue | undefined
+            if (c?.updatedAt && c.updatedAt > newest) newest = c.updatedAt
+          }
+        }
+
+        if (newest > 0 && now - newest > STALE_KEY_MAX_AGE_MS) {
+          await unlink(filePath)
+          deletedCount++
+        }
+      } catch {
+        // Skip files we can't read or parse
+      }
     }
 
-    // Prefer git diff for correct token alignment
-    try {
-      return await computeGitDiffAdditions(
-        editInput.old_string,
-        editInput.new_string
-      )
-    } catch {
-      // Fallback to structuredPatch if git is not available
-      return extractStructuredPatchAdditions(hookData)
+    if (deletedCount > 0) {
+      hookLog.info('Cleaned up stale session files', { deletedCount })
     }
+  } catch {
+    // If we can't list the directory, skip cleanup silently
   }
 
-  return ''
+  configStore.set('claudeCode.lastCleanupAt', now)
 }
 
 /**
- * Main function to collect and process hook data from stdin
+ * Main entry point: reads new transcript entries and uploads them
+ * as raw records via the batch UploadTracyRecords API.
  */
-export async function collectHookData(): Promise<{
-  hookData: HookData
-  inference: string
-  tracePayload: TraceData
-}> {
-  // Read raw data from stdin
+export type HookResult = {
+  entriesUploaded: number
+  entriesSkipped: number
+  errors: number
+}
+
+export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
+  hookLog.info('Hook invoked')
+
   const rawData = await readStdinData()
-
-  // Validate the data structure
   const hookData = validateHookData(rawData)
 
-  // Extract inference (code additions only)
-  const inference = await extractInference(hookData)
+  // Per-session configstore: each session gets its own file so concurrent
+  // hooks from different sessions never compete for the same JSON file.
+  const sessionStore = createSessionConfigStore(hookData.session_id)
 
-  // Parse transcript and create trace data
-  let tracePayload: TraceData
+  // Cleanup stale session files (runs at most once per day)
+  await cleanupStaleSessions(sessionStore)
+
+  // Cooldown: skip if this session was processed recently.
+  // The hook fires on every tool use, but we only need to upload every ~10s.
+  // Within a single session the cooldown serializes writes, so no race.
+  const lastRunAt = sessionStore.get(COOLDOWN_KEY) as number | undefined
+  if (lastRunAt && Date.now() - lastRunAt < HOOK_COOLDOWN_MS) {
+    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
+  }
+  sessionStore.set(COOLDOWN_KEY, Date.now())
+
+  // Create a project-scoped logger so logs are separated per repo
+  const log = createScopedHookLog(hookData.cwd)
+
+  log.info('Hook data validated', {
+    sessionId: hookData.session_id,
+    toolName: hookData.tool_name,
+    hookEvent: hookData.hook_event_name,
+    cwd: hookData.cwd,
+  })
 
   try {
-    tracePayload = await parseTranscriptAndCreateTrace(
-      hookData.transcript_path,
-      hookData,
-      inference
-    )
-  } catch (error) {
-    // Transcript parsing is optional - continue without it
-    console.warn(
-      'Warning: Could not parse transcript:',
-      (error as Error).message
-    )
-    // Create basic trace payload without transcript data
-    tracePayload = {
-      prompts: [
-        {
-          type: 'TOOL_EXECUTION',
-          date: new Date(),
-          tool: {
-            name: hookData.tool_name,
-            parameters: JSON.stringify(hookData.tool_input, null, 2),
-            result: JSON.stringify(hookData.tool_response, null, 2),
-            rawArguments: JSON.stringify(hookData.tool_input),
-            accepted: true,
-          },
-        },
-      ],
-      inference,
-      model: 'claude-sonnet-4',
-      tool: 'Claude Code',
-      responseTime: new Date().toISOString(),
-    }
-  }
-
-  return {
-    hookData,
-    inference,
-    tracePayload,
+    return await processTranscript(hookData, sessionStore, log)
+  } finally {
+    log.flushLogs()
   }
 }
 
-/**
- * Gets the normalized repository URL from a directory path.
- * Returns null if not a git repo or not a supported SCM type.
- */
-async function getRepositoryUrl(cwd: string): Promise<string | null> {
-  try {
-    const gitService = new GitService(cwd)
-    const isRepo = await gitService.isGitRepository()
-    if (!isRepo) {
-      return null
-    }
-    const remoteUrl = await gitService.getRemoteUrl()
-    const parsed = parseScmURL(remoteUrl)
-    return parsed?.scmType === ScmType.GitHub ||
-      parsed?.scmType === ScmType.GitLab
-      ? remoteUrl
-      : null
-  } catch {
-    return null
+async function processTranscript(
+  hookData: HookData,
+  sessionStore: Configstore,
+  log: Logger
+): Promise<HookResult> {
+  const cursorKey = getCursorKey(hookData.transcript_path)
+  const { entries: rawEntries, fileSize } = await readNewTranscriptEntries(
+    hookData.transcript_path,
+    hookData.session_id,
+    sessionStore
+  )
+
+  if (rawEntries.length === 0) {
+    log.info('No new entries to upload')
+    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
   }
-}
 
-/**
- * Processes hook data and uploads to backend
- */
-export async function processAndUploadHookData(): Promise<{
-  hookData: HookData
-  inference: string
-  tracePayload: TraceData
-  uploadSuccess: boolean
-}> {
-  // Collect and format the data
-  const result = await collectHookData()
-
-  // Resolve repository URL from the hook's working directory
-  const repositoryUrl = await getRepositoryUrl(result.hookData.cwd)
-
-  // Attempt to upload the trace data
-  let uploadSuccess
-  try {
-    await uploadAiBlameHandlerFromExtension({
-      prompts: result.tracePayload.prompts,
-      inference: result.tracePayload.inference,
-      model: result.tracePayload.model,
-      tool: result.tracePayload.tool,
-      responseTime: result.tracePayload.responseTime,
-      blameType: AiBlameInferenceType.Chat,
-      sessionId: result.hookData.session_id,
-      repositoryUrl,
+  const { filtered: entries, filteredOut } = filterEntries(rawEntries)
+  if (filteredOut > 0) {
+    log.info('Filtered out noise entries', {
+      filteredOut,
+      remaining: entries.length,
     })
-    uploadSuccess = true
-  } catch (error) {
-    // Silent failure as required by specification
-    console.warn(
-      'Warning: Failed to upload trace data:',
-      (error as Error).message
-    )
-    uploadSuccess = false
   }
 
+  if (entries.length === 0) {
+    log.info('All entries filtered out, nothing to upload')
+    // Advance cursor past filtered entries so we don't re-process them
+    const lastEntry = rawEntries[rawEntries.length - 1]!
+    const prevCursor = sessionStore.get(cursorKey) as CursorValue | undefined
+    const cursor: CursorValue = {
+      id: lastEntry._recordId,
+      byteOffset: fileSize,
+      updatedAt: Date.now(),
+      lastModel: prevCursor?.lastModel,
+    }
+    sessionStore.set(cursorKey, cursor)
+    return {
+      entriesUploaded: 0,
+      entriesSkipped: filteredOut,
+      errors: 0,
+    }
+  }
+
+  const gqlClient = await log.timed('GQL auth', () =>
+    getAuthenticatedGQLClient({ isSkipPrompts: true })
+  )
+
+  // Propagate model to entries that don't carry one natively.
+  // Restore last-seen model from the transcript cursor (persisted across hook
+  // invocations, cleaned up with other cursor keys after 14 days of inactivity).
+  const cursorForModel = sessionStore.get(cursorKey) as CursorValue | undefined
+  let lastSeenModel: string | null = cursorForModel?.lastModel ?? null
+  const records = entries.map((entry) => {
+    const { _recordId, ...rawEntry } = entry
+    const message = rawEntry['message'] as Record<string, unknown> | undefined
+    const currentModel = (message?.['model'] as string | undefined) ?? null
+
+    if (currentModel && currentModel !== '<synthetic>') {
+      lastSeenModel = currentModel
+    } else if (lastSeenModel && !currentModel) {
+      // Inject last-seen model into the entry's message (or create one)
+      if (message) {
+        message['model'] = lastSeenModel
+      } else {
+        rawEntry['message'] = { model: lastSeenModel }
+      }
+    }
+
+    return {
+      platform: InferencePlatform.ClaudeCode,
+      recordId: _recordId,
+      recordTimestamp: entry.timestamp ?? new Date().toISOString(),
+      blameType: AiBlameInferenceType.Chat,
+      rawData: rawEntry,
+    }
+  })
+
+  log.info('Uploading batch', {
+    count: records.length,
+    skipped: filteredOut,
+    firstRecordId: records[0]?.recordId,
+    lastRecordId: records[records.length - 1]?.recordId,
+  })
+
+  const result = await log.timed('Batch upload', () =>
+    prepareAndSendTracyRecords(gqlClient, records, hookData.cwd)
+  )
+
+  if (result.ok) {
+    // Advance cursor to end of file (including filtered entries)
+    const lastRawEntry = rawEntries[rawEntries.length - 1]!
+    const cursor: CursorValue = {
+      id: lastRawEntry._recordId,
+      byteOffset: fileSize,
+      updatedAt: Date.now(),
+      lastModel: lastSeenModel ?? undefined,
+    }
+    sessionStore.set(cursorKey, cursor)
+    log.heartbeat('Upload ok', {
+      entriesUploaded: entries.length,
+      entriesSkipped: filteredOut,
+    })
+    return {
+      entriesUploaded: entries.length,
+      entriesSkipped: filteredOut,
+      errors: 0,
+    }
+  }
+
+  log.error('Batch upload had errors', { errors: result.errors })
   return {
-    ...result,
-    uploadSuccess,
+    entriesUploaded: 0,
+    entriesSkipped: filteredOut,
+    errors: entries.length,
   }
 }

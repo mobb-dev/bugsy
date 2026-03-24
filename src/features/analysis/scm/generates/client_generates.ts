@@ -981,6 +981,19 @@ export type OrganizationType = {
   brokerHosts: Array<Maybe<BrokerHostsType>>;
 };
 
+export type PrSessionSummaryResponse = {
+  __typename?: 'PRSessionSummaryResponse';
+  combinedSummary?: Maybe<TracyPromptSummary>;
+  legacySessionCount: Scalars['Int']['output'];
+  legacySessionIds: Array<Scalars['String']['output']>;
+  /** Markdown output as it would appear in the PR comment */
+  markdown?: Maybe<Scalars['String']['output']>;
+  summariesFailed: Scalars['Int']['output'];
+  summariesGenerated: Scalars['Int']['output'];
+  tracySessionCount: Scalars['Int']['output'];
+  tracySessionIds: Array<Scalars['String']['output']>;
+};
+
 export enum PrStrategy {
   Condense = 'CONDENSE',
   Spread = 'SPREAD'
@@ -31251,6 +31264,13 @@ export type Query_Root = {
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   /**
+   * Runs the PR session summary pipeline: resolves inference IDs to sessions,
+   * generates individual summaries, and combines them.
+   * Same flow as the PR comment path — useful for debugging missing summaries.
+   * Restricted to admin users.
+   */
+  getPRSessionSummary: PrSessionSummaryResponse;
+  /**
    * Get AI-generated summary of a prompt associated with an AI Blame attribution.
    * Returns a structured summary with goal, developer's plan, AI implementation details,
    * important instructions/pushbacks, and a friction score.
@@ -33070,6 +33090,11 @@ export type Query_RootGetLinearIntegrationDataArgs = {
 
 export type Query_RootGetLinearTeamsArgs = {
   organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetPrSessionSummaryArgs = {
+  inferenceIds: Array<Scalars['String']['input']>;
 };
 
 

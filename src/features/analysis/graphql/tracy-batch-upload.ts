@@ -45,9 +45,10 @@ async function sanitizeRawData(rawData: unknown): Promise<string> {
 
 export async function prepareAndSendTracyRecords(
   client: GQLClient,
-  rawRecords: TracyRecordClientInput[]
+  rawRecords: TracyRecordClientInput[],
+  workingDir?: string
 ): Promise<TracyBatchUploadResult> {
-  const repositoryUrl = await getRepositoryUrl()
+  const repositoryUrl = await getRepositoryUrl(workingDir)
   const { computerName, userName } = getSystemInfo()
   const clientVersion = packageJson.version
 

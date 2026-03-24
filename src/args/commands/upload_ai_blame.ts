@@ -107,9 +107,11 @@ type SessionInput = {
  * Gets the normalized GitHub repository URL from the current working directory.
  * Returns null if not in a git repository or if not a GitHub repository.
  */
-export async function getRepositoryUrl(): Promise<string | null> {
+export async function getRepositoryUrl(
+  workingDir?: string
+): Promise<string | null> {
   try {
-    const gitService = new GitService(process.cwd())
+    const gitService = new GitService(workingDir ?? process.cwd())
     const isRepo = await gitService.isGitRepository()
     if (!isRepo) {
       return null

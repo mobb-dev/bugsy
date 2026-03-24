@@ -102,7 +102,8 @@ export async function installMobbHooks(
   }
 
   const mobbHookConfig: ClaudeCodeHookMatcher = {
-    matcher: 'Edit|Write',
+    // Empty matcher = match all tools (Claude Code hook spec: empty string matches every PostToolUse event)
+    matcher: '',
     hooks: [
       {
         type: 'command',
@@ -111,12 +112,11 @@ export async function installMobbHooks(
     ],
   }
 
-  const existingHookIndex = settings.hooks.PostToolUse.findIndex(
-    (hook) =>
-      hook.matcher === 'Edit|Write' &&
-      hook.hooks.some((h) =>
-        h.command?.includes('mobbdev@latest claude-code-process-hook')
-      )
+  // Detect both old ('Edit|Write') and new ('') matchers for upgrade/update
+  const existingHookIndex = settings.hooks.PostToolUse.findIndex((hook) =>
+    hook.hooks.some((h) =>
+      h.command?.includes('mobbdev@latest claude-code-process-hook')
+    )
   )
 
   if (existingHookIndex >= 0) {

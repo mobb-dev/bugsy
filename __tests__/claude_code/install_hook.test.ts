@@ -79,7 +79,7 @@ describe('installMobbHooks', () => {
       hooks: {
         PostToolUse: [
           {
-            matcher: 'Edit|Write',
+            matcher: '',
             hooks: [
               {
                 type: 'command',
@@ -98,7 +98,7 @@ describe('installMobbHooks', () => {
       hooks: {
         PostToolUse: [
           {
-            matcher: 'Edit|Write',
+            matcher: '',
             hooks: [
               {
                 type: 'command',
@@ -136,7 +136,7 @@ describe('installMobbHooks', () => {
     const writtenSettings = JSON.parse(writtenContent as string)
     expect(writtenSettings.hooks.PostToolUse).toHaveLength(2)
     expect(writtenSettings.hooks.PostToolUse[0]).toEqual({
-      matcher: 'Edit|Write',
+      matcher: '',
       hooks: [
         {
           type: 'command',
@@ -201,7 +201,7 @@ describe('installMobbHooks', () => {
 
     // Verify Mobb hook was added
     expect(writtenSettings.hooks.PostToolUse[1]).toEqual({
-      matcher: 'Edit|Write',
+      matcher: '',
       hooks: [
         {
           type: 'command',

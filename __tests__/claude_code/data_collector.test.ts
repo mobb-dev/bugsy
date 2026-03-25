@@ -40,9 +40,14 @@ function buildNestedAll(): Record<string, unknown> {
   return result
 }
 
+const mockSessionDelete = vi.fn((key: string) => {
+  sessionStoreData.delete(key)
+})
+
 const mockSessionStore = {
   get: (...args: unknown[]) => mockSessionGet(...(args as [string])),
   set: (...args: unknown[]) => mockSessionSet(...(args as [string, unknown])),
+  delete: (...args: unknown[]) => mockSessionDelete(...(args as [string])),
   get all() {
     return buildNestedAll()
   },
@@ -200,8 +205,8 @@ describe('processAndUploadTranscriptEntries', () => {
     expect(firstRecord.rawData.sessionId).toBe(EDIT_SESSION_ID)
     expect(firstRecord.rawData._recordId).toBeUndefined()
 
-    // Cooldown timestamp + cursor advance = 2 sessionStore.set calls
-    expect(mockSessionSet).toHaveBeenCalledTimes(2)
+    // active lock + cooldown + cursor advance = 3 sessionStore.set calls (active cleared via delete)
+    expect(mockSessionSet).toHaveBeenCalledTimes(3)
   })
 
   it('should upload only new entries on subsequent invocation', async () => {
@@ -263,8 +268,10 @@ describe('processAndUploadTranscriptEntries', () => {
     // Second invocation: should upload only the 5 new lines
     mockPrepareAndSend.mockClear()
     mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-    // Reset cooldown so we're not skipped
+    // Reset cooldown and active lock so we're not skipped
     sessionStoreData.delete('lastHookRunAt')
+    sessionStoreData.delete('hookActiveAt')
+    globalStoreData.delete('claudeCode.globalLastHookRunAt')
     const result2 = await processAndUploadTranscriptEntries()
     expect(result2.entriesUploaded).toBe(5)
 
@@ -292,8 +299,8 @@ describe('processAndUploadTranscriptEntries', () => {
     expect(result.entriesUploaded).toBe(0)
     expect(result.errors).toBeGreaterThan(0)
 
-    // Only cooldown timestamp, no cursor advance
-    expect(mockSessionSet).toHaveBeenCalledTimes(1)
+    // active lock + cooldown (no cursor advance on failure) = 2 sessionStore.set calls (active cleared via delete)
+    expect(mockSessionSet).toHaveBeenCalledTimes(2)
     expect(mockSessionSet).not.toHaveBeenCalledWith(
       expect.stringContaining('cursor.'),
       expect.anything()

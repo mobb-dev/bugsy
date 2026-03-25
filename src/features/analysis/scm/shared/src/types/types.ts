@@ -140,13 +140,25 @@ export const ReportQueryResultZ = z.object({
         ),
       })
     ),
-    repo: z.object({
-      name: z.string().nullable(),
-      originalUrl: z.string(),
-      reference: z.string(),
-      commitSha: z.string(),
-      isKnownBranch: z.boolean().nullish().default(true),
-    }),
+    repo: z
+      .object({
+        name: z.string().nullable(),
+        originalUrl: z.string(),
+        reference: z.string(),
+        commitSha: z.string(),
+        isKnownBranch: z.boolean().nullish().default(true),
+      })
+      .nullable()
+      .transform(
+        (repo) =>
+          repo ?? {
+            name: null,
+            originalUrl: '',
+            reference: '',
+            commitSha: '',
+            isKnownBranch: true as const,
+          }
+      ),
     vulnerabilityReportIssuesFixedCount: z.object({
       vulnerabilityReportIssues_aggregate: z.object({
         aggregate: z.object({ count: z.number() }),
@@ -164,10 +176,12 @@ export const ReportQueryResultZ = z.object({
       project: z.object({
         organizationId: z.string().uuid(),
       }),
-      file: z.object({
-        id: z.string().uuid(),
-        path: z.string(),
-      }),
+      file: z
+        .object({
+          id: z.string().uuid(),
+          path: z.string(),
+        })
+        .nullable(),
       pending: z.object({
         aggregate: z.object({
           count: z.number(),
@@ -404,11 +418,21 @@ const ProjectVulnerabilityReport = z.object({
     issueLanguages: z
       .record(z.nativeEnum(IssueLanguage_Enum), z.number())
       .nullable(),
-    repo: z.object({
-      originalUrl: z.string(),
-      reference: z.string(),
-      name: z.string(),
-    }),
+    repo: z
+      .object({
+        originalUrl: z.string(),
+        reference: z.string(),
+        name: z.string(),
+      })
+      .nullable()
+      .transform(
+        (repo) =>
+          repo ?? {
+            originalUrl: '',
+            reference: '',
+            name: '',
+          }
+      ),
     createdByUser: z
       .object({
         email: z.string(),

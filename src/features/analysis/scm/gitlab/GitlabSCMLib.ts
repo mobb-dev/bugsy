@@ -408,12 +408,21 @@ export class GitlabSCMLib extends SCMLib {
 
     const page = parseCursorSafe(params.cursor, 1)
     const perPage = params.limit || 10
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    // Map SearchReposParams sort to GitLab orderBy.
+    // 'updated' → 'last_activity_at' (best UX for interactive callers like the repo picker).
+    // 'created' or anything else → 'created_at' (safe default, used by bulk operations).
+    const orderBy: 'created_at' | 'last_activity_at' =
+      sort.field === 'updated' ? 'last_activity_at' : 'created_at'
 
     const { projects, hasMore } = await searchGitlabProjects({
       url: this.url,
       accessToken: this.accessToken,
       perPage,
       page,
+      orderBy,
+      sort: sort.order,
     })
 
     // Fetch languages for the current page only (unless opted out)

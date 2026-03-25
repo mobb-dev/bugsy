@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { open, readdir, readFile, unlink } from 'node:fs/promises'
+import { access, open, readdir, readFile, unlink } from 'node:fs/promises'
 import path from 'node:path'
 
 import Configstore from 'configstore'
@@ -17,13 +17,19 @@ import {
   getSessionFilePrefix,
 } from '../../utils/ConfigStoreService'
 import type { Logger } from '../../utils/shared-logger'
+import { withTimeout } from '../../utils/with-timeout'
 import { createScopedHookLog, hookLog } from './hook_logger'
 
-const HOOK_COOLDOWN_MS = 10_000 // 10 seconds — skip invocations within cooldown
+const GLOBAL_COOLDOWN_MS = 5_000 // 5 seconds — throttle across all sessions on this machine
+const HOOK_COOLDOWN_MS = 10_000 // 10 seconds — skip invocations within cooldown (per session)
+const ACTIVE_LOCK_TTL_MS = 60_000 // 60 seconds — stale lock fallback if hook crashes without clearing
+const GQL_AUTH_TIMEOUT_MS = 15_000 // 15 seconds — max wait for GQL authentication
 const STALE_KEY_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000 // 14 days
 const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000 // Run cleanup at most once per day
+const MAX_ENTRIES_PER_INVOCATION = 100 // Cap entries per hook run to avoid CPU spikes on large transcripts
 
 const COOLDOWN_KEY = 'lastHookRunAt'
+const ACTIVE_KEY = 'hookActiveAt'
 
 const HookDataSchema = z.object({
   session_id: z.string(),
@@ -76,9 +82,12 @@ export async function readStdinData(): Promise<unknown> {
       clearTimeout(timer)
       try {
         const parsedData = JSON.parse(inputData)
-        hookLog.debug('Parsed stdin data', {
-          keys: Object.keys(parsedData as Record<string, unknown>),
-        })
+        hookLog.debug(
+          {
+            data: { keys: Object.keys(parsedData as Record<string, unknown>) },
+          },
+          'Parsed stdin data'
+        )
         resolve(parsedData)
       } catch (error) {
         const msg = `Failed to parse JSON from stdin: ${(error as Error).message}`
@@ -91,7 +100,10 @@ export async function readStdinData(): Promise<unknown> {
       if (settled) return
       settled = true
       clearTimeout(timer)
-      hookLog.error('Error reading from stdin', { error: error.message })
+      hookLog.error(
+        { data: { error: error.message } },
+        'Error reading from stdin'
+      )
       reject(new Error(`Error reading from stdin: ${error.message}`))
     })
   })
@@ -140,6 +152,88 @@ type CursorValue = {
 }
 
 /**
+ * Resolves the transcript path, falling back to the base project directory
+ * when the path doesn't exist (e.g. worktree-derived paths where Claude Code
+ * stores the transcript under the original project, not the worktree).
+ *
+ * Strategy:
+ * 1. Try the original path as-is.
+ * 2. Strip the worktree suffix from the project dir name and try that.
+ * 3. Fall back to scanning sibling project dirs for the same filename.
+ */
+export async function resolveTranscriptPath(
+  transcriptPath: string,
+  sessionId: string
+): Promise<string> {
+  // 1. Fast path — file exists at the given location
+  try {
+    await access(transcriptPath)
+    return transcriptPath
+  } catch {
+    // continue to fallbacks
+  }
+
+  const filename = path.basename(transcriptPath)
+  const dirName = path.basename(path.dirname(transcriptPath))
+  const projectsDir = path.dirname(path.dirname(transcriptPath))
+
+  // 2. Strip worktree suffix: "-Users-...-repo--claude-worktrees-name" → "-Users-...-repo"
+  //    The encoded dir contains "claude-worktrees-" when cwd is inside .claude/worktrees/
+  const baseDirName = dirName.replace(/[-.]claude-worktrees-.+$/, '')
+  if (baseDirName !== dirName) {
+    const candidate = path.join(projectsDir, baseDirName, filename)
+    try {
+      await access(candidate)
+      hookLog.info(
+        {
+          data: {
+            original: transcriptPath,
+            resolved: candidate,
+            sessionId,
+            method: 'worktree-strip',
+          },
+        },
+        'Transcript path resolved via fallback'
+      )
+      return candidate
+    } catch {
+      // Stripped path didn't work either, fall through to scan
+    }
+  }
+
+  // 3. Scan sibling project dirs for the same transcript filename
+  try {
+    const dirs = await readdir(projectsDir)
+    for (const dir of dirs) {
+      if (dir === dirName) continue // already tried
+      const candidate = path.join(projectsDir, dir, filename)
+      try {
+        await access(candidate)
+        hookLog.info(
+          {
+            data: {
+              original: transcriptPath,
+              resolved: candidate,
+              sessionId,
+              method: 'sibling-scan',
+            },
+          },
+          'Transcript path resolved via fallback'
+        )
+        return candidate
+      } catch {
+        // Not in this dir, try next
+      }
+    }
+  } catch {
+    // Can't list projects dir
+  }
+
+  // No fallback found — return original path and let the caller handle the error
+  return transcriptPath
+}
+
+/**
  * Reads the transcript JSONL file and returns entries that haven't been
  * uploaded yet (everything after the stored cursor position).
  * Uses a byte offset to avoid re-reading/parsing the entire file on each invocation.
@@ -153,8 +247,10 @@ export async function readNewTranscriptEntries(
   sessionStore: Configstore
 ): Promise<{
   entries: (TranscriptEntry & { _recordId: string })[]
-  fileSize: number
+  endByteOffset: number
 }> {
+  transcriptPath = await resolveTranscriptPath(transcriptPath, sessionId)
+
   const cursor = sessionStore.get(getCursorKey(transcriptPath)) as
     | CursorValue
     | undefined
@@ -172,8 +268,8 @@ export async function readNewTranscriptEntries(
       const stat = await fh.stat()
       fileSize = stat.size
       if (cursor.byteOffset >= stat.size) {
-        hookLog.info('No new data in transcript file', { sessionId })
-        return { entries: [], fileSize }
+        hookLog.info({ data: { sessionId } }, 'No new data in transcript file')
+        return { entries: [], endByteOffset: fileSize }
       }
       const buf = Buffer.alloc(stat.size - cursor.byteOffset)
       await fh.read(buf, 0, buf.length, cursor.byteOffset)
@@ -185,60 +281,98 @@ export async function readNewTranscriptEntries(
     // but synthetic IDs only need to be unique within the file, so we use
     // the byte offset as a proxy (different from any real line index).
     lineIndexOffset = cursor.byteOffset
-    hookLog.debug('Read transcript file from offset', {
-      transcriptPath,
-      byteOffset: cursor.byteOffset,
-      bytesRead: content.length,
-    })
+    hookLog.debug(
+      {
+        data: {
+          transcriptPath,
+          byteOffset: cursor.byteOffset,
+          bytesRead: content.length,
+        },
+      },
+      'Read transcript file from offset'
+    )
   } else {
     content = await readFile(transcriptPath, 'utf-8')
     fileSize = Buffer.byteLength(content, 'utf-8')
     lineIndexOffset = 0
-    hookLog.debug('Read full transcript file', {
-      transcriptPath,
-      totalBytes: fileSize,
-    })
+    hookLog.debug(
+      { data: { transcriptPath, totalBytes: fileSize } },
+      'Read full transcript file'
+    )
   }
 
-  const lines = content.split('\n').filter((line) => line.trim().length > 0)
+  const startOffset = cursor?.byteOffset ?? 0
+  const allLines = content.split('\n')
 
   const parsed: (TranscriptEntry & { _recordId: string })[] = []
   let malformedLines = 0
-  for (let i = 0; i < lines.length; i++) {
+  let bytesConsumed = 0
+  let parsedLineIndex = 0
+
+  for (let i = 0; i < allLines.length; i++) {
+    const line = allLines[i]!
+    const lineBytes =
+      Buffer.byteLength(line, 'utf-8') + (i < allLines.length - 1 ? 1 : 0) // +1 for \n delimiter
+
+    if (parsed.length >= MAX_ENTRIES_PER_INVOCATION) break
+
+    bytesConsumed += lineBytes
+
+    if (line.trim().length === 0) continue
+
     try {
-      const entry = JSON.parse(lines[i]!) as TranscriptEntry
+      const entry = JSON.parse(line) as TranscriptEntry
       const recordId =
         entry.uuid ??
         generateSyntheticId(
           entry.sessionId,
           entry.timestamp,
           entry.type,
-          lineIndexOffset + i
+          lineIndexOffset + parsedLineIndex
         )
       parsed.push({ ...entry, _recordId: recordId })
     } catch {
       malformedLines++
     }
+    parsedLineIndex++
   }
+
+  const endByteOffset = startOffset + bytesConsumed
+  const capped = parsed.length >= MAX_ENTRIES_PER_INVOCATION
 
   if (malformedLines > 0) {
-    hookLog.warn('Skipped malformed lines', { malformedLines, transcriptPath })
+    hookLog.warn(
+      { data: { malformedLines, transcriptPath } },
+      'Skipped malformed lines'
+    )
   }
 
-  if (!cursor) {
-    hookLog.info('First invocation for session — uploading all entries', {
-      sessionId,
-      totalEntries: parsed.length,
-    })
+  if (capped) {
+    hookLog.info(
+      {
+        data: {
+          sessionId,
+          entriesParsed: parsed.length,
+          totalLines: allLines.length,
+        },
+      },
+      'Capped at MAX_ENTRIES_PER_INVOCATION, remaining entries deferred'
+    )
+  } else if (!cursor) {
+    hookLog.info(
+      { data: { sessionId, totalEntries: parsed.length } },
+      'First invocation for session — uploading all entries'
+    )
   } else {
-    hookLog.info('Resuming from byte offset', {
-      sessionId,
-      byteOffset: cursor.byteOffset,
-      newEntries: parsed.length,
-    })
+    hookLog.info(
+      {
+        data: { sessionId, byteOffset: startOffset, newEntries: parsed.length },
+      },
+      'Resuming from byte offset'
+    )
   }
 
-  return { entries: parsed, fileSize }
+  return { entries: parsed, endByteOffset }
 }
 
 /**
@@ -397,7 +531,7 @@ async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
     }
 
     if (deletedCount > 0) {
-      hookLog.info('Cleaned up stale session files', { deletedCount })
+      hookLog.info({ data: { deletedCount } }, 'Cleaned up stale session files')
     }
   } catch {
     // If we can't list the directory, skip cleanup silently
@@ -419,6 +553,17 @@ export type HookResult = {
 export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
   hookLog.info('Hook invoked')
 
+  // Global cooldown: throttle hook processes across all sessions on this machine.
+  // Shorter than per-session cooldown — just prevents burst spawning.
+  const globalLastRun = configStore.get('claudeCode.globalLastHookRunAt') as
+    | number
+    | undefined
+  const globalNow = Date.now()
+  if (globalLastRun && globalNow - globalLastRun < GLOBAL_COOLDOWN_MS) {
+    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
+  }
+  configStore.set('claudeCode.globalLastHookRunAt', globalNow)
+
   const rawData = await readStdinData()
   const hookData = validateHookData(rawData)
 
@@ -432,25 +577,53 @@ export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
   // Cooldown: skip if this session was processed recently.
   // The hook fires on every tool use, but we only need to upload every ~10s.
   // Within a single session the cooldown serializes writes, so no race.
+  const now = Date.now()
   const lastRunAt = sessionStore.get(COOLDOWN_KEY) as number | undefined
-  if (lastRunAt && Date.now() - lastRunAt < HOOK_COOLDOWN_MS) {
+  if (lastRunAt && now - lastRunAt < HOOK_COOLDOWN_MS) {
     return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
   }
-  sessionStore.set(COOLDOWN_KEY, Date.now())
+
+  // Active lock: skip if another hook process is currently running for this session.
+  // Prevents parallel hooks from piling up during slow network calls.
+  // TTL fallback ensures a crashed hook doesn't block future invocations.
+  const activeAt = sessionStore.get(ACTIVE_KEY) as number | undefined
+  if (activeAt && now - activeAt < ACTIVE_LOCK_TTL_MS) {
+    const activeDuration = now - activeAt
+    if (activeDuration > HOOK_COOLDOWN_MS) {
+      hookLog.warn(
+        {
+          data: {
+            activeDurationMs: activeDuration,
+            sessionId: hookData.session_id,
+          },
+        },
+        'Hook still active — possible slow upload or hung process'
+      )
+    }
+    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
+  }
+  sessionStore.set(ACTIVE_KEY, now)
+  sessionStore.set(COOLDOWN_KEY, now)
 
   // Create a project-scoped logger so logs are separated per repo
   const log = createScopedHookLog(hookData.cwd)
 
-  log.info('Hook data validated', {
-    sessionId: hookData.session_id,
-    toolName: hookData.tool_name,
-    hookEvent: hookData.hook_event_name,
-    cwd: hookData.cwd,
-  })
+  log.info(
+    {
+      data: {
+        sessionId: hookData.session_id,
+        toolName: hookData.tool_name,
+        hookEvent: hookData.hook_event_name,
+        cwd: hookData.cwd,
+      },
+    },
+    'Hook data validated'
+  )
 
   try {
     return await processTranscript(hookData, sessionStore, log)
   } finally {
+    sessionStore.delete(ACTIVE_KEY)
     log.flushLogs()
   }
 }
@@ -461,7 +634,7 @@ async function processTranscript(
   log: Logger
 ): Promise<HookResult> {
   const cursorKey = getCursorKey(hookData.transcript_path)
-  const { entries: rawEntries, fileSize } = await readNewTranscriptEntries(
+  const { entries: rawEntries, endByteOffset } = await readNewTranscriptEntries(
     hookData.transcript_path,
     hookData.session_id,
     sessionStore
@@ -474,10 +647,10 @@ async function processTranscript(
 
   const { filtered: entries, filteredOut } = filterEntries(rawEntries)
   if (filteredOut > 0) {
-    log.info('Filtered out noise entries', {
-      filteredOut,
-      remaining: entries.length,
-    })
+    log.info(
+      { data: { filteredOut, remaining: entries.length } },
+      'Filtered out noise entries'
+    )
   }
 
   if (entries.length === 0) {
@@ -487,7 +660,7 @@ async function processTranscript(
     const prevCursor = sessionStore.get(cursorKey) as CursorValue | undefined
     const cursor: CursorValue = {
       id: lastEntry._recordId,
-      byteOffset: fileSize,
+      byteOffset: endByteOffset,
       updatedAt: Date.now(),
       lastModel: prevCursor?.lastModel,
     }
@@ -499,9 +672,31 @@ async function processTranscript(
     }
   }
 
-  const gqlClient = await log.timed('GQL auth', () =>
-    getAuthenticatedGQLClient({ isSkipPrompts: true })
-  )
+  let gqlClient
+  try {
+    gqlClient = await log.timed('GQL auth', () =>
+      withTimeout(
+        getAuthenticatedGQLClient({ isSkipPrompts: true }),
+        GQL_AUTH_TIMEOUT_MS,
+        'GQL auth'
+      )
+    )
+  } catch (err) {
+    log.error(
+      {
+        data: {
+          error: String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+        },
+      },
+      'GQL auth failed'
+    )
+    return {
+      entriesUploaded: 0,
+      entriesSkipped: filteredOut,
+      errors: entries.length,
+    }
+  }
 
   // Propagate model to entries that don't carry one natively.
   // Restore last-seen model from the transcript cursor (persisted across hook
@@ -533,12 +728,17 @@ async function processTranscript(
     }
   })
 
-  log.info('Uploading batch', {
-    count: records.length,
-    skipped: filteredOut,
-    firstRecordId: records[0]?.recordId,
-    lastRecordId: records[records.length - 1]?.recordId,
-  })
+  log.info(
+    {
+      data: {
+        count: records.length,
+        skipped: filteredOut,
+        firstRecordId: records[0]?.recordId,
+        lastRecordId: records[records.length - 1]?.recordId,
+      },
+    },
+    'Uploading batch'
+  )
 
   const result = await log.timed('Batch upload', () =>
     prepareAndSendTracyRecords(gqlClient, records, hookData.cwd)
@@ -549,7 +749,7 @@ async function processTranscript(
     const lastRawEntry = rawEntries[rawEntries.length - 1]!
     const cursor: CursorValue = {
       id: lastRawEntry._recordId,
-      byteOffset: fileSize,
+      byteOffset: endByteOffset,
       updatedAt: Date.now(),
       lastModel: lastSeenModel ?? undefined,
     }
@@ -565,7 +765,10 @@ async function processTranscript(
     }
   }
 
-  log.error('Batch upload had errors', { errors: result.errors })
+  log.error(
+    { data: { errors: result.errors, recordCount: entries.length } },
+    'Batch upload had errors'
+  )
   return {
     entriesUploaded: 0,
     entriesSkipped: filteredOut,

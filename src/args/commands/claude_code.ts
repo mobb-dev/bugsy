@@ -74,34 +74,49 @@ export const claudeCodeProcessHookHandler = async () => {
 
   // Global safety net for any uncaught errors/rejections in the hook process
   process.on('uncaughtException', (error) => {
-    hookLog.error('Uncaught exception in hook', {
-      error: String(error),
-      stack: error.stack,
-    })
+    hookLog.error(
+      { data: { error: String(error), stack: error.stack } },
+      'Uncaught exception in hook'
+    )
     void flushAndExit(1)
   })
   process.on('unhandledRejection', (reason) => {
-    hookLog.error('Unhandled rejection in hook', {
-      error: String(reason),
-      stack: reason instanceof Error ? reason.stack : undefined,
-    })
+    hookLog.error(
+      {
+        data: {
+          error: String(reason),
+          stack: reason instanceof Error ? reason.stack : undefined,
+        },
+      },
+      'Unhandled rejection in hook'
+    )
     void flushAndExit(1)
   })
 
   let exitCode = 0
   try {
     const result = await processAndUploadTranscriptEntries()
-    hookLog.info('Claude Code upload complete', {
-      entriesUploaded: result.entriesUploaded,
-      entriesSkipped: result.entriesSkipped,
-      errors: result.errors,
-    })
+    hookLog.info(
+      {
+        data: {
+          entriesUploaded: result.entriesUploaded,
+          entriesSkipped: result.entriesSkipped,
+          errors: result.errors,
+        },
+      },
+      'Claude Code upload complete'
+    )
   } catch (error) {
     exitCode = 1
-    hookLog.error('Failed to process Claude Code hook', {
-      error: String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    })
+    hookLog.error(
+      {
+        data: {
+          error: String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      },
+      'Failed to process Claude Code hook'
+    )
   }
 
   await flushAndExit(exitCode)

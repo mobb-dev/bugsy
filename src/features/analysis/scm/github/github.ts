@@ -319,17 +319,34 @@ export function getGithubSdk(
     },
     async getGithubRepoList(): Promise<ScmRepoInfo[]> {
       try {
-        const githubRepos = await octokit.request(GET_USER_REPOS, {
-          sort: 'updated',
-        })
-        return githubRepos.data.map((repo) => ({
-          repoName: repo.name,
-          repoUrl: repo.html_url,
-          repoOwner: repo.owner.login,
-          repoLanguages: repo.language ? [repo.language] : [],
-          repoIsPublic: !repo.private,
-          repoUpdatedAt: repo.updated_at,
-        }))
+        const allRepos: ScmRepoInfo[] = []
+        let page = 1
+        const perPage = 100
+
+        let hasMore = true
+        while (hasMore) {
+          const githubRepos = await octokit.request(GET_USER_REPOS, {
+            sort: 'updated',
+            per_page: perPage,
+            page,
+          })
+
+          for (const repo of githubRepos.data) {
+            allRepos.push({
+              repoName: repo.name,
+              repoUrl: repo.html_url,
+              repoOwner: repo.owner.login,
+              repoLanguages: repo.language ? [repo.language] : [],
+              repoIsPublic: !repo.private,
+              repoUpdatedAt: repo.updated_at,
+            })
+          }
+
+          hasMore = githubRepos.data.length >= perPage
+          page++
+        }
+
+        return allRepos
       } catch (e) {
         if (e instanceof RequestError && e.status === 401) {
           console.warn(
@@ -893,8 +910,7 @@ export function getGithubSdk(
         throw new Error('Organization is required for repository search')
       }
 
-      // Build search query
-      const query = `org:${org}`
+      const query = `org:${org} fork:true`
 
       // Map sort field to GitHub's sort parameter
       // GitHub supports: stars, forks, help-wanted-issues, updated

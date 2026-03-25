@@ -508,10 +508,12 @@ export async function getAdoRepoList({
   orgName,
   tokenOrg,
   accessToken,
+  url,
 }: {
   orgName: string | undefined
   tokenOrg: string | undefined
   accessToken: string
+  url?: string | undefined
 }) {
   let orgs: string[] = []
   const adoTokenInfo = getAdoTokenInfo(accessToken)
@@ -521,10 +523,11 @@ export async function getAdoRepoList({
   if (adoTokenInfo.type === AdoTokenTypeEnum.OAUTH) {
     orgs = await getOrgsForOauthToken({ oauthToken: accessToken })
   }
-  if (orgs.length === 0 && !orgName) {
+  const effectiveOrgName = orgName || tokenOrg
+  if (orgs.length === 0 && !effectiveOrgName) {
     throw new Error(`no orgs for ADO`)
-  } else if (orgs.length === 0 && orgName) {
-    orgs = [orgName as string]
+  } else if (orgs.length === 0 && effectiveOrgName) {
+    orgs = [effectiveOrgName]
   }
 
   const repos = (
@@ -534,7 +537,7 @@ export async function getAdoRepoList({
           ...(await getAdoClientParams({
             accessToken,
             tokenOrg: tokenOrg || org,
-            url: undefined,
+            url,
           })),
           orgName: org,
         })

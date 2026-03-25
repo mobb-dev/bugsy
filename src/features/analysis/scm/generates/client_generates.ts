@@ -225,6 +225,52 @@ export type BaseResponseWithMessage = {
   status: Status;
 };
 
+export type BatchScanRepoInput = {
+  reference?: InputMaybe<Scalars['String']['input']>;
+  repoUrl: Scalars['String']['input'];
+};
+
+export type BatchScanRepoResult = {
+  __typename?: 'BatchScanRepoResult';
+  codeqlSarifLanguages?: Maybe<Scalars['Int']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Int']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  fixReportId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  projectId?: Maybe<Scalars['String']['output']>;
+  repoReference?: Maybe<Scalars['String']['output']>;
+  repoUrl: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+};
+
+export type BatchScanStatusError = {
+  __typename?: 'BatchScanStatusError';
+  error?: Maybe<Scalars['String']['output']>;
+};
+
+export type BatchScanStatusResponse = BatchScanStatusError | BatchScanStatusResult;
+
+export type BatchScanStatusResult = {
+  __typename?: 'BatchScanStatusResult';
+  createdOn: Scalars['String']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  failedRepos: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
+  processedRepos: Scalars['Int']['output'];
+  repos: Array<BatchScanRepoResult>;
+  scanType: Scalars['String']['output'];
+  skippedRepos: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  successfulRepos: Scalars['Int']['output'];
+  totalRepos: Scalars['Int']['output'];
+  updatedOn: Scalars['String']['output'];
+};
+
+export enum BatchScanType {
+  Codeql = 'CODEQL',
+  MobbScanner = 'MOBB_SCANNER'
+}
+
 export enum BlameStatus {
   Error = 'Error',
   Ok = 'OK',
@@ -254,6 +300,44 @@ export type ChangedLines = {
   __typename?: 'ChangedLines';
   added: Scalars['Int']['output'];
   removed: Scalars['Int']['output'];
+};
+
+export type CheckReposCodeQlError = {
+  __typename?: 'CheckReposCodeQLError';
+  error: Scalars['String']['output'];
+};
+
+export type CheckReposCodeQlResponse = CheckReposCodeQlError | CheckReposCodeQlSuccess;
+
+export type CheckReposCodeQlResult = {
+  __typename?: 'CheckReposCodeQLResult';
+  hasCodeQL: Scalars['Boolean']['output'];
+  repoUrl: Scalars['String']['output'];
+};
+
+export type CheckReposCodeQlSuccess = {
+  __typename?: 'CheckReposCodeQLSuccess';
+  repos: Array<CheckReposCodeQlResult>;
+};
+
+export type CheckReposPreviouslyScannedError = {
+  __typename?: 'CheckReposPreviouslyScannedError';
+  error: Scalars['String']['output'];
+};
+
+export type CheckReposPreviouslyScannedResponse = CheckReposPreviouslyScannedError | CheckReposPreviouslyScannedSuccess;
+
+export type CheckReposPreviouslyScannedResult = {
+  __typename?: 'CheckReposPreviouslyScannedResult';
+  lastScannedAt?: Maybe<Scalars['String']['output']>;
+  previouslyScanned: Scalars['Boolean']['output'];
+  projectId?: Maybe<Scalars['String']['output']>;
+  repoUrl: Scalars['String']['output'];
+};
+
+export type CheckReposPreviouslyScannedSuccess = {
+  __typename?: 'CheckReposPreviouslyScannedSuccess';
+  repos: Array<CheckReposPreviouslyScannedResult>;
 };
 
 export type CheckmarxProject = {
@@ -1452,6 +1536,19 @@ export type SplitFixData = {
   patches: Array<Scalars['String']['output']>;
   patchesOriginalEncodingBase64: Array<Scalars['String']['output']>;
   questions: Array<FixQuestion>;
+};
+
+export type StartBatchScanError = {
+  __typename?: 'StartBatchScanError';
+  error: Scalars['String']['output'];
+};
+
+export type StartBatchScanResponse = StartBatchScanError | StartBatchScanSuccess;
+
+export type StartBatchScanSuccess = {
+  __typename?: 'StartBatchScanSuccess';
+  batchScanId: Scalars['String']['output'];
+  totalRepos: Scalars['Int']['output'];
 };
 
 export enum Status {
@@ -10422,6 +10519,1352 @@ export type Api_Token_Updates = {
   where: Api_Token_Bool_Exp;
 };
 
+/** columns and relationships of "batch_scan" */
+export type Batch_Scan = {
+  __typename?: 'batch_scan';
+  batchGroupId?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  createdByUser: User;
+  createdByUserId: Scalars['uuid']['output'];
+  createdOn: Scalars['timestamptz']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  failedRepos: Scalars['Int']['output'];
+  hasCodeqlRepos?: Maybe<Scalars['Boolean']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  processedRepos: Scalars['Int']['output'];
+  /** An array relationship */
+  repos: Array<Batch_Scan_Repo>;
+  /** An aggregate relationship */
+  repos_aggregate: Batch_Scan_Repo_Aggregate;
+  scanType: Batch_Scan_Type_Enum;
+  skippedRepos: Scalars['Int']['output'];
+  status: Batch_Scan_Status_Enum;
+  successfulRepos: Scalars['Int']['output'];
+  totalRepos: Scalars['Int']['output'];
+  updatedOn: Scalars['timestamptz']['output'];
+};
+
+
+/** columns and relationships of "batch_scan" */
+export type Batch_ScanReposArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+/** columns and relationships of "batch_scan" */
+export type Batch_ScanRepos_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+/** aggregated selection of "batch_scan" */
+export type Batch_Scan_Aggregate = {
+  __typename?: 'batch_scan_aggregate';
+  aggregate?: Maybe<Batch_Scan_Aggregate_Fields>;
+  nodes: Array<Batch_Scan>;
+};
+
+/** aggregate fields of "batch_scan" */
+export type Batch_Scan_Aggregate_Fields = {
+  __typename?: 'batch_scan_aggregate_fields';
+  avg?: Maybe<Batch_Scan_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Batch_Scan_Max_Fields>;
+  min?: Maybe<Batch_Scan_Min_Fields>;
+  stddev?: Maybe<Batch_Scan_Stddev_Fields>;
+  stddev_pop?: Maybe<Batch_Scan_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Batch_Scan_Stddev_Samp_Fields>;
+  sum?: Maybe<Batch_Scan_Sum_Fields>;
+  var_pop?: Maybe<Batch_Scan_Var_Pop_Fields>;
+  var_samp?: Maybe<Batch_Scan_Var_Samp_Fields>;
+  variance?: Maybe<Batch_Scan_Variance_Fields>;
+};
+
+
+/** aggregate fields of "batch_scan" */
+export type Batch_Scan_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Batch_Scan_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Batch_Scan_Avg_Fields = {
+  __typename?: 'batch_scan_avg_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "batch_scan". All fields are combined with a logical 'AND'. */
+export type Batch_Scan_Bool_Exp = {
+  _and?: InputMaybe<Array<Batch_Scan_Bool_Exp>>;
+  _not?: InputMaybe<Batch_Scan_Bool_Exp>;
+  _or?: InputMaybe<Array<Batch_Scan_Bool_Exp>>;
+  batchGroupId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdByUser?: InputMaybe<User_Bool_Exp>;
+  createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  error?: InputMaybe<String_Comparison_Exp>;
+  failedRepos?: InputMaybe<Int_Comparison_Exp>;
+  hasCodeqlRepos?: InputMaybe<Boolean_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  processedRepos?: InputMaybe<Int_Comparison_Exp>;
+  repos?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+  repos_aggregate?: InputMaybe<Batch_Scan_Repo_Aggregate_Bool_Exp>;
+  scanType?: InputMaybe<Batch_Scan_Type_Enum_Comparison_Exp>;
+  skippedRepos?: InputMaybe<Int_Comparison_Exp>;
+  status?: InputMaybe<Batch_Scan_Status_Enum_Comparison_Exp>;
+  successfulRepos?: InputMaybe<Int_Comparison_Exp>;
+  totalRepos?: InputMaybe<Int_Comparison_Exp>;
+  updatedOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "batch_scan" */
+export enum Batch_Scan_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  BatchScanPkey = 'batch_scan_pkey'
+}
+
+/** input type for incrementing numeric columns in table "batch_scan" */
+export type Batch_Scan_Inc_Input = {
+  failedRepos?: InputMaybe<Scalars['Int']['input']>;
+  processedRepos?: InputMaybe<Scalars['Int']['input']>;
+  skippedRepos?: InputMaybe<Scalars['Int']['input']>;
+  successfulRepos?: InputMaybe<Scalars['Int']['input']>;
+  totalRepos?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "batch_scan" */
+export type Batch_Scan_Insert_Input = {
+  batchGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  failedRepos?: InputMaybe<Scalars['Int']['input']>;
+  hasCodeqlRepos?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  processedRepos?: InputMaybe<Scalars['Int']['input']>;
+  repos?: InputMaybe<Batch_Scan_Repo_Arr_Rel_Insert_Input>;
+  scanType?: InputMaybe<Batch_Scan_Type_Enum>;
+  skippedRepos?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Batch_Scan_Status_Enum>;
+  successfulRepos?: InputMaybe<Scalars['Int']['input']>;
+  totalRepos?: InputMaybe<Scalars['Int']['input']>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Batch_Scan_Max_Fields = {
+  __typename?: 'batch_scan_max_fields';
+  batchGroupId?: Maybe<Scalars['uuid']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  failedRepos?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  processedRepos?: Maybe<Scalars['Int']['output']>;
+  skippedRepos?: Maybe<Scalars['Int']['output']>;
+  successfulRepos?: Maybe<Scalars['Int']['output']>;
+  totalRepos?: Maybe<Scalars['Int']['output']>;
+  updatedOn?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Batch_Scan_Min_Fields = {
+  __typename?: 'batch_scan_min_fields';
+  batchGroupId?: Maybe<Scalars['uuid']['output']>;
+  createdByUserId?: Maybe<Scalars['uuid']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  failedRepos?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  processedRepos?: Maybe<Scalars['Int']['output']>;
+  skippedRepos?: Maybe<Scalars['Int']['output']>;
+  successfulRepos?: Maybe<Scalars['Int']['output']>;
+  totalRepos?: Maybe<Scalars['Int']['output']>;
+  updatedOn?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "batch_scan" */
+export type Batch_Scan_Mutation_Response = {
+  __typename?: 'batch_scan_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Batch_Scan>;
+};
+
+/** input type for inserting object relation for remote table "batch_scan" */
+export type Batch_Scan_Obj_Rel_Insert_Input = {
+  data: Batch_Scan_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Batch_Scan_On_Conflict>;
+};
+
+/** on_conflict condition type for table "batch_scan" */
+export type Batch_Scan_On_Conflict = {
+  constraint: Batch_Scan_Constraint;
+  update_columns?: Array<Batch_Scan_Update_Column>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "batch_scan". */
+export type Batch_Scan_Order_By = {
+  batchGroupId?: InputMaybe<Order_By>;
+  createdByUser?: InputMaybe<User_Order_By>;
+  createdByUserId?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  failedRepos?: InputMaybe<Order_By>;
+  hasCodeqlRepos?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  processedRepos?: InputMaybe<Order_By>;
+  repos_aggregate?: InputMaybe<Batch_Scan_Repo_Aggregate_Order_By>;
+  scanType?: InputMaybe<Order_By>;
+  skippedRepos?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
+  successfulRepos?: InputMaybe<Order_By>;
+  totalRepos?: InputMaybe<Order_By>;
+  updatedOn?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: batch_scan */
+export type Batch_Scan_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** columns and relationships of "batch_scan_repo" */
+export type Batch_Scan_Repo = {
+  __typename?: 'batch_scan_repo';
+  /** An object relationship */
+  batchScan: Batch_Scan;
+  batchScanId: Scalars['uuid']['output'];
+  codeqlSarifLanguages?: Maybe<Scalars['Int']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Int']['output']>;
+  createdOn: Scalars['timestamptz']['output'];
+  error?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  fixReport?: Maybe<FixReport>;
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  project?: Maybe<Project>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoReference?: Maybe<Scalars['String']['output']>;
+  repoUrl: Scalars['String']['output'];
+  status: Batch_Scan_Repo_Status_Enum;
+  updatedOn: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "batch_scan_repo" */
+export type Batch_Scan_Repo_Aggregate = {
+  __typename?: 'batch_scan_repo_aggregate';
+  aggregate?: Maybe<Batch_Scan_Repo_Aggregate_Fields>;
+  nodes: Array<Batch_Scan_Repo>;
+};
+
+export type Batch_Scan_Repo_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Batch_Scan_Repo_Aggregate_Bool_Exp_Count>;
+};
+
+export type Batch_Scan_Repo_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "batch_scan_repo" */
+export type Batch_Scan_Repo_Aggregate_Fields = {
+  __typename?: 'batch_scan_repo_aggregate_fields';
+  avg?: Maybe<Batch_Scan_Repo_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Batch_Scan_Repo_Max_Fields>;
+  min?: Maybe<Batch_Scan_Repo_Min_Fields>;
+  stddev?: Maybe<Batch_Scan_Repo_Stddev_Fields>;
+  stddev_pop?: Maybe<Batch_Scan_Repo_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Batch_Scan_Repo_Stddev_Samp_Fields>;
+  sum?: Maybe<Batch_Scan_Repo_Sum_Fields>;
+  var_pop?: Maybe<Batch_Scan_Repo_Var_Pop_Fields>;
+  var_samp?: Maybe<Batch_Scan_Repo_Var_Samp_Fields>;
+  variance?: Maybe<Batch_Scan_Repo_Variance_Fields>;
+};
+
+
+/** aggregate fields of "batch_scan_repo" */
+export type Batch_Scan_Repo_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Aggregate_Order_By = {
+  avg?: InputMaybe<Batch_Scan_Repo_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Batch_Scan_Repo_Max_Order_By>;
+  min?: InputMaybe<Batch_Scan_Repo_Min_Order_By>;
+  stddev?: InputMaybe<Batch_Scan_Repo_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Batch_Scan_Repo_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Batch_Scan_Repo_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Batch_Scan_Repo_Sum_Order_By>;
+  var_pop?: InputMaybe<Batch_Scan_Repo_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Batch_Scan_Repo_Var_Samp_Order_By>;
+  variance?: InputMaybe<Batch_Scan_Repo_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "batch_scan_repo" */
+export type Batch_Scan_Repo_Arr_Rel_Insert_Input = {
+  data: Array<Batch_Scan_Repo_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Batch_Scan_Repo_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Batch_Scan_Repo_Avg_Fields = {
+  __typename?: 'batch_scan_repo_avg_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Avg_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "batch_scan_repo". All fields are combined with a logical 'AND'. */
+export type Batch_Scan_Repo_Bool_Exp = {
+  _and?: InputMaybe<Array<Batch_Scan_Repo_Bool_Exp>>;
+  _not?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+  _or?: InputMaybe<Array<Batch_Scan_Repo_Bool_Exp>>;
+  batchScan?: InputMaybe<Batch_Scan_Bool_Exp>;
+  batchScanId?: InputMaybe<Uuid_Comparison_Exp>;
+  codeqlSarifLanguages?: InputMaybe<Int_Comparison_Exp>;
+  codeqlSarifRuns?: InputMaybe<Int_Comparison_Exp>;
+  createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  error?: InputMaybe<String_Comparison_Exp>;
+  fixReport?: InputMaybe<FixReport_Bool_Exp>;
+  fixReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  repoReference?: InputMaybe<String_Comparison_Exp>;
+  repoUrl?: InputMaybe<String_Comparison_Exp>;
+  status?: InputMaybe<Batch_Scan_Repo_Status_Enum_Comparison_Exp>;
+  updatedOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "batch_scan_repo" */
+export enum Batch_Scan_Repo_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  BatchScanRepoPkey = 'batch_scan_repo_pkey'
+}
+
+/** input type for incrementing numeric columns in table "batch_scan_repo" */
+export type Batch_Scan_Repo_Inc_Input = {
+  codeqlSarifLanguages?: InputMaybe<Scalars['Int']['input']>;
+  codeqlSarifRuns?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "batch_scan_repo" */
+export type Batch_Scan_Repo_Insert_Input = {
+  batchScan?: InputMaybe<Batch_Scan_Obj_Rel_Insert_Input>;
+  batchScanId?: InputMaybe<Scalars['uuid']['input']>;
+  codeqlSarifLanguages?: InputMaybe<Scalars['Int']['input']>;
+  codeqlSarifRuns?: InputMaybe<Scalars['Int']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoReference?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Batch_Scan_Repo_Status_Enum>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Batch_Scan_Repo_Max_Fields = {
+  __typename?: 'batch_scan_repo_max_fields';
+  batchScanId?: Maybe<Scalars['uuid']['output']>;
+  codeqlSarifLanguages?: Maybe<Scalars['Int']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Int']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoReference?: Maybe<Scalars['String']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+  updatedOn?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by max() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Max_Order_By = {
+  batchScanId?: InputMaybe<Order_By>;
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  fixReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  repoReference?: InputMaybe<Order_By>;
+  repoUrl?: InputMaybe<Order_By>;
+  updatedOn?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Batch_Scan_Repo_Min_Fields = {
+  __typename?: 'batch_scan_repo_min_fields';
+  batchScanId?: Maybe<Scalars['uuid']['output']>;
+  codeqlSarifLanguages?: Maybe<Scalars['Int']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Int']['output']>;
+  createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  repoReference?: Maybe<Scalars['String']['output']>;
+  repoUrl?: Maybe<Scalars['String']['output']>;
+  updatedOn?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by min() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Min_Order_By = {
+  batchScanId?: InputMaybe<Order_By>;
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  fixReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  repoReference?: InputMaybe<Order_By>;
+  repoUrl?: InputMaybe<Order_By>;
+  updatedOn?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "batch_scan_repo" */
+export type Batch_Scan_Repo_Mutation_Response = {
+  __typename?: 'batch_scan_repo_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Batch_Scan_Repo>;
+};
+
+/** on_conflict condition type for table "batch_scan_repo" */
+export type Batch_Scan_Repo_On_Conflict = {
+  constraint: Batch_Scan_Repo_Constraint;
+  update_columns?: Array<Batch_Scan_Repo_Update_Column>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "batch_scan_repo". */
+export type Batch_Scan_Repo_Order_By = {
+  batchScan?: InputMaybe<Batch_Scan_Order_By>;
+  batchScanId?: InputMaybe<Order_By>;
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+  createdOn?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  fixReport?: InputMaybe<FixReport_Order_By>;
+  fixReportId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  repoReference?: InputMaybe<Order_By>;
+  repoUrl?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
+  updatedOn?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: batch_scan_repo */
+export type Batch_Scan_Repo_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "batch_scan_repo" */
+export enum Batch_Scan_Repo_Select_Column {
+  /** column name */
+  BatchScanId = 'batchScanId',
+  /** column name */
+  CodeqlSarifLanguages = 'codeqlSarifLanguages',
+  /** column name */
+  CodeqlSarifRuns = 'codeqlSarifRuns',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoReference = 'repoReference',
+  /** column name */
+  RepoUrl = 'repoUrl',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  UpdatedOn = 'updatedOn'
+}
+
+/** input type for updating data in table "batch_scan_repo" */
+export type Batch_Scan_Repo_Set_Input = {
+  batchScanId?: InputMaybe<Scalars['uuid']['input']>;
+  codeqlSarifLanguages?: InputMaybe<Scalars['Int']['input']>;
+  codeqlSarifRuns?: InputMaybe<Scalars['Int']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoReference?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Batch_Scan_Repo_Status_Enum>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** columns and relationships of "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status = {
+  __typename?: 'batch_scan_repo_status';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Aggregate = {
+  __typename?: 'batch_scan_repo_status_aggregate';
+  aggregate?: Maybe<Batch_Scan_Repo_Status_Aggregate_Fields>;
+  nodes: Array<Batch_Scan_Repo_Status>;
+};
+
+/** aggregate fields of "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Aggregate_Fields = {
+  __typename?: 'batch_scan_repo_status_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Batch_Scan_Repo_Status_Max_Fields>;
+  min?: Maybe<Batch_Scan_Repo_Status_Min_Fields>;
+};
+
+
+/** aggregate fields of "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Batch_Scan_Repo_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "batch_scan_repo_status". All fields are combined with a logical 'AND'. */
+export type Batch_Scan_Repo_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Batch_Scan_Repo_Status_Bool_Exp>>;
+  _not?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Batch_Scan_Repo_Status_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "batch_scan_repo_status" */
+export enum Batch_Scan_Repo_Status_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  BatchScanRepoStatusPkey = 'batch_scan_repo_status_pkey'
+}
+
+export enum Batch_Scan_Repo_Status_Enum {
+  /** Checking for CodeQL analyses on GitHub */
+  CheckingCodeql = 'CHECKING_CODEQL',
+  /** Scan completed successfully */
+  Completed = 'COMPLETED',
+  /** Downloading SARIF from GitHub code scanning */
+  DownloadingSarif = 'DOWNLOADING_SARIF',
+  /** Scan failed */
+  Failed = 'FAILED',
+  /** Not yet started */
+  Pending = 'PENDING',
+  /** Scan has been queued for processing */
+  Queued = 'QUEUED',
+  /** Scan is in progress */
+  Scanning = 'SCANNING',
+  /** Repo was skipped (no CodeQL, archived, etc.) */
+  Skipped = 'SKIPPED'
+}
+
+/** Boolean expression to compare columns of type "batch_scan_repo_status_enum". All fields are combined with logical 'AND'. */
+export type Batch_Scan_Repo_Status_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Batch_Scan_Repo_Status_Enum>;
+  _in?: InputMaybe<Array<Batch_Scan_Repo_Status_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Batch_Scan_Repo_Status_Enum>;
+  _nin?: InputMaybe<Array<Batch_Scan_Repo_Status_Enum>>;
+};
+
+/** input type for inserting data into table "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Batch_Scan_Repo_Status_Max_Fields = {
+  __typename?: 'batch_scan_repo_status_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Batch_Scan_Repo_Status_Min_Fields = {
+  __typename?: 'batch_scan_repo_status_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Mutation_Response = {
+  __typename?: 'batch_scan_repo_status_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Batch_Scan_Repo_Status>;
+};
+
+/** on_conflict condition type for table "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_On_Conflict = {
+  constraint: Batch_Scan_Repo_Status_Constraint;
+  update_columns?: Array<Batch_Scan_Repo_Status_Update_Column>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "batch_scan_repo_status". */
+export type Batch_Scan_Repo_Status_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: batch_scan_repo_status */
+export type Batch_Scan_Repo_Status_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "batch_scan_repo_status" */
+export enum Batch_Scan_Repo_Status_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "batch_scan_repo_status" */
+export type Batch_Scan_Repo_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Batch_Scan_Repo_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Batch_Scan_Repo_Status_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "batch_scan_repo_status" */
+export enum Batch_Scan_Repo_Status_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Batch_Scan_Repo_Status_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Batch_Scan_Repo_Status_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Batch_Scan_Repo_Status_Bool_Exp;
+};
+
+/** aggregate stddev on columns */
+export type Batch_Scan_Repo_Stddev_Fields = {
+  __typename?: 'batch_scan_repo_stddev_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Stddev_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Batch_Scan_Repo_Stddev_Pop_Fields = {
+  __typename?: 'batch_scan_repo_stddev_pop_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Stddev_Pop_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Batch_Scan_Repo_Stddev_Samp_Fields = {
+  __typename?: 'batch_scan_repo_stddev_samp_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Stddev_Samp_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "batch_scan_repo" */
+export type Batch_Scan_Repo_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Batch_Scan_Repo_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Batch_Scan_Repo_Stream_Cursor_Value_Input = {
+  batchScanId?: InputMaybe<Scalars['uuid']['input']>;
+  codeqlSarifLanguages?: InputMaybe<Scalars['Int']['input']>;
+  codeqlSarifRuns?: InputMaybe<Scalars['Int']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  repoReference?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Batch_Scan_Repo_Status_Enum>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Batch_Scan_Repo_Sum_Fields = {
+  __typename?: 'batch_scan_repo_sum_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Int']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Sum_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "batch_scan_repo" */
+export enum Batch_Scan_Repo_Update_Column {
+  /** column name */
+  BatchScanId = 'batchScanId',
+  /** column name */
+  CodeqlSarifLanguages = 'codeqlSarifLanguages',
+  /** column name */
+  CodeqlSarifRuns = 'codeqlSarifRuns',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RepoReference = 'repoReference',
+  /** column name */
+  RepoUrl = 'repoUrl',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  UpdatedOn = 'updatedOn'
+}
+
+export type Batch_Scan_Repo_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Batch_Scan_Repo_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Batch_Scan_Repo_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Batch_Scan_Repo_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Batch_Scan_Repo_Var_Pop_Fields = {
+  __typename?: 'batch_scan_repo_var_pop_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Var_Pop_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Batch_Scan_Repo_Var_Samp_Fields = {
+  __typename?: 'batch_scan_repo_var_samp_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Var_Samp_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Batch_Scan_Repo_Variance_Fields = {
+  __typename?: 'batch_scan_repo_variance_fields';
+  codeqlSarifLanguages?: Maybe<Scalars['Float']['output']>;
+  codeqlSarifRuns?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "batch_scan_repo" */
+export type Batch_Scan_Repo_Variance_Order_By = {
+  codeqlSarifLanguages?: InputMaybe<Order_By>;
+  codeqlSarifRuns?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "batch_scan" */
+export enum Batch_Scan_Select_Column {
+  /** column name */
+  BatchGroupId = 'batchGroupId',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FailedRepos = 'failedRepos',
+  /** column name */
+  HasCodeqlRepos = 'hasCodeqlRepos',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProcessedRepos = 'processedRepos',
+  /** column name */
+  ScanType = 'scanType',
+  /** column name */
+  SkippedRepos = 'skippedRepos',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  SuccessfulRepos = 'successfulRepos',
+  /** column name */
+  TotalRepos = 'totalRepos',
+  /** column name */
+  UpdatedOn = 'updatedOn'
+}
+
+/** input type for updating data in table "batch_scan" */
+export type Batch_Scan_Set_Input = {
+  batchGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  failedRepos?: InputMaybe<Scalars['Int']['input']>;
+  hasCodeqlRepos?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  processedRepos?: InputMaybe<Scalars['Int']['input']>;
+  scanType?: InputMaybe<Batch_Scan_Type_Enum>;
+  skippedRepos?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Batch_Scan_Status_Enum>;
+  successfulRepos?: InputMaybe<Scalars['Int']['input']>;
+  totalRepos?: InputMaybe<Scalars['Int']['input']>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** columns and relationships of "batch_scan_status" */
+export type Batch_Scan_Status = {
+  __typename?: 'batch_scan_status';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "batch_scan_status" */
+export type Batch_Scan_Status_Aggregate = {
+  __typename?: 'batch_scan_status_aggregate';
+  aggregate?: Maybe<Batch_Scan_Status_Aggregate_Fields>;
+  nodes: Array<Batch_Scan_Status>;
+};
+
+/** aggregate fields of "batch_scan_status" */
+export type Batch_Scan_Status_Aggregate_Fields = {
+  __typename?: 'batch_scan_status_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Batch_Scan_Status_Max_Fields>;
+  min?: Maybe<Batch_Scan_Status_Min_Fields>;
+};
+
+
+/** aggregate fields of "batch_scan_status" */
+export type Batch_Scan_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Batch_Scan_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "batch_scan_status". All fields are combined with a logical 'AND'. */
+export type Batch_Scan_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Batch_Scan_Status_Bool_Exp>>;
+  _not?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Batch_Scan_Status_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "batch_scan_status" */
+export enum Batch_Scan_Status_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  BatchScanStatusPkey = 'batch_scan_status_pkey'
+}
+
+export enum Batch_Scan_Status_Enum {
+  /** Batch scan was cancelled by user */
+  Cancelled = 'CANCELLED',
+  /** All repositories have been processed */
+  Completed = 'COMPLETED',
+  /** Discovering repositories and checking scan availability */
+  Discovering = 'DISCOVERING',
+  /** Batch scan encountered a fatal error */
+  Failed = 'FAILED',
+  /** Processing repositories (creating projects, queuing scans) */
+  Processing = 'PROCESSING'
+}
+
+/** Boolean expression to compare columns of type "batch_scan_status_enum". All fields are combined with logical 'AND'. */
+export type Batch_Scan_Status_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Batch_Scan_Status_Enum>;
+  _in?: InputMaybe<Array<Batch_Scan_Status_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Batch_Scan_Status_Enum>;
+  _nin?: InputMaybe<Array<Batch_Scan_Status_Enum>>;
+};
+
+/** input type for inserting data into table "batch_scan_status" */
+export type Batch_Scan_Status_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Batch_Scan_Status_Max_Fields = {
+  __typename?: 'batch_scan_status_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Batch_Scan_Status_Min_Fields = {
+  __typename?: 'batch_scan_status_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "batch_scan_status" */
+export type Batch_Scan_Status_Mutation_Response = {
+  __typename?: 'batch_scan_status_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Batch_Scan_Status>;
+};
+
+/** on_conflict condition type for table "batch_scan_status" */
+export type Batch_Scan_Status_On_Conflict = {
+  constraint: Batch_Scan_Status_Constraint;
+  update_columns?: Array<Batch_Scan_Status_Update_Column>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "batch_scan_status". */
+export type Batch_Scan_Status_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: batch_scan_status */
+export type Batch_Scan_Status_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "batch_scan_status" */
+export enum Batch_Scan_Status_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "batch_scan_status" */
+export type Batch_Scan_Status_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "batch_scan_status" */
+export type Batch_Scan_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Batch_Scan_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Batch_Scan_Status_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "batch_scan_status" */
+export enum Batch_Scan_Status_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Batch_Scan_Status_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Batch_Scan_Status_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Batch_Scan_Status_Bool_Exp;
+};
+
+/** aggregate stddev on columns */
+export type Batch_Scan_Stddev_Fields = {
+  __typename?: 'batch_scan_stddev_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Batch_Scan_Stddev_Pop_Fields = {
+  __typename?: 'batch_scan_stddev_pop_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Batch_Scan_Stddev_Samp_Fields = {
+  __typename?: 'batch_scan_stddev_samp_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "batch_scan" */
+export type Batch_Scan_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Batch_Scan_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Batch_Scan_Stream_Cursor_Value_Input = {
+  batchGroupId?: InputMaybe<Scalars['uuid']['input']>;
+  createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  failedRepos?: InputMaybe<Scalars['Int']['input']>;
+  hasCodeqlRepos?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  processedRepos?: InputMaybe<Scalars['Int']['input']>;
+  scanType?: InputMaybe<Batch_Scan_Type_Enum>;
+  skippedRepos?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Batch_Scan_Status_Enum>;
+  successfulRepos?: InputMaybe<Scalars['Int']['input']>;
+  totalRepos?: InputMaybe<Scalars['Int']['input']>;
+  updatedOn?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Batch_Scan_Sum_Fields = {
+  __typename?: 'batch_scan_sum_fields';
+  failedRepos?: Maybe<Scalars['Int']['output']>;
+  processedRepos?: Maybe<Scalars['Int']['output']>;
+  skippedRepos?: Maybe<Scalars['Int']['output']>;
+  successfulRepos?: Maybe<Scalars['Int']['output']>;
+  totalRepos?: Maybe<Scalars['Int']['output']>;
+};
+
+/** columns and relationships of "batch_scan_type" */
+export type Batch_Scan_Type = {
+  __typename?: 'batch_scan_type';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "batch_scan_type" */
+export type Batch_Scan_Type_Aggregate = {
+  __typename?: 'batch_scan_type_aggregate';
+  aggregate?: Maybe<Batch_Scan_Type_Aggregate_Fields>;
+  nodes: Array<Batch_Scan_Type>;
+};
+
+/** aggregate fields of "batch_scan_type" */
+export type Batch_Scan_Type_Aggregate_Fields = {
+  __typename?: 'batch_scan_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Batch_Scan_Type_Max_Fields>;
+  min?: Maybe<Batch_Scan_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "batch_scan_type" */
+export type Batch_Scan_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Batch_Scan_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "batch_scan_type". All fields are combined with a logical 'AND'. */
+export type Batch_Scan_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Batch_Scan_Type_Bool_Exp>>;
+  _not?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Batch_Scan_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "batch_scan_type" */
+export enum Batch_Scan_Type_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  BatchScanTypePkey = 'batch_scan_type_pkey'
+}
+
+export enum Batch_Scan_Type_Enum {
+  /** Import CodeQL scan results from GitHub */
+  Codeql = 'CODEQL',
+  /** Mobb internal scanner (opengrep) for all repos */
+  MobbScanner = 'MOBB_SCANNER'
+}
+
+/** Boolean expression to compare columns of type "batch_scan_type_enum". All fields are combined with logical 'AND'. */
+export type Batch_Scan_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Batch_Scan_Type_Enum>;
+  _in?: InputMaybe<Array<Batch_Scan_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Batch_Scan_Type_Enum>;
+  _nin?: InputMaybe<Array<Batch_Scan_Type_Enum>>;
+};
+
+/** input type for inserting data into table "batch_scan_type" */
+export type Batch_Scan_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Batch_Scan_Type_Max_Fields = {
+  __typename?: 'batch_scan_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Batch_Scan_Type_Min_Fields = {
+  __typename?: 'batch_scan_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "batch_scan_type" */
+export type Batch_Scan_Type_Mutation_Response = {
+  __typename?: 'batch_scan_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Batch_Scan_Type>;
+};
+
+/** on_conflict condition type for table "batch_scan_type" */
+export type Batch_Scan_Type_On_Conflict = {
+  constraint: Batch_Scan_Type_Constraint;
+  update_columns?: Array<Batch_Scan_Type_Update_Column>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "batch_scan_type". */
+export type Batch_Scan_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: batch_scan_type */
+export type Batch_Scan_Type_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "batch_scan_type" */
+export enum Batch_Scan_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "batch_scan_type" */
+export type Batch_Scan_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "batch_scan_type" */
+export type Batch_Scan_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Batch_Scan_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Batch_Scan_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "batch_scan_type" */
+export enum Batch_Scan_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Batch_Scan_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Batch_Scan_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Batch_Scan_Type_Bool_Exp;
+};
+
+/** update columns of table "batch_scan" */
+export enum Batch_Scan_Update_Column {
+  /** column name */
+  BatchGroupId = 'batchGroupId',
+  /** column name */
+  CreatedByUserId = 'createdByUserId',
+  /** column name */
+  CreatedOn = 'createdOn',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FailedRepos = 'failedRepos',
+  /** column name */
+  HasCodeqlRepos = 'hasCodeqlRepos',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProcessedRepos = 'processedRepos',
+  /** column name */
+  ScanType = 'scanType',
+  /** column name */
+  SkippedRepos = 'skippedRepos',
+  /** column name */
+  Status = 'status',
+  /** column name */
+  SuccessfulRepos = 'successfulRepos',
+  /** column name */
+  TotalRepos = 'totalRepos',
+  /** column name */
+  UpdatedOn = 'updatedOn'
+}
+
+export type Batch_Scan_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Batch_Scan_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Batch_Scan_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Batch_Scan_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Batch_Scan_Var_Pop_Fields = {
+  __typename?: 'batch_scan_var_pop_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Batch_Scan_Var_Samp_Fields = {
+  __typename?: 'batch_scan_var_samp_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Batch_Scan_Variance_Fields = {
+  __typename?: 'batch_scan_variance_fields';
+  failedRepos?: Maybe<Scalars['Float']['output']>;
+  processedRepos?: Maybe<Scalars['Float']['output']>;
+  skippedRepos?: Maybe<Scalars['Float']['output']>;
+  successfulRepos?: Maybe<Scalars['Float']['output']>;
+  totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
 /** Boolean expression to compare columns of type "bigint". All fields are combined with logical 'AND'. */
 export type Bigint_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['bigint']['input']>;
@@ -19001,6 +20444,26 @@ export type Mutation_Root = {
   delete_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** delete single row from the table: "api_token" */
   delete_api_token_by_pk?: Maybe<Api_Token>;
+  /** delete data from the table: "batch_scan" */
+  delete_batch_scan?: Maybe<Batch_Scan_Mutation_Response>;
+  /** delete single row from the table: "batch_scan" */
+  delete_batch_scan_by_pk?: Maybe<Batch_Scan>;
+  /** delete data from the table: "batch_scan_repo" */
+  delete_batch_scan_repo?: Maybe<Batch_Scan_Repo_Mutation_Response>;
+  /** delete single row from the table: "batch_scan_repo" */
+  delete_batch_scan_repo_by_pk?: Maybe<Batch_Scan_Repo>;
+  /** delete data from the table: "batch_scan_repo_status" */
+  delete_batch_scan_repo_status?: Maybe<Batch_Scan_Repo_Status_Mutation_Response>;
+  /** delete single row from the table: "batch_scan_repo_status" */
+  delete_batch_scan_repo_status_by_pk?: Maybe<Batch_Scan_Repo_Status>;
+  /** delete data from the table: "batch_scan_status" */
+  delete_batch_scan_status?: Maybe<Batch_Scan_Status_Mutation_Response>;
+  /** delete single row from the table: "batch_scan_status" */
+  delete_batch_scan_status_by_pk?: Maybe<Batch_Scan_Status>;
+  /** delete data from the table: "batch_scan_type" */
+  delete_batch_scan_type?: Maybe<Batch_Scan_Type_Mutation_Response>;
+  /** delete single row from the table: "batch_scan_type" */
+  delete_batch_scan_type_by_pk?: Maybe<Batch_Scan_Type>;
   /** delete data from the table: "blame_ai_analysis_request" */
   delete_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
   /** delete single row from the table: "blame_ai_analysis_request" */
@@ -19443,6 +20906,26 @@ export type Mutation_Root = {
   insert_api_token?: Maybe<Api_Token_Mutation_Response>;
   /** insert a single row into the table: "api_token" */
   insert_api_token_one?: Maybe<Api_Token>;
+  /** insert data into the table: "batch_scan" */
+  insert_batch_scan?: Maybe<Batch_Scan_Mutation_Response>;
+  /** insert a single row into the table: "batch_scan" */
+  insert_batch_scan_one?: Maybe<Batch_Scan>;
+  /** insert data into the table: "batch_scan_repo" */
+  insert_batch_scan_repo?: Maybe<Batch_Scan_Repo_Mutation_Response>;
+  /** insert a single row into the table: "batch_scan_repo" */
+  insert_batch_scan_repo_one?: Maybe<Batch_Scan_Repo>;
+  /** insert data into the table: "batch_scan_repo_status" */
+  insert_batch_scan_repo_status?: Maybe<Batch_Scan_Repo_Status_Mutation_Response>;
+  /** insert a single row into the table: "batch_scan_repo_status" */
+  insert_batch_scan_repo_status_one?: Maybe<Batch_Scan_Repo_Status>;
+  /** insert data into the table: "batch_scan_status" */
+  insert_batch_scan_status?: Maybe<Batch_Scan_Status_Mutation_Response>;
+  /** insert a single row into the table: "batch_scan_status" */
+  insert_batch_scan_status_one?: Maybe<Batch_Scan_Status>;
+  /** insert data into the table: "batch_scan_type" */
+  insert_batch_scan_type?: Maybe<Batch_Scan_Type_Mutation_Response>;
+  /** insert a single row into the table: "batch_scan_type" */
+  insert_batch_scan_type_one?: Maybe<Batch_Scan_Type>;
   /** insert data into the table: "blame_ai_analysis_request" */
   insert_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
   /** insert a single row into the table: "blame_ai_analysis_request" */
@@ -19775,6 +21258,7 @@ export type Mutation_Root = {
   setAnswers: SetAnswersResponse;
   /** Replace all members of a developer group and sync to ClickHouse. */
   setDeveloperGroupMembers: DeveloperGroupResult;
+  startBatchScan: StartBatchScanResponse;
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
   submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
@@ -19947,6 +21431,36 @@ export type Mutation_Root = {
   update_api_token_by_pk?: Maybe<Api_Token>;
   /** update multiples rows of table: "api_token" */
   update_api_token_many?: Maybe<Array<Maybe<Api_Token_Mutation_Response>>>;
+  /** update data of the table: "batch_scan" */
+  update_batch_scan?: Maybe<Batch_Scan_Mutation_Response>;
+  /** update single row of the table: "batch_scan" */
+  update_batch_scan_by_pk?: Maybe<Batch_Scan>;
+  /** update multiples rows of table: "batch_scan" */
+  update_batch_scan_many?: Maybe<Array<Maybe<Batch_Scan_Mutation_Response>>>;
+  /** update data of the table: "batch_scan_repo" */
+  update_batch_scan_repo?: Maybe<Batch_Scan_Repo_Mutation_Response>;
+  /** update single row of the table: "batch_scan_repo" */
+  update_batch_scan_repo_by_pk?: Maybe<Batch_Scan_Repo>;
+  /** update multiples rows of table: "batch_scan_repo" */
+  update_batch_scan_repo_many?: Maybe<Array<Maybe<Batch_Scan_Repo_Mutation_Response>>>;
+  /** update data of the table: "batch_scan_repo_status" */
+  update_batch_scan_repo_status?: Maybe<Batch_Scan_Repo_Status_Mutation_Response>;
+  /** update single row of the table: "batch_scan_repo_status" */
+  update_batch_scan_repo_status_by_pk?: Maybe<Batch_Scan_Repo_Status>;
+  /** update multiples rows of table: "batch_scan_repo_status" */
+  update_batch_scan_repo_status_many?: Maybe<Array<Maybe<Batch_Scan_Repo_Status_Mutation_Response>>>;
+  /** update data of the table: "batch_scan_status" */
+  update_batch_scan_status?: Maybe<Batch_Scan_Status_Mutation_Response>;
+  /** update single row of the table: "batch_scan_status" */
+  update_batch_scan_status_by_pk?: Maybe<Batch_Scan_Status>;
+  /** update multiples rows of table: "batch_scan_status" */
+  update_batch_scan_status_many?: Maybe<Array<Maybe<Batch_Scan_Status_Mutation_Response>>>;
+  /** update data of the table: "batch_scan_type" */
+  update_batch_scan_type?: Maybe<Batch_Scan_Type_Mutation_Response>;
+  /** update single row of the table: "batch_scan_type" */
+  update_batch_scan_type_by_pk?: Maybe<Batch_Scan_Type>;
+  /** update multiples rows of table: "batch_scan_type" */
+  update_batch_scan_type_many?: Maybe<Array<Maybe<Batch_Scan_Type_Mutation_Response>>>;
   /** update data of the table: "blame_ai_analysis_request" */
   update_blame_ai_analysis_request?: Maybe<Blame_Ai_Analysis_Request_Mutation_Response>;
   /** update single row of the table: "blame_ai_analysis_request" */
@@ -20903,6 +22417,66 @@ export type Mutation_RootDelete_Api_TokenArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Api_Token_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_ScanArgs = {
+  where: Batch_Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_RepoArgs = {
+  where: Batch_Scan_Repo_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_Repo_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_Repo_StatusArgs = {
+  where: Batch_Scan_Repo_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_Repo_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_StatusArgs = {
+  where: Batch_Scan_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_TypeArgs = {
+  where: Batch_Scan_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Batch_Scan_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -22256,6 +23830,76 @@ export type Mutation_RootInsert_Api_Token_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Batch_ScanArgs = {
+  objects: Array<Batch_Scan_Insert_Input>;
+  on_conflict?: InputMaybe<Batch_Scan_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_OneArgs = {
+  object: Batch_Scan_Insert_Input;
+  on_conflict?: InputMaybe<Batch_Scan_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_RepoArgs = {
+  objects: Array<Batch_Scan_Repo_Insert_Input>;
+  on_conflict?: InputMaybe<Batch_Scan_Repo_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_Repo_OneArgs = {
+  object: Batch_Scan_Repo_Insert_Input;
+  on_conflict?: InputMaybe<Batch_Scan_Repo_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_Repo_StatusArgs = {
+  objects: Array<Batch_Scan_Repo_Status_Insert_Input>;
+  on_conflict?: InputMaybe<Batch_Scan_Repo_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_Repo_Status_OneArgs = {
+  object: Batch_Scan_Repo_Status_Insert_Input;
+  on_conflict?: InputMaybe<Batch_Scan_Repo_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_StatusArgs = {
+  objects: Array<Batch_Scan_Status_Insert_Input>;
+  on_conflict?: InputMaybe<Batch_Scan_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_Status_OneArgs = {
+  object: Batch_Scan_Status_Insert_Input;
+  on_conflict?: InputMaybe<Batch_Scan_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_TypeArgs = {
+  objects: Array<Batch_Scan_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Batch_Scan_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Batch_Scan_Type_OneArgs = {
+  object: Batch_Scan_Type_Insert_Input;
+  on_conflict?: InputMaybe<Batch_Scan_Type_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Blame_Ai_Analysis_RequestArgs = {
   objects: Array<Blame_Ai_Analysis_Request_Insert_Input>;
   on_conflict?: InputMaybe<Blame_Ai_Analysis_Request_On_Conflict>;
@@ -23465,6 +25109,15 @@ export type Mutation_RootSetDeveloperGroupMembersArgs = {
 
 
 /** mutation root */
+export type Mutation_RootStartBatchScanArgs = {
+  batchGroupId?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['String']['input'];
+  repos: Array<BatchScanRepoInput>;
+  scanType: BatchScanType;
+};
+
+
+/** mutation root */
 export type Mutation_RootSubmitCheckmarxVulnerabilityReportArgs = {
   checkmarxProjectId: Scalars['String']['input'];
   checkmarxProjectName: Scalars['String']['input'];
@@ -24107,6 +25760,110 @@ export type Mutation_RootUpdate_Api_Token_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Api_Token_ManyArgs = {
   updates: Array<Api_Token_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_ScanArgs = {
+  _inc?: InputMaybe<Batch_Scan_Inc_Input>;
+  _set?: InputMaybe<Batch_Scan_Set_Input>;
+  where: Batch_Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_By_PkArgs = {
+  _inc?: InputMaybe<Batch_Scan_Inc_Input>;
+  _set?: InputMaybe<Batch_Scan_Set_Input>;
+  pk_columns: Batch_Scan_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_ManyArgs = {
+  updates: Array<Batch_Scan_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_RepoArgs = {
+  _inc?: InputMaybe<Batch_Scan_Repo_Inc_Input>;
+  _set?: InputMaybe<Batch_Scan_Repo_Set_Input>;
+  where: Batch_Scan_Repo_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Repo_By_PkArgs = {
+  _inc?: InputMaybe<Batch_Scan_Repo_Inc_Input>;
+  _set?: InputMaybe<Batch_Scan_Repo_Set_Input>;
+  pk_columns: Batch_Scan_Repo_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Repo_ManyArgs = {
+  updates: Array<Batch_Scan_Repo_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Repo_StatusArgs = {
+  _set?: InputMaybe<Batch_Scan_Repo_Status_Set_Input>;
+  where: Batch_Scan_Repo_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Repo_Status_By_PkArgs = {
+  _set?: InputMaybe<Batch_Scan_Repo_Status_Set_Input>;
+  pk_columns: Batch_Scan_Repo_Status_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Repo_Status_ManyArgs = {
+  updates: Array<Batch_Scan_Repo_Status_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_StatusArgs = {
+  _set?: InputMaybe<Batch_Scan_Status_Set_Input>;
+  where: Batch_Scan_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Status_By_PkArgs = {
+  _set?: InputMaybe<Batch_Scan_Status_Set_Input>;
+  pk_columns: Batch_Scan_Status_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Status_ManyArgs = {
+  updates: Array<Batch_Scan_Status_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_TypeArgs = {
+  _set?: InputMaybe<Batch_Scan_Type_Set_Input>;
+  where: Batch_Scan_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Type_By_PkArgs = {
+  _set?: InputMaybe<Batch_Scan_Type_Set_Input>;
+  pk_columns: Batch_Scan_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Batch_Scan_Type_ManyArgs = {
+  updates: Array<Batch_Scan_Type_Updates>;
 };
 
 
@@ -31064,6 +32821,36 @@ export type Query_Root = {
   api_token_aggregate: Api_Token_Aggregate;
   /** fetch data from the table: "api_token" using primary key columns */
   api_token_by_pk?: Maybe<Api_Token>;
+  /** fetch data from the table: "batch_scan" */
+  batch_scan: Array<Batch_Scan>;
+  /** fetch aggregated fields from the table: "batch_scan" */
+  batch_scan_aggregate: Batch_Scan_Aggregate;
+  /** fetch data from the table: "batch_scan" using primary key columns */
+  batch_scan_by_pk?: Maybe<Batch_Scan>;
+  /** fetch data from the table: "batch_scan_repo" */
+  batch_scan_repo: Array<Batch_Scan_Repo>;
+  /** fetch aggregated fields from the table: "batch_scan_repo" */
+  batch_scan_repo_aggregate: Batch_Scan_Repo_Aggregate;
+  /** fetch data from the table: "batch_scan_repo" using primary key columns */
+  batch_scan_repo_by_pk?: Maybe<Batch_Scan_Repo>;
+  /** fetch data from the table: "batch_scan_repo_status" */
+  batch_scan_repo_status: Array<Batch_Scan_Repo_Status>;
+  /** fetch aggregated fields from the table: "batch_scan_repo_status" */
+  batch_scan_repo_status_aggregate: Batch_Scan_Repo_Status_Aggregate;
+  /** fetch data from the table: "batch_scan_repo_status" using primary key columns */
+  batch_scan_repo_status_by_pk?: Maybe<Batch_Scan_Repo_Status>;
+  /** fetch data from the table: "batch_scan_status" */
+  batch_scan_status: Array<Batch_Scan_Status>;
+  /** fetch aggregated fields from the table: "batch_scan_status" */
+  batch_scan_status_aggregate: Batch_Scan_Status_Aggregate;
+  /** fetch data from the table: "batch_scan_status" using primary key columns */
+  batch_scan_status_by_pk?: Maybe<Batch_Scan_Status>;
+  /** fetch data from the table: "batch_scan_type" */
+  batch_scan_type: Array<Batch_Scan_Type>;
+  /** fetch aggregated fields from the table: "batch_scan_type" */
+  batch_scan_type_aggregate: Batch_Scan_Type_Aggregate;
+  /** fetch data from the table: "batch_scan_type" using primary key columns */
+  batch_scan_type_by_pk?: Maybe<Batch_Scan_Type>;
   /** fetch data from the table: "blame_ai_analysis_request" */
   blame_ai_analysis_request: Array<Blame_Ai_Analysis_Request>;
   /** fetch aggregated fields from the table: "blame_ai_analysis_request" */
@@ -31088,6 +32875,8 @@ export type Query_Root = {
   broker_token_aggregate: Broker_Token_Aggregate;
   /** fetch data from the table: "broker_token" using primary key columns */
   broker_token_by_pk?: Maybe<Broker_Token>;
+  checkReposForCodeQL: CheckReposCodeQlResponse;
+  checkReposPreviouslyScanned: CheckReposPreviouslyScannedResponse;
   checkScmConnectionStatus?: Maybe<ValidationSuccess>;
   checkScmConnectionStatusAdmin?: Maybe<ValidationSuccess>;
   /** fetch data from the table: "cli_login" */
@@ -31237,6 +33026,7 @@ export type Query_Root = {
   getAdoptionTrendsTimeSeries: GetAdoptionTrendsTimeSeriesResponse;
   getAiToolTokens?: Maybe<GetAiToolTokensResponse>;
   getAiToolUsageStatistics?: Maybe<GetAiToolUsageStatisticsResponse>;
+  getBatchScanStatus: BatchScanStatusResponse;
   getCheckmarxIntegrationData?: Maybe<GetCheckmarxIntegrationDataResponse>;
   getCheckmarxProjects?: Maybe<GetCheckmarxProjectsResponse>;
   /**
@@ -32380,6 +34170,121 @@ export type Query_RootApi_Token_By_PkArgs = {
 };
 
 
+export type Query_RootBatch_ScanArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootBatch_Scan_RepoArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Repo_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Repo_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootBatch_Scan_Repo_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Repo_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Repo_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootBatch_Scan_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootBatch_Scan_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Type_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Type_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+};
+
+
+export type Query_RootBatch_Scan_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
 export type Query_RootBlame_Ai_Analysis_RequestArgs = {
   distinct_on?: InputMaybe<Array<Blame_Ai_Analysis_Request_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -32469,6 +34374,17 @@ export type Query_RootBroker_Token_AggregateArgs = {
 
 export type Query_RootBroker_Token_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootCheckReposForCodeQlArgs = {
+  repos: Array<BatchScanRepoInput>;
+};
+
+
+export type Query_RootCheckReposPreviouslyScannedArgs = {
+  organizationId: Scalars['String']['input'];
+  repoUrls: Array<Scalars['String']['input']>;
 };
 
 
@@ -33012,6 +34928,11 @@ export type Query_RootGetAiToolTokensArgs = {
 export type Query_RootGetAiToolUsageStatisticsArgs = {
   days?: InputMaybe<Scalars['Int']['input']>;
   organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetBatchScanStatusArgs = {
+  batchScanId: Scalars['String']['input'];
 };
 
 
@@ -37683,6 +39604,46 @@ export type Subscription_Root = {
   api_token_by_pk?: Maybe<Api_Token>;
   /** fetch data from the table in a streaming manner: "api_token" */
   api_token_stream: Array<Api_Token>;
+  /** fetch data from the table: "batch_scan" */
+  batch_scan: Array<Batch_Scan>;
+  /** fetch aggregated fields from the table: "batch_scan" */
+  batch_scan_aggregate: Batch_Scan_Aggregate;
+  /** fetch data from the table: "batch_scan" using primary key columns */
+  batch_scan_by_pk?: Maybe<Batch_Scan>;
+  /** fetch data from the table: "batch_scan_repo" */
+  batch_scan_repo: Array<Batch_Scan_Repo>;
+  /** fetch aggregated fields from the table: "batch_scan_repo" */
+  batch_scan_repo_aggregate: Batch_Scan_Repo_Aggregate;
+  /** fetch data from the table: "batch_scan_repo" using primary key columns */
+  batch_scan_repo_by_pk?: Maybe<Batch_Scan_Repo>;
+  /** fetch data from the table: "batch_scan_repo_status" */
+  batch_scan_repo_status: Array<Batch_Scan_Repo_Status>;
+  /** fetch aggregated fields from the table: "batch_scan_repo_status" */
+  batch_scan_repo_status_aggregate: Batch_Scan_Repo_Status_Aggregate;
+  /** fetch data from the table: "batch_scan_repo_status" using primary key columns */
+  batch_scan_repo_status_by_pk?: Maybe<Batch_Scan_Repo_Status>;
+  /** fetch data from the table in a streaming manner: "batch_scan_repo_status" */
+  batch_scan_repo_status_stream: Array<Batch_Scan_Repo_Status>;
+  /** fetch data from the table in a streaming manner: "batch_scan_repo" */
+  batch_scan_repo_stream: Array<Batch_Scan_Repo>;
+  /** fetch data from the table: "batch_scan_status" */
+  batch_scan_status: Array<Batch_Scan_Status>;
+  /** fetch aggregated fields from the table: "batch_scan_status" */
+  batch_scan_status_aggregate: Batch_Scan_Status_Aggregate;
+  /** fetch data from the table: "batch_scan_status" using primary key columns */
+  batch_scan_status_by_pk?: Maybe<Batch_Scan_Status>;
+  /** fetch data from the table in a streaming manner: "batch_scan_status" */
+  batch_scan_status_stream: Array<Batch_Scan_Status>;
+  /** fetch data from the table in a streaming manner: "batch_scan" */
+  batch_scan_stream: Array<Batch_Scan>;
+  /** fetch data from the table: "batch_scan_type" */
+  batch_scan_type: Array<Batch_Scan_Type>;
+  /** fetch aggregated fields from the table: "batch_scan_type" */
+  batch_scan_type_aggregate: Batch_Scan_Type_Aggregate;
+  /** fetch data from the table: "batch_scan_type" using primary key columns */
+  batch_scan_type_by_pk?: Maybe<Batch_Scan_Type>;
+  /** fetch data from the table in a streaming manner: "batch_scan_type" */
+  batch_scan_type_stream: Array<Batch_Scan_Type>;
   /** fetch data from the table: "blame_ai_analysis_request" */
   blame_ai_analysis_request: Array<Blame_Ai_Analysis_Request>;
   /** fetch aggregated fields from the table: "blame_ai_analysis_request" */
@@ -39280,6 +41241,156 @@ export type Subscription_RootApi_Token_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Api_Token_Stream_Cursor_Input>>;
   where?: InputMaybe<Api_Token_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_ScanArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootBatch_Scan_RepoArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Repo_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Repo_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Batch_Scan_Repo_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Batch_Scan_Repo_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Repo_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Batch_Scan_Repo_Stream_Cursor_Input>>;
+  where?: InputMaybe<Batch_Scan_Repo_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Status_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Status_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootBatch_Scan_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Batch_Scan_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Batch_Scan_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Batch_Scan_Stream_Cursor_Input>>;
+  where?: InputMaybe<Batch_Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Type_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Batch_Scan_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Batch_Scan_Type_Order_By>>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootBatch_Scan_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootBatch_Scan_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Batch_Scan_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Batch_Scan_Type_Bool_Exp>;
 };
 
 

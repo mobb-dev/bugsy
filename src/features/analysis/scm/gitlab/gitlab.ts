@@ -270,18 +270,27 @@ export async function getGitlabIsRemoteBranch({
 
 /**
  * Fetch paginated GitLab projects using gitbeaker with showExpanded for pagination info.
- * Uses `membership=true`, sorted by `last_activity_at desc` for most-recently-updated-first.
+ * Uses `membership=true` with configurable sort order.
+ *
+ * @param orderBy - Sort field. Defaults to `'created_at'` which is the most reliable
+ *   across all GitLab instances. When `'last_activity_at'` is requested (e.g. for the
+ *   UI repo picker), the call falls back to `'created_at'` on failure since some
+ *   GitLab instances/accounts return 500 for that sort field.
  */
 export async function searchGitlabProjects({
   url,
   accessToken,
   perPage = 20,
   page = 1,
+  orderBy = 'created_at',
+  sort = 'desc',
 }: {
   url: string | undefined
   accessToken: string
   perPage?: number
   page?: number
+  orderBy?: 'created_at' | 'last_activity_at'
+  sort?: 'asc' | 'desc'
 }): Promise<{
   projects: {
     id: number
@@ -301,33 +310,32 @@ export async function searchGitlabProjects({
 
   const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
 
-  // Try last_activity_at first (most relevant sort), fall back to created_at
-  // if GitLab returns 500 (known issue on some accounts/instances)
+  const fetchProjects = (effectiveOrderBy: 'created_at' | 'last_activity_at') =>
+    api.Projects.all({
+      membership: true,
+      orderBy: effectiveOrderBy,
+      sort,
+      pagination: 'offset',
+      perPage,
+      page,
+      showExpanded: true,
+    })
+
   let response
-  try {
-    response = await api.Projects.all({
-      membership: true,
-      orderBy: 'last_activity_at',
-      sort: 'desc',
-      pagination: 'offset',
-      perPage,
-      page,
-      showExpanded: true,
-    })
-  } catch (e) {
-    debug(
-      '[searchGitlabProjects] order_by=last_activity_at failed, falling back to created_at: %s',
-      e instanceof Error ? e.message : String(e)
-    )
-    response = await api.Projects.all({
-      membership: true,
-      orderBy: 'created_at',
-      sort: 'desc',
-      pagination: 'offset',
-      perPage,
-      page,
-      showExpanded: true,
-    })
+  if (orderBy === 'last_activity_at') {
+    // last_activity_at can cause 500 errors on some GitLab instances/accounts.
+    // Fall back to created_at which is universally reliable.
+    try {
+      response = await fetchProjects('last_activity_at')
+    } catch (e) {
+      debug(
+        '[searchGitlabProjects] order_by=last_activity_at failed, falling back to created_at: %s',
+        e instanceof Error ? e.message : String(e)
+      )
+      response = await fetchProjects('created_at')
+    }
+  } else {
+    response = await fetchProjects(orderBy)
   }
 
   const projects = response.data.map((p) => ({

@@ -5,7 +5,6 @@ import pLimit from 'p-limit'
 import { InvalidAccessTokenError } from '../errors'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
-import { scmCloudUrl } from '../shared/src'
 import {
   CreateSubmitRequestParams,
   GetReferenceResult,
@@ -109,15 +108,11 @@ export class AdoSCMLib extends SCMLib {
 
   async getRepoList(scmOrg: string | undefined): Promise<ScmRepoInfo[]> {
     this._validateAccessToken()
-    if (this.url && new URL(this.url).origin !== scmCloudUrl.Ado) {
-      throw new Error(
-        `Oauth token is not supported for ADO on prem - ${origin} `
-      )
-    }
     return getAdoRepoList({
       orgName: scmOrg,
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
+      url: this.url,
     })
   }
 
@@ -377,15 +372,11 @@ export class AdoSCMLib extends SCMLib {
     params: SearchReposParams
   ): Promise<SearchReposResult> {
     this._validateAccessToken()
-    if (this.url && new URL(this.url).origin !== scmCloudUrl.Ado) {
-      throw new Error(
-        `Oauth token is not supported for ADO on prem - ${this.url}`
-      )
-    }
     const allRepos = await getAdoRepoList({
       orgName: params.scmOrg,
       accessToken: this.accessToken,
       tokenOrg: this.scmOrg,
+      url: this.url,
     })
 
     // Sort by repoUpdatedAt descending (most recently updated first)

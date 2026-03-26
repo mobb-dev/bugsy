@@ -25,6 +25,12 @@ type ClaudeCodeSettings = {
 
 const CLAUDE_SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 
+/** The current recommended matcher for the hook. */
+export const RECOMMENDED_MATCHER = 'Bash|Write|Edit|Agent|Read'
+
+/** Matchers that should be auto-upgraded to the recommended one. */
+const STALE_MATCHERS = new Set(['', '*', 'Edit|Write'])
+
 export async function claudeSettingsExists(): Promise<boolean> {
   try {
     await fsPromises.access(CLAUDE_SETTINGS_PATH)
@@ -50,6 +56,42 @@ export async function writeClaudeSettings(
     JSON.stringify(settings, null, 2),
     'utf-8'
   )
+}
+
+/**
+ * Auto-upgrade stale hook matchers during normal hook execution.
+ * Runs silently — never throws, never logs to stdout.
+ * Returns true if an upgrade was performed.
+ */
+export async function autoUpgradeMatcherIfStale(): Promise<boolean> {
+  try {
+    if (!(await claudeSettingsExists())) return false
+
+    const settings = await readClaudeSettings()
+    const hooks = settings.hooks?.PostToolUse
+    if (!hooks) return false
+
+    let upgraded = false
+    for (const hook of hooks) {
+      const isMobbHook = hook.hooks.some(
+        (h) =>
+          h.command?.includes('claude-code-process-hook') &&
+          (h.command?.includes('mobbdev') || h.command?.includes('mobbdev@'))
+      )
+      if (isMobbHook && STALE_MATCHERS.has(hook.matcher)) {
+        hook.matcher = RECOMMENDED_MATCHER
+        upgraded = true
+      }
+    }
+
+    if (upgraded) {
+      await writeClaudeSettings(settings)
+    }
+    return upgraded
+  } catch {
+    // Silent — auto-upgrade is best-effort
+    return false
+  }
 }
 
 export async function installMobbHooks(
@@ -102,8 +144,10 @@ export async function installMobbHooks(
   }
 
   const mobbHookConfig: ClaudeCodeHookMatcher = {
-    // Empty matcher = match all tools (Claude Code hook spec: empty string matches every PostToolUse event)
-    matcher: '',
+    // Only fire on tools that indicate meaningful work — skip high-frequency
+    // read-only tools (Grep, Glob, WebSearch, WebFetch) to reduce CPU overhead
+    // from process startup (~1.7s user CPU per invocation).
+    matcher: RECOMMENDED_MATCHER,
     hooks: [
       {
         type: 'command',

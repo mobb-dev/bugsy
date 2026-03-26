@@ -11,6 +11,7 @@ import {
   AiBlameInferenceType,
   InferencePlatform,
 } from '../../features/analysis/scm/generates/client_generates'
+import { packageJson } from '../../utils/check_node_version'
 import {
   configStore,
   createSessionConfigStore,
@@ -19,14 +20,15 @@ import {
 import type { Logger } from '../../utils/shared-logger'
 import { withTimeout } from '../../utils/with-timeout'
 import { createScopedHookLog, hookLog } from './hook_logger'
+import { autoUpgradeMatcherIfStale } from './install_hook'
 
 const GLOBAL_COOLDOWN_MS = 5_000 // 5 seconds — throttle across all sessions on this machine
-const HOOK_COOLDOWN_MS = 10_000 // 10 seconds — skip invocations within cooldown (per session)
+const HOOK_COOLDOWN_MS = 15_000 // 15 seconds — skip invocations within cooldown (per session)
 const ACTIVE_LOCK_TTL_MS = 60_000 // 60 seconds — stale lock fallback if hook crashes without clearing
 const GQL_AUTH_TIMEOUT_MS = 15_000 // 15 seconds — max wait for GQL authentication
 const STALE_KEY_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000 // 14 days
 const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000 // Run cleanup at most once per day
-const MAX_ENTRIES_PER_INVOCATION = 100 // Cap entries per hook run to avoid CPU spikes on large transcripts
+const MAX_ENTRIES_PER_INVOCATION = 50 // Cap entries per hook run to avoid CPU spikes on large transcripts
 
 const COOLDOWN_KEY = 'lastHookRunAt'
 const ACTIVE_KEY = 'hookActiveAt'
@@ -248,6 +250,7 @@ export async function readNewTranscriptEntries(
 ): Promise<{
   entries: (TranscriptEntry & { _recordId: string })[]
   endByteOffset: number
+  resolvedTranscriptPath: string
 }> {
   transcriptPath = await resolveTranscriptPath(transcriptPath, sessionId)
 
@@ -269,7 +272,11 @@ export async function readNewTranscriptEntries(
       fileSize = stat.size
       if (cursor.byteOffset >= stat.size) {
         hookLog.info({ data: { sessionId } }, 'No new data in transcript file')
-        return { entries: [], endByteOffset: fileSize }
+        return {
+          entries: [],
+          endByteOffset: fileSize,
+          resolvedTranscriptPath: transcriptPath,
+        }
       }
       const buf = Buffer.alloc(stat.size - cursor.byteOffset)
       await fh.read(buf, 0, buf.length, cursor.byteOffset)
@@ -372,7 +379,11 @@ export async function readNewTranscriptEntries(
     )
   }
 
-  return { entries: parsed, endByteOffset }
+  return {
+    entries: parsed,
+    endByteOffset,
+    resolvedTranscriptPath: transcriptPath,
+  }
 }
 
 /**
@@ -564,6 +575,18 @@ export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
   }
   configStore.set('claudeCode.globalLastHookRunAt', globalNow)
 
+  // Auto-upgrade stale hook matcher (re-checks on each CLI version bump)
+  const lastUpgradeVersion = configStore.get(
+    'claudeCode.matcherUpgradeVersion'
+  ) as string | undefined
+  if (lastUpgradeVersion !== packageJson.version) {
+    const upgraded = await autoUpgradeMatcherIfStale()
+    configStore.set('claudeCode.matcherUpgradeVersion', packageJson.version)
+    if (upgraded) {
+      hookLog.info('Auto-upgraded hook matcher to reduce CPU usage')
+    }
+  }
+
   const rawData = await readStdinData()
   const hookData = validateHookData(rawData)
 
@@ -633,12 +656,18 @@ async function processTranscript(
   sessionStore: Configstore,
   log: Logger
 ): Promise<HookResult> {
-  const cursorKey = getCursorKey(hookData.transcript_path)
-  const { entries: rawEntries, endByteOffset } = await readNewTranscriptEntries(
-    hookData.transcript_path,
-    hookData.session_id,
-    sessionStore
+  const {
+    entries: rawEntries,
+    endByteOffset,
+    resolvedTranscriptPath,
+  } = await log.timed('Read transcript', () =>
+    readNewTranscriptEntries(
+      hookData.transcript_path,
+      hookData.session_id,
+      sessionStore
+    )
   )
+  const cursorKey = getCursorKey(resolvedTranscriptPath)
 
   if (rawEntries.length === 0) {
     log.info('No new entries to upload')
@@ -728,11 +757,16 @@ async function processTranscript(
     }
   })
 
+  const totalRawDataBytes = records.reduce((sum, r) => {
+    return sum + (r.rawData ? JSON.stringify(r.rawData).length : 0)
+  }, 0)
+
   log.info(
     {
       data: {
         count: records.length,
         skipped: filteredOut,
+        rawDataBytes: totalRawDataBytes,
         firstRecordId: records[0]?.recordId,
         lastRecordId: records[records.length - 1]?.recordId,
       },
@@ -740,8 +774,14 @@ async function processTranscript(
     'Uploading batch'
   )
 
+  // PII/secrets sanitization is off by default for performance (70+ regex patterns per string).
+  // Set MOBBDEV_HOOK_SANITIZE=1 in the hook command to enable PII/secrets redaction.
+  const sanitize = process.env['MOBBDEV_HOOK_SANITIZE'] === '1'
+
   const result = await log.timed('Batch upload', () =>
-    prepareAndSendTracyRecords(gqlClient, records, hookData.cwd)
+    prepareAndSendTracyRecords(gqlClient, records, hookData.cwd, {
+      sanitize,
+    })
   )
 
   if (result.ok) {

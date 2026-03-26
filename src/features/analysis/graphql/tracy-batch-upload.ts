@@ -13,6 +13,23 @@ import type { GQLClient } from './gql'
 
 const debug = Debug('mobbdev:tracy-batch-upload')
 
+function timedStep<T>(label: string, fn: () => T | Promise<T>): Promise<T> {
+  const start = Date.now()
+  const result = fn()
+  const maybePromise =
+    result instanceof Promise ? result : Promise.resolve(result)
+  return maybePromise.then(
+    (val) => {
+      debug('[perf] %s: %dms', label, Date.now() - start)
+      return val
+    },
+    (err) => {
+      debug('[perf] %s FAILED: %dms', label, Date.now() - start)
+      throw err
+    }
+  )
+}
+
 /** Max time for the entire batch upload flow (GQL + S3 + submit). */
 const BATCH_TIMEOUT_MS = 30_000 // 30 seconds
 
@@ -25,6 +42,10 @@ export type TracyRecordClientInput = Omit<
   | 'clientVersion'
 > & {
   rawData?: unknown // object from extension, will be sanitized & serialized
+  /** Override auto-detected repo URL (e.g. from extension metadata) */
+  repositoryUrl?: string
+  /** Override auto-detected client version (e.g. extension version instead of CLI version) */
+  clientVersion?: string
 }
 
 export type TracyBatchUploadResult = {
@@ -33,9 +54,16 @@ export type TracyBatchUploadResult = {
 }
 
 async function sanitizeRawData(rawData: unknown): Promise<string> {
+  const start = Date.now()
   try {
     const sanitized = await sanitizeData(rawData)
-    return JSON.stringify(sanitized)
+    const serialized = JSON.stringify(sanitized)
+    debug(
+      '[perf] sanitizeRawData: %dms (%d bytes)',
+      Date.now() - start,
+      serialized.length
+    )
+    return serialized
   } catch (err) {
     // Sanitization should never break JSON when operating on parsed objects,
     // but if it does: log warning and fall back to unsanitized data.
@@ -50,31 +78,47 @@ async function sanitizeRawData(rawData: unknown): Promise<string> {
 export async function prepareAndSendTracyRecords(
   client: GQLClient,
   rawRecords: TracyRecordClientInput[],
-  workingDir?: string
+  workingDir?: string,
+  options?: { sanitize?: boolean }
 ): Promise<TracyBatchUploadResult> {
-  const repositoryUrl = await getRepositoryUrl(workingDir)
   const { computerName, userName } = getSystemInfo()
-  const clientVersion = packageJson.version
+  const defaultClientVersion = packageJson.version
+  const shouldSanitize = options?.sanitize ?? true
 
-  // 1. Enrich records and sanitize rawData
-  debug('[step:sanitize] Sanitizing %d records', rawRecords.length)
+  // Only resolve default repo URL if the caller didn't provide one per-record.
+  const defaultRepoUrl = rawRecords[0]?.repositoryUrl
+    ? undefined
+    : ((await getRepositoryUrl(workingDir)) ?? undefined)
+
+  // 1. Enrich records and optionally sanitize rawData
+  debug(
+    '[step:sanitize] %s %d records',
+    shouldSanitize ? 'Sanitizing' : 'Serializing',
+    rawRecords.length
+  )
   const serializedRawDataByIndex = new Map<number, string>()
 
-  const records: TracyRecordInput[] = await Promise.all(
-    rawRecords.map(async (record, index) => {
-      if (record.rawData != null) {
-        const serialized = await sanitizeRawData(record.rawData)
-        serializedRawDataByIndex.set(index, serialized)
-      }
-      const { rawData: _rawData, ...rest } = record
-      return {
-        ...rest,
-        repositoryUrl: repositoryUrl ?? undefined,
-        computerName,
-        userName,
-        clientVersion,
-      }
-    })
+  const records: TracyRecordInput[] = await timedStep(
+    `${shouldSanitize ? 'sanitize' : 'serialize'} ${rawRecords.length} records`,
+    () =>
+      Promise.all(
+        rawRecords.map(async (record, index) => {
+          if (record.rawData != null) {
+            const serialized = shouldSanitize
+              ? await sanitizeRawData(record.rawData)
+              : JSON.stringify(record.rawData)
+            serializedRawDataByIndex.set(index, serialized)
+          }
+          const { rawData: _rawData, ...rest } = record
+          return {
+            ...rest,
+            repositoryUrl: record.repositoryUrl ?? defaultRepoUrl,
+            computerName,
+            userName,
+            clientVersion: record.clientVersion ?? defaultClientVersion,
+          }
+        })
+      )
   )
 
   // 2. Upload rawData to S3 for records that have it
@@ -130,6 +174,7 @@ export async function prepareAndSendTracyRecords(
       '[step:s3-upload] Uploading %d files to S3',
       recordsWithRawData.length
     )
+    const s3Start = Date.now()
     const uploadResults = await Promise.allSettled(
       recordsWithRawData.map(async (entry) => {
         const rawDataJson = serializedRawDataByIndex.get(entry.index)
@@ -153,6 +198,12 @@ export async function prepareAndSendTracyRecords(
 
         records[entry.index]!.rawDataS3Key = uploadKey
       })
+    )
+
+    debug(
+      '[perf] s3-upload %d files: %dms',
+      recordsWithRawData.length,
+      Date.now() - s3Start
     )
 
     const uploadErrors = uploadResults
@@ -185,10 +236,12 @@ export async function prepareAndSendTracyRecords(
   // 3. Submit all records in a single call
   debug('[step:gql-submit] Submitting %d records via GraphQL', records.length)
   try {
-    const result = await withTimeout(
-      client.uploadTracyRecords({ records }),
-      BATCH_TIMEOUT_MS,
-      '[step:gql-submit] uploadTracyRecords'
+    const result = await timedStep(`gql-submit ${records.length} records`, () =>
+      withTimeout(
+        client.uploadTracyRecords({ records }),
+        BATCH_TIMEOUT_MS,
+        '[step:gql-submit] uploadTracyRecords'
+      )
     )
     if (result.uploadTracyRecords.status !== 'OK') {
       return {

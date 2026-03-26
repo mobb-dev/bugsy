@@ -412,3 +412,15 @@ export const PrepareCommitBlameResponseMessageSchema =
 export type PrepareCommitBlameResponseMessage = z.infer<
   typeof PrepareCommitBlameResponseMessageZ
 >
+
+export const VulnerabilityAttributionMessageZ = z.object({
+  fixReportId: z.string().uuid(),
+  vulnerabilityAttributionRequestId: z.string().uuid(),
+  userEmail: z.string(),
+})
+export const VulnerabilityAttributionMessageSchema =
+  VulnerabilityAttributionMessageZ
+
+export type VulnerabilityAttributionMessage = z.infer<
+  typeof VulnerabilityAttributionMessageZ
+>

@@ -30,21 +30,21 @@ const activeScopedLoggers: Logger[] = []
 
 export const hookLog = logger
 
-/** Flush the global logger and all active scoped loggers. */
+/** Flush the global logger and all active scoped loggers (configstore only). */
 export function flushLogs() {
   logger.flushLogs()
   for (const scoped of activeScopedLoggers) {
     scoped.flushLogs()
   }
-  activeScopedLoggers.length = 0
 }
 
-/** Flush buffered Datadog logs and stop the timer. Call before process exit. */
+/** Flush buffered Datadog logs for all loggers, then clear scoped loggers. Call before process exit. */
 export async function flushDdLogs(): Promise<void> {
   await logger.flushDdAsync()
   for (const scoped of activeScopedLoggers) {
     await scoped.flushDdAsync()
   }
+  activeScopedLoggers.length = 0
 }
 
 /** Create a scoped logger for a specific project path.

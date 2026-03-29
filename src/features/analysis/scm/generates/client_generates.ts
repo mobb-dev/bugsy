@@ -27249,6 +27249,7 @@ export type Mutation_RootUpdate_Tracy_Tracy_Event_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Inference_EventArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Inference_Event_Inc_Input>;
   _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
   where: Tracy_Tracy_Inference_Event_Bool_Exp;
 };
@@ -27256,6 +27257,7 @@ export type Mutation_RootUpdate_Tracy_Tracy_Inference_EventArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_By_PkArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Inference_Event_Inc_Input>;
   _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
   pk_columns: Tracy_Tracy_Inference_Event_Pk_Columns_Input;
 };
@@ -46573,6 +46575,7 @@ export type Tracy_Tracy_Event_Updates = {
 export type Tracy_Tracy_Inference_Event = {
   __typename?: 'tracy_tracy_inference_event';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  charCount?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -46593,9 +46596,17 @@ export type Tracy_Tracy_Inference_Event_Aggregate = {
 /** aggregate fields of "tracy.tracy_inference_event" */
 export type Tracy_Tracy_Inference_Event_Aggregate_Fields = {
   __typename?: 'tracy_tracy_inference_event_aggregate_fields';
+  avg?: Maybe<Tracy_Tracy_Inference_Event_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Tracy_Tracy_Inference_Event_Max_Fields>;
   min?: Maybe<Tracy_Tracy_Inference_Event_Min_Fields>;
+  stddev?: Maybe<Tracy_Tracy_Inference_Event_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Tracy_Inference_Event_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Tracy_Inference_Event_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Tracy_Inference_Event_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Tracy_Inference_Event_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Tracy_Inference_Event_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Tracy_Inference_Event_Variance_Fields>;
 };
 
 
@@ -46605,12 +46616,19 @@ export type Tracy_Tracy_Inference_Event_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** aggregate avg on columns */
+export type Tracy_Tracy_Inference_Event_Avg_Fields = {
+  __typename?: 'tracy_tracy_inference_event_avg_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
+};
+
 /** Boolean expression to filter rows from the table "tracy.tracy_inference_event". All fields are combined with a logical 'AND'. */
 export type Tracy_Tracy_Inference_Event_Bool_Exp = {
   _and?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
   _not?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
   _or?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
   additionsS3Path?: InputMaybe<String_Comparison_Exp>;
+  charCount?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   rawDataS3Path?: InputMaybe<String_Comparison_Exp>;
@@ -46628,9 +46646,15 @@ export enum Tracy_Tracy_Inference_Event_Constraint {
   TracyInferenceEventTracyEventIdKey = 'tracy_inference_event_tracy_event_id_key'
 }
 
+/** input type for incrementing numeric columns in table "tracy.tracy_inference_event" */
+export type Tracy_Tracy_Inference_Event_Inc_Input = {
+  charCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "tracy.tracy_inference_event" */
 export type Tracy_Tracy_Inference_Event_Insert_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -46644,6 +46668,7 @@ export type Tracy_Tracy_Inference_Event_Insert_Input = {
 export type Tracy_Tracy_Inference_Event_Max_Fields = {
   __typename?: 'tracy_tracy_inference_event_max_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  charCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -46656,6 +46681,7 @@ export type Tracy_Tracy_Inference_Event_Max_Fields = {
 export type Tracy_Tracy_Inference_Event_Min_Fields = {
   __typename?: 'tracy_tracy_inference_event_min_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  charCount?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -46690,6 +46716,7 @@ export type Tracy_Tracy_Inference_Event_On_Conflict = {
 /** Ordering options when selecting data from "tracy.tracy_inference_event". */
 export type Tracy_Tracy_Inference_Event_Order_By = {
   additionsS3Path?: InputMaybe<Order_By>;
+  charCount?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   rawDataS3Path?: InputMaybe<Order_By>;
@@ -46709,6 +46736,8 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
   /** column name */
   AdditionsS3Path = 'additionsS3Path',
   /** column name */
+  CharCount = 'charCount',
+  /** column name */
   Id = 'id',
   /** column name */
   Model = 'model',
@@ -46725,12 +46754,31 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
 /** input type for updating data in table "tracy.tracy_inference_event" */
 export type Tracy_Tracy_Inference_Event_Set_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
   recordType?: InputMaybe<Scalars['String']['input']>;
   sessionId?: InputMaybe<Scalars['String']['input']>;
   tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Tracy_Tracy_Inference_Event_Stddev_Fields = {
+  __typename?: 'tracy_tracy_inference_event_stddev_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Tracy_Inference_Event_Stddev_Pop_Fields = {
+  __typename?: 'tracy_tracy_inference_event_stddev_pop_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Tracy_Inference_Event_Stddev_Samp_Fields = {
+  __typename?: 'tracy_tracy_inference_event_stddev_samp_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "tracy_tracy_inference_event" */
@@ -46744,6 +46792,7 @@ export type Tracy_Tracy_Inference_Event_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  charCount?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -46752,10 +46801,18 @@ export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
   tracyEventId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
+/** aggregate sum on columns */
+export type Tracy_Tracy_Inference_Event_Sum_Fields = {
+  __typename?: 'tracy_tracy_inference_event_sum_fields';
+  charCount?: Maybe<Scalars['Int']['output']>;
+};
+
 /** update columns of table "tracy.tracy_inference_event" */
 export enum Tracy_Tracy_Inference_Event_Update_Column {
   /** column name */
   AdditionsS3Path = 'additionsS3Path',
+  /** column name */
+  CharCount = 'charCount',
   /** column name */
   Id = 'id',
   /** column name */
@@ -46771,10 +46828,30 @@ export enum Tracy_Tracy_Inference_Event_Update_Column {
 }
 
 export type Tracy_Tracy_Inference_Event_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Tracy_Tracy_Inference_Event_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Tracy_Tracy_Inference_Event_Set_Input>;
   /** filter the rows which have to be updated */
   where: Tracy_Tracy_Inference_Event_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Tracy_Inference_Event_Var_Pop_Fields = {
+  __typename?: 'tracy_tracy_inference_event_var_pop_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Tracy_Inference_Event_Var_Samp_Fields = {
+  __typename?: 'tracy_tracy_inference_event_var_samp_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Tracy_Inference_Event_Variance_Fields = {
+  __typename?: 'tracy_tracy_inference_event_variance_fields';
+  charCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** a table which stores the un-fixable info where we have fix info object */

@@ -9,7 +9,6 @@ import {
 import {
   getCommitDescription,
   getCommitIssueDescription,
-  getCommitIssueUrl,
   getCommitUrl,
   getFixUrlWithRedirect,
   getGuidances,
@@ -73,25 +72,15 @@ export function buildFixCommentBody({
   irrelevantIssueWithTags,
 }: BuildFixCommentBodyParams) {
   const isIrrelevantIssueWithTags = irrelevantIssueWithTags?.[0]?.tag
-  const commitUrl = isIrrelevantIssueWithTags
-    ? getCommitIssueUrl({
-        appBaseUrl: WEB_APP_URL,
-        issueId,
-        projectId,
-        analysisId,
-        organizationId,
-        redirectUrl: commentUrl,
-        commentId,
-      })
-    : getCommitUrl({
-        appBaseUrl: WEB_APP_URL,
-        fixId,
-        projectId,
-        analysisId,
-        organizationId,
-        redirectUrl: commentUrl,
-        commentId,
-      })
+  const commitUrl = getCommitUrl({
+    appBaseUrl: WEB_APP_URL,
+    fixId,
+    projectId,
+    analysisId,
+    organizationId,
+    redirectUrl: commentUrl,
+    commentId,
+  })
   const fixUrl = isIrrelevantIssueWithTags
     ? getIssueUrlWithRedirect({
         appBaseUrl: WEB_APP_URL,

@@ -79,11 +79,12 @@ describe('installMobbHooks', () => {
       hooks: {
         PostToolUse: [
           {
-            matcher: 'Bash|Write|Edit|Agent|Read',
+            matcher: 'Write|Edit',
             hooks: [
               {
                 type: 'command',
                 command: 'npx --yes mobbdev@latest claude-code-process-hook',
+                async: true,
               },
             ],
           },
@@ -98,7 +99,7 @@ describe('installMobbHooks', () => {
       hooks: {
         PostToolUse: [
           {
-            matcher: 'Bash|Write|Edit|Agent|Read',
+            matcher: 'Write|Edit',
             hooks: [
               {
                 type: 'command',
@@ -136,11 +137,12 @@ describe('installMobbHooks', () => {
     const writtenSettings = JSON.parse(writtenContent as string)
     expect(writtenSettings.hooks.PostToolUse).toHaveLength(2)
     expect(writtenSettings.hooks.PostToolUse[0]).toEqual({
-      matcher: 'Bash|Write|Edit|Agent|Read',
+      matcher: 'Write|Edit',
       hooks: [
         {
           type: 'command',
           command: 'npx --yes mobbdev@latest claude-code-process-hook',
+          async: true,
         },
       ],
     })
@@ -201,11 +203,12 @@ describe('installMobbHooks', () => {
 
     // Verify Mobb hook was added
     expect(writtenSettings.hooks.PostToolUse[1]).toEqual({
-      matcher: 'Bash|Write|Edit|Agent|Read',
+      matcher: 'Write|Edit',
       hooks: [
         {
           type: 'command',
           command: 'npx --yes mobbdev@latest claude-code-process-hook',
+          async: true,
         },
       ],
     })

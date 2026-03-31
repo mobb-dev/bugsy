@@ -1009,5 +1009,47 @@ public class MortgageProduct {
         }
       })
     })
+
+    describe('Azure DevOps PAT detection', () => {
+      const ADO_PAT =
+        '1qk4jEg8Zw2izTrZDRqTLOFlzYzkPw5gBHMAN2iKxw6zyD3KKDbZJQQJ99CCACAAAAApvLnfAAASAZDO3AAA'
+
+      it('should mask ADO PAT in env var assignment', async () => {
+        const input = `export AZURE_DEVOPS_ACCESS_TOKEN="${ADO_PAT}"`
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain(ADO_PAT)
+      })
+
+      it('should mask standalone ADO PAT', async () => {
+        const input = `Use this token: ${ADO_PAT}`
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain(ADO_PAT)
+      })
+
+      it('should mask ADO PAT in JSON', async () => {
+        const input = JSON.stringify({ azureToken: ADO_PAT })
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain(ADO_PAT)
+      })
+
+      it('should NOT flag short strings containing JQQJ99', async () => {
+        const input = 'The code JQQJ99 is a reference number'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag normal base64 strings without JQQJ99 marker', async () => {
+        const input =
+          'data: SGVsbG8gV29ybGQhIFRoaXMgaXMgYSB0ZXN0IHN0cmluZyBlbmNvZGVk'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+
+      it('should NOT flag UUIDs', async () => {
+        const input = '550e8400-e29b-41d4-a716-446655440000'
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+    })
   })
 })

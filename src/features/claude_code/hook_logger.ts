@@ -10,6 +10,17 @@ const CLI_VERSION: string =
 
 const NAMESPACE = 'mobbdev-claude-code-hook-logs'
 
+/** Claude Code version detected at runtime. Set via setClaudeCodeVersion(). */
+let claudeCodeVersion: string | undefined
+
+function buildDdTags(): string {
+  const tags = [`version:${CLI_VERSION}`]
+  if (claudeCodeVersion) {
+    tags.push(`cc_version:${claudeCodeVersion}`)
+  }
+  return tags.join(',')
+}
+
 function createHookLogger(scopePath?: string): Logger {
   return createLogger({
     namespace: NAMESPACE,
@@ -18,7 +29,7 @@ function createHookLogger(scopePath?: string): Logger {
       apiKey: DD_RUM_TOKEN,
       ddsource: 'mobbdev-cli',
       service: 'mobbdev-cli-hook',
-      ddtags: `version:${CLI_VERSION}`,
+      ddtags: buildDdTags(),
       hostnameMode: 'hashed',
       unrefTimer: true,
     },
@@ -29,6 +40,22 @@ const logger = createHookLogger()
 const activeScopedLoggers: Logger[] = []
 
 export const hookLog = logger
+
+/**
+ * Set the detected Claude Code version. Call once early in the hook lifecycle.
+ * Updates the global logger's ddtags immediately and ensures new scoped
+ * loggers also include cc_version.
+ */
+export function setClaudeCodeVersion(version: string | undefined): void {
+  claudeCodeVersion = version
+  // Update the already-created global logger so all subsequent logs include cc_version
+  logger.updateDdTags(buildDdTags())
+}
+
+/** Get the currently detected Claude Code version. */
+export function getClaudeCodeVersion(): string | undefined {
+  return claudeCodeVersion
+}
 
 /** Flush the global logger and all active scoped loggers (configstore only). */
 export function flushLogs() {

@@ -24,6 +24,7 @@ export type DdBatch = {
   flushAsync: () => Promise<void>
   dispose: () => void
   createPinoStream: () => stream.Writable
+  updateDdTags: (ddtags: string) => void
 }
 
 export function createDdBatch(config: DdBatchConfig): DdBatch {
@@ -101,5 +102,10 @@ export function createDdBatch(config: DdBatchConfig): DdBatch {
     })
   }
 
-  return { enqueue, flush, flushAsync, dispose, createPinoStream }
+  // Only affects messages enqueued after this call — already-batched entries retain old tags.
+  function updateDdTags(ddtags: string): void {
+    config.ddtags = ddtags
+  }
+
+  return { enqueue, flush, flushAsync, dispose, createPinoStream, updateDdTags }
 }

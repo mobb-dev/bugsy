@@ -7,6 +7,7 @@ import chalk from 'chalk'
 type ClaudeCodeHook = {
   type: 'command'
   command: string
+  async?: boolean
 }
 
 type ClaudeCodeHookMatcher = {
@@ -26,10 +27,7 @@ type ClaudeCodeSettings = {
 const CLAUDE_SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 
 /** The current recommended matcher for the hook. */
-export const RECOMMENDED_MATCHER = 'Bash|Write|Edit|Agent|Read'
-
-/** Matchers that should be auto-upgraded to the recommended one. */
-const STALE_MATCHERS = new Set(['', '*', 'Edit|Write'])
+export const RECOMMENDED_MATCHER = 'Write|Edit'
 
 export async function claudeSettingsExists(): Promise<boolean> {
   try {
@@ -73,14 +71,22 @@ export async function autoUpgradeMatcherIfStale(): Promise<boolean> {
 
     let upgraded = false
     for (const hook of hooks) {
-      const isMobbHook = hook.hooks.some(
-        (h) =>
-          h.command?.includes('claude-code-process-hook') &&
-          (h.command?.includes('mobbdev') || h.command?.includes('mobbdev@'))
+      const isMobbHook = hook.hooks.some((h) =>
+        h.command?.includes('claude-code-process-hook')
       )
-      if (isMobbHook && STALE_MATCHERS.has(hook.matcher)) {
+      if (!isMobbHook) continue
+
+      if (hook.matcher !== RECOMMENDED_MATCHER) {
         hook.matcher = RECOMMENDED_MATCHER
         upgraded = true
+      }
+
+      // Ensure async is set on all Mobb hook entries
+      for (const h of hook.hooks) {
+        if (!h.async) {
+          h.async = true
+          upgraded = true
+        }
       }
     }
 
@@ -152,6 +158,7 @@ export async function installMobbHooks(
       {
         type: 'command',
         command,
+        async: true,
       },
     ],
   }

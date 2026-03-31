@@ -57,6 +57,8 @@ export type Logger = {
   disposeDd(): void
   /** Update the configstore scope path (e.g. when workspace becomes known). */
   setScopePath(path: string): void
+  /** Update Datadog tags at runtime (e.g. after detecting Claude Code version). */
+  updateDdTags(ddtags: string): void
 }
 
 export function createLogger(config: LoggerConfig): Logger {
@@ -166,6 +168,12 @@ export function createLogger(config: LoggerConfig): Logger {
     }
   }
 
+  function updateDdTags(newDdTags: string): void {
+    if (ddBatch) {
+      ddBatch.updateDdTags(newDdTags)
+    }
+  }
+
   return {
     info,
     warn,
@@ -177,5 +185,6 @@ export function createLogger(config: LoggerConfig): Logger {
     flushDdAsync,
     disposeDd,
     setScopePath: csStream.setScopePath,
+    updateDdTags,
   }
 }

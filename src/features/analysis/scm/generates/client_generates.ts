@@ -453,6 +453,7 @@ export type DeveloperGroupStatistic = {
   aiLinesCount: Scalars['Int']['output'];
   aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
+  groupId: Scalars['String']['output'];
   groupName: Scalars['String']['output'];
   humanLinesCount: Scalars['Int']['output'];
   humanLinesInMergedPrs: Scalars['Int']['output'];
@@ -467,6 +468,8 @@ export type DeveloperStatistic = {
   aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
   computerName?: Maybe<Scalars['String']['output']>;
+  groupId?: Maybe<Scalars['String']['output']>;
+  groupName?: Maybe<Scalars['String']['output']>;
   humanLinesCount: Scalars['Int']['output'];
   humanLinesInMergedPrs: Scalars['Int']['output'];
   lastSeenDate?: Maybe<Scalars['String']['output']>;
@@ -22012,6 +22015,7 @@ export type Mutation_RootAnalyzePrForAiBlameFromWebhookArgs = {
   organizationId: Scalars['String']['input'];
   prNumber: Scalars['Int']['input'];
   repositoryURL: Scalars['String']['input'];
+  skipLock?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 

@@ -1,6 +1,8 @@
+import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { access, open, readdir, readFile, unlink } from 'node:fs/promises'
 import path from 'node:path'
+import { promisify } from 'node:util'
 
 import Configstore from 'configstore'
 import { z } from 'zod'
@@ -19,8 +21,16 @@ import {
 } from '../../utils/ConfigStoreService'
 import type { Logger } from '../../utils/shared-logger'
 import { withTimeout } from '../../utils/with-timeout'
-import { createScopedHookLog, hookLog } from './hook_logger'
+import {
+  createScopedHookLog,
+  getClaudeCodeVersion,
+  hookLog,
+  setClaudeCodeVersion,
+} from './hook_logger'
 import { autoUpgradeMatcherIfStale } from './install_hook'
+
+const CC_VERSION_CACHE_KEY = 'claudeCode.detectedCCVersion'
+const CC_VERSION_CLI_KEY = 'claudeCode.detectedCCVersionCli'
 
 const GLOBAL_COOLDOWN_MS = 5_000 // 5 seconds — throttle across all sessions on this machine
 const HOOK_COOLDOWN_MS = 15_000 // 15 seconds — skip invocations within cooldown (per session)
@@ -34,9 +44,9 @@ const COOLDOWN_KEY = 'lastHookRunAt'
 const ACTIVE_KEY = 'hookActiveAt'
 
 const HookDataSchema = z.object({
-  session_id: z.string(),
-  transcript_path: z.string(),
-  cwd: z.string(),
+  session_id: z.string().nullish(),
+  transcript_path: z.string().nullish(),
+  cwd: z.string().nullish(),
   hook_event_name: z.string(),
   tool_name: z.string(),
   tool_input: z.unknown(),
@@ -51,6 +61,38 @@ type TranscriptEntry = {
   sessionId?: string
   timestamp?: string
   [key: string]: unknown
+}
+
+const execFileAsync = promisify(execFile)
+
+/**
+ * Detect the Claude Code version by running `claude --version`.
+ * Cached in configstore — re-detected when our CLI version changes.
+ */
+async function detectClaudeCodeVersion(): Promise<string | undefined> {
+  const cachedCliVersion = configStore.get(CC_VERSION_CLI_KEY) as
+    | string
+    | undefined
+  if (cachedCliVersion === packageJson.version) {
+    return configStore.get(CC_VERSION_CACHE_KEY) as string | undefined
+  }
+
+  try {
+    const { stdout } = await execFileAsync('claude', ['--version'], {
+      timeout: 3_000,
+      encoding: 'utf-8',
+    })
+    // Output format: "2.1.87 (Claude Code)" — extract the version number
+    const version = stdout.trim().split(/\s/)[0] || stdout.trim()
+    configStore.set(CC_VERSION_CACHE_KEY, version)
+    configStore.set(CC_VERSION_CLI_KEY, packageJson.version)
+    return version
+  } catch {
+    // claude not in PATH or not installed — cache empty to avoid retrying
+    configStore.set(CC_VERSION_CACHE_KEY, undefined)
+    configStore.set(CC_VERSION_CLI_KEY, packageJson.version)
+    return undefined
+  }
 }
 
 /**
@@ -116,6 +158,34 @@ export async function readStdinData(): Promise<unknown> {
  */
 export function validateHookData(data: unknown): HookData {
   return HookDataSchema.parse(data)
+}
+
+/**
+ * Extracts sessionId from the first entry of a transcript JSONL file.
+ * Used as a fallback when session_id is missing from hook stdin data
+ * (e.g. older Claude Code versions that don't provide it).
+ */
+export async function extractSessionIdFromTranscript(
+  transcriptPath: string
+): Promise<string | null> {
+  try {
+    // Read only the first 4KB to extract sessionId from the first line,
+    // avoiding loading the entire transcript file into memory.
+    const fh = await open(transcriptPath, 'r')
+    try {
+      const buf = Buffer.alloc(4096)
+      const { bytesRead } = await fh.read(buf, 0, 4096, 0)
+      const chunk = buf.toString('utf-8', 0, bytesRead)
+      const firstLine = chunk.split('\n').find((l) => l.trim().length > 0)
+      if (!firstLine) return null
+      const entry = JSON.parse(firstLine) as { sessionId?: string }
+      return entry.sessionId ?? null
+    } finally {
+      await fh.close()
+    }
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -587,12 +657,108 @@ export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
     }
   }
 
+  // Detect Claude Code version (cached — re-detected on CLI version bump).
+  // Must run before scoped loggers are created so ddtags include cc_version.
+  try {
+    const ccVersion = await detectClaudeCodeVersion()
+    setClaudeCodeVersion(ccVersion)
+  } catch {
+    // Never fail the hook for version detection
+  }
+
   const rawData = await readStdinData()
-  const hookData = validateHookData(rawData)
+  const rawObj = rawData as Record<string, unknown> | null
+  const hookData = (() => {
+    try {
+      return validateHookData(rawData)
+    } catch (err) {
+      hookLog.error(
+        {
+          data: {
+            hook_event_name: rawObj?.['hook_event_name'],
+            tool_name: rawObj?.['tool_name'],
+            session_id: rawObj?.['session_id'],
+            cwd: rawObj?.['cwd'],
+            keys: rawObj ? Object.keys(rawObj) : [],
+          },
+        },
+        `Hook validation failed: ${(err as Error).message?.slice(0, 200)}`
+      )
+      throw err
+    }
+  })()
+
+  // transcript_path is required — without it there's no file to read.
+  if (!hookData.transcript_path) {
+    hookLog.warn(
+      {
+        data: {
+          hook_event_name: hookData.hook_event_name,
+          tool_name: hookData.tool_name,
+          session_id: hookData.session_id,
+          cwd: hookData.cwd,
+        },
+      },
+      'Missing transcript_path — cannot process hook'
+    )
+    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
+  }
+
+  // session_id fallback: peek at the transcript file and extract from the first entry.
+  let sessionId = hookData.session_id
+  if (!sessionId) {
+    sessionId = await extractSessionIdFromTranscript(hookData.transcript_path)
+    if (sessionId) {
+      hookLog.warn(
+        {
+          data: {
+            hook_event_name: hookData.hook_event_name,
+            tool_name: hookData.tool_name,
+            cwd: hookData.cwd,
+            extractedSessionId: sessionId,
+          },
+        },
+        'Missing session_id in hook data — extracted from transcript'
+      )
+    } else {
+      hookLog.warn(
+        {
+          data: {
+            hook_event_name: hookData.hook_event_name,
+            tool_name: hookData.tool_name,
+            transcript_path: hookData.transcript_path,
+          },
+        },
+        'Missing session_id and could not extract from transcript — cannot process hook'
+      )
+      return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
+    }
+  }
+
+  if (!hookData.cwd) {
+    hookLog.warn(
+      {
+        data: {
+          hook_event_name: hookData.hook_event_name,
+          tool_name: hookData.tool_name,
+          session_id: sessionId,
+        },
+      },
+      'Missing cwd in hook data — scoped logging and repo URL detection disabled'
+    )
+  }
+
+  // Build a resolved hookData with guaranteed non-null session_id and transcript_path
+  const resolvedHookData = {
+    ...hookData,
+    session_id: sessionId,
+    transcript_path: hookData.transcript_path,
+    cwd: hookData.cwd ?? undefined,
+  }
 
   // Per-session configstore: each session gets its own file so concurrent
   // hooks from different sessions never compete for the same JSON file.
-  const sessionStore = createSessionConfigStore(hookData.session_id)
+  const sessionStore = createSessionConfigStore(resolvedHookData.session_id)
 
   // Cleanup stale session files (runs at most once per day)
   await cleanupStaleSessions(sessionStore)
@@ -617,7 +783,7 @@ export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
         {
           data: {
             activeDurationMs: activeDuration,
-            sessionId: hookData.session_id,
+            sessionId: resolvedHookData.session_id,
           },
         },
         'Hook still active — possible slow upload or hung process'
@@ -628,31 +794,40 @@ export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
   sessionStore.set(ACTIVE_KEY, now)
   sessionStore.set(COOLDOWN_KEY, now)
 
-  // Create a project-scoped logger so logs are separated per repo
-  const log = createScopedHookLog(hookData.cwd)
+  // Create a project-scoped logger so logs are separated per repo.
+  // Fall back to process.cwd() when cwd is missing from hook data —
+  // Claude Code spawns the hook process with cwd set to the project dir.
+  const log = createScopedHookLog(resolvedHookData.cwd ?? process.cwd())
 
   log.info(
     {
       data: {
-        sessionId: hookData.session_id,
-        toolName: hookData.tool_name,
-        hookEvent: hookData.hook_event_name,
-        cwd: hookData.cwd,
+        sessionId: resolvedHookData.session_id,
+        toolName: resolvedHookData.tool_name,
+        hookEvent: resolvedHookData.hook_event_name,
+        cwd: resolvedHookData.cwd,
+        claudeCodeVersion: getClaudeCodeVersion(),
       },
     },
     'Hook data validated'
   )
 
   try {
-    return await processTranscript(hookData, sessionStore, log)
+    return await processTranscript(resolvedHookData, sessionStore, log)
   } finally {
     sessionStore.delete(ACTIVE_KEY)
     log.flushLogs()
   }
 }
 
+type ResolvedHookData = Omit<HookData, 'session_id' | 'transcript_path'> & {
+  session_id: string
+  transcript_path: string
+  cwd: string | undefined
+}
+
 async function processTranscript(
-  hookData: HookData,
+  hookData: ResolvedHookData,
   sessionStore: Configstore,
   log: Logger
 ): Promise<HookResult> {
@@ -748,6 +923,12 @@ async function processTranscript(
       }
     }
 
+    // Ensure sessionId is on every record so the processor can extract it.
+    // Sub-agent events (role-based format) don't carry sessionId natively.
+    if (!rawEntry['sessionId']) {
+      rawEntry['sessionId'] = hookData.session_id
+    }
+
     return {
       platform: InferencePlatform.ClaudeCode,
       recordId: _recordId,
@@ -797,6 +978,7 @@ async function processTranscript(
     log.heartbeat('Upload ok', {
       entriesUploaded: entries.length,
       entriesSkipped: filteredOut,
+      claudeCodeVersion: getClaudeCodeVersion(),
     })
     return {
       entriesUploaded: entries.length,

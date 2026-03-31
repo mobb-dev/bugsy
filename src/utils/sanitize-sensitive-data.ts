@@ -1,7 +1,23 @@
-import { OpenRedaction } from '@openredaction/openredaction'
+import { OpenRedaction, type PIIPattern } from '@openredaction/openredaction'
+
+// Azure DevOps PATs (post-2022) embed a fixed "JQQJ99" marker.
+// Anchoring on this marker gives near-zero false positives without entropy analysis.
+// NOTE: Pre-2022 ADO PATs without the JQQJ99 marker will NOT be detected by this
+// pattern. They may still be caught by OAUTH_TOKEN or GENERIC_API_KEY when contextual
+// keywords (e.g. ACCESS_TOKEN=, api_key=) are present.
+const ADO_PAT_PATTERN: PIIPattern = {
+  type: 'AZURE_DEVOPS_PAT',
+  regex: /\b[a-zA-Z0-9]{20,}JQQJ99[a-zA-Z0-9]{10,52}\b/g,
+  priority: 95,
+  placeholder: '[ADO_PAT_{n}]',
+  description: 'Azure DevOps Personal Access Token',
+  severity: 'high',
+  validator: (match: string) => match.length >= 52 && match.length <= 100,
+}
 
 // Initialize OpenRedaction with comprehensive PII and secrets patterns while avoiding false-positive-prone patterns
 const openRedaction = new OpenRedaction({
+  customPatterns: [ADO_PAT_PATTERN],
   patterns: [
     // Core Personal Data
     // Removed EMAIL - causes false positives in code/test snippets (e.g. --author="Eve Author <eve@example.com>")
@@ -80,7 +96,9 @@ const openRedaction = new OpenRedaction({
     'STRIPE_API_KEY',
     'GOOGLE_API_KEY',
     'FIREBASE_API_KEY',
-    'HEROKU_API_KEY',
+    // Removed HEROKU_API_KEY - its regex matches ALL UUIDs ([a-f0-9]{8}-[a-f0-9]{4}-...)
+    // and the validator triggers on "auth" anywhere in context (e.g. "oauth2" in user IDs).
+    // This causes false positives on every UUID when OAuth-related strings are nearby.
     'MAILGUN_API_KEY',
     'SENDGRID_API_KEY',
     'TWILIO_API_KEY',
@@ -129,7 +147,17 @@ export async function sanitizeDataWithCounts(
     detections: { total: 0, high: 0, medium: 0, low: 0 },
   }
 
+  // Max string length to scan. Strings longer than this are typically
+  // base64 blobs, large code files, or binary data — not human-readable
+  // text that would contain secrets. Scanning them is extremely expensive
+  // (48+ regex patterns × millions of chars) and can hang the process.
+  const MAX_SCAN_LENGTH = 100_000
+
   const sanitizeString = async (str: string): Promise<string> => {
+    if (str.length > MAX_SCAN_LENGTH) {
+      return str
+    }
+
     let result = str
 
     // Apply PII and secrets detection using OpenRedaction

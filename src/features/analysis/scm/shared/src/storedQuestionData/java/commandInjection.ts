@@ -21,21 +21,6 @@ Make sure the input is not:
   - \`Runtime.getRuntime().exec(new String[] {"perl", "-e", "print '" + input + "'"});\``,
     guidance: () => '',
   },
-  isPlainCommandArgument: {
-    content: () => 'Is the input an argument of a plain command?',
-    description: () => `Examples for "yes" answer:
-
-  - \`Runtime.getRuntime().exec("git clone " + input);\`
-  - \`Runtime.getRuntime().exec("curl " + input);\`
-  - \`Runtime.getRuntime().exec("cat " + input);\`
-  
-Examples for "no" answer:
-
-  - \`Runtime.getRuntime().exec("cmd /c " + input);\`
-  - \`Runtime.getRuntime().exec("sh -c " + input);\`
-  - \`Runtime.getRuntime().exec("perl -e " + input);\``,
-    guidance: () => '',
-  },
   installApacheCommonsText: {
     content: () =>
       'Is the Apache Commons library (org.apache.commons) included in your project, if not, can you add it?',

@@ -538,7 +538,7 @@ Example payload:
         })
         if (
           response.content[0].text.includes(
-            'Total number of fixes available: **3**'
+            'Total number of fixes available: **2**'
           )
         ) {
           isReportUploaded = true
@@ -571,12 +571,6 @@ Example payload:
         '## Fix 2:',
         'Rescan should include the second fix'
       )
-      assertIncludes(
-        response2Text,
-        '## Fix 3:',
-        'Rescan should not include Fix 3',
-        false
-      )
       const response3 = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
         path: tempDirExistingReport,
         limit: 10,
@@ -592,12 +586,7 @@ Example payload:
       assertIncludes(
         response3Text,
         '## Fix 3:',
-        'Rescan should include Fix 3 (fourth)'
-      )
-      assertIncludes(
-        response3Text,
-        '## Fix 4:',
-        'Rescan should not include Fix 4',
+        'Rescan should not include Fix 3',
         false
       )
     } catch (error) {

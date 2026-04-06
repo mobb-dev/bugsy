@@ -376,6 +376,13 @@ export type CommitToSameBranchFixInput = {
   fixId: Scalars['String']['input'];
 };
 
+export type ConversationMessage = {
+  __typename?: 'ConversationMessage';
+  date: Scalars['String']['output'];
+  text: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
 export type CreateBrokerApiTokenResponse = {
   __typename?: 'CreateBrokerApiTokenResponse';
   token: Scalars['String']['output'];
@@ -643,6 +650,7 @@ export type FpSummarySuccess = {
 
 export type GetAiBlameInferencePromptResponse = {
   __typename?: 'GetAIBlameInferencePromptResponse';
+  conversationMessages?: Maybe<Array<ConversationMessage>>;
   error?: Maybe<Scalars['String']['output']>;
   promptUrl?: Maybe<Scalars['String']['output']>;
   status: Status;
@@ -3093,19 +3101,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference = {
   ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  char_count?: Maybe<Scalars['Int']['output']>;
+  client_version?: Maybe<Scalars['String']['output']>;
   commit_sha?: Maybe<Scalars['String']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   file_path?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Int']['output']>;
+  inference_file_md5?: Maybe<Scalars['String']['output']>;
+  inference_file_size?: Maybe<Scalars['Int']['output']>;
   inference_type?: Maybe<Scalars['String']['output']>;
   line_number?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   organization_id?: Maybe<Scalars['uuid']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
   prompt_summary?: Maybe<Scalars['String']['output']>;
+  record_id?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
+  session_id?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
   tracy_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_inference_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_user_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3144,6 +3162,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Avg_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_avg_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3157,19 +3178,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Bool_Exp = {
   ai_response_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   change_lines?: InputMaybe<Int_Comparison_Exp>;
   change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
+  char_count?: InputMaybe<Int_Comparison_Exp>;
+  client_version?: InputMaybe<String_Comparison_Exp>;
   commit_sha?: InputMaybe<String_Comparison_Exp>;
   computer_name?: InputMaybe<String_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   file_path?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  inference_file_line_count?: InputMaybe<Int_Comparison_Exp>;
+  inference_file_md5?: InputMaybe<String_Comparison_Exp>;
+  inference_file_size?: InputMaybe<Int_Comparison_Exp>;
   inference_type?: InputMaybe<String_Comparison_Exp>;
   line_number?: InputMaybe<Int_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  platform?: InputMaybe<String_Comparison_Exp>;
   prompt_summary?: InputMaybe<String_Comparison_Exp>;
+  record_id?: InputMaybe<String_Comparison_Exp>;
   repository_url?: InputMaybe<String_Comparison_Exp>;
+  session_id?: InputMaybe<String_Comparison_Exp>;
   tool_name?: InputMaybe<String_Comparison_Exp>;
   tracy_event_id?: InputMaybe<Uuid_Comparison_Exp>;
+  tracy_inference_event_id?: InputMaybe<Uuid_Comparison_Exp>;
+  tracy_user_id?: InputMaybe<Uuid_Comparison_Exp>;
   user_name?: InputMaybe<String_Comparison_Exp>;
 };
 
@@ -3181,19 +3212,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Max_Fields = {
   ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  char_count?: Maybe<Scalars['Int']['output']>;
+  client_version?: Maybe<Scalars['String']['output']>;
   commit_sha?: Maybe<Scalars['String']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   file_path?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Int']['output']>;
+  inference_file_md5?: Maybe<Scalars['String']['output']>;
+  inference_file_size?: Maybe<Scalars['Int']['output']>;
   inference_type?: Maybe<Scalars['String']['output']>;
   line_number?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   organization_id?: Maybe<Scalars['uuid']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
   prompt_summary?: Maybe<Scalars['String']['output']>;
+  record_id?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
+  session_id?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
   tracy_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_inference_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_user_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3205,19 +3246,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Min_Fields = {
   ai_response_at?: Maybe<Scalars['timestamptz']['output']>;
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  char_count?: Maybe<Scalars['Int']['output']>;
+  client_version?: Maybe<Scalars['String']['output']>;
   commit_sha?: Maybe<Scalars['String']['output']>;
   computer_name?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   file_path?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Int']['output']>;
+  inference_file_md5?: Maybe<Scalars['String']['output']>;
+  inference_file_size?: Maybe<Scalars['Int']['output']>;
   inference_type?: Maybe<Scalars['String']['output']>;
   line_number?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   organization_id?: Maybe<Scalars['uuid']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
   prompt_summary?: Maybe<Scalars['String']['output']>;
+  record_id?: Maybe<Scalars['String']['output']>;
   repository_url?: Maybe<Scalars['String']['output']>;
+  session_id?: Maybe<Scalars['String']['output']>;
   tool_name?: Maybe<Scalars['String']['output']>;
   tracy_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_inference_event_id?: Maybe<Scalars['uuid']['output']>;
+  tracy_user_id?: Maybe<Scalars['uuid']['output']>;
   user_name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3228,19 +3279,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Order_By = {
   ai_response_at?: InputMaybe<Order_By>;
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
+  char_count?: InputMaybe<Order_By>;
+  client_version?: InputMaybe<Order_By>;
   commit_sha?: InputMaybe<Order_By>;
   computer_name?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
   file_path?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inference_file_line_count?: InputMaybe<Order_By>;
+  inference_file_md5?: InputMaybe<Order_By>;
+  inference_file_size?: InputMaybe<Order_By>;
   inference_type?: InputMaybe<Order_By>;
   line_number?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   organization_id?: InputMaybe<Order_By>;
+  platform?: InputMaybe<Order_By>;
   prompt_summary?: InputMaybe<Order_By>;
+  record_id?: InputMaybe<Order_By>;
   repository_url?: InputMaybe<Order_By>;
+  session_id?: InputMaybe<Order_By>;
   tool_name?: InputMaybe<Order_By>;
   tracy_event_id?: InputMaybe<Order_By>;
+  tracy_inference_event_id?: InputMaybe<Order_By>;
+  tracy_user_id?: InputMaybe<Order_By>;
   user_name?: InputMaybe<Order_By>;
 };
 
@@ -3257,6 +3318,10 @@ export enum Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column {
   /** column name */
   ChangeMatchedLines = 'change_matched_lines',
   /** column name */
+  CharCount = 'char_count',
+  /** column name */
+  ClientVersion = 'client_version',
+  /** column name */
   CommitSha = 'commit_sha',
   /** column name */
   ComputerName = 'computer_name',
@@ -3267,6 +3332,12 @@ export enum Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceFileLineCount = 'inference_file_line_count',
+  /** column name */
+  InferenceFileMd5 = 'inference_file_md5',
+  /** column name */
+  InferenceFileSize = 'inference_file_size',
+  /** column name */
   InferenceType = 'inference_type',
   /** column name */
   LineNumber = 'line_number',
@@ -3275,13 +3346,23 @@ export enum Ai_Blame_Attribution_With_Commit_And_Inference_Select_Column {
   /** column name */
   OrganizationId = 'organization_id',
   /** column name */
+  Platform = 'platform',
+  /** column name */
   PromptSummary = 'prompt_summary',
   /** column name */
+  RecordId = 'record_id',
+  /** column name */
   RepositoryUrl = 'repository_url',
+  /** column name */
+  SessionId = 'session_id',
   /** column name */
   ToolName = 'tool_name',
   /** column name */
   TracyEventId = 'tracy_event_id',
+  /** column name */
+  TracyInferenceEventId = 'tracy_inference_event_id',
+  /** column name */
+  TracyUserId = 'tracy_user_id',
   /** column name */
   UserName = 'user_name'
 }
@@ -3291,6 +3372,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3299,6 +3383,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_pop_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3307,6 +3394,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Stddev_Samp_Fields = 
   __typename?: 'ai_blame_attribution_with_commit_and_inference_stddev_samp_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3325,19 +3415,29 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Stream_Cursor_Value_I
   ai_response_at?: InputMaybe<Scalars['timestamptz']['input']>;
   change_lines?: InputMaybe<Scalars['Int']['input']>;
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
+  char_count?: InputMaybe<Scalars['Int']['input']>;
+  client_version?: InputMaybe<Scalars['String']['input']>;
   commit_sha?: InputMaybe<Scalars['String']['input']>;
   computer_name?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   file_path?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inference_file_line_count?: InputMaybe<Scalars['Int']['input']>;
+  inference_file_md5?: InputMaybe<Scalars['String']['input']>;
+  inference_file_size?: InputMaybe<Scalars['Int']['input']>;
   inference_type?: InputMaybe<Scalars['String']['input']>;
   line_number?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
   prompt_summary?: InputMaybe<Scalars['String']['input']>;
+  record_id?: InputMaybe<Scalars['String']['input']>;
   repository_url?: InputMaybe<Scalars['String']['input']>;
+  session_id?: InputMaybe<Scalars['String']['input']>;
   tool_name?: InputMaybe<Scalars['String']['input']>;
   tracy_event_id?: InputMaybe<Scalars['uuid']['input']>;
+  tracy_inference_event_id?: InputMaybe<Scalars['uuid']['input']>;
+  tracy_user_id?: InputMaybe<Scalars['uuid']['input']>;
   user_name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -3346,6 +3446,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Sum_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_sum_fields';
   change_lines?: Maybe<Scalars['Int']['output']>;
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
+  char_count?: Maybe<Scalars['Int']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Int']['output']>;
+  inference_file_size?: Maybe<Scalars['Int']['output']>;
   line_number?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -3354,6 +3457,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Var_Pop_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_var_pop_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3362,6 +3468,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Var_Samp_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_var_samp_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3370,6 +3479,9 @@ export type Ai_Blame_Attribution_With_Commit_And_Inference_Variance_Fields = {
   __typename?: 'ai_blame_attribution_with_commit_and_inference_variance_fields';
   change_lines?: Maybe<Scalars['Float']['output']>;
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
+  char_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_line_count?: Maybe<Scalars['Float']['output']>;
+  inference_file_size?: Maybe<Scalars['Float']['output']>;
   line_number?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -54925,7 +55037,7 @@ export type GetAiBlameAttributionPromptQueryVariables = Exact<{
 }>;
 
 
-export type GetAiBlameAttributionPromptQuery = { __typename?: 'query_root', getAIBlameInferenceData: { __typename?: 'GetAIBlameInferencePromptResponse', promptUrl?: string | null } };
+export type GetAiBlameAttributionPromptQuery = { __typename?: 'query_root', getAIBlameInferenceData: { __typename?: 'GetAIBlameInferencePromptResponse', promptUrl?: string | null, conversationMessages?: Array<{ __typename?: 'ConversationMessage', type: string, text: string, date: string }> | null } };
 
 export type GetPromptSummaryQueryVariables = Exact<{
   aiBlameAttributionId: Scalars['String']['input'];
@@ -55597,6 +55709,11 @@ export const GetAiBlameAttributionPromptDocument = `
     query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
   getAIBlameInferenceData(aiBlameAttributionId: $aiBlameAttributionId) {
     promptUrl
+    conversationMessages {
+      type
+      text
+      date
+    }
   }
 }
     `;

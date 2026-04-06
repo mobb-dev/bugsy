@@ -431,6 +431,11 @@ query GetAIBlameInference($aiBlameInferenceIds: [uuid!]) {
 query GetAIBlameAttributionPrompt($aiBlameAttributionId: String!) {
   getAIBlameInferenceData(aiBlameAttributionId: $aiBlameAttributionId) {
     promptUrl
+    conversationMessages {
+      type
+      text
+      date
+    }
   }
 }
 

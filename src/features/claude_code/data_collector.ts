@@ -22,26 +22,26 @@ import {
 import type { Logger } from '../../utils/shared-logger'
 import { withTimeout } from '../../utils/with-timeout'
 import {
+  ACTIVE_KEY,
+  ACTIVE_LOCK_TTL_MS,
+  CC_VERSION_CACHE_KEY,
+  CC_VERSION_CLI_KEY,
+  CLEANUP_INTERVAL_MS,
+  COOLDOWN_KEY,
+  GLOBAL_COOLDOWN_MS,
+  GQL_AUTH_TIMEOUT_MS,
+  HOOK_COOLDOWN_MS,
+  MAX_ENTRIES_PER_INVOCATION,
+  STALE_KEY_MAX_AGE_MS,
+  STDIN_TIMEOUT_MS,
+} from './data_collector_constants'
+import {
   createScopedHookLog,
   getClaudeCodeVersion,
   hookLog,
   setClaudeCodeVersion,
 } from './hook_logger'
 import { autoUpgradeMatcherIfStale } from './install_hook'
-
-const CC_VERSION_CACHE_KEY = 'claudeCode.detectedCCVersion'
-const CC_VERSION_CLI_KEY = 'claudeCode.detectedCCVersionCli'
-
-const GLOBAL_COOLDOWN_MS = 5_000 // 5 seconds — throttle across all sessions on this machine
-const HOOK_COOLDOWN_MS = 15_000 // 15 seconds — skip invocations within cooldown (per session)
-const ACTIVE_LOCK_TTL_MS = 60_000 // 60 seconds — stale lock fallback if hook crashes without clearing
-const GQL_AUTH_TIMEOUT_MS = 15_000 // 15 seconds — max wait for GQL authentication
-const STALE_KEY_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000 // 14 days
-const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000 // Run cleanup at most once per day
-const MAX_ENTRIES_PER_INVOCATION = 50 // Cap entries per hook run to avoid CPU spikes on large transcripts
-
-const COOLDOWN_KEY = 'lastHookRunAt'
-const ACTIVE_KEY = 'hookActiveAt'
 
 const HookDataSchema = z.object({
   session_id: z.string().nullish(),
@@ -98,8 +98,6 @@ async function detectClaudeCodeVersion(): Promise<string | undefined> {
 /**
  * Reads and parses JSON data from stdin
  */
-const STDIN_TIMEOUT_MS = 10_000 // 10 seconds
-
 export async function readStdinData(): Promise<unknown> {
   hookLog.debug('Reading stdin data')
   return new Promise((resolve, reject) => {

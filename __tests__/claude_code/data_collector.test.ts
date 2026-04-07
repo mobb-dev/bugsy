@@ -116,6 +116,18 @@ vi.mock('../../src/features/analysis/graphql/tracy-batch-upload', () => ({
     mockPrepareAndSend(...args),
 }))
 
+// Override MAX_ENTRIES_PER_INVOCATION to 50 so existing 54-entry fixtures trigger the cap
+vi.mock(
+  '../../src/features/claude_code/data_collector_constants',
+  async (importOriginal) => {
+    const mod =
+      await importOriginal<
+        typeof import('../../src/features/claude_code/data_collector_constants')
+      >()
+    return { ...mod, MAX_ENTRIES_PER_INVOCATION: 50 }
+  }
+)
+
 // Authentic transcript files from real Claude Code sessions
 const EDIT_TRANSCRIPT = path.join(
   __dirname,

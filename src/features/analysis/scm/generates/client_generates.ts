@@ -2545,6 +2545,8 @@ export type Ai_Blame_Attribution = {
   createdAt: Scalars['timestamptz']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
+  inferenceEndIndex?: Maybe<Scalars['Int']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Int']['output']>;
   lineNumber: Scalars['Int']['output'];
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
@@ -2648,6 +2650,8 @@ export type Ai_Blame_Attribution_Avg_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2657,6 +2661,8 @@ export type Ai_Blame_Attribution_Avg_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2675,6 +2681,8 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  inferenceEndIndex?: InputMaybe<Int_Comparison_Exp>;
+  inferenceStartIndex?: InputMaybe<Int_Comparison_Exp>;
   lineNumber?: InputMaybe<Int_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   promptSummary?: InputMaybe<String_Comparison_Exp>;
@@ -2699,6 +2707,8 @@ export type Ai_Blame_Attribution_Inc_Input = {
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  inferenceEndIndex?: InputMaybe<Scalars['Int']['input']>;
+  inferenceStartIndex?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -2715,6 +2725,8 @@ export type Ai_Blame_Attribution_Insert_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceEndIndex?: InputMaybe<Scalars['Int']['input']>;
+  inferenceStartIndex?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
@@ -2736,6 +2748,8 @@ export type Ai_Blame_Attribution_Max_Fields = {
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Int']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Int']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
@@ -2754,6 +2768,8 @@ export type Ai_Blame_Attribution_Max_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
@@ -2773,6 +2789,8 @@ export type Ai_Blame_Attribution_Min_Fields = {
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Int']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Int']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   promptSummary?: Maybe<Scalars['String']['output']>;
@@ -2791,6 +2809,8 @@ export type Ai_Blame_Attribution_Min_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
@@ -2833,6 +2853,8 @@ export type Ai_Blame_Attribution_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   promptSummary?: InputMaybe<Order_By>;
@@ -2866,6 +2888,10 @@ export enum Ai_Blame_Attribution_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  InferenceEndIndex = 'inferenceEndIndex',
+  /** column name */
+  InferenceStartIndex = 'inferenceStartIndex',
+  /** column name */
   LineNumber = 'lineNumber',
   /** column name */
   Model = 'model',
@@ -2888,6 +2914,8 @@ export type Ai_Blame_Attribution_Set_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceEndIndex?: InputMaybe<Scalars['Int']['input']>;
+  inferenceStartIndex?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
@@ -2902,6 +2930,8 @@ export type Ai_Blame_Attribution_Stddev_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2911,6 +2941,8 @@ export type Ai_Blame_Attribution_Stddev_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2921,6 +2953,8 @@ export type Ai_Blame_Attribution_Stddev_Pop_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2930,6 +2964,8 @@ export type Ai_Blame_Attribution_Stddev_Pop_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2940,6 +2976,8 @@ export type Ai_Blame_Attribution_Stddev_Samp_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -2949,6 +2987,8 @@ export type Ai_Blame_Attribution_Stddev_Samp_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -2971,6 +3011,8 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  inferenceEndIndex?: InputMaybe<Scalars['Int']['input']>;
+  inferenceStartIndex?: InputMaybe<Scalars['Int']['input']>;
   lineNumber?: InputMaybe<Scalars['Int']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   promptSummary?: InputMaybe<Scalars['String']['input']>;
@@ -2985,6 +3027,8 @@ export type Ai_Blame_Attribution_Sum_Fields = {
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Int']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Int']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Int']['output']>;
   lineNumber?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -2994,6 +3038,8 @@ export type Ai_Blame_Attribution_Sum_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -3015,6 +3061,10 @@ export enum Ai_Blame_Attribution_Update_Column {
   FilePath = 'filePath',
   /** column name */
   Id = 'id',
+  /** column name */
+  InferenceEndIndex = 'inferenceEndIndex',
+  /** column name */
+  InferenceStartIndex = 'inferenceStartIndex',
   /** column name */
   LineNumber = 'lineNumber',
   /** column name */
@@ -3043,6 +3093,8 @@ export type Ai_Blame_Attribution_Var_Pop_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3052,6 +3104,8 @@ export type Ai_Blame_Attribution_Var_Pop_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -3062,6 +3116,8 @@ export type Ai_Blame_Attribution_Var_Samp_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3071,6 +3127,8 @@ export type Ai_Blame_Attribution_Var_Samp_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 
@@ -3081,6 +3139,8 @@ export type Ai_Blame_Attribution_Variance_Fields = {
   change_matched_lines?: Maybe<Scalars['Float']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Float']['output']>;
+  inferenceEndIndex?: Maybe<Scalars['Float']['output']>;
+  inferenceStartIndex?: Maybe<Scalars['Float']['output']>;
   lineNumber?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -3090,6 +3150,8 @@ export type Ai_Blame_Attribution_Variance_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  inferenceEndIndex?: InputMaybe<Order_By>;
+  inferenceStartIndex?: InputMaybe<Order_By>;
   lineNumber?: InputMaybe<Order_By>;
 };
 

@@ -129,10 +129,9 @@ export async function handleMobbLogin({
       throw new CliError('Failed to generate login URL')
     }
 
-    !skipPrompts &&
-      console.log(
-        `If the page does not open automatically, kindly access it through ${loginUrl}.`
-      )
+    console.log(
+      `If the page does not open automatically, kindly access it through ${loginUrl}.`
+    )
 
     authManager.openUrlInBrowser()
 

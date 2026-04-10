@@ -15,6 +15,11 @@ export class Npm {
   #npmRunParams
   #packageVersion
 
+  /** The temporary HOME directory used by spawned processes. */
+  get homeDir() {
+    return this.#tmpDir
+  }
+
   /**
    * Configure npm to run from local registry and publish fresh mobbdev (Bugsy)
    * build to it.

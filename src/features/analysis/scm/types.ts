@@ -239,3 +239,11 @@ export type ChangedLinesData = {
   additions: number
   deletions: number
 }
+
+export type RepositoryContributor = {
+  externalId: string
+  username: string | null
+  displayName: string | null
+  email: string | null
+  accessLevel: string | null
+}

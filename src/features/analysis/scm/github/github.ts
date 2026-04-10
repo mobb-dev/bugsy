@@ -932,5 +932,129 @@ export function getGithubSdk(
         hasMore: page * perPage < response.data.total_count,
       }
     },
+
+    async listRepositoryCollaborators(params: { owner: string; repo: string }) {
+      const collaborators = await octokit.paginate(
+        octokit.rest.repos.listCollaborators,
+        {
+          owner: params.owner,
+          repo: params.repo,
+          per_page: 100,
+        }
+      )
+      return collaborators
+    },
+
+    async listOrgMembers(params: { org: string }) {
+      const members = await octokit.paginate(octokit.rest.orgs.listMembers, {
+        org: params.org,
+        per_page: 100,
+      })
+      return members
+    },
+
+    async getUserProfile(params: { username: string }) {
+      const { data } = await octokit.rest.users.getByUsername({
+        username: params.username,
+      })
+      return data
+    },
+
+    async getLatestRepoCommitByAuthor(params: {
+      owner: string
+      repo: string
+      author: string
+    }) {
+      try {
+        const { data } = await octokit.rest.repos.listCommits({
+          owner: params.owner,
+          repo: params.repo,
+          author: params.author,
+          per_page: 1,
+        })
+        return data[0] ?? null
+      } catch {
+        return null
+      }
+    },
+
+    async getAuthenticatedUser(): Promise<{
+      id: number
+      login: string
+      email: string | null
+    } | null> {
+      try {
+        const { data } = await octokit.rest.users.getAuthenticated()
+        return { id: data.id, login: data.login, email: data.email ?? null }
+      } catch {
+        return null
+      }
+    },
+
+    async getAuthenticatedUserEmails(): Promise<
+      { email: string; primary: boolean; verified: boolean }[]
+    > {
+      try {
+        const { data } =
+          await octokit.rest.users.listEmailsForAuthenticatedUser({
+            per_page: 100,
+          })
+        return data
+      } catch {
+        return []
+      }
+    },
+
+    async getEmailFromPublicEvents(params: {
+      username: string
+    }): Promise<string | null> {
+      try {
+        const { data: events } =
+          await octokit.rest.activity.listPublicEventsForUser({
+            username: params.username,
+            per_page: 30,
+          })
+        let fallback: string | null = null
+        for (const event of events) {
+          if (event.type !== 'PushEvent') continue
+          const payload = event.payload as {
+            commits?: { author?: { email?: string } }[]
+          }
+          if (!payload.commits) continue
+          for (const commit of payload.commits) {
+            const email = commit.author?.email
+            if (!email) continue
+            if (!email.includes('noreply')) return email
+            if (!fallback) fallback = email
+          }
+        }
+        return fallback
+      } catch {
+        return null
+      }
+    },
+
+    async getEmailFromCommitSearch(params: {
+      username: string
+    }): Promise<string | null> {
+      try {
+        const { data } = await octokit.rest.search.commits({
+          q: `author:${params.username}`,
+          sort: 'author-date',
+          order: 'desc',
+          per_page: 5,
+        })
+        let fallback: string | null = null
+        for (const item of data.items) {
+          const email = item.commit?.author?.email
+          if (!email) continue
+          if (!email.includes('noreply')) return email
+          if (!fallback) fallback = email
+        }
+        return fallback
+      } catch {
+        return null
+      }
+    },
   }
 }

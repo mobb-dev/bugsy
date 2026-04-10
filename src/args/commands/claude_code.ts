@@ -1,13 +1,16 @@
+import { spawn } from 'node:child_process'
+
 import { Argv } from 'yargs'
 
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
-import { processAndUploadTranscriptEntries } from '../../features/claude_code/data_collector'
+import { startDaemon } from '../../features/claude_code/daemon'
+import { DaemonPidFile } from '../../features/claude_code/daemon_pid_file'
+import { flushDdLogs, hookLog } from '../../features/claude_code/hook_logger'
 import {
-  flushDdLogs,
-  flushLogs,
-  hookLog,
-} from '../../features/claude_code/hook_logger'
-import { installMobbHooks } from '../../features/claude_code/install_hook'
+  autoUpgradeMatcherIfStale,
+  installMobbHooks,
+  writeDaemonCheckScript,
+} from '../../features/claude_code/install_hook'
 
 export const claudeCodeInstallHookBuilder = (yargs: Argv) => {
   return yargs
@@ -32,7 +35,16 @@ export const claudeCodeProcessHookBuilder = (yargs: Argv) => {
   return yargs
     .example(
       '$0 claude-code-process-hook',
-      'Process Claude Code hook data and upload to backend'
+      'Process Claude Code hook data (legacy — spawns daemon)'
+    )
+    .strict()
+}
+
+export const claudeCodeDaemonBuilder = (yargs: Argv) => {
+  return yargs
+    .example(
+      '$0 claude-code-daemon',
+      'Run the background daemon that processes Claude Code transcripts'
     )
     .strict()
 }
@@ -58,81 +70,59 @@ export const claudeCodeInstallHookHandler = async (argv: {
 }
 
 /**
- * Handler for the claude-code-process-hook command - processes stdin hook data and uploads traces
+ * Handler for the claude-code-process-hook command.
+ * Now a lightweight shim: auto-upgrades hook config, ensures daemon is running, exits.
+ * No stdin reading, no transcript processing.
  */
 export const claudeCodeProcessHookHandler = async () => {
-  // process.uptime() = seconds since Node started. Everything before this point
-  // is bundle parse/JIT + yargs init + command dispatch.
-  const startupMs = Math.round(process.uptime() * 1000)
-
-  // When MOBBDEV_HOOK_DEBUG=1, exit with code 1 on errors so Claude Code
-  // surfaces "Bash hook error". Otherwise swallow errors silently.
-  const debugMode = process.env['MOBBDEV_HOOK_DEBUG'] === '1'
-
-  async function flushAndExit(code: number): Promise<never> {
-    try {
-      flushLogs()
-      await flushDdLogs()
-    } catch {
-      // Best-effort flush — ensure we always exit
-    } finally {
-      process.exit(debugMode ? code : 0)
-    }
-  }
-
-  // Global safety net for any uncaught errors/rejections in the hook process.
-  process.on('uncaughtException', (error) => {
-    hookLog.error(
-      { data: { error: String(error), stack: error.stack } },
-      'Uncaught exception in hook'
-    )
-    void flushAndExit(1)
-  })
-  process.on('unhandledRejection', (reason) => {
-    hookLog.error(
-      {
-        data: {
-          error: String(reason),
-          stack: reason instanceof Error ? reason.stack : undefined,
-        },
-      },
-      'Unhandled rejection in hook'
-    )
-    void flushAndExit(1)
-  })
-
-  let exitCode = 0
-  const hookStart = Date.now()
   try {
-    const result = await processAndUploadTranscriptEntries()
-    if (result.errors > 0) {
-      exitCode = 1
+    // Auto-upgrade hook config to new daemon-check shim format
+    await autoUpgradeMatcherIfStale()
+
+    // Ensure daemon-check.js shim exists on disk
+    writeDaemonCheckScript()
+
+    // Check if daemon is alive; if not, spawn it
+    const pidFile = new DaemonPidFile()
+    pidFile.read()
+    if (!pidFile.isAlive()) {
+      hookLog.info('Daemon not alive — spawning')
+      const localCli = process.env['MOBBDEV_LOCAL_CLI']
+      const child = localCli
+        ? spawn('node', [localCli, 'claude-code-daemon'], {
+            detached: true,
+            stdio: 'ignore',
+            windowsHide: true,
+          })
+        : spawn('npx', ['--yes', 'mobbdev@latest', 'claude-code-daemon'], {
+            detached: true,
+            stdio: 'ignore',
+            shell: true,
+            windowsHide: true,
+          })
+      child.unref()
     }
-    hookLog.info(
-      {
-        data: {
-          entriesUploaded: result.entriesUploaded,
-          entriesSkipped: result.entriesSkipped,
-          errors: result.errors,
-          startupMs,
-          durationMs: Date.now() - hookStart,
-        },
-      },
-      'Claude Code upload complete'
-    )
-  } catch (error) {
-    exitCode = 1
-    hookLog.error(
-      {
-        data: {
-          error: String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-          durationMs: Date.now() - hookStart,
-        },
-      },
-      'Failed to process Claude Code hook'
-    )
+  } catch (err) {
+    hookLog.error({ err }, 'Error in process-hook shim')
   }
 
-  await flushAndExit(exitCode)
+  try {
+    await flushDdLogs()
+  } catch {
+    // Best-effort flush
+  }
+  process.exit(0)
+}
+
+/**
+ * Handler for the claude-code-daemon command — starts the persistent daemon.
+ */
+export const claudeCodeDaemonHandler = async () => {
+  try {
+    await startDaemon()
+  } catch (err) {
+    hookLog.error({ err }, 'Daemon crashed')
+    await flushDdLogs()
+    process.exit(1)
+  }
 }

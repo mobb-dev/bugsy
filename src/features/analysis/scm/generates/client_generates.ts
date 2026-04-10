@@ -20835,6 +20835,18 @@ export type Mutation_Root = {
   delete_repo?: Maybe<Repo_Mutation_Response>;
   /** delete single row from the table: "repo" */
   delete_repo_by_pk?: Maybe<Repo>;
+  /** delete data from the table: "repo_contributor" */
+  delete_repo_contributor?: Maybe<Repo_Contributor_Mutation_Response>;
+  /** delete data from the table: "repo_contributor_access" */
+  delete_repo_contributor_access?: Maybe<Repo_Contributor_Access_Mutation_Response>;
+  /** delete single row from the table: "repo_contributor_access" */
+  delete_repo_contributor_access_by_pk?: Maybe<Repo_Contributor_Access>;
+  /** delete single row from the table: "repo_contributor" */
+  delete_repo_contributor_by_pk?: Maybe<Repo_Contributor>;
+  /** delete data from the table: "repo_contributor_snapshot" */
+  delete_repo_contributor_snapshot?: Maybe<Repo_Contributor_Snapshot_Mutation_Response>;
+  /** delete single row from the table: "repo_contributor_snapshot" */
+  delete_repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
   /** delete data from the table: "scan" */
   delete_scan?: Maybe<Scan_Mutation_Response>;
   /** delete single row from the table: "scan" */
@@ -21303,6 +21315,18 @@ export type Mutation_Root = {
   insert_project_to_user_one?: Maybe<Project_To_User>;
   /** insert data into the table: "repo" */
   insert_repo?: Maybe<Repo_Mutation_Response>;
+  /** insert data into the table: "repo_contributor" */
+  insert_repo_contributor?: Maybe<Repo_Contributor_Mutation_Response>;
+  /** insert data into the table: "repo_contributor_access" */
+  insert_repo_contributor_access?: Maybe<Repo_Contributor_Access_Mutation_Response>;
+  /** insert a single row into the table: "repo_contributor_access" */
+  insert_repo_contributor_access_one?: Maybe<Repo_Contributor_Access>;
+  /** insert a single row into the table: "repo_contributor" */
+  insert_repo_contributor_one?: Maybe<Repo_Contributor>;
+  /** insert data into the table: "repo_contributor_snapshot" */
+  insert_repo_contributor_snapshot?: Maybe<Repo_Contributor_Snapshot_Mutation_Response>;
+  /** insert a single row into the table: "repo_contributor_snapshot" */
+  insert_repo_contributor_snapshot_one?: Maybe<Repo_Contributor_Snapshot>;
   /** insert a single row into the table: "repo" */
   insert_repo_one?: Maybe<Repo>;
   /** insert data into the table: "scan" */
@@ -21944,6 +21968,24 @@ export type Mutation_Root = {
   update_repo?: Maybe<Repo_Mutation_Response>;
   /** update single row of the table: "repo" */
   update_repo_by_pk?: Maybe<Repo>;
+  /** update data of the table: "repo_contributor" */
+  update_repo_contributor?: Maybe<Repo_Contributor_Mutation_Response>;
+  /** update data of the table: "repo_contributor_access" */
+  update_repo_contributor_access?: Maybe<Repo_Contributor_Access_Mutation_Response>;
+  /** update single row of the table: "repo_contributor_access" */
+  update_repo_contributor_access_by_pk?: Maybe<Repo_Contributor_Access>;
+  /** update multiples rows of table: "repo_contributor_access" */
+  update_repo_contributor_access_many?: Maybe<Array<Maybe<Repo_Contributor_Access_Mutation_Response>>>;
+  /** update single row of the table: "repo_contributor" */
+  update_repo_contributor_by_pk?: Maybe<Repo_Contributor>;
+  /** update multiples rows of table: "repo_contributor" */
+  update_repo_contributor_many?: Maybe<Array<Maybe<Repo_Contributor_Mutation_Response>>>;
+  /** update data of the table: "repo_contributor_snapshot" */
+  update_repo_contributor_snapshot?: Maybe<Repo_Contributor_Snapshot_Mutation_Response>;
+  /** update single row of the table: "repo_contributor_snapshot" */
+  update_repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
+  /** update multiples rows of table: "repo_contributor_snapshot" */
+  update_repo_contributor_snapshot_many?: Maybe<Array<Maybe<Repo_Contributor_Snapshot_Mutation_Response>>>;
   /** update multiples rows of table: "repo" */
   update_repo_many?: Maybe<Array<Maybe<Repo_Mutation_Response>>>;
   /** update data of the table: "scan" */
@@ -23285,6 +23327,42 @@ export type Mutation_RootDelete_RepoArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Repo_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_ContributorArgs = {
+  where: Repo_Contributor_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Contributor_AccessArgs = {
+  where: Repo_Contributor_Access_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Contributor_Access_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Contributor_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Contributor_SnapshotArgs = {
+  where: Repo_Contributor_Snapshot_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Contributor_Snapshot_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -24823,6 +24901,48 @@ export type Mutation_RootInsert_Project_To_User_OneArgs = {
 export type Mutation_RootInsert_RepoArgs = {
   objects: Array<Repo_Insert_Input>;
   on_conflict?: InputMaybe<Repo_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_ContributorArgs = {
+  objects: Array<Repo_Contributor_Insert_Input>;
+  on_conflict?: InputMaybe<Repo_Contributor_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Contributor_AccessArgs = {
+  objects: Array<Repo_Contributor_Access_Insert_Input>;
+  on_conflict?: InputMaybe<Repo_Contributor_Access_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Contributor_Access_OneArgs = {
+  object: Repo_Contributor_Access_Insert_Input;
+  on_conflict?: InputMaybe<Repo_Contributor_Access_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Contributor_OneArgs = {
+  object: Repo_Contributor_Insert_Input;
+  on_conflict?: InputMaybe<Repo_Contributor_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Contributor_SnapshotArgs = {
+  objects: Array<Repo_Contributor_Snapshot_Insert_Input>;
+  on_conflict?: InputMaybe<Repo_Contributor_Snapshot_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Contributor_Snapshot_OneArgs = {
+  object: Repo_Contributor_Snapshot_Insert_Input;
+  on_conflict?: InputMaybe<Repo_Contributor_Snapshot_On_Conflict>;
 };
 
 
@@ -27152,6 +27272,68 @@ export type Mutation_RootUpdate_Repo_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Repo_ContributorArgs = {
+  _set?: InputMaybe<Repo_Contributor_Set_Input>;
+  where: Repo_Contributor_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_AccessArgs = {
+  _set?: InputMaybe<Repo_Contributor_Access_Set_Input>;
+  where: Repo_Contributor_Access_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_Access_By_PkArgs = {
+  _set?: InputMaybe<Repo_Contributor_Access_Set_Input>;
+  pk_columns: Repo_Contributor_Access_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_Access_ManyArgs = {
+  updates: Array<Repo_Contributor_Access_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_By_PkArgs = {
+  _set?: InputMaybe<Repo_Contributor_Set_Input>;
+  pk_columns: Repo_Contributor_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_ManyArgs = {
+  updates: Array<Repo_Contributor_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_SnapshotArgs = {
+  _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
+  _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
+  where: Repo_Contributor_Snapshot_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_Snapshot_By_PkArgs = {
+  _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
+  _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
+  pk_columns: Repo_Contributor_Snapshot_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Contributor_Snapshot_ManyArgs = {
+  updates: Array<Repo_Contributor_Snapshot_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Repo_ManyArgs = {
   updates: Array<Repo_Updates>;
 };
@@ -28109,6 +28291,8 @@ export type Organization = {
   brokerHosts_aggregate: Broker_Host_Aggregate;
   brokerTokenExpiryInDays: Scalars['Int']['output'];
   codingTimeStats: GetCodingTimeStatsResponse;
+  /** A computed field, executes function "organization_contributor_counts" */
+  contributorCounts?: Maybe<Array<View_Types_Contributor_Counts>>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
   /** A computed field, executes function "organization_deployed_fixes_count" */
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
@@ -28179,6 +28363,14 @@ export type Organization = {
   /** An aggregate relationship */
   rawIssueTypeBlocklist_aggregate: Organization_Raw_Issue_Type_Blocklist_Aggregate;
   remainingUnstableFixes: Scalars['Int']['output'];
+  /** An array relationship */
+  repoContributorSnapshots: Array<Repo_Contributor_Snapshot>;
+  /** An aggregate relationship */
+  repoContributorSnapshots_aggregate: Repo_Contributor_Snapshot_Aggregate;
+  /** An array relationship */
+  repoContributors: Array<Repo_Contributor>;
+  /** An aggregate relationship */
+  repoContributors_aggregate: Repo_Contributor_Aggregate;
   /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
   /** A computed field, executes function "organization_review_time_stats" */
@@ -28293,6 +28485,16 @@ export type OrganizationBrokerHosts_AggregateArgs = {
 export type OrganizationCodingTimeStatsArgs = {
   endDate: Scalars['Timestamp']['input'];
   startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationContributorCountsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
 };
 
 
@@ -28537,6 +28739,46 @@ export type OrganizationRawIssueTypeBlocklist_AggregateArgs = {
 
 
 /** columns and relationships of "organization" */
+export type OrganizationRepoContributorSnapshotsArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepoContributorSnapshots_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepoContributorsArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepoContributors_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
 export type OrganizationResolvedAggregatedVulnerabilitySeveritiesArgs = {
   args: ResolvedAggregatedVulnerabilitySeverities_Organization_Args;
   distinct_on?: InputMaybe<Array<Aggregated_Severities_Select_Column>>;
@@ -28676,6 +28918,7 @@ export type Organization_Bool_Exp = {
   brokerHosts?: InputMaybe<Broker_Host_Bool_Exp>;
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Bool_Exp>;
   brokerTokenExpiryInDays?: InputMaybe<Int_Comparison_Exp>;
+  contributorCounts?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   disablePrSessionSummary?: InputMaybe<Boolean_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
@@ -28710,6 +28953,10 @@ export type Organization_Bool_Exp = {
   rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
   rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp>;
   remainingUnstableFixes?: InputMaybe<Int_Comparison_Exp>;
+  repoContributorSnapshots?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+  repoContributorSnapshots_aggregate?: InputMaybe<Repo_Contributor_Snapshot_Aggregate_Bool_Exp>;
+  repoContributors?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  repoContributors_aggregate?: InputMaybe<Repo_Contributor_Aggregate_Bool_Exp>;
   roiDevHourlyRate?: InputMaybe<Int_Comparison_Exp>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
@@ -29171,6 +29418,8 @@ export type Organization_Insert_Input = {
   projects?: InputMaybe<Project_Arr_Rel_Insert_Input>;
   rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Arr_Rel_Insert_Input>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
+  repoContributorSnapshots?: InputMaybe<Repo_Contributor_Snapshot_Arr_Rel_Insert_Input>;
+  repoContributors?: InputMaybe<Repo_Contributor_Arr_Rel_Insert_Input>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -29510,6 +29759,7 @@ export type Organization_Order_By = {
   availableUniqueFixes_aggregate?: InputMaybe<Fix_Aggregate_Order_By>;
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Order_By>;
   brokerTokenExpiryInDays?: InputMaybe<Order_By>;
+  contributorCounts_aggregate?: InputMaybe<View_Types_Contributor_Counts_Aggregate_Order_By>;
   createdOn?: InputMaybe<Order_By>;
   disablePrSessionSummary?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
@@ -29536,6 +29786,8 @@ export type Organization_Order_By = {
   projects_aggregate?: InputMaybe<Project_Aggregate_Order_By>;
   rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Order_By>;
   remainingUnstableFixes?: InputMaybe<Order_By>;
+  repoContributorSnapshots_aggregate?: InputMaybe<Repo_Contributor_Snapshot_Aggregate_Order_By>;
+  repoContributors_aggregate?: InputMaybe<Repo_Contributor_Aggregate_Order_By>;
   roiDevHourlyRate?: InputMaybe<Order_By>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Order_By>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Order_By>;
@@ -33581,6 +33833,24 @@ export type Query_Root = {
   repo_aggregate: Repo_Aggregate;
   /** fetch data from the table: "repo" using primary key columns */
   repo_by_pk?: Maybe<Repo>;
+  /** fetch data from the table: "repo_contributor" */
+  repo_contributor: Array<Repo_Contributor>;
+  /** fetch data from the table: "repo_contributor_access" */
+  repo_contributor_access: Array<Repo_Contributor_Access>;
+  /** fetch aggregated fields from the table: "repo_contributor_access" */
+  repo_contributor_access_aggregate: Repo_Contributor_Access_Aggregate;
+  /** fetch data from the table: "repo_contributor_access" using primary key columns */
+  repo_contributor_access_by_pk?: Maybe<Repo_Contributor_Access>;
+  /** fetch aggregated fields from the table: "repo_contributor" */
+  repo_contributor_aggregate: Repo_Contributor_Aggregate;
+  /** fetch data from the table: "repo_contributor" using primary key columns */
+  repo_contributor_by_pk?: Maybe<Repo_Contributor>;
+  /** fetch data from the table: "repo_contributor_snapshot" */
+  repo_contributor_snapshot: Array<Repo_Contributor_Snapshot>;
+  /** fetch aggregated fields from the table: "repo_contributor_snapshot" */
+  repo_contributor_snapshot_aggregate: Repo_Contributor_Snapshot_Aggregate;
+  /** fetch data from the table: "repo_contributor_snapshot" using primary key columns */
+  repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
   /** fetch data from the table: "scan" */
   scan: Array<Scan>;
   /** fetch aggregated fields from the table: "scan" */
@@ -33720,6 +33990,10 @@ export type Query_Root = {
   view_types_ai_human_days_stats: Array<View_Types_Ai_Human_Days_Stats>;
   /** fetch aggregated fields from the table: "view_types.ai_human_days_stats" */
   view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
+  /** fetch data from the table: "view_types.contributor_counts" */
+  view_types_contributor_counts: Array<View_Types_Contributor_Counts>;
+  /** fetch aggregated fields from the table: "view_types.contributor_counts" */
+  view_types_contributor_counts_aggregate: View_Types_Contributor_Counts_Aggregate;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -36141,6 +36415,75 @@ export type Query_RootRepo_By_PkArgs = {
 };
 
 
+export type Query_RootRepo_ContributorArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_AccessArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_Access_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_Access_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootRepo_Contributor_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootRepo_Contributor_SnapshotArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_Snapshot_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Contributor_Snapshot_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootScanArgs = {
   distinct_on?: InputMaybe<Array<Scan_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -36708,6 +37051,24 @@ export type Query_RootView_Types_Ai_Human_Days_Stats_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
   where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Contributor_CountsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Contributor_Counts_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
 };
 
 
@@ -37289,6 +37650,1063 @@ export enum Repo_Constraint {
   /** unique or primary key constraint on columns "id" */
   RepoPkey = 'repo_pkey'
 }
+
+/** columns and relationships of "repo_contributor" */
+export type Repo_Contributor = {
+  __typename?: 'repo_contributor';
+  createdAt: Scalars['timestamptz']['output'];
+  displayName?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  externalId: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+  isActive: Scalars['Boolean']['output'];
+  /** An object relationship */
+  mobbUser?: Maybe<User>;
+  mobbUserId?: Maybe<Scalars['uuid']['output']>;
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  /** An array relationship */
+  repoAccesses: Array<Repo_Contributor_Access>;
+  /** An aggregate relationship */
+  repoAccesses_aggregate: Repo_Contributor_Access_Aggregate;
+  scmType: Submit_Fix_Request_Scm_Type_Enum;
+  scmUrl: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** columns and relationships of "repo_contributor" */
+export type Repo_ContributorRepoAccessesArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+/** columns and relationships of "repo_contributor" */
+export type Repo_ContributorRepoAccesses_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+/** columns and relationships of "repo_contributor_access" */
+export type Repo_Contributor_Access = {
+  __typename?: 'repo_contributor_access';
+  accessLevel?: Maybe<Scalars['String']['output']>;
+  deactivatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  firstSeenAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  isActive: Scalars['Boolean']['output'];
+  lastSeenAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  repoContributor: Repo_Contributor;
+  repoContributorId: Scalars['uuid']['output'];
+  repositoryUrl: Scalars['String']['output'];
+};
+
+/** aggregated selection of "repo_contributor_access" */
+export type Repo_Contributor_Access_Aggregate = {
+  __typename?: 'repo_contributor_access_aggregate';
+  aggregate?: Maybe<Repo_Contributor_Access_Aggregate_Fields>;
+  nodes: Array<Repo_Contributor_Access>;
+};
+
+export type Repo_Contributor_Access_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Repo_Contributor_Access_Aggregate_Bool_Exp_Count>;
+};
+
+export type Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Repo_Contributor_Access_Select_Column_Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Repo_Contributor_Access_Select_Column_Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Repo_Contributor_Access_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "repo_contributor_access" */
+export type Repo_Contributor_Access_Aggregate_Fields = {
+  __typename?: 'repo_contributor_access_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Repo_Contributor_Access_Max_Fields>;
+  min?: Maybe<Repo_Contributor_Access_Min_Fields>;
+};
+
+
+/** aggregate fields of "repo_contributor_access" */
+export type Repo_Contributor_Access_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "repo_contributor_access" */
+export type Repo_Contributor_Access_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Repo_Contributor_Access_Max_Order_By>;
+  min?: InputMaybe<Repo_Contributor_Access_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "repo_contributor_access" */
+export type Repo_Contributor_Access_Arr_Rel_Insert_Input = {
+  data: Array<Repo_Contributor_Access_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Repo_Contributor_Access_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "repo_contributor_access". All fields are combined with a logical 'AND'. */
+export type Repo_Contributor_Access_Bool_Exp = {
+  _and?: InputMaybe<Array<Repo_Contributor_Access_Bool_Exp>>;
+  _not?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+  _or?: InputMaybe<Array<Repo_Contributor_Access_Bool_Exp>>;
+  accessLevel?: InputMaybe<String_Comparison_Exp>;
+  deactivatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  firstSeenAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  isActive?: InputMaybe<Boolean_Comparison_Exp>;
+  lastSeenAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  repoContributor?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  repoContributorId?: InputMaybe<Uuid_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "repo_contributor_access" */
+export enum Repo_Contributor_Access_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  RepoContributorAccessPkey = 'repo_contributor_access_pkey',
+  /** unique or primary key constraint on columns "repository_url", "repo_contributor_id" */
+  RepoContributorAccessRepoContributorIdRepositoryUrlKey = 'repo_contributor_access_repo_contributor_id_repository_url_key'
+}
+
+/** input type for inserting data into table "repo_contributor_access" */
+export type Repo_Contributor_Access_Insert_Input = {
+  accessLevel?: InputMaybe<Scalars['String']['input']>;
+  deactivatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  repoContributor?: InputMaybe<Repo_Contributor_Obj_Rel_Insert_Input>;
+  repoContributorId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Repo_Contributor_Access_Max_Fields = {
+  __typename?: 'repo_contributor_access_max_fields';
+  accessLevel?: Maybe<Scalars['String']['output']>;
+  deactivatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  firstSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  repoContributorId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "repo_contributor_access" */
+export type Repo_Contributor_Access_Max_Order_By = {
+  accessLevel?: InputMaybe<Order_By>;
+  deactivatedAt?: InputMaybe<Order_By>;
+  firstSeenAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lastSeenAt?: InputMaybe<Order_By>;
+  repoContributorId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Repo_Contributor_Access_Min_Fields = {
+  __typename?: 'repo_contributor_access_min_fields';
+  accessLevel?: Maybe<Scalars['String']['output']>;
+  deactivatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  firstSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  repoContributorId?: Maybe<Scalars['uuid']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "repo_contributor_access" */
+export type Repo_Contributor_Access_Min_Order_By = {
+  accessLevel?: InputMaybe<Order_By>;
+  deactivatedAt?: InputMaybe<Order_By>;
+  firstSeenAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lastSeenAt?: InputMaybe<Order_By>;
+  repoContributorId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "repo_contributor_access" */
+export type Repo_Contributor_Access_Mutation_Response = {
+  __typename?: 'repo_contributor_access_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Repo_Contributor_Access>;
+};
+
+/** on_conflict condition type for table "repo_contributor_access" */
+export type Repo_Contributor_Access_On_Conflict = {
+  constraint: Repo_Contributor_Access_Constraint;
+  update_columns?: Array<Repo_Contributor_Access_Update_Column>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "repo_contributor_access". */
+export type Repo_Contributor_Access_Order_By = {
+  accessLevel?: InputMaybe<Order_By>;
+  deactivatedAt?: InputMaybe<Order_By>;
+  firstSeenAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  isActive?: InputMaybe<Order_By>;
+  lastSeenAt?: InputMaybe<Order_By>;
+  repoContributor?: InputMaybe<Repo_Contributor_Order_By>;
+  repoContributorId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: repo_contributor_access */
+export type Repo_Contributor_Access_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "repo_contributor_access" */
+export enum Repo_Contributor_Access_Select_Column {
+  /** column name */
+  AccessLevel = 'accessLevel',
+  /** column name */
+  DeactivatedAt = 'deactivatedAt',
+  /** column name */
+  FirstSeenAt = 'firstSeenAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsActive = 'isActive',
+  /** column name */
+  LastSeenAt = 'lastSeenAt',
+  /** column name */
+  RepoContributorId = 'repoContributorId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl'
+}
+
+/** select "repo_contributor_access_aggregate_bool_exp_bool_and_arguments_columns" columns of table "repo_contributor_access" */
+export enum Repo_Contributor_Access_Select_Column_Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  IsActive = 'isActive'
+}
+
+/** select "repo_contributor_access_aggregate_bool_exp_bool_or_arguments_columns" columns of table "repo_contributor_access" */
+export enum Repo_Contributor_Access_Select_Column_Repo_Contributor_Access_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsActive = 'isActive'
+}
+
+/** input type for updating data in table "repo_contributor_access" */
+export type Repo_Contributor_Access_Set_Input = {
+  accessLevel?: InputMaybe<Scalars['String']['input']>;
+  deactivatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  repoContributorId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "repo_contributor_access" */
+export type Repo_Contributor_Access_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Repo_Contributor_Access_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Repo_Contributor_Access_Stream_Cursor_Value_Input = {
+  accessLevel?: InputMaybe<Scalars['String']['input']>;
+  deactivatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  repoContributorId?: InputMaybe<Scalars['uuid']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "repo_contributor_access" */
+export enum Repo_Contributor_Access_Update_Column {
+  /** column name */
+  AccessLevel = 'accessLevel',
+  /** column name */
+  DeactivatedAt = 'deactivatedAt',
+  /** column name */
+  FirstSeenAt = 'firstSeenAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsActive = 'isActive',
+  /** column name */
+  LastSeenAt = 'lastSeenAt',
+  /** column name */
+  RepoContributorId = 'repoContributorId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl'
+}
+
+export type Repo_Contributor_Access_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Repo_Contributor_Access_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Repo_Contributor_Access_Bool_Exp;
+};
+
+/** aggregated selection of "repo_contributor" */
+export type Repo_Contributor_Aggregate = {
+  __typename?: 'repo_contributor_aggregate';
+  aggregate?: Maybe<Repo_Contributor_Aggregate_Fields>;
+  nodes: Array<Repo_Contributor>;
+};
+
+export type Repo_Contributor_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Repo_Contributor_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Repo_Contributor_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Repo_Contributor_Aggregate_Bool_Exp_Count>;
+};
+
+export type Repo_Contributor_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Repo_Contributor_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Repo_Contributor_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "repo_contributor" */
+export type Repo_Contributor_Aggregate_Fields = {
+  __typename?: 'repo_contributor_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Repo_Contributor_Max_Fields>;
+  min?: Maybe<Repo_Contributor_Min_Fields>;
+};
+
+
+/** aggregate fields of "repo_contributor" */
+export type Repo_Contributor_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "repo_contributor" */
+export type Repo_Contributor_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Repo_Contributor_Max_Order_By>;
+  min?: InputMaybe<Repo_Contributor_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "repo_contributor" */
+export type Repo_Contributor_Arr_Rel_Insert_Input = {
+  data: Array<Repo_Contributor_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Repo_Contributor_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "repo_contributor". All fields are combined with a logical 'AND'. */
+export type Repo_Contributor_Bool_Exp = {
+  _and?: InputMaybe<Array<Repo_Contributor_Bool_Exp>>;
+  _not?: InputMaybe<Repo_Contributor_Bool_Exp>;
+  _or?: InputMaybe<Array<Repo_Contributor_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  displayName?: InputMaybe<String_Comparison_Exp>;
+  email?: InputMaybe<String_Comparison_Exp>;
+  externalId?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  isActive?: InputMaybe<Boolean_Comparison_Exp>;
+  mobbUser?: InputMaybe<User_Bool_Exp>;
+  mobbUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  repoAccesses?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+  repoAccesses_aggregate?: InputMaybe<Repo_Contributor_Access_Aggregate_Bool_Exp>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum_Comparison_Exp>;
+  scmUrl?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  username?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "repo_contributor" */
+export enum Repo_Contributor_Constraint {
+  /** unique or primary key constraint on columns "external_id", "scm_type", "organization_id", "scm_url" */
+  RepoContributorOrganizationIdScmTypeScmUrlExternalKey = 'repo_contributor_organization_id_scm_type_scm_url_external__key',
+  /** unique or primary key constraint on columns "id" */
+  RepoContributorPkey = 'repo_contributor_pkey'
+}
+
+/** input type for inserting data into table "repo_contributor" */
+export type Repo_Contributor_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  mobbUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repoAccesses?: InputMaybe<Repo_Contributor_Access_Arr_Rel_Insert_Input>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  scmUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Repo_Contributor_Max_Fields = {
+  __typename?: 'repo_contributor_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  externalId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mobbUserId?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  scmUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "repo_contributor" */
+export type Repo_Contributor_Max_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  displayName?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mobbUserId?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  scmUrl?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  username?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Repo_Contributor_Min_Fields = {
+  __typename?: 'repo_contributor_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  externalId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mobbUserId?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  scmUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "repo_contributor" */
+export type Repo_Contributor_Min_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  displayName?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mobbUserId?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  scmUrl?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  username?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "repo_contributor" */
+export type Repo_Contributor_Mutation_Response = {
+  __typename?: 'repo_contributor_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Repo_Contributor>;
+};
+
+/** input type for inserting object relation for remote table "repo_contributor" */
+export type Repo_Contributor_Obj_Rel_Insert_Input = {
+  data: Repo_Contributor_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Repo_Contributor_On_Conflict>;
+};
+
+/** on_conflict condition type for table "repo_contributor" */
+export type Repo_Contributor_On_Conflict = {
+  constraint: Repo_Contributor_Constraint;
+  update_columns?: Array<Repo_Contributor_Update_Column>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "repo_contributor". */
+export type Repo_Contributor_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  displayName?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  externalId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  isActive?: InputMaybe<Order_By>;
+  mobbUser?: InputMaybe<User_Order_By>;
+  mobbUserId?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repoAccesses_aggregate?: InputMaybe<Repo_Contributor_Access_Aggregate_Order_By>;
+  scmType?: InputMaybe<Order_By>;
+  scmUrl?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  username?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: repo_contributor */
+export type Repo_Contributor_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "repo_contributor" */
+export enum Repo_Contributor_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DisplayName = 'displayName',
+  /** column name */
+  Email = 'email',
+  /** column name */
+  ExternalId = 'externalId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsActive = 'isActive',
+  /** column name */
+  MobbUserId = 'mobbUserId',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ScmType = 'scmType',
+  /** column name */
+  ScmUrl = 'scmUrl',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  Username = 'username'
+}
+
+/** select "repo_contributor_aggregate_bool_exp_bool_and_arguments_columns" columns of table "repo_contributor" */
+export enum Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  IsActive = 'isActive'
+}
+
+/** select "repo_contributor_aggregate_bool_exp_bool_or_arguments_columns" columns of table "repo_contributor" */
+export enum Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsActive = 'isActive'
+}
+
+/** input type for updating data in table "repo_contributor" */
+export type Repo_Contributor_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  scmUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** columns and relationships of "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot = {
+  __typename?: 'repo_contributor_snapshot';
+  activeContributors: Scalars['Int']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  linkedContributors: Scalars['Int']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  snapshotDate: Scalars['date']['output'];
+  totalContributors: Scalars['Int']['output'];
+};
+
+/** aggregated selection of "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Aggregate = {
+  __typename?: 'repo_contributor_snapshot_aggregate';
+  aggregate?: Maybe<Repo_Contributor_Snapshot_Aggregate_Fields>;
+  nodes: Array<Repo_Contributor_Snapshot>;
+};
+
+export type Repo_Contributor_Snapshot_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Repo_Contributor_Snapshot_Aggregate_Bool_Exp_Count>;
+};
+
+export type Repo_Contributor_Snapshot_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Aggregate_Fields = {
+  __typename?: 'repo_contributor_snapshot_aggregate_fields';
+  avg?: Maybe<Repo_Contributor_Snapshot_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Repo_Contributor_Snapshot_Max_Fields>;
+  min?: Maybe<Repo_Contributor_Snapshot_Min_Fields>;
+  stddev?: Maybe<Repo_Contributor_Snapshot_Stddev_Fields>;
+  stddev_pop?: Maybe<Repo_Contributor_Snapshot_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Repo_Contributor_Snapshot_Stddev_Samp_Fields>;
+  sum?: Maybe<Repo_Contributor_Snapshot_Sum_Fields>;
+  var_pop?: Maybe<Repo_Contributor_Snapshot_Var_Pop_Fields>;
+  var_samp?: Maybe<Repo_Contributor_Snapshot_Var_Samp_Fields>;
+  variance?: Maybe<Repo_Contributor_Snapshot_Variance_Fields>;
+};
+
+
+/** aggregate fields of "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Aggregate_Order_By = {
+  avg?: InputMaybe<Repo_Contributor_Snapshot_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Repo_Contributor_Snapshot_Max_Order_By>;
+  min?: InputMaybe<Repo_Contributor_Snapshot_Min_Order_By>;
+  stddev?: InputMaybe<Repo_Contributor_Snapshot_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Repo_Contributor_Snapshot_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Repo_Contributor_Snapshot_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Repo_Contributor_Snapshot_Sum_Order_By>;
+  var_pop?: InputMaybe<Repo_Contributor_Snapshot_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Repo_Contributor_Snapshot_Var_Samp_Order_By>;
+  variance?: InputMaybe<Repo_Contributor_Snapshot_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Arr_Rel_Insert_Input = {
+  data: Array<Repo_Contributor_Snapshot_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Repo_Contributor_Snapshot_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Repo_Contributor_Snapshot_Avg_Fields = {
+  __typename?: 'repo_contributor_snapshot_avg_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Avg_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "repo_contributor_snapshot". All fields are combined with a logical 'AND'. */
+export type Repo_Contributor_Snapshot_Bool_Exp = {
+  _and?: InputMaybe<Array<Repo_Contributor_Snapshot_Bool_Exp>>;
+  _not?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+  _or?: InputMaybe<Array<Repo_Contributor_Snapshot_Bool_Exp>>;
+  activeContributors?: InputMaybe<Int_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  linkedContributors?: InputMaybe<Int_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  snapshotDate?: InputMaybe<Date_Comparison_Exp>;
+  totalContributors?: InputMaybe<Int_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "repo_contributor_snapshot" */
+export enum Repo_Contributor_Snapshot_Constraint {
+  /** unique or primary key constraint on columns "snapshot_date", "organization_id" */
+  RepoContributorSnapshotOrganizationIdSnapshotDateKey = 'repo_contributor_snapshot_organization_id_snapshot_date_key',
+  /** unique or primary key constraint on columns "id" */
+  RepoContributorSnapshotPkey = 'repo_contributor_snapshot_pkey'
+}
+
+/** input type for incrementing numeric columns in table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Inc_Input = {
+  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
+  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Insert_Input = {
+  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate max on columns */
+export type Repo_Contributor_Snapshot_Max_Fields = {
+  __typename?: 'repo_contributor_snapshot_max_fields';
+  activeContributors?: Maybe<Scalars['Int']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  linkedContributors?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  snapshotDate?: Maybe<Scalars['date']['output']>;
+  totalContributors?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by max() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Max_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  snapshotDate?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Repo_Contributor_Snapshot_Min_Fields = {
+  __typename?: 'repo_contributor_snapshot_min_fields';
+  activeContributors?: Maybe<Scalars['Int']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  linkedContributors?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  snapshotDate?: Maybe<Scalars['date']['output']>;
+  totalContributors?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by min() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Min_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  snapshotDate?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Mutation_Response = {
+  __typename?: 'repo_contributor_snapshot_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Repo_Contributor_Snapshot>;
+};
+
+/** on_conflict condition type for table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_On_Conflict = {
+  constraint: Repo_Contributor_Snapshot_Constraint;
+  update_columns?: Array<Repo_Contributor_Snapshot_Update_Column>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "repo_contributor_snapshot". */
+export type Repo_Contributor_Snapshot_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  snapshotDate?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: repo_contributor_snapshot */
+export type Repo_Contributor_Snapshot_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "repo_contributor_snapshot" */
+export enum Repo_Contributor_Snapshot_Select_Column {
+  /** column name */
+  ActiveContributors = 'activeContributors',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LinkedContributors = 'linkedContributors',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  SnapshotDate = 'snapshotDate',
+  /** column name */
+  TotalContributors = 'totalContributors'
+}
+
+/** input type for updating data in table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Set_Input = {
+  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Repo_Contributor_Snapshot_Stddev_Fields = {
+  __typename?: 'repo_contributor_snapshot_stddev_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Stddev_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Repo_Contributor_Snapshot_Stddev_Pop_Fields = {
+  __typename?: 'repo_contributor_snapshot_stddev_pop_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Stddev_Pop_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Repo_Contributor_Snapshot_Stddev_Samp_Fields = {
+  __typename?: 'repo_contributor_snapshot_stddev_samp_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Stddev_Samp_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Repo_Contributor_Snapshot_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Repo_Contributor_Snapshot_Stream_Cursor_Value_Input = {
+  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Repo_Contributor_Snapshot_Sum_Fields = {
+  __typename?: 'repo_contributor_snapshot_sum_fields';
+  activeContributors?: Maybe<Scalars['Int']['output']>;
+  linkedContributors?: Maybe<Scalars['Int']['output']>;
+  totalContributors?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Sum_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "repo_contributor_snapshot" */
+export enum Repo_Contributor_Snapshot_Update_Column {
+  /** column name */
+  ActiveContributors = 'activeContributors',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LinkedContributors = 'linkedContributors',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  SnapshotDate = 'snapshotDate',
+  /** column name */
+  TotalContributors = 'totalContributors'
+}
+
+export type Repo_Contributor_Snapshot_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Repo_Contributor_Snapshot_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Repo_Contributor_Snapshot_Var_Pop_Fields = {
+  __typename?: 'repo_contributor_snapshot_var_pop_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Var_Pop_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Repo_Contributor_Snapshot_Var_Samp_Fields = {
+  __typename?: 'repo_contributor_snapshot_var_samp_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Var_Samp_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Repo_Contributor_Snapshot_Variance_Fields = {
+  __typename?: 'repo_contributor_snapshot_variance_fields';
+  activeContributors?: Maybe<Scalars['Float']['output']>;
+  linkedContributors?: Maybe<Scalars['Float']['output']>;
+  totalContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "repo_contributor_snapshot" */
+export type Repo_Contributor_Snapshot_Variance_Order_By = {
+  activeContributors?: InputMaybe<Order_By>;
+  linkedContributors?: InputMaybe<Order_By>;
+  totalContributors?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "repo_contributor" */
+export type Repo_Contributor_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Repo_Contributor_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Repo_Contributor_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  displayName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  scmUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "repo_contributor" */
+export enum Repo_Contributor_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DisplayName = 'displayName',
+  /** column name */
+  Email = 'email',
+  /** column name */
+  ExternalId = 'externalId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsActive = 'isActive',
+  /** column name */
+  MobbUserId = 'mobbUserId',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ScmType = 'scmType',
+  /** column name */
+  ScmUrl = 'scmUrl',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  Username = 'username'
+}
+
+export type Repo_Contributor_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Repo_Contributor_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Repo_Contributor_Bool_Exp;
+};
 
 /** input type for incrementing numeric columns in table "repo" */
 export type Repo_Inc_Input = {
@@ -40428,6 +41846,30 @@ export type Subscription_Root = {
   repo_aggregate: Repo_Aggregate;
   /** fetch data from the table: "repo" using primary key columns */
   repo_by_pk?: Maybe<Repo>;
+  /** fetch data from the table: "repo_contributor" */
+  repo_contributor: Array<Repo_Contributor>;
+  /** fetch data from the table: "repo_contributor_access" */
+  repo_contributor_access: Array<Repo_Contributor_Access>;
+  /** fetch aggregated fields from the table: "repo_contributor_access" */
+  repo_contributor_access_aggregate: Repo_Contributor_Access_Aggregate;
+  /** fetch data from the table: "repo_contributor_access" using primary key columns */
+  repo_contributor_access_by_pk?: Maybe<Repo_Contributor_Access>;
+  /** fetch data from the table in a streaming manner: "repo_contributor_access" */
+  repo_contributor_access_stream: Array<Repo_Contributor_Access>;
+  /** fetch aggregated fields from the table: "repo_contributor" */
+  repo_contributor_aggregate: Repo_Contributor_Aggregate;
+  /** fetch data from the table: "repo_contributor" using primary key columns */
+  repo_contributor_by_pk?: Maybe<Repo_Contributor>;
+  /** fetch data from the table: "repo_contributor_snapshot" */
+  repo_contributor_snapshot: Array<Repo_Contributor_Snapshot>;
+  /** fetch aggregated fields from the table: "repo_contributor_snapshot" */
+  repo_contributor_snapshot_aggregate: Repo_Contributor_Snapshot_Aggregate;
+  /** fetch data from the table: "repo_contributor_snapshot" using primary key columns */
+  repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
+  /** fetch data from the table in a streaming manner: "repo_contributor_snapshot" */
+  repo_contributor_snapshot_stream: Array<Repo_Contributor_Snapshot>;
+  /** fetch data from the table in a streaming manner: "repo_contributor" */
+  repo_contributor_stream: Array<Repo_Contributor>;
   /** fetch data from the table in a streaming manner: "repo" */
   repo_stream: Array<Repo>;
   /** fetch data from the table: "scan" */
@@ -40612,6 +42054,12 @@ export type Subscription_Root = {
   view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.ai_human_days_stats" */
   view_types_ai_human_days_stats_stream: Array<View_Types_Ai_Human_Days_Stats>;
+  /** fetch data from the table: "view_types.contributor_counts" */
+  view_types_contributor_counts: Array<View_Types_Contributor_Counts>;
+  /** fetch aggregated fields from the table: "view_types.contributor_counts" */
+  view_types_contributor_counts_aggregate: View_Types_Contributor_Counts_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.contributor_counts" */
+  view_types_contributor_counts_stream: Array<View_Types_Contributor_Counts>;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -43431,6 +44879,96 @@ export type Subscription_RootRepo_By_PkArgs = {
 };
 
 
+export type Subscription_RootRepo_ContributorArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_AccessArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_Access_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Access_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Access_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_Access_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootRepo_Contributor_Access_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Repo_Contributor_Access_Stream_Cursor_Input>>;
+  where?: InputMaybe<Repo_Contributor_Access_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootRepo_Contributor_SnapshotArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_Snapshot_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Contributor_Snapshot_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Contributor_Snapshot_Order_By>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_Snapshot_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootRepo_Contributor_Snapshot_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Repo_Contributor_Snapshot_Stream_Cursor_Input>>;
+  where?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Contributor_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Repo_Contributor_Stream_Cursor_Input>>;
+  where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
 export type Subscription_RootRepo_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Repo_Stream_Cursor_Input>>;
@@ -44136,6 +45674,31 @@ export type Subscription_RootView_Types_Ai_Human_Days_Stats_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Ai_Human_Days_Stats_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Contributor_CountsArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Contributor_Counts_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Contributor_Counts_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Contributor_Counts_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
 };
 
 
@@ -49480,6 +51043,251 @@ export type View_Types_Ai_Human_Days_Stats_Variance_Fields = {
   humanAvgDays?: Maybe<Scalars['Float']['output']>;
   previousAiAvgDays?: Maybe<Scalars['Float']['output']>;
   previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts = {
+  __typename?: 'view_types_contributor_counts';
+  active?: Maybe<Scalars['bigint']['output']>;
+  linked?: Maybe<Scalars['bigint']['output']>;
+  total?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Aggregate = {
+  __typename?: 'view_types_contributor_counts_aggregate';
+  aggregate?: Maybe<View_Types_Contributor_Counts_Aggregate_Fields>;
+  nodes: Array<View_Types_Contributor_Counts>;
+};
+
+/** aggregate fields of "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Aggregate_Fields = {
+  __typename?: 'view_types_contributor_counts_aggregate_fields';
+  avg?: Maybe<View_Types_Contributor_Counts_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Contributor_Counts_Max_Fields>;
+  min?: Maybe<View_Types_Contributor_Counts_Min_Fields>;
+  stddev?: Maybe<View_Types_Contributor_Counts_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Contributor_Counts_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Contributor_Counts_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Contributor_Counts_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Contributor_Counts_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Contributor_Counts_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Contributor_Counts_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Contributor_Counts_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Aggregate_Order_By = {
+  avg?: InputMaybe<View_Types_Contributor_Counts_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<View_Types_Contributor_Counts_Max_Order_By>;
+  min?: InputMaybe<View_Types_Contributor_Counts_Min_Order_By>;
+  stddev?: InputMaybe<View_Types_Contributor_Counts_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<View_Types_Contributor_Counts_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<View_Types_Contributor_Counts_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<View_Types_Contributor_Counts_Sum_Order_By>;
+  var_pop?: InputMaybe<View_Types_Contributor_Counts_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<View_Types_Contributor_Counts_Var_Samp_Order_By>;
+  variance?: InputMaybe<View_Types_Contributor_Counts_Variance_Order_By>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Contributor_Counts_Avg_Fields = {
+  __typename?: 'view_types_contributor_counts_avg_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Avg_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.contributor_counts". All fields are combined with a logical 'AND'. */
+export type View_Types_Contributor_Counts_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Contributor_Counts_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Contributor_Counts_Bool_Exp>>;
+  active?: InputMaybe<Bigint_Comparison_Exp>;
+  linked?: InputMaybe<Bigint_Comparison_Exp>;
+  total?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Contributor_Counts_Max_Fields = {
+  __typename?: 'view_types_contributor_counts_max_fields';
+  active?: Maybe<Scalars['bigint']['output']>;
+  linked?: Maybe<Scalars['bigint']['output']>;
+  total?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by max() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Max_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Contributor_Counts_Min_Fields = {
+  __typename?: 'view_types_contributor_counts_min_fields';
+  active?: Maybe<Scalars['bigint']['output']>;
+  linked?: Maybe<Scalars['bigint']['output']>;
+  total?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by min() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Min_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** Ordering options when selecting data from "view_types.contributor_counts". */
+export type View_Types_Contributor_Counts_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.contributor_counts" */
+export enum View_Types_Contributor_Counts_Select_Column {
+  /** column name */
+  Active = 'active',
+  /** column name */
+  Linked = 'linked',
+  /** column name */
+  Total = 'total'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Contributor_Counts_Stddev_Fields = {
+  __typename?: 'view_types_contributor_counts_stddev_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Stddev_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Contributor_Counts_Stddev_Pop_Fields = {
+  __typename?: 'view_types_contributor_counts_stddev_pop_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Stddev_Pop_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Contributor_Counts_Stddev_Samp_Fields = {
+  __typename?: 'view_types_contributor_counts_stddev_samp_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Stddev_Samp_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "view_types_contributor_counts" */
+export type View_Types_Contributor_Counts_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Contributor_Counts_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Contributor_Counts_Stream_Cursor_Value_Input = {
+  active?: InputMaybe<Scalars['bigint']['input']>;
+  linked?: InputMaybe<Scalars['bigint']['input']>;
+  total?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Contributor_Counts_Sum_Fields = {
+  __typename?: 'view_types_contributor_counts_sum_fields';
+  active?: Maybe<Scalars['bigint']['output']>;
+  linked?: Maybe<Scalars['bigint']['output']>;
+  total?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Sum_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Contributor_Counts_Var_Pop_Fields = {
+  __typename?: 'view_types_contributor_counts_var_pop_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Var_Pop_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Contributor_Counts_Var_Samp_Fields = {
+  __typename?: 'view_types_contributor_counts_var_samp_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Var_Samp_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Contributor_Counts_Variance_Fields = {
+  __typename?: 'view_types_contributor_counts_variance_fields';
+  active?: Maybe<Scalars['Float']['output']>;
+  linked?: Maybe<Scalars['Float']['output']>;
+  total?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "view_types.contributor_counts" */
+export type View_Types_Contributor_Counts_Variance_Order_By = {
+  active?: InputMaybe<Order_By>;
+  linked?: InputMaybe<Order_By>;
+  total?: InputMaybe<Order_By>;
 };
 
 /** columns and relationships of "view_types.issue_type_count" */

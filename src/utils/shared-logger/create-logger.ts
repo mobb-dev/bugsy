@@ -40,6 +40,8 @@ export type LoggerConfig = {
     stream: stream.Writable
     level: string | number
   }[]
+  /** Enable the local configstore log stream. Default: true. Set to false for daemon (DD-only) mode. */
+  enableConfigstore?: boolean
 }
 
 export type Logger = {
@@ -70,16 +72,20 @@ export function createLogger(config: LoggerConfig): Logger {
     maxHeartbeat,
     dd,
     additionalStreams = [],
+    enableConfigstore = true,
   } = config
 
-  // --- Configstore stream ---
-  const store = new Configstore(namespace, {})
-  const csStream = createConfigstoreStream(store, {
-    buffered,
-    scopePath,
-    maxLogs,
-    maxHeartbeat,
-  })
+  // --- Configstore stream (optional — disabled for daemon DD-only mode) ---
+  let csStream: ReturnType<typeof createConfigstoreStream> | null = null
+  if (enableConfigstore) {
+    const store = new Configstore(namespace, {})
+    csStream = createConfigstoreStream(store, {
+      buffered,
+      scopePath,
+      maxLogs,
+      maxHeartbeat,
+    })
+  }
 
   // --- Datadog batch ---
   let ddBatch: DdBatch | null = null
@@ -100,9 +106,11 @@ export function createLogger(config: LoggerConfig): Logger {
   }
 
   // --- Assemble pino multistream ---
-  const streams: pino.StreamEntry[] = [
-    { stream: csStream.writable, level: 'info' as const },
-  ]
+  const streams: pino.StreamEntry[] = []
+
+  if (csStream) {
+    streams.push({ stream: csStream.writable, level: 'info' as const })
+  }
 
   if (ddBatch) {
     streams.push({ stream: ddBatch.createPinoStream(), level: 'info' as const })
@@ -117,6 +125,11 @@ export function createLogger(config: LoggerConfig): Logger {
 
   const pinoLogger = pino(
     {
+      serializers: {
+        err: pino.stdSerializers.err,
+        error: pino.stdSerializers.err,
+        e: pino.stdSerializers.err,
+      },
       formatters: {
         level: (label) => ({ level: label }),
       },
@@ -153,7 +166,7 @@ export function createLogger(config: LoggerConfig): Logger {
   }
 
   function flushLogs(): void {
-    csStream.flush()
+    csStream?.flush()
   }
 
   async function flushDdAsync(): Promise<void> {
@@ -184,7 +197,8 @@ export function createLogger(config: LoggerConfig): Logger {
     flushLogs,
     flushDdAsync,
     disposeDd,
-    setScopePath: csStream.setScopePath,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    setScopePath: csStream?.setScopePath ?? (() => {}),
     updateDdTags,
   }
 }

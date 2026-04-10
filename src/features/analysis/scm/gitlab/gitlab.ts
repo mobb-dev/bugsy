@@ -1177,3 +1177,101 @@ async function brokerRequestHandler(
 
   throw new Error(`gitbeaker: ${response.statusText}`)
 }
+
+export async function listGitlabProjectMembers({
+  repoUrl,
+  accessToken,
+}: {
+  repoUrl: string
+  accessToken: string
+}) {
+  const { owner, projectPath } = parseGitlabOwnerAndRepo(repoUrl)
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+
+  const projectMembers = await api.ProjectMembers.all(projectPath, {
+    includeInherited: true,
+  })
+
+  if (projectMembers.length > 1 || !owner) return projectMembers
+
+  try {
+    const groupMembers = await api.GroupMembers.all(owner, {
+      includeInherited: true,
+    })
+    if (groupMembers.length > projectMembers.length) {
+      return groupMembers
+    }
+  } catch {
+    // Group members API may fail for personal namespaces — fall through
+  }
+
+  return projectMembers
+}
+
+export async function getGitlabUserPublicEmail({
+  repoUrl,
+  accessToken,
+  userId,
+}: {
+  repoUrl: string
+  accessToken: string
+  userId: number
+}): Promise<string | null> {
+  try {
+    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+    const user = await api.Users.show(userId)
+    return (user as Record<string, unknown>)['public_email'] as string | null
+  } catch {
+    return null
+  }
+}
+
+type GitlabRepoContributor = {
+  name: string
+  email: string
+  commits: number
+}
+
+export async function listGitlabRepoContributors({
+  repoUrl,
+  accessToken,
+}: {
+  repoUrl: string
+  accessToken: string
+}): Promise<GitlabRepoContributor[]> {
+  try {
+    const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
+    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+    const contributors = await api.Repositories.allContributors(projectPath)
+    return contributors.map((c) => ({
+      name: c.name,
+      email: c.email,
+      commits: c.commits,
+    }))
+  } catch {
+    return []
+  }
+}
+
+export async function getGitlabAuthenticatedUser({
+  repoUrl,
+  accessToken,
+}: {
+  repoUrl: string
+  accessToken: string
+}): Promise<{ id: number; email: string | null } | null> {
+  try {
+    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+    const user = await api.Users.showCurrentUser()
+    const record = user as Record<string, unknown>
+    return {
+      id: record['id'] as number,
+      email:
+        (record['email'] as string | null) ??
+        (record['public_email'] as string | null) ??
+        null,
+    }
+  } catch {
+    return null
+  }
+}

@@ -8,6 +8,8 @@ import {
 import { mobbCliCommand } from '../types'
 import { analyzeBuilder, analyzeHandler } from './commands/analyze'
 import {
+  claudeCodeDaemonBuilder,
+  claudeCodeDaemonHandler,
   claudeCodeInstallHookBuilder,
   claudeCodeInstallHookHandler,
   claudeCodeProcessHookBuilder,
@@ -114,9 +116,17 @@ export const parseArgs = async (args: readonly string[]) => {
     )
     .command(
       mobbCliCommand.claudeCodeProcessHook,
-      chalk.bold('Process Claude Code hook data and upload to backend.'),
+      chalk.bold('Process Claude Code hook data (legacy — spawns daemon).'),
       claudeCodeProcessHookBuilder,
       claudeCodeProcessHookHandler
+    )
+    .command(
+      mobbCliCommand.claudeCodeDaemon,
+      chalk.bold(
+        'Run the background daemon for Claude Code transcript processing.'
+      ),
+      claudeCodeDaemonBuilder,
+      claudeCodeDaemonHandler
     )
     .command(
       mobbCliCommand.windsurfIntellijInstallHook,

@@ -1,5 +1,6 @@
 import pLimit from 'p-limit'
 
+import { contextLogger } from '../../../../utils/contextLogger'
 import { MAX_BRANCHES_FETCH, ReferenceType, ScmRepoInfo } from '..'
 import {
   InvalidRepoUrlError,
@@ -500,6 +501,51 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
         return commitRes.value
       }
       throw new RefNotFoundError(`ref: ${ref} does not exist`)
+    },
+    async listProjectMembers({ repoUrl }: { repoUrl: string }) {
+      try {
+        const { projectName } = parseAdoOwnerAndRepo(repoUrl)
+        if (!projectName) return []
+        const coreApi = await api.getCoreApi()
+        const teams = await coreApi.getTeams(projectName)
+        const allMembers: {
+          id: string
+          displayName: string
+          uniqueName: string
+          imageUrl: string
+        }[] = []
+        const seenIds = new Set<string>()
+        for (const team of teams) {
+          if (!team.id || !team.projectId) continue
+          const members = await coreApi.getTeamMembersWithExtendedProperties(
+            team.projectId,
+            team.id
+          )
+          for (const member of members) {
+            const identity = member.identity
+            if (!identity?.id || seenIds.has(identity.id)) continue
+            seenIds.add(identity.id)
+            allMembers.push({
+              id: identity.id,
+              displayName: identity.displayName ?? '',
+              uniqueName:
+                ((identity as Record<string, unknown>)[
+                  'uniqueName'
+                ] as string) ?? '',
+              imageUrl:
+                ((identity as Record<string, unknown>)['imageUrl'] as string) ??
+                '',
+            })
+          }
+        }
+        return allMembers
+      } catch (e) {
+        contextLogger.warn(
+          '[listProjectMembers] Failed to list ADO project members — scope may be insufficient',
+          { error: e instanceof Error ? e.message : String(e), repoUrl }
+        )
+        return []
+      }
     },
   }
 }

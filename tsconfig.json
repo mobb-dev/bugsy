@@ -45,6 +45,7 @@
     "static",
     "**/*.json",
     "__tests__/assets/**/*.js",
+    "**/*.tmpl.js",
     "__e2e__"
   ]
 }

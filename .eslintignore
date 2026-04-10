@@ -17,3 +17,4 @@ __tests__/assets/github_fixer_demo/irrelevant_auxiliary_code/repo/scripts/xss-ex
 __tests__/mcp/vitest.config.ts
 vitest.config.ts
 src/post_install/binary.mjs
+*.tmpl.js

@@ -5,9 +5,9 @@ import path from 'node:path'
 import { promisify } from 'node:util'
 
 import Configstore from 'configstore'
-import { z } from 'zod'
 
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
+import { GQLClient } from '../../features/analysis/graphql/gql'
 import { prepareAndSendTracyRecords } from '../../features/analysis/graphql/tracy-batch-upload'
 import {
   AiBlameInferenceType,
@@ -16,44 +16,19 @@ import {
 import { packageJson } from '../../utils/check_node_version'
 import {
   configStore,
-  createSessionConfigStore,
   getSessionFilePrefix,
 } from '../../utils/ConfigStoreService'
 import type { Logger } from '../../utils/shared-logger'
 import { withTimeout } from '../../utils/with-timeout'
 import {
-  ACTIVE_KEY,
-  ACTIVE_LOCK_TTL_MS,
   CC_VERSION_CACHE_KEY,
   CC_VERSION_CLI_KEY,
   CLEANUP_INTERVAL_MS,
-  COOLDOWN_KEY,
-  GLOBAL_COOLDOWN_MS,
+  DAEMON_CHUNK_SIZE,
   GQL_AUTH_TIMEOUT_MS,
-  HOOK_COOLDOWN_MS,
-  MAX_ENTRIES_PER_INVOCATION,
   STALE_KEY_MAX_AGE_MS,
-  STDIN_TIMEOUT_MS,
 } from './data_collector_constants'
-import {
-  createScopedHookLog,
-  getClaudeCodeVersion,
-  hookLog,
-  setClaudeCodeVersion,
-} from './hook_logger'
-import { autoUpgradeMatcherIfStale } from './install_hook'
-
-const HookDataSchema = z.object({
-  session_id: z.string().nullish(),
-  transcript_path: z.string().nullish(),
-  cwd: z.string().nullish(),
-  hook_event_name: z.string(),
-  tool_name: z.string(),
-  tool_input: z.unknown(),
-  tool_response: z.unknown(),
-})
-
-export type HookData = z.infer<typeof HookDataSchema>
+import { getClaudeCodeVersion, hookLog } from './hook_logger'
 
 type TranscriptEntry = {
   type?: string
@@ -69,7 +44,7 @@ const execFileAsync = promisify(execFile)
  * Detect the Claude Code version by running `claude --version`.
  * Cached in configstore — re-detected when our CLI version changes.
  */
-async function detectClaudeCodeVersion(): Promise<string | undefined> {
+export async function detectClaudeCodeVersion(): Promise<string | undefined> {
   const cachedCliVersion = configStore.get(CC_VERSION_CLI_KEY) as
     | string
     | undefined
@@ -92,97 +67,6 @@ async function detectClaudeCodeVersion(): Promise<string | undefined> {
     configStore.set(CC_VERSION_CACHE_KEY, undefined)
     configStore.set(CC_VERSION_CLI_KEY, packageJson.version)
     return undefined
-  }
-}
-
-/**
- * Reads and parses JSON data from stdin
- */
-export async function readStdinData(): Promise<unknown> {
-  hookLog.debug('Reading stdin data')
-  return new Promise((resolve, reject) => {
-    let inputData = ''
-    let settled = false
-
-    const timer = setTimeout(() => {
-      if (!settled) {
-        settled = true
-        process.stdin.destroy()
-        reject(new Error('Timed out reading from stdin'))
-      }
-    }, STDIN_TIMEOUT_MS)
-
-    process.stdin.setEncoding('utf-8')
-
-    process.stdin.on('data', (chunk: string) => {
-      inputData += chunk
-    })
-
-    process.stdin.on('end', () => {
-      if (settled) return
-      settled = true
-      clearTimeout(timer)
-      try {
-        const parsedData = JSON.parse(inputData)
-        hookLog.debug(
-          {
-            data: { keys: Object.keys(parsedData as Record<string, unknown>) },
-          },
-          'Parsed stdin data'
-        )
-        resolve(parsedData)
-      } catch (error) {
-        const msg = `Failed to parse JSON from stdin: ${(error as Error).message}`
-        hookLog.error(msg)
-        reject(new Error(msg))
-      }
-    })
-
-    process.stdin.on('error', (error) => {
-      if (settled) return
-      settled = true
-      clearTimeout(timer)
-      hookLog.error(
-        { data: { error: error.message } },
-        'Error reading from stdin'
-      )
-      reject(new Error(`Error reading from stdin: ${error.message}`))
-    })
-  })
-}
-
-/**
- * Validates hook data structure against the expected schema
- */
-export function validateHookData(data: unknown): HookData {
-  return HookDataSchema.parse(data)
-}
-
-/**
- * Extracts sessionId from the first entry of a transcript JSONL file.
- * Used as a fallback when session_id is missing from hook stdin data
- * (e.g. older Claude Code versions that don't provide it).
- */
-export async function extractSessionIdFromTranscript(
-  transcriptPath: string
-): Promise<string | null> {
-  try {
-    // Read only the first 4KB to extract sessionId from the first line,
-    // avoiding loading the entire transcript file into memory.
-    const fh = await open(transcriptPath, 'r')
-    try {
-      const buf = Buffer.alloc(4096)
-      const { bytesRead } = await fh.read(buf, 0, 4096, 0)
-      const chunk = buf.toString('utf-8', 0, bytesRead)
-      const firstLine = chunk.split('\n').find((l) => l.trim().length > 0)
-      if (!firstLine) return null
-      const entry = JSON.parse(firstLine) as { sessionId?: string }
-      return entry.sessionId ?? null
-    } finally {
-      await fh.close()
-    }
-  } catch {
-    return null
   }
 }
 
@@ -309,12 +193,14 @@ export async function resolveTranscriptPath(
  * Uses a byte offset to avoid re-reading/parsing the entire file on each invocation.
  * Each entry gets an `_recordId` (from uuid or synthetic) assigned.
  *
+ * @param maxEntries - Maximum entries to read in a single call. Daemon passes DAEMON_CHUNK_SIZE (50).
  * Returns the entries and the total file size (used to save the cursor byte offset).
  */
 export async function readNewTranscriptEntries(
   transcriptPath: string,
   sessionId: string,
-  sessionStore: Configstore
+  sessionStore: Configstore,
+  maxEntries: number = DAEMON_CHUNK_SIZE
 ): Promise<{
   entries: (TranscriptEntry & { _recordId: string })[]
   endByteOffset: number
@@ -389,7 +275,7 @@ export async function readNewTranscriptEntries(
     const lineBytes =
       Buffer.byteLength(line, 'utf-8') + (i < allLines.length - 1 ? 1 : 0) // +1 for \n delimiter
 
-    if (parsed.length >= MAX_ENTRIES_PER_INVOCATION) break
+    if (parsed.length >= maxEntries) break
 
     bytesConsumed += lineBytes
 
@@ -413,7 +299,7 @@ export async function readNewTranscriptEntries(
   }
 
   const endByteOffset = startOffset + bytesConsumed
-  const capped = parsed.length >= MAX_ENTRIES_PER_INVOCATION
+  const capped = parsed.length >= maxEntries
 
   if (malformedLines > 0) {
     hookLog.warn(
@@ -429,9 +315,10 @@ export async function readNewTranscriptEntries(
           sessionId,
           entriesParsed: parsed.length,
           totalLines: allLines.length,
+          maxEntries,
         },
       },
-      'Capped at MAX_ENTRIES_PER_INVOCATION, remaining entries deferred'
+      'Capped at maxEntries, remaining entries deferred'
     )
   } else if (!cursor) {
     hookLog.info(
@@ -561,7 +448,7 @@ export function filterEntries(
  * in STALE_KEY_MAX_AGE_MS. Runs at most once per day.
  * Uses the global configStore only for the cleanup-throttle timestamp.
  */
-async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
+export async function cleanupStaleSessions(configDir: string): Promise<void> {
   const lastCleanup = configStore.get('claudeCode.lastCleanupAt') as
     | number
     | undefined
@@ -571,7 +458,6 @@ async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
 
   const now = Date.now()
   const prefix = getSessionFilePrefix()
-  const configDir = path.dirname(sessionStore.path)
 
   try {
     const files = await readdir(configDir)
@@ -587,10 +473,8 @@ async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
           unknown
         >
 
-        // Find the most recent updatedAt across all cursor entries + cooldown
+        // Find the most recent updatedAt across all cursor entries
         let newest = 0
-        const cooldown = content[COOLDOWN_KEY] as number | undefined
-        if (cooldown && cooldown > newest) newest = cooldown
 
         const cursors = content['cursor'] as Record<string, unknown> | undefined
         if (cursors && typeof cursors === 'object') {
@@ -620,214 +504,30 @@ async function cleanupStaleSessions(sessionStore: Configstore): Promise<void> {
 }
 
 /**
- * Main entry point: reads new transcript entries and uploads them
- * as raw records via the batch UploadTracyRecords API.
+ * Input for processTranscript — the 3 fields that the daemon provides.
  */
+export type TranscriptProcessInput = {
+  session_id: string
+  transcript_path: string
+  cwd: string | undefined
+}
+
 export type HookResult = {
   entriesUploaded: number
   entriesSkipped: number
   errors: number
 }
 
-export async function processAndUploadTranscriptEntries(): Promise<HookResult> {
-  hookLog.info('Hook invoked')
-
-  // Global cooldown: throttle hook processes across all sessions on this machine.
-  // Shorter than per-session cooldown — just prevents burst spawning.
-  const globalLastRun = configStore.get('claudeCode.globalLastHookRunAt') as
-    | number
-    | undefined
-  const globalNow = Date.now()
-  if (globalLastRun && globalNow - globalLastRun < GLOBAL_COOLDOWN_MS) {
-    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
-  }
-  configStore.set('claudeCode.globalLastHookRunAt', globalNow)
-
-  // Auto-upgrade stale hook matcher (re-checks on each CLI version bump)
-  const lastUpgradeVersion = configStore.get(
-    'claudeCode.matcherUpgradeVersion'
-  ) as string | undefined
-  if (lastUpgradeVersion !== packageJson.version) {
-    const upgraded = await autoUpgradeMatcherIfStale()
-    configStore.set('claudeCode.matcherUpgradeVersion', packageJson.version)
-    if (upgraded) {
-      hookLog.info('Auto-upgraded hook matcher to reduce CPU usage')
-    }
-  }
-
-  // Detect Claude Code version (cached — re-detected on CLI version bump).
-  // Must run before scoped loggers are created so ddtags include cc_version.
-  try {
-    const ccVersion = await detectClaudeCodeVersion()
-    setClaudeCodeVersion(ccVersion)
-  } catch {
-    // Never fail the hook for version detection
-  }
-
-  const rawData = await readStdinData()
-  const rawObj = rawData as Record<string, unknown> | null
-  const hookData = (() => {
-    try {
-      return validateHookData(rawData)
-    } catch (err) {
-      hookLog.error(
-        {
-          data: {
-            hook_event_name: rawObj?.['hook_event_name'],
-            tool_name: rawObj?.['tool_name'],
-            session_id: rawObj?.['session_id'],
-            cwd: rawObj?.['cwd'],
-            keys: rawObj ? Object.keys(rawObj) : [],
-          },
-        },
-        `Hook validation failed: ${(err as Error).message?.slice(0, 200)}`
-      )
-      throw err
-    }
-  })()
-
-  // transcript_path is required — without it there's no file to read.
-  if (!hookData.transcript_path) {
-    hookLog.warn(
-      {
-        data: {
-          hook_event_name: hookData.hook_event_name,
-          tool_name: hookData.tool_name,
-          session_id: hookData.session_id,
-          cwd: hookData.cwd,
-        },
-      },
-      'Missing transcript_path — cannot process hook'
-    )
-    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
-  }
-
-  // session_id fallback: peek at the transcript file and extract from the first entry.
-  let sessionId = hookData.session_id
-  if (!sessionId) {
-    sessionId = await extractSessionIdFromTranscript(hookData.transcript_path)
-    if (sessionId) {
-      hookLog.warn(
-        {
-          data: {
-            hook_event_name: hookData.hook_event_name,
-            tool_name: hookData.tool_name,
-            cwd: hookData.cwd,
-            extractedSessionId: sessionId,
-          },
-        },
-        'Missing session_id in hook data — extracted from transcript'
-      )
-    } else {
-      hookLog.warn(
-        {
-          data: {
-            hook_event_name: hookData.hook_event_name,
-            tool_name: hookData.tool_name,
-            transcript_path: hookData.transcript_path,
-          },
-        },
-        'Missing session_id and could not extract from transcript — cannot process hook'
-      )
-      return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
-    }
-  }
-
-  if (!hookData.cwd) {
-    hookLog.warn(
-      {
-        data: {
-          hook_event_name: hookData.hook_event_name,
-          tool_name: hookData.tool_name,
-          session_id: sessionId,
-        },
-      },
-      'Missing cwd in hook data — scoped logging and repo URL detection disabled'
-    )
-  }
-
-  // Build a resolved hookData with guaranteed non-null session_id and transcript_path
-  const resolvedHookData = {
-    ...hookData,
-    session_id: sessionId,
-    transcript_path: hookData.transcript_path,
-    cwd: hookData.cwd ?? undefined,
-  }
-
-  // Per-session configstore: each session gets its own file so concurrent
-  // hooks from different sessions never compete for the same JSON file.
-  const sessionStore = createSessionConfigStore(resolvedHookData.session_id)
-
-  // Cleanup stale session files (runs at most once per day)
-  await cleanupStaleSessions(sessionStore)
-
-  // Cooldown: skip if this session was processed recently.
-  // The hook fires on every tool use, but we only need to upload every ~10s.
-  // Within a single session the cooldown serializes writes, so no race.
-  const now = Date.now()
-  const lastRunAt = sessionStore.get(COOLDOWN_KEY) as number | undefined
-  if (lastRunAt && now - lastRunAt < HOOK_COOLDOWN_MS) {
-    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
-  }
-
-  // Active lock: skip if another hook process is currently running for this session.
-  // Prevents parallel hooks from piling up during slow network calls.
-  // TTL fallback ensures a crashed hook doesn't block future invocations.
-  const activeAt = sessionStore.get(ACTIVE_KEY) as number | undefined
-  if (activeAt && now - activeAt < ACTIVE_LOCK_TTL_MS) {
-    const activeDuration = now - activeAt
-    if (activeDuration > HOOK_COOLDOWN_MS) {
-      hookLog.warn(
-        {
-          data: {
-            activeDurationMs: activeDuration,
-            sessionId: resolvedHookData.session_id,
-          },
-        },
-        'Hook still active — possible slow upload or hung process'
-      )
-    }
-    return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
-  }
-  sessionStore.set(ACTIVE_KEY, now)
-  sessionStore.set(COOLDOWN_KEY, now)
-
-  // Create a project-scoped logger so logs are separated per repo.
-  // Fall back to process.cwd() when cwd is missing from hook data —
-  // Claude Code spawns the hook process with cwd set to the project dir.
-  const log = createScopedHookLog(resolvedHookData.cwd ?? process.cwd())
-
-  log.info(
-    {
-      data: {
-        sessionId: resolvedHookData.session_id,
-        toolName: resolvedHookData.tool_name,
-        hookEvent: resolvedHookData.hook_event_name,
-        cwd: resolvedHookData.cwd,
-        claudeCodeVersion: getClaudeCodeVersion(),
-      },
-    },
-    'Hook data validated'
-  )
-
-  try {
-    return await processTranscript(resolvedHookData, sessionStore, log)
-  } finally {
-    sessionStore.delete(ACTIVE_KEY)
-    log.flushLogs()
-  }
-}
-
-type ResolvedHookData = Omit<HookData, 'session_id' | 'transcript_path'> & {
-  session_id: string
-  transcript_path: string
-  cwd: string | undefined
-}
-
-async function processTranscript(
-  hookData: ResolvedHookData,
+/**
+ * Core transcript processing pipeline: reads new entries, filters noise,
+ * authenticates, enriches with model info, and uploads the batch.
+ */
+export async function processTranscript(
+  input: TranscriptProcessInput,
   sessionStore: Configstore,
-  log: Logger
+  log: Logger,
+  maxEntries: number = DAEMON_CHUNK_SIZE,
+  gqlClientOverride?: GQLClient
 ): Promise<HookResult> {
   const {
     entries: rawEntries,
@@ -835,9 +535,10 @@ async function processTranscript(
     resolvedTranscriptPath,
   } = await log.timed('Read transcript', () =>
     readNewTranscriptEntries(
-      hookData.transcript_path,
-      hookData.session_id,
-      sessionStore
+      input.transcript_path,
+      input.session_id,
+      sessionStore,
+      maxEntries
     )
   )
   const cursorKey = getCursorKey(resolvedTranscriptPath)
@@ -874,29 +575,25 @@ async function processTranscript(
     }
   }
 
-  let gqlClient
-  try {
-    gqlClient = await log.timed('GQL auth', () =>
-      withTimeout(
-        getAuthenticatedGQLClient({ isSkipPrompts: true }),
-        GQL_AUTH_TIMEOUT_MS,
-        'GQL auth'
+  let gqlClient: GQLClient
+  if (gqlClientOverride) {
+    gqlClient = gqlClientOverride
+  } else {
+    try {
+      gqlClient = await log.timed('GQL auth', () =>
+        withTimeout(
+          getAuthenticatedGQLClient({ isSkipPrompts: true }),
+          GQL_AUTH_TIMEOUT_MS,
+          'GQL auth'
+        )
       )
-    )
-  } catch (err) {
-    log.error(
-      {
-        data: {
-          error: String(err),
-          stack: err instanceof Error ? err.stack : undefined,
-        },
-      },
-      'GQL auth failed'
-    )
-    return {
-      entriesUploaded: 0,
-      entriesSkipped: filteredOut,
-      errors: entries.length,
+    } catch (err) {
+      log.error({ err }, 'GQL auth failed')
+      return {
+        entriesUploaded: 0,
+        entriesSkipped: filteredOut,
+        errors: entries.length,
+      }
     }
   }
 
@@ -924,7 +621,7 @@ async function processTranscript(
     // Ensure sessionId is on every record so the processor can extract it.
     // Sub-agent events (role-based format) don't carry sessionId natively.
     if (!rawEntry['sessionId']) {
-      rawEntry['sessionId'] = hookData.session_id
+      rawEntry['sessionId'] = input.session_id
     }
 
     return {
@@ -958,7 +655,7 @@ async function processTranscript(
   const sanitize = process.env['MOBBDEV_HOOK_SANITIZE'] === '1'
 
   const result = await log.timed('Batch upload', () =>
-    prepareAndSendTracyRecords(gqlClient, records, hookData.cwd, {
+    prepareAndSendTracyRecords(gqlClient, records, input.cwd, {
       sanitize,
     })
   )

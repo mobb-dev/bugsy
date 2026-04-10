@@ -1,3 +1,5 @@
+import pLimit from 'p-limit'
+
 import { contextLogger } from '../../../../utils/contextLogger'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
@@ -9,6 +11,7 @@ import {
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
+  RepositoryContributor,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -21,6 +24,7 @@ import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   createMarkdownCommentOnPullRequest,
   createMergeRequest,
+  getGitlabAuthenticatedUser,
   getGitlabBranchList,
   getGitlabCommitUrl,
   getGitlabIsRemoteBranch,
@@ -36,8 +40,11 @@ import {
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
   getGitlabUsername,
+  getGitlabUserPublicEmail,
   gitlabMergeRequestStatus,
   gitlabValidateParams,
+  listGitlabProjectMembers,
+  listGitlabRepoContributors,
   searchGitlabMergeRequests,
   searchGitlabProjects,
 } from './gitlab'
@@ -511,5 +518,106 @@ export class GitlabSCMLib extends SCMLib {
       repoUrl: this.url,
       accessToken: this.accessToken,
     })
+  }
+
+  async getRepositoryContributors(): Promise<RepositoryContributor[]> {
+    this._validateAccessTokenAndUrl()
+    const [members, repoContributors, authUser] = await Promise.all([
+      listGitlabProjectMembers({
+        repoUrl: this.url,
+        accessToken: this.accessToken,
+      }),
+      listGitlabRepoContributors({
+        repoUrl: this.url,
+        accessToken: this.accessToken,
+      }),
+      getGitlabAuthenticatedUser({
+        repoUrl: this.url,
+        accessToken: this.accessToken,
+      }),
+    ])
+
+    contextLogger.info('[GitLab] Starting contributor enrichment', {
+      memberCount: members.length,
+      repoContributorCount: repoContributors.length,
+    })
+
+    const enrichLimit = pLimit(5)
+    const enriched = await Promise.all(
+      members.map((m) =>
+        enrichLimit(async () => {
+          let email: string | null = null
+          let emailSource = 'none'
+
+          if (authUser?.email && authUser.id === m.id) {
+            email = authUser.email
+            emailSource = 'authenticated_user'
+          }
+
+          if (!email) {
+            try {
+              email = await getGitlabUserPublicEmail({
+                repoUrl: this.url,
+                accessToken: this.accessToken,
+                userId: m.id,
+              })
+              if (email) emailSource = 'public_email'
+            } catch (err) {
+              contextLogger.warn('[GitLab] getGitlabUserPublicEmail failed', {
+                username: m.username,
+                userId: m.id,
+                error: err instanceof Error ? err.message : String(err),
+              })
+            }
+          }
+
+          if (!email && m.username) {
+            const match = repoContributors.find(
+              (rc) =>
+                rc.name?.toLowerCase() === m.username?.toLowerCase() ||
+                rc.name?.toLowerCase() === m.name?.toLowerCase()
+            )
+            if (match?.email) {
+              email = match.email
+              emailSource = match.email.includes('noreply')
+                ? 'commit_noreply'
+                : 'commit_author'
+            } else {
+              contextLogger.debug(
+                '[GitLab] No commit author match for member',
+                {
+                  username: m.username,
+                  displayName: m.name,
+                }
+              )
+            }
+          }
+
+          if (email) {
+            contextLogger.info('[GitLab] Resolved contributor email', {
+              username: m.username,
+              emailSource,
+            })
+          }
+
+          return {
+            externalId: String(m.id),
+            username: m.username ?? null,
+            displayName: m.name ?? null,
+            email,
+            accessLevel: m.access_level != null ? String(m.access_level) : null,
+          }
+        })
+      )
+    )
+
+    const withEmail = enriched.filter((c) => c.email)
+    contextLogger.info('[GitLab] Contributor enrichment summary', {
+      total: enriched.length,
+      withEmail: withEmail.length,
+      withoutEmail: enriched.length - withEmail.length,
+    })
+
+    return enriched
   }
 }

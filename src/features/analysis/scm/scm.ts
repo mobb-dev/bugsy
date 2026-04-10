@@ -8,6 +8,7 @@ import {
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
+  RepositoryContributor,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -221,6 +222,12 @@ export abstract class SCMLib {
    * @returns Promise with rate limit info or null if not available
    */
   abstract getRateLimitStatus(): Promise<RateLimitStatus | null>
+
+  /**
+   * Fetches the list of people with access to the repository (collaborators/members).
+   * Used by the contributor sync job for seat-based tracking.
+   */
+  abstract getRepositoryContributors(): Promise<RepositoryContributor[]>
 
   public getAccessToken(): string {
     return this.accessToken || ''

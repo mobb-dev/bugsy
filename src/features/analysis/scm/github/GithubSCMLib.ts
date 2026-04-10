@@ -1,5 +1,7 @@
+import pLimit from 'p-limit'
 import { z } from 'zod'
 
+import { contextLogger } from '../../../../utils/contextLogger'
 import { InvalidRepoUrlError } from '../errors'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
@@ -13,6 +15,7 @@ import {
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
+  RepositoryContributor,
   SCMDeleteGeneralPrCommentParams,
   SCMDeleteGeneralPrReviewResponse,
   SCMGetPrReviewCommentsParams,
@@ -236,6 +239,183 @@ export class GithubSCMLib extends SCMLib {
       reset: result.reset,
       limit: result.limit,
     }
+  }
+
+  async getRepositoryContributors(): Promise<RepositoryContributor[]> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+
+    const [collaborators, authUser, authEmails] = await Promise.all([
+      this.githubSdk.listRepositoryCollaborators({ owner, repo }),
+      this.githubSdk.getAuthenticatedUser(),
+      this.githubSdk.getAuthenticatedUserEmails(),
+    ])
+
+    let authUserPrimaryEmail: string | null = null
+    if (authEmails.length > 0) {
+      const primary = authEmails.find((e) => e.primary && e.verified)
+      const verified = authEmails.find((e) => e.verified)
+      authUserPrimaryEmail =
+        primary?.email ?? verified?.email ?? authEmails[0]?.email ?? null
+    }
+
+    const enrichLimit = pLimit(5)
+    const enriched = await Promise.all(
+      collaborators.map((c) =>
+        enrichLimit(async () => {
+          let profileEmail: string | null = c.email ?? null
+          let displayName: string | null = c.login ?? null
+          let emailSource: string = profileEmail ? 'collaborator_api' : 'none'
+
+          if (
+            !profileEmail &&
+            authUser &&
+            authUserPrimaryEmail &&
+            c.id === authUser.id
+          ) {
+            profileEmail = authUserPrimaryEmail
+            emailSource = 'authenticated_user'
+          }
+
+          const isRealEmail = (e: string | null) => e && !e.includes('noreply')
+          let noreplyFallback: string | null = null
+          let noreplySource = ''
+
+          if (c.login) {
+            try {
+              const profile = await this.githubSdk.getUserProfile({
+                username: c.login,
+              })
+              if (profile.email) {
+                profileEmail = profile.email
+                emailSource = 'user_profile'
+              }
+              displayName = profile.name ?? displayName
+            } catch (err) {
+              contextLogger.warn('[GitHub] getUserProfile failed', {
+                username: c.login,
+                error: err instanceof Error ? err.message : String(err),
+              })
+            }
+
+            if (!isRealEmail(profileEmail)) {
+              if (profileEmail && !noreplyFallback) {
+                noreplyFallback = profileEmail
+                noreplySource = emailSource
+              }
+              try {
+                const commit = await this.githubSdk.getLatestRepoCommitByAuthor(
+                  {
+                    owner,
+                    repo,
+                    author: c.login,
+                  }
+                )
+                const commitEmail = commit?.commit?.author?.email
+                if (commitEmail) {
+                  if (isRealEmail(commitEmail)) {
+                    profileEmail = commitEmail
+                    emailSource = 'commit_author'
+                  } else if (!noreplyFallback) {
+                    noreplyFallback = commitEmail
+                    noreplySource = 'commit_noreply'
+                  }
+                }
+              } catch (err) {
+                contextLogger.warn(
+                  '[GitHub] getLatestRepoCommitByAuthor failed',
+                  {
+                    username: c.login,
+                    owner,
+                    repo,
+                    error: err instanceof Error ? err.message : String(err),
+                  }
+                )
+              }
+            }
+
+            if (!isRealEmail(profileEmail)) {
+              try {
+                const eventEmail =
+                  await this.githubSdk.getEmailFromPublicEvents({
+                    username: c.login,
+                  })
+                if (eventEmail) {
+                  if (isRealEmail(eventEmail)) {
+                    profileEmail = eventEmail
+                    emailSource = 'public_events'
+                  } else if (!noreplyFallback) {
+                    noreplyFallback = eventEmail
+                    noreplySource = 'events_noreply'
+                  }
+                }
+              } catch (err) {
+                contextLogger.warn('[GitHub] getEmailFromPublicEvents failed', {
+                  username: c.login,
+                  error: err instanceof Error ? err.message : String(err),
+                })
+              }
+            }
+
+            if (!isRealEmail(profileEmail)) {
+              try {
+                const searchEmail =
+                  await this.githubSdk.getEmailFromCommitSearch({
+                    username: c.login,
+                  })
+                if (searchEmail) {
+                  if (isRealEmail(searchEmail)) {
+                    profileEmail = searchEmail
+                    emailSource = 'commit_search'
+                  } else if (!noreplyFallback) {
+                    noreplyFallback = searchEmail
+                    noreplySource = 'search_noreply'
+                  }
+                }
+              } catch (err) {
+                contextLogger.warn('[GitHub] getEmailFromCommitSearch failed', {
+                  username: c.login,
+                  error: err instanceof Error ? err.message : String(err),
+                })
+              }
+            }
+
+            if (!isRealEmail(profileEmail) && noreplyFallback) {
+              profileEmail = noreplyFallback
+              emailSource = noreplySource
+            }
+          }
+
+          if (profileEmail) {
+            contextLogger.info('[GitHub] Resolved contributor email', {
+              username: c.login,
+              emailSource,
+            })
+          } else {
+            contextLogger.debug('[GitHub] No email resolved for contributor', {
+              username: c.login,
+            })
+          }
+
+          return {
+            externalId: String(c.id),
+            username: c.login ?? null,
+            displayName,
+            email: profileEmail,
+            accessLevel: c.role_name ?? null,
+          }
+        })
+      )
+    )
+
+    const withEmail = enriched.filter((c) => c.email)
+    contextLogger.info('[GitHub] Contributor enrichment summary', {
+      total: enriched.length,
+      withEmail: withEmail.length,
+      withoutEmail: enriched.length - withEmail.length,
+    })
+
+    return enriched
   }
 
   get scmLibType(): ScmLibScmType {

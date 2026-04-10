@@ -13,6 +13,7 @@ import {
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
+  RepositoryContributor,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -497,6 +498,21 @@ export class AdoSCMLib extends SCMLib {
       remaining: 10000,
       reset: new Date(Date.now() + 3600000),
     }
+  }
+
+  async getRepositoryContributors(): Promise<RepositoryContributor[]> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    const members = await adoSdk.listProjectMembers({ repoUrl: this.url })
+    const isLikelyEmail = (v: string | null | undefined) =>
+      !!v && /^[^@\s\\]+@[^@\s\\]+\.[^@\s\\]+$/.test(v)
+    return members.map((m) => ({
+      externalId: m.id,
+      username: m.uniqueName || null,
+      displayName: m.displayName || null,
+      email: isLikelyEmail(m.uniqueName) ? m.uniqueName! : null,
+      accessLevel: null,
+    }))
   }
 }
 

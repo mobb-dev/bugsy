@@ -4,9 +4,9 @@ import {
   PromptItem,
   uploadAiBlameHandlerFromExtension,
 } from '../../args/commands/upload_ai_blame'
+import { readStdinData } from '../../utils/read-stdin'
 import { AiBlameInferenceType } from '../analysis/scm/generates/client_generates'
 import { parseScmURL, ScmType } from '../analysis/scm/shared/src/urlParser'
-import { readStdinData } from '../claude_code/data_collector'
 import {
   getGrpcClient,
   PromisifiedClient,

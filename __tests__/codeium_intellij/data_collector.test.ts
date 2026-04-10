@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { uploadAiBlameHandlerFromExtension } from '../../src/args/commands/upload_ai_blame'
-import { readStdinData } from '../../src/features/claude_code/data_collector'
 import { getGrpcClient } from '../../src/features/codeium_intellij/codeium_language_server_grpc_client'
 import { processAndUploadHookData } from '../../src/features/codeium_intellij/data_collector'
 import { findRunningCodeiumLanguageServers } from '../../src/features/codeium_intellij/parse_intellij_logs'
+import { readStdinData } from '../../src/utils/read-stdin'
 
-vi.mock('../../src/features/claude_code/data_collector', () => ({
+vi.mock('../../src/utils/read-stdin', () => ({
   readStdinData: vi.fn(),
 }))
 

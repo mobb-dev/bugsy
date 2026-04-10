@@ -21,10 +21,14 @@ function buildDdTags(): string {
   return tags.join(',')
 }
 
-function createHookLogger(scopePath?: string): Logger {
+function createHookLogger(opts?: {
+  scopePath?: string
+  enableConfigstore?: boolean
+}): Logger {
   return createLogger({
     namespace: NAMESPACE,
-    scopePath,
+    scopePath: opts?.scopePath,
+    enableConfigstore: opts?.enableConfigstore,
     dd: {
       apiKey: DD_RUM_TOKEN,
       ddsource: 'mobbdev-cli',
@@ -38,6 +42,7 @@ function createHookLogger(scopePath?: string): Logger {
 
 const logger = createHookLogger()
 const activeScopedLoggers: Logger[] = []
+const scopedLoggerCache = new Map<string, Logger>()
 
 export const hookLog = logger
 
@@ -57,27 +62,29 @@ export function getClaudeCodeVersion(): string | undefined {
   return claudeCodeVersion
 }
 
-/** Flush the global logger and all active scoped loggers (configstore only). */
-export function flushLogs() {
-  logger.flushLogs()
-  for (const scoped of activeScopedLoggers) {
-    scoped.flushLogs()
-  }
-}
-
-/** Flush buffered Datadog logs for all loggers, then clear scoped loggers. Call before process exit. */
+/** Flush buffered Datadog logs for all loggers. */
 export async function flushDdLogs(): Promise<void> {
   await logger.flushDdAsync()
   for (const scoped of activeScopedLoggers) {
     await scoped.flushDdAsync()
   }
-  activeScopedLoggers.length = 0
 }
 
-/** Create a scoped logger for a specific project path.
- *  Registered for flushing via flushLogs(). */
-export function createScopedHookLog(scopePath: string): Logger {
-  const scoped = createHookLogger(scopePath)
+/** Create or retrieve a scoped logger for a specific project path.
+ *  Cached by path to avoid accumulating loggers in long-running daemons.
+ *  Set daemonMode to disable configstore (DD-only). */
+export function createScopedHookLog(
+  scopePath: string,
+  opts?: { daemonMode?: boolean }
+): Logger {
+  const cached = scopedLoggerCache.get(scopePath)
+  if (cached) return cached
+
+  const scoped = createHookLogger({
+    scopePath,
+    enableConfigstore: opts?.daemonMode ? false : undefined,
+  })
+  scopedLoggerCache.set(scopePath, scoped)
   activeScopedLoggers.push(scoped)
   return scoped
 }

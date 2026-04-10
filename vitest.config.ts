@@ -1,8 +1,24 @@
 /// <reference types="vitest" />
+import * as fs from 'fs'
 import * as path from 'path'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 
+/** Vite plugin: load *.tmpl.js files as plain-text string exports. */
+function textLoaderPlugin(): Plugin {
+  return {
+    name: 'tmpl-js-text-loader',
+    transform(_code, id) {
+      if (id.endsWith('.tmpl.js')) {
+        const content = fs.readFileSync(id, 'utf8')
+        return { code: `export default ${JSON.stringify(content)}` }
+      }
+    },
+  }
+}
+
 export default defineConfig({
+  plugins: [textLoaderPlugin()],
   test: {
     globals: true,
     reporters: ['html', 'default'],

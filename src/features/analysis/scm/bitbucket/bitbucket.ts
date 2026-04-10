@@ -387,6 +387,97 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       })
       return res.data
     },
+    async getWorkspaceMembers(params: { workspace: string }) {
+      const allMembers: Record<string, unknown>[] = []
+      let hasMore = true
+      let page = 1
+      while (hasMore) {
+        const res = await bitbucketClient.workspaces.getMembersForWorkspace({
+          workspace: params.workspace,
+          page: String(page),
+          pagelen: 100,
+        } as Parameters<
+          typeof bitbucketClient.workspaces.getMembersForWorkspace
+        >[0])
+        const values = res.data.values ?? []
+        allMembers.push(...values)
+        hasMore = Boolean(res.data.next) && values.length > 0
+        page++
+      }
+      return allMembers
+    },
+
+    async getCurrentUserWithEmail(): Promise<{
+      accountId: string | null
+      email: string | null
+    }> {
+      try {
+        const [userRes, emailsRes] = await Promise.all([
+          bitbucketClient.user.get({}),
+          bitbucketClient.user.listEmails({}),
+        ])
+        const accountId =
+          ((userRes.data as Record<string, unknown>)?.['account_id'] as
+            | string
+            | null) ?? null
+        const emails = ((emailsRes.data as { values?: unknown[] })?.values ??
+          []) as {
+          email?: string
+          is_primary?: boolean
+          is_confirmed?: boolean
+        }[]
+        const primary = emails.find((e) => e.is_primary && e.is_confirmed)
+        const confirmed = emails.find((e) => e.is_confirmed)
+        const email =
+          primary?.email ?? confirmed?.email ?? emails[0]?.email ?? null
+        return { accountId, email }
+      } catch {
+        return { accountId: null, email: null }
+      }
+    },
+
+    async getRepoCommitAuthors(params: {
+      workspace: string
+      repo_slug: string
+    }) {
+      try {
+        const res = await bitbucketClient.repositories.listCommits({
+          repo_slug: params.repo_slug,
+          workspace: params.workspace,
+          pagelen: 100,
+        } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
+        const commits = (res.data as { values?: unknown[] })?.values ?? []
+        const authorMap = new Map<
+          string,
+          { name: string; email: string; accountId: string | null }
+        >()
+        for (const commit of commits) {
+          const raw = (commit as Record<string, unknown>)?.['author'] as
+            | {
+                raw?: string
+                user?: { account_id?: string; nickname?: string }
+              }
+            | undefined
+          if (!raw?.raw) continue
+          const match = raw.raw.match(/^(.+?)\s*<([^>]+)>/)
+          if (!match) continue
+          const [, name, email] = match
+          if (!email) continue
+          const accountId = raw.user?.account_id ?? null
+          const dedupeKey = accountId ?? raw.user?.nickname ?? email
+          if (!authorMap.has(dedupeKey)) {
+            authorMap.set(dedupeKey, {
+              name: name!.trim(),
+              email,
+              accountId,
+            })
+          }
+        }
+        return Array.from(authorMap.values())
+      } catch {
+        return []
+      }
+    },
   }
 }
 

@@ -7,6 +7,7 @@ import {
   RateLimitStatus,
   RecentCommitsResult,
   ReferenceType,
+  RepositoryContributor,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -154,5 +155,10 @@ export class StubSCMLib extends SCMLib {
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
     console.warn('getRateLimitStatus() returning null')
     return null
+  }
+
+  async getRepositoryContributors(): Promise<RepositoryContributor[]> {
+    console.warn('getRepositoryContributors() returning empty array')
+    return []
   }
 }

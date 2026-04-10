@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises'
 
 import { z } from 'zod'
 
+import { contextLogger } from '../../../../utils/contextLogger'
 import { buildAuthorizedRepoUrl } from '../'
 import { InvalidRepoUrlError } from '../errors'
 import { SCMLib } from '../scm'
@@ -13,6 +14,7 @@ import {
   PullRequestMetrics,
   RateLimitStatus,
   RecentCommitsResult,
+  RepositoryContributor,
   ScmLibScmType,
   ScmRepoInfo,
   ScmSubmitRequestStatus,
@@ -335,6 +337,102 @@ export class BitbucketSCMLib extends SCMLib {
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
     // Bitbucket doesn't expose a dedicated rate limit API
     return null
+  }
+
+  async getRepositoryContributors(): Promise<RepositoryContributor[]> {
+    this._validateAccessTokenAndUrl()
+    const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(this.url)
+    const [members, commitAuthors, currentUser] = await Promise.all([
+      this.bitbucketSdk.getWorkspaceMembers({ workspace }),
+      this.bitbucketSdk.getRepoCommitAuthors({ workspace, repo_slug }),
+      this.bitbucketSdk.getCurrentUserWithEmail(),
+    ])
+
+    const emailByAccountId = new Map<string, string>()
+    const emailByName = new Map<string, string>()
+    for (const author of commitAuthors) {
+      if (author.accountId) {
+        emailByAccountId.set(author.accountId, author.email)
+      }
+      const nameLower = author.name.toLowerCase()
+      if (!emailByName.has(nameLower)) {
+        emailByName.set(nameLower, author.email)
+      }
+    }
+
+    contextLogger.info('[Bitbucket] Starting contributor enrichment', {
+      memberCount: members.length,
+      commitAuthorCount: commitAuthors.length,
+      byAccountId: emailByAccountId.size,
+      byName: emailByName.size,
+    })
+
+    const result = members.map((m: Record<string, unknown>) => {
+      const user = m['user'] as
+        | {
+            account_id?: string
+            nickname?: string
+            display_name?: string
+            uuid?: string
+            links?: { avatar?: { href?: string } }
+          }
+        | undefined
+
+      let email: string | null = null
+      let emailSource = 'none'
+
+      if (
+        currentUser.email &&
+        currentUser.accountId &&
+        user?.account_id === currentUser.accountId
+      ) {
+        email = currentUser.email
+        emailSource = 'authenticated_user'
+      }
+
+      if (!email && user?.account_id) {
+        email = emailByAccountId.get(user.account_id) ?? null
+        if (email) emailSource = 'commit_by_account_id'
+      }
+      if (!email && user?.nickname) {
+        email = emailByName.get(user.nickname.toLowerCase()) ?? null
+        if (email) emailSource = 'commit_by_nickname'
+      }
+      if (!email && user?.display_name) {
+        email = emailByName.get(user.display_name.toLowerCase()) ?? null
+        if (email) emailSource = 'commit_by_displayname'
+      }
+
+      if (email) {
+        contextLogger.info('[Bitbucket] Resolved contributor email', {
+          nickname: user?.nickname,
+          emailSource,
+        })
+      } else {
+        contextLogger.debug('[Bitbucket] No email resolved for member', {
+          nickname: user?.nickname,
+          displayName: user?.display_name,
+          accountId: user?.account_id,
+        })
+      }
+
+      return {
+        externalId: user?.account_id ?? user?.uuid ?? '',
+        username: user?.nickname ?? null,
+        displayName: user?.display_name ?? null,
+        email,
+        accessLevel: null,
+      }
+    })
+
+    const withEmail = result.filter((c) => c.email)
+    contextLogger.info('[Bitbucket] Contributor enrichment summary', {
+      total: result.length,
+      withEmail: withEmail.length,
+      withoutEmail: result.length - withEmail.length,
+    })
+
+    return result
   }
 }
 

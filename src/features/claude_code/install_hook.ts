@@ -1,8 +1,13 @@
+import fs from 'node:fs'
 import fsPromises from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
 import chalk from 'chalk'
+
+import { getDaemonCheckScriptPath, getMobbdevDir } from './daemon_pid_file'
+import daemonCheckShimTemplate from './daemon-check-shim.tmpl.js'
+import { HEARTBEAT_STALE_MS } from './data_collector_constants'
 
 type ClaudeCodeHook = {
   type: 'command'
@@ -26,8 +31,12 @@ type ClaudeCodeSettings = {
 
 const CLAUDE_SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 
-/** The current recommended matcher for the hook. */
-export const RECOMMENDED_MATCHER = 'Write|Edit'
+/**
+ * The current recommended matcher for the hook.
+ * With the daemon architecture the hook is a lightweight shim (~100ms)
+ * that only checks daemon liveness, so matching all tools is acceptable.
+ */
+export const RECOMMENDED_MATCHER = '*'
 
 export async function claudeSettingsExists(): Promise<boolean> {
   try {
@@ -56,6 +65,42 @@ export async function writeClaudeSettings(
   )
 }
 
+/** Returns true if a hook command looks like a Mobb hook (old or new format). */
+function isMobbHookCommand(command: string | undefined): boolean {
+  if (!command) return false
+  return (
+    command.includes('mobbdev@latest') ||
+    command.includes('/.mobbdev/') ||
+    command.includes('\\.mobbdev\\')
+  )
+}
+
+/** The daemon-check.js shim script (CommonJS for max Node compat). */
+function getDaemonCheckScript(): string {
+  return daemonCheckShimTemplate.replace(
+    '__HEARTBEAT_STALE_MS__',
+    String(HEARTBEAT_STALE_MS)
+  )
+}
+
+/**
+ * Writes the daemon-check.js shim script to ~/.mobbdev/.
+ * Creates the directory if it doesn't exist.
+ */
+export function writeDaemonCheckScript(): void {
+  fs.mkdirSync(getMobbdevDir(), { recursive: true })
+  fs.writeFileSync(getDaemonCheckScriptPath(), getDaemonCheckScript(), 'utf8')
+}
+
+/** Build the hook command string pointing to the daemon-check shim. */
+function buildHookCommand(envPrefix?: string): string {
+  // Use absolute node path to avoid PATH issues with nvm/fnm/volta.
+  // Fall back to bare `node` if execPath is unavailable.
+  const nodeBin = process.execPath || 'node'
+  const base = `${nodeBin} ${getDaemonCheckScriptPath()}`
+  return envPrefix ? `${envPrefix} ${base}` : base
+}
+
 /**
  * Auto-upgrade stale hook matchers during normal hook execution.
  * Runs silently — never throws, never logs to stdout.
@@ -71,9 +116,7 @@ export async function autoUpgradeMatcherIfStale(): Promise<boolean> {
 
     let upgraded = false
     for (const hook of hooks) {
-      const isMobbHook = hook.hooks.some((h) =>
-        h.command?.includes('claude-code-process-hook')
-      )
+      const isMobbHook = hook.hooks.some((h) => isMobbHookCommand(h.command))
       if (!isMobbHook) continue
 
       if (hook.matcher !== RECOMMENDED_MATCHER) {
@@ -81,8 +124,15 @@ export async function autoUpgradeMatcherIfStale(): Promise<boolean> {
         upgraded = true
       }
 
-      // Ensure async is set on all Mobb hook entries
+      // Upgrade command to new daemon-check shim
       for (const h of hook.hooks) {
+        if (h.command && !h.command.includes('daemon-check.js')) {
+          // Preserve any env var prefix (e.g. WEB_APP_URL="..." API_URL="...")
+          const envMatch = h.command.match(/^((?:\w+="[^"]*"\s*)+)/)
+          const envPrefix = envMatch?.[1]?.trim()
+          h.command = buildHookCommand(envPrefix)
+          upgraded = true
+        }
         if (!h.async) {
           h.async = true
           upgraded = true
@@ -91,6 +141,7 @@ export async function autoUpgradeMatcherIfStale(): Promise<boolean> {
     }
 
     if (upgraded) {
+      writeDaemonCheckScript()
       await writeClaudeSettings(settings)
     }
     return upgraded
@@ -115,6 +166,9 @@ export async function installMobbHooks(
     )
   }
 
+  // Write the daemon-check shim to disk
+  writeDaemonCheckScript()
+
   const settings = await readClaudeSettings()
 
   if (!settings.hooks) {
@@ -126,10 +180,9 @@ export async function installMobbHooks(
   }
 
   // Build command with environment variables if saveEnv is enabled
-  let command = 'npx --yes mobbdev@latest claude-code-process-hook'
-
+  let envPrefix: string | undefined
   if (options.saveEnv) {
-    const envVars = []
+    const envVars: string[] = []
 
     if (process.env['WEB_APP_URL']) {
       envVars.push(`WEB_APP_URL="${process.env['WEB_APP_URL']}"`)
@@ -140,7 +193,7 @@ export async function installMobbHooks(
     }
 
     if (envVars.length > 0) {
-      command = `${envVars.join(' ')} ${command}`
+      envPrefix = envVars.join(' ')
       console.log(
         chalk.blue(
           `Adding environment variables to hook command: ${envVars.join(', ')}`
@@ -149,10 +202,9 @@ export async function installMobbHooks(
     }
   }
 
+  const command = buildHookCommand(envPrefix)
+
   const mobbHookConfig: ClaudeCodeHookMatcher = {
-    // Only fire on tools that indicate meaningful work — skip high-frequency
-    // read-only tools (Grep, Glob, WebSearch, WebFetch) to reduce CPU overhead
-    // from process startup (~1.7s user CPU per invocation).
     matcher: RECOMMENDED_MATCHER,
     hooks: [
       {
@@ -163,11 +215,9 @@ export async function installMobbHooks(
     ],
   }
 
-  // Detect both old ('Edit|Write') and new ('') matchers for upgrade/update
+  // Detect both old (npx mobbdev) and new (daemon-check.js) hooks for upgrade/update
   const existingHookIndex = settings.hooks.PostToolUse.findIndex((hook) =>
-    hook.hooks.some((h) =>
-      h.command?.includes('mobbdev@latest claude-code-process-hook')
-    )
+    hook.hooks.some((h) => isMobbHookCommand(h.command))
   )
 
   if (existingHookIndex >= 0) {

@@ -1,7 +1,9 @@
+import fs from 'node:fs'
 import fsPromises from 'node:fs/promises'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { getDaemonCheckScriptPath } from '../../src/features/claude_code/daemon_pid_file'
 import { installMobbHooks } from '../../src/features/claude_code/install_hook'
 
 // Mock node:fs/promises
@@ -13,7 +15,24 @@ vi.mock('node:fs/promises', () => ({
   },
 }))
 
+// Mock node:fs (sync ops used by writeDaemonCheckScript)
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>
+  return {
+    ...actual,
+    default: {
+      ...(actual['default'] as Record<string, unknown>),
+      mkdirSync: vi.fn(),
+      writeFileSync: vi.fn(),
+    },
+  }
+})
+
 const mockFs = vi.mocked(fsPromises)
+const mockFsSync = vi.mocked(fs)
+
+const EXPECTED_MATCHER = '*'
+const expectedCommand = `${process.execPath} ${getDaemonCheckScriptPath()}`
 
 describe('installMobbHooks', () => {
   beforeEach(() => {
@@ -31,7 +50,9 @@ describe('installMobbHooks', () => {
     }
 
     vi.stubGlobal('process', {
+      ...process,
       env: {
+        ...process.env,
         WEB_APP_URL: 2,
         API_URL: 3,
       },
@@ -51,6 +72,9 @@ describe('installMobbHooks', () => {
 
     expect(cmd).toContain('WEB_APP_URL="2"')
     expect(cmd).toContain('API_URL="3"')
+    // Verify daemon-check shim was written to disk
+    expect(mockFsSync.mkdirSync).toHaveBeenCalled()
+    expect(mockFsSync.writeFileSync).toHaveBeenCalled()
   })
 
   it('should successfully install Mobb hooks when settings file exists and no hooks exist', async () => {
@@ -79,11 +103,11 @@ describe('installMobbHooks', () => {
       hooks: {
         PostToolUse: [
           {
-            matcher: 'Write|Edit',
+            matcher: EXPECTED_MATCHER,
             hooks: [
               {
                 type: 'command',
-                command: 'npx --yes mobbdev@latest claude-code-process-hook',
+                command: expectedCommand,
                 async: true,
               },
             ],
@@ -94,7 +118,7 @@ describe('installMobbHooks', () => {
   })
 
   it('should successfully update existing Mobb hooks when they already exist', async () => {
-    // Arrange
+    // Arrange — old-style npx hook should be detected and upgraded
     const initialSettings = {
       hooks: {
         PostToolUse: [
@@ -137,11 +161,11 @@ describe('installMobbHooks', () => {
     const writtenSettings = JSON.parse(writtenContent as string)
     expect(writtenSettings.hooks.PostToolUse).toHaveLength(2)
     expect(writtenSettings.hooks.PostToolUse[0]).toEqual({
-      matcher: 'Write|Edit',
+      matcher: EXPECTED_MATCHER,
       hooks: [
         {
           type: 'command',
-          command: 'npx --yes mobbdev@latest claude-code-process-hook',
+          command: expectedCommand,
           async: true,
         },
       ],
@@ -203,11 +227,11 @@ describe('installMobbHooks', () => {
 
     // Verify Mobb hook was added
     expect(writtenSettings.hooks.PostToolUse[1]).toEqual({
-      matcher: 'Write|Edit',
+      matcher: EXPECTED_MATCHER,
       hooks: [
         {
           type: 'command',
-          command: 'npx --yes mobbdev@latest claude-code-process-hook',
+          command: expectedCommand,
           async: true,
         },
       ],

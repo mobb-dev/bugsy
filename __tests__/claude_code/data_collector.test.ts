@@ -6,12 +6,11 @@ import tmp from 'tmp-promise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  extractSessionIdFromTranscript,
   filterEntries,
-  processAndUploadTranscriptEntries,
+  processTranscript,
   readNewTranscriptEntries,
   resolveTranscriptPath,
-  validateHookData,
+  type TranscriptProcessInput,
 } from '../../src/features/claude_code/data_collector'
 
 // Per-session configstore mock — each session gets its own in-memory store.
@@ -116,7 +115,7 @@ vi.mock('../../src/features/analysis/graphql/tracy-batch-upload', () => ({
     mockPrepareAndSend(...args),
 }))
 
-// Override MAX_ENTRIES_PER_INVOCATION to 50 so existing 54-entry fixtures trigger the cap
+// Override DAEMON_CHUNK_SIZE to 50 so existing 54-entry fixtures trigger the cap
 vi.mock(
   '../../src/features/claude_code/data_collector_constants',
   async (importOriginal) => {
@@ -124,7 +123,7 @@ vi.mock(
       await importOriginal<
         typeof import('../../src/features/claude_code/data_collector_constants')
       >()
-    return { ...mod, MAX_ENTRIES_PER_INVOCATION: 50 }
+    return { ...mod, DAEMON_CHUNK_SIZE: 50 }
   }
 )
 
@@ -135,7 +134,7 @@ const EDIT_TRANSCRIPT = path.join(
   'dcc484f5-c9f4-4c34-b5c0-791b746026b4.jsonl'
 )
 const EDIT_SESSION_ID = 'dcc484f5-c9f4-4c34-b5c0-791b746026b4'
-const EDIT_ENTRY_COUNT = 50 // 54 raw entries, capped at MAX_ENTRIES_PER_INVOCATION (50)
+const EDIT_ENTRY_COUNT = 50 // 54 raw entries, capped at DAEMON_CHUNK_SIZE (50)
 
 const WRITE_TRANSCRIPT = path.join(
   __dirname,
@@ -144,7 +143,22 @@ const WRITE_TRANSCRIPT = path.join(
 )
 const WRITE_SESSION_ID = '2e251410-b29f-4ff4-817a-7bc61c76d1fb'
 
-describe('processAndUploadTranscriptEntries', () => {
+// Mock logger for processTranscript
+const mockLog = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  heartbeat: vi.fn(),
+  flushLogs: vi.fn(),
+  timed: vi.fn(async (_label: string, fn: () => Promise<unknown>) => fn()),
+  flushDdAsync: vi.fn(),
+  disposeDd: vi.fn(),
+  setScopePath: vi.fn(),
+  updateDdTags: vi.fn(),
+}
+
+describe('processTranscript', () => {
   let tmpDirs: tmp.DirectoryResult[] = []
 
   beforeEach(() => {
@@ -169,31 +183,6 @@ describe('processAndUploadTranscriptEntries', () => {
     }
   })
 
-  function mockStdin(data: string) {
-    const mockStdinObj = {
-      setEncoding: vi.fn(),
-      on: vi.fn((event: string, callback: (data?: string) => void) => {
-        if (event === 'data') {
-          callback(data)
-        } else if (event === 'end') {
-          callback()
-        }
-      }),
-    }
-
-    vi.stubGlobal(
-      'process',
-      new Proxy(process, {
-        get(target, prop) {
-          if (prop === 'stdin') {
-            return mockStdinObj
-          }
-          return Reflect.get(target, prop, target)
-        },
-      })
-    )
-  }
-
   function cursorKeyFor(transcriptPath: string): string {
     const hash = createHash('sha256')
       .update(transcriptPath)
@@ -202,24 +191,15 @@ describe('processAndUploadTranscriptEntries', () => {
     return `cursor.${hash}`
   }
 
-  function createHookStdinData(
+  function makeInput(
     transcriptPath: string,
     sessionId: string,
-    cwd = '/tmp/test-workspace'
-  ): string {
-    return JSON.stringify({
-      session_id: sessionId,
-      transcript_path: transcriptPath,
-      cwd,
-      hook_event_name: 'PostToolUse',
-      tool_name: 'Edit',
-      tool_input: { file_path: '/tmp/test.js', old_string: '', new_string: '' },
-      tool_response: { filePath: '/tmp/test.js', structuredPatch: [] },
-    })
+    cwd: string | undefined = '/tmp/test-workspace'
+  ): TranscriptProcessInput {
+    return { session_id: sessionId, transcript_path: transcriptPath, cwd }
   }
 
   it('should upload all entries on first invocation (edit transcript)', async () => {
-    // No cursor set — first invocation
     mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
 
     const tmpDir = await tmp.dir({ unsafeCleanup: true })
@@ -228,9 +208,11 @@ describe('processAndUploadTranscriptEntries', () => {
     const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
     await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
 
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
+    const result = await processTranscript(
+      makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
 
     expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
     expect(result.errors).toBe(0)
@@ -251,8 +233,11 @@ describe('processAndUploadTranscriptEntries', () => {
     expect(firstRecord.rawData.sessionId).toBe(EDIT_SESSION_ID)
     expect(firstRecord.rawData._recordId).toBeUndefined()
 
-    // active lock + cooldown + cursor advance = 3 sessionStore.set calls (active cleared via delete)
-    expect(mockSessionSet).toHaveBeenCalledTimes(3)
+    // cursor advance = 1 sessionStore.set call
+    expect(mockSessionSet).toHaveBeenCalledWith(
+      expect.stringContaining('cursor.'),
+      expect.anything()
+    )
   })
 
   it('should upload only new entries on subsequent invocation', async () => {
@@ -277,9 +262,11 @@ describe('processAndUploadTranscriptEntries', () => {
       updatedAt: Date.now(),
     })
 
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
+    const result = await processTranscript(
+      makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
 
     const expectedNewEntries = 54 - 40 // 54 total raw entries minus 40 already uploaded
     expect(result.entriesUploaded).toBe(expectedNewEntries)
@@ -303,8 +290,11 @@ describe('processAndUploadTranscriptEntries', () => {
     await fs.writeFile(tmpTranscriptPath, initialLines.join('\n') + '\n')
 
     // First invocation: uploads all 10 entries
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-    const result1 = await processAndUploadTranscriptEntries()
+    const result1 = await processTranscript(
+      makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
     expect(result1.entriesUploaded).toBe(10)
 
     // Append 5 more lines to simulate file growth
@@ -313,12 +303,11 @@ describe('processAndUploadTranscriptEntries', () => {
 
     // Second invocation: should upload only the 5 new lines
     mockPrepareAndSend.mockClear()
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-    // Reset cooldown and active lock so we're not skipped
-    sessionStoreData.delete('lastHookRunAt')
-    sessionStoreData.delete('hookActiveAt')
-    globalStoreData.delete('claudeCode.globalLastHookRunAt')
-    const result2 = await processAndUploadTranscriptEntries()
+    const result2 = await processTranscript(
+      makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
     expect(result2.entriesUploaded).toBe(5)
 
     const [, records] = mockPrepareAndSend.mock.calls[0]!
@@ -326,7 +315,6 @@ describe('processAndUploadTranscriptEntries', () => {
   })
 
   it('should not advance cursor on batch failure', async () => {
-    // No cursor set — first invocation
     mockPrepareAndSend.mockResolvedValue({
       ok: false,
       errors: ['Chunk of 10 records failed: Network error'],
@@ -338,15 +326,16 @@ describe('processAndUploadTranscriptEntries', () => {
     const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
     await fs.copyFile(WRITE_TRANSCRIPT, tmpTranscriptPath)
 
-    mockStdin(createHookStdinData(tmpTranscriptPath, WRITE_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
+    const result = await processTranscript(
+      makeInput(tmpTranscriptPath, WRITE_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
 
     expect(result.entriesUploaded).toBe(0)
     expect(result.errors).toBeGreaterThan(0)
 
-    // active lock + cooldown (no cursor advance on failure) = 2 sessionStore.set calls (active cleared via delete)
-    expect(mockSessionSet).toHaveBeenCalledTimes(2)
+    // No cursor advance on failure
     expect(mockSessionSet).not.toHaveBeenCalledWith(
       expect.stringContaining('cursor.'),
       expect.anything()
@@ -377,17 +366,17 @@ describe('processAndUploadTranscriptEntries', () => {
   })
 
   it('should return zero counts for empty transcript', async () => {
-    // No cursor set — first invocation with empty file
-
     const tmpDir = await tmp.dir({ unsafeCleanup: true })
     tmpDirs.push(tmpDir)
 
     const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
     await fs.writeFile(tmpTranscriptPath, '')
 
-    mockStdin(createHookStdinData(tmpTranscriptPath, 'empty-session'))
-
-    const result = await processAndUploadTranscriptEntries()
+    const result = await processTranscript(
+      makeInput(tmpTranscriptPath, 'empty-session'),
+      mockSessionStore as any,
+      mockLog as any
+    )
 
     expect(result.entriesUploaded).toBe(0)
     expect(result.entriesSkipped).toBe(0)
@@ -549,281 +538,15 @@ describe('processAndUploadTranscriptEntries', () => {
       updatedAt: Date.now(),
     })
 
-    mockStdin(createHookStdinData(tmpTranscriptPath, WRITE_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
+    const result = await processTranscript(
+      makeInput(tmpTranscriptPath, WRITE_SESSION_ID),
+      mockSessionStore as any,
+      mockLog as any
+    )
 
     expect(result.entriesUploaded).toBe(0)
     expect(result.errors).toBe(0)
     expect(mockPrepareAndSend).not.toHaveBeenCalled()
-  })
-
-  it('should skip when invoked within cooldown period for the same session', async () => {
-    const tmpDir = await tmp.dir({ unsafeCleanup: true })
-    tmpDirs.push(tmpDir)
-
-    const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-    await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-    // Set per-session cooldown timestamp to 5 seconds ago (within 10s cooldown)
-    sessionStoreData.set('lastHookRunAt', Date.now() - 5_000)
-
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
-
-    expect(result.entriesUploaded).toBe(0)
-    expect(result.entriesSkipped).toBe(0)
-    expect(result.errors).toBe(0)
-    expect(mockPrepareAndSend).not.toHaveBeenCalled()
-  })
-
-  it('should proceed when cooldown has expired', async () => {
-    mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-    // Set per-session cooldown timestamp to 15 seconds ago (beyond 10s cooldown)
-    sessionStoreData.set('lastHookRunAt', Date.now() - 15_000)
-
-    const tmpDir = await tmp.dir({ unsafeCleanup: true })
-    tmpDirs.push(tmpDir)
-
-    const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-    await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-    mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-    const result = await processAndUploadTranscriptEntries()
-
-    expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-    expect(result.errors).toBe(0)
-    expect(mockPrepareAndSend).toHaveBeenCalled()
-  })
-
-  describe('missing hook fields (graceful degradation)', () => {
-    it('should return zero counts when transcript_path is missing', async () => {
-      mockStdin(
-        JSON.stringify({
-          session_id: 'some-session',
-          transcript_path: null,
-          cwd: '/tmp/test',
-          hook_event_name: 'PostToolUse',
-          tool_name: 'Edit',
-          tool_input: {},
-          tool_response: {},
-        })
-      )
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(0)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).not.toHaveBeenCalled()
-    })
-
-    it('should fall back to session_id from transcript when missing in hook data', async () => {
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      // Send hook data WITHOUT session_id
-      mockStdin(
-        JSON.stringify({
-          transcript_path: tmpTranscriptPath,
-          cwd: '/tmp/test-workspace',
-          hook_event_name: 'PostToolUse',
-          tool_name: 'Edit',
-          tool_input: {},
-          tool_response: {},
-        })
-      )
-
-      const result = await processAndUploadTranscriptEntries()
-
-      // Should succeed by extracting session_id from transcript entries
-      expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).toHaveBeenCalledTimes(1)
-    })
-
-    it('should return zero counts when session_id is missing and transcript has no sessionId', async () => {
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      // Write a transcript with entries that have no sessionId field
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.writeFile(
-        tmpTranscriptPath,
-        '{"type":"user","timestamp":"2025-01-01T00:00:00Z"}\n'
-      )
-
-      mockStdin(
-        JSON.stringify({
-          transcript_path: tmpTranscriptPath,
-          cwd: '/tmp/test',
-          hook_event_name: 'PostToolUse',
-          tool_name: 'Edit',
-          tool_input: {},
-          tool_response: {},
-        })
-      )
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(0)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).not.toHaveBeenCalled()
-    })
-
-    it('should upload successfully when cwd is missing', async () => {
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      // Send hook data WITHOUT cwd
-      mockStdin(
-        JSON.stringify({
-          session_id: EDIT_SESSION_ID,
-          transcript_path: tmpTranscriptPath,
-          hook_event_name: 'PostToolUse',
-          tool_name: 'Edit',
-          tool_input: {},
-          tool_response: {},
-        })
-      )
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).toHaveBeenCalledTimes(1)
-
-      // cwd passed to prepareAndSendTracyRecords should be undefined
-      const [, , cwd] = mockPrepareAndSend.mock.calls[0]!
-      expect(cwd).toBeUndefined()
-    })
-
-    it('should upload successfully when both session_id and cwd are missing', async () => {
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      // Send hook data WITHOUT session_id AND cwd
-      mockStdin(
-        JSON.stringify({
-          transcript_path: tmpTranscriptPath,
-          hook_event_name: 'PostToolUse',
-          tool_name: 'Edit',
-          tool_input: {},
-          tool_response: {},
-        })
-      )
-
-      const result = await processAndUploadTranscriptEntries()
-
-      // Should succeed by extracting session_id from transcript
-      expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-      expect(result.errors).toBe(0)
-    })
-  })
-
-  describe('extractSessionIdFromTranscript', () => {
-    it('should extract sessionId from first transcript entry', async () => {
-      const result = await extractSessionIdFromTranscript(EDIT_TRANSCRIPT)
-      expect(result).toBe(EDIT_SESSION_ID)
-    })
-
-    it('should return null for empty transcript', async () => {
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      const tmpPath = path.join(tmpDir.path, 'empty.jsonl')
-      await fs.writeFile(tmpPath, '')
-
-      const result = await extractSessionIdFromTranscript(tmpPath)
-      expect(result).toBeNull()
-    })
-
-    it('should return null for transcript with no sessionId in first entry', async () => {
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-
-      const tmpPath = path.join(tmpDir.path, 'no-session.jsonl')
-      await fs.writeFile(tmpPath, '{"type":"user","timestamp":"2025-01-01"}\n')
-
-      const result = await extractSessionIdFromTranscript(tmpPath)
-      expect(result).toBeNull()
-    })
-
-    it('should return null for non-existent file', async () => {
-      const result = await extractSessionIdFromTranscript(
-        '/tmp/non-existent-transcript.jsonl'
-      )
-      expect(result).toBeNull()
-    })
-  })
-
-  describe('validateHookData', () => {
-    it('should accept valid hook data with all fields', () => {
-      const data = {
-        session_id: 'abc',
-        transcript_path: '/tmp/t.jsonl',
-        cwd: '/tmp',
-        hook_event_name: 'PostToolUse',
-        tool_name: 'Edit',
-        tool_input: {},
-        tool_response: {},
-      }
-      const result = validateHookData(data)
-      expect(result.session_id).toBe('abc')
-      expect(result.cwd).toBe('/tmp')
-    })
-
-    it('should accept hook data with null optional fields', () => {
-      const data = {
-        session_id: null,
-        transcript_path: null,
-        cwd: null,
-        hook_event_name: 'PostToolUse',
-        tool_name: 'Edit',
-        tool_input: {},
-        tool_response: {},
-      }
-      const result = validateHookData(data)
-      expect(result.session_id).toBeNull()
-      expect(result.cwd).toBeNull()
-    })
-
-    it('should accept hook data with missing optional fields', () => {
-      const data = {
-        hook_event_name: 'PostToolUse',
-        tool_name: 'Edit',
-        tool_input: {},
-        tool_response: {},
-      }
-      const result = validateHookData(data)
-      expect(result.session_id).toBeUndefined()
-    })
-
-    it('should reject data missing required fields', () => {
-      expect(() => validateHookData({ session_id: 'abc' })).toThrow()
-    })
-
-    it('should reject non-object input', () => {
-      expect(() => validateHookData('not-an-object')).toThrow()
-      expect(() => validateHookData(null)).toThrow()
-    })
   })
 
   describe('resolveTranscriptPath', () => {
@@ -842,9 +565,6 @@ describe('processAndUploadTranscriptEntries', () => {
       const tmpDir = await tmp.dir({ unsafeCleanup: true })
       tmpDirs.push(tmpDir)
 
-      // Simulate Claude Code projects directory structure:
-      // projects/-Users-me-repo/transcript.jsonl  (exists)
-      // projects/-Users-me-repo-claude-worktrees-fix/transcript.jsonl  (doesn't exist)
       const projectsDir = path.join(tmpDir.path, 'projects')
       const baseDir = path.join(projectsDir, '-Users-me-repo')
       const worktreeDir = path.join(
@@ -857,7 +577,6 @@ describe('processAndUploadTranscriptEntries', () => {
       const transcript = path.join(baseDir, 'session.jsonl')
       await fs.writeFile(transcript, '{"test":true}\n')
 
-      // Request the worktree path (file doesn't exist there)
       const worktreePath = path.join(worktreeDir, 'session.jsonl')
       const result = await resolveTranscriptPath(worktreePath, 'session-1')
       expect(result).toBe(transcript)
@@ -867,8 +586,6 @@ describe('processAndUploadTranscriptEntries', () => {
       const tmpDir = await tmp.dir({ unsafeCleanup: true })
       tmpDirs.push(tmpDir)
 
-      // projects/dir-a/session.jsonl (exists)
-      // projects/dir-b/session.jsonl (requested but doesn't exist)
       const projectsDir = path.join(tmpDir.path, 'projects')
       const dirA = path.join(projectsDir, 'dir-a')
       const dirB = path.join(projectsDir, 'dir-b')
@@ -959,67 +676,6 @@ describe('processAndUploadTranscriptEntries', () => {
     })
   })
 
-  describe('global cooldown', () => {
-    it('should skip when invoked within global cooldown', async () => {
-      globalStoreData.set(
-        'claudeCode.globalLastHookRunAt',
-        Date.now() - 2_000 // 2 seconds ago (within 5s global cooldown)
-      )
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(0)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('active lock', () => {
-    it('should skip when another hook is actively running for the session', async () => {
-      // Set active lock to 10 seconds ago (within 60s TTL)
-      sessionStoreData.set('hookActiveAt', Date.now() - 10_000)
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(0)
-      expect(result.errors).toBe(0)
-      expect(mockPrepareAndSend).not.toHaveBeenCalled()
-    })
-
-    it('should proceed when active lock has expired (stale)', async () => {
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      // Set active lock to 90 seconds ago (beyond 60s TTL)
-      sessionStoreData.set('hookActiveAt', Date.now() - 90_000)
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      const result = await processAndUploadTranscriptEntries()
-
-      expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-      expect(result.errors).toBe(0)
-    })
-  })
-
   describe('GQL auth failure', () => {
     it('should return errors count when GQL auth fails', async () => {
       mockGetGQLClient.mockRejectedValue(new Error('Auth0 token expired'))
@@ -1029,82 +685,15 @@ describe('processAndUploadTranscriptEntries', () => {
       const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
       await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
 
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      const result = await processAndUploadTranscriptEntries()
+      const result = await processTranscript(
+        makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       expect(result.entriesUploaded).toBe(0)
       expect(result.errors).toBeGreaterThan(0)
       expect(mockPrepareAndSend).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('detectClaudeCodeVersion (via processAndUploadTranscriptEntries)', () => {
-    it('should detect Claude Code version and cache it', async () => {
-      mockExecFile.mockReturnValue('2.1.87 (Claude Code)\n')
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      await processAndUploadTranscriptEntries()
-
-      expect(mockExecFile).toHaveBeenCalledWith(
-        'claude',
-        ['--version'],
-        expect.objectContaining({ timeout: 3_000 })
-      )
-      // Version should be cached in global configStore
-      expect(mockGlobalSet).toHaveBeenCalledWith(
-        'claudeCode.detectedCCVersion',
-        '2.1.87'
-      )
-    })
-
-    it('should not fail the hook when claude is not in PATH', async () => {
-      mockExecFile.mockImplementation(() => {
-        throw new Error('ENOENT: claude not found')
-      })
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      const result = await processAndUploadTranscriptEntries()
-
-      // Hook should still succeed
-      expect(result.entriesUploaded).toBe(EDIT_ENTRY_COUNT)
-      expect(result.errors).toBe(0)
-    })
-
-    it('should use cached version on subsequent invocations', async () => {
-      // Simulate cached version from a previous run with same CLI version
-      const pkgVersion =
-        (await import('../../src/utils/check_node_version')).packageJson
-          .version ?? 'unknown'
-      globalStoreData.set('claudeCode.detectedCCVersionCli', pkgVersion)
-      globalStoreData.set('claudeCode.detectedCCVersion', '2.0.0')
-      mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
-
-      const tmpDir = await tmp.dir({ unsafeCleanup: true })
-      tmpDirs.push(tmpDir)
-      const tmpTranscriptPath = path.join(tmpDir.path, 'transcript.jsonl')
-      await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
-
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-
-      await processAndUploadTranscriptEntries()
-
-      // Should NOT have called execFile — used cache
-      expect(mockExecFile).not.toHaveBeenCalled()
     })
   })
 
@@ -1116,10 +705,6 @@ describe('processAndUploadTranscriptEntries', () => {
       tmpDirs.push(tmpDir)
       const tmpPath = path.join(tmpDir.path, 'transcript.jsonl')
 
-      // Entry 1: assistant with model
-      // Entry 2: user (no model) — should get model injected
-      // Entry 3: assistant with different model
-      // Entry 4: user (no model) — should get second model
       await fs.writeFile(
         tmpPath,
         [
@@ -1131,20 +716,18 @@ describe('processAndUploadTranscriptEntries', () => {
         ].join('\n')
       )
 
-      mockStdin(createHookStdinData(tmpPath, 's1'))
-
-      await processAndUploadTranscriptEntries()
+      await processTranscript(
+        makeInput(tmpPath, 's1'),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       expect(mockPrepareAndSend).toHaveBeenCalledTimes(1)
       const [, records] = mockPrepareAndSend.mock.calls[0]!
 
-      // Entry 1: has its own model
       expect(records[0].rawData.message.model).toBe('claude-sonnet-4')
-      // Entry 2: should have model injected from entry 1
       expect(records[1].rawData.message.model).toBe('claude-sonnet-4')
-      // Entry 3: has its own model
       expect(records[2].rawData.message.model).toBe('claude-opus-4')
-      // Entry 4: should have model injected from entry 3
       expect(records[3].rawData.message.model).toBe('claude-opus-4')
     })
 
@@ -1155,7 +738,6 @@ describe('processAndUploadTranscriptEntries', () => {
       tmpDirs.push(tmpDir)
       const tmpPath = path.join(tmpDir.path, 'transcript.jsonl')
 
-      // Single user entry with no model — needs injection from cursor
       const line =
         '{"type":"user","uuid":"u1","sessionId":"s1","timestamp":"2025-01-01T00:00:00Z","message":{"role":"user","content":"hello"}}\n'
       await fs.writeFile(tmpPath, line)
@@ -1168,14 +750,15 @@ describe('processAndUploadTranscriptEntries', () => {
         lastModel: 'claude-sonnet-4',
       })
 
-      mockStdin(createHookStdinData(tmpPath, 's1'))
-
-      await processAndUploadTranscriptEntries()
+      await processTranscript(
+        makeInput(tmpPath, 's1'),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       expect(mockPrepareAndSend).toHaveBeenCalledTimes(1)
       const [, records] = mockPrepareAndSend.mock.calls[0]!
 
-      // Model should be injected from cursor's lastModel
       expect(records[0].rawData.message.model).toBe('claude-sonnet-4')
     })
 
@@ -1191,11 +774,12 @@ describe('processAndUploadTranscriptEntries', () => {
         '{"type":"assistant","uuid":"a1","sessionId":"s1","timestamp":"2025-01-01T00:00:00Z","message":{"role":"assistant","model":"claude-opus-4","content":[]}}\n'
       )
 
-      mockStdin(createHookStdinData(tmpPath, 's1'))
+      await processTranscript(
+        makeInput(tmpPath, 's1'),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
-      await processAndUploadTranscriptEntries()
-
-      // Find the cursor.set call that stores the cursor value
       const cursorSetCall = mockSessionSet.mock.calls.find(
         ([key]) => typeof key === 'string' && key.startsWith('cursor.')
       )
@@ -1221,12 +805,13 @@ describe('processAndUploadTranscriptEntries', () => {
         ].join('\n')
       )
 
-      mockStdin(createHookStdinData(tmpPath, 's1'))
-
-      await processAndUploadTranscriptEntries()
+      await processTranscript(
+        makeInput(tmpPath, 's1'),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       const [, records] = mockPrepareAndSend.mock.calls[0]!
-      // <synthetic> should NOT override the last real model
       expect(records[2].rawData.message.model).toBe('claude-sonnet-4')
     })
   })
@@ -1239,7 +824,6 @@ describe('processAndUploadTranscriptEntries', () => {
       tmpDirs.push(tmpDir)
       const tmpPath = path.join(tmpDir.path, 'transcript.jsonl')
 
-      // Write only entries that will be filtered out
       await fs.writeFile(
         tmpPath,
         [
@@ -1249,14 +833,15 @@ describe('processAndUploadTranscriptEntries', () => {
         ].join('\n')
       )
 
-      mockStdin(createHookStdinData(tmpPath, 's1'))
-
-      const result = await processAndUploadTranscriptEntries()
+      const result = await processTranscript(
+        makeInput(tmpPath, 's1'),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       expect(result.entriesUploaded).toBe(0)
       expect(result.entriesSkipped).toBe(2)
       expect(result.errors).toBe(0)
-      // Should NOT have called upload
       expect(mockPrepareAndSend).not.toHaveBeenCalled()
 
       // Cursor should still have been advanced (so we don't reprocess)
@@ -1277,7 +862,6 @@ describe('processAndUploadTranscriptEntries', () => {
 
       const SESSION_ID = 'test-session-id-inject'
 
-      // Entry 1: normal entry with sessionId
       const normalEntry = JSON.stringify({
         type: 'assistant',
         sessionId: SESSION_ID,
@@ -1289,7 +873,6 @@ describe('processAndUploadTranscriptEntries', () => {
         },
       })
 
-      // Entry 2: sub-agent entry with role but NO sessionId
       const subagentEntry = JSON.stringify({
         role: 'assistant',
         timestamp: '2026-01-01T00:00:02Z',
@@ -1307,23 +890,23 @@ describe('processAndUploadTranscriptEntries', () => {
       })
 
       await fs.writeFile(tmpPath, normalEntry + '\n' + subagentEntry + '\n')
-      mockStdin(createHookStdinData(tmpPath, SESSION_ID))
 
-      await processAndUploadTranscriptEntries()
+      await processTranscript(
+        makeInput(tmpPath, SESSION_ID),
+        mockSessionStore as any,
+        mockLog as any
+      )
 
       expect(mockPrepareAndSend).toHaveBeenCalledTimes(1)
       const [, records] = mockPrepareAndSend.mock.calls[0]!
 
-      // Normal entry should keep its sessionId
       expect(records[0].rawData.sessionId).toBe(SESSION_ID)
-
-      // Sub-agent entry should have sessionId injected
       expect(records[1].rawData.sessionId).toBe(SESSION_ID)
       expect(records[1].rawData.role).toBe('assistant')
     })
   })
 
-  describe('MAX_ENTRIES_PER_INVOCATION cap', () => {
+  describe('DAEMON_CHUNK_SIZE cap', () => {
     it('should cap entries at 50 and defer remaining', async () => {
       mockPrepareAndSend.mockResolvedValue({ ok: true, errors: null })
 
@@ -1346,17 +929,20 @@ describe('processAndUploadTranscriptEntries', () => {
       await fs.copyFile(EDIT_TRANSCRIPT, tmpTranscriptPath)
 
       // First invocation: uploads 50 (capped)
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-      const result1 = await processAndUploadTranscriptEntries()
+      const result1 = await processTranscript(
+        makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+        mockSessionStore as any,
+        mockLog as any
+      )
       expect(result1.entriesUploaded).toBe(50)
 
       // Second invocation: should upload remaining 4
       mockPrepareAndSend.mockClear()
-      sessionStoreData.delete('lastHookRunAt')
-      sessionStoreData.delete('hookActiveAt')
-      globalStoreData.delete('claudeCode.globalLastHookRunAt')
-      mockStdin(createHookStdinData(tmpTranscriptPath, EDIT_SESSION_ID))
-      const result2 = await processAndUploadTranscriptEntries()
+      const result2 = await processTranscript(
+        makeInput(tmpTranscriptPath, EDIT_SESSION_ID),
+        mockSessionStore as any,
+        mockLog as any
+      )
       expect(result2.entriesUploaded).toBe(4)
     })
   })

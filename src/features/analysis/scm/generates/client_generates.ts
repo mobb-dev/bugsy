@@ -18,6 +18,7 @@ export type Scalars = {
   Timestamp: { input: any; output: any; }
   Void: { input: any; output: any; }
   _text: { input: any; output: any; }
+  _uuid: { input: any; output: any; }
   bigint: { input: any; output: any; }
   date: { input: any; output: any; }
   json: { input: any; output: any; }
@@ -39,6 +40,7 @@ export type AiBlameAttribution = {
   changeLines: Scalars['Int']['output'];
   changeMatchedLines: Scalars['Int']['output'];
   commitSha: Scalars['String']['output'];
+  contentHash?: Maybe<Scalars['String']['output']>;
   filePath: Scalars['String']['output'];
   id: Scalars['String']['output'];
   inferenceType: AiBlameInferenceType;
@@ -170,6 +172,7 @@ export type AiToolTypeUsage = {
 
 export type Attribution = {
   __typename?: 'Attribution';
+  contentHash?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   inferenceType?: Maybe<AiBlameInferenceType>;
   model?: Maybe<Scalars['String']['output']>;
@@ -482,6 +485,8 @@ export type DeveloperStatistic = {
   lastSeenDate?: Maybe<Scalars['String']['output']>;
   mainModel?: Maybe<Scalars['String']['output']>;
   mainTool?: Maybe<Scalars['String']['output']>;
+  totalOriginalLines: Scalars['Int']['output'];
+  totalSurvivedLines: Scalars['Int']['output'];
   userName: Scalars['String']['output'];
 };
 
@@ -2542,6 +2547,7 @@ export type Ai_Blame_Attribution = {
   change_matched_lines: Scalars['Int']['output'];
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Int']['output']>;
+  contentHash?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   filePath: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
@@ -2678,6 +2684,7 @@ export type Ai_Blame_Attribution_Bool_Exp = {
   change_lines?: InputMaybe<Int_Comparison_Exp>;
   change_matched_lines?: InputMaybe<Int_Comparison_Exp>;
   charCount?: InputMaybe<Int_Comparison_Exp>;
+  contentHash?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -2722,6 +2729,7 @@ export type Ai_Blame_Attribution_Insert_Input = {
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  contentHash?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -2745,6 +2753,7 @@ export type Ai_Blame_Attribution_Max_Fields = {
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Int']['output']>;
+  contentHash?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -2765,6 +2774,7 @@ export type Ai_Blame_Attribution_Max_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  contentHash?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2786,6 +2796,7 @@ export type Ai_Blame_Attribution_Min_Fields = {
   change_matched_lines?: Maybe<Scalars['Int']['output']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: Maybe<Scalars['Int']['output']>;
+  contentHash?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -2806,6 +2817,7 @@ export type Ai_Blame_Attribution_Min_Order_By = {
   change_matched_lines?: InputMaybe<Order_By>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Order_By>;
+  contentHash?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2850,6 +2862,7 @@ export type Ai_Blame_Attribution_Order_By = {
   change_lines?: InputMaybe<Order_By>;
   change_matched_lines?: InputMaybe<Order_By>;
   charCount?: InputMaybe<Order_By>;
+  contentHash?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -2882,6 +2895,8 @@ export enum Ai_Blame_Attribution_Select_Column {
   /** column name */
   CharCount = 'charCount',
   /** column name */
+  ContentHash = 'contentHash',
+  /** column name */
   CreatedAt = 'createdAt',
   /** column name */
   FilePath = 'filePath',
@@ -2911,6 +2926,7 @@ export type Ai_Blame_Attribution_Set_Input = {
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  contentHash?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -3008,6 +3024,7 @@ export type Ai_Blame_Attribution_Stream_Cursor_Value_Input = {
   change_matched_lines?: InputMaybe<Scalars['Int']['input']>;
   /** whitespace-normalized char count of the matched diff line content */
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  contentHash?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -3055,6 +3072,8 @@ export enum Ai_Blame_Attribution_Update_Column {
   ChangeMatchedLines = 'change_matched_lines',
   /** column name */
   CharCount = 'charCount',
+  /** column name */
+  ContentHash = 'contentHash',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
@@ -20885,6 +20904,10 @@ export type Mutation_Root = {
   delete_ticket_integration_by_pk?: Maybe<Ticket_Integration>;
   /** delete data from the table: "tracy.ai_blame_pr" */
   delete_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** delete data from the table: "tracy.ai_blame_pr_attribution" */
+  delete_tracy_ai_blame_pr_attribution?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>;
+  /** delete single row from the table: "tracy.ai_blame_pr_attribution" */
+  delete_tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
   /** delete single row from the table: "tracy.ai_blame_pr" */
   delete_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** delete data from the table: "tracy.tracy_edit_event" */
@@ -21367,6 +21390,10 @@ export type Mutation_Root = {
   insert_ticket_integration_one?: Maybe<Ticket_Integration>;
   /** insert data into the table: "tracy.ai_blame_pr" */
   insert_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** insert data into the table: "tracy.ai_blame_pr_attribution" */
+  insert_tracy_ai_blame_pr_attribution?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>;
+  /** insert a single row into the table: "tracy.ai_blame_pr_attribution" */
+  insert_tracy_ai_blame_pr_attribution_one?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
   /** insert a single row into the table: "tracy.ai_blame_pr" */
   insert_tracy_ai_blame_pr_one?: Maybe<Tracy_Ai_Blame_Pr>;
   /** insert data into the table: "tracy.tracy_edit_event" */
@@ -22044,6 +22071,12 @@ export type Mutation_Root = {
   update_ticket_integration_many?: Maybe<Array<Maybe<Ticket_Integration_Mutation_Response>>>;
   /** update data of the table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr?: Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>;
+  /** update data of the table: "tracy.ai_blame_pr_attribution" */
+  update_tracy_ai_blame_pr_attribution?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>;
+  /** update single row of the table: "tracy.ai_blame_pr_attribution" */
+  update_tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
+  /** update multiples rows of table: "tracy.ai_blame_pr_attribution" */
+  update_tracy_ai_blame_pr_attribution_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>>>;
   /** update single row of the table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** update multiples rows of table: "tracy.ai_blame_pr" */
@@ -23478,6 +23511,19 @@ export type Mutation_RootDelete_Ticket_Integration_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Ai_Blame_PrArgs = {
   where: Tracy_Ai_Blame_Pr_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_AttributionArgs = {
+  where: Tracy_Ai_Blame_Pr_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_Attribution_By_PkArgs = {
+  aiBlameAttributionId: Scalars['uuid']['input'];
+  aiBlamePrId: Scalars['uuid']['input'];
 };
 
 
@@ -25083,6 +25129,20 @@ export type Mutation_RootInsert_Ticket_Integration_OneArgs = {
 export type Mutation_RootInsert_Tracy_Ai_Blame_PrArgs = {
   objects: Array<Tracy_Ai_Blame_Pr_Insert_Input>;
   on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_AttributionArgs = {
+  objects: Array<Tracy_Ai_Blame_Pr_Attribution_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_Attribution_OneArgs = {
+  object: Tracy_Ai_Blame_Pr_Attribution_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_On_Conflict>;
 };
 
 
@@ -27538,6 +27598,26 @@ export type Mutation_RootUpdate_Tracy_Ai_Blame_PrArgs = {
   _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Inc_Input>;
   _set?: InputMaybe<Tracy_Ai_Blame_Pr_Set_Input>;
   where: Tracy_Ai_Blame_Pr_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_AttributionArgs = {
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Set_Input>;
+  where: Tracy_Ai_Blame_Pr_Attribution_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_Attribution_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Set_Input>;
+  pk_columns: Tracy_Ai_Blame_Pr_Attribution_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_Attribution_ManyArgs = {
+  updates: Array<Tracy_Ai_Blame_Pr_Attribution_Updates>;
 };
 
 
@@ -33915,8 +33995,18 @@ export type Query_Root = {
   tracy_ai_blame_pr: Array<Tracy_Ai_Blame_Pr>;
   /** fetch aggregated fields from the table: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_attribution" */
+  tracy_ai_blame_pr_attribution: Array<Tracy_Ai_Blame_Pr_Attribution>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr_attribution" */
+  tracy_ai_blame_pr_attribution_aggregate: Tracy_Ai_Blame_Pr_Attribution_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_attribution" using primary key columns */
+  tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
+  tracy_compute_pr_survived_lines: Array<View_Types_Pr_Survival_Result>;
+  /** execute function "tracy.compute_pr_survived_lines" and query aggregates on result of table type "view_types.pr_survival_result" */
+  tracy_compute_pr_survived_lines_aggregate: View_Types_Pr_Survival_Result_Aggregate;
   /** fetch data from the table: "tracy.tracy_edit_event" */
   tracy_tracy_edit_event: Array<Tracy_Tracy_Edit_Event>;
   /** fetch aggregated fields from the table: "tracy.tracy_edit_event" */
@@ -34018,6 +34108,10 @@ export type Query_Root = {
   view_types_percent_repos_with_ai_stats: Array<View_Types_Percent_Repos_With_Ai_Stats>;
   /** fetch aggregated fields from the table: "view_types.percent_repos_with_ai_stats" */
   view_types_percent_repos_with_ai_stats_aggregate: View_Types_Percent_Repos_With_Ai_Stats_Aggregate;
+  /** fetch data from the table: "view_types.pr_survival_result" */
+  view_types_pr_survival_result: Array<View_Types_Pr_Survival_Result>;
+  /** fetch aggregated fields from the table: "view_types.pr_survival_result" */
+  view_types_pr_survival_result_aggregate: View_Types_Pr_Survival_Result_Aggregate;
   /** fetch data from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
@@ -36736,8 +36830,52 @@ export type Query_RootTracy_Ai_Blame_Pr_AggregateArgs = {
 };
 
 
+export type Query_RootTracy_Ai_Blame_Pr_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_Attribution_By_PkArgs = {
+  aiBlameAttributionId: Scalars['uuid']['input'];
+  aiBlamePrId: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Compute_Pr_Survived_LinesArgs = {
+  args: Tracy_Compute_Pr_Survived_Lines_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Compute_Pr_Survived_Lines_AggregateArgs = {
+  args: Tracy_Compute_Pr_Survived_Lines_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
 };
 
 
@@ -37177,6 +37315,24 @@ export type Query_RootView_Types_Percent_Repos_With_Ai_Stats_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Percent_Repos_With_Ai_Stats_Order_By>>;
   where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Pr_Survival_ResultArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Pr_Survival_Result_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
 };
 
 
@@ -41948,10 +42104,22 @@ export type Subscription_Root = {
   tracy_ai_blame_pr: Array<Tracy_Ai_Blame_Pr>;
   /** fetch aggregated fields from the table: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_aggregate: Tracy_Ai_Blame_Pr_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_attribution" */
+  tracy_ai_blame_pr_attribution: Array<Tracy_Ai_Blame_Pr_Attribution>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr_attribution" */
+  tracy_ai_blame_pr_attribution_aggregate: Tracy_Ai_Blame_Pr_Attribution_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_attribution" using primary key columns */
+  tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
+  /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr_attribution" */
+  tracy_ai_blame_pr_attribution_stream: Array<Tracy_Ai_Blame_Pr_Attribution>;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
+  /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
+  tracy_compute_pr_survived_lines: Array<View_Types_Pr_Survival_Result>;
+  /** execute function "tracy.compute_pr_survived_lines" and query aggregates on result of table type "view_types.pr_survival_result" */
+  tracy_compute_pr_survived_lines_aggregate: View_Types_Pr_Survival_Result_Aggregate;
   /** fetch data from the table in a streaming manner: "tracy.developer_group_member" */
   tracy_developer_group_member_stream: Array<Tracy_Developer_Group_Member>;
   /** fetch data from the table in a streaming manner: "tracy.developer_group" */
@@ -42096,6 +42264,12 @@ export type Subscription_Root = {
   view_types_percent_repos_with_ai_stats_aggregate: View_Types_Percent_Repos_With_Ai_Stats_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.percent_repos_with_ai_stats" */
   view_types_percent_repos_with_ai_stats_stream: Array<View_Types_Percent_Repos_With_Ai_Stats>;
+  /** fetch data from the table: "view_types.pr_survival_result" */
+  view_types_pr_survival_result: Array<View_Types_Pr_Survival_Result>;
+  /** fetch aggregated fields from the table: "view_types.pr_survival_result" */
+  view_types_pr_survival_result_aggregate: View_Types_Pr_Survival_Result_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.pr_survival_result" */
+  view_types_pr_survival_result_stream: Array<View_Types_Pr_Survival_Result>;
   /** fetch data from the table: "view_types.roi_trends_time_series" */
   view_types_roi_trends_time_series: Array<View_Types_Roi_Trends_Time_Series>;
   /** fetch aggregated fields from the table: "view_types.roi_trends_time_series" */
@@ -45264,6 +45438,37 @@ export type Subscription_RootTracy_Ai_Blame_Pr_AggregateArgs = {
 };
 
 
+export type Subscription_RootTracy_Ai_Blame_Pr_AttributionArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Attribution_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Attribution_By_PkArgs = {
+  aiBlameAttributionId: Scalars['uuid']['input'];
+  aiBlamePrId: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Attribution_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Ai_Blame_Pr_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
@@ -45273,6 +45478,26 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Stream_Cursor_Input>>;
   where?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Compute_Pr_Survived_LinesArgs = {
+  args: Tracy_Compute_Pr_Survived_Lines_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Compute_Pr_Survived_Lines_AggregateArgs = {
+  args: Tracy_Compute_Pr_Survived_Lines_Args;
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
 };
 
 
@@ -45849,6 +46074,31 @@ export type Subscription_RootView_Types_Percent_Repos_With_Ai_Stats_StreamArgs =
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Percent_Repos_With_Ai_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Pr_Survival_ResultArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Pr_Survival_Result_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Pr_Survival_Result_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Pr_Survival_Result_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
 };
 
 
@@ -46792,7 +47042,15 @@ export type Tracy_Ai_Blame_Pr = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Int']['output']>;
   organizationId: Scalars['uuid']['output'];
+  /** An array relationship */
+  prAttributions: Array<Tracy_Ai_Blame_Pr_Attribution>;
+  /** An aggregate relationship */
+  prAttributions_aggregate: Tracy_Ai_Blame_Pr_Attribution_Aggregate;
   prCreatedAt: Scalars['timestamptz']['output'];
   prId: Scalars['String']['output'];
   prMergedAt?: Maybe<Scalars['timestamptz']['output']>;
@@ -46812,6 +47070,26 @@ export type Tracy_Ai_Blame_Pr = {
 /** columns and relationships of "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_PrAdditionalDataArgs = {
   path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_PrPrAttributionsArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_PrPrAttributions_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
 };
 
 /** aggregated selection of "tracy.ai_blame_pr" */
@@ -46844,6 +47122,188 @@ export type Tracy_Ai_Blame_Pr_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** columns and relationships of "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution = {
+  __typename?: 'tracy_ai_blame_pr_attribution';
+  aiBlameAttributionId: Scalars['uuid']['output'];
+  /** An object relationship */
+  aiBlamePr: Tracy_Ai_Blame_Pr;
+  aiBlamePrId: Scalars['uuid']['output'];
+  /** An object relationship */
+  attribution: Ai_Blame_Attribution;
+};
+
+/** aggregated selection of "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate = {
+  __typename?: 'tracy_ai_blame_pr_attribution_aggregate';
+  aggregate?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Fields>;
+  nodes: Array<Tracy_Ai_Blame_Pr_Attribution>;
+};
+
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate_Fields = {
+  __typename?: 'tracy_ai_blame_pr_attribution_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Max_Fields>;
+  min?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Max_Order_By>;
+  min?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Ai_Blame_Pr_Attribution_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.ai_blame_pr_attribution". All fields are combined with a logical 'AND'. */
+export type Tracy_Ai_Blame_Pr_Attribution_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>>;
+  aiBlameAttributionId?: InputMaybe<Uuid_Comparison_Exp>;
+  aiBlamePr?: InputMaybe<Tracy_Ai_Blame_Pr_Bool_Exp>;
+  aiBlamePrId?: InputMaybe<Uuid_Comparison_Exp>;
+  attribution?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.ai_blame_pr_attribution" */
+export enum Tracy_Ai_Blame_Pr_Attribution_Constraint {
+  /** unique or primary key constraint on columns "ai_blame_pr_id", "ai_blame_attribution_id" */
+  AiBlamePrAttributionPkey = 'ai_blame_pr_attribution_pkey'
+}
+
+/** input type for inserting data into table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Insert_Input = {
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlamePr?: InputMaybe<Tracy_Ai_Blame_Pr_Obj_Rel_Insert_Input>;
+  aiBlamePrId?: InputMaybe<Scalars['uuid']['input']>;
+  attribution?: InputMaybe<Ai_Blame_Attribution_Obj_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Ai_Blame_Pr_Attribution_Max_Fields = {
+  __typename?: 'tracy_ai_blame_pr_attribution_max_fields';
+  aiBlameAttributionId?: Maybe<Scalars['uuid']['output']>;
+  aiBlamePrId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Max_Order_By = {
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  aiBlamePrId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Ai_Blame_Pr_Attribution_Min_Fields = {
+  __typename?: 'tracy_ai_blame_pr_attribution_min_fields';
+  aiBlameAttributionId?: Maybe<Scalars['uuid']['output']>;
+  aiBlamePrId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Min_Order_By = {
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  aiBlamePrId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Mutation_Response = {
+  __typename?: 'tracy_ai_blame_pr_attribution_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Ai_Blame_Pr_Attribution>;
+};
+
+/** on_conflict condition type for table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_On_Conflict = {
+  constraint: Tracy_Ai_Blame_Pr_Attribution_Constraint;
+  update_columns?: Array<Tracy_Ai_Blame_Pr_Attribution_Update_Column>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.ai_blame_pr_attribution". */
+export type Tracy_Ai_Blame_Pr_Attribution_Order_By = {
+  aiBlameAttributionId?: InputMaybe<Order_By>;
+  aiBlamePr?: InputMaybe<Tracy_Ai_Blame_Pr_Order_By>;
+  aiBlamePrId?: InputMaybe<Order_By>;
+  attribution?: InputMaybe<Ai_Blame_Attribution_Order_By>;
+};
+
+/** primary key columns input for table: tracy.ai_blame_pr_attribution */
+export type Tracy_Ai_Blame_Pr_Attribution_Pk_Columns_Input = {
+  aiBlameAttributionId: Scalars['uuid']['input'];
+  aiBlamePrId: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.ai_blame_pr_attribution" */
+export enum Tracy_Ai_Blame_Pr_Attribution_Select_Column {
+  /** column name */
+  AiBlameAttributionId = 'aiBlameAttributionId',
+  /** column name */
+  AiBlamePrId = 'aiBlamePrId'
+}
+
+/** input type for updating data in table "tracy.ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Set_Input = {
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlamePrId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_ai_blame_pr_attribution" */
+export type Tracy_Ai_Blame_Pr_Attribution_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Ai_Blame_Pr_Attribution_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Ai_Blame_Pr_Attribution_Stream_Cursor_Value_Input = {
+  aiBlameAttributionId?: InputMaybe<Scalars['uuid']['input']>;
+  aiBlamePrId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "tracy.ai_blame_pr_attribution" */
+export enum Tracy_Ai_Blame_Pr_Attribution_Update_Column {
+  /** column name */
+  AiBlameAttributionId = 'aiBlameAttributionId',
+  /** column name */
+  AiBlamePrId = 'aiBlamePrId'
+}
+
+export type Tracy_Ai_Blame_Pr_Attribution_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Ai_Blame_Pr_Attribution_Bool_Exp;
+};
+
 /** aggregate avg on columns */
 export type Tracy_Ai_Blame_Pr_Avg_Fields = {
   __typename?: 'tracy_ai_blame_pr_avg_fields';
@@ -46853,6 +47313,10 @@ export type Tracy_Ai_Blame_Pr_Avg_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -46878,7 +47342,11 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   humanLinesAdded?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   linesAdded?: InputMaybe<Int_Comparison_Exp>;
+  numberOfOriginalLines?: InputMaybe<Int_Comparison_Exp>;
+  numberOfSurvivedLines?: InputMaybe<Int_Comparison_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  prAttributions?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
+  prAttributions_aggregate?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Bool_Exp>;
   prCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   prId?: InputMaybe<String_Comparison_Exp>;
   prMergedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -46905,6 +47373,10 @@ export type Tracy_Ai_Blame_Pr_Inc_Input = {
   commitsCount?: InputMaybe<Scalars['Int']['input']>;
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: InputMaybe<Scalars['Int']['input']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: InputMaybe<Scalars['Int']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
@@ -46928,7 +47400,12 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prAttributions?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Arr_Rel_Insert_Input>;
   prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   prMergedAt?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -46957,6 +47434,10 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
@@ -46985,6 +47466,10 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   prCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
@@ -47009,6 +47494,13 @@ export type Tracy_Ai_Blame_Pr_Mutation_Response = {
   returning: Array<Tracy_Ai_Blame_Pr>;
 };
 
+/** input type for inserting object relation for remote table "tracy.ai_blame_pr" */
+export type Tracy_Ai_Blame_Pr_Obj_Rel_Insert_Input = {
+  data: Tracy_Ai_Blame_Pr_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
+};
+
 /** on_conflict condition type for table "tracy.ai_blame_pr" */
 export type Tracy_Ai_Blame_Pr_On_Conflict = {
   constraint: Tracy_Ai_Blame_Pr_Constraint;
@@ -47029,7 +47521,10 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   humanLinesAdded?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   linesAdded?: InputMaybe<Order_By>;
+  numberOfOriginalLines?: InputMaybe<Order_By>;
+  numberOfSurvivedLines?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  prAttributions_aggregate?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Order_By>;
   prCreatedAt?: InputMaybe<Order_By>;
   prId?: InputMaybe<Order_By>;
   prMergedAt?: InputMaybe<Order_By>;
@@ -47072,6 +47567,10 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   LinesAdded = 'linesAdded',
   /** column name */
+  NumberOfOriginalLines = 'numberOfOriginalLines',
+  /** column name */
+  NumberOfSurvivedLines = 'numberOfSurvivedLines',
+  /** column name */
   OrganizationId = 'organizationId',
   /** column name */
   PrCreatedAt = 'prCreatedAt',
@@ -47109,6 +47608,10 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
@@ -47134,6 +47637,10 @@ export type Tracy_Ai_Blame_Pr_Stddev_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47152,6 +47659,10 @@ export type Tracy_Ai_Blame_Pr_Stddev_Pop_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47170,6 +47681,10 @@ export type Tracy_Ai_Blame_Pr_Stddev_Samp_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47201,6 +47716,10 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
@@ -47226,6 +47745,10 @@ export type Tracy_Ai_Blame_Pr_Sum_Fields = {
   commitsCount?: Maybe<Scalars['Int']['output']>;
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Int']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Int']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
@@ -47259,6 +47782,10 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   Id = 'id',
   /** column name */
   LinesAdded = 'linesAdded',
+  /** column name */
+  NumberOfOriginalLines = 'numberOfOriginalLines',
+  /** column name */
+  NumberOfSurvivedLines = 'numberOfSurvivedLines',
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
@@ -47301,6 +47828,10 @@ export type Tracy_Ai_Blame_Pr_Var_Pop_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47319,6 +47850,10 @@ export type Tracy_Ai_Blame_Pr_Var_Samp_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47337,6 +47872,10 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   commitsCount?: Maybe<Scalars['Float']['output']>;
   humanLinesAdded?: Maybe<Scalars['Float']['output']>;
   linesAdded?: Maybe<Scalars['Float']['output']>;
+  /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use accepted_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   rejectedLines?: Maybe<Scalars['Float']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Float']['output']>;
@@ -47344,6 +47883,14 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
+};
+
+export type Tracy_Compute_Pr_Survived_Lines_Args = {
+  p_current_attribution_ids?: InputMaybe<Scalars['_uuid']['input']>;
+  p_min_char_count?: InputMaybe<Scalars['Int']['input']>;
+  p_organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  p_pr_id?: InputMaybe<Scalars['String']['input']>;
+  p_repository_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "tracy.developer_group" */
@@ -48317,6 +48864,7 @@ export type Tracy_Tracy_Inference_Event = {
   __typename?: 'tracy_tracy_inference_event';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -48370,6 +48918,7 @@ export type Tracy_Tracy_Inference_Event_Bool_Exp = {
   _or?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
   additionsS3Path?: InputMaybe<String_Comparison_Exp>;
   charCount?: InputMaybe<Int_Comparison_Exp>;
+  filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   rawDataS3Path?: InputMaybe<String_Comparison_Exp>;
@@ -48396,6 +48945,7 @@ export type Tracy_Tracy_Inference_Event_Inc_Input = {
 export type Tracy_Tracy_Inference_Event_Insert_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -48410,6 +48960,7 @@ export type Tracy_Tracy_Inference_Event_Max_Fields = {
   __typename?: 'tracy_tracy_inference_event_max_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -48423,6 +48974,7 @@ export type Tracy_Tracy_Inference_Event_Min_Fields = {
   __typename?: 'tracy_tracy_inference_event_min_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
+  filePath?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -48458,6 +49010,7 @@ export type Tracy_Tracy_Inference_Event_On_Conflict = {
 export type Tracy_Tracy_Inference_Event_Order_By = {
   additionsS3Path?: InputMaybe<Order_By>;
   charCount?: InputMaybe<Order_By>;
+  filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   rawDataS3Path?: InputMaybe<Order_By>;
@@ -48479,6 +49032,8 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
   /** column name */
   CharCount = 'charCount',
   /** column name */
+  FilePath = 'filePath',
+  /** column name */
   Id = 'id',
   /** column name */
   Model = 'model',
@@ -48496,6 +49051,7 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
 export type Tracy_Tracy_Inference_Event_Set_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -48534,6 +49090,7 @@ export type Tracy_Tracy_Inference_Event_Stream_Cursor_Input = {
 export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
+  filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -48554,6 +49111,8 @@ export enum Tracy_Tracy_Inference_Event_Update_Column {
   AdditionsS3Path = 'additionsS3Path',
   /** column name */
   CharCount = 'charCount',
+  /** column name */
+  FilePath = 'filePath',
   /** column name */
   Id = 'id',
   /** column name */
@@ -52296,6 +52855,149 @@ export type View_Types_Percent_Repos_With_Ai_Stats_Variance_Fields = {
   previousTotalRepos?: Maybe<Scalars['Float']['output']>;
   reposWithAi?: Maybe<Scalars['Float']['output']>;
   totalRepos?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "view_types.pr_survival_result" */
+export type View_Types_Pr_Survival_Result = {
+  __typename?: 'view_types_pr_survival_result';
+  numberOfOriginalLines?: Maybe<Scalars['bigint']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+export type View_Types_Pr_Survival_Result_Aggregate = {
+  __typename?: 'view_types_pr_survival_result_aggregate';
+  aggregate?: Maybe<View_Types_Pr_Survival_Result_Aggregate_Fields>;
+  nodes: Array<View_Types_Pr_Survival_Result>;
+};
+
+/** aggregate fields of "view_types.pr_survival_result" */
+export type View_Types_Pr_Survival_Result_Aggregate_Fields = {
+  __typename?: 'view_types_pr_survival_result_aggregate_fields';
+  avg?: Maybe<View_Types_Pr_Survival_Result_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Pr_Survival_Result_Max_Fields>;
+  min?: Maybe<View_Types_Pr_Survival_Result_Min_Fields>;
+  stddev?: Maybe<View_Types_Pr_Survival_Result_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Pr_Survival_Result_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Pr_Survival_Result_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Pr_Survival_Result_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Pr_Survival_Result_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Pr_Survival_Result_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Pr_Survival_Result_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.pr_survival_result" */
+export type View_Types_Pr_Survival_Result_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Pr_Survival_Result_Avg_Fields = {
+  __typename?: 'view_types_pr_survival_result_avg_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.pr_survival_result". All fields are combined with a logical 'AND'. */
+export type View_Types_Pr_Survival_Result_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Pr_Survival_Result_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Pr_Survival_Result_Bool_Exp>>;
+  numberOfOriginalLines?: InputMaybe<Bigint_Comparison_Exp>;
+  numberOfSurvivedLines?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Pr_Survival_Result_Max_Fields = {
+  __typename?: 'view_types_pr_survival_result_max_fields';
+  numberOfOriginalLines?: Maybe<Scalars['bigint']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Pr_Survival_Result_Min_Fields = {
+  __typename?: 'view_types_pr_survival_result_min_fields';
+  numberOfOriginalLines?: Maybe<Scalars['bigint']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.pr_survival_result". */
+export type View_Types_Pr_Survival_Result_Order_By = {
+  numberOfOriginalLines?: InputMaybe<Order_By>;
+  numberOfSurvivedLines?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.pr_survival_result" */
+export enum View_Types_Pr_Survival_Result_Select_Column {
+  /** column name */
+  NumberOfOriginalLines = 'numberOfOriginalLines',
+  /** column name */
+  NumberOfSurvivedLines = 'numberOfSurvivedLines'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Pr_Survival_Result_Stddev_Fields = {
+  __typename?: 'view_types_pr_survival_result_stddev_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Pr_Survival_Result_Stddev_Pop_Fields = {
+  __typename?: 'view_types_pr_survival_result_stddev_pop_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Pr_Survival_Result_Stddev_Samp_Fields = {
+  __typename?: 'view_types_pr_survival_result_stddev_samp_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_pr_survival_result" */
+export type View_Types_Pr_Survival_Result_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Pr_Survival_Result_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Pr_Survival_Result_Stream_Cursor_Value_Input = {
+  numberOfOriginalLines?: InputMaybe<Scalars['bigint']['input']>;
+  numberOfSurvivedLines?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Pr_Survival_Result_Sum_Fields = {
+  __typename?: 'view_types_pr_survival_result_sum_fields';
+  numberOfOriginalLines?: Maybe<Scalars['bigint']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Pr_Survival_Result_Var_Pop_Fields = {
+  __typename?: 'view_types_pr_survival_result_var_pop_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Pr_Survival_Result_Var_Samp_Fields = {
+  __typename?: 'view_types_pr_survival_result_var_samp_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Pr_Survival_Result_Variance_Fields = {
+  __typename?: 'view_types_pr_survival_result_variance_fields';
+  numberOfOriginalLines?: Maybe<Scalars['Float']['output']>;
+  numberOfSurvivedLines?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "view_types.roi_trends_time_series" */

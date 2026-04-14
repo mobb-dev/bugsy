@@ -1805,6 +1805,12 @@ export type TracyRecordInput = {
   /** Edit fields (required when uploading an edit record) */
   editType?: InputMaybe<EditType>;
   filePath?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * Absolute local filesystem path of the user's git checkout (e.g. /Users/foo/proj/autofixer).
+   * Captured by the client at upload time. Used server-side to filter out inference events
+   * whose filePath falls outside the repo from the acceptance rate denominator.
+   */
+  gitRoot?: InputMaybe<Scalars['String']['input']>;
   platform: InferencePlatform;
   rawDataS3Key?: InputMaybe<Scalars['String']['input']>;
   recordId: Scalars['String']['input'];
@@ -48865,7 +48871,10 @@ export type Tracy_Tracy_Inference_Event = {
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
+  gitRoot?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
+  /** A computed field, executes function "tracy.tracy_inference_event_is_outside_repo" */
+  isOutsideRepo?: Maybe<Scalars['Boolean']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
   recordType: Scalars['String']['output'];
@@ -48919,7 +48928,9 @@ export type Tracy_Tracy_Inference_Event_Bool_Exp = {
   additionsS3Path?: InputMaybe<String_Comparison_Exp>;
   charCount?: InputMaybe<Int_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
+  gitRoot?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  isOutsideRepo?: InputMaybe<Boolean_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   rawDataS3Path?: InputMaybe<String_Comparison_Exp>;
   recordType?: InputMaybe<String_Comparison_Exp>;
@@ -48946,6 +48957,7 @@ export type Tracy_Tracy_Inference_Event_Insert_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
+  gitRoot?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -48961,6 +48973,7 @@ export type Tracy_Tracy_Inference_Event_Max_Fields = {
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
+  gitRoot?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -48975,6 +48988,7 @@ export type Tracy_Tracy_Inference_Event_Min_Fields = {
   additionsS3Path?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
+  gitRoot?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
@@ -49011,7 +49025,9 @@ export type Tracy_Tracy_Inference_Event_Order_By = {
   additionsS3Path?: InputMaybe<Order_By>;
   charCount?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
+  gitRoot?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  isOutsideRepo?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   rawDataS3Path?: InputMaybe<Order_By>;
   recordType?: InputMaybe<Order_By>;
@@ -49034,6 +49050,8 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
   /** column name */
   FilePath = 'filePath',
   /** column name */
+  GitRoot = 'gitRoot',
+  /** column name */
   Id = 'id',
   /** column name */
   Model = 'model',
@@ -49052,6 +49070,7 @@ export type Tracy_Tracy_Inference_Event_Set_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
+  gitRoot?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -49091,6 +49110,7 @@ export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
+  gitRoot?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
@@ -49113,6 +49133,8 @@ export enum Tracy_Tracy_Inference_Event_Update_Column {
   CharCount = 'charCount',
   /** column name */
   FilePath = 'filePath',
+  /** column name */
+  GitRoot = 'gitRoot',
   /** column name */
   Id = 'id',
   /** column name */

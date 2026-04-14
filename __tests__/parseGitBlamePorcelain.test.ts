@@ -39,5 +39,9 @@ describe('parseGitBlamePorcelain', () => {
     expect(lineInfo?.authorName).toBeTypeOf('string')
     expect(lineInfo?.authorEmail).toBeTypeOf('string')
     expect(lineInfo?.authorTime).toBeGreaterThan(1600000000)
+    // The asset file has not been renamed, so porcelain should report
+    // its current path as the historical path.
+    expect(lineInfo?.originalFile).toBeTypeOf('string')
+    expect(lineInfo?.originalFile).toContain('SigningAssignment.java')
   })
 })

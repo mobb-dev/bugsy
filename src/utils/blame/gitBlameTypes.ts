@@ -337,10 +337,27 @@ export type CommitsManifest = z.infer<typeof CommitsManifestZ>
  * A single blame line entry for targeted blame data.
  */
 export const BlameLineEntryZ = z.object({
+  /** Current file path in the PR head (what git blame was invoked on). */
   file: z.string(),
+  /** Current line number in the PR head. */
   line: z.number(),
+  /** SHA of the commit that originally authored this line. */
   originalCommitSha: z.string(),
+  /** Line number as it was in `originalCommitSha`. */
   originalLineNumber: z.number(),
+  /**
+   * File path as it was in `originalCommitSha` at the time that commit
+   * authored this line. When a file has been renamed since, this differs
+   * from `file`. Used as the primary lookup key against attribution
+   * records (which are stored at the path-as-of-original-commit).
+   *
+   * Defaults to `''` to preserve backward compatibility with
+   * BlameLinesData records persisted in S3 before this field existed —
+   * those records deserialize with `originalFile === ''` and callers
+   * must treat empty as "fall back to `file`" (see enrichDiffLines,
+   * targetedBlame).
+   */
+  originalFile: z.string().default(''),
 })
 
 export type BlameLineEntry = z.infer<typeof BlameLineEntryZ>

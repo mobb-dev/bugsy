@@ -1,6 +1,7 @@
 import Debug from 'debug'
 
 import {
+  getRepoGitRoot,
   getRepositoryUrl,
   getSystemInfo,
 } from '../../../args/commands/upload_ai_blame'
@@ -37,6 +38,7 @@ export type TracyRecordClientInput = Omit<
   TracyRecordInput,
   | 'rawDataS3Key'
   | 'repositoryUrl'
+  | 'gitRoot'
   | 'computerName'
   | 'userName'
   | 'clientVersion'
@@ -44,6 +46,8 @@ export type TracyRecordClientInput = Omit<
   rawData?: unknown // object from extension, will be sanitized & serialized
   /** Override auto-detected repo URL (e.g. from extension metadata) */
   repositoryUrl?: string
+  /** Override auto-detected git root (e.g. from extension metadata) */
+  gitRoot?: string
   /** Override auto-detected client version (e.g. extension version instead of CLI version) */
   clientVersion?: string
 }
@@ -90,6 +94,11 @@ export async function prepareAndSendTracyRecords(
     ? undefined
     : ((await getRepositoryUrl(workingDir)) ?? undefined)
 
+  // Only resolve default git root if the caller didn't provide one per-record.
+  const defaultGitRoot = rawRecords[0]?.gitRoot
+    ? undefined
+    : ((await getRepoGitRoot(workingDir)) ?? undefined)
+
   // 1. Enrich records and optionally sanitize rawData
   debug(
     '[step:sanitize] %s %d records',
@@ -113,6 +122,7 @@ export async function prepareAndSendTracyRecords(
           return {
             ...rest,
             repositoryUrl: record.repositoryUrl ?? defaultRepoUrl,
+            gitRoot: record.gitRoot ?? defaultGitRoot,
             computerName,
             userName,
             clientVersion: record.clientVersion ?? defaultClientVersion,

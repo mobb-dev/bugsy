@@ -125,26 +125,6 @@ export async function getRepositoryUrl(
 }
 
 /**
- * Gets the absolute git root path of the working directory's git checkout.
- * Used by Tracy uploads to let the server filter out events whose filePath
- * falls outside the repo (e.g., /tmp scratchpads, ~/.zshrc).
- */
-export async function getRepoGitRoot(
-  workingDir?: string
-): Promise<string | null> {
-  try {
-    const gitService = new GitService(workingDir ?? process.cwd())
-    const isRepo = await gitService.isGitRepository()
-    if (!isRepo) {
-      return null
-    }
-    return await gitService.getGitRoot()
-  } catch {
-    return null
-  }
-}
-
-/**
  * Get system information for tracking inference source.
  * Works cross-platform (Windows, macOS, Linux).
  * Handles errors gracefully for containerized environments where user info may not be available.

@@ -505,7 +505,6 @@ input TracyRecordInput {
   recordTimestamp: Timestamp!
   clientVersion: String!
   repositoryUrl: String
-  gitRoot: String
   computerName: String
   userName: String
   blameType: AIBlameInferenceType

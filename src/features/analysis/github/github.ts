@@ -48,7 +48,7 @@ function parseRepoUrl(repoUrl: string) {
   const slug = extractSlug(repoUrl)
   const [owner, repo] = slug.split('/')
   if (!owner || !repo) {
-    throw new Error(`Error parsing repo url ${repoUrl}}`)
+    throw new Error(`Error parsing repo url ${repoUrl}`)
   }
   return { owner, repo }
 }
@@ -111,7 +111,7 @@ export async function downloadRepo(
     debug('GH zipball request failed %s %s', response.body, response.status)
     repoSpinner.error({ text: '💾 Repo download failed' })
     throw new Error(
-      `Can't access the the branch ${chalk.bold(reference)} on ${chalk.bold(
+      `Can't access the branch ${chalk.bold(reference)} on ${chalk.bold(
         repoUrl
       )} make sure it exits.`
     )

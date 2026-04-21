@@ -167,6 +167,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.RedundantNilErrorCheck]: 'Redundant Nil Error Check',
   [IssueType_Enum.MissingWorkflowPermissions]: 'Missing Workflow Permissions',
   [IssueType_Enum.ExcessiveSecretsExposure]: 'Excessive Secrets Exposure',
+  [IssueType_Enum.TaintedNumericCast]: 'Tainted Numeric Cast',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

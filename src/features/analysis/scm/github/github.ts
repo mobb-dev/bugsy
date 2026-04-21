@@ -830,10 +830,13 @@ export function getGithubSdk(
       return res
     },
     /**
-     * Search PRs using GitHub's Search API with sorting
-     * https://docs.github.com/en/rest/search/search?apiVersion=2022-11-28#search-issues-and-pull-requests
+     * List PRs using GitHub's REST `/repos/{owner}/{repo}/pulls` endpoint.
+     * https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests
+     *
+     * Uses the 5000/hr core rate-limit bucket and reads freshly-created PRs
+     * without the indexing lag of the Search API.
      */
-    async searchPullRequests(params: {
+    async listPullRequests(params: {
       owner: string
       repo: string
       updatedAfter?: Date
@@ -855,37 +858,44 @@ export function getGithubSdk(
         page = 1,
       } = params
 
-      // Build search query
-      let query = `repo:${owner}/${repo} is:pr`
-
-      if (updatedAfter) {
-        const dateStr = updatedAfter.toISOString().split('T')[0]
-        query += ` updated:>=${dateStr}`
-      }
-
-      if (state !== 'all') {
-        query += ` is:${state}`
-      }
-
-      // Map sort field to GitHub's sort parameter
-      // GitHub supports: comments, reactions, interactions, created, updated
-      const githubSortField =
+      // REST /pulls supports sort = 'created' | 'updated' | 'popularity' | 'long-running'.
+      // Map 'comments' to 'popularity' (closest proxy); otherwise pass through.
+      const restSortField: 'created' | 'updated' | 'popularity' =
         sort.field === 'updated' || sort.field === 'created'
           ? sort.field
-          : 'comments'
+          : 'popularity'
 
-      const response = await octokit.rest.search.issuesAndPullRequests({
-        q: query,
-        sort: githubSortField,
-        order: sort.order,
+      const response = await octokit.rest.pulls.list({
+        owner,
+        repo,
+        state,
+        sort: restSortField,
+        direction: sort.order,
         per_page: perPage,
         page,
       })
 
+      // REST /pulls has no `updated:>=` filter, so apply the cutoff client-side.
+      const filtered = updatedAfter
+        ? response.data.filter((pr) => new Date(pr.updated_at) >= updatedAfter)
+        : response.data
+
+      // REST /pulls doesn't return a total count. A full page from GitHub
+      // normally means there may be more; the one exception is a desc-sorted
+      // page that hit the `updatedAfter` cutoff (i.e. GitHub returned a full
+      // page but we dropped some) — subsequent pages are strictly older, so
+      // we can stop early. With asc sort the relationship is inverted
+      // (filtered-out items are older and newer ones are on later pages), so
+      // we must not apply the same short-circuit.
+      const hitDescCutoff =
+        sort.order === 'desc' &&
+        updatedAfter !== undefined &&
+        filtered.length < response.data.length
+      const hasMore = response.data.length === perPage && !hitDescCutoff
+
       return {
-        items: response.data.items,
-        totalCount: response.data.total_count,
-        hasMore: page * perPage < response.data.total_count,
+        items: filtered,
+        hasMore,
       }
     },
 

@@ -415,4 +415,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.RedundantNilErrorCheck]: undefined,
   [IssueType_Enum.MissingWorkflowPermissions]: undefined,
   [IssueType_Enum.ExcessiveSecretsExposure]: undefined,
+  [IssueType_Enum.TaintedNumericCast]: undefined,
 }

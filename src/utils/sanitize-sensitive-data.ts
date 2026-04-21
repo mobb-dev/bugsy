@@ -141,7 +141,8 @@ export type SanitizationResult = {
 }
 
 export async function sanitizeDataWithCounts(
-  obj: unknown
+  obj: unknown,
+  options?: { noSizeLimit?: boolean }
 ): Promise<SanitizationResult> {
   const counts: SanitizationCounts = {
     detections: { total: 0, high: 0, medium: 0, low: 0 },
@@ -151,10 +152,12 @@ export async function sanitizeDataWithCounts(
   // base64 blobs, large code files, or binary data — not human-readable
   // text that would contain secrets. Scanning them is extremely expensive
   // (48+ regex patterns × millions of chars) and can hang the process.
+  // Server-side callers (e.g. context file handler) can disable this limit
+  // via { noSizeLimit: true } when sanitization is mandatory regardless of size.
   const MAX_SCAN_LENGTH = 100_000
 
   const sanitizeString = async (str: string): Promise<string> => {
-    if (str.length > MAX_SCAN_LENGTH) {
+    if (!options?.noSizeLimit && str.length > MAX_SCAN_LENGTH) {
       return str
     }
 

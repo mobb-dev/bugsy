@@ -1,3 +1,4 @@
+import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
@@ -51,6 +52,10 @@ import {
  */
 export async function startDaemon(): Promise<void> {
   hookLog.info('Daemon starting')
+
+  // One-time cleanup of bloated hook log file on daemon startup.
+  // The configstore log file can grow unbounded when many scope keys accumulate.
+  pruneHookLogFile()
 
   const pidFile = await acquirePidFile()
 
@@ -277,5 +282,78 @@ async function tryAutoUpgradeHooks(): Promise<void> {
     }
   } catch (err) {
     hookLog.warn({ err }, 'Failed to auto-upgrade hook matcher')
+  }
+}
+
+const HOOK_LOG_MAX_SCOPE_KEYS = 20
+const HOOK_LOG_MAX_ENTRIES_PER_KEY = 200
+
+/**
+ * Prune the hook log configstore file on daemon startup.
+ *
+ * The file grows unbounded because each unique cwd creates a scoped key
+ * (logs:{path}, heartbeat:{path}) that persists forever. Over time this
+ * produces a 20+ MB JSON file with 96 keys. This function:
+ * 1. Keeps only the most recent scope keys per prefix
+ * 2. Trims each key's entries to a reasonable limit
+ */
+function pruneHookLogFile(): void {
+  // Derive the path from a Configstore instance so it respects XDG_CONFIG_HOME
+  // and platform-specific paths (Windows %LOCALAPPDATA%).
+  const logFilePath = new Configstore('mobbdev-claude-code-hook-logs').path
+
+  try {
+    const raw = readFileSync(logFilePath, 'utf-8')
+    const data = JSON.parse(raw) as Record<string, unknown>
+
+    // Group keys by prefix (logs, heartbeat, or bare)
+    const prefixes = new Map<string, string[]>()
+    for (const key of Object.keys(data)) {
+      const colonIdx = key.indexOf(':')
+      const prefix = colonIdx > 0 ? key.slice(0, colonIdx) : key
+      const group = prefixes.get(prefix) ?? []
+      group.push(key)
+      prefixes.set(prefix, group)
+    }
+
+    let changed = false
+    for (const [, keys] of prefixes) {
+      if (keys.length <= HOOK_LOG_MAX_SCOPE_KEYS) {
+        continue
+      }
+
+      // Sort by last entry timestamp, keep newest
+      const withTs = keys
+        .map((k) => {
+          const val = data[k]
+          if (!Array.isArray(val) || val.length === 0) {
+            return { key: k, lastTs: '' }
+          }
+          const last = val[val.length - 1] as { timestamp?: string }
+          return { key: k, lastTs: last?.timestamp ?? '' }
+        })
+        .sort((a, b) => a.lastTs.localeCompare(b.lastTs))
+
+      const toDelete = withTs.slice(0, withTs.length - HOOK_LOG_MAX_SCOPE_KEYS)
+      for (const { key } of toDelete) {
+        delete data[key]
+        changed = true
+      }
+    }
+
+    // Trim remaining arrays
+    for (const [key, val] of Object.entries(data)) {
+      if (Array.isArray(val) && val.length > HOOK_LOG_MAX_ENTRIES_PER_KEY) {
+        data[key] = val.slice(-HOOK_LOG_MAX_ENTRIES_PER_KEY)
+        changed = true
+      }
+    }
+
+    if (changed) {
+      writeFileSync(logFilePath, JSON.stringify(data, null, '\t'))
+      hookLog.info('Pruned hook log file')
+    }
+  } catch {
+    // Non-critical — if we can't prune, log file just stays big
   }
 }

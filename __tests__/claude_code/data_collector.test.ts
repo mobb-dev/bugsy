@@ -457,7 +457,11 @@ describe('processTranscript', () => {
       expect(filteredOut).toBe(0)
     })
 
-    it('should filter out assistant TaskOutput tool_use entries', () => {
+    // TaskOutput / ToolSearch are NO LONGER filtered (T-447): these assistant
+    // tool_use entries carry real `message.usage` token counts we need for
+    // per-model token attribution. They're now uploaded like any other
+    // assistant tool_use entry.
+    it('should keep assistant TaskOutput tool_use entries (no longer filtered, carries tokens)', () => {
       const entries = [
         entry({
           type: 'assistant',
@@ -467,11 +471,11 @@ describe('processTranscript', () => {
         }),
       ]
       const { filtered, filteredOut } = filterEntries(entries)
-      expect(filtered).toHaveLength(0)
-      expect(filteredOut).toBe(1)
+      expect(filtered).toHaveLength(1)
+      expect(filteredOut).toBe(0)
     })
 
-    it('should filter out assistant ToolSearch tool_use entries', () => {
+    it('should keep assistant ToolSearch tool_use entries (no longer filtered, carries tokens)', () => {
       const entries = [
         entry({
           type: 'assistant',
@@ -481,8 +485,8 @@ describe('processTranscript', () => {
         }),
       ]
       const { filtered, filteredOut } = filterEntries(entries)
-      expect(filtered).toHaveLength(0)
-      expect(filteredOut).toBe(1)
+      expect(filtered).toHaveLength(1)
+      expect(filteredOut).toBe(0)
     })
 
     it('should keep assistant entries with non-filtered tools', () => {

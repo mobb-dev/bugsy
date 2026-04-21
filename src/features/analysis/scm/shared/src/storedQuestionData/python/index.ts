@@ -4,6 +4,7 @@ import { duplicatedStrings } from './duplicatedStrings'
 import { logForging } from './logForging'
 import { missingEncoding } from './missingEncoding'
 import { openRedirect } from './openRedirect'
+import { ssrf } from './ssrf'
 import { uncheckedLoopCondition } from './uncheckedLoopCondition'
 
 const vulnerabilities = {
@@ -13,6 +14,7 @@ const vulnerabilities = {
   [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
   [IssueType_Enum.DuplicatedStrings as string]: duplicatedStrings,
   [IssueType_Enum.MissingEncodingFileOpen as string]: missingEncoding,
+  [IssueType_Enum.Ssrf as string]: ssrf,
 }
 
 export default vulnerabilities

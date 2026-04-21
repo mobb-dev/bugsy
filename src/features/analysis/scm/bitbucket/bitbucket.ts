@@ -54,6 +54,21 @@ const BitbucketParseResultZ = z.object({
   repoName: z.string(),
   hostname: z.literal(BITBUCKET_HOSTNAME),
 })
+// Response schema for GET /2.0/user/workspaces/{workspace}/permissions/repositories
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-user-workspaces-workspace-permissions-repositories-get
+const UserWorkspacePermissionsRepositoriesResponseZ = z.object({
+  values: z
+    .array(
+      z.object({
+        repository: z
+          .object({
+            full_name: z.string().optional(),
+          })
+          .optional(),
+      })
+    )
+    .optional(),
+})
 export function parseBitbucketOrganizationAndRepo(bitbucketUrl: string): {
   workspace: string
   repo_slug: string
@@ -206,17 +221,30 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       const { repo_slug, workspace } =
         parseBitbucketOrganizationAndRepo(repoUrl)
       const fullRepoName = `${workspace}/${repo_slug}`
-      // note: initially I thought about using this endpoint - https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-users-get
-      // which is more precision but it requires the user to have admin access to the repo
-
-      // note we're using ~ for case insensitive search
-      const res = await bitbucketClient.user.listPermissionsForRepos({
+      // We used to call GET /user/permissions/repositories (cross-workspace),
+      // but Bitbucket sunset that endpoint on 2026-04-14 and it now returns
+      // HTTP 410 Gone. The workspace-scoped replacement is
+      // GET /user/workspaces/{workspace}/permissions/repositories, which isn't
+      // yet exposed as a named method in bitbucket@2.12.0, so we call it via
+      // the SDK's generic request() helper.
+      //
+      // note: we previously considered the repo-scoped permissions-config endpoint
+      // (/repositories/{workspace}/{repo_slug}/permissions-config/users) which is
+      // more precise, but it requires repo admin access and would 403 for regular users.
+      //
+      // note: we're using ~ for case insensitive search
+      const res = await bitbucketClient.request({
+        method: 'GET',
+        url: '/user/workspaces/{workspace}/permissions/repositories',
+        workspace,
         q: `repository.full_name~"${fullRepoName}"`,
       })
+      const parsed = UserWorkspacePermissionsRepositoriesResponseZ.safeParse(
+        res.data
+      )
+      const values = parsed.success ? parsed.data.values : undefined
       return (
-        res.data.values?.some(
-          (res) => res.repository?.full_name === fullRepoName
-        ) ?? false
+        values?.some((v) => v.repository?.full_name === fullRepoName) ?? false
       )
     },
     async createPullRequest(params: CreatePullRequestParams) {

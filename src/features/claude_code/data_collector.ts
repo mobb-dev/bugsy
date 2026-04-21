@@ -7,6 +7,9 @@ import { promisify } from 'node:util'
 import Configstore from 'configstore'
 
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
+import { processContextFiles } from '../../features/analysis/context_file_processor'
+import { scanContextFiles } from '../../features/analysis/context_file_scanner'
+import { runContextFileUploadPipeline } from '../../features/analysis/context_file_uploader'
 import { GQLClient } from '../../features/analysis/graphql/gql'
 import { prepareAndSendTracyRecords } from '../../features/analysis/graphql/tracy-batch-upload'
 import {
@@ -382,19 +385,10 @@ const FILTERED_ENTRY_TYPES = new Set([
   'last-prompt',
 ])
 
-/**
- * Assistant tool_use entries that are pure plumbing — their meaningful data
- * is already captured in the corresponding user:tool_result entry.
- */
-const FILTERED_ASSISTANT_TOOLS = new Set([
-  // Polls for a sub-agent result. The input is just task_id + boilerplate
-  // (block, timeout). The actual result is captured in the user:tool_result.
-  'TaskOutput',
-
-  // Discovers available deferred/MCP tools. The input is just a search query.
-  // The discovered tools are captured in the user:tool_result.
-  'ToolSearch',
-])
+// NOTE: An older version of this file filtered specific assistant tool_use entries
+// (TaskOutput, ToolSearch). That filtering was removed because those entries carry
+// real `message.usage` token counts for Claude API calls — dropping them lost those
+// tokens from session totals. No assistant tool_use entries are filtered today.
 
 /**
  * Filters out transcript entries that carry no unique session data.
@@ -419,22 +413,6 @@ export function filterEntries(
       const data = entry['data'] as Record<string, unknown> | undefined
       const subtype = typeof data?.['type'] === 'string' ? data['type'] : ''
       return !FILTERED_PROGRESS_SUBTYPES.has(subtype)
-    }
-
-    // Filter out assistant tool_use entries that are pure plumbing
-    if (entryType === 'assistant') {
-      const message = entry['message'] as Record<string, unknown> | undefined
-      const content = message?.['content']
-      if (Array.isArray(content) && content.length > 0) {
-        const block = content[0] as Record<string, unknown>
-        if (
-          block['type'] === 'tool_use' &&
-          typeof block['name'] === 'string' &&
-          FILTERED_ASSISTANT_TOOLS.has(block['name'])
-        ) {
-          return false
-        }
-      }
     }
 
     return true
@@ -675,6 +653,18 @@ export async function processTranscript(
       entriesSkipped: filteredOut,
       claudeCodeVersion: getClaudeCodeVersion(),
     })
+
+    // Upload new/changed context files. The scanner's per-session mtime tracking skips unchanged files.
+    if (input.cwd) {
+      uploadContextFilesIfNeeded(
+        input.session_id,
+        input.cwd,
+        gqlClient,
+        log
+      ).catch((err) => {
+        log.error({ data: { err } }, 'uploadContextFilesIfNeeded failed')
+      })
+    }
     return {
       entriesUploaded: entries.length,
       entriesSkipped: filteredOut,
@@ -690,5 +680,91 @@ export async function processTranscript(
     entriesUploaded: 0,
     entriesSkipped: filteredOut,
     errors: entries.length,
+  }
+}
+
+/**
+ * Scans, sanitizes, and uploads context files and skills for this session.
+ * Each file/skill is uploaded directly to S3 with its own Tracy event.
+ * Change detection is handled inside the scanner via mtime tracking.
+ */
+async function uploadContextFilesIfNeeded(
+  sessionId: string,
+  cwd: string,
+  gqlClient: GQLClient,
+  log: Logger
+): Promise<void> {
+  const { regularFiles, skillGroups } = await scanContextFiles(
+    cwd,
+    'claude-code',
+    sessionId
+  )
+  if (regularFiles.length === 0 && skillGroups.length === 0) {
+    return
+  }
+
+  const { files: processedFiles, skills: processedSkills } =
+    await processContextFiles(regularFiles, skillGroups)
+
+  if (processedFiles.length === 0 && processedSkills.length === 0) {
+    return
+  }
+
+  const uploadUrlResult = await gqlClient.getTracyRawDataUploadUrl()
+  const { url, uploadFieldsJSON, keyPrefix } =
+    uploadUrlResult.getTracyRawDataUploadUrl
+  if (!url || !uploadFieldsJSON || !keyPrefix) {
+    log.error(
+      { data: { sessionId } },
+      'Failed to get S3 upload URL for context files'
+    )
+    return
+  }
+
+  const pipelineResult = await runContextFileUploadPipeline({
+    processedFiles,
+    processedSkills,
+    sessionId,
+    platform: InferencePlatform.ClaudeCode,
+    url,
+    uploadFieldsJSON,
+    keyPrefix,
+    submitRecords: async (records) => {
+      const r = await prepareAndSendTracyRecords(gqlClient, records, cwd)
+      if (!r.ok) {
+        throw new Error(r.errors?.join(', ') ?? 'batch upload failed')
+      }
+    },
+    onFileError: (name, err) =>
+      log.error(
+        { data: { sessionId, name, err } },
+        'Failed to upload context file to S3'
+      ),
+    onSkillError: (name, err) =>
+      log.error(
+        { data: { sessionId, name, err } },
+        'Failed to upload skill zip to S3'
+      ),
+  })
+
+  if (pipelineResult === null) {
+    log.error(
+      { data: { sessionId } },
+      'Malformed uploadFieldsJSON for context files'
+    )
+    return
+  }
+
+  if (pipelineResult.fileCount > 0 || pipelineResult.skillCount > 0) {
+    log.info(
+      {
+        data: {
+          sessionId,
+          fileCount: pipelineResult.fileCount,
+          skillCount: pipelineResult.skillCount,
+        },
+      },
+      'Uploaded context files and skills for session'
+    )
   }
 }

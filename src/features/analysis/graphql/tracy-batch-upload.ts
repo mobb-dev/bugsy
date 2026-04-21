@@ -42,6 +42,11 @@ export type TracyRecordClientInput = Omit<
   | 'clientVersion'
 > & {
   rawData?: unknown // object from extension, will be sanitized & serialized
+  /**
+   * Pre-uploaded S3 key. When set, the rawData serialization + S3 upload step
+   * is skipped for this record — the caller has already uploaded the content.
+   */
+  rawDataS3Key?: string
   /** Override auto-detected repo URL (e.g. from extension metadata) */
   repositoryUrl?: string
   /** Override auto-detected client version (e.g. extension version instead of CLI version) */
@@ -103,7 +108,8 @@ export async function prepareAndSendTracyRecords(
     () =>
       Promise.all(
         rawRecords.map(async (record, index) => {
-          if (record.rawData != null) {
+          if (record.rawData != null && record.rawDataS3Key == null) {
+            // Only serialize rawData when no pre-uploaded S3 key was provided
             const serialized = shouldSanitize
               ? await sanitizeRawData(record.rawData)
               : JSON.stringify(record.rawData)

@@ -25,7 +25,7 @@ index 000000000..7ae37c591
 +jobs:
 +  review:
 +    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
-+    timeout-minutes: 45
++    timeout-minutes: 50
 +    permissions:
 +      contents: write
 +      pull-requests: write
@@ -95,7 +95,7 @@ index a2f324410..000000000
 -  review-opus:
 -    if: github.event.label.name == 'AI Review Opus'
 -    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
--    timeout-minutes: 45
+-    timeout-minutes: 50
 -
 -    permissions:
 -      contents: write
@@ -128,7 +128,7 @@ index 7a1388085..761666e17 100644
    review-haiku:
      if: github.event.label.name == 'AI Review Haiku'
 -    runs-on: runs-on=${{ github.run_id }}/runner=1cpu-linux-x64
--    timeout-minutes: 45
+-    timeout-minutes: 50
 +    permissions:
 +      contents: write
 +      pull-requests: write

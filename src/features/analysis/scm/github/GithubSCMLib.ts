@@ -631,8 +631,12 @@ export class GithubSCMLib extends SCMLib {
   }
 
   /**
-   * Override searchSubmitRequests to use GitHub's Search API for efficient pagination.
-   * This is much faster than fetching all PRs and filtering in-memory.
+   * Override searchSubmitRequests to use GitHub's REST `/pulls` endpoint.
+   *
+   * The Search API we used previously has a separate 30/min secondary rate
+   * limit and an async index that lags on just-created PRs. `/pulls` hits
+   * GitHub's primary datastore, uses the 5000/hr core bucket, and returns
+   * `head.ref` / `base.ref` so we can populate sourceBranch / targetBranch.
    */
   override async searchSubmitRequests(
     params: SearchSubmitRequestsParams
@@ -645,7 +649,7 @@ export class GithubSCMLib extends SCMLib {
     const perPage = params.limit || 10
     const sort = params.sort || { field: 'updated', order: 'desc' }
 
-    const searchResult = await this.githubSdk.searchPullRequests({
+    const listResult = await this.githubSdk.listPullRequests({
       owner,
       repo,
       updatedAfter: params.filters?.updatedAfter,
@@ -655,37 +659,35 @@ export class GithubSCMLib extends SCMLib {
       page,
     })
 
-    // Convert GitHub's Issue format to GetSubmitRequestInfo
-    const results: GetSubmitRequestInfo[] = searchResult.items.map((issue) => {
+    const results: GetSubmitRequestInfo[] = listResult.items.map((pr) => {
       let status: ScmSubmitRequestStatus = 'open'
-      if (issue.state === 'closed') {
-        // Check if merged (pull_request object has merged_at field)
-        status = issue.pull_request?.merged_at ? 'merged' : 'closed'
-      } else if (issue.draft) {
+      if (pr.state === 'closed') {
+        status = pr.merged_at ? 'merged' : 'closed'
+      } else if (pr.draft) {
         status = 'draft'
       }
 
       return {
-        submitRequestId: String(issue.number),
-        submitRequestNumber: issue.number,
-        title: issue.title,
+        submitRequestId: String(pr.number),
+        submitRequestNumber: pr.number,
+        title: pr.title,
         status,
-        sourceBranch: '', // Not available in search API
-        targetBranch: '', // Not available in search API
-        authorName: issue.user?.login,
-        authorEmail: undefined, // Not available in search API
-        createdAt: new Date(issue.created_at),
-        updatedAt: new Date(issue.updated_at),
-        description: issue.body || undefined,
-        tickets: [], // Would need separate parsing
-        changedLines: { added: 0, removed: 0 }, // Not available in search API
+        sourceBranch: pr.head?.ref ?? '',
+        targetBranch: pr.base?.ref ?? '',
+        authorName: pr.user?.login,
+        authorEmail: undefined,
+        createdAt: new Date(pr.created_at),
+        updatedAt: new Date(pr.updated_at),
+        description: pr.body || undefined,
+        tickets: [],
+        changedLines: { added: 0, removed: 0 },
       }
     })
 
     return {
       results,
-      nextCursor: searchResult.hasMore ? String(page + 1) : undefined,
-      hasMore: searchResult.hasMore,
+      nextCursor: listResult.hasMore ? String(page + 1) : undefined,
+      hasMore: listResult.hasMore,
     }
   }
 

@@ -314,6 +314,7 @@ mutation uploadS3BucketInfo($fileName: String!) {
 # AI Blame uploads (remote schema: aiBlameApi via Hasura)
 
 scalar Timestamp
+scalar JSON
 
 input AIBlameInferenceInitInput {
   promptFileName: String!
@@ -512,6 +513,7 @@ input TracyRecordInput {
   editType: EditType
   filePath: String
   additions: String
+  context: JSON
 }
 
 type TracyBatchUploadResponse {

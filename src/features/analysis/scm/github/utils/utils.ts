@@ -101,12 +101,18 @@ export function getOctoKit(
       fetch: getFetch(baseUrl),
       timeout: 10000, // 10 second timeout
     },
-    retry: options?.isEnableRetries
-      ? {
-          doNotRetry: [400, 401, 403, 404, 422], // Don't retry on these status codes
-          retries: 3, // Retry up to 3 times
-        }
-      : { enabled: false },
+    // Always retry on transient failures. 401 is intentionally retryable:
+    // GitHub briefly returns 401 for an OAuth token in the first few seconds
+    // after it is minted, and without this, validateRepoUrl and every
+    // downstream SCM call can fail permanently on that propagation glitch.
+    // Trade-off: a genuinely revoked/invalid token surfaces after ~14s of
+    // backoff (@octokit/plugin-retry uses retryCount^2 * 1000 ms: 1s, 4s, 9s)
+    // instead of immediately. Acceptable given the alternative is permanent
+    // failure / 10-minute test timeouts.
+    retry: {
+      doNotRetry: [400, 403, 404, 422],
+      retries: 3,
+    },
     throttle: options?.isEnableRetries
       ? {
           onRateLimit: (

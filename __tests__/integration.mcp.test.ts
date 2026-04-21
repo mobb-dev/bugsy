@@ -683,7 +683,7 @@ describe('mcp tests', () => {
         } finally {
           testRepo.cleanupAll()
         }
-      }, 180000)
+      }, 300000)
     })
   })
 

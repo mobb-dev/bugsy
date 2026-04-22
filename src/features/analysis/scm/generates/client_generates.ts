@@ -1316,6 +1316,7 @@ export type ScanSkillResult = {
   findingsCount: Scalars['Int']['output'];
   layersExecuted: Array<Scalars['String']['output']>;
   scanDurationMs: Scalars['Int']['output'];
+  scannerVersion: Scalars['String']['output'];
   skillHash?: Maybe<Scalars['String']['output']>;
   skillName: Scalars['String']['output'];
   skillVersion?: Maybe<Scalars['String']['output']>;
@@ -1541,6 +1542,16 @@ export type SetDeveloperGroupMembersInput = {
   userNames: Array<Scalars['String']['input']>;
 };
 
+export type SkillVerdict = {
+  __typename?: 'SkillVerdict';
+  md5: Scalars['String']['output'];
+  scannedAt: Scalars['String']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
+  summary?: Maybe<Scalars['String']['output']>;
+  verdict: Scalars['String']['output'];
+};
+
 export enum SortOrder {
   Asc = 'ASC',
   Desc = 'DESC'
@@ -1751,6 +1762,7 @@ export type TracyAppliedSkill = {
   args?: Maybe<Scalars['String']['output']>;
   contextFileIds: Array<Scalars['String']['output']>;
   identifier: Scalars['String']['output'];
+  invocationType?: Maybe<Scalars['String']['output']>;
   invokedAt?: Maybe<Scalars['String']['output']>;
   origin: Scalars['String']['output'];
 };
@@ -21052,6 +21064,10 @@ export type Mutation_Root = {
   delete_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_inference_event" */
   delete_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** delete data from the table: "tracy.tracy_skill_scan" */
+  delete_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_skill_scan" */
+  delete_tracy_tracy_skill_scan_by_pk?: Maybe<Tracy_Tracy_Skill_Scan>;
   /** delete data from the table: "unfixable" */
   delete_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** delete single row from the table: "unfixable" */
@@ -21542,6 +21558,10 @@ export type Mutation_Root = {
   insert_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** insert a single row into the table: "tracy.tracy_inference_event" */
   insert_tracy_tracy_inference_event_one?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** insert data into the table: "tracy.tracy_skill_scan" */
+  insert_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_skill_scan" */
+  insert_tracy_tracy_skill_scan_one?: Maybe<Tracy_Tracy_Skill_Scan>;
   /** insert data into the table: "unfixable" */
   insert_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** insert a single row into the table: "unfixable" */
@@ -22243,6 +22263,12 @@ export type Mutation_Root = {
   update_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** update multiples rows of table: "tracy.tracy_inference_event" */
   update_tracy_tracy_inference_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_skill_scan" */
+  update_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_skill_scan" */
+  update_tracy_tracy_skill_scan_by_pk?: Maybe<Tracy_Tracy_Skill_Scan>;
+  /** update multiples rows of table: "tracy.tracy_skill_scan" */
+  update_tracy_tracy_skill_scan_many?: Maybe<Array<Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>>>;
   /** update data of the table: "unfixable" */
   update_unfixable?: Maybe<Unfixable_Mutation_Response>;
   /** update single row of the table: "unfixable" */
@@ -23717,6 +23743,18 @@ export type Mutation_RootDelete_Tracy_Tracy_Inference_EventArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Inference_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Skill_ScanArgs = {
+  where: Tracy_Tracy_Skill_Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Skill_Scan_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -25362,6 +25400,20 @@ export type Mutation_RootInsert_Tracy_Tracy_Inference_Event_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Skill_ScanArgs = {
+  objects: Array<Tracy_Tracy_Skill_Scan_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Skill_Scan_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Skill_Scan_OneArgs = {
+  object: Tracy_Tracy_Skill_Scan_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Skill_Scan_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_UnfixableArgs = {
   objects: Array<Unfixable_Insert_Input>;
   on_conflict?: InputMaybe<Unfixable_On_Conflict>;
@@ -25676,6 +25728,7 @@ export type Mutation_RootSaveUsageMcpArgs = {
 
 /** mutation root */
 export type Mutation_RootScanSkillArgs = {
+  internal?: InputMaybe<Scalars['Boolean']['input']>;
   skillUrl: Scalars['String']['input'];
 };
 
@@ -27894,6 +27947,26 @@ export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_ManyArgs = {
   updates: Array<Tracy_Tracy_Inference_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Skill_ScanArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Skill_Scan_Set_Input>;
+  where: Tracy_Tracy_Skill_Scan_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Skill_Scan_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Skill_Scan_Set_Input>;
+  pk_columns: Tracy_Tracy_Skill_Scan_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Skill_Scan_ManyArgs = {
+  updates: Array<Tracy_Tracy_Skill_Scan_Updates>;
 };
 
 
@@ -34149,6 +34222,8 @@ export type Query_Root = {
   /** fetch data from the table: "scm_submit_fix_request" using primary key columns */
   scm_submit_fix_request_by_pk?: Maybe<Scm_Submit_Fix_Request>;
   skillScanHealth?: Maybe<Scalars['String']['output']>;
+  skillScannerVersion: Scalars['String']['output'];
+  skillVerdictsByMd5: Array<SkillVerdict>;
   /** fetch data from the table: "submit_fix_request" */
   submit_fix_request: Array<Submit_Fix_Request>;
   /** fetch aggregated fields from the table: "submit_fix_request" */
@@ -34219,6 +34294,12 @@ export type Query_Root = {
   tracy_tracy_inference_event_aggregate: Tracy_Tracy_Inference_Event_Aggregate;
   /** fetch data from the table: "tracy.tracy_inference_event" using primary key columns */
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_skill_scan" */
+  tracy_tracy_skill_scan: Array<Tracy_Tracy_Skill_Scan>;
+  /** fetch aggregated fields from the table: "tracy.tracy_skill_scan" */
+  tracy_tracy_skill_scan_aggregate: Tracy_Tracy_Skill_Scan_Aggregate;
+  /** fetch data from the table: "tracy.tracy_skill_scan" using primary key columns */
+  tracy_tracy_skill_scan_by_pk?: Maybe<Tracy_Tracy_Skill_Scan>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -36891,6 +36972,11 @@ export type Query_RootScm_Submit_Fix_Request_By_PkArgs = {
 };
 
 
+export type Query_RootSkillVerdictsByMd5Args = {
+  md5s: Array<Scalars['String']['input']>;
+};
+
+
 export type Query_RootSubmit_Fix_RequestArgs = {
   distinct_on?: InputMaybe<Array<Submit_Fix_Request_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -37161,6 +37247,29 @@ export type Query_RootTracy_Tracy_Inference_Event_AggregateArgs = {
 
 
 export type Query_RootTracy_Tracy_Inference_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Skill_ScanArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Skill_Scan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Skill_Scan_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -42375,6 +42484,14 @@ export type Subscription_Root = {
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** fetch data from the table in a streaming manner: "tracy.tracy_inference_event" */
   tracy_tracy_inference_event_stream: Array<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_skill_scan" */
+  tracy_tracy_skill_scan: Array<Tracy_Tracy_Skill_Scan>;
+  /** fetch aggregated fields from the table: "tracy.tracy_skill_scan" */
+  tracy_tracy_skill_scan_aggregate: Tracy_Tracy_Skill_Scan_Aggregate;
+  /** fetch data from the table: "tracy.tracy_skill_scan" using primary key columns */
+  tracy_tracy_skill_scan_by_pk?: Maybe<Tracy_Tracy_Skill_Scan>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_skill_scan" */
+  tracy_tracy_skill_scan_stream: Array<Tracy_Tracy_Skill_Scan>;
   /** fetch data from the table: "unfixable" */
   unfixable: Array<Unfixable>;
   /** fetch aggregated fields from the table: "unfixable" */
@@ -45867,6 +45984,36 @@ export type Subscription_RootTracy_Tracy_Inference_Event_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Tracy_Skill_ScanArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Skill_Scan_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Skill_Scan_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Skill_Scan_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Skill_Scan_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
 export type Subscription_RootUnfixableArgs = {
   distinct_on?: InputMaybe<Array<Unfixable_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -48685,6 +48832,30 @@ export type Tracy_Tracy_Context_File = {
   md5: Scalars['String']['output'];
   s3Path: Scalars['String']['output'];
   sizeBytes: Scalars['Int']['output'];
+  /** An array relationship */
+  skillScans: Array<Tracy_Tracy_Skill_Scan>;
+  /** An aggregate relationship */
+  skillScans_aggregate: Tracy_Tracy_Skill_Scan_Aggregate;
+};
+
+
+/** columns and relationships of "tracy.tracy_context_file" */
+export type Tracy_Tracy_Context_FileSkillScansArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_context_file" */
+export type Tracy_Tracy_Context_FileSkillScans_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
 };
 
 /** aggregated selection of "tracy.tracy_context_file" */
@@ -48734,6 +48905,8 @@ export type Tracy_Tracy_Context_File_Bool_Exp = {
   md5?: InputMaybe<String_Comparison_Exp>;
   s3Path?: InputMaybe<String_Comparison_Exp>;
   sizeBytes?: InputMaybe<Int_Comparison_Exp>;
+  skillScans?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+  skillScans_aggregate?: InputMaybe<Tracy_Tracy_Skill_Scan_Aggregate_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "tracy.tracy_context_file" */
@@ -48757,6 +48930,7 @@ export type Tracy_Tracy_Context_File_Insert_Input = {
   md5?: InputMaybe<Scalars['String']['input']>;
   s3Path?: InputMaybe<Scalars['String']['input']>;
   sizeBytes?: InputMaybe<Scalars['Int']['input']>;
+  skillScans?: InputMaybe<Tracy_Tracy_Skill_Scan_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -48812,6 +48986,7 @@ export type Tracy_Tracy_Context_File_Order_By = {
   md5?: InputMaybe<Order_By>;
   s3Path?: InputMaybe<Order_By>;
   sizeBytes?: InputMaybe<Order_By>;
+  skillScans_aggregate?: InputMaybe<Tracy_Tracy_Skill_Scan_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: tracy.tracy_context_file */
@@ -49678,6 +49853,254 @@ export type Tracy_Tracy_Inference_Event_Var_Samp_Fields = {
 export type Tracy_Tracy_Inference_Event_Variance_Fields = {
   __typename?: 'tracy_tracy_inference_event_variance_fields';
   charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan = {
+  __typename?: 'tracy_tracy_skill_scan';
+  /** An object relationship */
+  contextFile: Tracy_Tracy_Context_File;
+  contextFileId: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  scannedAt: Scalars['timestamptz']['output'];
+  scannerName: Scalars['String']['output'];
+  scannerVersion: Scalars['String']['output'];
+  summary?: Maybe<Scalars['String']['output']>;
+  verdict: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Aggregate = {
+  __typename?: 'tracy_tracy_skill_scan_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Skill_Scan_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Skill_Scan>;
+};
+
+export type Tracy_Tracy_Skill_Scan_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Tracy_Skill_Scan_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Tracy_Skill_Scan_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_skill_scan_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Skill_Scan_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Skill_Scan_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Tracy_Skill_Scan_Max_Order_By>;
+  min?: InputMaybe<Tracy_Tracy_Skill_Scan_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Tracy_Skill_Scan_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Skill_Scan_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_skill_scan". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Skill_Scan_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Skill_Scan_Bool_Exp>>;
+  contextFile?: InputMaybe<Tracy_Tracy_Context_File_Bool_Exp>;
+  contextFileId?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  scannedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  scannerName?: InputMaybe<String_Comparison_Exp>;
+  scannerVersion?: InputMaybe<String_Comparison_Exp>;
+  summary?: InputMaybe<String_Comparison_Exp>;
+  verdict?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_skill_scan" */
+export enum Tracy_Tracy_Skill_Scan_Constraint {
+  /** unique or primary key constraint on columns "context_file_id", "scanner_version", "scanner_name" */
+  TracySkillScanBundleScannerKey = 'tracy_skill_scan_bundle_scanner_key',
+  /** unique or primary key constraint on columns "id" */
+  TracySkillScanPkey = 'tracy_skill_scan_pkey'
+}
+
+/** input type for inserting data into table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Insert_Input = {
+  contextFile?: InputMaybe<Tracy_Tracy_Context_File_Obj_Rel_Insert_Input>;
+  contextFileId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  scannedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  scannerName?: InputMaybe<Scalars['String']['input']>;
+  scannerVersion?: InputMaybe<Scalars['String']['input']>;
+  summary?: InputMaybe<Scalars['String']['input']>;
+  verdict?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Skill_Scan_Max_Fields = {
+  __typename?: 'tracy_tracy_skill_scan_max_fields';
+  contextFileId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  scannedAt?: Maybe<Scalars['timestamptz']['output']>;
+  scannerName?: Maybe<Scalars['String']['output']>;
+  scannerVersion?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  verdict?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Max_Order_By = {
+  contextFileId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  scannedAt?: InputMaybe<Order_By>;
+  scannerName?: InputMaybe<Order_By>;
+  scannerVersion?: InputMaybe<Order_By>;
+  summary?: InputMaybe<Order_By>;
+  verdict?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Skill_Scan_Min_Fields = {
+  __typename?: 'tracy_tracy_skill_scan_min_fields';
+  contextFileId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  scannedAt?: Maybe<Scalars['timestamptz']['output']>;
+  scannerName?: Maybe<Scalars['String']['output']>;
+  scannerVersion?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  verdict?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Min_Order_By = {
+  contextFileId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  scannedAt?: InputMaybe<Order_By>;
+  scannerName?: InputMaybe<Order_By>;
+  scannerVersion?: InputMaybe<Order_By>;
+  summary?: InputMaybe<Order_By>;
+  verdict?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Mutation_Response = {
+  __typename?: 'tracy_tracy_skill_scan_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Skill_Scan>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_On_Conflict = {
+  constraint: Tracy_Tracy_Skill_Scan_Constraint;
+  update_columns?: Array<Tracy_Tracy_Skill_Scan_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_skill_scan". */
+export type Tracy_Tracy_Skill_Scan_Order_By = {
+  contextFile?: InputMaybe<Tracy_Tracy_Context_File_Order_By>;
+  contextFileId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  scannedAt?: InputMaybe<Order_By>;
+  scannerName?: InputMaybe<Order_By>;
+  scannerVersion?: InputMaybe<Order_By>;
+  summary?: InputMaybe<Order_By>;
+  verdict?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_skill_scan */
+export type Tracy_Tracy_Skill_Scan_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.tracy_skill_scan" */
+export enum Tracy_Tracy_Skill_Scan_Select_Column {
+  /** column name */
+  ContextFileId = 'contextFileId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ScannedAt = 'scannedAt',
+  /** column name */
+  ScannerName = 'scannerName',
+  /** column name */
+  ScannerVersion = 'scannerVersion',
+  /** column name */
+  Summary = 'summary',
+  /** column name */
+  Verdict = 'verdict'
+}
+
+/** input type for updating data in table "tracy.tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Set_Input = {
+  contextFileId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  scannedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  scannerName?: InputMaybe<Scalars['String']['input']>;
+  scannerVersion?: InputMaybe<Scalars['String']['input']>;
+  summary?: InputMaybe<Scalars['String']['input']>;
+  verdict?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_skill_scan" */
+export type Tracy_Tracy_Skill_Scan_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Skill_Scan_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Skill_Scan_Stream_Cursor_Value_Input = {
+  contextFileId?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  scannedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  scannerName?: InputMaybe<Scalars['String']['input']>;
+  scannerVersion?: InputMaybe<Scalars['String']['input']>;
+  summary?: InputMaybe<Scalars['String']['input']>;
+  verdict?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.tracy_skill_scan" */
+export enum Tracy_Tracy_Skill_Scan_Update_Column {
+  /** column name */
+  ContextFileId = 'contextFileId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ScannedAt = 'scannedAt',
+  /** column name */
+  ScannerName = 'scannerName',
+  /** column name */
+  ScannerVersion = 'scannerVersion',
+  /** column name */
+  Summary = 'summary',
+  /** column name */
+  Verdict = 'verdict'
+}
+
+export type Tracy_Tracy_Skill_Scan_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Skill_Scan_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Skill_Scan_Bool_Exp;
 };
 
 /** a table which stores the un-fixable info where we have fix info object */
@@ -58322,6 +58745,13 @@ export type ScanSkillMutationVariables = Exact<{
 
 export type ScanSkillMutation = { __typename?: 'mutation_root', scanSkill: { __typename?: 'ScanSkillResult', skillName: string, skillHash?: string | null, skillVersion?: string | null, verdict: string, findingsCount: number, scanDurationMs: number, layersExecuted: Array<string>, cached: boolean, summary?: string | null, findings: Array<{ __typename?: 'ScanFinding', category: string, severity: string, ruleId?: string | null, explanation: string, evidence?: string | null, filePath?: string | null, lineNumber?: number | null, confidence: number, layer: string }> } };
 
+export type SkillVerdictsByMd5QueryVariables = Exact<{
+  md5s: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type SkillVerdictsByMd5Query = { __typename?: 'query_root', skillVerdictsByMd5: Array<{ __typename?: 'SkillVerdict', md5: string, verdict: string, summary?: string | null, scannerName: string, scannerVersion: string, scannedAt: string }> };
+
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
   id
@@ -59164,6 +59594,18 @@ export const ScanSkillDocument = `
   }
 }
     `;
+export const SkillVerdictsByMd5Document = `
+    query SkillVerdictsByMd5($md5s: [String!]!) {
+  skillVerdictsByMd5(md5s: $md5s) {
+    md5
+    verdict
+    summary
+    scannerName
+    scannerVersion
+    scannedAt
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -59288,6 +59730,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     ScanSkill(variables: ScanSkillMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ScanSkillMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<ScanSkillMutation>({ document: ScanSkillDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'ScanSkill', 'mutation', variables);
+    },
+    SkillVerdictsByMd5(variables: SkillVerdictsByMd5QueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SkillVerdictsByMd5Query> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SkillVerdictsByMd5Query>({ document: SkillVerdictsByMd5Document, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SkillVerdictsByMd5', 'query', variables);
     }
   };
 }

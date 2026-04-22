@@ -1019,3 +1019,18 @@ mutation ScanSkill($skillUrl: String!) {
     summary
   }
 }
+
+# T-467 — batched verdict lookup for the Claude Code client's quarantine
+# check. For each md5 returns the most severe verdict across scanners.
+# md5s without a scan row are omitted; client treats absence as unknown
+# → fail-open.
+query SkillVerdictsByMd5($md5s: [String!]!) {
+  skillVerdictsByMd5(md5s: $md5s) {
+    md5
+    verdict
+    summary
+    scannerName
+    scannerVersion
+    scannedAt
+  }
+}

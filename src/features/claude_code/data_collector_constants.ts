@@ -7,7 +7,13 @@ export const CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000 // Run cleanup at most on
 
 // Daemon-specific constants
 export const DAEMON_TTL_MS = 30 * 60 * 1000 // 30 minutes — daemon self-terminates after this
-export const DAEMON_POLL_INTERVAL_MS = 10_000 // 10 seconds — poll cycle interval
+// Poll interval defaults to 10s; override via MOBB_DAEMON_POLL_INTERVAL_MS
+// (e.g. test harnesses). Clamped to [100ms, 60_000ms].
+export const DAEMON_POLL_INTERVAL_MS = (() => {
+  const raw = Number(process.env['MOBB_DAEMON_POLL_INTERVAL_MS'])
+  if (!Number.isFinite(raw) || raw <= 0) return 10_000
+  return Math.min(Math.max(raw, 100), 60_000)
+})()
 export const HEARTBEAT_STALE_MS = 30_000 // 30 seconds — shim considers daemon dead if heartbeat older
 export const TRANSCRIPT_MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 hours — skip files not modified recently
 export const DAEMON_CHUNK_SIZE = 50 // entries per chunk — bounds memory, enables crash recovery

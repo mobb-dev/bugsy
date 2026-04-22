@@ -730,4 +730,9 @@ export class GQLClient {
   async scanSkill(variables: ScanSkillMutationVariables) {
     return await this._clientSdk.ScanSkill(variables)
   }
+
+  // T-467 — batched verdict lookup for the client-side quarantine check.
+  async skillVerdictsByMd5(md5s: string[]) {
+    return await this._clientSdk.SkillVerdictsByMd5({ md5s })
+  }
 }

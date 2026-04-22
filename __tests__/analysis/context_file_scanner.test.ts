@@ -325,8 +325,8 @@ describe('scanContextFiles', () => {
     })
   })
 
-  describe('skills glob matching', () => {
-    it('matches all files under .claude/skills/**/* as a skill group', async () => {
+  describe('skill-bundle enumeration', () => {
+    it('uploads all files inside a skill directory (manifest + siblings + nested subfolders)', async () => {
       await writeFile(
         workspace.path,
         '.claude/skills/my-skill/SKILL.md',
@@ -337,16 +337,437 @@ describe('scanContextFiles', () => {
         '.claude/skills/my-skill/helper.ts',
         'export const x = 1'
       )
+      await writeFile(
+        workspace.path,
+        '.claude/skills/my-skill/templates/foo.py',
+        '# nested resource'
+      )
 
       const result = await scanFull('claude-code')
       const mySkill = result.skillGroups.find((sg) => sg.name === 'my-skill')
       expect(mySkill).toBeDefined()
-      expect(mySkill!.isFolder).toBe(true)
-      const fileNames = mySkill!.files.map((f) => f.name).sort()
-      expect(fileNames).toContain('.claude/skills/my-skill/SKILL.md')
-      expect(fileNames).toContain('.claude/skills/my-skill/helper.ts')
+      const allFiles = mySkill!.files
+      const names = allFiles.map((f) => f.name)
+      const byName = Object.fromEntries(allFiles.map((f) => [f.name, f]))
+      expect(byName['.claude/skills/my-skill/SKILL.md']?.category).toBe('skill')
+      // Sibling and nested files are now included so the zip pipeline can
+      // bundle the full skill directory.
+      expect(names).toContain('.claude/skills/my-skill/helper.ts')
+      expect(names).toContain('.claude/skills/my-skill/templates/foo.py')
     })
 
+    it('excludes loose .md files directly under skills root (no SKILL.md)', async () => {
+      // Proper skill with SKILL.md
+      await writeFile(
+        workspace.path,
+        '.claude/skills/tracy/SKILL.md',
+        'real skill'
+      )
+      // Loose .md files users sometimes drop — NOT agent-visible, must be skipped
+      await writeFile(workspace.path, '.claude/skills/loose-note.md', 'ad hoc')
+      await writeFile(
+        workspace.path,
+        '.claude/skills/another-loose.md',
+        'ad hoc'
+      )
+
+      const result = await scanFull('claude-code')
+      const skillNames = result.skillGroups.flatMap((sg) =>
+        sg.files.map((f) => f.name)
+      )
+      expect(skillNames).toContain('.claude/skills/tracy/SKILL.md')
+      expect(skillNames).not.toContain('.claude/skills/loose-note.md')
+      expect(skillNames).not.toContain('.claude/skills/another-loose.md')
+    })
+
+    it('includes all files from valid skill dirs but skips dirs without a SKILL.md manifest', async () => {
+      // Valid skill with manifest
+      await writeFile(
+        workspace.path,
+        '.claude/skills/good/SKILL.md',
+        'manifest'
+      )
+      await writeFile(
+        workspace.path,
+        '.claude/skills/good/helper.sh',
+        'echo hi'
+      )
+      // Not a skill — directory exists but has no SKILL.md manifest
+      await writeFile(
+        workspace.path,
+        '.claude/skills/no-manifest/random.md',
+        'orphaned'
+      )
+      await writeFile(
+        workspace.path,
+        '.claude/skills/no-manifest/other.py',
+        'orphaned'
+      )
+
+      const result = await scanFull('claude-code')
+      const names = result.skillGroups.flatMap((sg) =>
+        sg.files.map((f) => f.name)
+      )
+      expect(names).toContain('.claude/skills/good/SKILL.md')
+      // Sibling files of a valid manifest are now included for full zip bundling.
+      expect(names).toContain('.claude/skills/good/helper.sh')
+      // Directories without a SKILL.md are not valid skill dirs — excluded.
+      expect(names).not.toContain('.claude/skills/no-manifest/random.md')
+      expect(names).not.toContain('.claude/skills/no-manifest/other.py')
+    })
+  })
+
+  describe('copilot custom location settings (.vscode/settings.json)', () => {
+    it('picks up chat.agentSkillsLocations with object-shape values', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': {
+            'my-skills': true,
+            'disabled-skills': false,
+          },
+        })
+      )
+      await writeFile(workspace.path, 'my-skills/demo/SKILL.md', 'demo skill')
+      await writeFile(
+        workspace.path,
+        'disabled-skills/nope/SKILL.md',
+        'should be ignored'
+      )
+
+      const result = await scanFull('copilot')
+      const allSkillFiles = result.skillGroups.flatMap((sg) => sg.files)
+      const paths = allSkillFiles.map((f) => f.path)
+      expect(paths.some((p) => p.endsWith('my-skills/demo/SKILL.md'))).toBe(
+        true
+      )
+      expect(
+        paths.some((p) => p.endsWith('disabled-skills/nope/SKILL.md'))
+      ).toBe(false)
+      const skillFile = allSkillFiles.find((f) =>
+        f.path.endsWith('my-skills/demo/SKILL.md')
+      )
+      expect(skillFile!.category).toBe('skill')
+    })
+
+    it('supports array-shape, JSONC comments, and trailing commas', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        `{
+          // workspace config
+          "chat.promptFilesLocations": [
+            "custom-prompts", /* inline */
+          ],
+        }`
+      )
+      await writeFile(workspace.path, 'custom-prompts/greet.prompt.md', 'hi')
+
+      const result = await scanFull('copilot')
+      const allSkillFiles = result.skillGroups.flatMap((sg) => sg.files)
+      const entry = allSkillFiles.find((f) =>
+        f.path.endsWith('custom-prompts/greet.prompt.md')
+      )
+      expect(entry).toBeDefined()
+      expect(entry!.category).toBe('skill')
+    })
+
+    it('resolves the workspaceFolder variable and home-relative paths', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.instructionsFilesLocations': {
+            '${workspaceFolder}/ws-rules': true,
+            '~/home-rules': true,
+          },
+        })
+      )
+      await writeFile(
+        workspace.path,
+        'ws-rules/a.instructions.md',
+        'workspace rule'
+      )
+      await writeFile(
+        fakeHome.path,
+        'home-rules/b.instructions.md',
+        'home rule'
+      )
+
+      const files = await scan('copilot')
+      const wsMatch = files.find((f) =>
+        f.path.endsWith('ws-rules/a.instructions.md')
+      )
+      const homeMatch = files.find((f) =>
+        f.path.endsWith('home-rules/b.instructions.md')
+      )
+      expect(wsMatch).toBeDefined()
+      expect(wsMatch!.category).toBe('rule')
+      expect(homeMatch).toBeDefined()
+      expect(homeMatch!.category).toBe('rule')
+    })
+
+    it('is a no-op when .vscode/settings.json is missing or malformed — static entries still scan', async () => {
+      // Malformed JSON plus a static copilot entry + a file that would only
+      // be returned if the broken settings got parsed.
+      await writeFile(workspace.path, '.vscode/settings.json', '{ not json')
+      await writeFile(
+        workspace.path,
+        '.github/copilot-instructions.md',
+        'static copilot rule'
+      )
+      await writeFile(workspace.path, 'stealth/a/SKILL.md', 'should not load')
+
+      const files = await scan('copilot')
+      const names = files.map((f) => f.name)
+      expect(names).toContain('.github/copilot-instructions.md')
+      expect(files.some((f) => f.path.endsWith('stealth/a/SKILL.md'))).toBe(
+        false
+      )
+    })
+
+    it('ignores custom locations for non-copilot platforms', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': { 'my-skills': true },
+        })
+      )
+      await writeFile(workspace.path, 'my-skills/a/SKILL.md', 'skill')
+      const files = await scan('claude-code')
+      expect(files.some((f) => f.path.endsWith('my-skills/a/SKILL.md'))).toBe(
+        false
+      )
+    })
+  })
+
+  describe('claude-code autoMemoryDirectory override', () => {
+    it('honors autoMemoryDirectory from ~/.claude/settings.json', async () => {
+      await writeFile(
+        fakeHome.path,
+        '.claude/settings.json',
+        JSON.stringify({ autoMemoryDirectory: '~/custom-memory' })
+      )
+      await writeFile(
+        fakeHome.path,
+        'custom-memory/proj-hash/memory/MEMORY.md',
+        'index'
+      )
+      await writeFile(
+        fakeHome.path,
+        'custom-memory/proj-hash/memory/user.md',
+        'user memory'
+      )
+
+      const files = await scan('claude-code')
+      const memoryPaths = files
+        .filter((f) => f.category === 'memory')
+        .map((f) => f.path)
+      expect(
+        memoryPaths.some((p) =>
+          p.endsWith('custom-memory/proj-hash/memory/MEMORY.md')
+        )
+      ).toBe(true)
+      expect(
+        memoryPaths.some((p) =>
+          p.endsWith('custom-memory/proj-hash/memory/user.md')
+        )
+      ).toBe(true)
+    })
+
+    it('falls back to default path when autoMemoryDirectory is absent', async () => {
+      await writeFile(
+        fakeHome.path,
+        '.claude/settings.json',
+        JSON.stringify({ theme: 'dark' })
+      )
+      await writeFile(
+        fakeHome.path,
+        '.claude/projects/proj-hash/memory/MEMORY.md',
+        'default content'
+      )
+      const files = await scan('claude-code')
+      const memoryFiles = files.filter((f) => f.category === 'memory')
+      expect(memoryFiles.length).toBe(1)
+      expect(memoryFiles[0]!.name).toBe(
+        '.claude/projects/proj-hash/memory/MEMORY.md'
+      )
+      expect(memoryFiles[0]!.content).toBe('default content')
+    })
+
+    it('ignores autoMemoryDirectory declared in workspace settings (user-only key)', async () => {
+      await writeFile(
+        workspace.path,
+        '.claude/settings.json',
+        JSON.stringify({ autoMemoryDirectory: '~/should-not-scan' })
+      )
+      await writeFile(
+        fakeHome.path,
+        'should-not-scan/proj/memory/MEMORY.md',
+        'nope'
+      )
+      const files = await scan('claude-code')
+      expect(
+        files.some((f) =>
+          f.path.endsWith('should-not-scan/proj/memory/MEMORY.md')
+        )
+      ).toBe(false)
+    })
+
+    it('narrow glob rejects stray markdown outside the memory/ convention', async () => {
+      await writeFile(
+        fakeHome.path,
+        '.claude/settings.json',
+        JSON.stringify({ autoMemoryDirectory: '~/custom-memory' })
+      )
+      // Matches the `*/memory/*.md` pattern
+      await writeFile(
+        fakeHome.path,
+        'custom-memory/proj/memory/MEMORY.md',
+        'ok'
+      )
+      // Does NOT match — at the override root, or one level deep without memory/
+      await writeFile(fakeHome.path, 'custom-memory/README.md', 'skip me')
+      await writeFile(fakeHome.path, 'custom-memory/proj/notes.md', 'skip me')
+
+      const files = await scan('claude-code')
+      const memoryNames = files
+        .filter((f) => f.category === 'memory')
+        .map((f) => f.path)
+      expect(
+        memoryNames.some((p) =>
+          p.endsWith('custom-memory/proj/memory/MEMORY.md')
+        )
+      ).toBe(true)
+      expect(
+        memoryNames.some((p) => p.endsWith('custom-memory/README.md'))
+      ).toBe(false)
+      expect(
+        memoryNames.some((p) => p.endsWith('custom-memory/proj/notes.md'))
+      ).toBe(false)
+    })
+  })
+
+  describe('security containment — hostile .vscode/settings.json', () => {
+    it('refuses sensitive home subdirectories (~/.ssh, ~/.aws, ~/.config)', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': {
+            '~/.ssh': true,
+            '~/.aws': true,
+            '~/.config': true,
+          },
+        })
+      )
+      await writeFile(fakeHome.path, '.ssh/id_rsa', 'SECRET KEY')
+      await writeFile(fakeHome.path, '.aws/credentials', 'aws secret')
+      await writeFile(fakeHome.path, '.config/important', 'config')
+
+      const files = await scan('copilot')
+      const paths = files.map((f) => f.path)
+      expect(paths.some((p) => p.includes('/.ssh/'))).toBe(false)
+      expect(paths.some((p) => p.includes('/.aws/'))).toBe(false)
+      expect(paths.some((p) => p.includes('/.config/'))).toBe(false)
+    })
+
+    it('refuses filesystem root and bare $HOME', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': { '/': true, '~': true },
+        })
+      )
+      await writeFile(workspace.path, 'file.md', 'inside workspace')
+
+      const files = await scan('copilot')
+      // Should not walk '/' or $HOME — resulting files must all be inside
+      // workspaceRoot (from static globs) or none.
+      for (const f of files) {
+        expect(f.path.startsWith(workspace.path)).toBe(true)
+      }
+    })
+
+    it('refuses ..-escape via the workspaceFolder variable', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': {
+            '${workspaceFolder}/../../../etc': true,
+          },
+        })
+      )
+      await writeFile(workspace.path, 'src/a.md', 'inside')
+      const files = await scan('copilot')
+      for (const f of files) {
+        expect(f.path.startsWith(workspace.path)).toBe(true)
+      }
+    })
+
+    it('refuses `~foo` (no slash — POSIX other-user syntax)', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.agentSkillsLocations': { '~someuser/skills': true },
+        })
+      )
+      // Create the weird literal directory to prove we don't silently scan it
+      // as workspace-relative (historical behavior).
+      await writeFile(
+        workspace.path,
+        '~someuser/skills/secret.md',
+        'should not load'
+      )
+      const files = await scan('copilot')
+      expect(
+        files.some((f) => f.path.endsWith('~someuser/skills/secret.md'))
+      ).toBe(false)
+    })
+
+    it('category-specific glob filters non-instruction files from chat.instructionsFilesLocations', async () => {
+      await writeFile(
+        workspace.path,
+        '.vscode/settings.json',
+        JSON.stringify({
+          'chat.instructionsFilesLocations': { docs: true },
+        })
+      )
+      await writeFile(workspace.path, 'docs/foo.instructions.md', 'rule')
+      await writeFile(workspace.path, 'docs/random.png', 'binary')
+      await writeFile(workspace.path, 'docs/other.md', 'not an instruction')
+
+      const files = await scan('copilot')
+      const docs = files.filter((f) => f.path.includes('/docs/'))
+      const names = docs.map((f) => f.name)
+      expect(names).toContain('foo.instructions.md')
+      expect(docs.some((f) => f.path.endsWith('random.png'))).toBe(false)
+      expect(docs.some((f) => f.path.endsWith('other.md'))).toBe(false)
+    })
+
+    it('stamps scope=user-global on home-rooted entries', async () => {
+      await writeFile(fakeHome.path, '.claude/CLAUDE.md', 'global')
+      const files = await scan('claude-code')
+      const homeFile = files.find((f) => f.path.includes(fakeHome.path))
+      expect(homeFile).toBeDefined()
+      expect(homeFile!.scope).toBe('user-global')
+    })
+
+    it('leaves scope undefined on workspace-rooted entries (server infers)', async () => {
+      await writeFile(workspace.path, 'CLAUDE.md', 'project')
+      const files = await scan('claude-code')
+      const wsFile = files.find((f) => f.name === 'CLAUDE.md')
+      expect(wsFile).toBeDefined()
+      expect(wsFile!.scope).toBeUndefined()
+    })
+  })
+
+  describe('groupSkills behavior', () => {
     it('copilot .github/prompts/*.prompt.md are treated as standalone skills (no skills/ dir)', async () => {
       await writeFile(
         workspace.path,
@@ -362,7 +783,7 @@ describe('scanContextFiles', () => {
       expect(skill.files.length).toBe(1)
     })
 
-    it('copilot .github/chatmodes/*.chatmode.md are treated as standalone skills', async () => {
+    it('copilot .github/chatmodes/*.chatmode.md are treated as agent-config (not skills)', async () => {
       await writeFile(
         workspace.path,
         '.github/chatmodes/pair-program.chatmode.md',
@@ -370,10 +791,13 @@ describe('scanContextFiles', () => {
       )
 
       const result = await scanFull('copilot')
-      expect(result.skillGroups.length).toBe(1)
-      const skill = result.skillGroups[0]!
-      expect(skill.name).toBe('pair-program.chatmode')
-      expect(skill.isFolder).toBe(false)
+      // Chatmodes are agent-config, not skills — they appear in regularFiles, not skillGroups.
+      expect(result.skillGroups.length).toBe(0)
+      const chatmodeFile = result.regularFiles.find((f) =>
+        f.path.includes('pair-program.chatmode.md')
+      )
+      expect(chatmodeFile).toBeDefined()
+      expect(chatmodeFile!.category).toBe('agent-config')
     })
 
     it('workspace path containing "skills/" does not interfere with copilot skill detection', async () => {
@@ -390,6 +814,11 @@ describe('scanContextFiles', () => {
     it('folder skill with subfolders has skillPath pointing at skill root, not a subfolder', async () => {
       await writeFile(
         workspace.path,
+        '.claude/skills/deep-skill/SKILL.md',
+        'skill manifest'
+      )
+      await writeFile(
+        workspace.path,
         '.claude/skills/deep-skill/main.md',
         'main content'
       )
@@ -403,7 +832,7 @@ describe('scanContextFiles', () => {
       const skill = result.skillGroups.find((sg) => sg.name === 'deep-skill')
       expect(skill).toBeDefined()
       expect(skill!.isFolder).toBe(true)
-      expect(skill!.files.length).toBe(2)
+      expect(skill!.files.length).toBe(3)
       // skillPath must be the root of the skill folder, not any sub-directory
       expect(skill!.skillPath).toMatch(/deep-skill$/)
       // All files should be relative to the skill root (no "../" entries)
@@ -413,18 +842,30 @@ describe('scanContextFiles', () => {
       }
     })
 
-    it('standalone .claude/skills/*.md is treated as standalone (not folder) skill', async () => {
+    it('loose .md files directly under .claude/skills/ do not create skill groups', async () => {
       await writeFile(
         workspace.path,
         '.claude/skills/solo-skill.md',
         'standalone skill'
       )
+      // A valid skill dir should still work alongside loose files
+      await writeFile(
+        workspace.path,
+        '.claude/skills/real-skill/SKILL.md',
+        'real skill'
+      )
 
       const result = await scanFull('claude-code')
-      const skill = result.skillGroups.find((sg) => sg.name === 'solo-skill')
-      expect(skill).toBeDefined()
-      expect(skill!.isFolder).toBe(false)
-      expect(skill!.files.length).toBe(1)
+      // Loose .md file at root is excluded — only dir-based skills count
+      expect(
+        result.skillGroups.find((sg) => sg.name === 'solo-skill')
+      ).toBeUndefined()
+      // Valid SKILL.md-based dir still shows up
+      const realSkill = result.skillGroups.find(
+        (sg) => sg.name === 'real-skill'
+      )
+      expect(realSkill).toBeDefined()
+      expect(realSkill!.isFolder).toBe(true)
     })
   })
 })

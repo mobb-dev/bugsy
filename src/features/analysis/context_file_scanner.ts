@@ -1,13 +1,19 @@
-import { readFile, stat } from 'node:fs/promises'
+import { lstat, readFile, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
 import { globby } from 'globby'
+import { parse as parseJsoncLib, ParseError } from 'jsonc-parser'
+
+import {
+  SCAN_PATHS,
+  type ScanEntry,
+  SKILL_CATEGORY,
+} from './context_file_scan_paths'
+
+export { SCAN_PATHS, SKILL_CATEGORY }
 
 const MAX_CONTEXT_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
-
-/** Shared category sentinel — import instead of repeating the string literal. */
-export const SKILL_CATEGORY = 'skill'
 
 /** 24 hours in milliseconds — sessions older than this are pruned. */
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000
@@ -92,6 +98,13 @@ export type ContextFileEntry = {
   category: string
   /** File modification time in ms (for change detection) */
   mtimeMs: number
+  /**
+   * Authoritative scope determined at scan time from the originating `ScanEntry.root`.
+   * `home` / `absolute` roots always produce `user-global`; `workspace` roots leave
+   * `scope` undefined so the server can fall back to path-based inference (which
+   * distinguishes repo vs project via `.github/` presence).
+   */
+  scope?: 'project' | 'user-global' | 'repo'
 }
 
 /**
@@ -115,96 +128,387 @@ export type SkillGroup = {
   sessionKey: string
 }
 
-type ScanEntry = {
-  glob: string
-  category: string
-  root: 'workspace' | 'home'
+/**
+ * VS Code Copilot settings keys that let users declare extra directories
+ * beyond the built-in conventions (e.g. `chat.agentSkillsLocations`).
+ * We read `.vscode/settings.json` at scan time and materialize these into
+ * dynamic ScanEntry values with `root: 'absolute'`.
+ *
+ * Each entry maps a VS Code settings key to either:
+ * - `kind: 'glob'` + glob pattern + category (for files that ARE the instruction)
+ * - `kind: 'skill-bundle'` (for skill directories — all files inside
+ *   `<dir>/<skill>/` subdirs are scanned, loose files at the root are ignored).
+ */
+const COPILOT_CUSTOM_LOCATION_SETTINGS = [
+  {
+    key: 'chat.agentSkillsLocations',
+    kind: 'skill-bundle' as const,
+  },
+  {
+    key: 'chat.instructionsFilesLocations',
+    kind: 'glob' as const,
+    category: 'rule' as const,
+    glob: '**/*.instructions.md',
+  },
+  {
+    key: 'chat.promptFilesLocations',
+    kind: 'glob' as const,
+    category: 'skill' as const,
+    glob: '**/*.prompt.md',
+  },
+  {
+    key: 'chat.agentFilesLocations',
+    kind: 'glob' as const,
+    category: 'agent-config' as const,
+    glob: '**/*.agent.md',
+  },
+] as const
+
+/**
+ * Claude Code exposes exactly one configurable discovery path:
+ * `autoMemoryDirectory` in user-level `~/.claude/settings.json`. Project-level
+ * settings are intentionally ignored for this key to match Claude Code's own
+ * security model.
+ *
+ * Glob mirrors the default memory structure (`<base>/<hash>/memory/*.md`) so
+ * an override at a broad path (e.g. `~/Documents`) doesn't turn the scanner
+ * into a general markdown crawler.
+ */
+const CLAUDE_CODE_CUSTOM_LOCATION_SETTINGS = [
+  {
+    key: 'autoMemoryDirectory',
+    category: 'memory' as const,
+    glob: '*/memory/*.md',
+  },
+] as const
+
+/**
+ * Parse JSONC (JSON with comments and trailing commas) using the official
+ * VS Code `jsonc-parser` library. Returns `null` on parse failure so callers
+ * can fall back to static globs silently.
+ */
+function parseJsonc(text: string): unknown {
+  const errors: ParseError[] = []
+  const parsed = parseJsoncLib(text, errors, {
+    allowTrailingComma: true,
+    disallowComments: false,
+  })
+  // jsonc-parser returns `undefined` on catastrophic failure; any recoverable
+  // parse still returns a value plus non-empty `errors`. We accept recoverable
+  // parses so a single typo in a user's settings.json doesn't wipe out all
+  // custom locations.
+  return parsed ?? null
 }
 
 /**
- * Context file scan paths keyed by platform.
- * Each platform only lists files it actually auto-loads.
+ * Extract enabled custom locations from a settings value.
  *
- * Kept in sync with tscommon/backend/src/utils/tracyContextFilePaths.ts
- * (server-side canonical source). If paths diverge, the scanner will miss
- * files but no data corruption occurs — the server just won't see them.
+ * Accepts both shapes VS Code uses:
+ * - Array of path strings: every non-empty string is enabled.
+ * - Object mapping `path → boolean`: only entries with the exact value `true`
+ *   are enabled. Truthy non-booleans (`1`, `"yes"`, `{}`) are rejected because
+ *   VS Code's chat settings are strictly typed as booleans.
  */
-const SCAN_PATHS: Record<string, ScanEntry[]> = {
-  'claude-code': [
-    { glob: 'CLAUDE.md', category: 'rule', root: 'workspace' },
-    { glob: 'CLAUDE.local.md', category: 'rule', root: 'workspace' },
-    { glob: 'INSIGHTS.md', category: 'rule', root: 'workspace' },
-    { glob: 'AGENTS.md', category: 'rule', root: 'workspace' },
-    { glob: '.claude/rules/**/*.md', category: 'rule', root: 'workspace' },
-    { glob: '.claude/CLAUDE.md', category: 'rule', root: 'home' },
-    { glob: '.claude/INSIGHTS.md', category: 'rule', root: 'home' },
-    { glob: '.claude/rules/**/*.md', category: 'rule', root: 'home' },
-    {
-      glob: '.claude/projects/*/memory/*.md',
-      category: 'memory',
-      root: 'home',
-    },
-    {
-      glob: '.claude/skills/**/*',
-      category: SKILL_CATEGORY,
-      root: 'workspace',
-    },
-    { glob: '.claude/commands/*.md', category: 'command', root: 'workspace' },
-    {
-      glob: '.claude/agents/*.md',
-      category: 'agent-config',
-      root: 'workspace',
-    },
-    { glob: '.claude/skills/**/*', category: SKILL_CATEGORY, root: 'home' },
-    { glob: '.claude/commands/*.md', category: 'command', root: 'home' },
-    { glob: '.claude/agents/*.md', category: 'agent-config', root: 'home' },
-    { glob: '.claude/settings.json', category: 'config', root: 'workspace' },
-    {
-      glob: '.claude/settings.local.json',
-      category: 'config',
-      root: 'workspace',
-    },
-    { glob: '.mcp.json', category: 'mcp-config', root: 'workspace' },
-    { glob: '.claude/.mcp.json', category: 'mcp-config', root: 'workspace' },
-    { glob: '.claude/settings.json', category: 'config', root: 'home' },
-    { glob: '.claudeignore', category: 'ignore', root: 'workspace' },
-  ],
+function extractCustomLocations(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter(
+      (v): v is string => typeof v === 'string' && v.length > 0
+    )
+  }
+  if (value && typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>)
+      .filter(([, v]) => v === true)
+      .map(([k]) => k)
+      .filter((k) => k.length > 0)
+  }
+  return []
+}
 
-  cursor: [
-    { glob: '.cursorrules', category: 'rule', root: 'workspace' },
-    { glob: '.cursor/rules/**/*.mdc', category: 'rule', root: 'workspace' },
-    { glob: '.cursor/mcp.json', category: 'mcp-config', root: 'workspace' },
-    { glob: '.cursor/mcp.json', category: 'mcp-config', root: 'home' },
-    { glob: '.cursorignore', category: 'ignore', root: 'workspace' },
-  ],
+/**
+ * Sensitive home-relative directories that must never be scanned even if the
+ * user (or a hostile repo's committed `.vscode/settings.json`) names them.
+ * These typically hold credentials and keys; allowing a scan would mean
+ * uploading those file contents to the tracy backend.
+ */
+const SENSITIVE_HOME_SUBDIRS = [
+  '.ssh',
+  '.aws',
+  '.gnupg',
+  '.config',
+  '.kube',
+  '.docker',
+  '.gcloud',
+  '.npmrc',
+  '.netrc',
+  '.git-credentials',
+  '.m2',
+  '.pypirc',
+  '.pgpass',
+  '.boto',
+  '.password-store',
+]
 
-  copilot: [
-    {
-      glob: '.github/copilot-instructions.md',
-      category: 'rule',
-      root: 'workspace',
-    },
-    {
-      glob: '.github/instructions/*.instructions.md',
-      category: 'rule',
-      root: 'workspace',
-    },
-    {
-      glob: '.github/prompts/*.prompt.md',
-      category: SKILL_CATEGORY,
-      root: 'workspace',
-    },
-    {
-      glob: '.github/chatmodes/*.chatmode.md',
-      category: SKILL_CATEGORY,
-      root: 'workspace',
-    },
-    {
-      glob: '.config/github-copilot/global-copilot-instructions.md',
-      category: 'rule',
-      root: 'home',
-    },
-  ],
+/**
+ * Resolve a settings-file path to an absolute directory path, with
+ * containment checks to prevent hostile or misconfigured settings from
+ * redirecting the scanner to sensitive/system locations.
+ *
+ * Supports:
+ *  - absolute paths (checked against containment + sensitive-dir rules)
+ *  - `~/...` / bare `~` (home-relative)
+ *  - `${workspaceFolder}/...` (VS Code variable)
+ *  - anything else (workspace-relative)
+ *
+ * Returns `null` if:
+ *  - the string references an unsupported variable
+ *  - the resolved path is `~foo` (no slash — ambiguous POSIX syntax we don't support)
+ *  - the resolved path escapes both the workspace and home roots
+ *  - the resolved path equals `/`, `$HOME`, or one of SENSITIVE_HOME_SUBDIRS
+ */
+function resolveCustomLocationPath(
+  raw: string,
+  workspaceRoot: string,
+  home: string
+): string | null {
+  let s = raw.replace(/\$\{workspaceFolder\}/g, workspaceRoot)
+  if (/\$\{[^}]+\}/.test(s)) {
+    return null
+  }
+  // Reject `~someuser/...` (POSIX other-user syntax) — we don't expand it
+  // and silently resolving it against workspaceRoot is surprising.
+  if (/^~[^/]/.test(s)) {
+    return null
+  }
+  if (s.startsWith('~/') || s === '~') {
+    s = path.join(home, s.slice(1))
+  }
+  if (!path.isAbsolute(s)) {
+    s = path.resolve(workspaceRoot, s)
+  }
+  const resolved = path.normalize(s)
+  // Hard-reject filesystem root and bare $HOME.
+  if (resolved === '/' || resolved === home) {
+    return null
+  }
+  // Reject sensitive home subdirs regardless of containment outcome.
+  for (const sub of SENSITIVE_HOME_SUBDIRS) {
+    const sensitive = path.join(home, sub)
+    if (
+      resolved === sensitive ||
+      resolved.startsWith(`${sensitive}${path.sep}`)
+    ) {
+      return null
+    }
+  }
+  // Containment: resolved path must be inside workspaceRoot or inside home.
+  const relWorkspace = path.relative(workspaceRoot, resolved)
+  const relHome = path.relative(home, resolved)
+  const escapesWorkspace =
+    relWorkspace.startsWith('..') || path.isAbsolute(relWorkspace)
+  const escapesHome = relHome.startsWith('..') || path.isAbsolute(relHome)
+  if (escapesWorkspace && escapesHome) {
+    return null
+  }
+  return resolved
+}
+
+/**
+ * Mtime-keyed cache for parsed settings files. Keys are absolute paths; values
+ * hold the mtimeMs at parse time and the parsed payload (or `null` when the
+ * file was missing / malformed). Avoids re-reading `.vscode/settings.json`
+ * on every polling cycle when the file hasn't changed.
+ */
+type SettingsCacheEntry = {
+  mtimeMs: number | null
+  parsed: Record<string, unknown> | null
+}
+const MAX_SETTINGS_CACHE_SIZE = 50
+const settingsCache = new Map<string, SettingsCacheEntry>()
+
+/**
+ * Read a JSONC settings file from disk with mtime-based caching. Returns the
+ * parsed object, or `null` if the file is missing / unreadable / invalid.
+ */
+async function readJsoncSettings(
+  settingsPath: string
+): Promise<Record<string, unknown> | null> {
+  // Reject symlinks — a symlinked settings file could point outside the workspace
+  // and bypass the containment checks applied to paths read from it.
+  try {
+    const lst = await lstat(settingsPath)
+    if (lst.isSymbolicLink()) {
+      return null
+    }
+  } catch {
+    // File doesn't exist — cache the absence and return.
+    putSettingsCache(settingsPath, { mtimeMs: null, parsed: null })
+    return null
+  }
+
+  let mtimeMs: number | null = null
+  try {
+    const st = await stat(settingsPath)
+    if (!st.isFile()) {
+      putSettingsCache(settingsPath, { mtimeMs: null, parsed: null })
+      return null
+    }
+    mtimeMs = st.mtimeMs
+  } catch (err) {
+    // Only cache ENOENT — transient errors (EACCES, I/O) should retry on next scan.
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      putSettingsCache(settingsPath, { mtimeMs: null, parsed: null })
+    }
+    return null
+  }
+  const cached = settingsCache.get(settingsPath)
+  if (cached && cached.mtimeMs === mtimeMs) {
+    return cached.parsed
+  }
+  let text: string
+  try {
+    text = await readFile(settingsPath, 'utf-8')
+  } catch {
+    // Don't cache readFile errors — they may be transient (EACCES, I/O).
+    return null
+  }
+  const parsed = parseJsonc(text)
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    putSettingsCache(settingsPath, { mtimeMs, parsed: null })
+    return null
+  }
+  const payload = parsed as Record<string, unknown>
+  putSettingsCache(settingsPath, { mtimeMs, parsed: payload })
+  return payload
+}
+
+/** Write an entry to the settings cache, evicting the oldest if at capacity. */
+function putSettingsCache(path: string, entry: SettingsCacheEntry): void {
+  if (
+    !settingsCache.has(path) &&
+    settingsCache.size >= MAX_SETTINGS_CACHE_SIZE
+  ) {
+    settingsCache.delete(settingsCache.keys().next().value!)
+  }
+  settingsCache.set(path, entry)
+}
+
+/**
+ * Reset the settings cache. Exposed for tests that need deterministic reads
+ * across workspaces; not called in production.
+ */
+export function __resetSettingsCacheForTesting(): void {
+  settingsCache.clear()
+}
+
+/**
+ * Read Copilot's custom skill/instruction/prompt/agent locations from
+ * `.vscode/settings.json`. Silent no-op if the file is missing or invalid.
+ */
+async function readCopilotCustomLocations(
+  workspaceRoot: string
+): Promise<ScanEntry[]> {
+  const parsed = await readJsoncSettings(
+    path.join(workspaceRoot, '.vscode', 'settings.json')
+  )
+  if (!parsed) {
+    return []
+  }
+  const home = homedir()
+  const dynamic: ScanEntry[] = []
+  const seen = new Set<string>()
+  for (const setting of COPILOT_CUSTOM_LOCATION_SETTINGS) {
+    for (const loc of extractCustomLocations(parsed[setting.key])) {
+      const abs = resolveCustomLocationPath(loc, workspaceRoot, home)
+      if (!abs) {
+        continue
+      }
+      if (setting.kind === 'skill-bundle') {
+        const dedupKey = `skill-bundle:${abs}`
+        if (seen.has(dedupKey)) {
+          continue
+        }
+        seen.add(dedupKey)
+        // For dynamic skill bundles the resolved absolute path IS the skills
+        // root (user's setting points at a container of skill subdirs).
+        dynamic.push({
+          kind: 'skill-bundle',
+          skillsRoot: '.',
+          root: 'absolute',
+          absoluteBase: abs,
+        })
+      } else {
+        const dedupKey = `${setting.category}:${abs}`
+        if (seen.has(dedupKey)) {
+          continue
+        }
+        seen.add(dedupKey)
+        dynamic.push({
+          kind: 'glob',
+          glob: setting.glob,
+          category: setting.category,
+          root: 'absolute',
+          absoluteBase: abs,
+        })
+      }
+    }
+  }
+  return dynamic
+}
+
+/**
+ * Read Claude Code's custom memory directory from user-level
+ * `~/.claude/settings.json`. Only `autoMemoryDirectory` is configurable —
+ * Claude Code intentionally disallows this key in project settings, so we
+ * read user settings only.
+ */
+async function readClaudeCodeCustomLocations(): Promise<ScanEntry[]> {
+  const home = homedir()
+  const parsed = await readJsoncSettings(
+    path.join(home, '.claude', 'settings.json')
+  )
+  if (!parsed) {
+    return []
+  }
+  const dynamic: ScanEntry[] = []
+  for (const { key, category, glob } of CLAUDE_CODE_CUSTOM_LOCATION_SETTINGS) {
+    const raw = parsed[key]
+    if (typeof raw !== 'string' || raw.length === 0) {
+      continue
+    }
+    // `${workspaceFolder}` is nonsensical for user-scoped settings — reject it
+    // so a typo doesn't silently bind to $HOME.
+    if (/\$\{workspaceFolder\}/.test(raw)) {
+      continue
+    }
+    const abs = resolveCustomLocationPath(raw, home, home)
+    if (!abs) {
+      continue
+    }
+    dynamic.push({
+      kind: 'glob',
+      glob,
+      category,
+      root: 'absolute',
+      absoluteBase: abs,
+    })
+  }
+  return dynamic
+}
+
+/**
+ * Read user-declared custom locations for each platform.
+ */
+async function readCustomLocations(
+  workspaceRoot: string,
+  platform: string
+): Promise<ScanEntry[]> {
+  if (platform === 'copilot') {
+    return readCopilotCustomLocations(workspaceRoot)
+  }
+  if (platform === 'claude-code') {
+    return readClaudeCodeCustomLocations()
+  }
+  return []
 }
 
 /**
@@ -320,6 +624,12 @@ export type ScanResult = {
  * - Uses path.join/resolve for cross-platform path handling
  * - Gracefully skips missing files/directories (ENOENT)
  *
+ * Platform-specific dynamic resolution:
+ * - `copilot`: reads `.vscode/settings.json` for `chat.*FilesLocations` /
+ *   `chat.agentSkillsLocations` overrides.
+ * - `claude-code`: reads `~/.claude/settings.json` for `autoMemoryDirectory`
+ *   (user-scope only; Claude Code disallows this key in project settings).
+ *
  * No MD5 computed here — the processor handles that after sanitization.
  */
 export async function scanContextFiles(
@@ -327,8 +637,10 @@ export async function scanContextFiles(
   platform: string,
   sessionId?: string
 ): Promise<ScanResult> {
-  const entries = SCAN_PATHS[platform]
-  if (!entries || entries.length === 0) {
+  const staticEntries = SCAN_PATHS[platform] ?? []
+  const dynamicEntries = await readCustomLocations(workspaceRoot, platform)
+  const entries = [...staticEntries, ...dynamicEntries]
+  if (entries.length === 0) {
     return { regularFiles: [], skillGroups: [] }
   }
 
@@ -345,20 +657,27 @@ export async function scanContextFiles(
 
   // Collect all files first (skill mtime checked at group level after grouping)
   const allFiles: ContextFileEntry[] = []
-  // Track which baseDir each skill file came from for proper grouping
-  const skillFilesByRoot = new Map<'workspace' | 'home', ContextFileEntry[]>()
+  // Track skill file batches keyed by (effectiveRoot, baseDir) for proper grouping.
+  // Absolute entries (user-declared paths) use 'workspace' as effectiveRoot so
+  // groupSkills can compute skill names and sessionKeys consistently.
+  type SkillBatch = {
+    root: 'workspace' | 'home'
+    baseDir: string
+    files: ContextFileEntry[]
+  }
+  const skillBatches = new Map<string, SkillBatch>()
   const seenPaths = new Set<string>()
 
   for (const entry of entries) {
-    const baseDir = entry.root === 'home' ? home : workspaceRoot
-    const matchedFiles = await globby(entry.glob, {
-      cwd: baseDir,
-      absolute: true,
-      onlyFiles: true,
-      dot: true,
-    })
+    const baseDir = resolveBaseDir(entry, workspaceRoot, home)
+    const scope = scopeForRoot(entry.root)
+    const isDynamic = entry.root === 'absolute'
+    const matches =
+      entry.kind === 'skill-bundle'
+        ? await enumerateSkillBundle(baseDir, entry.skillsRoot)
+        : await enumerateGlob(entry.glob, baseDir, entry.category, isDynamic)
 
-    for (const filePath of matchedFiles) {
+    for (const { path: filePath, category } of matches) {
       if (seenPaths.has(filePath)) {
         continue
       }
@@ -376,24 +695,30 @@ export async function scanContextFiles(
         const content = await readFile(filePath, 'utf-8')
         const sizeBytes = Buffer.byteLength(content, 'utf-8')
         const name = deriveIdentifier(filePath, baseDir)
+
         const fileEntry: ContextFileEntry = {
           name,
           path: filePath,
           content,
           sizeBytes,
-          category: entry.category,
+          category,
           mtimeMs: fileStat.mtimeMs,
         }
+        if (scope) {
+          fileEntry.scope = scope
+        }
 
-        if (entry.category === SKILL_CATEGORY) {
+        if (category === SKILL_CATEGORY) {
           // Skill files are grouped — mtime checked at group level below.
-          // Use push (O(1)) instead of spread-recreate (O(n)) per iteration.
-          let rootFiles = skillFilesByRoot.get(entry.root)
-          if (!rootFiles) {
-            rootFiles = []
-            skillFilesByRoot.set(entry.root, rootFiles)
+          const effectiveRoot: 'workspace' | 'home' =
+            entry.root === 'home' ? 'home' : 'workspace'
+          const batchKey = `${effectiveRoot}:${baseDir}`
+          let batch = skillBatches.get(batchKey)
+          if (!batch) {
+            batch = { root: effectiveRoot, baseDir, files: [] }
+            skillBatches.set(batchKey, batch)
           }
-          rootFiles.push(fileEntry)
+          batch.files.push(fileEntry)
         } else {
           // Non-skill: filter by per-file mtime
           const prevMtime = sessionEntry?.files.get(filePath)
@@ -402,7 +727,7 @@ export async function scanContextFiles(
           }
           allFiles.push(fileEntry)
         }
-      } catch (_err) {
+      } catch {
         // Skip files that can't be read (permissions, encoding, etc.)
       }
     }
@@ -410,8 +735,7 @@ export async function scanContextFiles(
 
   // Group skill files and apply group-level mtime change detection
   const allSkillGroups: SkillGroup[] = []
-  for (const [root, files] of skillFilesByRoot) {
-    const baseDir = root === 'home' ? home : workspaceRoot
+  for (const { root, baseDir, files } of skillBatches.values()) {
     const groups = groupSkills(files, root, baseDir)
     for (const group of groups) {
       // Skip if no file in the group has changed since last upload
@@ -426,6 +750,127 @@ export async function scanContextFiles(
   }
 
   return { regularFiles: allFiles, skillGroups: allSkillGroups }
+}
+
+/** Plain glob enumeration returning `{path, category}` tuples. */
+async function enumerateGlob(
+  pattern: string,
+  cwd: string,
+  category: string,
+  isDynamic: boolean
+): Promise<{ path: string; category: string }[]> {
+  let files: string[]
+  try {
+    files = await globby(pattern, {
+      cwd,
+      absolute: true,
+      onlyFiles: true,
+      dot: true,
+      // Never follow symlinks — a malicious committed repo can place a
+      // symlink at a scanned path (e.g. .github/copilot-instructions.md →
+      // ~/.aws/credentials) and the scanner would read and upload the target.
+      followSymbolicLinks: false,
+      // Dynamic absolute bases additionally cap traversal depth so a
+      // misconfigured setting can't enumerate the whole filesystem.
+      ...(isDynamic ? { deep: DYNAMIC_SCAN_MAX_DEPTH } : {}),
+    })
+  } catch {
+    // Missing/unreadable cwd, or any other globby rejection: treat as no
+    // matches rather than failing the whole scan.
+    return []
+  }
+  return files.map((path) => ({ path, category }))
+}
+
+/**
+ * Skill-bundle enumeration: identifies skill directories by finding SKILL.md
+ * manifests, then returns ALL files inside each skill directory recursively
+ * (including nested subdirectories).
+ *
+ * Two-pass approach:
+ * 1. Find `<skillsRoot>/<skill>/SKILL.md` to identify valid skill dirs.
+ * 2. For each skill dir, enumerate all files recursively so the zip pipeline
+ *    captures sibling resources, templates, nested helpers, etc.
+ *
+ * Loose files directly under `<skillsRoot>/` (no skill subdirectory) and
+ * directories without a SKILL.md manifest are excluded.
+ */
+async function enumerateSkillBundle(
+  baseDir: string,
+  skillsRoot: string
+): Promise<{ path: string; category: string }[]> {
+  const skillsDir = path.resolve(baseDir, skillsRoot)
+
+  // Pass 1: find skill directories via their SKILL.md manifests
+  let manifests: string[]
+  try {
+    manifests = await globby('*/SKILL.md', {
+      cwd: skillsDir,
+      absolute: true,
+      onlyFiles: true,
+      dot: true,
+      followSymbolicLinks: false,
+      deep: SKILL_MANIFEST_SCAN_DEPTH,
+    })
+  } catch {
+    return []
+  }
+
+  // Pass 2: enumerate all files inside each discovered skill directory (in parallel)
+  const perSkillResults = await Promise.all(
+    manifests.map(async (manifest) => {
+      const skillDir = path.dirname(manifest)
+      try {
+        return await globby('**/*', {
+          cwd: skillDir,
+          absolute: true,
+          onlyFiles: true,
+          dot: true,
+          followSymbolicLinks: false,
+          deep: SKILL_BUNDLE_MAX_DEPTH,
+        })
+      } catch {
+        return []
+      }
+    })
+  )
+  return perSkillResults.flat().map((p) => ({ path: p, category: 'skill' }))
+}
+
+/** Maximum traversal depth for dynamic (user-declared) scan directories. */
+const DYNAMIC_SCAN_MAX_DEPTH = 6
+/** Depth for SKILL.md manifest discovery: skill dirs are one level under the skills root. */
+const SKILL_MANIFEST_SCAN_DEPTH = 2
+/** Depth for enumerating all files inside a discovered skill directory. */
+const SKILL_BUNDLE_MAX_DEPTH = 5
+
+/** Resolve the base directory for a ScanEntry. */
+function resolveBaseDir(
+  entry: ScanEntry,
+  workspaceRoot: string,
+  home: string
+): string {
+  switch (entry.root) {
+    case 'home':
+      return home
+    case 'absolute':
+      return entry.absoluteBase
+    default:
+      return workspaceRoot
+  }
+}
+
+/**
+ * Authoritative scope derived from `ScanEntry.root`. `home` and `absolute`
+ * entries are always user-global (they live outside the workspace). Workspace
+ * entries return `undefined` so the server's path-based inference can still
+ * classify `.github/` as `repo` vs other workspace paths as `project`.
+ */
+function scopeForRoot(root: ScanEntry['root']): 'user-global' | undefined {
+  if (root === 'home' || root === 'absolute') {
+    return 'user-global'
+  }
+  return undefined
 }
 
 function deriveIdentifier(filePath: string, baseDir: string): string {

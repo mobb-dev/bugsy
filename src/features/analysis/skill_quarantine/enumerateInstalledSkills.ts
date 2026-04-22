@@ -1,0 +1,51 @@
+import { processContextFiles } from '../context_file_processor'
+import { scanContextFiles } from '../context_file_scanner'
+
+/**
+ * T-467 — enumerate locally installed Claude Code skills and compute
+ * their md5s using the same zip+hash algorithm the uploader uses (via
+ * `processContextFiles`). Client and server therefore agree on the key
+ * by construction.
+ */
+
+export type InstalledSkill = {
+  /** Absolute path on disk. Directory for folder skills, `.md` file for standalone. */
+  skillPath: string
+  /** md5 of the sanitized zip bundle (same as `tracy_context_file.md5`). */
+  md5: string
+  /** Basename — folder name for folder skills, filename with extension for standalone. */
+  origName: string
+  /** Whether the skill is a folder (true) or a single `.md` file (false). */
+  isFolder: boolean
+}
+
+export async function enumerateInstalledSkills(
+  workspaceRoot: string
+): Promise<InstalledSkill[]> {
+  // Pass undefined sessionId so no mtime dedup — quarantine needs a full
+  // snapshot every tick.
+  const { skillGroups } = await scanContextFiles(
+    workspaceRoot,
+    'claude-code',
+    undefined
+  )
+  if (skillGroups.length === 0) {
+    return []
+  }
+
+  // Only process skill groups (regular files are out of scope for quarantine).
+  const { skills } = await processContextFiles([], skillGroups)
+
+  return skills.map((s) => {
+    // For folder skills, origName is the final path segment (dir name).
+    // For standalone skills, origName is the full filename (sneaky.md).
+    const parts = s.group.skillPath.split(/[\\/]/)
+    const origName = parts[parts.length - 1] || s.group.name
+    return {
+      skillPath: s.group.skillPath,
+      md5: s.md5,
+      origName,
+      isFolder: s.group.isFolder,
+    }
+  })
+}

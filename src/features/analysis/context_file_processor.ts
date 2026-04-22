@@ -75,6 +75,15 @@ export async function processContextFiles(
               ? path.relative(group.skillPath, file.path).replace(/\\/g, '/')
               : path.basename(file.path)
             zip.addFile(zipEntryName, Buffer.from(sanitizedContent, 'utf-8'))
+            // Force each entry's mtime to the epoch so the resulting zip
+            // bytes are content-addressed — identical content → identical
+            // md5, regardless of when the zip is built. Without this,
+            // AdmZip stamps each entry with the current wall-clock time,
+            // producing a different zip (and thus md5) on every call.
+            const entry = zip.getEntry(zipEntryName)
+            if (entry) {
+              entry.header.time = new Date(0)
+            }
           }
 
           const zipBuffer = zip.toBuffer()

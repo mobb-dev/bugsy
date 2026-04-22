@@ -11,6 +11,7 @@ import {
   createSessionConfigStore,
 } from '../../utils/ConfigStoreService'
 import { withTimeout } from '../../utils/with-timeout'
+import { runQuarantineCheckIfNeeded } from '../analysis/skill_quarantine'
 import { DaemonPidFile } from './daemon_pid_file'
 import {
   cleanupStaleSessions,
@@ -240,6 +241,26 @@ async function drainTranscript(
       { err, data: { sessionId: transcript.sessionId } },
       'Error processing transcript — skipping'
     )
+  }
+
+  // T-467 — skill quarantine check. Tied to transcript activity: every
+  // active session gets checked each time its transcript grows. Idle
+  // sessions don't re-check, which is fine — a malicious skill can't
+  // execute without user activity anyway, and the next turn will catch
+  // any pending MALICIOUS verdict from a scan that completed since the
+  // last tick.
+  if (cwd) {
+    runQuarantineCheckIfNeeded({
+      sessionId: transcript.sessionId,
+      cwd,
+      gqlClient,
+      log,
+    }).catch((err) => {
+      hookLog.warn(
+        { err, data: { sessionId: transcript.sessionId } },
+        'runQuarantineCheckIfNeeded failed'
+      )
+    })
   }
 }
 

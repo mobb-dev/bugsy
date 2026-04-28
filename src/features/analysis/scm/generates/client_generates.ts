@@ -477,6 +477,7 @@ export type DeveloperStatistic = {
   aiLinesCount: Scalars['Int']['output'];
   aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
+  availableSkills: Array<Scalars['String']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   groupId?: Maybe<Scalars['String']['output']>;
   groupName?: Maybe<Scalars['String']['output']>;
@@ -487,6 +488,7 @@ export type DeveloperStatistic = {
   mainTool?: Maybe<Scalars['String']['output']>;
   totalOriginalLines: Scalars['Int']['output'];
   totalSurvivedLines: Scalars['Int']['output'];
+  usedSkills: Array<Scalars['String']['output']>;
   userName: Scalars['String']['output'];
 };
 
@@ -830,6 +832,20 @@ export type GetLinearIntegrationDataSuccess = {
   teamId?: Maybe<Scalars['String']['output']>;
 };
 
+export type GetOrgSkillsError = {
+  __typename?: 'GetOrgSkillsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetOrgSkillsResponse = GetOrgSkillsError | GetOrgSkillsSuccess;
+
+export type GetOrgSkillsSuccess = {
+  __typename?: 'GetOrgSkillsSuccess';
+  skills: Array<OrgSkill>;
+  status: Status;
+};
+
 export type GetPromptSummaryResponse = PromptSummaryError | PromptSummaryProcessing | PromptSummarySuccess;
 
 export type GetReportsResponseError = {
@@ -1069,6 +1085,21 @@ export type OpenFixTicketResponseSuccess = {
   __typename?: 'OpenFixTicketResponseSuccess';
   id: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type OrgSkill = {
+  __typename?: 'OrgSkill';
+  contextFileId?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  firstSeen?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  installationCount: Scalars['Int']['output'];
+  invocationCount: Scalars['Int']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  quarantined: Scalars['Boolean']['output'];
+  scanSummary?: Maybe<Scalars['String']['output']>;
+  scanVerdict?: Maybe<Scalars['String']['output']>;
+  skillName: Scalars['String']['output'];
 };
 
 export type OrganizationToRoleType = {
@@ -1529,6 +1560,19 @@ export type SendInvitationResponse = SendInvitationError | SendInvitationSuccess
 export type SendInvitationSuccess = {
   __typename?: 'SendInvitationSuccess';
   invitationId: Scalars['String']['output'];
+  status: Status;
+};
+
+export type SetAdminSkillVerdictError = {
+  __typename?: 'SetAdminSkillVerdictError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type SetAdminSkillVerdictResponse = SetAdminSkillVerdictError | SetAdminSkillVerdictSuccess;
+
+export type SetAdminSkillVerdictSuccess = {
+  __typename?: 'SetAdminSkillVerdictSuccess';
   status: Status;
 };
 
@@ -2128,6 +2172,7 @@ export type ValidationSuccess = {
 };
 
 export enum Vendors {
+  BlackDuck = 'BlackDuck',
   Checkmarx = 'Checkmarx',
   CodeQl = 'CodeQL',
   Datadog = 'Datadog',
@@ -20282,6 +20327,8 @@ export enum IssueType_Enum {
   ImproperResourceShutdownOrRelease = 'IMPROPER_RESOURCE_SHUTDOWN_OR_RELEASE',
   /** IMPROPER_STRING_FORMATTING */
   ImproperStringFormatting = 'IMPROPER_STRING_FORMATTING',
+  /** IMPROPER_VALIDATION_OF_ARRAY_INDEX */
+  ImproperValidationOfArrayIndex = 'IMPROPER_VALIDATION_OF_ARRAY_INDEX',
   /** Incomplete Hostname Regex */
   IncompleteHostnameRegex = 'INCOMPLETE_HOSTNAME_REGEX',
   /** INCOMPLETE_SANITIZATION */
@@ -20290,6 +20337,8 @@ export enum IssueType_Enum {
   IncompleteUrlSanitization = 'INCOMPLETE_URL_SANITIZATION',
   /** Incomplete URL Scheme Check */
   IncompleteUrlSchemeCheck = 'INCOMPLETE_URL_SCHEME_CHECK',
+  /** INCORRECT_INTEGER_CONVERSION */
+  IncorrectIntegerConversion = 'INCORRECT_INTEGER_CONVERSION',
   /** INCORRECT_SQL_API_USAGE */
   IncorrectSqlApiUsage = 'INCORRECT_SQL_API_USAGE',
   /** Information Exposure via Headers */
@@ -20338,6 +20387,8 @@ export enum IssueType_Enum {
   MissingWhitespace = 'MISSING_WHITESPACE',
   /** MISSING_WORKFLOW_PERMISSIONS */
   MissingWorkflowPermissions = 'MISSING_WORKFLOW_PERMISSIONS',
+  /** MISSING_X_FRAME_OPTIONS */
+  MissingXFrameOptions = 'MISSING_X_FRAME_OPTIONS',
   /** MODIFIED_DEFAULT_PARAM */
   ModifiedDefaultParam = 'MODIFIED_DEFAULT_PARAM',
   /** Non-final public static field */
@@ -21048,6 +21099,10 @@ export type Mutation_Root = {
   delete_tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
   /** delete single row from the table: "tracy.ai_blame_pr" */
   delete_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** delete data from the table: "tracy.ai_blame_pr_main_survival" */
+  delete_tracy_ai_blame_pr_main_survival?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Mutation_Response>;
+  /** delete single row from the table: "tracy.ai_blame_pr_main_survival" */
+  delete_tracy_ai_blame_pr_main_survival_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
   /** delete data from the table: "tracy.tracy_context_file" */
   delete_tracy_tracy_context_file?: Maybe<Tracy_Tracy_Context_File_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_context_file" */
@@ -21064,6 +21119,18 @@ export type Mutation_Root = {
   delete_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_inference_event" */
   delete_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** delete data from the table: "tracy.tracy_session" */
+  delete_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** delete data from the table: "tracy.tracy_session_available_skill" */
+  delete_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_session_available_skill" */
+  delete_tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** delete single row from the table: "tracy.tracy_session" */
+  delete_tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** delete data from the table: "tracy.tracy_session_used_skill" */
+  delete_tracy_tracy_session_used_skill?: Maybe<Tracy_Tracy_Session_Used_Skill_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_session_used_skill" */
+  delete_tracy_tracy_session_used_skill_by_pk?: Maybe<Tracy_Tracy_Session_Used_Skill>;
   /** delete data from the table: "tracy.tracy_skill_scan" */
   delete_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_skill_scan" */
@@ -21540,6 +21607,10 @@ export type Mutation_Root = {
   insert_tracy_ai_blame_pr_attribution?: Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>;
   /** insert a single row into the table: "tracy.ai_blame_pr_attribution" */
   insert_tracy_ai_blame_pr_attribution_one?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
+  /** insert data into the table: "tracy.ai_blame_pr_main_survival" */
+  insert_tracy_ai_blame_pr_main_survival?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Mutation_Response>;
+  /** insert a single row into the table: "tracy.ai_blame_pr_main_survival" */
+  insert_tracy_ai_blame_pr_main_survival_one?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
   /** insert a single row into the table: "tracy.ai_blame_pr" */
   insert_tracy_ai_blame_pr_one?: Maybe<Tracy_Ai_Blame_Pr>;
   /** insert data into the table: "tracy.tracy_context_file" */
@@ -21558,6 +21629,18 @@ export type Mutation_Root = {
   insert_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** insert a single row into the table: "tracy.tracy_inference_event" */
   insert_tracy_tracy_inference_event_one?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** insert data into the table: "tracy.tracy_session" */
+  insert_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** insert data into the table: "tracy.tracy_session_available_skill" */
+  insert_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_session_available_skill" */
+  insert_tracy_tracy_session_available_skill_one?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** insert a single row into the table: "tracy.tracy_session" */
+  insert_tracy_tracy_session_one?: Maybe<Tracy_Tracy_Session>;
+  /** insert data into the table: "tracy.tracy_session_used_skill" */
+  insert_tracy_tracy_session_used_skill?: Maybe<Tracy_Tracy_Session_Used_Skill_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_session_used_skill" */
+  insert_tracy_tracy_session_used_skill_one?: Maybe<Tracy_Tracy_Session_Used_Skill>;
   /** insert data into the table: "tracy.tracy_skill_scan" */
   insert_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
   /** insert a single row into the table: "tracy.tracy_skill_scan" */
@@ -21643,6 +21726,11 @@ export type Mutation_Root = {
   saveUsageMcp?: Maybe<SaveUsageMcpResponse>;
   scanSkill: ScanSkillResult;
   sendInvitation?: Maybe<SendInvitationResponse>;
+  /**
+   * Set an admin-level verdict on a skill (e.g. MALICIOUS to quarantine it).
+   * Inserts or updates a tracy_skill_scan row with scanner_name='admin'.
+   */
+  setAdminSkillVerdict: SetAdminSkillVerdictResponse;
   setAnswers: SetAnswersResponse;
   /** Replace all members of a developer group and sync to ClickHouse. */
   setDeveloperGroupMembers: DeveloperGroupResult;
@@ -21650,6 +21738,8 @@ export type Mutation_Root = {
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
   submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
+  /** execute VOLATILE function "tracy.upsert_tracy_session" which returns "tracy.tracy_session" */
+  tracy_upsert_tracy_session: Array<Tracy_Tracy_Session>;
   /**
    * Admin-only: Manually trigger ClickHouse backfill to sync data from PostgreSQL.
    * Used for testing and maintenance purposes.
@@ -22233,6 +22323,12 @@ export type Mutation_Root = {
   update_tracy_ai_blame_pr_attribution_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Attribution_Mutation_Response>>>;
   /** update single row of the table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** update data of the table: "tracy.ai_blame_pr_main_survival" */
+  update_tracy_ai_blame_pr_main_survival?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Mutation_Response>;
+  /** update single row of the table: "tracy.ai_blame_pr_main_survival" */
+  update_tracy_ai_blame_pr_main_survival_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
+  /** update multiples rows of table: "tracy.ai_blame_pr_main_survival" */
+  update_tracy_ai_blame_pr_main_survival_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Mutation_Response>>>;
   /** update multiples rows of table: "tracy.ai_blame_pr" */
   update_tracy_ai_blame_pr_many?: Maybe<Array<Maybe<Tracy_Ai_Blame_Pr_Mutation_Response>>>;
   /** update multiples rows of table: "tracy.developer_group" */
@@ -22263,6 +22359,24 @@ export type Mutation_Root = {
   update_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** update multiples rows of table: "tracy.tracy_inference_event" */
   update_tracy_tracy_inference_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_session" */
+  update_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** update data of the table: "tracy.tracy_session_available_skill" */
+  update_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_session_available_skill" */
+  update_tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** update multiples rows of table: "tracy.tracy_session_available_skill" */
+  update_tracy_tracy_session_available_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>>>;
+  /** update single row of the table: "tracy.tracy_session" */
+  update_tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** update multiples rows of table: "tracy.tracy_session" */
+  update_tracy_tracy_session_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_session_used_skill" */
+  update_tracy_tracy_session_used_skill?: Maybe<Tracy_Tracy_Session_Used_Skill_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_session_used_skill" */
+  update_tracy_tracy_session_used_skill_by_pk?: Maybe<Tracy_Tracy_Session_Used_Skill>;
+  /** update multiples rows of table: "tracy.tracy_session_used_skill" */
+  update_tracy_tracy_session_used_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Used_Skill_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_skill_scan" */
   update_tracy_tracy_skill_scan?: Maybe<Tracy_Tracy_Skill_Scan_Mutation_Response>;
   /** update single row of the table: "tracy.tracy_skill_scan" */
@@ -23700,6 +23814,18 @@ export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_Main_SurvivalArgs = {
+  where: Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Ai_Blame_Pr_Main_Survival_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Context_FileArgs = {
   where: Tracy_Tracy_Context_File_Bool_Exp;
 };
@@ -23744,6 +23870,44 @@ export type Mutation_RootDelete_Tracy_Tracy_Inference_EventArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Inference_Event_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_SessionArgs = {
+  where: Tracy_Tracy_Session_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Available_SkillArgs = {
+  where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Available_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Used_SkillArgs = {
+  where: Tracy_Tracy_Session_Used_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Used_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
 };
 
 
@@ -25337,6 +25501,20 @@ export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_Attribution_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_Main_SurvivalArgs = {
+  objects: Array<Tracy_Ai_Blame_Pr_Main_Survival_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_Main_Survival_OneArgs = {
+  object: Tracy_Ai_Blame_Pr_Main_Survival_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Tracy_Ai_Blame_Pr_OneArgs = {
   object: Tracy_Ai_Blame_Pr_Insert_Input;
   on_conflict?: InputMaybe<Tracy_Ai_Blame_Pr_On_Conflict>;
@@ -25396,6 +25574,48 @@ export type Mutation_RootInsert_Tracy_Tracy_Inference_EventArgs = {
 export type Mutation_RootInsert_Tracy_Tracy_Inference_Event_OneArgs = {
   object: Tracy_Tracy_Inference_Event_Insert_Input;
   on_conflict?: InputMaybe<Tracy_Tracy_Inference_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_SessionArgs = {
+  objects: Array<Tracy_Tracy_Session_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Available_SkillArgs = {
+  objects: Array<Tracy_Tracy_Session_Available_Skill_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Available_Skill_OneArgs = {
+  object: Tracy_Tracy_Session_Available_Skill_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_OneArgs = {
+  object: Tracy_Tracy_Session_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Used_SkillArgs = {
+  objects: Array<Tracy_Tracy_Session_Used_Skill_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Used_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Used_Skill_OneArgs = {
+  object: Tracy_Tracy_Session_Used_Skill_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Used_Skill_On_Conflict>;
 };
 
 
@@ -25743,6 +25963,14 @@ export type Mutation_RootSendInvitationArgs = {
 
 
 /** mutation root */
+export type Mutation_RootSetAdminSkillVerdictArgs = {
+  contextFileId: Scalars['String']['input'];
+  organizationId: Scalars['String']['input'];
+  verdict: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootSetAnswersArgs = {
   fixId: Scalars['uuid']['input'];
   userInput: Array<QuestionAnswer>;
@@ -25797,6 +26025,17 @@ export type Mutation_RootSubmitVulnerabilityReportArgs = {
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootTracy_Upsert_Tracy_SessionArgs = {
+  args: Tracy_Upsert_Tracy_Session_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
 };
 
 
@@ -27849,6 +28088,28 @@ export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_Main_SurvivalArgs = {
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Inc_Input>;
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Set_Input>;
+  where: Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_Main_Survival_By_PkArgs = {
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Inc_Input>;
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Set_Input>;
+  pk_columns: Tracy_Ai_Blame_Pr_Main_Survival_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_Main_Survival_ManyArgs = {
+  updates: Array<Tracy_Ai_Blame_Pr_Main_Survival_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Tracy_Ai_Blame_Pr_ManyArgs = {
   updates: Array<Tracy_Ai_Blame_Pr_Updates>;
 };
@@ -27947,6 +28208,68 @@ export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_ManyArgs = {
   updates: Array<Tracy_Tracy_Inference_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_SessionArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Session_Inc_Input>;
+  _set?: InputMaybe<Tracy_Tracy_Session_Set_Input>;
+  where: Tracy_Tracy_Session_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_SkillArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Set_Input>;
+  where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Skill_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Set_Input>;
+  pk_columns: Tracy_Tracy_Session_Available_Skill_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Skill_ManyArgs = {
+  updates: Array<Tracy_Tracy_Session_Available_Skill_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_By_PkArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Session_Inc_Input>;
+  _set?: InputMaybe<Tracy_Tracy_Session_Set_Input>;
+  pk_columns: Tracy_Tracy_Session_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_ManyArgs = {
+  updates: Array<Tracy_Tracy_Session_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Used_SkillArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Set_Input>;
+  where: Tracy_Tracy_Session_Used_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Used_Skill_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Set_Input>;
+  pk_columns: Tracy_Tracy_Session_Used_Skill_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Used_Skill_ManyArgs = {
+  updates: Array<Tracy_Tracy_Session_Used_Skill_Updates>;
 };
 
 
@@ -33937,6 +34260,12 @@ export type Query_Root = {
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   /**
+   * Get aggregated skill data for all skills observed across the organization.
+   * Returns per-skill: first seen date, installation count (unique users), invocation count
+   * (unique sessions where skill was used), scan verdict, and quarantine status.
+   */
+  getOrgSkills: GetOrgSkillsResponse;
+  /**
    * Runs the PR session summary pipeline: resolves inference IDs to sessions,
    * generates individual summaries, and combines them.
    * Same flow as the PR comment path — useful for debugging missing summaries.
@@ -34266,10 +34595,28 @@ export type Query_Root = {
   tracy_ai_blame_pr_attribution_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Attribution>;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table: "tracy.ai_blame_pr_main_survival" */
+  tracy_ai_blame_pr_main_survival: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr_main_survival" */
+  tracy_ai_blame_pr_main_survival_aggregate: Tracy_Ai_Blame_Pr_Main_Survival_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_main_survival" using primary key columns */
+  tracy_ai_blame_pr_main_survival_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
   /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
   tracy_compute_pr_survived_lines: Array<View_Types_Pr_Survival_Result>;
   /** execute function "tracy.compute_pr_survived_lines" and query aggregates on result of table type "view_types.pr_survival_result" */
   tracy_compute_pr_survived_lines_aggregate: View_Types_Pr_Survival_Result_Aggregate;
+  /** execute function "tracy.get_org_skill_stats" which returns "tracy.org_skill_stats_row" */
+  tracy_get_org_skill_stats: Array<Tracy_Org_Skill_Stats_Row>;
+  /** execute function "tracy.get_org_skill_stats" and query aggregates on result of table type "tracy.org_skill_stats_row" */
+  tracy_get_org_skill_stats_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
+  /** fetch data from the table: "tracy.org_skill_stats_row" */
+  tracy_org_skill_stats_row: Array<Tracy_Org_Skill_Stats_Row>;
+  /** fetch aggregated fields from the table: "tracy.org_skill_stats_row" */
+  tracy_org_skill_stats_row_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
+  /** fetch data from the table: "tracy.session_skill_status" */
+  tracy_session_skill_status: Array<Tracy_Session_Skill_Status>;
+  /** fetch aggregated fields from the table: "tracy.session_skill_status" */
+  tracy_session_skill_status_aggregate: Tracy_Session_Skill_Status_Aggregate;
   /** fetch data from the table: "tracy.tracy_context_file" */
   tracy_tracy_context_file: Array<Tracy_Tracy_Context_File>;
   /** fetch aggregated fields from the table: "tracy.tracy_context_file" */
@@ -34294,6 +34641,24 @@ export type Query_Root = {
   tracy_tracy_inference_event_aggregate: Tracy_Tracy_Inference_Event_Aggregate;
   /** fetch data from the table: "tracy.tracy_inference_event" using primary key columns */
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_session" */
+  tracy_tracy_session: Array<Tracy_Tracy_Session>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session" */
+  tracy_tracy_session_aggregate: Tracy_Tracy_Session_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_skill" */
+  tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
+  tracy_tracy_session_available_skill_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_skill" using primary key columns */
+  tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** fetch data from the table: "tracy.tracy_session" using primary key columns */
+  tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** fetch data from the table: "tracy.tracy_session_used_skill" */
+  tracy_tracy_session_used_skill: Array<Tracy_Tracy_Session_Used_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_used_skill" */
+  tracy_tracy_session_used_skill_aggregate: Tracy_Tracy_Session_Used_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_used_skill" using primary key columns */
+  tracy_tracy_session_used_skill_by_pk?: Maybe<Tracy_Tracy_Session_Used_Skill>;
   /** fetch data from the table: "tracy.tracy_skill_scan" */
   tracy_tracy_skill_scan: Array<Tracy_Tracy_Skill_Scan>;
   /** fetch aggregated fields from the table: "tracy.tracy_skill_scan" */
@@ -35959,6 +36324,12 @@ export type Query_RootGetLinearTeamsArgs = {
 };
 
 
+export type Query_RootGetOrgSkillsArgs = {
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetPrSessionSummaryArgs = {
   inferenceIds: Array<Scalars['String']['input']>;
 };
@@ -37139,6 +37510,29 @@ export type Query_RootTracy_Ai_Blame_Pr_By_PkArgs = {
 };
 
 
+export type Query_RootTracy_Ai_Blame_Pr_Main_SurvivalArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_Main_Survival_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Blame_Pr_Main_Survival_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootTracy_Compute_Pr_Survived_LinesArgs = {
   args: Tracy_Compute_Pr_Survived_Lines_Args;
   distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
@@ -37156,6 +37550,62 @@ export type Query_RootTracy_Compute_Pr_Survived_Lines_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Pr_Survival_Result_Order_By>>;
   where?: InputMaybe<View_Types_Pr_Survival_Result_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Get_Org_Skill_StatsArgs = {
+  args: Tracy_Get_Org_Skill_Stats_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Get_Org_Skill_Stats_AggregateArgs = {
+  args: Tracy_Get_Org_Skill_Stats_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Org_Skill_Stats_RowArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Org_Skill_Stats_Row_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Session_Skill_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Skill_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Session_Skill_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Skill_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
 };
 
 
@@ -37248,6 +37698,77 @@ export type Query_RootTracy_Tracy_Inference_Event_AggregateArgs = {
 
 export type Query_RootTracy_Tracy_Inference_Event_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_SessionArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Available_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Available_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Available_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Session_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Session_Used_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Used_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Used_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
 };
 
 
@@ -42440,6 +42961,14 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_attribution_stream: Array<Tracy_Ai_Blame_Pr_Attribution>;
   /** fetch data from the table: "tracy.ai_blame_pr" using primary key columns */
   tracy_ai_blame_pr_by_pk?: Maybe<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table: "tracy.ai_blame_pr_main_survival" */
+  tracy_ai_blame_pr_main_survival: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
+  /** fetch aggregated fields from the table: "tracy.ai_blame_pr_main_survival" */
+  tracy_ai_blame_pr_main_survival_aggregate: Tracy_Ai_Blame_Pr_Main_Survival_Aggregate;
+  /** fetch data from the table: "tracy.ai_blame_pr_main_survival" using primary key columns */
+  tracy_ai_blame_pr_main_survival_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
+  /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr_main_survival" */
+  tracy_ai_blame_pr_main_survival_stream: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
   /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
@@ -42452,6 +42981,22 @@ export type Subscription_Root = {
   tracy_developer_group_stream: Array<Tracy_Developer_Group>;
   /** fetch data from the table in a streaming manner: "tracy.developer_groups_flat" */
   tracy_developer_groups_flat_stream: Array<Tracy_Developer_Groups_Flat>;
+  /** execute function "tracy.get_org_skill_stats" which returns "tracy.org_skill_stats_row" */
+  tracy_get_org_skill_stats: Array<Tracy_Org_Skill_Stats_Row>;
+  /** execute function "tracy.get_org_skill_stats" and query aggregates on result of table type "tracy.org_skill_stats_row" */
+  tracy_get_org_skill_stats_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
+  /** fetch data from the table: "tracy.org_skill_stats_row" */
+  tracy_org_skill_stats_row: Array<Tracy_Org_Skill_Stats_Row>;
+  /** fetch aggregated fields from the table: "tracy.org_skill_stats_row" */
+  tracy_org_skill_stats_row_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
+  /** fetch data from the table in a streaming manner: "tracy.org_skill_stats_row" */
+  tracy_org_skill_stats_row_stream: Array<Tracy_Org_Skill_Stats_Row>;
+  /** fetch data from the table: "tracy.session_skill_status" */
+  tracy_session_skill_status: Array<Tracy_Session_Skill_Status>;
+  /** fetch aggregated fields from the table: "tracy.session_skill_status" */
+  tracy_session_skill_status_aggregate: Tracy_Session_Skill_Status_Aggregate;
+  /** fetch data from the table in a streaming manner: "tracy.session_skill_status" */
+  tracy_session_skill_status_stream: Array<Tracy_Session_Skill_Status>;
   /** fetch data from the table: "tracy.tracy_context_file" */
   tracy_tracy_context_file: Array<Tracy_Tracy_Context_File>;
   /** fetch aggregated fields from the table: "tracy.tracy_context_file" */
@@ -42484,6 +43029,30 @@ export type Subscription_Root = {
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** fetch data from the table in a streaming manner: "tracy.tracy_inference_event" */
   tracy_tracy_inference_event_stream: Array<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_session" */
+  tracy_tracy_session: Array<Tracy_Tracy_Session>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session" */
+  tracy_tracy_session_aggregate: Tracy_Tracy_Session_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_skill" */
+  tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
+  tracy_tracy_session_available_skill_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_skill" using primary key columns */
+  tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_session_available_skill" */
+  tracy_tracy_session_available_skill_stream: Array<Tracy_Tracy_Session_Available_Skill>;
+  /** fetch data from the table: "tracy.tracy_session" using primary key columns */
+  tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_session" */
+  tracy_tracy_session_stream: Array<Tracy_Tracy_Session>;
+  /** fetch data from the table: "tracy.tracy_session_used_skill" */
+  tracy_tracy_session_used_skill: Array<Tracy_Tracy_Session_Used_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_used_skill" */
+  tracy_tracy_session_used_skill_aggregate: Tracy_Tracy_Session_Used_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_used_skill" using primary key columns */
+  tracy_tracy_session_used_skill_by_pk?: Maybe<Tracy_Tracy_Session_Used_Skill>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_session_used_skill" */
+  tracy_tracy_session_used_skill_stream: Array<Tracy_Tracy_Session_Used_Skill>;
   /** fetch data from the table: "tracy.tracy_skill_scan" */
   tracy_tracy_skill_scan: Array<Tracy_Tracy_Skill_Scan>;
   /** fetch aggregated fields from the table: "tracy.tracy_skill_scan" */
@@ -45816,6 +46385,36 @@ export type Subscription_RootTracy_Ai_Blame_Pr_By_PkArgs = {
 };
 
 
+export type Subscription_RootTracy_Ai_Blame_Pr_Main_SurvivalArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Main_Survival_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Main_Survival_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Ai_Blame_Pr_Main_Survival_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Ai_Blame_Pr_Stream_Cursor_Input>>;
@@ -45861,6 +46460,76 @@ export type Subscription_RootTracy_Developer_Groups_Flat_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Developer_Groups_Flat_Stream_Cursor_Input>>;
   where?: InputMaybe<Tracy_Developer_Groups_Flat_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Get_Org_Skill_StatsArgs = {
+  args: Tracy_Get_Org_Skill_Stats_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Get_Org_Skill_Stats_AggregateArgs = {
+  args: Tracy_Get_Org_Skill_Stats_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Org_Skill_Stats_RowArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Org_Skill_Stats_Row_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Order_By>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Org_Skill_Stats_Row_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Org_Skill_Stats_Row_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Session_Skill_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Skill_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Session_Skill_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Skill_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Session_Skill_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Session_Skill_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
 };
 
 
@@ -45981,6 +46650,98 @@ export type Subscription_RootTracy_Tracy_Inference_Event_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Tracy_Inference_Event_Stream_Cursor_Input>>;
   where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_SessionArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Skill_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Session_Available_Skill_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_By_PkArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Session_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Used_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Used_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Used_Skill_By_PkArgs = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Used_Skill_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Session_Used_Skill_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
 };
 
 
@@ -47444,6 +48205,7 @@ export type Tracy_Ai_Blame_Pr = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  mergeCommitShas?: Maybe<Array<Scalars['String']['output']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -47462,6 +48224,7 @@ export type Tracy_Ai_Blame_Pr = {
   repositoryUrl: Scalars['String']['output'];
   rowCreatedAt: Scalars['timestamptz']['output'];
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  targetBranch?: Maybe<Scalars['String']['output']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
@@ -47744,6 +48507,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   humanLinesAdded?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   linesAdded?: InputMaybe<Int_Comparison_Exp>;
+  mergeCommitShas?: InputMaybe<String_Array_Comparison_Exp>;
   numberOfOriginalLines?: InputMaybe<Int_Comparison_Exp>;
   numberOfSurvivedLines?: InputMaybe<Int_Comparison_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -47757,6 +48521,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   rowCreatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tabAutocompleteLinesAdded?: InputMaybe<Int_Comparison_Exp>;
+  targetBranch?: InputMaybe<String_Comparison_Exp>;
   totalInferenceCharCount?: InputMaybe<Int_Comparison_Exp>;
   totalInferenceLines?: InputMaybe<Int_Comparison_Exp>;
 };
@@ -47802,6 +48567,7 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  mergeCommitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -47817,10 +48583,296 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  targetBranch?: InputMaybe<Scalars['String']['input']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** columns and relationships of "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival = {
+  __typename?: 'tracy_ai_blame_pr_main_survival';
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  mainSurvivalOriginal?: Maybe<Scalars['Int']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  prId: Scalars['String']['output'];
+  repositoryUrl: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Aggregate = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_aggregate';
+  aggregate?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Aggregate_Fields>;
+  nodes: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
+};
+
+/** aggregate fields of "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Aggregate_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_aggregate_fields';
+  avg?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Max_Fields>;
+  min?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Min_Fields>;
+  stddev?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Avg_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_avg_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.ai_blame_pr_main_survival". All fields are combined with a logical 'AND'. */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  mainSurvivalOriginal?: InputMaybe<Int_Comparison_Exp>;
+  mainSurvivalSurvived?: InputMaybe<Int_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  prId?: InputMaybe<String_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.ai_blame_pr_main_survival" */
+export enum Tracy_Ai_Blame_Pr_Main_Survival_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  AiBlamePrMainSurvivalPkey = 'ai_blame_pr_main_survival_pkey',
+  /** unique or primary key constraint on columns "main_survival_survived", "pr_id", "repository_url", "organization_id", "main_survival_original" */
+  AiBlamePrMainSurvivalPrRepoOrgSurvivalCountsUnique = 'ai_blame_pr_main_survival_pr_repo_org_survival_counts_unique'
+}
+
+/** input type for incrementing numeric columns in table "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Inc_Input = {
+  mainSurvivalOriginal?: InputMaybe<Scalars['Int']['input']>;
+  mainSurvivalSurvived?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mainSurvivalOriginal?: InputMaybe<Scalars['Int']['input']>;
+  mainSurvivalSurvived?: InputMaybe<Scalars['Int']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Max_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mainSurvivalOriginal?: Maybe<Scalars['Int']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Min_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mainSurvivalOriginal?: Maybe<Scalars['Int']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Int']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prId?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Mutation_Response = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
+};
+
+/** on_conflict condition type for table "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_On_Conflict = {
+  constraint: Tracy_Ai_Blame_Pr_Main_Survival_Constraint;
+  update_columns?: Array<Tracy_Ai_Blame_Pr_Main_Survival_Update_Column>;
+  where?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.ai_blame_pr_main_survival". */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mainSurvivalOriginal?: InputMaybe<Order_By>;
+  mainSurvivalSurvived?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  prId?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.ai_blame_pr_main_survival */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.ai_blame_pr_main_survival" */
+export enum Tracy_Ai_Blame_Pr_Main_Survival_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MainSurvivalOriginal = 'mainSurvivalOriginal',
+  /** column name */
+  MainSurvivalSurvived = 'mainSurvivalSurvived',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  PrId = 'prId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "tracy.ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mainSurvivalOriginal?: InputMaybe<Scalars['Int']['input']>;
+  mainSurvivalSurvived?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_stddev_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Pop_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_stddev_pop_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Stddev_Samp_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_stddev_samp_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "tracy_ai_blame_pr_main_survival" */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Ai_Blame_Pr_Main_Survival_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mainSurvivalOriginal?: InputMaybe<Scalars['Int']['input']>;
+  mainSurvivalSurvived?: InputMaybe<Scalars['Int']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prId?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Sum_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_sum_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Int']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "tracy.ai_blame_pr_main_survival" */
+export enum Tracy_Ai_Blame_Pr_Main_Survival_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MainSurvivalOriginal = 'mainSurvivalOriginal',
+  /** column name */
+  MainSurvivalSurvived = 'mainSurvivalSurvived',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  PrId = 'prId',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Tracy_Ai_Blame_Pr_Main_Survival_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Ai_Blame_Pr_Main_Survival_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Var_Pop_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_var_pop_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Var_Samp_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_var_samp_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Ai_Blame_Pr_Main_Survival_Variance_Fields = {
+  __typename?: 'tracy_ai_blame_pr_main_survival_variance_fields';
+  mainSurvivalOriginal?: Maybe<Scalars['Float']['output']>;
+  mainSurvivalSurvived?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate max on columns */
@@ -47836,6 +48888,7 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  mergeCommitShas?: Maybe<Array<Scalars['String']['output']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -47849,6 +48902,7 @@ export type Tracy_Ai_Blame_Pr_Max_Fields = {
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  targetBranch?: Maybe<Scalars['String']['output']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
@@ -47868,6 +48922,7 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   humanLinesAdded?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   linesAdded?: Maybe<Scalars['Int']['output']>;
+  mergeCommitShas?: Maybe<Array<Scalars['String']['output']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -47881,6 +48936,7 @@ export type Tracy_Ai_Blame_Pr_Min_Fields = {
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   rowCreatedAt?: Maybe<Scalars['timestamptz']['output']>;
   tabAutocompleteLinesAdded?: Maybe<Scalars['Int']['output']>;
+  targetBranch?: Maybe<Scalars['String']['output']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: Maybe<Scalars['Int']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
@@ -47923,6 +48979,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   humanLinesAdded?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   linesAdded?: InputMaybe<Order_By>;
+  mergeCommitShas?: InputMaybe<Order_By>;
   numberOfOriginalLines?: InputMaybe<Order_By>;
   numberOfSurvivedLines?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
@@ -47935,6 +48992,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   repositoryUrl?: InputMaybe<Order_By>;
   rowCreatedAt?: InputMaybe<Order_By>;
   tabAutocompleteLinesAdded?: InputMaybe<Order_By>;
+  targetBranch?: InputMaybe<Order_By>;
   totalInferenceCharCount?: InputMaybe<Order_By>;
   totalInferenceLines?: InputMaybe<Order_By>;
 };
@@ -47969,6 +49027,8 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   LinesAdded = 'linesAdded',
   /** column name */
+  MergeCommitShas = 'mergeCommitShas',
+  /** column name */
   NumberOfOriginalLines = 'numberOfOriginalLines',
   /** column name */
   NumberOfSurvivedLines = 'numberOfSurvivedLines',
@@ -47991,6 +49051,8 @@ export enum Tracy_Ai_Blame_Pr_Select_Column {
   /** column name */
   TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
   /** column name */
+  TargetBranch = 'targetBranch',
+  /** column name */
   TotalInferenceCharCount = 'totalInferenceCharCount',
   /** column name */
   TotalInferenceLines = 'totalInferenceLines'
@@ -48010,6 +49072,7 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  mergeCommitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -48024,6 +49087,7 @@ export type Tracy_Ai_Blame_Pr_Set_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  targetBranch?: InputMaybe<Scalars['String']['input']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
@@ -48118,6 +49182,7 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   humanLinesAdded?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   linesAdded?: InputMaybe<Scalars['Int']['input']>;
+  mergeCommitShas?: InputMaybe<Array<Scalars['String']['input']>>;
   /** Count of CODE_GENERATION AI-attributed line instances (attribution rows) in the first ACTIVE PR snapshot with content_hash and char_count >= 35. Duplicate identical lines count separately. NULL for the first snapshot itself. */
   numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
@@ -48132,6 +49197,7 @@ export type Tracy_Ai_Blame_Pr_Stream_Cursor_Value_Input = {
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   rowCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tabAutocompleteLinesAdded?: InputMaybe<Scalars['Int']['input']>;
+  targetBranch?: InputMaybe<Scalars['String']['input']>;
   /** sum of char_count from all post-planning CHAT inferences in the session */
   totalInferenceCharCount?: InputMaybe<Scalars['Int']['input']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
@@ -48185,6 +49251,8 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   /** column name */
   LinesAdded = 'linesAdded',
   /** column name */
+  MergeCommitShas = 'mergeCommitShas',
+  /** column name */
   NumberOfOriginalLines = 'numberOfOriginalLines',
   /** column name */
   NumberOfSurvivedLines = 'numberOfSurvivedLines',
@@ -48206,6 +49274,8 @@ export enum Tracy_Ai_Blame_Pr_Update_Column {
   RowCreatedAt = 'rowCreatedAt',
   /** column name */
   TabAutocompleteLinesAdded = 'tabAutocompleteLinesAdded',
+  /** column name */
+  TargetBranch = 'targetBranch',
   /** column name */
   TotalInferenceCharCount = 'totalInferenceCharCount',
   /** column name */
@@ -48823,13 +49893,377 @@ export type Tracy_Developer_Groups_Flat_Stream_Cursor_Value_Input = {
   userName?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type Tracy_Get_Org_Skill_Stats_Args = {
+  p_from_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  p_user_names?: InputMaybe<Scalars['_text']['input']>;
+};
+
+/** columns and relationships of "tracy.org_skill_stats_row" */
+export type Tracy_Org_Skill_Stats_Row = {
+  __typename?: 'tracy_org_skill_stats_row';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  first_seen?: Maybe<Scalars['timestamptz']['output']>;
+  installation_count?: Maybe<Scalars['bigint']['output']>;
+  invocation_count?: Maybe<Scalars['bigint']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+};
+
+export type Tracy_Org_Skill_Stats_Row_Aggregate = {
+  __typename?: 'tracy_org_skill_stats_row_aggregate';
+  aggregate?: Maybe<Tracy_Org_Skill_Stats_Row_Aggregate_Fields>;
+  nodes: Array<Tracy_Org_Skill_Stats_Row>;
+};
+
+/** aggregate fields of "tracy.org_skill_stats_row" */
+export type Tracy_Org_Skill_Stats_Row_Aggregate_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_aggregate_fields';
+  avg?: Maybe<Tracy_Org_Skill_Stats_Row_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Org_Skill_Stats_Row_Max_Fields>;
+  min?: Maybe<Tracy_Org_Skill_Stats_Row_Min_Fields>;
+  stddev?: Maybe<Tracy_Org_Skill_Stats_Row_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Org_Skill_Stats_Row_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Org_Skill_Stats_Row_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Org_Skill_Stats_Row_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Org_Skill_Stats_Row_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Org_Skill_Stats_Row_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Org_Skill_Stats_Row_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.org_skill_stats_row" */
+export type Tracy_Org_Skill_Stats_Row_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Org_Skill_Stats_Row_Avg_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_avg_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.org_skill_stats_row". All fields are combined with a logical 'AND'. */
+export type Tracy_Org_Skill_Stats_Row_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Org_Skill_Stats_Row_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Org_Skill_Stats_Row_Bool_Exp>>;
+  context_file_id?: InputMaybe<Uuid_Comparison_Exp>;
+  first_seen?: InputMaybe<Timestamptz_Comparison_Exp>;
+  installation_count?: InputMaybe<Bigint_Comparison_Exp>;
+  invocation_count?: InputMaybe<Bigint_Comparison_Exp>;
+  skill_name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Org_Skill_Stats_Row_Max_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_max_fields';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  first_seen?: Maybe<Scalars['timestamptz']['output']>;
+  installation_count?: Maybe<Scalars['bigint']['output']>;
+  invocation_count?: Maybe<Scalars['bigint']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Org_Skill_Stats_Row_Min_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_min_fields';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  first_seen?: Maybe<Scalars['timestamptz']['output']>;
+  installation_count?: Maybe<Scalars['bigint']['output']>;
+  invocation_count?: Maybe<Scalars['bigint']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "tracy.org_skill_stats_row". */
+export type Tracy_Org_Skill_Stats_Row_Order_By = {
+  context_file_id?: InputMaybe<Order_By>;
+  first_seen?: InputMaybe<Order_By>;
+  installation_count?: InputMaybe<Order_By>;
+  invocation_count?: InputMaybe<Order_By>;
+  skill_name?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "tracy.org_skill_stats_row" */
+export enum Tracy_Org_Skill_Stats_Row_Select_Column {
+  /** column name */
+  ContextFileId = 'context_file_id',
+  /** column name */
+  FirstSeen = 'first_seen',
+  /** column name */
+  InstallationCount = 'installation_count',
+  /** column name */
+  InvocationCount = 'invocation_count',
+  /** column name */
+  SkillName = 'skill_name'
+}
+
+/** aggregate stddev on columns */
+export type Tracy_Org_Skill_Stats_Row_Stddev_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_stddev_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Org_Skill_Stats_Row_Stddev_Pop_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_stddev_pop_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Org_Skill_Stats_Row_Stddev_Samp_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_stddev_samp_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "tracy_org_skill_stats_row" */
+export type Tracy_Org_Skill_Stats_Row_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Org_Skill_Stats_Row_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Org_Skill_Stats_Row_Stream_Cursor_Value_Input = {
+  context_file_id?: InputMaybe<Scalars['uuid']['input']>;
+  first_seen?: InputMaybe<Scalars['timestamptz']['input']>;
+  installation_count?: InputMaybe<Scalars['bigint']['input']>;
+  invocation_count?: InputMaybe<Scalars['bigint']['input']>;
+  skill_name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Org_Skill_Stats_Row_Sum_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_sum_fields';
+  installation_count?: Maybe<Scalars['bigint']['output']>;
+  invocation_count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Org_Skill_Stats_Row_Var_Pop_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_var_pop_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Org_Skill_Stats_Row_Var_Samp_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_var_samp_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Org_Skill_Stats_Row_Variance_Fields = {
+  __typename?: 'tracy_org_skill_stats_row_variance_fields';
+  installation_count?: Maybe<Scalars['Float']['output']>;
+  invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.session_skill_status" */
+export type Tracy_Session_Skill_Status = {
+  __typename?: 'tracy_session_skill_status';
+  contextFileId?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  invoked?: Maybe<Scalars['Boolean']['output']>;
+  md5?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  pr_url?: Maybe<Scalars['String']['output']>;
+  scanSummary?: Maybe<Scalars['String']['output']>;
+  scanVerdict?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  session?: Maybe<Tracy_Tracy_Session>;
+  session_id?: Maybe<Scalars['String']['output']>;
+  skillInsertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  skillKey?: Maybe<Scalars['String']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  user?: Maybe<User>;
+  user_id?: Maybe<Scalars['uuid']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "tracy.session_skill_status" */
+export type Tracy_Session_Skill_Status_Aggregate = {
+  __typename?: 'tracy_session_skill_status_aggregate';
+  aggregate?: Maybe<Tracy_Session_Skill_Status_Aggregate_Fields>;
+  nodes: Array<Tracy_Session_Skill_Status>;
+};
+
+/** aggregate fields of "tracy.session_skill_status" */
+export type Tracy_Session_Skill_Status_Aggregate_Fields = {
+  __typename?: 'tracy_session_skill_status_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Session_Skill_Status_Max_Fields>;
+  min?: Maybe<Tracy_Session_Skill_Status_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.session_skill_status" */
+export type Tracy_Session_Skill_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.session_skill_status". All fields are combined with a logical 'AND'. */
+export type Tracy_Session_Skill_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Session_Skill_Status_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Session_Skill_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Session_Skill_Status_Bool_Exp>>;
+  contextFileId?: InputMaybe<Uuid_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  description?: InputMaybe<String_Comparison_Exp>;
+  invoked?: InputMaybe<Boolean_Comparison_Exp>;
+  md5?: InputMaybe<String_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  pr_url?: InputMaybe<String_Comparison_Exp>;
+  scanSummary?: InputMaybe<String_Comparison_Exp>;
+  scanVerdict?: InputMaybe<String_Comparison_Exp>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  session_id?: InputMaybe<String_Comparison_Exp>;
+  skillInsertedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  skillKey?: InputMaybe<String_Comparison_Exp>;
+  skill_name?: InputMaybe<String_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  user_id?: InputMaybe<Uuid_Comparison_Exp>;
+  user_name?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Session_Skill_Status_Max_Fields = {
+  __typename?: 'tracy_session_skill_status_max_fields';
+  contextFileId?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  md5?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  pr_url?: Maybe<Scalars['String']['output']>;
+  scanSummary?: Maybe<Scalars['String']['output']>;
+  scanVerdict?: Maybe<Scalars['String']['output']>;
+  session_id?: Maybe<Scalars['String']['output']>;
+  skillInsertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  skillKey?: Maybe<Scalars['String']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+  user_id?: Maybe<Scalars['uuid']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Session_Skill_Status_Min_Fields = {
+  __typename?: 'tracy_session_skill_status_min_fields';
+  contextFileId?: Maybe<Scalars['uuid']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  md5?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  pr_url?: Maybe<Scalars['String']['output']>;
+  scanSummary?: Maybe<Scalars['String']['output']>;
+  scanVerdict?: Maybe<Scalars['String']['output']>;
+  session_id?: Maybe<Scalars['String']['output']>;
+  skillInsertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  skillKey?: Maybe<Scalars['String']['output']>;
+  skill_name?: Maybe<Scalars['String']['output']>;
+  user_id?: Maybe<Scalars['uuid']['output']>;
+  user_name?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "tracy.session_skill_status". */
+export type Tracy_Session_Skill_Status_Order_By = {
+  contextFileId?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  invoked?: InputMaybe<Order_By>;
+  md5?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  pr_url?: InputMaybe<Order_By>;
+  scanSummary?: InputMaybe<Order_By>;
+  scanVerdict?: InputMaybe<Order_By>;
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  session_id?: InputMaybe<Order_By>;
+  skillInsertedAt?: InputMaybe<Order_By>;
+  skillKey?: InputMaybe<Order_By>;
+  skill_name?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  user_id?: InputMaybe<Order_By>;
+  user_name?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "tracy.session_skill_status" */
+export enum Tracy_Session_Skill_Status_Select_Column {
+  /** column name */
+  ContextFileId = 'contextFileId',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  Invoked = 'invoked',
+  /** column name */
+  Md5 = 'md5',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  PrUrl = 'pr_url',
+  /** column name */
+  ScanSummary = 'scanSummary',
+  /** column name */
+  ScanVerdict = 'scanVerdict',
+  /** column name */
+  SessionId = 'session_id',
+  /** column name */
+  SkillInsertedAt = 'skillInsertedAt',
+  /** column name */
+  SkillKey = 'skillKey',
+  /** column name */
+  SkillName = 'skill_name',
+  /** column name */
+  UserId = 'user_id',
+  /** column name */
+  UserName = 'user_name'
+}
+
+/** Streaming cursor of the table "tracy_session_skill_status" */
+export type Tracy_Session_Skill_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Session_Skill_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Session_Skill_Status_Stream_Cursor_Value_Input = {
+  contextFileId?: InputMaybe<Scalars['uuid']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  invoked?: InputMaybe<Scalars['Boolean']['input']>;
+  md5?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  pr_url?: InputMaybe<Scalars['String']['input']>;
+  scanSummary?: InputMaybe<Scalars['String']['input']>;
+  scanVerdict?: InputMaybe<Scalars['String']['input']>;
+  session_id?: InputMaybe<Scalars['String']['input']>;
+  skillInsertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  skillKey?: InputMaybe<Scalars['String']['input']>;
+  skill_name?: InputMaybe<Scalars['String']['input']>;
+  user_id?: InputMaybe<Scalars['uuid']['input']>;
+  user_name?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** columns and relationships of "tracy.tracy_context_file" */
 export type Tracy_Tracy_Context_File = {
   __typename?: 'tracy_tracy_context_file';
   category: Scalars['String']['output'];
   createdAt: Scalars['timestamptz']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   md5: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   s3Path: Scalars['String']['output'];
   sizeBytes: Scalars['Int']['output'];
   /** An array relationship */
@@ -48901,8 +50335,10 @@ export type Tracy_Tracy_Context_File_Bool_Exp = {
   _or?: InputMaybe<Array<Tracy_Tracy_Context_File_Bool_Exp>>;
   category?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  description?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   md5?: InputMaybe<String_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
   s3Path?: InputMaybe<String_Comparison_Exp>;
   sizeBytes?: InputMaybe<Int_Comparison_Exp>;
   skillScans?: InputMaybe<Tracy_Tracy_Skill_Scan_Bool_Exp>;
@@ -48926,8 +50362,10 @@ export type Tracy_Tracy_Context_File_Inc_Input = {
 export type Tracy_Tracy_Context_File_Insert_Input = {
   category?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   md5?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   s3Path?: InputMaybe<Scalars['String']['input']>;
   sizeBytes?: InputMaybe<Scalars['Int']['input']>;
   skillScans?: InputMaybe<Tracy_Tracy_Skill_Scan_Arr_Rel_Insert_Input>;
@@ -48938,8 +50376,10 @@ export type Tracy_Tracy_Context_File_Max_Fields = {
   __typename?: 'tracy_tracy_context_file_max_fields';
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   md5?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
   s3Path?: Maybe<Scalars['String']['output']>;
   sizeBytes?: Maybe<Scalars['Int']['output']>;
 };
@@ -48949,8 +50389,10 @@ export type Tracy_Tracy_Context_File_Min_Fields = {
   __typename?: 'tracy_tracy_context_file_min_fields';
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   md5?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
   s3Path?: Maybe<Scalars['String']['output']>;
   sizeBytes?: Maybe<Scalars['Int']['output']>;
 };
@@ -48982,8 +50424,10 @@ export type Tracy_Tracy_Context_File_On_Conflict = {
 export type Tracy_Tracy_Context_File_Order_By = {
   category?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   md5?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
   s3Path?: InputMaybe<Order_By>;
   sizeBytes?: InputMaybe<Order_By>;
   skillScans_aggregate?: InputMaybe<Tracy_Tracy_Skill_Scan_Aggregate_Order_By>;
@@ -49001,9 +50445,13 @@ export enum Tracy_Tracy_Context_File_Select_Column {
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
+  Description = 'description',
+  /** column name */
   Id = 'id',
   /** column name */
   Md5 = 'md5',
+  /** column name */
+  Name = 'name',
   /** column name */
   S3Path = 's3Path',
   /** column name */
@@ -49014,8 +50462,10 @@ export enum Tracy_Tracy_Context_File_Select_Column {
 export type Tracy_Tracy_Context_File_Set_Input = {
   category?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   md5?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   s3Path?: InputMaybe<Scalars['String']['input']>;
   sizeBytes?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -49050,8 +50500,10 @@ export type Tracy_Tracy_Context_File_Stream_Cursor_Input = {
 export type Tracy_Tracy_Context_File_Stream_Cursor_Value_Input = {
   category?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   md5?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   s3Path?: InputMaybe<Scalars['String']['input']>;
   sizeBytes?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -49069,9 +50521,13 @@ export enum Tracy_Tracy_Context_File_Update_Column {
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
+  Description = 'description',
+  /** column name */
   Id = 'id',
   /** column name */
   Md5 = 'md5',
+  /** column name */
+  Name = 'name',
   /** column name */
   S3Path = 's3Path',
   /** column name */
@@ -49855,6 +51311,794 @@ export type Tracy_Tracy_Inference_Event_Variance_Fields = {
   charCount?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_Session = {
+  __typename?: 'tracy_tracy_session';
+  aiSummary?: Maybe<Scalars['String']['output']>;
+  /** An array relationship */
+  availableSkills: Array<Tracy_Tracy_Session_Available_Skill>;
+  /** An aggregate relationship */
+  availableSkills_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
+  createdAt: Scalars['timestamptz']['output'];
+  endedAt?: Maybe<Scalars['timestamptz']['output']>;
+  id: Scalars['String']['output'];
+  mainModel?: Maybe<Scalars['String']['output']>;
+  platform: Scalars['String']['output'];
+  prUrl?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  startedAt: Scalars['timestamptz']['output'];
+  tokens: Scalars['Int']['output'];
+  totalEvents: Scalars['Int']['output'];
+  /** An array relationship */
+  usedSkills: Array<Tracy_Tracy_Session_Used_Skill>;
+  /** An aggregate relationship */
+  usedSkills_aggregate: Tracy_Tracy_Session_Used_Skill_Aggregate;
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionAvailableSkillsArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionAvailableSkills_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionUsedSkillsArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionUsedSkills_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+/** aggregated selection of "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Aggregate = {
+  __typename?: 'tracy_tracy_session_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Session_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Session>;
+};
+
+/** aggregate fields of "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_session_aggregate_fields';
+  avg?: Maybe<Tracy_Tracy_Session_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Session_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Session_Min_Fields>;
+  stddev?: Maybe<Tracy_Tracy_Session_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Tracy_Session_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Tracy_Session_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Tracy_Session_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Tracy_Session_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Tracy_Session_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Tracy_Session_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** columns and relationships of "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill = {
+  __typename?: 'tracy_tracy_session_available_skill';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  inserted_at: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  session: Tracy_Tracy_Session;
+  sessionId: Scalars['String']['output'];
+  skillName: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Aggregate = {
+  __typename?: 'tracy_tracy_session_available_skill_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Session_Available_Skill>;
+};
+
+export type Tracy_Tracy_Session_Available_Skill_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Tracy_Session_Available_Skill_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_session_available_skill_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Session_Available_Skill_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Session_Available_Skill_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Max_Order_By>;
+  min?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Tracy_Session_Available_Skill_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Skill_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_session_available_skill". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Session_Available_Skill_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Bool_Exp>>;
+  context_file_id?: InputMaybe<Uuid_Comparison_Exp>;
+  inserted_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+  skillName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_session_available_skill" */
+export enum Tracy_Tracy_Session_Available_Skill_Constraint {
+  /** unique or primary key constraint on columns "skill_name", "session_id" */
+  TracySessionAvailableSkillPkey = 'tracy_session_available_skill_pkey'
+}
+
+/** input type for inserting data into table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Insert_Input = {
+  context_file_id?: InputMaybe<Scalars['uuid']['input']>;
+  inserted_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  session?: InputMaybe<Tracy_Tracy_Session_Obj_Rel_Insert_Input>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Session_Available_Skill_Max_Fields = {
+  __typename?: 'tracy_tracy_session_available_skill_max_fields';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  inserted_at?: Maybe<Scalars['timestamptz']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  skillName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Max_Order_By = {
+  context_file_id?: InputMaybe<Order_By>;
+  inserted_at?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Session_Available_Skill_Min_Fields = {
+  __typename?: 'tracy_tracy_session_available_skill_min_fields';
+  context_file_id?: Maybe<Scalars['uuid']['output']>;
+  inserted_at?: Maybe<Scalars['timestamptz']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  skillName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Min_Order_By = {
+  context_file_id?: InputMaybe<Order_By>;
+  inserted_at?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Mutation_Response = {
+  __typename?: 'tracy_tracy_session_available_skill_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Session_Available_Skill>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_On_Conflict = {
+  constraint: Tracy_Tracy_Session_Available_Skill_Constraint;
+  update_columns?: Array<Tracy_Tracy_Session_Available_Skill_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_session_available_skill". */
+export type Tracy_Tracy_Session_Available_Skill_Order_By = {
+  context_file_id?: InputMaybe<Order_By>;
+  inserted_at?: InputMaybe<Order_By>;
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_session_available_skill */
+export type Tracy_Tracy_Session_Available_Skill_Pk_Columns_Input = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+/** select columns of table "tracy.tracy_session_available_skill" */
+export enum Tracy_Tracy_Session_Available_Skill_Select_Column {
+  /** column name */
+  ContextFileId = 'context_file_id',
+  /** column name */
+  InsertedAt = 'inserted_at',
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  SkillName = 'skillName'
+}
+
+/** input type for updating data in table "tracy.tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Set_Input = {
+  context_file_id?: InputMaybe<Scalars['uuid']['input']>;
+  inserted_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_session_available_skill" */
+export type Tracy_Tracy_Session_Available_Skill_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Session_Available_Skill_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Session_Available_Skill_Stream_Cursor_Value_Input = {
+  context_file_id?: InputMaybe<Scalars['uuid']['input']>;
+  inserted_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.tracy_session_available_skill" */
+export enum Tracy_Tracy_Session_Available_Skill_Update_Column {
+  /** column name */
+  ContextFileId = 'context_file_id',
+  /** column name */
+  InsertedAt = 'inserted_at',
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  SkillName = 'skillName'
+}
+
+export type Tracy_Tracy_Session_Available_Skill_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Tracy_Session_Avg_Fields = {
+  __typename?: 'tracy_tracy_session_avg_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_session". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Session_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Session_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Session_Bool_Exp>>;
+  aiSummary?: InputMaybe<String_Comparison_Exp>;
+  availableSkills?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+  availableSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Bool_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  endedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<String_Comparison_Exp>;
+  mainModel?: InputMaybe<String_Comparison_Exp>;
+  platform?: InputMaybe<String_Comparison_Exp>;
+  prUrl?: InputMaybe<String_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  tokens?: InputMaybe<Int_Comparison_Exp>;
+  totalEvents?: InputMaybe<Int_Comparison_Exp>;
+  usedSkills?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+  usedSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Aggregate_Bool_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+  userName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_session" */
+export enum Tracy_Tracy_Session_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  TracySessionPkey = 'tracy_session_pkey'
+}
+
+/** input type for incrementing numeric columns in table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Inc_Input = {
+  tokens?: InputMaybe<Scalars['Int']['input']>;
+  totalEvents?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Insert_Input = {
+  aiSummary?: InputMaybe<Scalars['String']['input']>;
+  availableSkills?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Arr_Rel_Insert_Input>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  endedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  mainModel?: InputMaybe<Scalars['String']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  tokens?: InputMaybe<Scalars['Int']['input']>;
+  totalEvents?: InputMaybe<Scalars['Int']['input']>;
+  usedSkills?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Arr_Rel_Insert_Input>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Session_Max_Fields = {
+  __typename?: 'tracy_tracy_session_max_fields';
+  aiSummary?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  endedAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  mainModel?: Maybe<Scalars['String']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  tokens?: Maybe<Scalars['Int']['output']>;
+  totalEvents?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Session_Min_Fields = {
+  __typename?: 'tracy_tracy_session_min_fields';
+  aiSummary?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  endedAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  mainModel?: Maybe<Scalars['String']['output']>;
+  platform?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  tokens?: Maybe<Scalars['Int']['output']>;
+  totalEvents?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Mutation_Response = {
+  __typename?: 'tracy_tracy_session_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Session>;
+};
+
+/** input type for inserting object relation for remote table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Obj_Rel_Insert_Input = {
+  data: Tracy_Tracy_Session_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_On_Conflict>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_On_Conflict = {
+  constraint: Tracy_Tracy_Session_Constraint;
+  update_columns?: Array<Tracy_Tracy_Session_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_session". */
+export type Tracy_Tracy_Session_Order_By = {
+  aiSummary?: InputMaybe<Order_By>;
+  availableSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  endedAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mainModel?: InputMaybe<Order_By>;
+  platform?: InputMaybe<Order_By>;
+  prUrl?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  tokens?: InputMaybe<Order_By>;
+  totalEvents?: InputMaybe<Order_By>;
+  usedSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Aggregate_Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_session */
+export type Tracy_Tracy_Session_Pk_Columns_Input = {
+  id: Scalars['String']['input'];
+};
+
+/** select columns of table "tracy.tracy_session" */
+export enum Tracy_Tracy_Session_Select_Column {
+  /** column name */
+  AiSummary = 'aiSummary',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  EndedAt = 'endedAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MainModel = 'mainModel',
+  /** column name */
+  Platform = 'platform',
+  /** column name */
+  PrUrl = 'prUrl',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  Tokens = 'tokens',
+  /** column name */
+  TotalEvents = 'totalEvents',
+  /** column name */
+  UserId = 'userId',
+  /** column name */
+  UserName = 'userName'
+}
+
+/** input type for updating data in table "tracy.tracy_session" */
+export type Tracy_Tracy_Session_Set_Input = {
+  aiSummary?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  endedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  mainModel?: InputMaybe<Scalars['String']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  tokens?: InputMaybe<Scalars['Int']['input']>;
+  totalEvents?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Tracy_Tracy_Session_Stddev_Fields = {
+  __typename?: 'tracy_tracy_session_stddev_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Tracy_Session_Stddev_Pop_Fields = {
+  __typename?: 'tracy_tracy_session_stddev_pop_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Tracy_Session_Stddev_Samp_Fields = {
+  __typename?: 'tracy_tracy_session_stddev_samp_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_session" */
+export type Tracy_Tracy_Session_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Session_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Session_Stream_Cursor_Value_Input = {
+  aiSummary?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  endedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  mainModel?: InputMaybe<Scalars['String']['input']>;
+  platform?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  tokens?: InputMaybe<Scalars['Int']['input']>;
+  totalEvents?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Tracy_Session_Sum_Fields = {
+  __typename?: 'tracy_tracy_session_sum_fields';
+  tokens?: Maybe<Scalars['Int']['output']>;
+  totalEvents?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "tracy.tracy_session" */
+export enum Tracy_Tracy_Session_Update_Column {
+  /** column name */
+  AiSummary = 'aiSummary',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  EndedAt = 'endedAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MainModel = 'mainModel',
+  /** column name */
+  Platform = 'platform',
+  /** column name */
+  PrUrl = 'prUrl',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  Tokens = 'tokens',
+  /** column name */
+  TotalEvents = 'totalEvents',
+  /** column name */
+  UserId = 'userId',
+  /** column name */
+  UserName = 'userName'
+}
+
+export type Tracy_Tracy_Session_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Tracy_Tracy_Session_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Session_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Session_Bool_Exp;
+};
+
+/** columns and relationships of "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill = {
+  __typename?: 'tracy_tracy_session_used_skill';
+  /** An object relationship */
+  session: Tracy_Tracy_Session;
+  sessionId: Scalars['String']['output'];
+  skillName: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Aggregate = {
+  __typename?: 'tracy_tracy_session_used_skill_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Session_Used_Skill_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Session_Used_Skill>;
+};
+
+export type Tracy_Tracy_Session_Used_Skill_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Tracy_Session_Used_Skill_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_session_used_skill_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Session_Used_Skill_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Session_Used_Skill_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Max_Order_By>;
+  min?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Tracy_Session_Used_Skill_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Used_Skill_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_session_used_skill". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Session_Used_Skill_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Session_Used_Skill_Bool_Exp>>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+  skillName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_session_used_skill" */
+export enum Tracy_Tracy_Session_Used_Skill_Constraint {
+  /** unique or primary key constraint on columns "skill_name", "session_id" */
+  TracySessionUsedSkillPkey = 'tracy_session_used_skill_pkey'
+}
+
+/** input type for inserting data into table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Insert_Input = {
+  session?: InputMaybe<Tracy_Tracy_Session_Obj_Rel_Insert_Input>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Session_Used_Skill_Max_Fields = {
+  __typename?: 'tracy_tracy_session_used_skill_max_fields';
+  sessionId?: Maybe<Scalars['String']['output']>;
+  skillName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Max_Order_By = {
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Session_Used_Skill_Min_Fields = {
+  __typename?: 'tracy_tracy_session_used_skill_min_fields';
+  sessionId?: Maybe<Scalars['String']['output']>;
+  skillName?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Min_Order_By = {
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Mutation_Response = {
+  __typename?: 'tracy_tracy_session_used_skill_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Session_Used_Skill>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_On_Conflict = {
+  constraint: Tracy_Tracy_Session_Used_Skill_Constraint;
+  update_columns?: Array<Tracy_Tracy_Session_Used_Skill_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_session_used_skill". */
+export type Tracy_Tracy_Session_Used_Skill_Order_By = {
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  skillName?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_session_used_skill */
+export type Tracy_Tracy_Session_Used_Skill_Pk_Columns_Input = {
+  sessionId: Scalars['String']['input'];
+  skillName: Scalars['String']['input'];
+};
+
+/** select columns of table "tracy.tracy_session_used_skill" */
+export enum Tracy_Tracy_Session_Used_Skill_Select_Column {
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  SkillName = 'skillName'
+}
+
+/** input type for updating data in table "tracy.tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Set_Input = {
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_session_used_skill" */
+export type Tracy_Tracy_Session_Used_Skill_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Session_Used_Skill_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Session_Used_Skill_Stream_Cursor_Value_Input = {
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  skillName?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.tracy_session_used_skill" */
+export enum Tracy_Tracy_Session_Used_Skill_Update_Column {
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  SkillName = 'skillName'
+}
+
+export type Tracy_Tracy_Session_Used_Skill_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Session_Used_Skill_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Tracy_Session_Var_Pop_Fields = {
+  __typename?: 'tracy_tracy_session_var_pop_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Tracy_Session_Var_Samp_Fields = {
+  __typename?: 'tracy_tracy_session_var_samp_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Tracy_Session_Variance_Fields = {
+  __typename?: 'tracy_tracy_session_variance_fields';
+  tokens?: Maybe<Scalars['Float']['output']>;
+  totalEvents?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "tracy.tracy_skill_scan" */
 export type Tracy_Tracy_Skill_Scan = {
   __typename?: 'tracy_tracy_skill_scan';
@@ -50101,6 +52345,18 @@ export type Tracy_Tracy_Skill_Scan_Updates = {
   _set?: InputMaybe<Tracy_Tracy_Skill_Scan_Set_Input>;
   /** filter the rows which have to be updated */
   where: Tracy_Tracy_Skill_Scan_Bool_Exp;
+};
+
+export type Tracy_Upsert_Tracy_Session_Args = {
+  p_id?: InputMaybe<Scalars['String']['input']>;
+  p_model?: InputMaybe<Scalars['String']['input']>;
+  p_platform?: InputMaybe<Scalars['String']['input']>;
+  p_pr_url?: InputMaybe<Scalars['String']['input']>;
+  p_repository_url?: InputMaybe<Scalars['String']['input']>;
+  p_timestamp?: InputMaybe<Scalars['timestamptz']['input']>;
+  p_tokens_delta?: InputMaybe<Scalars['Int']['input']>;
+  p_user_id?: InputMaybe<Scalars['uuid']['input']>;
+  p_user_name?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** a table which stores the un-fixable info where we have fix info object */
@@ -58147,6 +60403,8 @@ export enum Vulnerability_Report_Vendor_Constraint {
 }
 
 export enum Vulnerability_Report_Vendor_Enum {
+  /** Black Duck Polaris (SARIF) */
+  BlackDuck = 'blackDuck',
   /** checkmarx */
   Checkmarx = 'checkmarx',
   /** checkmarxXml */

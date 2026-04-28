@@ -449,8 +449,14 @@ describe('mcp tests', () => {
       })
     })
 
-    // Skipped: This test is flaky and often times out
-    it.skip(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
+    // MOBB-3591: previously skipped with "This test is flaky and often times out".
+    // Un-skipped after validating it completes within 200s. The non-git repo
+    // is built from NonGitRepo (benign sample files) — the fixture swap in
+    // fileContents.ts is not exercised by this path. The test asserts only
+    // that the scan completes (output contains "MOBB SECURITY SCAN COMPLETED")
+    // — no fix-specific assertions, so the outcome is purely about pipeline
+    // throughput, not analyzer correctness.
+    it(`should handle active non-git repository path in ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} tool`, async () => {
       // Verify the directory still exists before running the test
       expect(existsSync(activeNonGitRepoPath)).toBe(true)
       expect(existsSync(join(activeNonGitRepoPath, 'sample1.py'))).toBe(true)
@@ -868,8 +874,9 @@ describe('mcp tests', () => {
       await expectNoFreshFixes()
     }, 200000)
 
-    // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-    it.skip('should return 3 initial fixes in 1 batch', async () => {
+    // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+    // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+    it('should return 3 initial fixes in 1 batch', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
       await replaceMcpClient(new InlineMCPClient(createMcpServer()))
       activeRepo.updateFileContent(0, vulnerableFileContent)
@@ -887,8 +894,9 @@ describe('mcp tests', () => {
       await expectNoFreshFixes()
     }, 200000)
 
-    // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-    it.skip('should return 4 initial fixes in 2 batches', async () => {
+    // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+    // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+    it('should return 4 initial fixes in 2 batches', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
       await replaceMcpClient(new InlineMCPClient(createMcpServer()))
       activeRepo.updateFileContent(0, vulnerableFileContent)
@@ -1009,8 +1017,9 @@ describe('mcp tests', () => {
         delete process.env['MVS_AUTO_FIX']
       })
 
-      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-      it.skip('should apply fixes to multiple files with different comment styles', async () => {
+      // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+      // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+      it('should apply fixes to multiple files with different comment styles', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1115,8 +1124,9 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-      it.skip('should NOT auto-apply fixes when files are modified after scan starts', async () => {
+      // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+      // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+      it('should NOT auto-apply fixes when files are modified after scan starts', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1172,8 +1182,9 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-      it.skip('should NOT auto-apply fixes when files have already been patched', async () => {
+      // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+      // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+      it('should NOT auto-apply fixes when files have already been patched', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1273,8 +1284,9 @@ describe('mcp tests', () => {
         }
       }, 200000)
 
-      // Skipped because AI costs became too expensive for this test. Need to review with a better eye and more patience before re-enabling.
-      it.skip('should apply only one fix when multiple fixes target the same file', async () => {
+      // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
+      // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
+      it('should apply only one fix when multiple fixes target the same file', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()

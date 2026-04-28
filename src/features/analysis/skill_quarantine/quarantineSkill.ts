@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import {
+  lstat,
   mkdir,
   readdir,
   readFile,
   rename,
   rm,
   stat,
+  unlink,
   writeFile,
 } from 'node:fs/promises'
 import path from 'node:path'
@@ -68,6 +70,72 @@ export async function quarantineSkill(
       'skill_quarantine: already quarantined, skipping'
     )
     return { status: 'already_quarantined' }
+  }
+
+  // Detect symlink before any move I/O. `move()` renames a symlink rather
+  // than its target on same-FS, and `writeFile()` follows symlinks — both
+  // wrong for quarantine purposes. Symlink path takes a distinct fast-path.
+  let isSymlink = false
+  try {
+    const lst = await lstat(skillPath)
+    isSymlink = lst.isSymbolicLink()
+  } catch {
+    // Can't stat — let normal flow proceed; it will fail gracefully if missing.
+  }
+
+  if (isSymlink) {
+    // Symlink fast-path: remove the link and write a stub in its place.
+    // We do NOT move the symlink target — it may live in a shared location
+    // owned by a different project. The symlink is the install-local artifact.
+    const stubContent = renderStub({
+      md5,
+      isFolder,
+      // Symlinks have no quarantine archive; note that in the stub.
+      quarantinedPath: `(symlink at ${skillPath} replaced — original content was not moved)`,
+      origPath: skillPath,
+      summary: verdict.summary,
+      scannerName: verdict.scannerName,
+      scannerVersion: verdict.scannerVersion,
+      scannedAt: verdict.scannedAt,
+    })
+    try {
+      // Create presence marker first; signals quarantine is in effect even
+      // if the stub write below fails halfway.
+      await mkdir(hashDir, { recursive: true })
+      // Write stub to a temp path then rename to atomically replace the symlink,
+      // eliminating the window where neither the symlink nor the stub exists.
+      if (isFolder) {
+        const tmpDir = `${skillPath}.__tracy_tmp__`
+        await mkdir(tmpDir, { recursive: true })
+        await writeFile(path.join(tmpDir, 'SKILL.md'), stubContent, 'utf8')
+        await unlink(skillPath)
+        await rename(tmpDir, skillPath)
+      } else {
+        const tmpFile = `${skillPath}.__tracy_tmp__`
+        await writeFile(tmpFile, stubContent, 'utf8')
+        await unlink(skillPath)
+        await rename(tmpFile, skillPath)
+      }
+    } catch (err) {
+      log.error(
+        { err, md5, skillPath, metric: Metric.STUB_ERROR },
+        'skill_quarantine: symlink stub write failed'
+      )
+      return { status: 'stub_error', err }
+    }
+    await preRegisterStubMd5(skillPath, isFolder, log)
+    log.info(
+      {
+        md5,
+        verdict: verdict.verdict,
+        shape: isFolder ? 'folder' : 'standalone',
+        scanner: verdict.scannerName,
+        scannerVersion: verdict.scannerVersion,
+        metric: Metric.QUARANTINED,
+      },
+      'skill_quarantine: quarantined (symlink)'
+    )
+    return { status: 'quarantined' }
   }
 
   const stagingDir = getStagingDir(md5, process.pid, randomUUID())

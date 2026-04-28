@@ -35,15 +35,15 @@ export const SCAN_PATHS: Record<string, ScanEntry[]> = {
       root: 'home',
     },
     { kind: 'skill-bundle', skillsRoot: '.claude/skills', root: 'workspace' },
-    { glob: '.claude/commands/*.md', category: 'command', root: 'workspace' },
+    { glob: '.claude/commands/*.md', category: 'skill', root: 'workspace' },
     {
       glob: '.claude/agents/*.md',
-      category: 'agent-config',
+      category: SKILL_CATEGORY,
       root: 'workspace',
     },
     { kind: 'skill-bundle', skillsRoot: '.claude/skills', root: 'home' },
-    { glob: '.claude/commands/*.md', category: 'command', root: 'home' },
-    { glob: '.claude/agents/*.md', category: 'agent-config', root: 'home' },
+    { glob: '.claude/commands/*.md', category: 'skill', root: 'home' },
+    { glob: '.claude/agents/*.md', category: SKILL_CATEGORY, root: 'home' },
     { glob: '.claude/settings.json', category: 'config', root: 'workspace' },
     {
       glob: '.claude/settings.local.json',
@@ -124,7 +124,7 @@ export const SCAN_PATHS: Record<string, ScanEntry[]> = {
     },
     {
       glob: '.claude/agents/*.md',
-      category: 'agent-config',
+      category: SKILL_CATEGORY,
       root: 'workspace',
     },
     // Agent skills — Copilot discovers skills in all three roots (VS Code docs:
@@ -156,7 +156,7 @@ export const SCAN_PATHS: Record<string, ScanEntry[]> = {
     // Cross-compat home paths (Copilot reads Claude / generic agent dirs too)
     { glob: '.claude/CLAUDE.md', category: 'rule', root: 'home' },
     { glob: '.claude/rules/**/*.md', category: 'rule', root: 'home' },
-    { glob: '.claude/agents/*.md', category: 'agent-config', root: 'home' },
+    { glob: '.claude/agents/*.md', category: SKILL_CATEGORY, root: 'home' },
     { kind: 'skill-bundle', skillsRoot: '.claude/skills', root: 'home' },
     { kind: 'skill-bundle', skillsRoot: '.agents/skills', root: 'home' },
   ],

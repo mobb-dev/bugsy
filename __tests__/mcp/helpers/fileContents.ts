@@ -12,27 +12,35 @@ export const benignFileContent = `def add(a, b):
 print(add(1, 2))
 `
 
-// Internal helper to generate vulnerable Python functions dynamically
+// MOBB-3591: deterministic fixture. `uuid.uuid1()` triggers Semgrep rule
+// lang.security.insecure-uuid-version.insecure-uuid-version → PYTHON/INSECURE_UUID_VERSION
+// (IS_IO_BOUND=false in pycommon/pycommon/report/supported_issues.json) —
+// routes through the algorithmic fixer at
+// consumers/analyzer/analyzer/fixes/python/insecure_uuid_version/. No LLM
+// call, no per-fix cost, and crucially a single rule fires per call (unlike
+// `requests.get` which triggers both USE_TIMEOUT and USE_RAISE_FOR_STATUS).
+// Originally these fixtures used Python subprocess CMDI (Python/CMDI, LLM-
+// bound) — expensive, which is why the tests that consume these fixtures
+// were .skip'd in integration.mcp.test.ts.
 const vulnerablePyFunction = (name: string) => `
-def delete_user_folder_${name}(name):
-    delete_cmd = f"rm -rf /home/{name}"
-    subprocess.run(delete_cmd, shell=True)
+def gen_${name}():
+    return uuid.uuid1()
     `
 
 // A single vulnerable snippet leveraging the helper above
-export const vulnerableFileContent = `import subprocess
+export const vulnerableFileContent = `import uuid
 
 ${vulnerablePyFunction('test')}
-    delete_user_folder_test('test')
+    gen_test()
   `
 
 // A longer file containing multiple vulnerable functions
-export const multipleVulnerableFileContent = `import subprocess
+export const multipleVulnerableFileContent = `import uuid
 
 ${vulnerablePyFunction('test')}
 ${vulnerablePyFunction('test2')}
-    delete_user_folder_test('test')
-    delete_user_folder_test2('test2')
+    gen_test()
+    gen_test2()
     `
 
 // Java file with hardcoded password vulnerability matching the mock report.json
@@ -105,22 +113,18 @@ export const authVulnerableFileContent = `function authenticateUser(password) {
 }`
 
 // Python file with multiple vulnerabilities for testing fix prioritization
-export const multiVulnerableFileContent = `# Python file with multiple vulnerabilities
-import subprocess
-import sqlite3
+// MOBB-3591: deterministic fixture for the file-level dedup test
+// ("should apply only one fix when multiple fixes target the same file").
+// Three `uuid.uuid1()` sites in the same file produce three separate
+// INSECURE_UUID_VERSION findings that all target multi-vuln.py — exactly
+// the "multiple fixes on the same file" shape the test exercises — while
+// routing through the algorithmic fixer (no LLM call, deterministic).
+export const multiVulnerableFileContent = `import uuid
 
-def get_user_data(user_id):
-    # SQL injection vulnerability
-    query = "SELECT * FROM users WHERE id = " + user_id
-    cursor.execute(query)
-    return cursor.fetchall()
-
-def execute_user_command(user_cmd):
-    # Command injection vulnerability
-    full_cmd = f"echo 'Processing: {user_cmd}'"
-    subprocess.run(full_cmd, shell=True)
-
-def delete_user_folder(username):
-    # Another command injection vulnerability
-    delete_cmd = f"rm -rf /tmp/{username}"
-    subprocess.run(delete_cmd, shell=True)`
+${vulnerablePyFunction('a')}
+${vulnerablePyFunction('b')}
+${vulnerablePyFunction('c')}
+    gen_a()
+    gen_b()
+    gen_c()
+    `

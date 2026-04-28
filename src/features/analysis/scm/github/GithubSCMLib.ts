@@ -11,6 +11,7 @@ import {
   GetReferenceResult,
   GetSubmitRequestInfo,
   GetSubmitRequestMetadataResult,
+  MergedPrSurvivalMetadata,
   PostPRReviewCommentParams,
   PullRequestMetrics,
   RateLimitStatus,
@@ -47,6 +48,7 @@ import {
   UpdateCommentResponse,
 } from './types'
 import { encryptSecret } from './utils/encrypt_secret'
+import { commitShasBetweenBaseAndMerge } from './utils/mergeCommitShas'
 
 type PrState = NonNullable<
   GetPRMetricsResponse['repository']['pullRequest']
@@ -876,6 +878,42 @@ export class GithubSCMLib extends SCMLib {
       prStatus,
       commentIds,
     }
+  }
+
+  /**
+   * Detect merge strategy and SHAs on the target branch for main-branch survival (GitHub only).
+   */
+  override async getMergedPrSurvivalMetadata(
+    prNumber: number
+  ): Promise<MergedPrSurvivalMetadata | null> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url)
+
+    const pr = await this.githubSdk.getPr({
+      owner,
+      repo,
+      pull_number: prNumber,
+    })
+
+    if (pr.data.merged !== true || !pr.data.merge_commit_sha) {
+      return null
+    }
+
+    const mergeCommitSha = pr.data.merge_commit_sha
+    const targetBranch = pr.data.base.ref
+    const baseSha = pr.data.base.sha
+
+    const mergeCommitShas = await commitShasBetweenBaseAndMerge(
+      this.githubSdk,
+      {
+        owner,
+        repo,
+        baseSha,
+        mergeCommitSha,
+      }
+    )
+
+    return { mergeCommitShas, targetBranch }
   }
 }
 

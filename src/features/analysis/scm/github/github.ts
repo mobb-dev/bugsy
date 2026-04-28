@@ -829,6 +829,24 @@ export function getGithubSdk(
       )
       return res
     },
+
+    async listPullRequestCommits(params: {
+      owner: string
+      repo: string
+      pull_number: number
+      per_page?: number
+    }) {
+      return octokit.rest.pulls.listCommits(params)
+    },
+
+    async compareCommitsBasehead(params: {
+      owner: string
+      repo: string
+      basehead: string
+    }) {
+      return octokit.rest.repos.compareCommitsWithBasehead(params)
+    },
+
     /**
      * List PRs using GitHub's REST `/repos/{owner}/{repo}/pulls` endpoint.
      * https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests

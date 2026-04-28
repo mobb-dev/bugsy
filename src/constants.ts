@@ -54,6 +54,7 @@ export const SCANNERS = {
   Sonarqube: 'sonarqube',
   Semgrep: 'semgrep',
   Datadog: 'datadog',
+  BlackDuck: 'blackduck',
 } as const
 
 export const scannerToVulnerabilityReportVendorEnum = {
@@ -64,6 +65,7 @@ export const scannerToVulnerabilityReportVendorEnum = {
   [SCANNERS.Fortify]: Vulnerability_Report_Vendor_Enum.Fortify,
   [SCANNERS.Semgrep]: Vulnerability_Report_Vendor_Enum.Semgrep,
   [SCANNERS.Datadog]: Vulnerability_Report_Vendor_Enum.Datadog,
+  [SCANNERS.BlackDuck]: Vulnerability_Report_Vendor_Enum.BlackDuck,
 } as const
 
 export const SupportedScannersZ = z.enum([SCANNERS.Checkmarx, SCANNERS.Snyk])

@@ -15,4 +15,5 @@ export const scannerToFriendlyString: Record<Scanner, string> = {
   sonarqube: 'Sonarqube',
   semgrep: 'Semgrep',
   datadog: 'Datadog',
+  blackduck: 'Black Duck',
 } as const

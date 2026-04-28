@@ -115,13 +115,52 @@ describe('scanContextFiles', () => {
 
       const result = await scanFull('claude-code')
       // Skill folder files land in skillGroups, not regularFiles
-      expect(result.skillGroups.length).toBeGreaterThanOrEqual(1)
       expect(result.skillGroups.some((sg) => sg.name === 's1')).toBe(true)
+      // .claude/commands/*.md has category 'skill' — treated as standalone skill groups
+      expect(result.skillGroups.some((sg) => sg.name === 'cmd')).toBe(true)
+      // agents land in regularFiles with category 'agent-config'
       const byName = Object.fromEntries(
         result.regularFiles.map((f) => [f.name, f])
       )
-      expect(byName['.claude/commands/cmd.md']?.category).toBe('command')
       expect(byName['.claude/agents/agent.md']?.category).toBe('agent-config')
+    })
+
+    it('picks up standalone .md files directly in .claude/skills/', async () => {
+      await writeFile(
+        workspace.path,
+        '.claude/skills/standalone_skill.md',
+        '# Standalone Skill\nDoes something useful.'
+      )
+      await writeFile(
+        workspace.path,
+        '.claude/skills/folder_skill/SKILL.md',
+        'folder'
+      )
+
+      const result = await scanFull('claude-code')
+      const names = result.skillGroups.map((sg) => sg.name)
+      expect(names).toContain('standalone_skill')
+      expect(names).toContain('folder_skill')
+      const standalone = result.skillGroups.find(
+        (sg) => sg.name === 'standalone_skill'
+      )
+      expect(standalone?.isFolder).toBe(false)
+      expect(standalone?.files).toHaveLength(1)
+    })
+
+    it('picks up standalone .md skill files from home .claude/skills/', async () => {
+      await writeFile(
+        fakeHome.path,
+        '.claude/skills/my_tool.md',
+        '# My Tool\nA home-level skill.'
+      )
+
+      const result = await scanFull('claude-code')
+      const names = result.skillGroups.map((sg) => sg.name)
+      expect(names).toContain('my_tool')
+      const sg = result.skillGroups.find((sg) => sg.name === 'my_tool')
+      expect(sg?.isFolder).toBe(false)
+      expect(sg?.root).toBe('home')
     })
 
     it('matches config files', async () => {
@@ -356,14 +395,14 @@ describe('scanContextFiles', () => {
       expect(names).toContain('.claude/skills/my-skill/templates/foo.py')
     })
 
-    it('excludes loose .md files directly under skills root (no SKILL.md)', async () => {
-      // Proper skill with SKILL.md
+    it('includes standalone .md files AND folder skills under the skills root', async () => {
+      // Proper skill with SKILL.md folder
       await writeFile(
         workspace.path,
         '.claude/skills/tracy/SKILL.md',
         'real skill'
       )
-      // Loose .md files users sometimes drop — NOT agent-visible, must be skipped
+      // Standalone .md files are also valid single-file skills
       await writeFile(workspace.path, '.claude/skills/loose-note.md', 'ad hoc')
       await writeFile(
         workspace.path,
@@ -372,12 +411,16 @@ describe('scanContextFiles', () => {
       )
 
       const result = await scanFull('claude-code')
-      const skillNames = result.skillGroups.flatMap((sg) =>
-        sg.files.map((f) => f.name)
-      )
-      expect(skillNames).toContain('.claude/skills/tracy/SKILL.md')
-      expect(skillNames).not.toContain('.claude/skills/loose-note.md')
-      expect(skillNames).not.toContain('.claude/skills/another-loose.md')
+      const groupNames = result.skillGroups.map((sg) => sg.name)
+      // Folder skill is found
+      expect(groupNames).toContain('tracy')
+      // Standalone .md files are also found as individual skill groups
+      expect(groupNames).toContain('loose-note')
+      expect(groupNames).toContain('another-loose')
+      // Standalone groups are not folder-based
+      expect(
+        result.skillGroups.find((sg) => sg.name === 'loose-note')?.isFolder
+      ).toBe(false)
     })
 
     it('includes all files from valid skill dirs but skips dirs without a SKILL.md manifest', async () => {
@@ -414,6 +457,72 @@ describe('scanContextFiles', () => {
       // Directories without a SKILL.md are not valid skill dirs — excluded.
       expect(names).not.toContain('.claude/skills/no-manifest/random.md')
       expect(names).not.toContain('.claude/skills/no-manifest/other.py')
+    })
+
+    it('finds a folder skill installed as a directory symlink', async () => {
+      // Real skill folder lives outside the .claude/skills directory.
+      const realDir = path.join(
+        workspace.path,
+        'external-skills',
+        'linked-skill'
+      )
+      await fs.mkdir(realDir, { recursive: true })
+      await fs.writeFile(path.join(realDir, 'SKILL.md'), '# Linked Skill')
+      await fs.writeFile(path.join(realDir, 'helper.ts'), 'export const x = 1')
+
+      // Install the skill as a symlink inside the skills directory.
+      const skillsDir = path.join(workspace.path, '.claude', 'skills')
+      await fs.mkdir(skillsDir, { recursive: true })
+      await fs.symlink(realDir, path.join(skillsDir, 'linked-skill'))
+
+      const result = await scanFull('claude-code')
+      const skill = result.skillGroups.find((sg) => sg.name === 'linked-skill')
+      expect(skill).toBeDefined()
+      expect(skill!.isFolder).toBe(true)
+      const fileBasenames = skill!.files.map((f) => path.basename(f.path))
+      expect(fileBasenames).toContain('SKILL.md')
+      expect(fileBasenames).toContain('helper.ts')
+      // skillPath points at the symlink location, not the real directory.
+      expect(skill!.skillPath).toContain('linked-skill')
+      expect(skill!.skillPath).toContain(skillsDir)
+    })
+
+    it('finds a standalone .md skill installed as a file symlink', async () => {
+      // Real .md file lives outside the .claude/skills directory.
+      const realFile = path.join(workspace.path, 'external-skills', 'solo.md')
+      await fs.mkdir(path.dirname(realFile), { recursive: true })
+      await fs.writeFile(realFile, '# Solo Skill')
+
+      // Install as a symlink inside the skills directory.
+      const skillsDir = path.join(workspace.path, '.claude', 'skills')
+      await fs.mkdir(skillsDir, { recursive: true })
+      await fs.symlink(realFile, path.join(skillsDir, 'solo.md'))
+
+      const result = await scanFull('claude-code')
+      const skill = result.skillGroups.find((sg) => sg.name === 'solo')
+      expect(skill).toBeDefined()
+      expect(skill!.isFolder).toBe(false)
+      // skillPath uses the symlink path so quarantine writes the stub correctly.
+      expect(skill!.skillPath).toContain(path.join(skillsDir, 'solo.md'))
+    })
+
+    it('skips symlinked directories that have no SKILL.md manifest', async () => {
+      // Real folder has no SKILL.md — not a valid skill.
+      const realDir = path.join(
+        workspace.path,
+        'external-skills',
+        'not-a-skill'
+      )
+      await fs.mkdir(realDir, { recursive: true })
+      await fs.writeFile(path.join(realDir, 'random.txt'), 'not a skill')
+
+      const skillsDir = path.join(workspace.path, '.claude', 'skills')
+      await fs.mkdir(skillsDir, { recursive: true })
+      await fs.symlink(realDir, path.join(skillsDir, 'not-a-skill'))
+
+      const result = await scanFull('claude-code')
+      const groupNames = result.skillGroups.map((sg) => sg.name)
+      expect(groupNames).not.toContain('not-a-skill')
     })
   })
 
@@ -842,13 +951,13 @@ describe('scanContextFiles', () => {
       }
     })
 
-    it('loose .md files directly under .claude/skills/ do not create skill groups', async () => {
+    it('standalone .md files under .claude/skills/ create their own skill groups', async () => {
       await writeFile(
         workspace.path,
         '.claude/skills/solo-skill.md',
         'standalone skill'
       )
-      // A valid skill dir should still work alongside loose files
+      // A valid skill dir should still work alongside standalone files
       await writeFile(
         workspace.path,
         '.claude/skills/real-skill/SKILL.md',
@@ -856,11 +965,13 @@ describe('scanContextFiles', () => {
       )
 
       const result = await scanFull('claude-code')
-      // Loose .md file at root is excluded — only dir-based skills count
-      expect(
-        result.skillGroups.find((sg) => sg.name === 'solo-skill')
-      ).toBeUndefined()
-      // Valid SKILL.md-based dir still shows up
+      // Standalone .md creates a non-folder skill group
+      const standalone = result.skillGroups.find(
+        (sg) => sg.name === 'solo-skill'
+      )
+      expect(standalone).toBeDefined()
+      expect(standalone!.isFolder).toBe(false)
+      // Folder-based skill is still found
       const realSkill = result.skillGroups.find(
         (sg) => sg.name === 'real-skill'
       )

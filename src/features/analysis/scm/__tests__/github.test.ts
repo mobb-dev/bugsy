@@ -1,9 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { z } from 'zod'
 
 import { getGithubSdk, parseGithubOwnerAndRepo } from '../github'
 import { GithubSCMLib } from '../github/GithubSCMLib'
 import { createScmLib } from '../scmFactory'
-import { ScmLibScmType } from '../types'
+import {
+  GithubFullShaZ,
+  type MergedPrSurvivalMetadata,
+  MergedPrSurvivalMetadataZ,
+  ScmLibScmType,
+} from '../types'
 import { RepoConfig } from './common'
 import { env } from './env'
 
@@ -375,6 +381,93 @@ describe('getPullRequestMetrics', () => {
 
     expect(Array.isArray(metrics.commentIds)).toBe(true)
     expect(metrics.commentIds.length).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('getMergedPrSurvivalMetadata', () => {
+  const TEST_REPO_URL = 'https://github.com/mobbcitestjob/ai-blame-e2e-tests'
+  const TARGET_BRANCH = 'test_merge_types'
+  /** Squash merge: 2 commits on branch → 1 on base */
+  const PR_SQUASH_MERGE = 25882
+  /** Merge commit: 1 commit on branch */
+  const PR_MERGE_COMMIT = 25887
+  /** Rebase and merge: 2 commits on branch */
+  const PR_REBASE_MERGE = 25890
+
+  const survivalMetadataTestMergeTypesZ = MergedPrSurvivalMetadataZ.refine(
+    (data) => data.targetBranch === TARGET_BRANCH,
+    { message: `targetBranch must be ${TARGET_BRANCH}` }
+  )
+
+  /** merge_base(branch_tip, sha) === sha ⇒ sha is on branch history */
+  const githubCompareMergeBaseMatchesSha = (expectedSha: string) =>
+    z
+      .object({
+        merge_base_commit: z
+          .object({ sha: GithubFullShaZ })
+          .nullable()
+          .optional(),
+      })
+      .refine(
+        (d) =>
+          d.merge_base_commit?.sha?.toLowerCase() === expectedSha.toLowerCase(),
+        {
+          message: `merge_base must be ${expectedSha} (commit on ${TARGET_BRANCH} history)`,
+        }
+      )
+
+  function assertMergedPrSurvivalMetadataShape(meta: MergedPrSurvivalMetadata) {
+    survivalMetadataTestMergeTypesZ.parse(meta)
+  }
+
+  /** Each SHA must be on {@link TARGET_BRANCH}: merge_base(branch_tip, sha) === sha. */
+  async function assertMergeCommitShasOnTargetBranch(
+    mergeCommitShas: readonly string[]
+  ) {
+    const { owner, repo } = parseGithubOwnerAndRepo(TEST_REPO_URL)
+    const sdk = getGithubSdk({
+      auth: env.PLAYWRIGHT_GH_CLOUD_PAT,
+      url: TEST_REPO_URL,
+      isEnableRetries: true,
+    })
+    for (const sha of mergeCommitShas) {
+      const { data } = await sdk.compareCommitsBasehead({
+        owner,
+        repo,
+        basehead: `${TARGET_BRANCH}...${sha}`,
+      })
+      githubCompareMergeBaseMatchesSha(sha).parse(data)
+    }
+  }
+
+  const createTestRepoScmLib = () =>
+    new GithubSCMLib(TEST_REPO_URL, env.PLAYWRIGHT_GH_CLOUD_PAT, undefined)
+
+  it('squash merge PR returns single merge commit SHA on target branch', async () => {
+    const scmLib = createTestRepoScmLib()
+    const meta = await scmLib.getMergedPrSurvivalMetadata(PR_SQUASH_MERGE)
+    expect(meta).not.toBeNull()
+    assertMergedPrSurvivalMetadataShape(meta!)
+    await assertMergeCommitShasOnTargetBranch(meta!.mergeCommitShas)
+    expect(meta!.mergeCommitShas.length).toBe(1)
+  })
+
+  it('merge commit PR returns at least one merge commit SHA', async () => {
+    const scmLib = createTestRepoScmLib()
+    const meta = await scmLib.getMergedPrSurvivalMetadata(PR_MERGE_COMMIT)
+    expect(meta).not.toBeNull()
+    assertMergedPrSurvivalMetadataShape(meta!)
+    await assertMergeCommitShasOnTargetBranch(meta!.mergeCommitShas)
+    expect(meta!.mergeCommitShas.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('rebase and merge PR with two commits returns two SHAs', async () => {
+    const scmLib = createTestRepoScmLib()
+    const meta = await scmLib.getMergedPrSurvivalMetadata(PR_REBASE_MERGE)
+    expect(meta).not.toBeNull()
+    assertMergedPrSurvivalMetadataShape(meta!)
+    await assertMergeCommitShasOnTargetBranch(meta!.mergeCommitShas)
+    expect(meta!.mergeCommitShas.length).toBe(2)
   })
 })
 

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "SnykCode",
+          "semanticVersion": "1.0.0",
+          "version": "1.0.0",
+          "rules": [
+            {
+              "id": "javascript/WebCookieSecureDisabledByDefault",
+              "name": "WebCookieSecureDisabledByDefault",
+              "shortDescription": {
+                "text": "Sensitive Cookie in HTTPS Session Without 'Secure' Attribute"
+              },
+              "defaultConfiguration": { "level": "warning" },
+              "help": {
+                "markdown": "## Details\n\nWhen a cookie is sent without the `Secure` attribute it may be transmitted over an unencrypted channel and leak sensitive information.",
+                "text": ""
+              },
+              "properties": {
+                "tags": ["javascript"],
+                "categories": ["Security"]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "javascript/WebCookieSecureDisabledByDefault",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Cookie is set without the 'Secure' flag. Using an insecure cookie can leak sensitive data over plain HTTP."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "test/server.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 19,
+                  "endLine": 19,
+                  "startColumn": 5,
+                  "endColumn": 61
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "0": "mobb-3591-fixture-irrelevant-test-code-test-server-js-19"
+          }
+        }
+      ]
+    }
+  ]
+}

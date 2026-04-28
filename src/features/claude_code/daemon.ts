@@ -17,8 +17,10 @@ import {
   cleanupStaleSessions,
   detectClaudeCodeVersion,
   processTranscript,
+  uploadContextFilesIfNeeded,
 } from './data_collector'
 import {
+  CONTEXT_SCAN_INTERVAL_MS,
   DAEMON_CHUNK_SIZE,
   DAEMON_POLL_INTERVAL_MS,
   DAEMON_TTL_MS,
@@ -101,6 +103,10 @@ export async function startDaemon(): Promise<void> {
   const lastSeen = new Map<string, { mtimeMs: number; size: number }>()
   // Track configDir for cleanupStaleSessions (run once per day)
   let cleanupConfigDir: string | undefined
+  // Per-session cwd cache for the independent context-file scan loop.
+  // Keyed by transcript filePath (same key space as lastSeen).
+  const sessionCwdCache = new Map<string, { sessionId: string; cwd: string }>()
+  let lastContextScanMs = 0
 
   // Main poll loop — awaits sleep between cycles to keep the process alive
   // eslint-disable-next-line no-constant-condition
@@ -129,7 +135,34 @@ export async function startDaemon(): Promise<void> {
           cleanupConfigDir = path.dirname(sessionStore.path)
         }
 
-        await drainTranscript(transcript, sessionStore, gqlClient)
+        await drainTranscript(
+          transcript,
+          sessionStore,
+          gqlClient,
+          sessionCwdCache
+        )
+      }
+
+      // Evict sessions whose transcript files have disappeared from lastSeen.
+      // Skip eviction when lastSeen is empty — that indicates a scan error
+      // rather than all sessions genuinely disappearing.
+      if (lastSeen.size > 0) {
+        for (const filePath of sessionCwdCache.keys()) {
+          if (!lastSeen.has(filePath)) sessionCwdCache.delete(filePath)
+        }
+      }
+
+      // Scan context files independently of transcript changes, every 5 s.
+      // mtime tracking inside scanContextFiles makes repeated calls cheap.
+      const now = Date.now()
+      if (now - lastContextScanMs >= CONTEXT_SCAN_INTERVAL_MS) {
+        lastContextScanMs = now
+        for (const { sessionId, cwd } of sessionCwdCache.values()) {
+          const log = createScopedHookLog(cwd, { daemonMode: true })
+          uploadContextFilesIfNeeded(sessionId, cwd, gqlClient, log).catch(
+            (err) => log.warn({ err }, 'Context file scan failed')
+          )
+        }
       }
 
       // Cleanup stale session files (runs at most once per day)
@@ -198,12 +231,21 @@ async function authenticateOrExit(
 async function drainTranscript(
   transcript: TranscriptFileInfo,
   sessionStore: Configstore,
-  gqlClient: Awaited<ReturnType<typeof getAuthenticatedGQLClient>>
+  gqlClient: Awaited<ReturnType<typeof getAuthenticatedGQLClient>>,
+  sessionCwdCache: Map<string, { sessionId: string; cwd: string }>
 ): Promise<void> {
   const cwd = await extractCwdFromTranscript(transcript.filePath)
   const log = createScopedHookLog(cwd ?? transcript.projectDir, {
     daemonMode: true,
   })
+
+  // Cache cwd so the independent context-file scan loop can reach this session.
+  if (cwd) {
+    sessionCwdCache.set(transcript.filePath, {
+      sessionId: transcript.sessionId,
+      cwd,
+    })
+  }
 
   try {
     let hasMore = true

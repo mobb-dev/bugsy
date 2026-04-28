@@ -131,6 +131,52 @@ describe('processContextFiles — skill groups produce zip buffers', () => {
     expect(entries[0]).toBe('my-skill.md')
   })
 
+  it('standalone skill zip contains only itself even when a folder skill exists in the same batch', async () => {
+    // Simulate what scanContextFiles produces when both skill types coexist:
+    // one standalone group (single file) and one folder group (multiple files)
+    const standaloneFile = makeFile(
+      '/home/.claude/skills/solo.md',
+      '# Solo',
+      'skill'
+    )
+    const standaloneGroup = makeSkillGroup(
+      '/home/.claude/skills/solo.md',
+      [standaloneFile],
+      false
+    )
+
+    const folderSkillPath = '/home/.claude/skills/big-skill'
+    const folderFiles = [
+      makeFile(`${folderSkillPath}/SKILL.md`, '# Big', 'skill'),
+      makeFile(`${folderSkillPath}/helper.ts`, 'export {}', 'skill'),
+      makeFile(`${folderSkillPath}/sub/util.md`, 'util', 'skill'),
+    ]
+    const folderGroup = makeSkillGroup(folderSkillPath, folderFiles, true)
+
+    const { skills } = await processContextFiles(
+      [],
+      [standaloneGroup, folderGroup]
+    )
+
+    expect(skills).toHaveLength(2)
+
+    const solo = skills.find((s) => s.group.name === 'solo.md')!
+    const big = skills.find((s) => s.group.name === 'big-skill')!
+
+    // Standalone zip contains ONLY solo.md — no folder files leak in
+    const soloEntries = new AdmZip(solo.zipBuffer)
+      .getEntries()
+      .map((e) => e.entryName)
+    expect(soloEntries).toEqual(['solo.md'])
+
+    // Folder zip contains all 3 folder files — standalone doesn't leak in
+    const bigEntries = new AdmZip(big.zipBuffer)
+      .getEntries()
+      .map((e) => e.entryName)
+      .sort()
+    expect(bigEntries).toEqual(['SKILL.md', 'helper.ts', 'sub/util.md'])
+  })
+
   it('folder skill produces a zip with entry names relative to the skill root', async () => {
     const skillPath = '/home/.claude/skills/my-skill'
     const files = [

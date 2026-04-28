@@ -168,6 +168,10 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.MissingWorkflowPermissions]: 'Missing Workflow Permissions',
   [IssueType_Enum.ExcessiveSecretsExposure]: 'Excessive Secrets Exposure',
   [IssueType_Enum.TaintedNumericCast]: 'Tainted Numeric Cast',
+  [IssueType_Enum.MissingXFrameOptions]: 'Missing X-Frame-Options Header',
+  [IssueType_Enum.ImproperValidationOfArrayIndex]:
+    'Improper Validation of Array Index',
+  [IssueType_Enum.IncorrectIntegerConversion]: 'Incorrect Integer Conversion',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

@@ -1,5 +1,8 @@
+import { homedir } from 'node:os'
+import path from 'node:path'
+
 import { processContextFiles } from '../context_file_processor'
-import { scanContextFiles } from '../context_file_scanner'
+import { scanContextFiles, type SkillGroup } from '../context_file_scanner'
 
 /**
  * T-467 — enumerate locally installed Claude Code skills and compute
@@ -24,17 +27,37 @@ export async function enumerateInstalledSkills(
 ): Promise<InstalledSkill[]> {
   // Pass undefined sessionId so no mtime dedup — quarantine needs a full
   // snapshot every tick.
-  const { skillGroups } = await scanContextFiles(
+  const { skillGroups, regularFiles } = await scanContextFiles(
     workspaceRoot,
     'claude-code',
     undefined
   )
-  if (skillGroups.length === 0) {
+
+  // Agent-config files (.claude/agents/*.md) can carry malicious system-prompt
+  // instructions and therefore need the same quarantine protection as skills.
+  // Treat each one as a synthetic standalone skill group so processContextFiles
+  // zips it and computes an md5 the server can look up.
+  const home = homedir()
+  const agentGroups: SkillGroup[] = regularFiles
+    .filter((f) => f.category === 'agent-config')
+    .map((f) => ({
+      name: path.basename(f.path, path.extname(f.path)),
+      root: f.path.startsWith(home + path.sep)
+        ? ('home' as const)
+        : ('workspace' as const),
+      skillPath: f.path,
+      files: [f],
+      isFolder: false,
+      maxMtimeMs: f.mtimeMs,
+      sessionKey: `agent-config:${f.path}`,
+    }))
+
+  const allGroups = [...skillGroups, ...agentGroups]
+  if (allGroups.length === 0) {
     return []
   }
 
-  // Only process skill groups (regular files are out of scope for quarantine).
-  const { skills } = await processContextFiles([], skillGroups)
+  const { skills } = await processContextFiles([], allGroups)
 
   return skills.map((s) => {
     // For folder skills, origName is the final path segment (dir name).

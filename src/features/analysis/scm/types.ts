@@ -92,6 +92,26 @@ export type PullRequestMetrics = {
   commentIds: string[]
 }
 
+/** Metadata for survival computation; GitHub only when PR is merged. */
+export type MergedPrSurvivalMetadata = {
+  /** SHAs on main for survival storage; MergeCommit/Rebase from compare base…merge; Squash is single tip. */
+  mergeCommitShas: string[]
+  targetBranch: string
+}
+
+/** Full 40-char lowercase hex commit SHA as returned by GitHub REST. */
+export const GithubFullShaZ = z.string().regex(/^[a-f0-9]{40}$/)
+
+export const MergedPrSurvivalMetadataZ = z.object({
+  mergeCommitShas: z
+    .array(GithubFullShaZ)
+    .min(1)
+    .refine((shas) => new Set(shas).size === shas.length, {
+      message: 'mergeCommitShas must contain unique SHAs',
+    }),
+  targetBranch: z.string().min(1),
+})
+
 export const scmSubmitRequestStatus = {
   MERGED: 'merged',
   OPEN: 'open',

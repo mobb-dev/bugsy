@@ -35,6 +35,8 @@ type PorcelainParseResult = {
   commitMetadata: Record<string, Record<string, string>>
 }
 
+const GIT_BLAME_PORCELAIN_ENTRY_LINE_RE = /^([0-9a-f]{40})\s+(\d+)\s+(\d+)/
+
 function parsePorcelainCore(output: string): PorcelainParseResult {
   const entries: PorcelainEntry[] = []
   const commitMetadata: Record<string, Record<string, string>> = {}
@@ -59,7 +61,7 @@ function parsePorcelainCore(output: string): PorcelainParseResult {
       continue
     }
 
-    const match = line.match(/^([0-9a-f]{40})\s+(\d+)\s+(\d+)/)
+    const match = line.match(GIT_BLAME_PORCELAIN_ENTRY_LINE_RE)
     if (!match) {
       i++
       continue

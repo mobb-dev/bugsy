@@ -34,7 +34,7 @@ export function analyzeBuilder(
       alias: 'scan-file',
       type: 'string',
       describe: chalk.bold(
-        'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL, Sonarqube, Semgrep, Datadog)'
+        'Select the vulnerability report to analyze (Checkmarx, Snyk, Fortify, CodeQL, Sonarqube, Semgrep, Datadog, Black Duck)'
       ),
     })
     .option('repo', repoOption)

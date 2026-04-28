@@ -416,4 +416,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.MissingWorkflowPermissions]: undefined,
   [IssueType_Enum.ExcessiveSecretsExposure]: undefined,
   [IssueType_Enum.TaintedNumericCast]: undefined,
+  [IssueType_Enum.MissingXFrameOptions]: undefined,
+  [IssueType_Enum.ImproperValidationOfArrayIndex]: undefined,
+  [IssueType_Enum.IncorrectIntegerConversion]: undefined,
 }

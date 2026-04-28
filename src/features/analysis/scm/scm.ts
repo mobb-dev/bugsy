@@ -4,6 +4,7 @@ import {
   CreateSubmitRequestParams,
   GetReferenceResult,
   GetSubmitRequestMetadataResult,
+  MergedPrSurvivalMetadata,
   PrCommentData,
   PullRequestMetrics,
   RateLimitStatus,
@@ -204,6 +205,15 @@ export abstract class SCMLib {
   }
 
   abstract getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics>
+
+  /**
+   * GitHub: merge detection for main-branch survival. Other providers return null.
+   */
+  async getMergedPrSurvivalMetadata(
+    _prNumber: number
+  ): Promise<MergedPrSurvivalMetadata | null> {
+    return null
+  }
 
   /**
    * Fetches recent commits since the given date.

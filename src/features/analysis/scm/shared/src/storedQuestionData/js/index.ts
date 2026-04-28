@@ -12,6 +12,7 @@ import { insecureRandomness } from './insecureRandomness'
 import { logForging } from './logForging'
 import { cspHeaderValue } from './missingCSPHeader'
 import { headerMaxAge } from './missingHSTSHeader'
+import { xFrameOptionsValue } from './missingXFrameOptions'
 import { noLimitsOrThrottling } from './noLimitsOrThrottling'
 import { openRedirect } from './openRedirect'
 import { pt } from './pt'
@@ -42,6 +43,7 @@ const vulnerabilities = {
   [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
   [IssueType_Enum.NoLimitsOrThrottling as string]: noLimitsOrThrottling,
   [IssueType_Enum.MissingCspHeader as string]: cspHeaderValue,
+  [IssueType_Enum.MissingXFrameOptions as string]: xFrameOptionsValue,
   [IssueType_Enum.HardcodedDomainInHtml as string]: hardcodedDomainInHtml,
   [IssueType_Enum.Csrf as string]: csrf,
 }

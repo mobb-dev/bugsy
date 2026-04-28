@@ -654,17 +654,6 @@ export async function processTranscript(
       claudeCodeVersion: getClaudeCodeVersion(),
     })
 
-    // Upload new/changed context files. The scanner's per-session mtime tracking skips unchanged files.
-    if (input.cwd) {
-      uploadContextFilesIfNeeded(
-        input.session_id,
-        input.cwd,
-        gqlClient,
-        log
-      ).catch((err) => {
-        log.error({ data: { err } }, 'uploadContextFilesIfNeeded failed')
-      })
-    }
     return {
       entriesUploaded: entries.length,
       entriesSkipped: filteredOut,
@@ -688,7 +677,7 @@ export async function processTranscript(
  * Each file/skill is uploaded directly to S3 with its own Tracy event.
  * Change detection is handled inside the scanner via mtime tracking.
  */
-async function uploadContextFilesIfNeeded(
+export async function uploadContextFilesIfNeeded(
   sessionId: string,
   cwd: string,
   gqlClient: GQLClient,

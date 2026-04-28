@@ -1,4 +1,4 @@
-import { lstat, readFile, stat } from 'node:fs/promises'
+import { lstat, readdir, readFile, realpath, stat } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
@@ -834,7 +834,89 @@ async function enumerateSkillBundle(
       }
     })
   )
-  return perSkillResults.flat().map((p) => ({ path: p, category: 'skill' }))
+
+  const standaloneFiles = await enumerateStandaloneSkills(skillsDir)
+  const symlinkResults = await enumerateSymlinkedSkills(skillsDir)
+
+  return [
+    ...perSkillResults.flat().map((p) => ({ path: p, category: 'skill' })),
+    ...standaloneFiles.map((p) => ({ path: p, category: 'skill' })),
+    ...symlinkResults,
+  ]
+}
+
+/** Pass 3: standalone *.md files directly under skillsDir (single-file skills). */
+async function enumerateStandaloneSkills(skillsDir: string): Promise<string[]> {
+  try {
+    return await globby('*.md', {
+      cwd: skillsDir,
+      absolute: true,
+      onlyFiles: true,
+      dot: false,
+      followSymbolicLinks: false,
+    })
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Pass 4: skill directories or standalone .md files installed as symlinks.
+ * globby with followSymbolicLinks:false misses these. We enumerate the
+ * skills root with readdir, then for each symlink we stat the target to
+ * decide if it's a folder skill (has SKILL.md) or a standalone skill (.md).
+ * Files are enumerated from the real directory but paths are mapped back
+ * through the symlink so groupSkills receives the in-skills-root path (e.g.
+ * ~/.claude/skills/my-skill/SKILL.md) rather than the real path — this keeps
+ * quarantine's skillPath pointing at the correct install location.
+ */
+async function enumerateSymlinkedSkills(
+  skillsDir: string
+): Promise<{ path: string; category: string }[]> {
+  let dirEntries: import('node:fs').Dirent<string>[]
+  try {
+    dirEntries = await readdir(skillsDir, {
+      withFileTypes: true,
+      encoding: 'utf8',
+    })
+  } catch {
+    return []
+  }
+
+  const results: { path: string; category: string }[] = []
+  for (const entry of dirEntries) {
+    if (!entry.isSymbolicLink()) continue
+    const entryPath = path.join(skillsDir, entry.name)
+    try {
+      const st = await stat(entryPath) // follows the symlink
+      if (st.isDirectory()) {
+        const hasManifest = await stat(path.join(entryPath, 'SKILL.md'))
+          .then(() => true)
+          .catch(() => false)
+        if (!hasManifest) continue
+        const realDir = await realpath(entryPath)
+        const realFiles = await globby('**/*', {
+          cwd: realDir,
+          absolute: true,
+          onlyFiles: true,
+          dot: true,
+          followSymbolicLinks: false,
+          deep: SKILL_BUNDLE_MAX_DEPTH,
+        }).catch(() => [] as string[])
+        for (const f of realFiles) {
+          results.push({
+            path: path.join(entryPath, path.relative(realDir, f)),
+            category: 'skill',
+          })
+        }
+      } else if (st.isFile() && entry.name.endsWith('.md')) {
+        results.push({ path: entryPath, category: 'skill' })
+      }
+    } catch {
+      // Broken or unreadable symlink — skip silently.
+    }
+  }
+  return results
 }
 
 /** Maximum traversal depth for dynamic (user-declared) scan directories. */

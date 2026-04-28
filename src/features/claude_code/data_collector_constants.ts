@@ -17,3 +17,4 @@ export const DAEMON_POLL_INTERVAL_MS = (() => {
 export const HEARTBEAT_STALE_MS = 30_000 // 30 seconds — shim considers daemon dead if heartbeat older
 export const TRANSCRIPT_MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 hours — skip files not modified recently
 export const DAEMON_CHUNK_SIZE = 50 // entries per chunk — bounds memory, enables crash recovery
+export const CONTEXT_SCAN_INTERVAL_MS = 5_000 // scan context/skill files every 5 s, independent of transcript changes

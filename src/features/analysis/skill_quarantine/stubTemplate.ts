@@ -7,14 +7,20 @@
  * how to undo, how to report (plan §3.3).
  */
 
+import path from 'node:path'
+
+import { quote } from 'shell-quote'
+
+import { STUB_MARKER } from './constants'
+
 export type StubParams = {
-  /** MD5 of the original (malicious) skill zip. */
+  /** MD5 of the original (malicious) skill zip, as known to the server. */
   md5: string
   /** Whether the original was a folder or a single `.md` file. */
   isFolder: boolean
-  /** Absolute path where the quarantined content now lives. */
-  quarantinedPath: string
-  /** Original path at which the skill used to live (pre-move). */
+  /** Absolute path of the `<md5>.zip` archive that holds the original. */
+  quarantinedZipPath: string
+  /** Original path at which the skill used to live (pre-quarantine). */
   origPath: string
   /** Server-provided short reason; may be null for legacy scan rows. */
   summary: string | null
@@ -31,11 +37,20 @@ const LEGACY_SUMMARY_FALLBACK = 'not available (scan predates current schema)'
 export function renderStub(params: StubParams): string {
   const folderOrFile = params.isFolder ? 'skill folder' : 'skill file'
   const reason = params.summary ?? LEGACY_SUMMARY_FALLBACK
-  return `# ⛔ QUARANTINED BY TRACY
+  // The archive reconstructs `origName` at its top level, so unzipping
+  // into the parent of `origPath` rebuilds the skill exactly where it
+  // used to live. All three interpolated paths are shell-quoted because
+  // `origPath` embeds an attacker-controlled filename (CWE-078).
+  const extractParent = path.dirname(params.origPath)
+  const recoverCommand =
+    `rm -rf ${quote([params.origPath])} && ` +
+    `unzip -o ${quote([params.quarantinedZipPath])} -d ${quote([extractParent])}`
+
+  return `# ${STUB_MARKER}
 
 This skill was flagged **MALICIOUS** by the Mobb security scanner and has been
-moved out of your skills folder. **Claude Code will not execute it** while this
-stub is in place.
+archived out of your skills folder. **Claude Code will not execute it** while
+this stub is in place.
 
 ## Why this skill was flagged
 
@@ -46,23 +61,22 @@ stub is in place.
 
 ## Where the original is now
 
-The original ${folderOrFile} has been moved to:
+The original ${folderOrFile} has been archived to:
 
-    ${params.quarantinedPath}
+    ${params.quarantinedZipPath}
 
-Nothing has been deleted. The contents are intact; only the location changed.
+Nothing has been deleted. The archive preserves the skill exactly as it was,
+including any secrets or local-only edits.
 
 ## If this is a false positive — how to recover
 
 If you're confident this skill is safe and want to restore it:
 
-    mv ${params.quarantinedPath} ${params.origPath}
+    ${recoverCommand}
 
-Tracy will not re-quarantine it as long as the directory
-\`~/.tracy/quarantine/claude/skills/${params.md5}/\` still exists on your
-machine (even if it's empty after you moved the contents out). If you delete
-that directory entirely, the next heartbeat will re-evaluate the skill from
-scratch.
+Tracy will not re-quarantine it as long as \`${params.md5}.zip\` remains in
+the quarantine folder. If you delete the archive, the next heartbeat will
+re-evaluate the skill from scratch.
 
 ## How to report a false positive
 

@@ -4,47 +4,28 @@ import path from 'node:path'
 /**
  * T-467 — filesystem layout for client-side skill quarantine.
  *
- * All paths are Tracy-owned under `~/.tracy/`. The `{platform}/{category}/`
- * nesting leaves room for future extensions (Cursor, VS Code, other
- * categories) without rename churn — see plan §3.1.
+ * Two on-disk shapes:
+ *   <md5>_tmp_<uuid>.zip  — an in-flight or crashed zip write. Reconcile
+ *                           parses it; valid archives get published, broken
+ *                           ones are swept after the grace window.
+ *   <md5>.zip             — the final addressing key. Presence is the
+ *                           "fully quarantined" lock.
  */
 
-/**
- * Root for Claude Code skill quarantine.
- * Example: `/Users/alice/.tracy/quarantine/claude/skills/`.
- */
 export function getQuarantineRoot(): string {
   return path.join(homedir(), '.tracy', 'quarantine', 'claude', 'skills')
 }
 
-/**
- * Presence of this directory is the "already quarantined" signal.
- * Example: `~/.tracy/quarantine/claude/skills/a1b2c3.../`.
- */
-export function getQuarantinedHashDir(md5: string): string {
-  return path.join(getQuarantineRoot(), md5)
+export function getQuarantineZipPath(md5: string): string {
+  return path.join(getQuarantineRoot(), `${md5}.zip`)
 }
 
-/**
- * Final destination for the moved skill content.
- * For folder skills this is a directory; for standalone `.md` skills it is
- * a file. `origName` includes the extension for standalone skills.
- */
-export function getQuarantinedTargetPath(
-  md5: string,
-  origName: string
-): string {
-  return path.join(getQuarantinedHashDir(md5), origName)
+export function getTmpZipPath(md5: string, uuid: string): string {
+  return path.join(getQuarantineRoot(), `${md5}_tmp_${uuid}.zip`)
 }
 
-/**
- * Unique staging directory for a single quarantine attempt. The uuid
- * suffix prevents collisions between two daemons on the same machine or
- * successive retries for the same md5.
- */
-export function getStagingDir(md5: string, pid: number, uuid: string): string {
-  return path.join(getQuarantineRoot(), `${md5}_tmp_${pid}_${uuid}`)
-}
+/** `<md5>_tmp_<uuid>.zip` — capture 1 is md5. */
+export const TMP_ZIP_REGEX = /^([0-9a-f]{32})_tmp_[0-9a-f-]+\.zip$/
 
-/** Regex for identifying staging dirs during orphan sweep. */
-export const STAGING_DIR_REGEX = /^([0-9a-f]{32})_tmp_/
+/** `<md5>.zip` (final) — capture 1 is md5. */
+export const COMMITTED_ZIP_REGEX = /^([0-9a-f]{32})\.zip$/

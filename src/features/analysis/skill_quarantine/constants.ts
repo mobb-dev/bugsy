@@ -20,8 +20,12 @@ export const KILL_SWITCH_ENV = 'MOBB_TRACY_SKILL_QUARANTINE_DISABLE'
 export const MALICIOUS_VERDICT = 'MALICIOUS'
 
 /**
- * Orphan sweep grace period. `*_tmp_*` staging dirs younger than this are
- * skipped (they may belong to an in-flight quarantine or a phase-2 failure
- * we intentionally preserved for manual recovery).
+ * Grace period before cleaning up `_partial_*.zip` leftovers from a
+ * crashed zip-write. Tmp and final zips need no grace because the
+ * partial→tmp rename invariant makes any `_tmp_` file a complete archive,
+ * and any `<md5>.zip` is the committed state.
  */
-export const ORPHAN_SWEEP_GRACE_MS = 10 * 60 * 1000
+export const PARTIAL_SWEEP_GRACE_MS = 10 * 60 * 1000
+
+/** Marker line in the rendered stub. Used to detect our own writes. */
+export const STUB_MARKER = '⛔ QUARANTINED BY TRACY'

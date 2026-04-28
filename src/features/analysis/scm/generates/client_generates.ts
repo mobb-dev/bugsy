@@ -1563,19 +1563,6 @@ export type SendInvitationSuccess = {
   status: Status;
 };
 
-export type SetAdminSkillVerdictError = {
-  __typename?: 'SetAdminSkillVerdictError';
-  error?: Maybe<Scalars['String']['output']>;
-  status: Status;
-};
-
-export type SetAdminSkillVerdictResponse = SetAdminSkillVerdictError | SetAdminSkillVerdictSuccess;
-
-export type SetAdminSkillVerdictSuccess = {
-  __typename?: 'SetAdminSkillVerdictSuccess';
-  status: Status;
-};
-
 export type SetAnswersResponse = {
   __typename?: 'SetAnswersResponse';
   status: FixerStatus;
@@ -21726,11 +21713,6 @@ export type Mutation_Root = {
   saveUsageMcp?: Maybe<SaveUsageMcpResponse>;
   scanSkill: ScanSkillResult;
   sendInvitation?: Maybe<SendInvitationResponse>;
-  /**
-   * Set an admin-level verdict on a skill (e.g. MALICIOUS to quarantine it).
-   * Inserts or updates a tracy_skill_scan row with scanner_name='admin'.
-   */
-  setAdminSkillVerdict: SetAdminSkillVerdictResponse;
   setAnswers: SetAnswersResponse;
   /** Replace all members of a developer group and sync to ClickHouse. */
   setDeveloperGroupMembers: DeveloperGroupResult;
@@ -25959,14 +25941,6 @@ export type Mutation_RootSendInvitationArgs = {
   projectIds?: InputMaybe<Array<Scalars['String']['input']>>;
   role: Scalars['String']['input'];
   userEmail: Scalars['String']['input'];
-};
-
-
-/** mutation root */
-export type Mutation_RootSetAdminSkillVerdictArgs = {
-  contextFileId: Scalars['String']['input'];
-  organizationId: Scalars['String']['input'];
-  verdict: Scalars['String']['input'];
 };
 
 

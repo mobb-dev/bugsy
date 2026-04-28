@@ -4,44 +4,45 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import {
-  getQuarantinedHashDir,
-  getQuarantinedTargetPath,
+  COMMITTED_ZIP_REGEX,
   getQuarantineRoot,
-  getStagingDir,
-  STAGING_DIR_REGEX,
+  getQuarantineZipPath,
+  getTmpZipPath,
+  TMP_ZIP_REGEX,
 } from '../paths'
 
 describe('skill_quarantine/paths', () => {
+  const md5 = 'a'.repeat(32)
+  const uuid = 'deadbeef-dead-beef-dead-beefdeadbeef'
+
   it('returns ~/.tracy/quarantine/claude/skills/ as the root', () => {
     expect(getQuarantineRoot()).toBe(
       path.join(homedir(), '.tracy', 'quarantine', 'claude', 'skills')
     )
   })
 
-  it('hash dir nests the md5 under root', () => {
-    const md5 = 'a'.repeat(32)
-    expect(getQuarantinedHashDir(md5)).toBe(path.join(getQuarantineRoot(), md5))
-  })
-
-  it('target path puts origName inside the hash dir', () => {
-    const md5 = 'a'.repeat(32)
-    expect(getQuarantinedTargetPath(md5, 'evil')).toBe(
-      path.join(getQuarantineRoot(), md5, 'evil')
-    )
-    expect(getQuarantinedTargetPath(md5, 'inline.md')).toBe(
-      path.join(getQuarantineRoot(), md5, 'inline.md')
+  it('getQuarantineZipPath puts `<md5>.zip` under the root', () => {
+    expect(getQuarantineZipPath(md5)).toBe(
+      path.join(getQuarantineRoot(), `${md5}.zip`)
     )
   })
 
-  it('staging dir includes md5 + pid + uuid and matches STAGING_DIR_REGEX', () => {
-    const md5 = 'a'.repeat(32)
-    const staging = getStagingDir(md5, 12345, 'some-uuid-goes-here')
-    const basename = path.basename(staging)
-    expect(STAGING_DIR_REGEX.test(basename)).toBe(true)
-    expect(basename.startsWith(`${md5}_tmp_12345_some-uuid`)).toBe(true)
+  it('getTmpZipPath embeds md5 and uuid', () => {
+    expect(getTmpZipPath(md5, uuid)).toBe(
+      path.join(getQuarantineRoot(), `${md5}_tmp_${uuid}.zip`)
+    )
   })
 
-  it('STAGING_DIR_REGEX does not match final hash dirs', () => {
-    expect(STAGING_DIR_REGEX.test('a'.repeat(32))).toBe(false)
+  it('TMP_ZIP_REGEX captures md5 and rejects committed / non-tmp names', () => {
+    const tmp = path.basename(getTmpZipPath(md5, uuid))
+    expect(TMP_ZIP_REGEX.exec(tmp)?.[1]).toBe(md5)
+    expect(TMP_ZIP_REGEX.test(`${md5}.zip`)).toBe(false)
+    expect(TMP_ZIP_REGEX.test(md5)).toBe(false)
+  })
+
+  it('COMMITTED_ZIP_REGEX captures md5 only on `<md5>.zip`', () => {
+    expect(COMMITTED_ZIP_REGEX.exec(`${md5}.zip`)?.[1]).toBe(md5)
+    expect(COMMITTED_ZIP_REGEX.test(`${md5}_tmp_${uuid}.zip`)).toBe(false)
+    expect(COMMITTED_ZIP_REGEX.test(md5)).toBe(false)
   })
 })

@@ -60,7 +60,7 @@ describe('runQuarantineCheckIfNeeded', () => {
     }))
     vi.doMock('../quarantineSkill', () => ({
       quarantineSkill: vi.fn(),
-      sweepOrphanStagingDirs: vi.fn().mockResolvedValue(0),
+      reconcileAndSweep: vi.fn().mockResolvedValue(undefined),
     }))
     const { runQuarantineCheckIfNeeded, __resetQuarantineCheckStateForTests } =
       await loadModule()
@@ -121,7 +121,7 @@ describe('runQuarantineCheckIfNeeded', () => {
     }))
     vi.doMock('../quarantineSkill', () => ({
       quarantineSkill: quarantineSpy,
-      sweepOrphanStagingDirs: vi.fn().mockResolvedValue(0),
+      reconcileAndSweep: vi.fn().mockResolvedValue(undefined),
     }))
     const { runQuarantineCheckIfNeeded, __resetQuarantineCheckStateForTests } =
       await loadModule()

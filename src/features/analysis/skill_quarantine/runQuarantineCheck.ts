@@ -7,7 +7,7 @@ import {
 } from './constants'
 import { enumerateInstalledSkills } from './enumerateInstalledSkills'
 import { Metric } from './metrics'
-import { quarantineSkill, sweepOrphanStagingDirs } from './quarantineSkill'
+import { quarantineSkill, reconcileAndSweep } from './quarantineSkill'
 import { queryVerdicts } from './queryVerdicts'
 
 /**
@@ -63,8 +63,8 @@ export async function runQuarantineCheckIfNeeded(
   const t0 = Date.now()
 
   try {
-    // Step 1: sweep stale staging dirs.
-    await sweepOrphanStagingDirs(log)
+    // Step 1: finish any leftover tmp archives and clean stale partials.
+    await reconcileAndSweep(log)
 
     // Step 2: enumerate installed skills + compute md5s.
     const installed = await enumerateInstalledSkills(cwd)

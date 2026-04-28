@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import { existsSync } from 'node:fs'
 import {
-  lstat,
+  access,
   mkdir,
   readdir,
   readFile,
@@ -13,30 +12,33 @@ import {
 } from 'node:fs/promises'
 import path from 'node:path'
 
-import { move } from 'fs-extra'
+import AdmZip from 'adm-zip'
 
 import type { Logger } from '../../../utils/shared-logger/create-logger'
-import { processContextFiles } from '../context_file_processor'
-import type { ContextFileEntry, SkillGroup } from '../context_file_scanner'
-import { ORPHAN_SWEEP_GRACE_MS } from './constants'
+import { PARTIAL_SWEEP_GRACE_MS } from './constants'
 import { Metric } from './metrics'
 import {
-  getQuarantinedHashDir,
-  getQuarantinedTargetPath,
+  COMMITTED_ZIP_REGEX,
   getQuarantineRoot,
-  getStagingDir,
-  STAGING_DIR_REGEX,
+  getQuarantineZipPath,
+  getTmpZipPath,
+  TMP_ZIP_REGEX,
 } from './paths'
 import type { SkillVerdict } from './queryVerdicts'
 import { renderStub } from './stubTemplate'
 
 /**
- * T-467 — quarantine one skill. Two-phase transactional move, then stub
- * write, then pre-register the stub-md5 presence dir to suppress
- * self-quarantine loops (plan §3.2).
+ * T-467 — quarantine one skill.
  *
- * All branches are idempotent: re-running on an already-quarantined skill
- * short-circuits at the presence check.
+ *   phase 1: build zip in memory, write to `<md5>_tmp_<uuid>.zip`.
+ *   phase 2: replace skillPath with the stub (neutralizes execution).
+ *   phase 3: rename `_tmp_` → `<md5>.zip`. Presence = "fully quarantined".
+ *
+ * `<md5>` matches the server's verdict record (sanitized md5). The zip
+ * holds RAW bytes so false-positive recovery preserves secrets.
+ *
+ * `reconcileAndSweep` finishes crashed runs (leftover `_tmp_` → published
+ * or swept depending on whether it parses as a valid zip).
  */
 
 export type QuarantineSkillParams = {
@@ -51,175 +53,63 @@ export type QuarantineSkillParams = {
 export type QuarantineOutcome =
   | { status: 'quarantined' }
   | { status: 'already_quarantined' }
-  | { status: 'move_error'; phase: 'stage' | 'publish'; err: unknown }
+  | { status: 'zip_error'; err: unknown }
   | { status: 'stub_error'; err: unknown }
+  | { status: 'publish_error'; err: unknown }
 
 export async function quarantineSkill(
   params: QuarantineSkillParams
 ): Promise<QuarantineOutcome> {
   const { skillPath, isFolder, md5, origName, verdict, log } = params
+  const finalZip = getQuarantineZipPath(md5)
 
-  const hashDir = getQuarantinedHashDir(md5)
-
-  // Step 2 (plan): presence check — the parent `{md5}/` dir is the state.
-  // `existsSync` has no real async equivalent; for a single stat it's
-  // fine.
-  if (existsSync(hashDir)) {
+  if (await exists(finalZip)) {
     log.debug(
       { md5, metric: Metric.ALREADY_QUARANTINED },
-      'skill_quarantine: already quarantined, skipping'
+      'skill_quarantine: already quarantined'
     )
     return { status: 'already_quarantined' }
   }
 
-  // Detect symlink before any move I/O. `move()` renames a symlink rather
-  // than its target on same-FS, and `writeFile()` follows symlinks — both
-  // wrong for quarantine purposes. Symlink path takes a distinct fast-path.
-  let isSymlink = false
-  try {
-    const lst = await lstat(skillPath)
-    isSymlink = lst.isSymbolicLink()
-  } catch {
-    // Can't stat — let normal flow proceed; it will fail gracefully if missing.
-  }
-
-  if (isSymlink) {
-    // Symlink fast-path: remove the link and write a stub in its place.
-    // We do NOT move the symlink target — it may live in a shared location
-    // owned by a different project. The symlink is the install-local artifact.
-    const stubContent = renderStub({
-      md5,
-      isFolder,
-      // Symlinks have no quarantine archive; note that in the stub.
-      quarantinedPath: `(symlink at ${skillPath} replaced — original content was not moved)`,
-      origPath: skillPath,
-      summary: verdict.summary,
-      scannerName: verdict.scannerName,
-      scannerVersion: verdict.scannerVersion,
-      scannedAt: verdict.scannedAt,
-    })
-    try {
-      // Create presence marker first; signals quarantine is in effect even
-      // if the stub write below fails halfway.
-      await mkdir(hashDir, { recursive: true })
-      // Write stub to a temp path then rename to atomically replace the symlink,
-      // eliminating the window where neither the symlink nor the stub exists.
-      if (isFolder) {
-        const tmpDir = `${skillPath}.__tracy_tmp__`
-        await mkdir(tmpDir, { recursive: true })
-        await writeFile(path.join(tmpDir, 'SKILL.md'), stubContent, 'utf8')
-        await unlink(skillPath)
-        await rename(tmpDir, skillPath)
-      } else {
-        const tmpFile = `${skillPath}.__tracy_tmp__`
-        await writeFile(tmpFile, stubContent, 'utf8')
-        await unlink(skillPath)
-        await rename(tmpFile, skillPath)
-      }
-    } catch (err) {
-      log.error(
-        { err, md5, skillPath, metric: Metric.STUB_ERROR },
-        'skill_quarantine: symlink stub write failed'
-      )
-      return { status: 'stub_error', err }
-    }
-    await preRegisterStubMd5(skillPath, isFolder, log)
-    log.info(
-      {
-        md5,
-        verdict: verdict.verdict,
-        shape: isFolder ? 'folder' : 'standalone',
-        scanner: verdict.scannerName,
-        scannerVersion: verdict.scannerVersion,
-        metric: Metric.QUARANTINED,
-      },
-      'skill_quarantine: quarantined (symlink)'
-    )
-    return { status: 'quarantined' }
-  }
-
-  const stagingDir = getStagingDir(md5, process.pid, randomUUID())
-  const stagingTarget = path.join(stagingDir, origName)
-  const finalTarget = getQuarantinedTargetPath(md5, origName)
-
-  // Step 3: two-phase transactional move. {md5}/ only becomes visible
-  // once fully published via the atomic rename in phase 2.
-  try {
-    await mkdir(stagingDir, { recursive: true })
-  } catch (err) {
-    log.error(
-      { err, md5, metric: Metric.MOVE_ERROR, phase: 'stage' },
-      'skill_quarantine: failed to create staging dir'
-    )
-    return { status: 'move_error', phase: 'stage', err }
-  }
+  const tmpZip = getTmpZipPath(md5, randomUUID())
 
   try {
-    // fs-extra's move transparently handles cross-filesystem moves
-    // (EXDEV → copy-then-remove), so this one call works for dev-container
-    // setups where workspace and ~/.tracy/ live on different mounts.
-    await move(skillPath, stagingTarget)
-  } catch (err) {
-    // Phase-1 fail: destroy staging; original still at skillPath.
-    await tryRm(stagingDir)
-    log.error(
-      { err, md5, metric: Metric.MOVE_ERROR, phase: 'stage' },
-      'skill_quarantine: phase-1 move failed'
-    )
-    return { status: 'move_error', phase: 'stage', err }
-  }
-
-  try {
-    await rename(stagingDir, hashDir)
-  } catch (err) {
-    // Phase-2 fail: preserve staging for manual recovery (plan §5). The
-    // orphan sweep's grace window keeps it on disk for 10 minutes.
-    log.error(
-      {
-        err,
-        md5,
-        stagingDir,
-        metric: Metric.MOVE_ERROR,
-        phase: 'publish',
-      },
-      'skill_quarantine: phase-2 publish failed; staging dir preserved for manual recovery'
-    )
-    return { status: 'move_error', phase: 'publish', err }
-  }
-
-  // Step 4: recreate skillPath with the stub.
-  const quarantinedPath = finalTarget
-  const stubContent = renderStub({
-    md5,
-    isFolder,
-    quarantinedPath,
-    origPath: skillPath,
-    summary: verdict.summary,
-    scannerName: verdict.scannerName,
-    scannerVersion: verdict.scannerVersion,
-    scannedAt: verdict.scannedAt,
-  })
-
-  try {
+    await mkdir(getQuarantineRoot(), { recursive: true })
+    const zip = new AdmZip()
     if (isFolder) {
-      await mkdir(skillPath, { recursive: true })
-      await writeFile(path.join(skillPath, 'SKILL.md'), stubContent, 'utf8')
+      await addFolderAsync(zip, skillPath, origName)
     } else {
-      await writeFile(skillPath, stubContent, 'utf8')
+      zip.addFile(origName, await readFile(skillPath))
     }
+    await writeFile(tmpZip, zip.toBuffer())
   } catch (err) {
-    // The move has already succeeded; the quarantine is durable. Missing
-    // stub is a UX bug, not a security one — next heartbeat's presence
-    // check will short-circuit since {md5}/ exists.
+    await unlink(tmpZip).catch(ignoreErr)
+    log.error(
+      { err, md5, metric: Metric.ZIP_ERROR },
+      'skill_quarantine: phase-1 zip write failed'
+    )
+    return { status: 'zip_error', err }
+  }
+
+  try {
+    await writeStub(params)
+  } catch (err) {
     log.error(
       { err, md5, skillPath, metric: Metric.STUB_ERROR },
-      'skill_quarantine: stub write failed; quarantine is still in place'
+      'skill_quarantine: stub write failed; tmp zip preserved for reconcile'
     )
     return { status: 'stub_error', err }
   }
 
-  // Step 5: pre-register the stub-md5 dir to suppress self-quarantine loops.
-  await preRegisterStubMd5(skillPath, isFolder, log)
+  try {
+    await rename(tmpZip, finalZip)
+  } catch (err) {
+    log.error(
+      { err, md5, tmpZip, metric: Metric.PUBLISH_ERROR },
+      'skill_quarantine: phase-3 publish failed; reconcile will retry'
+    )
+    return { status: 'publish_error', err }
+  }
 
   log.info(
     {
@@ -236,108 +126,150 @@ export async function quarantineSkill(
 }
 
 /**
- * Compute the stub's md5 (by re-zipping the stub exactly as the uploader
- * would) and create an empty `{stubMd5}/` dir. Next heartbeat's presence
- * check will hit → the stub won't be quarantined as its own malicious
- * artifact. See plan §3.2 step 5 for the known upload/scan-waste tradeoff.
+ * Replace `skillPath` with the rendered stub. Folder skill: rm-rf then
+ * recreate with a single SKILL.md. Standalone: overwrite the .md file.
+ * The folder case isn't atomic across its steps; a crash mid-step leaves
+ * a half-rebuilt directory that the next tick simply re-enumerates over
+ * (the zip is already safely in `_tmp_`).
  */
-async function preRegisterStubMd5(
-  skillPath: string,
-  isFolder: boolean,
-  log: Logger
-): Promise<void> {
-  try {
-    const stubEntries = await gatherStubEntries(skillPath, isFolder)
-    const stubGroup: SkillGroup = {
-      name: path.basename(skillPath).replace(/\.md$/i, ''),
-      root: 'workspace',
-      skillPath,
-      files: stubEntries,
-      isFolder,
-      maxMtimeMs: Date.now(),
-      sessionKey: `quarantine-stub:${skillPath}`,
-    }
-    const { skills } = await processContextFiles([], [stubGroup])
-    if (skills.length === 0) return
-    const stubMd5 = skills[0]!.md5
-    await mkdir(getQuarantinedHashDir(stubMd5), { recursive: true })
-  } catch (err) {
-    // Best-effort — if this fails, the worst case is an extra scan round
-    // next heartbeat (captured in plan §3.2 tradeoff discussion).
-    log.warn(
-      { err, skillPath },
-      'skill_quarantine: failed to pre-register stub md5'
-    )
+async function writeStub(params: QuarantineSkillParams): Promise<void> {
+  const { skillPath, isFolder, md5, verdict } = params
+  const stubContent = renderStub({
+    md5,
+    isFolder,
+    quarantinedZipPath: getQuarantineZipPath(md5),
+    origPath: skillPath,
+    summary: verdict.summary,
+    scannerName: verdict.scannerName,
+    scannerVersion: verdict.scannerVersion,
+    scannedAt: verdict.scannedAt,
+  })
+  if (isFolder) {
+    await rm(skillPath, { recursive: true, force: true })
+    await mkdir(skillPath, { recursive: true })
+    await writeFile(path.join(skillPath, 'SKILL.md'), stubContent, 'utf8')
+  } else {
+    await writeFile(skillPath, stubContent, 'utf8')
   }
 }
 
-async function gatherStubEntries(
-  skillPath: string,
-  isFolder: boolean
-): Promise<ContextFileEntry[]> {
-  const now = Date.now()
-  const target = isFolder ? path.join(skillPath, 'SKILL.md') : skillPath
-  const [st, content] = await Promise.all([
-    stat(target),
-    readFile(target, 'utf8'),
-  ])
-  return [
-    {
-      name: isFolder ? 'SKILL.md' : path.basename(skillPath),
-      path: target,
-      content,
-      sizeBytes: st.size,
-      category: 'skill',
-      mtimeMs: now,
-    },
-  ]
-}
-
 /**
- * T-467 — sweep stale staging dirs at the top of every quarantine check.
- * Any `{md5}_tmp_*` dir older than the grace window is removed; fresher
- * ones are left (they may be in-flight or phase-2-failure preservations).
+ * T-467 — reconcile + sweep pass, run at the top of every check.
+ *
+ * For each `<md5>_tmp_*.zip` in the root:
+ *   - `<md5>.zip` sibling exists → unlink (redundant).
+ *   - parses as a valid zip → rename → `<md5>.zip` (finish a crash
+ *     between phase 2 and phase 3).
+ *   - invalid zip and older than grace → unlink (partial from phase-1
+ *     crash).
+ *   - invalid zip and fresh → leave (may be in-flight).
  */
-export async function sweepOrphanStagingDirs(log: Logger): Promise<number> {
+export async function reconcileAndSweep(log: Logger): Promise<void> {
   const root = getQuarantineRoot()
   let entries: string[]
   try {
     entries = await readdir(root)
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return 0
-    log.warn({ err, root }, 'skill_quarantine: orphan sweep readdir failed')
-    return 0
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return
+    log.warn({ err, root }, 'skill_quarantine: reconcile readdir failed')
+    return
   }
+
+  const committed = new Set(
+    entries
+      .map((e) => COMMITTED_ZIP_REGEX.exec(e)?.[1])
+      .filter((m): m is string => m !== undefined)
+  )
+
   const now = Date.now()
-  let swept = 0
   for (const entry of entries) {
-    if (!STAGING_DIR_REGEX.test(entry)) continue
+    const md5 = TMP_ZIP_REGEX.exec(entry)?.[1]
+    if (md5 === undefined) continue
     const full = path.join(root, entry)
-    let mtimeMs: number
-    try {
-      mtimeMs = (await stat(full)).mtimeMs
-    } catch {
+
+    if (committed.has(md5)) {
+      await unlink(full).catch((err) =>
+        log.warn(
+          { err, path: full, md5 },
+          'skill_quarantine: redundant tmp unlink failed'
+        )
+      )
+      log.info(
+        { path: full, md5, metric: Metric.SWEPT_REDUNDANT_TMP },
+        'skill_quarantine: swept redundant tmp'
+      )
       continue
     }
-    if (now - mtimeMs < ORPHAN_SWEEP_GRACE_MS) continue
+
+    let valid: boolean
     try {
-      await rm(full, { recursive: true, force: true })
-      swept += 1
-      log.info(
-        { path: full, metric: Metric.ORPHAN_SWEPT },
-        'skill_quarantine: orphan swept'
-      )
-    } catch (err) {
-      log.warn({ err, path: full }, 'skill_quarantine: orphan sweep rm failed')
+      new AdmZip(full).getEntries()
+      valid = true
+    } catch {
+      valid = false
     }
+
+    if (valid) {
+      try {
+        await rename(full, getQuarantineZipPath(md5))
+        committed.add(md5)
+        log.info(
+          { path: full, md5, metric: Metric.RECONCILED },
+          'skill_quarantine: reconciled tmp → published'
+        )
+      } catch (err) {
+        log.warn(
+          { err, path: full, md5 },
+          'skill_quarantine: reconcile rename failed'
+        )
+      }
+      continue
+    }
+
+    // Broken archive — probably a crashed writeFile. Give it the grace
+    // window in case another process is mid-write, then sweep.
+    const { mtimeMs } = await stat(full).catch(() => ({ mtimeMs: now }))
+    if (now - mtimeMs < PARTIAL_SWEEP_GRACE_MS) continue
+    await unlink(full).catch((err) =>
+      log.warn({ err, path: full }, 'skill_quarantine: partial unlink failed')
+    )
+    log.info(
+      { path: full, metric: Metric.SWEPT_PARTIAL },
+      'skill_quarantine: swept broken tmp (partial write)'
+    )
   }
-  return swept
 }
 
-async function tryRm(p: string): Promise<void> {
-  try {
-    await rm(p, { recursive: true, force: true })
-  } catch {
-    // best-effort cleanup
+function exists(p: string): Promise<boolean> {
+  return access(p).then(
+    () => true,
+    () => false
+  )
+}
+
+/** Swallow-on-failure handler for best-effort cleanup. */
+function ignoreErr(): void {
+  // intentionally empty
+}
+
+/**
+ * Walk `root` and add every regular file to `zip` with entry paths of the
+ * form `<prefix>/<rel-from-root>`. I/O stays async (readdir/readFile);
+ * AdmZip's `addFile` is an in-memory buffer operation.
+ */
+async function addFolderAsync(
+  zip: AdmZip,
+  root: string,
+  prefix: string
+): Promise<void> {
+  async function walk(dir: string, relPrefix: string): Promise<void> {
+    const entries = await readdir(dir, { withFileTypes: true })
+    for (const e of entries) {
+      const full = path.join(dir, e.name)
+      const rel = path.posix.join(relPrefix, e.name)
+      if (e.isDirectory()) await walk(full, rel)
+      else if (e.isFile()) zip.addFile(rel, await readFile(full))
+    }
   }
+  await walk(root, prefix)
 }

@@ -14,18 +14,24 @@ export const Metric = {
   CHECK_DISABLED_ENV: 'skill_quarantine.check_disabled_env',
   /** Verdict-query call failed. Fail-open. */
   QUERY_ERROR: 'skill_quarantine.query_error',
-  /** Count of skills enumerated in this run (histogram-ish). */
+  /** Count of skills enumerated in this run. */
   SKILLS_CHECKED: 'skill_quarantine.skills_checked',
-  /** A skill was freshly quarantined. Tagged with shape. */
+  /** A skill was freshly quarantined. */
   QUARANTINED: 'skill_quarantine.quarantined',
-  /** Presence check hit; skill already quarantined. */
+  /** Presence check hit (`<md5>.zip` exists); skill already quarantined. */
   ALREADY_QUARANTINED: 'skill_quarantine.already_quarantined',
-  /** Move step failed. Tagged with phase (stage | publish). */
-  MOVE_ERROR: 'skill_quarantine.move_error',
-  /** Stub creation failed after the move succeeded. */
+  /** Zip build or partial→tmp rename failed (phase 1). */
+  ZIP_ERROR: 'skill_quarantine.zip_error',
+  /** Stub write failed (phase 2); tmp preserved for reconcile. */
   STUB_ERROR: 'skill_quarantine.stub_error',
-  /** A stale staging dir was swept. */
-  ORPHAN_SWEPT: 'skill_quarantine.orphan_swept',
+  /** Tmp→published rename failed (phase 3); reconcile will retry. */
+  PUBLISH_ERROR: 'skill_quarantine.publish_error',
+  /** Reconcile published a leftover tmp whose `<md5>.zip` was missing. */
+  RECONCILED: 'skill_quarantine.reconciled',
+  /** Tmp removed because `<md5>.zip` already existed. */
+  SWEPT_REDUNDANT_TMP: 'skill_quarantine.swept_redundant_tmp',
+  /** Stale partial zip swept (older than grace window). */
+  SWEPT_PARTIAL: 'skill_quarantine.swept_partial',
   /** Total run duration including I/O. */
   DURATION_MS: 'skill_quarantine.duration_ms',
 } as const

@@ -7,7 +7,6 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -15,6 +14,8 @@ import path from 'node:path'
 import { test } from 'node:test'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
+
+import AdmZip from 'adm-zip'
 
 import { mobbApi } from './MobbApi.mjs'
 import { npm } from './Npm.mjs'
@@ -76,9 +77,13 @@ function simulateUserActivity(transcriptPath, sessionId, cwd, intervalMs) {
   return () => clearInterval(timer)
 }
 
-function listQuarantined(root) {
+// Layout: `~/.tracy/quarantine/claude/skills/<md5>.zip` is the committed
+// archive; `<md5>_tmp_<uuid>.zip` is an in-flight or crashed write.
+const COMMITTED_ZIP_REGEX = /^[0-9a-f]{32}\.zip$/
+
+function listCommittedZips(root) {
   if (!existsSync(root)) return []
-  return readdirSync(root).filter((e) => !e.includes('_tmp_'))
+  return readdirSync(root).filter((e) => COMMITTED_ZIP_REGEX.test(e))
 }
 
 function listStaging(root) {
@@ -86,11 +91,22 @@ function listStaging(root) {
   return readdirSync(root).filter((e) => e.includes('_tmp_'))
 }
 
+/**
+ * Wait until some `<md5>.zip` in `root` contains an entry whose name
+ * starts with `<skillName>/SKILL.md` (folder skills zip with `origName`
+ * as the top-level prefix). Returns the absolute zip path or null on
+ * timeout.
+ */
 async function waitForQuarantine(root, skillName, deadline) {
   while (Date.now() < deadline) {
-    for (const md5 of listQuarantined(root)) {
-      const dir = path.join(root, md5)
-      if (existsSync(path.join(dir, skillName, 'SKILL.md'))) return dir
+    for (const entry of listCommittedZips(root)) {
+      const full = path.join(root, entry)
+      try {
+        const names = new AdmZip(full).getEntries().map((e) => e.entryName)
+        if (names.includes(`${skillName}/SKILL.md`)) return full
+      } catch {
+        // broken zip — ignore, wait for a valid one to land
+      }
     }
     await sleep(2_000)
   }
@@ -99,7 +115,10 @@ async function waitForQuarantine(root, skillName, deadline) {
 
 test(
   'Claude Code Daemon skill quarantine E2E',
-  { timeout: TEST_TIMEOUT },
+  {
+    timeout: TEST_TIMEOUT,
+    skip: 'triggerSkillScan disabled in tracy_raw_processor pending prod bug investigation — no MALICIOUS verdict means daemon never quarantines',
+  },
   async (t) => {
     await t.before(async () => {
       await mobbApi.init()
@@ -178,33 +197,38 @@ test(
               'claude',
               'skills'
             )
-            const quarantineDir = await waitForQuarantine(
+            const quarantineZip = await waitForQuarantine(
               quarantineRoot,
               'evil',
               Date.now() + QUARANTINE_WAIT
             )
             assert.ok(
-              quarantineDir,
+              quarantineZip,
               'skill should have been quarantined within budget'
             )
 
             // Stub at origPath carries the quarantine notice + MD5 that
-            // matches the quarantine dir name.
+            // matches the archive filename.
             const stub = readFileSync(path.join(evilSkill, 'SKILL.md'), 'utf8')
-            const md5 = path.basename(quarantineDir)
+            const md5 = path.basename(quarantineZip, '.zip')
             assert.match(stub, /^# ⛔ QUARANTINED BY TRACY/)
             assert.match(stub, /mobb-internal/)
             assert.match(stub, new RegExp(md5))
             assert.deepStrictEqual(listStaging(quarantineRoot), [])
 
-            // Recovery round-trip: user moves the quarantined folder back.
-            // Activity keeps flowing so the daemon's next drainTranscript
-            // ticks see the recovered skill and confirm no re-quarantine.
+            // Recovery round-trip: simulate the user running the stub's
+            // `rm -rf <origPath> && unzip <zip> -d <parent>` recipe. The
+            // daemon's next drainTranscript ticks should then see the
+            // recovered skill and not re-quarantine (presence check on
+            // `<md5>.zip` short-circuits).
             rmSync(evilSkill, { recursive: true, force: true })
-            renameSync(path.join(quarantineDir, 'evil'), evilSkill)
+            new AdmZip(quarantineZip).extractAllTo(
+              path.dirname(evilSkill),
+              /* overwrite */ true
+            )
             await sleep(DAEMON_POLL_MS * 5 + 1_000)
             assert.ok(existsSync(path.join(evilSkill, 'SKILL.md')))
-            assert.ok(existsSync(quarantineDir))
+            assert.ok(existsSync(quarantineZip))
             assert.deepStrictEqual(listStaging(quarantineRoot), [])
           } finally {
             stopActivity()

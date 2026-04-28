@@ -1,26 +1,23 @@
 import {
   existsSync,
-  lstatSync,
   mkdirSync,
   readFileSync,
-  symlinkSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs'
 import path from 'node:path'
 
+import AdmZip from 'adm-zip'
 import tmp from 'tmp-promise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Logger } from '../../../../utils/shared-logger/create-logger'
+import { STUB_MARKER } from '../constants'
 import type { SkillVerdict } from '../queryVerdicts'
 
-// Redirect homedir() so quarantine lands under the temp dir.
 let fakeHome: tmp.DirectoryResult
 let workspace: tmp.DirectoryResult
 
-// Minimal Logger-shaped mock that satisfies the shared-logger interface.
-// The quarantine module only calls .info / .warn / .error / .debug in prod,
-// but the interface requires more methods; we stub them as no-ops.
 const silentLog: Logger = {
   info: vi.fn(),
   warn: vi.fn(),
@@ -54,6 +51,17 @@ async function loadModule() {
   return await import('../quarantineSkill')
 }
 
+function rootOf(): string {
+  return path.join(fakeHome.path, '.tracy', 'quarantine', 'claude', 'skills')
+}
+
+/** Produce a valid zip buffer for reconcile tests. */
+function makeZipBuffer(entries: { name: string; content: string }[]): Buffer {
+  const z = new AdmZip()
+  for (const e of entries) z.addFile(e.name, Buffer.from(e.content))
+  return z.toBuffer()
+}
+
 describe('quarantineSkill', () => {
   beforeEach(async () => {
     fakeHome = await tmp.dir({ unsafeCleanup: true })
@@ -67,13 +75,12 @@ describe('quarantineSkill', () => {
     vi.doUnmock('node:os')
   })
 
-  it('moves a folder skill wholesale, writes stub, creates {md5}/ marker', async () => {
+  it('archives a folder skill, replaces original with stub, publishes <md5>.zip', async () => {
     const { quarantineSkill } = await loadModule()
-    // Set up a fake malicious folder skill.
     const skillDir = path.join(workspace.path, '.claude', 'skills', 'evil')
     mkdirSync(skillDir, { recursive: true })
     writeFileSync(path.join(skillDir, 'SKILL.md'), '# evil SKILL')
-    writeFileSync(path.join(skillDir, 'setup.sh'), '#!/bin/sh')
+    writeFileSync(path.join(skillDir, 'setup.sh'), '#!/bin/sh\necho pwned')
 
     const verdict = makeVerdict()
     const result = await quarantineSkill({
@@ -86,31 +93,27 @@ describe('quarantineSkill', () => {
     })
 
     expect(result.status).toBe('quarantined')
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
+
+    const finalZip = path.join(rootOf(), `${verdict.md5}.zip`)
+    expect(existsSync(finalZip)).toBe(true)
+
+    // Raw (unsanitized) content preserved for recovery.
+    const zip = new AdmZip(finalZip)
+    const entries = zip
+      .getEntries()
+      .map((e) => e.entryName)
+      .sort()
+    expect(entries).toContain('evil/SKILL.md')
+    expect(entries).toContain('evil/setup.sh')
+    expect(zip.readAsText('evil/setup.sh')).toBe('#!/bin/sh\necho pwned')
+
+    expect(readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8')).toContain(
+      STUB_MARKER
     )
-    // Hash dir exists with contents.
-    expect(
-      existsSync(path.join(quarantineRoot, verdict.md5, 'evil', 'SKILL.md'))
-    ).toBe(true)
-    expect(
-      existsSync(path.join(quarantineRoot, verdict.md5, 'evil', 'setup.sh'))
-    ).toBe(true)
-    // Original path rebuilt with stub only.
-    expect(existsSync(path.join(skillDir, 'SKILL.md'))).toBe(true)
     expect(existsSync(path.join(skillDir, 'setup.sh'))).toBe(false)
-    const stub = readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8')
-    expect(stub).toContain('⛔ QUARANTINED BY TRACY')
-    // No leftover staging dirs.
-    const entries = (await import('node:fs')).readdirSync(quarantineRoot)
-    expect(entries.filter((e) => e.includes('_tmp_')).length).toBe(0)
   })
 
-  it('moves a standalone .md skill, stub is a file not a dir', async () => {
+  it('archives a standalone .md skill; stub replaces the file', async () => {
     const { quarantineSkill } = await loadModule()
     const skillFile = path.join(
       workspace.path,
@@ -119,7 +122,7 @@ describe('quarantineSkill', () => {
       'inline.md'
     )
     mkdirSync(path.dirname(skillFile), { recursive: true })
-    writeFileSync(skillFile, '# inline malicious')
+    writeFileSync(skillFile, '# inline malicious\nsecret=SUPER_SECRET')
 
     const verdict = makeVerdict({ md5: 'b'.repeat(32) })
     const result = await quarantineSkill({
@@ -130,39 +133,25 @@ describe('quarantineSkill', () => {
       verdict,
       log: silentLog,
     })
+
     expect(result.status).toBe('quarantined')
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
+    const zip = new AdmZip(path.join(rootOf(), `${verdict.md5}.zip`))
+    expect(zip.readAsText('inline.md')).toBe(
+      '# inline malicious\nsecret=SUPER_SECRET'
     )
-    // Quarantined as a file, not a folder.
-    expect(
-      existsSync(path.join(quarantineRoot, verdict.md5, 'inline.md'))
-    ).toBe(true)
-    // Stub is written as a single .md file back at the original path.
-    const stub = readFileSync(skillFile, 'utf8')
-    expect(stub).toContain('⛔ QUARANTINED BY TRACY')
+    expect(readFileSync(skillFile, 'utf8')).toContain(STUB_MARKER)
   })
 
-  it('short-circuits when {md5}/ already exists (already_quarantined)', async () => {
+  it('short-circuits when <md5>.zip already exists', async () => {
     const { quarantineSkill } = await loadModule()
     const skillDir = path.join(workspace.path, '.claude', 'skills', 'evil')
     mkdirSync(skillDir, { recursive: true })
-    writeFileSync(path.join(skillDir, 'SKILL.md'), '# evil')
+    writeFileSync(path.join(skillDir, 'SKILL.md'), '# still-malicious')
 
     const verdict = makeVerdict({ md5: 'c'.repeat(32) })
-    // Pre-create the hash dir to simulate prior quarantine.
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
-    )
-    mkdirSync(path.join(quarantineRoot, verdict.md5), { recursive: true })
+    const root = rootOf()
+    mkdirSync(root, { recursive: true })
+    writeFileSync(path.join(root, `${verdict.md5}.zip`), 'sentinel')
 
     const result = await quarantineSkill({
       skillPath: skillDir,
@@ -172,149 +161,112 @@ describe('quarantineSkill', () => {
       verdict,
       log: silentLog,
     })
+
     expect(result.status).toBe('already_quarantined')
-    // Skill untouched — user control is preserved.
-    expect(existsSync(path.join(skillDir, 'SKILL.md'))).toBe(true)
+    expect(readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8')).toBe(
+      '# still-malicious'
+    )
   })
 
-  it('sweepOrphanStagingDirs removes stale *_tmp_* dirs', async () => {
-    const { sweepOrphanStagingDirs } = await loadModule()
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
-    )
-    mkdirSync(quarantineRoot, { recursive: true })
+  describe('reconcileAndSweep', () => {
+    const backdate = (p: string, minutesAgo: number): void => {
+      const t = (Date.now() - minutesAgo * 60_000) / 1000
+      utimesSync(p, t, t)
+    }
+    // UUIDs use hex + dashes only — what TMP_ZIP_REGEX expects.
+    const uuidA = '00000000-0000-0000-0000-00000000000a'
+    const uuidB = '00000000-0000-0000-0000-00000000000b'
 
-    // Stale tmp
-    const staleMd5 = 'd'.repeat(32)
-    const staleTmp = path.join(quarantineRoot, `${staleMd5}_tmp_1_old`)
-    mkdirSync(staleTmp)
-    // Backdate mtime by 1 hour
-    const oneHourAgo = Date.now() - 60 * 60 * 1000
-    const { utimesSync } = await import('node:fs')
-    utimesSync(staleTmp, oneHourAgo / 1000, oneHourAgo / 1000)
+    it('publishes a valid leftover tmp as `<md5>.zip` when no sibling exists', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      const root = rootOf()
+      mkdirSync(root, { recursive: true })
 
-    // Fresh tmp (recent)
-    const freshMd5 = 'e'.repeat(32)
-    const freshTmp = path.join(quarantineRoot, `${freshMd5}_tmp_2_new`)
-    mkdirSync(freshTmp)
+      const md5 = '3'.repeat(32)
+      const tmpZip = path.join(root, `${md5}_tmp_${uuidA}.zip`)
+      writeFileSync(
+        tmpZip,
+        makeZipBuffer([{ name: 'evil/SKILL.md', content: '# x' }])
+      )
 
-    // Final hash dir (not a tmp, must not be swept)
-    const finalDir = path.join(quarantineRoot, 'f'.repeat(32))
-    mkdirSync(finalDir)
+      await reconcileAndSweep(silentLog)
 
-    const swept = await sweepOrphanStagingDirs(silentLog)
-    expect(swept).toBe(1)
-    expect(existsSync(staleTmp)).toBe(false)
-    expect(existsSync(freshTmp)).toBe(true)
-    expect(existsSync(finalDir)).toBe(true)
-  })
-
-  it('sweepOrphanStagingDirs no-ops when root does not exist', async () => {
-    const { sweepOrphanStagingDirs } = await loadModule()
-    // fakeHome is fresh; .tracy/quarantine/claude/skills/ does not yet exist.
-    expect(await sweepOrphanStagingDirs(silentLog)).toBe(0)
-  })
-
-  it('replaces a symlinked standalone .md skill with a stub file', async () => {
-    const { quarantineSkill } = await loadModule()
-
-    // Real content lives outside the skills directory (shared/external location).
-    const externalDir = path.join(workspace.path, 'external')
-    mkdirSync(externalDir, { recursive: true })
-    const realContent = path.join(externalDir, 'evil-content.md')
-    writeFileSync(realContent, '# real malicious content')
-
-    // Skill is installed as a symlink.
-    const skillsDir = path.join(workspace.path, '.claude', 'skills')
-    mkdirSync(skillsDir, { recursive: true })
-    const symlinkPath = path.join(skillsDir, 'evil.md')
-    symlinkSync(realContent, symlinkPath)
-
-    const verdict = makeVerdict({
-      md5: 'symstandalone'.padEnd(32, '0').slice(0, 32),
-    })
-    const result = await quarantineSkill({
-      skillPath: symlinkPath,
-      isFolder: false,
-      md5: verdict.md5,
-      origName: 'evil.md',
-      verdict,
-      log: silentLog,
+      expect(existsSync(tmpZip)).toBe(false)
+      const finalZip = path.join(root, `${md5}.zip`)
+      expect(existsSync(finalZip)).toBe(true)
+      // Published content is still the same zip bytes.
+      expect(new AdmZip(finalZip).getEntries()[0]!.entryName).toBe(
+        'evil/SKILL.md'
+      )
     })
 
-    expect(result.status).toBe('quarantined')
-    // Symlink is replaced with a real stub file (not a symlink).
-    expect(lstatSync(symlinkPath).isSymbolicLink()).toBe(false)
-    expect(lstatSync(symlinkPath).isFile()).toBe(true)
-    expect(readFileSync(symlinkPath, 'utf8')).toContain(
-      '⛔ QUARANTINED BY TRACY'
-    )
-    // External content is untouched — we don't own it.
-    expect(readFileSync(realContent, 'utf8')).toBe('# real malicious content')
-    // Presence marker created.
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
-    )
-    expect(existsSync(path.join(quarantineRoot, verdict.md5))).toBe(true)
-  })
+    it('unlinks a tmp whose `<md5>.zip` sibling already exists', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      const root = rootOf()
+      mkdirSync(root, { recursive: true })
 
-  it('replaces a symlinked folder skill with a stub directory', async () => {
-    const { quarantineSkill } = await loadModule()
+      const md5 = '4'.repeat(32)
+      const tmpZip = path.join(root, `${md5}_tmp_${uuidA}.zip`)
+      const finalZip = path.join(root, `${md5}.zip`)
+      writeFileSync(tmpZip, makeZipBuffer([{ name: 'x', content: 'x' }]))
+      writeFileSync(finalZip, 'already-published')
 
-    // Real skill folder lives outside the skills directory.
-    const externalDir = path.join(workspace.path, 'external', 'evil-skill')
-    mkdirSync(externalDir, { recursive: true })
-    writeFileSync(path.join(externalDir, 'SKILL.md'), '# real skill')
-    writeFileSync(path.join(externalDir, 'setup.sh'), '#!/bin/sh')
+      await reconcileAndSweep(silentLog)
 
-    // Skill is installed as a symlink to the folder.
-    const skillsDir = path.join(workspace.path, '.claude', 'skills')
-    mkdirSync(skillsDir, { recursive: true })
-    const symlinkPath = path.join(skillsDir, 'evil-skill')
-    symlinkSync(externalDir, symlinkPath)
-
-    const verdict = makeVerdict({
-      md5: 'symfolder000'.padEnd(32, '0').slice(0, 32),
-    })
-    const result = await quarantineSkill({
-      skillPath: symlinkPath,
-      isFolder: true,
-      md5: verdict.md5,
-      origName: 'evil-skill',
-      verdict,
-      log: silentLog,
+      expect(existsSync(tmpZip)).toBe(false)
+      expect(readFileSync(finalZip, 'utf8')).toBe('already-published')
     })
 
-    expect(result.status).toBe('quarantined')
-    // Symlink replaced with a real directory.
-    expect(lstatSync(symlinkPath).isSymbolicLink()).toBe(false)
-    expect(lstatSync(symlinkPath).isDirectory()).toBe(true)
-    expect(readFileSync(path.join(symlinkPath, 'SKILL.md'), 'utf8')).toContain(
-      '⛔ QUARANTINED BY TRACY'
-    )
-    // setup.sh is NOT in the stub dir (only stub SKILL.md is recreated).
-    expect(existsSync(path.join(symlinkPath, 'setup.sh'))).toBe(false)
-    // External folder is untouched.
-    expect(readFileSync(path.join(externalDir, 'SKILL.md'), 'utf8')).toBe(
-      '# real skill'
-    )
-    expect(existsSync(path.join(externalDir, 'setup.sh'))).toBe(true)
-    // Presence marker created.
-    const quarantineRoot = path.join(
-      fakeHome.path,
-      '.tracy',
-      'quarantine',
-      'claude',
-      'skills'
-    )
-    expect(existsSync(path.join(quarantineRoot, verdict.md5))).toBe(true)
+    it('sweeps a stale broken tmp (partial write from crash)', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      const root = rootOf()
+      mkdirSync(root, { recursive: true })
+
+      const md5 = '5'.repeat(32)
+      const broken = path.join(root, `${md5}_tmp_${uuidA}.zip`)
+      writeFileSync(broken, 'not-a-zip-partial-bytes')
+      backdate(broken, 60) // 1h ago
+
+      await reconcileAndSweep(silentLog)
+
+      expect(existsSync(broken)).toBe(false)
+      expect(existsSync(path.join(root, `${md5}.zip`))).toBe(false)
+    })
+
+    it('leaves a fresh broken tmp alone (may be an in-flight write)', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      const root = rootOf()
+      mkdirSync(root, { recursive: true })
+
+      const md5 = '6'.repeat(32)
+      const broken = path.join(root, `${md5}_tmp_${uuidB}.zip`)
+      writeFileSync(broken, 'partial')
+
+      await reconcileAndSweep(silentLog)
+
+      expect(existsSync(broken)).toBe(true)
+      expect(existsSync(path.join(root, `${md5}.zip`))).toBe(false)
+    })
+
+    it('leaves `<md5>.zip` files and unknown entries alone', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      const root = rootOf()
+      mkdirSync(root, { recursive: true })
+
+      const final = path.join(root, `${'7'.repeat(32)}.zip`)
+      const unknown = path.join(root, 'README.txt')
+      writeFileSync(final, 'committed')
+      writeFileSync(unknown, 'notes')
+
+      await reconcileAndSweep(silentLog)
+
+      expect(existsSync(final)).toBe(true)
+      expect(existsSync(unknown)).toBe(true)
+    })
+
+    it('no-ops when the quarantine root does not exist', async () => {
+      const { reconcileAndSweep } = await loadModule()
+      await expect(reconcileAndSweep(silentLog)).resolves.toBeUndefined()
+    })
   })
 })

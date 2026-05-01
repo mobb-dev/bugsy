@@ -455,6 +455,12 @@ query GetPromptSummary($aiBlameAttributionId: String!) {
           level
           justification
         }
+        appliedSkills
+        mcpCalls {
+          mcpServer
+          mcpTool
+          callCount
+        }
       }
     }
     ... on PromptSummaryProcessing {
@@ -648,6 +654,17 @@ mutation CreateCliLogin($publicKey: String!) {
 mutation performCliLogin($loginId: String!) {
   performCliLogin(loginId: $loginId) {
     status
+  }
+}
+
+# T-493 — flip the per-org quarantine toggle for orgs the caller owns.
+# Used by the e2e harness to opt the test org in before asserting that
+# the daemon quarantines a malicious skill. The Hasura update_permissions
+# on the column already restrict this to org owners, so where: {} is safe
+# (it narrows to the caller's owned orgs by construction).
+mutation SetQuarantineEnabled($enabled: Boolean!) {
+  update_organization(where: {}, _set: { quarantineEnabled: $enabled }) {
+    affected_rows
   }
 }
 
@@ -1026,11 +1043,14 @@ mutation ScanSkill($skillUrl: String!) {
 # → fail-open.
 query SkillVerdictsByMd5($md5s: [String!]!) {
   skillVerdictsByMd5(md5s: $md5s) {
-    md5
-    verdict
-    summary
-    scannerName
-    scannerVersion
-    scannedAt
+    quarantineEnabled
+    verdicts {
+      md5
+      verdict
+      summary
+      scannerName
+      scannerVersion
+      scannedAt
+    }
   }
 }

@@ -208,6 +208,7 @@ export async function readNewTranscriptEntries(
   entries: (TranscriptEntry & { _recordId: string })[]
   endByteOffset: number
   resolvedTranscriptPath: string
+  transcriptBytesRead: number
 }> {
   transcriptPath = await resolveTranscriptPath(transcriptPath, sessionId)
 
@@ -223,6 +224,9 @@ export async function readNewTranscriptEntries(
     // Read only the new portion of the file from the cursor byte offset.
     // The offset always points to a line boundary (after a '\n'),
     // so the first line in the read portion is always a complete JSONL entry.
+    // Cap the read to MAX_READ_BYTES to avoid OOM on very large transcripts.
+    // We only consume maxEntries (50) per chunk anyway — excess is re-read next cycle.
+    const MAX_TRANSCRIPT_READ_BYTES = 10 * 1024 * 1024 // 10MB — enough for 50 entries with large tool outputs
     const fh = await open(transcriptPath, 'r')
     try {
       const stat = await fh.stat()
@@ -233,11 +237,26 @@ export async function readNewTranscriptEntries(
           entries: [],
           endByteOffset: fileSize,
           resolvedTranscriptPath: transcriptPath,
+          transcriptBytesRead: 0,
         }
       }
-      const buf = Buffer.alloc(stat.size - cursor.byteOffset)
-      await fh.read(buf, 0, buf.length, cursor.byteOffset)
+      const bytesToRead = Math.min(
+        stat.size - cursor.byteOffset,
+        MAX_TRANSCRIPT_READ_BYTES
+      )
+      const buf = Buffer.alloc(bytesToRead)
+      await fh.read(buf, 0, bytesToRead, cursor.byteOffset)
       content = buf.toString('utf-8')
+      // If we capped the read, drop the last partial line (may be truncated mid-JSON)
+      if (
+        bytesToRead < stat.size - cursor.byteOffset &&
+        !content.endsWith('\n')
+      ) {
+        const lastNewline = content.lastIndexOf('\n')
+        if (lastNewline > 0) {
+          content = content.substring(0, lastNewline + 1)
+        }
+      }
     } finally {
       await fh.close()
     }
@@ -256,12 +275,35 @@ export async function readNewTranscriptEntries(
       'Read transcript file from offset'
     )
   } else {
-    content = await readFile(transcriptPath, 'utf-8')
-    fileSize = Buffer.byteLength(content, 'utf-8')
+    // First run (no cursor) — cap the read to avoid OOM on large transcripts.
+    const MAX_CWD_READ_BYTES = 2 * 1024 * 1024
+    const fh = await open(transcriptPath, 'r')
+    try {
+      const stat = await fh.stat()
+      fileSize = stat.size
+      const bytesToRead = Math.min(stat.size, MAX_CWD_READ_BYTES)
+      const buf = Buffer.alloc(bytesToRead)
+      await fh.read(buf, 0, bytesToRead, 0)
+      content = buf.toString('utf-8')
+      if (bytesToRead < stat.size && !content.endsWith('\n')) {
+        const lastNewline = content.lastIndexOf('\n')
+        if (lastNewline > 0) {
+          content = content.substring(0, lastNewline + 1)
+        }
+      }
+    } finally {
+      await fh.close()
+    }
     lineIndexOffset = 0
     hookLog.debug(
-      { data: { transcriptPath, totalBytes: fileSize } },
-      'Read full transcript file'
+      {
+        data: {
+          transcriptPath,
+          totalBytes: fileSize,
+          cappedBytes: content.length,
+        },
+      },
+      'Read transcript file (first run)'
     )
   }
 
@@ -341,6 +383,7 @@ export async function readNewTranscriptEntries(
     entries: parsed,
     endByteOffset,
     resolvedTranscriptPath: transcriptPath,
+    transcriptBytesRead: content.length,
   }
 }
 
@@ -434,16 +477,17 @@ export async function cleanupStaleSessions(configDir: string): Promise<void> {
     return
   }
 
-  const now = Date.now()
+  const cleanupStart = Date.now()
   const prefix = getSessionFilePrefix()
 
   try {
     const files = await readdir(configDir)
+    const sessionFiles = files.filter(
+      (f) => f.startsWith(prefix) && f.endsWith('.json')
+    )
     let deletedCount = 0
 
-    for (const file of files) {
-      if (!file.startsWith(prefix) || !file.endsWith('.json')) continue
-
+    for (const file of sessionFiles) {
       const filePath = path.join(configDir, file)
       try {
         const content = JSON.parse(await readFile(filePath, 'utf-8')) as Record<
@@ -462,7 +506,7 @@ export async function cleanupStaleSessions(configDir: string): Promise<void> {
           }
         }
 
-        if (newest > 0 && now - newest > STALE_KEY_MAX_AGE_MS) {
+        if (newest > 0 && cleanupStart - newest > STALE_KEY_MAX_AGE_MS) {
           await unlink(filePath)
           deletedCount++
         }
@@ -471,14 +515,22 @@ export async function cleanupStaleSessions(configDir: string): Promise<void> {
       }
     }
 
-    if (deletedCount > 0) {
-      hookLog.info({ data: { deletedCount } }, 'Cleaned up stale session files')
-    }
+    hookLog.info(
+      {
+        heartbeat: true,
+        data: {
+          sessionFileCount: sessionFiles.length,
+          deletedCount,
+          cleanupDurationMs: Date.now() - cleanupStart,
+        },
+      },
+      'Session cleanup'
+    )
   } catch {
     // If we can't list the directory, skip cleanup silently
   }
 
-  configStore.set('claudeCode.lastCleanupAt', now)
+  configStore.set('claudeCode.lastCleanupAt', cleanupStart)
 }
 
 /**
@@ -511,6 +563,7 @@ export async function processTranscript(
     entries: rawEntries,
     endByteOffset,
     resolvedTranscriptPath,
+    transcriptBytesRead,
   } = await log.timed('Read transcript', () =>
     readNewTranscriptEntries(
       input.transcript_path,
@@ -611,16 +664,22 @@ export async function processTranscript(
     }
   })
 
-  const totalRawDataBytes = records.reduce((sum, r) => {
-    return sum + (r.rawData ? JSON.stringify(r.rawData).length : 0)
-  }, 0)
+  let totalRawDataBytes = 0
+  let maxRecordBytes = 0
+  for (const r of records) {
+    const size = r.rawData ? JSON.stringify(r.rawData).length : 0
+    totalRawDataBytes += size
+    if (size > maxRecordBytes) maxRecordBytes = size
+  }
 
   log.info(
     {
       data: {
         count: records.length,
         skipped: filteredOut,
+        transcriptBytesRead,
         rawDataBytes: totalRawDataBytes,
+        maxRecordBytes,
         firstRecordId: records[0]?.recordId,
         lastRecordId: records[records.length - 1]?.recordId,
       },

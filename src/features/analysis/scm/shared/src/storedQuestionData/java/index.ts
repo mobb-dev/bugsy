@@ -6,6 +6,7 @@ import { erroneousStringCompare } from './erroneousStringCompare'
 import { errorConditionWithoutAction } from './errorConditionWithoutAction'
 import { httpOnlyCookie } from './httpOnlyCookie'
 import { insecureCookie } from './insecureCookie'
+import { j2eeGetConnection } from './j2eeGetConnection'
 import { leftoverDebugCode } from './leftoverDebugCode'
 import { localeDependentComparison } from './localeDependentComparison'
 import { logForging } from './logForging'
@@ -47,6 +48,7 @@ const vulnerabilities = {
   [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
   [IssueType_Enum.InsecureCookie as string]: insecureCookie,
   [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
+  [IssueType_Enum.J2EeGetConnection as string]: j2eeGetConnection,
   [IssueType_Enum.LeftoverDebugCode as string]: leftoverDebugCode,
   [IssueType_Enum.ErroneousStringCompare as string]: erroneousStringCompare,
   [IssueType_Enum.DuplicatedStrings as string]: duplicatedStrings,

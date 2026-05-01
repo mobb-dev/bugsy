@@ -116,13 +116,18 @@ describe('scanContextFiles', () => {
       const result = await scanFull('claude-code')
       // Skill folder files land in skillGroups, not regularFiles
       expect(result.skillGroups.some((sg) => sg.name === 's1')).toBe(true)
-      // .claude/commands/*.md has category 'skill' — treated as standalone skill groups
-      expect(result.skillGroups.some((sg) => sg.name === 'cmd')).toBe(true)
-      // agents land in regularFiles with category 'agent-config'
-      const byName = Object.fromEntries(
-        result.regularFiles.map((f) => [f.name, f])
+      // .claude/agents/*.md is intentionally categorized as 'skill' — agents
+      // carry system-prompt instructions and are real attack surface, so they
+      // ride the same scan/quarantine path as skills.
+      expect(result.skillGroups.some((sg) => sg.name === 'agent')).toBe(true)
+      // .claude/commands/*.md is NOT a skill (T-491). It must NOT appear in
+      // skillGroups; it should be uploaded as a regular file with
+      // category 'command' so the server-side scan trigger drops it.
+      expect(result.skillGroups.some((sg) => sg.name === 'cmd')).toBe(false)
+      const cmdRegular = result.regularFiles.find(
+        (f) => f.name === '.claude/commands/cmd.md'
       )
-      expect(byName['.claude/agents/agent.md']?.category).toBe('agent-config')
+      expect(cmdRegular?.category).toBe('command')
     })
 
     it('picks up standalone .md files directly in .claude/skills/', async () => {
@@ -574,12 +579,14 @@ describe('scanContextFiles', () => {
       await writeFile(workspace.path, 'custom-prompts/greet.prompt.md', 'hi')
 
       const result = await scanFull('copilot')
-      const allSkillFiles = result.skillGroups.flatMap((sg) => sg.files)
-      const entry = allSkillFiles.find((f) =>
+      // Prompt files use category 'prompt' since T-491; they go through
+      // regularFiles, not skillGroups, so the server-side scan trigger
+      // skips them.
+      const entry = result.regularFiles.find((f) =>
         f.path.endsWith('custom-prompts/greet.prompt.md')
       )
       expect(entry).toBeDefined()
-      expect(entry!.category).toBe('skill')
+      expect(entry!.category).toBe('prompt')
     })
 
     it('resolves the workspaceFolder variable and home-relative paths', async () => {
@@ -877,7 +884,7 @@ describe('scanContextFiles', () => {
   })
 
   describe('groupSkills behavior', () => {
-    it('copilot .github/prompts/*.prompt.md are treated as standalone skills (no skills/ dir)', async () => {
+    it('copilot .github/prompts/*.prompt.md are categorized as prompt, not as skills (T-491)', async () => {
       await writeFile(
         workspace.path,
         '.github/prompts/my-prompt.prompt.md',
@@ -885,11 +892,16 @@ describe('scanContextFiles', () => {
       )
 
       const result = await scanFull('copilot')
-      expect(result.skillGroups.length).toBe(1)
-      const skill = result.skillGroups[0]!
-      expect(skill.name).toBe('my-prompt.prompt')
-      expect(skill.isFolder).toBe(false)
-      expect(skill.files.length).toBe(1)
+      // Prompts must NOT enter the skill pipeline — that was the upstream
+      // cause of the 2026-04-28 production loop. They go through regular
+      // file upload with category 'prompt' so the server-side trigger drops
+      // them.
+      expect(result.skillGroups.length).toBe(0)
+      const prompt = result.regularFiles.find((f) =>
+        f.path.includes('my-prompt.prompt.md')
+      )
+      expect(prompt).toBeDefined()
+      expect(prompt!.category).toBe('prompt')
     })
 
     it('copilot .github/chatmodes/*.chatmode.md are treated as agent-config (not skills)', async () => {
@@ -907,17 +919,6 @@ describe('scanContextFiles', () => {
       )
       expect(chatmodeFile).toBeDefined()
       expect(chatmodeFile!.category).toBe('agent-config')
-    })
-
-    it('workspace path containing "skills/" does not interfere with copilot skill detection', async () => {
-      // Even if the workspace root itself contains 'skills/' in its path,
-      // copilot prompt files (no skills/ dir in relative path) should be standalone.
-      await writeFile(workspace.path, '.github/prompts/test.prompt.md', 'test')
-
-      const result = await scanFull('copilot')
-      const skill = result.skillGroups.find((sg) => sg.name === 'test.prompt')
-      expect(skill).toBeDefined()
-      expect(skill!.isFolder).toBe(false)
     })
 
     it('folder skill with subfolders has skillPath pointing at skill root, not a subfolder', async () => {

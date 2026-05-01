@@ -191,7 +191,13 @@ export async function sanitizeDataWithCounts(
     if (typeof data === 'string') {
       return sanitizeString(data)
     } else if (Array.isArray(data)) {
-      return Promise.all(data.map((item) => sanitizeRecursive(item)))
+      // Process array items sequentially to avoid memory spikes
+      // from concurrent regex-heavy sanitization passes
+      const results: unknown[] = []
+      for (const item of data) {
+        results.push(await sanitizeRecursive(item))
+      }
+      return results
     } else if (data instanceof Error) {
       return data
     } else if (data instanceof Date) {

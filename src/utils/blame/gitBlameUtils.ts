@@ -8,7 +8,7 @@ import type {
 } from './gitBlameTypes'
 
 // ---------------------------------------------------------------------------
-// Core porcelain parser (private)
+// Core porcelain parser (exported for unit tests; public APIs wrap this)
 // ---------------------------------------------------------------------------
 
 type PorcelainEntry = {
@@ -37,7 +37,7 @@ type PorcelainParseResult = {
 
 const GIT_BLAME_PORCELAIN_ENTRY_LINE_RE = /^([0-9a-f]{40})\s+(\d+)\s+(\d+)/
 
-function parsePorcelainCore(output: string): PorcelainParseResult {
+export function parsePorcelainCore(output: string): PorcelainParseResult {
   const entries: PorcelainEntry[] = []
   const commitMetadata: Record<string, Record<string, string>> = {}
   // Git porcelain emits `filename` once per group (a contiguous run of

@@ -153,7 +153,7 @@ const COPILOT_CUSTOM_LOCATION_SETTINGS = [
   {
     key: 'chat.promptFilesLocations',
     kind: 'glob' as const,
-    category: 'skill' as const,
+    category: 'prompt' as const,
     glob: '**/*.prompt.md',
   },
   {
@@ -518,8 +518,10 @@ async function readCustomLocations(
  *   Standalone: skills/some_skill.md          → one group, isFolder=false
  *   Folder:     skills/another_skill/file.md  → one group per folder, isFolder=true
  *
- * Files NOT under a `skills/` directory (e.g. Copilot `.github/prompts/*.prompt.md`)
- * are always treated as standalone skills regardless of slashes in their path.
+ * Files labeled `category: 'skill'` but NOT under a `skills/` directory are
+ * always treated as standalone skills regardless of slashes in their path.
+ * Slash-commands and Copilot prompts use their own categories (`command`,
+ * `prompt`) and are intentionally excluded from this grouping (T-491).
  *
  * The root (workspace/home) is inferred from baseDir.
  */

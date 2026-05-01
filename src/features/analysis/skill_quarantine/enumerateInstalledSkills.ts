@@ -61,7 +61,7 @@ export async function enumerateInstalledSkills(
 
   return skills.map((s) => {
     // For folder skills, origName is the final path segment (dir name).
-    // For standalone skills, origName is the full filename (sneaky.md).
+    // For standalone skills (.claude/skills/someskill.md), origName is the full filename (e.g. someskill.md).
     const parts = s.group.skillPath.split(/[\\/]/)
     const origName = parts[parts.length - 1] || s.group.name
     return {

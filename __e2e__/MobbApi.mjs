@@ -68,6 +68,35 @@ export class MobbApi {
   }
 
   /**
+   * T-493 — flip the per-org quarantine toggle on every org the caller
+   * owns (`update_permissions` on the column already restricts updates to
+   * owners, so `where: {}` is safe — it narrows server-side). Used by the
+   * quarantine e2e to opt the test org in before asserting on-disk
+   * enforcement.
+   *
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  async setQuarantineEnabled(enabled) {
+    const response = await fetch(CLI_LOCAL_ENV_OVERWRITE.API_URL, {
+      headers: {
+        authorization: `Bearer ${this.#auth0Token}`,
+        'content-type': 'application/json',
+      },
+      body: `{"query":"\\n    mutation SetQuarantineEnabled($enabled: Boolean!) {\\n  update_organization(where: {}, _set: {quarantineEnabled: $enabled}) {\\n    affected_rows\\n  }\\n}\\n    ","variables":{"enabled":${JSON.stringify(enabled)}},"operationName":"SetQuarantineEnabled"}`,
+      method: 'POST',
+    })
+
+    const body = await response.json()
+
+    if (body.errors) {
+      throw new Error(
+        `Failed to set quarantine flag ${JSON.stringify(body, null, 2)}`
+      )
+    }
+  }
+
+  /**
    * Create new Mobb API token.
    *
    * @returns {Promise<string>}

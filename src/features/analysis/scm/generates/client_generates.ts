@@ -485,6 +485,8 @@ export type DeveloperStatistic = {
   humanLinesInMergedPrs: Scalars['Int']['output'];
   lastSeenDate?: Maybe<Scalars['String']['output']>;
   mainModel?: Maybe<Scalars['String']['output']>;
+  mainSurvivalOriginal: Scalars['Int']['output'];
+  mainSurvivalSurvived: Scalars['Int']['output'];
   mainTool?: Maybe<Scalars['String']['output']>;
   totalOriginalLines: Scalars['Int']['output'];
   totalSurvivedLines: Scalars['Int']['output'];
@@ -1043,6 +1045,13 @@ export enum ManifestAction {
   Upgrade = 'upgrade'
 }
 
+export type McpCallData = {
+  __typename?: 'McpCallData';
+  callCount: Scalars['Int']['output'];
+  mcpServer: Scalars['String']['output'];
+  mcpTool: Scalars['String']['output'];
+};
+
 export type McpInfo = {
   __typename?: 'McpInfo';
   ideName?: Maybe<Scalars['String']['output']>;
@@ -1202,11 +1211,13 @@ export enum Projects {
 export type PromptSummaryData = {
   __typename?: 'PromptSummaryData';
   aiImplementationDetails: Array<Scalars['String']['output']>;
+  appliedSkills: Array<Scalars['String']['output']>;
   backAndForthLevel: BackAndForthLevel;
   developersPlan: Array<Scalars['String']['output']>;
   developersPushbacks: Array<Scalars['String']['output']>;
   goal: Scalars['String']['output'];
   importantInstructionsAndDecisions: Array<Scalars['String']['output']>;
+  mcpCalls: Array<McpCallData>;
 };
 
 export type PromptSummaryError = {
@@ -1581,6 +1592,12 @@ export type SkillVerdict = {
   scannerVersion: Scalars['String']['output'];
   summary?: Maybe<Scalars['String']['output']>;
   verdict: Scalars['String']['output'];
+};
+
+export type SkillVerdictsResponse = {
+  __typename?: 'SkillVerdictsResponse';
+  quarantineEnabled: Scalars['Boolean']['output'];
+  verdicts: Array<SkillVerdict>;
 };
 
 export enum SortOrder {
@@ -2013,6 +2030,13 @@ export type TriggerBackfillResult = {
   __typename?: 'TriggerBackfillResult';
   message: Scalars['String']['output'];
   status: Status;
+};
+
+export type TriggerBranchSurvivalInput = {
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  /** When set, survival runs against this branch instead of the repo default (e.g. E2E temp base branch). */
+  targetBranchOverride?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UnstructuredFixExtraContext = {
@@ -20308,6 +20332,8 @@ export enum IssueType_Enum {
   HttpResponseSplitting = 'HTTP_RESPONSE_SPLITTING',
   /** Client use of iframe without sandbox */
   IframeWithoutSandbox = 'IFRAME_WITHOUT_SANDBOX',
+  /** IMPROPER_CERTIFICATE_VALIDATION */
+  ImproperCertificateValidation = 'IMPROPER_CERTIFICATE_VALIDATION',
   /** Improper Exception Handling */
   ImproperExceptionHandling = 'IMPROPER_EXCEPTION_HANDLING',
   /** A resource was defined without proper release */
@@ -20344,6 +20370,8 @@ export enum IssueType_Enum {
   InsecureUuidVersion = 'INSECURE_UUID_VERSION',
   /** Insufficient Logging of Sensitive Operations */
   InsufficientLogging = 'INSUFFICIENT_LOGGING',
+  /** J2EE_GET_CONNECTION */
+  J2EeGetConnection = 'J2EE_GET_CONNECTION',
   /** Client jQuery deprecated symbols */
   JqueryDeprecatedSymbols = 'JQUERY_DEPRECATED_SYMBOLS',
   /** Leftover debug code */
@@ -21110,8 +21138,6 @@ export type Mutation_Root = {
   delete_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
   /** delete data from the table: "tracy.tracy_session_available_skill" */
   delete_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
-  /** delete single row from the table: "tracy.tracy_session_available_skill" */
-  delete_tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
   /** delete single row from the table: "tracy.tracy_session" */
   delete_tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
   /** delete data from the table: "tracy.tracy_session_used_skill" */
@@ -21722,6 +21748,8 @@ export type Mutation_Root = {
   submitVulnerabilityReport: VulnerabilityReportResponse;
   /** execute VOLATILE function "tracy.upsert_tracy_session" which returns "tracy.tracy_session" */
   tracy_upsert_tracy_session: Array<Tracy_Tracy_Session>;
+  /** Admin only. Queue main-branch survival computation for one repo (RabbitMQ). */
+  triggerBranchSurvival: DeveloperGroupResult;
   /**
    * Admin-only: Manually trigger ClickHouse backfill to sync data from PostgreSQL.
    * Used for testing and maintenance purposes.
@@ -22345,8 +22373,6 @@ export type Mutation_Root = {
   update_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
   /** update data of the table: "tracy.tracy_session_available_skill" */
   update_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
-  /** update single row of the table: "tracy.tracy_session_available_skill" */
-  update_tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
   /** update multiples rows of table: "tracy.tracy_session_available_skill" */
   update_tracy_tracy_session_available_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>>>;
   /** update single row of the table: "tracy.tracy_session" */
@@ -23864,13 +23890,6 @@ export type Mutation_RootDelete_Tracy_Tracy_SessionArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Session_Available_SkillArgs = {
   where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootDelete_Tracy_Tracy_Session_Available_Skill_By_PkArgs = {
-  sessionId: Scalars['String']['input'];
-  skillName: Scalars['String']['input'];
 };
 
 
@@ -26010,6 +26029,12 @@ export type Mutation_RootTracy_Upsert_Tracy_SessionArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
   where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+/** mutation root */
+export type Mutation_RootTriggerBranchSurvivalArgs = {
+  input: TriggerBranchSurvivalInput;
 };
 
 
@@ -28201,13 +28226,6 @@ export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_SkillArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Skill_By_PkArgs = {
-  _set?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Set_Input>;
-  pk_columns: Tracy_Tracy_Session_Available_Skill_Pk_Columns_Input;
-};
-
-
-/** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Skill_ManyArgs = {
   updates: Array<Tracy_Tracy_Session_Available_Skill_Updates>;
 };
@@ -28996,6 +29014,7 @@ export type Organization = {
   projects: Array<Project>;
   /** An aggregate relationship */
   projects_aggregate: Project_Aggregate;
+  quarantineEnabled: Scalars['Boolean']['output'];
   /** An array relationship */
   rawIssueTypeBlocklist: Array<Organization_Raw_Issue_Type_Blocklist>;
   /** An aggregate relationship */
@@ -29588,6 +29607,7 @@ export type Organization_Bool_Exp = {
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Bool_Exp>;
   projects?: InputMaybe<Project_Bool_Exp>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Bool_Exp>;
+  quarantineEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Bool_Exp>;
   rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Bool_Exp>;
   remainingUnstableFixes?: InputMaybe<Int_Comparison_Exp>;
@@ -30054,6 +30074,7 @@ export type Organization_Insert_Input = {
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
   projects?: InputMaybe<Project_Arr_Rel_Insert_Input>;
+  quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Arr_Rel_Insert_Input>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   repoContributorSnapshots?: InputMaybe<Repo_Contributor_Snapshot_Arr_Rel_Insert_Input>;
@@ -30422,6 +30443,7 @@ export type Organization_Order_By = {
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Order_By>;
+  quarantineEnabled?: InputMaybe<Order_By>;
   rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Order_By>;
   remainingUnstableFixes?: InputMaybe<Order_By>;
   repoContributorSnapshots_aggregate?: InputMaybe<Repo_Contributor_Snapshot_Aggregate_Order_By>;
@@ -31058,6 +31080,8 @@ export enum Organization_Select_Column {
   /** column name */
   OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
   /** column name */
+  QuarantineEnabled = 'quarantineEnabled',
+  /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
   RoiDevHourlyRate = 'roiDevHourlyRate',
@@ -31094,6 +31118,7 @@ export type Organization_Set_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
+  quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -31218,6 +31243,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
+  quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -31755,6 +31781,8 @@ export enum Organization_Update_Column {
   OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
   /** column name */
   OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
+  /** column name */
+  QuarantineEnabled = 'quarantineEnabled',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
@@ -34526,7 +34554,7 @@ export type Query_Root = {
   scm_submit_fix_request_by_pk?: Maybe<Scm_Submit_Fix_Request>;
   skillScanHealth?: Maybe<Scalars['String']['output']>;
   skillScannerVersion: Scalars['String']['output'];
-  skillVerdictsByMd5: Array<SkillVerdict>;
+  skillVerdictsByMd5: SkillVerdictsResponse;
   /** fetch data from the table: "submit_fix_request" */
   submit_fix_request: Array<Submit_Fix_Request>;
   /** fetch aggregated fields from the table: "submit_fix_request" */
@@ -34623,8 +34651,6 @@ export type Query_Root = {
   tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
-  /** fetch data from the table: "tracy.tracy_session_available_skill" using primary key columns */
-  tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
   /** fetch data from the table: "tracy.tracy_session" using primary key columns */
   tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
   /** fetch data from the table: "tracy.tracy_session_used_skill" */
@@ -37708,12 +37734,6 @@ export type Query_RootTracy_Tracy_Session_Available_Skill_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
   where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
-};
-
-
-export type Query_RootTracy_Tracy_Session_Available_Skill_By_PkArgs = {
-  sessionId: Scalars['String']['input'];
-  skillName: Scalars['String']['input'];
 };
 
 
@@ -43011,8 +43031,6 @@ export type Subscription_Root = {
   tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
-  /** fetch data from the table: "tracy.tracy_session_available_skill" using primary key columns */
-  tracy_tracy_session_available_skill_by_pk?: Maybe<Tracy_Tracy_Session_Available_Skill>;
   /** fetch data from the table in a streaming manner: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill_stream: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch data from the table: "tracy.tracy_session" using primary key columns */
@@ -46663,12 +46681,6 @@ export type Subscription_RootTracy_Tracy_Session_Available_Skill_AggregateArgs =
 };
 
 
-export type Subscription_RootTracy_Tracy_Session_Available_Skill_By_PkArgs = {
-  sessionId: Scalars['String']['input'];
-  skillName: Scalars['String']['input'];
-};
-
-
 export type Subscription_RootTracy_Tracy_Session_Available_Skill_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Tracy_Session_Available_Skill_Stream_Cursor_Input>>;
@@ -48576,6 +48588,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival = {
   organizationId: Scalars['uuid']['output'];
   prId: Scalars['String']['output'];
   repositoryUrl: Scalars['String']['output'];
+  targetBranchHeadSha?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['timestamptz']['output'];
 };
 
@@ -48629,6 +48642,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Bool_Exp = {
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   prId?: InputMaybe<String_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  targetBranchHeadSha?: InputMaybe<String_Comparison_Exp>;
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
 };
 
@@ -48656,6 +48670,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Insert_Input = {
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  targetBranchHeadSha?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -48669,6 +48684,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Max_Fields = {
   organizationId?: Maybe<Scalars['uuid']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
+  targetBranchHeadSha?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -48682,6 +48698,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Min_Fields = {
   organizationId?: Maybe<Scalars['uuid']['output']>;
   prId?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
+  targetBranchHeadSha?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
 };
 
@@ -48711,6 +48728,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Order_By = {
   organizationId?: InputMaybe<Order_By>;
   prId?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
+  targetBranchHeadSha?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
 };
 
@@ -48736,6 +48754,8 @@ export enum Tracy_Ai_Blame_Pr_Main_Survival_Select_Column {
   /** column name */
   RepositoryUrl = 'repositoryUrl',
   /** column name */
+  TargetBranchHeadSha = 'targetBranchHeadSha',
+  /** column name */
   UpdatedAt = 'updatedAt'
 }
 
@@ -48748,6 +48768,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Set_Input = {
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  targetBranchHeadSha?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -48789,6 +48810,7 @@ export type Tracy_Ai_Blame_Pr_Main_Survival_Stream_Cursor_Value_Input = {
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prId?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  targetBranchHeadSha?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -48815,6 +48837,8 @@ export enum Tracy_Ai_Blame_Pr_Main_Survival_Update_Column {
   PrId = 'prId',
   /** column name */
   RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  TargetBranchHeadSha = 'targetBranchHeadSha',
   /** column name */
   UpdatedAt = 'updatedAt'
 }
@@ -51301,6 +51325,7 @@ export type Tracy_Tracy_Session = {
   prUrl?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   startedAt: Scalars['timestamptz']['output'];
+  title?: Maybe<Scalars['String']['output']>;
   tokens: Scalars['Int']['output'];
   totalEvents: Scalars['Int']['output'];
   /** An array relationship */
@@ -51455,8 +51480,8 @@ export type Tracy_Tracy_Session_Available_Skill_Bool_Exp = {
 
 /** unique or primary key constraints on table "tracy.tracy_session_available_skill" */
 export enum Tracy_Tracy_Session_Available_Skill_Constraint {
-  /** unique or primary key constraint on columns "skill_name", "session_id" */
-  TracySessionAvailableSkillPkey = 'tracy_session_available_skill_pkey'
+  /** unique or primary key constraint on columns "context_file_id", "session_id" */
+  UqSessionAvailableSkillContentId = 'uq_session_available_skill_content_id'
 }
 
 /** input type for inserting data into table "tracy.tracy_session_available_skill" */
@@ -51525,12 +51550,6 @@ export type Tracy_Tracy_Session_Available_Skill_Order_By = {
   session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
   sessionId?: InputMaybe<Order_By>;
   skillName?: InputMaybe<Order_By>;
-};
-
-/** primary key columns input for table: tracy.tracy_session_available_skill */
-export type Tracy_Tracy_Session_Available_Skill_Pk_Columns_Input = {
-  sessionId: Scalars['String']['input'];
-  skillName: Scalars['String']['input'];
 };
 
 /** select columns of table "tracy.tracy_session_available_skill" */
@@ -51611,6 +51630,7 @@ export type Tracy_Tracy_Session_Bool_Exp = {
   prUrl?: InputMaybe<String_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
   startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  title?: InputMaybe<String_Comparison_Exp>;
   tokens?: InputMaybe<Int_Comparison_Exp>;
   totalEvents?: InputMaybe<Int_Comparison_Exp>;
   usedSkills?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Bool_Exp>;
@@ -51644,6 +51664,7 @@ export type Tracy_Tracy_Session_Insert_Input = {
   prUrl?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
   tokens?: InputMaybe<Scalars['Int']['input']>;
   totalEvents?: InputMaybe<Scalars['Int']['input']>;
   usedSkills?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Arr_Rel_Insert_Input>;
@@ -51664,6 +51685,7 @@ export type Tracy_Tracy_Session_Max_Fields = {
   prUrl?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
   tokens?: Maybe<Scalars['Int']['output']>;
   totalEvents?: Maybe<Scalars['Int']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
@@ -51682,6 +51704,7 @@ export type Tracy_Tracy_Session_Min_Fields = {
   prUrl?: Maybe<Scalars['String']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
   tokens?: Maybe<Scalars['Int']['output']>;
   totalEvents?: Maybe<Scalars['Int']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
@@ -51723,6 +51746,7 @@ export type Tracy_Tracy_Session_Order_By = {
   prUrl?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
   startedAt?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
   tokens?: InputMaybe<Order_By>;
   totalEvents?: InputMaybe<Order_By>;
   usedSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Used_Skill_Aggregate_Order_By>;
@@ -51757,6 +51781,8 @@ export enum Tracy_Tracy_Session_Select_Column {
   /** column name */
   StartedAt = 'startedAt',
   /** column name */
+  Title = 'title',
+  /** column name */
   Tokens = 'tokens',
   /** column name */
   TotalEvents = 'totalEvents',
@@ -51777,6 +51803,7 @@ export type Tracy_Tracy_Session_Set_Input = {
   prUrl?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
   tokens?: InputMaybe<Scalars['Int']['input']>;
   totalEvents?: InputMaybe<Scalars['Int']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -51823,6 +51850,7 @@ export type Tracy_Tracy_Session_Stream_Cursor_Value_Input = {
   prUrl?: InputMaybe<Scalars['String']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
   tokens?: InputMaybe<Scalars['Int']['input']>;
   totalEvents?: InputMaybe<Scalars['Int']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -51856,6 +51884,8 @@ export enum Tracy_Tracy_Session_Update_Column {
   RepositoryUrl = 'repositoryUrl',
   /** column name */
   StartedAt = 'startedAt',
+  /** column name */
+  Title = 'title',
   /** column name */
   Tokens = 'tokens',
   /** column name */
@@ -60797,7 +60827,7 @@ export type GetPromptSummaryQueryVariables = Exact<{
 }>;
 
 
-export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummaryProcessing', status: Status } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: Array<string>, developersPushbacks: Array<string>, importantInstructionsAndDecisions: Array<string>, backAndForthLevel: { __typename?: 'BackAndForthLevel', level: number, justification: string } } } };
+export type GetPromptSummaryQuery = { __typename?: 'query_root', getPromptSummary: { __typename: 'PromptSummaryError', status: Status, error: string } | { __typename: 'PromptSummaryProcessing', status: Status } | { __typename: 'PromptSummarySuccess', status: Status, summary: { __typename?: 'PromptSummaryData', goal: string, developersPlan: Array<string>, aiImplementationDetails: Array<string>, developersPushbacks: Array<string>, importantInstructionsAndDecisions: Array<string>, appliedSkills: Array<string>, backAndForthLevel: { __typename?: 'BackAndForthLevel', level: number, justification: string }, mcpCalls: Array<{ __typename?: 'McpCallData', mcpServer: string, mcpTool: string, callCount: number }> } } };
 
 export type UploadAiBlameInferencesInitMutationVariables = Exact<{
   sessions: Array<AiBlameInferenceInitInput> | AiBlameInferenceInitInput;
@@ -60874,6 +60904,13 @@ export type PerformCliLoginMutationVariables = Exact<{
 
 
 export type PerformCliLoginMutation = { __typename?: 'mutation_root', performCliLogin?: { __typename?: 'StatusQueryResponse', status: Status } | null };
+
+export type SetQuarantineEnabledMutationVariables = Exact<{
+  enabled: Scalars['Boolean']['input'];
+}>;
+
+
+export type SetQuarantineEnabledMutation = { __typename?: 'mutation_root', update_organization?: { __typename?: 'organization_mutation_response', affected_rows: number } | null };
 
 export type CreateProjectMutationVariables = Exact<{
   organizationId: Scalars['String']['input'];
@@ -60982,7 +61019,7 @@ export type SkillVerdictsByMd5QueryVariables = Exact<{
 }>;
 
 
-export type SkillVerdictsByMd5Query = { __typename?: 'query_root', skillVerdictsByMd5: Array<{ __typename?: 'SkillVerdict', md5: string, verdict: string, summary?: string | null, scannerName: string, scannerVersion: string, scannedAt: string }> };
+export type SkillVerdictsByMd5Query = { __typename?: 'query_root', skillVerdictsByMd5: { __typename?: 'SkillVerdictsResponse', quarantineEnabled: boolean, verdicts: Array<{ __typename?: 'SkillVerdict', md5: string, verdict: string, summary?: string | null, scannerName: string, scannerVersion: string, scannedAt: string }> } };
 
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
@@ -61493,6 +61530,12 @@ export const GetPromptSummaryDocument = `
           level
           justification
         }
+        appliedSkills
+        mcpCalls {
+          mcpServer
+          mcpTool
+          callCount
+        }
       }
     }
     ... on PromptSummaryProcessing {
@@ -61643,6 +61686,13 @@ export const PerformCliLoginDocument = `
     mutation performCliLogin($loginId: String!) {
   performCliLogin(loginId: $loginId) {
     status
+  }
+}
+    `;
+export const SetQuarantineEnabledDocument = `
+    mutation SetQuarantineEnabled($enabled: Boolean!) {
+  update_organization(where: {}, _set: {quarantineEnabled: $enabled}) {
+    affected_rows
   }
 }
     `;
@@ -61829,12 +61879,15 @@ export const ScanSkillDocument = `
 export const SkillVerdictsByMd5Document = `
     query SkillVerdictsByMd5($md5s: [String!]!) {
   skillVerdictsByMd5(md5s: $md5s) {
-    md5
-    verdict
-    summary
-    scannerName
-    scannerVersion
-    scannedAt
+    quarantineEnabled
+    verdicts {
+      md5
+      verdict
+      summary
+      scannerName
+      scannerVersion
+      scannedAt
+    }
   }
 }
     `;
@@ -61926,6 +61979,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     performCliLogin(variables: PerformCliLoginMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<PerformCliLoginMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<PerformCliLoginMutation>({ document: PerformCliLoginDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'performCliLogin', 'mutation', variables);
+    },
+    SetQuarantineEnabled(variables: SetQuarantineEnabledMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SetQuarantineEnabledMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<SetQuarantineEnabledMutation>({ document: SetQuarantineEnabledDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SetQuarantineEnabled', 'mutation', variables);
     },
     CreateProject(variables: CreateProjectMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<CreateProjectMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<CreateProjectMutation>({ document: CreateProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'CreateProject', 'mutation', variables);

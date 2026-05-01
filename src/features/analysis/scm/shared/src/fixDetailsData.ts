@@ -301,6 +301,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'A data member and a function have the same name which can be confusing to the developer.',
     fixInstructions: 'Rename the data member to avoid confusion.',
   },
+  [IssueType_Enum.J2EeGetConnection]: undefined,
   [IssueType_Enum.LeftoverDebugCode]: undefined,
   [IssueType_Enum.UnvalidatedPublicMethodArgument]: undefined,
   [IssueType_Enum.ErroneousStringCompare]: undefined,
@@ -419,4 +420,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.MissingXFrameOptions]: undefined,
   [IssueType_Enum.ImproperValidationOfArrayIndex]: undefined,
   [IssueType_Enum.IncorrectIntegerConversion]: undefined,
+  [IssueType_Enum.ImproperCertificateValidation]: undefined,
 }

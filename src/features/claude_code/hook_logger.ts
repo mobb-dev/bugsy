@@ -14,18 +14,30 @@ const NAMESPACE = 'mobbdev-claude-code-hook-logs'
 let claudeCodeVersion: string | undefined
 
 function buildDdTags(): string {
-  const tags = [`version:${CLI_VERSION}`]
+  const tags = [
+    `version:${CLI_VERSION}`,
+    `platform:claude_code`,
+    `os:${process.platform}`,
+    `arch:${process.arch}`,
+  ]
   if (claudeCodeVersion) {
     tags.push(`cc_version:${claudeCodeVersion}`)
   }
   return tags.join(',')
 }
 
+/**
+ * Guards against recursion when logging a DD-ship failure through the same
+ * logger (which will itself try to ship to DD). Nested onError invocations
+ * fall back to stderr and don't re-enter the logger.
+ */
+let handlingDdError = false
+
 function createHookLogger(opts?: {
   scopePath?: string
   enableConfigstore?: boolean
 }): Logger {
-  return createLogger({
+  const created: Logger = createLogger({
     namespace: NAMESPACE,
     scopePath: opts?.scopePath,
     enableConfigstore: opts?.enableConfigstore,
@@ -36,8 +48,29 @@ function createHookLogger(opts?: {
       ddtags: buildDdTags(),
       hostnameMode: 'hashed',
       unrefTimer: true,
+      onError: (error) => {
+        if (handlingDdError) {
+          // Last-resort trail when the logger itself can't reach DD.
+          // Stderr is swallowed by the daemon but appears in test/dev runs.
+          process.stderr.write(`dd-ship-error: ${String(error)}\n`)
+          return
+        }
+        // Route through the standard logger so the failure lands in
+        // configstore logs and ships to DD itself once connectivity
+        // recovers — uniform with every other warn in the CLI.
+        handlingDdError = true
+        try {
+          created.warn(
+            { err: String(error), source: 'dd-log-shipping' },
+            'Datadog log shipping failed'
+          )
+        } finally {
+          handlingDdError = false
+        }
+      },
     },
   })
+  return created
 }
 
 const logger = createHookLogger()
@@ -87,4 +120,9 @@ export function createScopedHookLog(
   scopedLoggerCache.set(scopePath, scoped)
   activeScopedLoggers.push(scoped)
   return scoped
+}
+
+/** Number of cached scoped loggers (for monitoring unbounded growth). */
+export function getScopedLoggerCount(): number {
+  return scopedLoggerCache.size
 }

@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs'
+import * as os from 'node:os'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
@@ -29,6 +30,7 @@ import {
 import {
   createScopedHookLog,
   flushDdLogs,
+  getScopedLoggerCount,
   hookLog,
   setClaudeCodeVersion,
 } from './hook_logger'
@@ -38,6 +40,7 @@ import {
 } from './install_hook'
 import {
   extractCwdFromTranscript,
+  getCwdCacheSize,
   scanForTranscripts,
   type TranscriptFileInfo,
 } from './transcript_scanner'
@@ -108,6 +111,14 @@ export async function startDaemon(): Promise<void> {
   const sessionCwdCache = new Map<string, { sessionId: string; cwd: string }>()
   let lastContextScanMs = 0
 
+  // NOTE: mirrors machineContext from tracer_ext/src/shared/machineContext.ts.
+  // CLI and extension can't share the same module, so we duplicate the shape.
+  const machineContext = {
+    cpuCount: os.cpus().length,
+    totalMemGB: Math.round(os.totalmem() / 1024 ** 3),
+    nodeVersion: process.version,
+  }
+
   // Main poll loop — awaits sleep between cycles to keep the process alive
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -123,8 +134,16 @@ export async function startDaemon(): Promise<void> {
     // Update heartbeat to prove liveness to shim + peers
     pidFile.updateHeartbeat()
 
+    const cpuBefore = process.cpuUsage()
+    const heapBefore = process.memoryUsage().heapUsed
+    const cycleStart = Date.now()
+    let changedCount = 0
+    let totalUploaded = 0
+    let totalErrors = 0
+
     try {
       const changed = await detectChangedTranscripts(lastSeen)
+      changedCount = changed.length
 
       // Process each changed transcript file sequentially
       for (const transcript of changed) {
@@ -135,12 +154,33 @@ export async function startDaemon(): Promise<void> {
           cleanupConfigDir = path.dirname(sessionStore.path)
         }
 
-        await drainTranscript(
+        // Update heartbeat between transcripts to prevent stale detection
+        // during long sequential drains (A8 vulnerability)
+        pidFile.updateHeartbeat()
+
+        const drainStart = Date.now()
+        const result = await drainTranscript(
           transcript,
           sessionStore,
           gqlClient,
           sessionCwdCache
         )
+        totalUploaded += result.uploaded
+        totalErrors += result.errors
+        if (result.uploaded > 0 || result.errors > 0) {
+          hookLog.info(
+            {
+              data: {
+                sessionId: transcript.sessionId,
+                drainDurationMs: Date.now() - drainStart,
+                chunksProcessed: result.chunks,
+                entriesUploaded: result.uploaded,
+                errors: result.errors,
+              },
+            },
+            'Transcript drained'
+          )
+        }
       }
 
       // Evict sessions whose transcript files have disappeared from lastSeen.
@@ -173,6 +213,31 @@ export async function startDaemon(): Promise<void> {
       // Unexpected error in cycle — log but don't exit for scan/stat errors
       hookLog.warn({ err }, 'Unexpected error in daemon cycle')
     }
+
+    // Emit cycle performance metrics
+    const cpuDelta = process.cpuUsage(cpuBefore)
+    const heapAfter = process.memoryUsage().heapUsed
+    hookLog.info(
+      {
+        heartbeat: true,
+        data: {
+          cycleDurationMs: Date.now() - cycleStart,
+          cpuUserUs: cpuDelta.user,
+          cpuSystemUs: cpuDelta.system,
+          heapDeltaBytes: heapAfter - heapBefore,
+          heapUsedBytes: heapAfter,
+          daemonUptimeMs: Date.now() - startedAt,
+          changedTranscripts: changedCount,
+          activeTranscripts: lastSeen.size,
+          entriesUploaded: totalUploaded,
+          errors: totalErrors,
+          cwdCacheSize: getCwdCacheSize(),
+          scopedLoggerCount: getScopedLoggerCount(),
+          ...machineContext,
+        },
+      },
+      'daemon poll cycle'
+    )
 
     // Wait before next cycle
     await sleep(DAEMON_POLL_INTERVAL_MS)
@@ -233,11 +298,15 @@ async function drainTranscript(
   sessionStore: Configstore,
   gqlClient: Awaited<ReturnType<typeof getAuthenticatedGQLClient>>,
   sessionCwdCache: Map<string, { sessionId: string; cwd: string }>
-): Promise<void> {
+): Promise<{ uploaded: number; errors: number; chunks: number }> {
   const cwd = await extractCwdFromTranscript(transcript.filePath)
   const log = createScopedHookLog(cwd ?? transcript.projectDir, {
     daemonMode: true,
   })
+
+  let totalUploaded = 0
+  let totalErrors = 0
+  let chunks = 0
 
   // Cache cwd so the independent context-file scan loop can reach this session.
   if (cwd) {
@@ -250,6 +319,7 @@ async function drainTranscript(
   try {
     let hasMore = true
     while (hasMore) {
+      chunks++
       const result = await processTranscript(
         {
           session_id: transcript.sessionId,
@@ -262,10 +332,13 @@ async function drainTranscript(
         gqlClient
       )
 
+      totalUploaded += result.entriesUploaded
+
       hasMore =
         result.entriesUploaded + result.entriesSkipped >= DAEMON_CHUNK_SIZE
 
       if (result.errors > 0) {
+        totalErrors += result.errors
         hookLog.warn(
           {
             data: {
@@ -304,6 +377,8 @@ async function drainTranscript(
       )
     })
   }
+
+  return { uploaded: totalUploaded, errors: totalErrors, chunks }
 }
 
 /** Scan transcripts and return only those changed since last cycle. */

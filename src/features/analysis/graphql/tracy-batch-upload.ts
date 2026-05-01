@@ -105,26 +105,32 @@ export async function prepareAndSendTracyRecords(
 
   const records: TracyRecordInput[] = await timedStep(
     `${shouldSanitize ? 'sanitize' : 'serialize'} ${rawRecords.length} records`,
-    () =>
-      Promise.all(
-        rawRecords.map(async (record, index) => {
-          if (record.rawData != null && record.rawDataS3Key == null) {
-            // Only serialize rawData when no pre-uploaded S3 key was provided
-            const serialized = shouldSanitize
-              ? await sanitizeRawData(record.rawData)
-              : JSON.stringify(record.rawData)
-            serializedRawDataByIndex.set(index, serialized)
-          }
-          const { rawData: _rawData, ...rest } = record
-          return {
-            ...rest,
-            repositoryUrl: record.repositoryUrl ?? defaultRepoUrl,
-            computerName,
-            userName,
-            clientVersion: record.clientVersion ?? defaultClientVersion,
-          }
+    async () => {
+      // Process records sequentially to avoid memory spikes from concurrent
+      // regex-heavy sanitization passes or large JSON.stringify buffers.
+      // The daemon is a background process so latency is acceptable;
+      // memory safety is not.
+      const results: TracyRecordInput[] = []
+      for (let index = 0; index < rawRecords.length; index++) {
+        const record = rawRecords[index]!
+        if (record.rawData != null && record.rawDataS3Key == null) {
+          // Only serialize rawData when no pre-uploaded S3 key was provided
+          const serialized = shouldSanitize
+            ? await sanitizeRawData(record.rawData)
+            : JSON.stringify(record.rawData)
+          serializedRawDataByIndex.set(index, serialized)
+        }
+        const { rawData: _rawData, ...rest } = record
+        results.push({
+          ...rest,
+          repositoryUrl: record.repositoryUrl ?? defaultRepoUrl,
+          computerName,
+          userName,
+          clientVersion: record.clientVersion ?? defaultClientVersion,
         })
-      )
+      }
+      return results
+    }
   )
 
   // 2. Upload rawData to S3 for records that have it
@@ -175,36 +181,54 @@ export async function prepareAndSendTracyRecords(
       }
     }
 
-    // Upload all rawData files to S3 concurrently using a single presigned URL
+    // Upload rawData files to S3 with bounded concurrency. Without a cap,
+    // 50 records × their serialized Buffers all in flight simultaneously
+    // caused a 309MB RSS spike in the A4 stress test. With MAX_CONCURRENT
+    // = 5, only 5 Buffers + HTTP streams exist at once — peak RSS drops
+    // proportionally while total throughput is unaffected (latency is not
+    // a concern for background uploads).
+    const MAX_CONCURRENT_S3_UPLOADS = 5
     debug(
-      '[step:s3-upload] Uploading %d files to S3',
-      recordsWithRawData.length
+      '[step:s3-upload] Uploading %d files to S3 (concurrency=%d)',
+      recordsWithRawData.length,
+      MAX_CONCURRENT_S3_UPLOADS
     )
     const s3Start = Date.now()
-    const uploadResults = await Promise.allSettled(
-      recordsWithRawData.map(async (entry) => {
-        const rawDataJson = serializedRawDataByIndex.get(entry.index)
-        if (!rawDataJson) {
-          debug('No serialized rawData for recordId=%s', entry.recordId)
-          return
-        }
 
-        const uploadKey = `${keyPrefix}${entry.recordId}.json`
+    // Chunked Promise.allSettled: process MAX_CONCURRENT at a time
+    const uploadResults: PromiseSettledResult<void>[] = []
+    for (
+      let i = 0;
+      i < recordsWithRawData.length;
+      i += MAX_CONCURRENT_S3_UPLOADS
+    ) {
+      const chunk = recordsWithRawData.slice(i, i + MAX_CONCURRENT_S3_UPLOADS)
+      const chunkResults = await Promise.allSettled(
+        chunk.map(async (entry) => {
+          const rawDataJson = serializedRawDataByIndex.get(entry.index)
+          if (!rawDataJson) {
+            debug('No serialized rawData for recordId=%s', entry.recordId)
+            return
+          }
 
-        await withTimeout(
-          uploadFile({
-            file: Buffer.from(rawDataJson, 'utf-8'),
-            url,
-            uploadKey,
-            uploadFields,
-          }),
-          BATCH_TIMEOUT_MS,
-          `[step:s3-upload] uploadFile ${entry.recordId}`
-        )
+          const uploadKey = `${keyPrefix}${entry.recordId}.json`
 
-        records[entry.index]!.rawDataS3Key = uploadKey
-      })
-    )
+          await withTimeout(
+            uploadFile({
+              file: Buffer.from(rawDataJson, 'utf-8'),
+              url,
+              uploadKey,
+              uploadFields,
+            }),
+            BATCH_TIMEOUT_MS,
+            `[step:s3-upload] uploadFile ${entry.recordId}`
+          )
+
+          records[entry.index]!.rawDataS3Key = uploadKey
+        })
+      )
+      uploadResults.push(...chunkResults)
+    }
 
     debug(
       '[perf] s3-upload %d files: %dms',

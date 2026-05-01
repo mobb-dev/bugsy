@@ -12,6 +12,12 @@ export const Metric = {
   CHECK_TRIGGERED: 'skill_quarantine.check_triggered',
   /** The env-var kill switch skipped the run. */
   CHECK_DISABLED_ENV: 'skill_quarantine.check_disabled_env',
+  /**
+   * T-493 — the per-org opt-in toggle was off for every org the caller
+   * belongs to. Verdict query still ran (useful server-side telemetry);
+   * on-disk enforcement was skipped.
+   */
+  CHECK_DISABLED_ORG: 'skill_quarantine.check_disabled_org',
   /** Verdict-query call failed. Fail-open. */
   QUERY_ERROR: 'skill_quarantine.query_error',
   /** Count of skills enumerated in this run. */
@@ -34,6 +40,17 @@ export const Metric = {
   SWEPT_PARTIAL: 'skill_quarantine.swept_partial',
   /** Total run duration including I/O. */
   DURATION_MS: 'skill_quarantine.duration_ms',
+  /**
+   * T-492 — Stub-md5 sentinel published successfully. The next heartbeat's
+   * presence check will short-circuit re-quarantining our own stub.
+   */
+  STUB_PREREGISTERED: 'skill_quarantine.stub_preregistered',
+  /**
+   * T-492 — Stub-md5 sentinel write failed. Layer 1 (the scanner LLM
+   * recognising stubs) still protects against the loop; this layer is
+   * defense in depth.
+   */
+  STUB_PREREGISTER_ERROR: 'skill_quarantine.stub_preregister_error',
 } as const
 
 export type MetricName = (typeof Metric)[keyof typeof Metric]

@@ -53,14 +53,15 @@ describe('runQuarantineCheckIfNeeded', () => {
     expect(enumerateSpy).not.toHaveBeenCalled()
   })
 
-  it('debounces: second call within 30s is a no-op', async () => {
+  it('debounces: second call within 30s skips verdict fetch and enumeration (mtime unchanged)', async () => {
     const enumerateSpy = vi.fn(async () => [])
     vi.doMock('../enumerateInstalledSkills', () => ({
       enumerateInstalledSkills: enumerateSpy,
     }))
+    const reconcileSpy = vi.fn().mockResolvedValue(undefined)
     vi.doMock('../quarantineSkill', () => ({
       quarantineSkill: vi.fn(),
-      reconcileAndSweep: vi.fn().mockResolvedValue(undefined),
+      reconcileAndSweep: reconcileSpy,
     }))
     const { runQuarantineCheckIfNeeded, __resetQuarantineCheckStateForTests } =
       await loadModule()
@@ -77,7 +78,11 @@ describe('runQuarantineCheckIfNeeded', () => {
       gqlClient: {} as never,
       log: silentLog,
     })
+    // Enumeration is skipped on the 2nd call: mtime pre-check sees unchanged
+    // skill dirs (both stat() calls return 0) and short-circuits before enumeration.
     expect(enumerateSpy).toHaveBeenCalledTimes(1)
+    // The full check (sweep + verdict fetch) only runs once within the debounce window.
+    expect(reconcileSpy).toHaveBeenCalledTimes(1)
   })
 
   it('quarantines only MALICIOUS skills; others are left alone', async () => {
@@ -88,33 +93,33 @@ describe('runQuarantineCheckIfNeeded', () => {
       ]),
     }))
     vi.doMock('../queryVerdicts', () => ({
-      queryVerdicts: vi.fn(
-        async () =>
-          new Map([
-            [
-              'aaa',
-              {
-                md5: 'aaa',
-                verdict: 'MALICIOUS',
-                summary: null,
-                scannerName: 'x',
-                scannerVersion: 'v',
-                scannedAt: 't',
-              },
-            ],
-            [
-              'bbb',
-              {
-                md5: 'bbb',
-                verdict: 'BENIGN',
-                summary: null,
-                scannerName: 'x',
-                scannerVersion: 'v',
-                scannedAt: 't',
-              },
-            ],
-          ])
-      ),
+      queryVerdicts: vi.fn(async () => ({
+        quarantineEnabled: true,
+        verdicts: new Map([
+          [
+            'aaa',
+            {
+              md5: 'aaa',
+              verdict: 'MALICIOUS',
+              summary: null,
+              scannerName: 'x',
+              scannerVersion: 'v',
+              scannedAt: 't',
+            },
+          ],
+          [
+            'bbb',
+            {
+              md5: 'bbb',
+              verdict: 'BENIGN',
+              summary: null,
+              scannerName: 'x',
+              scannerVersion: 'v',
+              scannedAt: 't',
+            },
+          ],
+        ]),
+      })),
     }))
     const quarantineSpy = vi.fn(async () => ({
       status: 'quarantined' as const,
@@ -136,5 +141,50 @@ describe('runQuarantineCheckIfNeeded', () => {
     expect(quarantineSpy).toHaveBeenCalledWith(
       expect.objectContaining({ md5: 'aaa' })
     )
+  })
+
+  // T-493 — when no org the user belongs to has opted in, on-disk
+  // quarantine MUST NOT happen even if the verdict says MALICIOUS.
+  it('skips on-disk quarantine when quarantineEnabled is false', async () => {
+    vi.doMock('../enumerateInstalledSkills', () => ({
+      enumerateInstalledSkills: vi.fn(async () => [
+        { skillPath: '/a', md5: 'aaa', origName: 'a', isFolder: true },
+      ]),
+    }))
+    vi.doMock('../queryVerdicts', () => ({
+      queryVerdicts: vi.fn(async () => ({
+        quarantineEnabled: false,
+        verdicts: new Map([
+          [
+            'aaa',
+            {
+              md5: 'aaa',
+              verdict: 'MALICIOUS',
+              summary: null,
+              scannerName: 'x',
+              scannerVersion: 'v',
+              scannedAt: 't',
+            },
+          ],
+        ]),
+      })),
+    }))
+    const quarantineSpy = vi.fn(async () => ({
+      status: 'quarantined' as const,
+    }))
+    vi.doMock('../quarantineSkill', () => ({
+      quarantineSkill: quarantineSpy,
+      reconcileAndSweep: vi.fn().mockResolvedValue(undefined),
+    }))
+    const { runQuarantineCheckIfNeeded, __resetQuarantineCheckStateForTests } =
+      await loadModule()
+    __resetQuarantineCheckStateForTests()
+    await runQuarantineCheckIfNeeded({
+      sessionId: 's1',
+      cwd: '/cwd',
+      gqlClient: {} as never,
+      log: silentLog,
+    })
+    expect(quarantineSpy).not.toHaveBeenCalled()
   })
 })

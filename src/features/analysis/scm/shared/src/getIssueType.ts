@@ -85,6 +85,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.InformationExposureViaHeaders]:
     'Information Exposure via Headers',
   [IssueType_Enum.DebugEnabled]: 'Debug Enabled',
+  [IssueType_Enum.J2EeGetConnection]: 'J2EE Bad Practices: getConnection()',
   [IssueType_Enum.LeftoverDebugCode]: 'Leftover Debug Code',
   [IssueType_Enum.PoorErrorHandlingEmptyCatchBlock]:
     'Poor Error Handling: Empty Catch Block',
@@ -172,6 +173,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.ImproperValidationOfArrayIndex]:
     'Improper Validation of Array Index',
   [IssueType_Enum.IncorrectIntegerConversion]: 'Incorrect Integer Conversion',
+  [IssueType_Enum.ImproperCertificateValidation]:
+    'Improper Certificate Validation',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

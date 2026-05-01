@@ -117,7 +117,6 @@ test(
   'Claude Code Daemon skill quarantine E2E',
   {
     timeout: TEST_TIMEOUT,
-    skip: 'triggerSkillScan disabled in tracy_raw_processor pending prod bug investigation — no MALICIOUS verdict means daemon never quarantines',
   },
   async (t) => {
     await t.before(async () => {
@@ -159,6 +158,11 @@ test(
               /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
             )[0]
           await mobbApi.cliLogin(loginId)
+          // T-493 — opt the freshly-created test org into quarantine before
+          // the daemon's first verdict poll runs. Default for new orgs is
+          // off; without this the daemon sees `quarantineEnabled: false` and
+          // skips on-disk action.
+          await mobbApi.setQuarantineEnabled(true)
           await daemon.waitForString(/Login to Mobb success/)
 
           // Drop a synthetic Claude Code transcript so the daemon's poll loop

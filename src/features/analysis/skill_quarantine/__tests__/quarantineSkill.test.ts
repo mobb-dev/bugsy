@@ -1,6 +1,7 @@
 import {
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   utimesSync,
   writeFileSync,
@@ -166,6 +167,59 @@ describe('quarantineSkill', () => {
     expect(readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8')).toBe(
       '# still-malicious'
     )
+  })
+
+  // T-492 layer 2 — pre-register the stub's md5 after writeStub so the next
+  // heartbeat can't kick off a second quarantine of our own artifact even
+  // when the LLM flakes and re-flags the stub MALICIOUS.
+  it('pre-registers the stub md5 so a follow-up quarantine of the stub short-circuits', async () => {
+    const { quarantineSkill } = await loadModule()
+    const skillDir = path.join(workspace.path, '.claude', 'skills', 'evil')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(path.join(skillDir, 'SKILL.md'), '# original-malicious')
+
+    const verdict = makeVerdict({ md5: 'd'.repeat(32) })
+    const first = await quarantineSkill({
+      skillPath: skillDir,
+      isFolder: true,
+      md5: verdict.md5,
+      origName: 'evil',
+      verdict,
+      log: silentLog,
+    })
+    expect(first.status).toBe('quarantined')
+
+    // Two zips are now in the quarantine root: the archived original
+    // (`<original-md5>.zip`) and the stub-md5 sentinel.
+    const root = rootOf()
+    const zips = readdirSync(root)
+      .filter((f) => f.endsWith('.zip') && !f.includes('_tmp_'))
+      .sort()
+    expect(zips).toHaveLength(2)
+    const stubZipName = zips.find((n: string) => !n.startsWith(verdict.md5))!
+    const stubMd5 = stubZipName.replace(/\.zip$/, '')
+    expect(stubMd5).not.toBe(verdict.md5)
+
+    // Simulate the next heartbeat re-quarantining the stub (e.g. LLM
+    // flake): same skillPath (now contains the stub) + the stub's md5.
+    // The presence check at the top of `quarantineSkill` MUST hit and
+    // skip without rewriting the stub.
+    const stubVerdict = makeVerdict({ md5: stubMd5 })
+    const second = await quarantineSkill({
+      skillPath: skillDir,
+      isFolder: true,
+      md5: stubMd5,
+      origName: 'evil',
+      verdict: stubVerdict,
+      log: silentLog,
+    })
+    expect(second.status).toBe('already_quarantined')
+
+    // The stub the user sees is unchanged — no second-generation stub
+    // referencing yet another md5 was written.
+    const stubAfter = readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8')
+    expect(stubAfter).toContain(STUB_MARKER)
+    expect(stubAfter).toContain(verdict.md5)
   })
 
   describe('reconcileAndSweep', () => {

@@ -732,6 +732,7 @@ export class GQLClient {
   }
 
   // T-467 — batched verdict lookup for the client-side quarantine check.
+  // T-493 — response is the envelope `{ quarantineEnabled, verdicts }`.
   async skillVerdictsByMd5(md5s: string[]) {
     return await this._clientSdk.SkillVerdictsByMd5({ md5s })
   }

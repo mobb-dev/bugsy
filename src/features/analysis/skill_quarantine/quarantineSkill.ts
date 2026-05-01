@@ -15,6 +15,8 @@ import path from 'node:path'
 import AdmZip from 'adm-zip'
 
 import type { Logger } from '../../../utils/shared-logger/create-logger'
+import { processContextFiles } from '../context_file_processor'
+import type { ContextFileEntry, SkillGroup } from '../context_file_scanner'
 import { PARTIAL_SWEEP_GRACE_MS } from './constants'
 import { Metric } from './metrics'
 import {
@@ -111,6 +113,17 @@ export async function quarantineSkill(
     return { status: 'publish_error', err }
   }
 
+  // T-492 layer 2 — pre-register the just-written stub's md5 so the next
+  // heartbeat's presence check short-circuits before re-quarantining our
+  // own artifact. Failure here is logged but doesn't fail the quarantine:
+  // the scanner-side prompt update (layer 1) is still active.
+  await preregisterStubMd5(params).catch((err) => {
+    log.warn(
+      { err, md5, metric: Metric.STUB_PREREGISTER_ERROR },
+      'skill_quarantine: stub-md5 pre-registration failed; LLM-side recognition remains'
+    )
+  })
+
   log.info(
     {
       md5,
@@ -123,6 +136,76 @@ export async function quarantineSkill(
     'skill_quarantine: quarantined'
   )
   return { status: 'quarantined' }
+}
+
+/**
+ * T-492 — compute the md5 of the just-written stub using the same algorithm
+ * the next heartbeat's enumerator will (sanitize → zip with deterministic
+ * ordering and epoch mtime → md5 of zip bytes), then publish a sentinel zip
+ * at `<stubMd5>.zip`. The next pass through `quarantineSkill` for that md5
+ * hits the existing `await exists(finalZip)` short-circuit and returns
+ * `already_quarantined` without re-writing the stub or zipping anything.
+ *
+ * The sentinel is the stub's own zipped content — it's a real zip, so
+ * `reconcileAndSweep`'s validity check accepts it.
+ */
+async function preregisterStubMd5(
+  params: QuarantineSkillParams
+): Promise<void> {
+  const { skillPath, isFolder, origName, log } = params
+
+  // Mirror what enumerateInstalledSkills + scanContextFiles will hand to
+  // processContextFiles on the next tick, so the md5 we compute here is
+  // exactly the md5 the heartbeat will look up.
+  const stubFilePath = isFolder ? path.join(skillPath, 'SKILL.md') : skillPath
+  const stubEntryName = isFolder ? `${origName}/SKILL.md` : origName
+  const content = await readFile(stubFilePath, 'utf-8')
+  const fileStat = await stat(stubFilePath)
+  const stubFile: ContextFileEntry = {
+    name: stubEntryName,
+    path: stubFilePath,
+    content,
+    sizeBytes: fileStat.size,
+    category: 'skill',
+    mtimeMs: fileStat.mtimeMs,
+  }
+
+  const stubGroup: SkillGroup = {
+    name: isFolder
+      ? origName
+      : path.basename(skillPath, path.extname(skillPath)),
+    root: 'workspace', // unused by md5 computation
+    skillPath,
+    files: [stubFile],
+    isFolder,
+    maxMtimeMs: stubFile.mtimeMs,
+    sessionKey: `stub-preregister:${skillPath}`,
+  }
+
+  const { skills } = await processContextFiles([], [stubGroup])
+  const processed = skills[0]
+  if (!processed) {
+    return
+  }
+  const { md5: stubMd5, zipBuffer } = processed
+  const sentinelPath = getQuarantineZipPath(stubMd5)
+  if (await exists(sentinelPath)) {
+    return
+  }
+
+  const tmpSentinel = getTmpZipPath(stubMd5, randomUUID())
+  try {
+    await writeFile(tmpSentinel, zipBuffer)
+    await rename(tmpSentinel, sentinelPath)
+  } catch (err) {
+    await unlink(tmpSentinel).catch(ignoreErr)
+    throw err
+  }
+
+  log.info(
+    { stubMd5, metric: Metric.STUB_PREREGISTERED },
+    'skill_quarantine: stub md5 pre-registered'
+  )
 }
 
 /**

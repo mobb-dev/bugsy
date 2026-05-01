@@ -167,3 +167,8 @@ export async function extractCwdFromTranscript(
 export function clearCwdCache(): void {
   cwdCache.clear()
 }
+
+/** Number of cached CWD entries (for monitoring unbounded growth). */
+export function getCwdCacheSize(): number {
+  return cwdCache.size
+}

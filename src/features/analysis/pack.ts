@@ -5,7 +5,7 @@ import AdmZip from 'adm-zip'
 import Debug from 'debug'
 import { globby } from 'globby'
 import { isBinary } from 'istextorbinary'
-import { simpleGit } from 'simple-git'
+import { type SimpleGit, simpleGit } from 'simple-git'
 import { parseStringPromise } from 'xml2js'
 import { z } from 'zod'
 
@@ -43,7 +43,7 @@ export async function pack(
   isIncludeAllFiles: boolean = false
 ) {
   debug('pack folder %s', srcDirPath)
-  let git = undefined
+  let git: SimpleGit | undefined
   try {
     git = simpleGit({
       baseDir: srcDirPath,
@@ -98,7 +98,11 @@ export async function pack(
     }
 
     if (fs.lstatSync(absFilepath).size > MCP_MAX_FILE_SIZE) {
-      debug('ignoring %s because the size is > 5MB', filepath)
+      debug(
+        'ignoring %s — file size exceeds MCP_MAX_FILE_SIZE (%d bytes)',
+        filepath,
+        MCP_MAX_FILE_SIZE
+      )
       continue
     }
 

@@ -4,7 +4,7 @@ const EnvVariablesZod = z.object({
   GITLAB_API_TOKEN: z.string().optional(),
   GITHUB_API_TOKEN: z.string().optional(),
   GIT_PROXY_HOST: z.string().optional().default('http://tinyproxy:8888'),
-  MAX_UPLOAD_FILE_SIZE_MB: z.coerce.number().gt(0).default(5),
+  MAX_UPLOAD_FILE_SIZE_MB: z.coerce.number().gt(0).default(2),
   GITHUB_API_CONCURRENCY: z.coerce.number().gt(0).optional().default(10),
 })
 const {

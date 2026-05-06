@@ -33,6 +33,7 @@ query getLastOrgAndNamedProject($email: String!, $projectName: String!) {
       id
       organization {
         id
+        enableV2Fixes
         projects(where: { name: { _eq: $projectName } }) {
           name
           id
@@ -50,6 +51,7 @@ query getLastOrg($email: String!) {
       id
       organization {
         id
+        enableV2Fixes
       }
     }
   }

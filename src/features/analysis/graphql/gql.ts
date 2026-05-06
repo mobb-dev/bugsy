@@ -181,6 +181,9 @@ export class GQLClient {
         getLastOrgRes?.user?.[0]?.userOrganizationsAndUserOrganizationRoles?.[0]
           ?.organization?.id,
       userName: getLastOrgRes?.user?.[0]?.name ?? '',
+      enableV2Fixes:
+        getLastOrgRes?.user?.[0]?.userOrganizationsAndUserOrganizationRoles?.[0]
+          ?.organization?.enableV2Fixes === true,
     }
   }
 
@@ -259,8 +262,13 @@ export class GQLClient {
     const organization = orgAndProjectRes.user
       ?.at(0)
       ?.userOrganizationsAndUserOrganizationRoles.map(
-        (org: { organization: { id: string; projects?: { id: string }[] } }) =>
-          org.organization
+        (org: {
+          organization: {
+            id: string
+            enableV2Fixes: boolean
+            projects?: { id: string }[]
+          }
+        }) => org.organization
       )
       .filter((org: { id: string }) =>
         userDefinedOrganizationId ? org.id === userDefinedOrganizationId : true
@@ -286,6 +294,7 @@ export class GQLClient {
     return {
       organizationId: organization.id,
       projectId: projectId,
+      enableV2Fixes: organization.enableV2Fixes === true,
     }
   }
 

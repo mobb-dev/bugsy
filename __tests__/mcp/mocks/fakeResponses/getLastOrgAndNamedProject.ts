@@ -8,6 +8,7 @@ export const mockGetLastOrgAndNamedProject = {
             id: 'test-user-org-role-id',
             organization: {
               id: 'test-org-id',
+              enableV2Fixes: false,
               projects: [
                 {
                   id: 'test-project-id-1',
@@ -40,6 +41,7 @@ export const mockGetLastOrgAndNamedProjectProjectNotFound = {
             id: 'test-user-org-role-id',
             organization: {
               id: 'test-org-id',
+              enableV2Fixes: false,
               projects: [],
             },
           },

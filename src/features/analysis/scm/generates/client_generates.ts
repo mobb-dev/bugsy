@@ -28958,6 +28958,7 @@ export type Organization = {
   disablePrSessionSummary: Scalars['Boolean']['output'];
   /** This is a deprecated field it should be deleted */
   enableIssueFilter: Scalars['Boolean']['output'];
+  enableV2Fixes: Scalars['Boolean']['output'];
   /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
   generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
@@ -29579,6 +29580,7 @@ export type Organization_Bool_Exp = {
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   disablePrSessionSummary?: InputMaybe<Boolean_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
+  enableV2Fixes?: InputMaybe<Boolean_Comparison_Exp>;
   ghFixerNoFixComments?: InputMaybe<Boolean_Comparison_Exp>;
   githubApps?: InputMaybe<Github_App_Bool_Exp>;
   githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Bool_Exp>;
@@ -30051,6 +30053,7 @@ export type Organization_Insert_Input = {
   disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   githubApps?: InputMaybe<Github_App_Arr_Rel_Insert_Input>;
@@ -30422,6 +30425,7 @@ export type Organization_Order_By = {
   createdOn?: InputMaybe<Order_By>;
   disablePrSessionSummary?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
+  enableV2Fixes?: InputMaybe<Order_By>;
   ghFixerNoFixComments?: InputMaybe<Order_By>;
   githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Order_By>;
   github_app_installation_id?: InputMaybe<Order_By>;
@@ -31052,6 +31056,8 @@ export enum Organization_Select_Column {
   /** column name */
   EnableIssueFilter = 'enableIssueFilter',
   /** column name */
+  EnableV2Fixes = 'enableV2Fixes',
+  /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
   GithubAppInstallationId = 'github_app_installation_id',
@@ -31102,6 +31108,7 @@ export type Organization_Set_Input = {
   disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
@@ -31227,6 +31234,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
+  enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
@@ -31753,6 +31761,8 @@ export enum Organization_Update_Column {
   DisablePrSessionSummary = 'disablePrSessionSummary',
   /** column name */
   EnableIssueFilter = 'enableIssueFilter',
+  /** column name */
+  EnableV2Fixes = 'enableV2Fixes',
   /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
@@ -60704,14 +60714,14 @@ export type GetLastOrgAndNamedProjectQueryVariables = Exact<{
 }>;
 
 
-export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
+export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
 
 export type GetLastOrgQueryVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
 
-export type GetLastOrgQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, name?: string | null, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any } }> }> };
+export type GetLastOrgQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, name?: string | null, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean } }> }> };
 
 export type GetEncryptedApiTokenQueryVariables = Exact<{
   loginId: Scalars['uuid']['input'];
@@ -61182,6 +61192,7 @@ export const GetLastOrgAndNamedProjectDocument = `
       id
       organization {
         id
+        enableV2Fixes
         projects(where: {name: {_eq: $projectName}}) {
           name
           id
@@ -61200,6 +61211,7 @@ export const GetLastOrgDocument = `
       id
       organization {
         id
+        enableV2Fixes
       }
     }
   }

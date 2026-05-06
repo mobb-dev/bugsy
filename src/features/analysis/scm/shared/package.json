@@ -4,5 +4,6 @@
   "main": "./src/index.ts",
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {}
 }

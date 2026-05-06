@@ -531,7 +531,17 @@ export function groupSkills(
   baseDir: string
 ): SkillGroup[] {
   const skillFiles = files.filter((f) => f.category === SKILL_CATEGORY)
-  const folderMap = new Map<string, ContextFileEntry[]>()
+  // Folder skills keyed by `<scanRoot>/skills/<folderName>` (relative to baseDir),
+  // not by `<folderName>` alone — the same skill name can be installed under
+  // multiple scan roots (e.g. cursor's `.agents/skills/` and `.claude/skills/`),
+  // and merging them into one group produces a SkillGroup whose files don't
+  // share a common ancestor. That makes `path.relative(skillPath, file.path)`
+  // emit `..`-prefixed entry names that AdmZip rewrites on serialize, so the
+  // zip md5 drifts per scan (T-496).
+  const folderMap = new Map<
+    string,
+    { folderName: string; files: ContextFileEntry[] }
+  >()
   const standalone: ContextFileEntry[] = []
 
   for (const f of skillFiles) {
@@ -554,12 +564,19 @@ export function groupSkills(
       // Standalone: "some_skill.md"
       standalone.push(f)
     } else {
-      // Folder skill: "another_skill/file.md"
+      // Folder skill: key by full skill-folder relative path so two scan
+      // roots with the same folderName produce two groups, not one.
       const folderName = relFromSkills.slice(0, slashIdx)
-      if (!folderMap.has(folderName)) {
-        folderMap.set(folderName, [])
+      const folderKey = rel.slice(
+        0,
+        skillsIdx + skillsMarker.length + folderName.length
+      )
+      let bucket = folderMap.get(folderKey)
+      if (!bucket) {
+        bucket = { folderName, files: [] }
+        folderMap.set(folderKey, bucket)
       }
-      folderMap.get(folderName)!.push(f)
+      bucket.files.push(f)
     }
   }
 
@@ -567,7 +584,10 @@ export function groupSkills(
 
   for (const f of standalone) {
     const name = path.basename(f.path, path.extname(f.path))
-    const sessionKey = `skill:${root}:${name}`
+    // Disambiguate same-named standalone skills installed under different scan
+    // roots — sessionKey collisions cause cross-folder dedup in the uploader.
+    const standaloneRel = path.relative(baseDir, f.path).replace(/\\/g, '/')
+    const sessionKey = `skill:${root}:${standaloneRel}`
     groups.push({
       name,
       root,
@@ -579,21 +599,10 @@ export function groupSkills(
     })
   }
 
-  for (const [folderName, folderFiles] of folderMap) {
+  for (const [folderKey, { folderName, files: folderFiles }] of folderMap) {
     const maxMtimeMs = Math.max(...folderFiles.map((f) => f.mtimeMs))
-    // Compute skillPath as the root of the skill folder (e.g. "~/.claude/skills/my-skill").
-    // Using path.dirname(folderFiles[0]) would break when the first collected file is
-    // inside a subfolder — we'd get "~/.claude/skills/my-skill/sub" instead, which makes
-    // path.relative() produce "../sibling.md" entries in the zip.
-    const anyFile = folderFiles[0]!
-    const rel = path.relative(baseDir, anyFile.path).replace(/\\/g, '/')
-    const skillsIdx = rel.indexOf('skills/')
-    const skillRelPath = rel.slice(
-      0,
-      skillsIdx + 'skills/'.length + folderName.length
-    )
-    const skillPath = path.join(baseDir, skillRelPath)
-    const sessionKey = `skill:${root}:${folderName}`
+    const skillPath = path.join(baseDir, folderKey)
+    const sessionKey = `skill:${root}:${folderKey}`
     groups.push({
       name: folderName,
       root,

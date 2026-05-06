@@ -239,6 +239,31 @@ describe('Basic Analyze tests', () => {
     }
   )
 
+  it('pack includes all files when isIncludeAllFiles is true (enableV2Fixes)', async () => {
+    const vulnFiles = ['simple/src/main/java/Ping.java']
+
+    // isIncludeAllFiles=false: only vuln-relevant files + manifests
+    const filteredBuffer = await pack(
+      path.join(__dirname, 'assets'),
+      vulnFiles,
+      false
+    )
+    const filteredZip = new AdmZip(filteredBuffer)
+
+    // isIncludeAllFiles=true: all files (simulates enableV2Fixes=true)
+    const fullBuffer = await pack(
+      path.join(__dirname, 'assets'),
+      vulnFiles,
+      true
+    )
+    const fullZip = new AdmZip(fullBuffer)
+
+    // full zip should contain strictly more files than filtered zip
+    expect(fullZip.getEntryCount()).toBeGreaterThan(filteredZip.getEntryCount())
+    // filtered zip should only contain vuln files + manifests
+    expect(filteredZip.getEntryCount()).toBeGreaterThanOrEqual(1)
+  })
+
   it('Direct repo upload from FPR file', async () => {
     const packSpy = vi.spyOn(ourPackModule, 'repackFpr')
     const autoPrAnalysisSpy = vi.spyOn(GQLClient.prototype, 'autoPrAnalysis')

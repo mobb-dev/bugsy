@@ -68,7 +68,9 @@ function _getScanSource(
   ci: boolean
 ): Scan_Source_Enum {
   // `review` comes from the GitHub action https://github.com/mobb-dev/action/blob/b5dfbbe1e005a46b135421c2481a6bff2a3f46fe/review/action.yml#L37
-  if (command === 'review') return Scan_Source_Enum.AutoFixer
+  if (command === 'review') {
+    return Scan_Source_Enum.AutoFixer
+  }
 
   // Based on code samples from grep.app. Not tested on every env.
   const envToCi: [string, Scan_Source_Enum][] = [
@@ -366,11 +368,14 @@ export async function _scan(
     throw new Error('mobbProjectName is required')
   }
 
-  const { projectId, organizationId } =
-    await gqlClient.getLastOrgAndNamedProject({
-      projectName: mobbProjectName,
-      userDefinedOrganizationId: userOrganizationId,
-    })
+  const {
+    projectId,
+    organizationId,
+    enableV2Fixes: orgEnableV2Fixes,
+  } = await gqlClient.getLastOrgAndNamedProject({
+    projectName: mobbProjectName,
+    userDefinedOrganizationId: userOrganizationId,
+  })
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()
@@ -681,7 +686,7 @@ export async function _scan(
         srcPath,
         vulnFiles,
         repoUploadInfo,
-        isIncludeAllFiles: false,
+        isIncludeAllFiles: orgEnableV2Fixes,
       })
       gitInfo = res.gitInfo
       //if the user did not provide a report path, we need to upload the repo with all files and only then call the digest which will actually run an opengrep scan

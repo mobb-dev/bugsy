@@ -162,7 +162,15 @@ export class FileUtils {
     const filePromises = []
 
     for (const item of items) {
-      const fullPath = path.join(dir, item)
+      const safeInput = path.resolve(
+        path.sep,
+        path.normalize(
+          String(dir || '')
+            .replace('\0', '')
+            .replace(/^(\.\.(\/|\\$))+/, '')
+        )
+      )
+      const fullPath = path.join(safeInput, item)
 
       try {
         await fsPromises.access(fullPath, fs.constants.R_OK)
@@ -216,7 +224,9 @@ export class FileUtils {
   }): Promise<string[]> {
     try {
       const stats = fs.statSync(dir)
-      if (!stats.isDirectory()) return []
+      if (!stats.isDirectory()) {
+        return []
+      }
     } catch {
       return []
     }
@@ -229,7 +239,7 @@ export class FileUtils {
       }
       const gitService = new GitService(dir)
       gitMatcher = await gitService.getGitignoreMatcher()
-    } catch (e) {
+    } catch {
       // ignore error – treat as if no gitignore present
     }
     // Process the directory tree (root-level files and subdirectories)
@@ -252,3 +262,5 @@ export class FileUtils {
     }
   }
 }
+
+// Mobb security fix applied: PT https://api-st-stenant.mobb.dev/organization/d9e4bd39-84bb-4849-a4f7-975157cbc999/project/4b0b311e-72e7-49c4-a6a7-7002029661f6/report/5dc12c28-44f9-49f1-8429-513828d658b9/fix/51296daf-fb02-4c00-a488-de45bffd73ca

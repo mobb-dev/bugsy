@@ -11,9 +11,8 @@ import { FileUtils } from '../../src/features/analysis/scm/services/FileUtils'
 import { FileOperations } from '../../src/mcp/services/FileOperations'
 import { EmptyGitRepo, MockRepo, NonGitRepo } from './helpers/MockRepo'
 
-// Mock istextorbinary before the rest of the imports
 vi.mock('istextorbinary', () => ({
-  isBinary: vi.fn(),
+  isBinary: vi.fn(() => false),
 }))
 
 describe('FileUtils', () => {
@@ -564,9 +563,6 @@ describe('FileUtils', () => {
 
       vi.spyOn(FileUtils, 'isExcludedFileType').mockReturnValueOnce(false)
 
-      // Mock isBinary to return false
-      vi.mocked(isBinary).mockReturnValueOnce(false)
-
       expect(FileUtils.shouldPackFile(fullPath)).toBe(true)
     })
 
@@ -695,9 +691,8 @@ dist/
       // Create a complex repository with a real .gitignore file
       const repoPath = await createComplexRepo()
 
-      // Create a real .gitignore file
-      await mockRepo.addFile(
-        '.gitignore',
+      fs.writeFileSync(
+        path.join(repoPath, '.gitignore'),
         `
 # Example gitignore
 node_modules/
@@ -705,7 +700,8 @@ dist/
 *.log
 **/*.min.js
 vendor/
-`
+`,
+        'utf8'
       )
 
       // Mock shouldPackFile to include only source files
@@ -914,7 +910,9 @@ vendor/
       const repoPath = repo.getRepoPath()!
       // Remove .gitignore created by helper
       const gitignorePath = path.join(repoPath, '.gitignore')
-      if (fs.existsSync(gitignorePath)) fs.unlinkSync(gitignorePath)
+      if (fs.existsSync(gitignorePath)) {
+        fs.unlinkSync(gitignorePath)
+      }
 
       // Add files under an excluded root directory (node_modules) and a normal directory
       await repo.addFiles([
@@ -946,7 +944,9 @@ vendor/
 
       // Remove .gitignore created by helper
       const gitignorePath = path.join(repoPath, '.gitignore')
-      if (fs.existsSync(gitignorePath)) fs.unlinkSync(gitignorePath)
+      if (fs.existsSync(gitignorePath)) {
+        fs.unlinkSync(gitignorePath)
+      }
 
       await repo.addFiles([
         {

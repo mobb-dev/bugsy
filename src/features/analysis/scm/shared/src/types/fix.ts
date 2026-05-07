@@ -75,6 +75,16 @@ export const FixRatingZ = z.object({
   }),
 })
 
+export const IssueRatingZ = z.object({
+  voteScore: z.number(),
+  comment: z.string().nullable().default(null),
+  updatedDate: z.string().nullable(),
+  user: z.object({
+    email: z.string(),
+    name: z.string(),
+  }),
+})
+
 const IssueSharedStateZ = z
   .object({
     id: z.string(),
@@ -86,6 +96,7 @@ const IssueSharedStateZ = z
         url: z.string(),
       })
     ),
+    issueRatings: z.array(IssueRatingZ).default([]),
   })
   .nullable()
 

@@ -2199,6 +2199,11 @@ export type VoteOnFixResponse = {
   status: Status;
 };
 
+export type VoteOnIssueResponse = {
+  __typename?: 'VoteOnIssueResponse';
+  status: Status;
+};
+
 export type VulnReportFix = {
   __typename?: 'VulnReportFix';
   effortToApplyFix?: Maybe<Scalars['String']['output']>;
@@ -21188,6 +21193,10 @@ export type Mutation_Root = {
   delete_vulnerability_report_issue_code_node?: Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_code_node" */
   delete_vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
+  /** delete data from the table: "vulnerability_report_issue_rating" */
+  delete_vulnerability_report_issue_rating?: Maybe<Vulnerability_Report_Issue_Rating_Mutation_Response>;
+  /** delete single row from the table: "vulnerability_report_issue_rating" */
+  delete_vulnerability_report_issue_rating_by_pk?: Maybe<Vulnerability_Report_Issue_Rating>;
   /** delete data from the table: "vulnerability_report_issue_shared_state" */
   delete_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
   /** delete single row from the table: "vulnerability_report_issue_shared_state" */
@@ -21696,6 +21705,10 @@ export type Mutation_Root = {
   insert_vulnerability_report_issue_code_node_one?: Maybe<Vulnerability_Report_Issue_Code_Node>;
   /** insert a single row into the table: "vulnerability_report_issue" */
   insert_vulnerability_report_issue_one?: Maybe<Vulnerability_Report_Issue>;
+  /** insert data into the table: "vulnerability_report_issue_rating" */
+  insert_vulnerability_report_issue_rating?: Maybe<Vulnerability_Report_Issue_Rating_Mutation_Response>;
+  /** insert a single row into the table: "vulnerability_report_issue_rating" */
+  insert_vulnerability_report_issue_rating_one?: Maybe<Vulnerability_Report_Issue_Rating>;
   /** insert data into the table: "vulnerability_report_issue_shared_state" */
   insert_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_report_issue_shared_state" */
@@ -22449,6 +22462,12 @@ export type Mutation_Root = {
   update_vulnerability_report_issue_code_node_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Code_Node_Mutation_Response>>>;
   /** update multiples rows of table: "vulnerability_report_issue" */
   update_vulnerability_report_issue_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Mutation_Response>>>;
+  /** update data of the table: "vulnerability_report_issue_rating" */
+  update_vulnerability_report_issue_rating?: Maybe<Vulnerability_Report_Issue_Rating_Mutation_Response>;
+  /** update single row of the table: "vulnerability_report_issue_rating" */
+  update_vulnerability_report_issue_rating_by_pk?: Maybe<Vulnerability_Report_Issue_Rating>;
+  /** update multiples rows of table: "vulnerability_report_issue_rating" */
+  update_vulnerability_report_issue_rating_many?: Maybe<Array<Maybe<Vulnerability_Report_Issue_Rating_Mutation_Response>>>;
   /** update data of the table: "vulnerability_report_issue_shared_state" */
   update_vulnerability_report_issue_shared_state?: Maybe<Vulnerability_Report_Issue_Shared_State_Mutation_Response>;
   /** update single row of the table: "vulnerability_report_issue_shared_state" */
@@ -22506,6 +22525,7 @@ export type Mutation_Root = {
   uploadTracyRecords: TracyBatchUploadResponse;
   userSignedUp?: Maybe<StatusQueryResponse>;
   voteOnFix?: Maybe<VoteOnFixResponse>;
+  voteOnIssue?: Maybe<VoteOnIssueResponse>;
 };
 
 
@@ -24040,6 +24060,18 @@ export type Mutation_RootDelete_Vulnerability_Report_Issue_Code_NodeArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Vulnerability_Report_Issue_Code_Node_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_RatingArgs = {
+  where: Vulnerability_Report_Issue_Rating_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Vulnerability_Report_Issue_Rating_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -25764,6 +25796,20 @@ export type Mutation_RootInsert_Vulnerability_Report_Issue_Code_Node_OneArgs = {
 export type Mutation_RootInsert_Vulnerability_Report_Issue_OneArgs = {
   object: Vulnerability_Report_Issue_Insert_Input;
   on_conflict?: InputMaybe<Vulnerability_Report_Issue_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_RatingArgs = {
+  objects: Array<Vulnerability_Report_Issue_Rating_Insert_Input>;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Rating_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Vulnerability_Report_Issue_Rating_OneArgs = {
+  object: Vulnerability_Report_Issue_Rating_Insert_Input;
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Rating_On_Conflict>;
 };
 
 
@@ -28494,6 +28540,28 @@ export type Mutation_RootUpdate_Vulnerability_Report_Issue_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_RatingArgs = {
+  _inc?: InputMaybe<Vulnerability_Report_Issue_Rating_Inc_Input>;
+  _set?: InputMaybe<Vulnerability_Report_Issue_Rating_Set_Input>;
+  where: Vulnerability_Report_Issue_Rating_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Rating_By_PkArgs = {
+  _inc?: InputMaybe<Vulnerability_Report_Issue_Rating_Inc_Input>;
+  _set?: InputMaybe<Vulnerability_Report_Issue_Rating_Set_Input>;
+  pk_columns: Vulnerability_Report_Issue_Rating_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Vulnerability_Report_Issue_Rating_ManyArgs = {
+  updates: Array<Vulnerability_Report_Issue_Rating_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Vulnerability_Report_Issue_Shared_StateArgs = {
   _set?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Set_Input>;
   where: Vulnerability_Report_Issue_Shared_State_Bool_Exp;
@@ -28663,6 +28731,16 @@ export type Mutation_RootVoteOnFixArgs = {
   fixId: Scalars['String']['input'];
   fixRatingTag?: InputMaybe<Scalars['String']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  projectId: Scalars['String']['input'];
+  voteScore: Scalars['Int']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootVoteOnIssueArgs = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  isArchived?: InputMaybe<Scalars['Boolean']['input']>;
+  issueId: Scalars['String']['input'];
   projectId: Scalars['String']['input'];
   voteScore: Scalars['Int']['input'];
 };
@@ -34820,6 +34898,12 @@ export type Query_Root = {
   vulnerability_report_issue_code_node_aggregate: Vulnerability_Report_Issue_Code_Node_Aggregate;
   /** fetch data from the table: "vulnerability_report_issue_code_node" using primary key columns */
   vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
+  /** fetch data from the table: "vulnerability_report_issue_rating" */
+  vulnerability_report_issue_rating: Array<Vulnerability_Report_Issue_Rating>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_rating" */
+  vulnerability_report_issue_rating_aggregate: Vulnerability_Report_Issue_Rating_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_rating" using primary key columns */
+  vulnerability_report_issue_rating_by_pk?: Maybe<Vulnerability_Report_Issue_Rating>;
   /** fetch data from the table: "vulnerability_report_issue_shared_state" */
   vulnerability_report_issue_shared_state: Array<Vulnerability_Report_Issue_Shared_State>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_shared_state" */
@@ -38416,6 +38500,29 @@ export type Query_RootVulnerability_Report_Issue_Code_Node_AggregateArgs = {
 
 
 export type Query_RootVulnerability_Report_Issue_Code_Node_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootVulnerability_Report_Issue_RatingArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Rating_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+
+export type Query_RootVulnerability_Report_Issue_Rating_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -43259,6 +43366,14 @@ export type Subscription_Root = {
   vulnerability_report_issue_code_node_by_pk?: Maybe<Vulnerability_Report_Issue_Code_Node>;
   /** fetch data from the table in a streaming manner: "vulnerability_report_issue_code_node" */
   vulnerability_report_issue_code_node_stream: Array<Vulnerability_Report_Issue_Code_Node>;
+  /** fetch data from the table: "vulnerability_report_issue_rating" */
+  vulnerability_report_issue_rating: Array<Vulnerability_Report_Issue_Rating>;
+  /** fetch aggregated fields from the table: "vulnerability_report_issue_rating" */
+  vulnerability_report_issue_rating_aggregate: Vulnerability_Report_Issue_Rating_Aggregate;
+  /** fetch data from the table: "vulnerability_report_issue_rating" using primary key columns */
+  vulnerability_report_issue_rating_by_pk?: Maybe<Vulnerability_Report_Issue_Rating>;
+  /** fetch data from the table in a streaming manner: "vulnerability_report_issue_rating" */
+  vulnerability_report_issue_rating_stream: Array<Vulnerability_Report_Issue_Rating>;
   /** fetch data from the table: "vulnerability_report_issue_shared_state" */
   vulnerability_report_issue_shared_state: Array<Vulnerability_Report_Issue_Shared_State>;
   /** fetch aggregated fields from the table: "vulnerability_report_issue_shared_state" */
@@ -47554,6 +47669,36 @@ export type Subscription_RootVulnerability_Report_Issue_Code_Node_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Vulnerability_Report_Issue_Code_Node_Stream_Cursor_Input>>;
   where?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_RatingArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Rating_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Rating_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootVulnerability_Report_Issue_Rating_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Vulnerability_Report_Issue_Rating_Stream_Cursor_Input>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
 };
 
 
@@ -58860,6 +59005,370 @@ export type Vulnerability_Report_Issue_Prepend_Input = {
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
+/** columns and relationships of "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating = {
+  __typename?: 'vulnerability_report_issue_rating';
+  comment?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  ratedByUserId: Scalars['uuid']['output'];
+  /** An object relationship */
+  sharedState: Vulnerability_Report_Issue_Shared_State;
+  updatedDate: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  user: User;
+  voteScore: Scalars['smallint']['output'];
+  vulnerabilityReportIssueRatingTag?: Maybe<Scalars['String']['output']>;
+  vulnerabilityReportIssueSharedStateId: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Aggregate = {
+  __typename?: 'vulnerability_report_issue_rating_aggregate';
+  aggregate?: Maybe<Vulnerability_Report_Issue_Rating_Aggregate_Fields>;
+  nodes: Array<Vulnerability_Report_Issue_Rating>;
+};
+
+export type Vulnerability_Report_Issue_Rating_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Vulnerability_Report_Issue_Rating_Aggregate_Bool_Exp_Count>;
+};
+
+export type Vulnerability_Report_Issue_Rating_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Aggregate_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_aggregate_fields';
+  avg?: Maybe<Vulnerability_Report_Issue_Rating_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Vulnerability_Report_Issue_Rating_Max_Fields>;
+  min?: Maybe<Vulnerability_Report_Issue_Rating_Min_Fields>;
+  stddev?: Maybe<Vulnerability_Report_Issue_Rating_Stddev_Fields>;
+  stddev_pop?: Maybe<Vulnerability_Report_Issue_Rating_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Vulnerability_Report_Issue_Rating_Stddev_Samp_Fields>;
+  sum?: Maybe<Vulnerability_Report_Issue_Rating_Sum_Fields>;
+  var_pop?: Maybe<Vulnerability_Report_Issue_Rating_Var_Pop_Fields>;
+  var_samp?: Maybe<Vulnerability_Report_Issue_Rating_Var_Samp_Fields>;
+  variance?: Maybe<Vulnerability_Report_Issue_Rating_Variance_Fields>;
+};
+
+
+/** aggregate fields of "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Aggregate_Order_By = {
+  avg?: InputMaybe<Vulnerability_Report_Issue_Rating_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Vulnerability_Report_Issue_Rating_Max_Order_By>;
+  min?: InputMaybe<Vulnerability_Report_Issue_Rating_Min_Order_By>;
+  stddev?: InputMaybe<Vulnerability_Report_Issue_Rating_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Vulnerability_Report_Issue_Rating_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Vulnerability_Report_Issue_Rating_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Vulnerability_Report_Issue_Rating_Sum_Order_By>;
+  var_pop?: InputMaybe<Vulnerability_Report_Issue_Rating_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Vulnerability_Report_Issue_Rating_Var_Samp_Order_By>;
+  variance?: InputMaybe<Vulnerability_Report_Issue_Rating_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Arr_Rel_Insert_Input = {
+  data: Array<Vulnerability_Report_Issue_Rating_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Vulnerability_Report_Issue_Rating_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Vulnerability_Report_Issue_Rating_Avg_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_avg_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Avg_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "vulnerability_report_issue_rating". All fields are combined with a logical 'AND'. */
+export type Vulnerability_Report_Issue_Rating_Bool_Exp = {
+  _and?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Bool_Exp>>;
+  _not?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+  _or?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  ratedByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
+  updatedDate?: InputMaybe<Timestamptz_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  voteScore?: InputMaybe<Smallint_Comparison_Exp>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<String_Comparison_Exp>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "vulnerability_report_issue_rating" */
+export enum Vulnerability_Report_Issue_Rating_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  VulnerabilityReportIssueRatingPkey = 'vulnerability_report_issue_rating_pkey',
+  /** unique or primary key constraint on columns "vulnerability_report_issue_shared_state_id", "rated_by_user_id" */
+  VulnerabilityReportIssueRatingUserSharedStateKey = 'vulnerability_report_issue_rating_user_shared_state_key'
+}
+
+/** input type for incrementing numeric columns in table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Inc_Input = {
+  voteScore?: InputMaybe<Scalars['smallint']['input']>;
+};
+
+/** input type for inserting data into table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ratedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Obj_Rel_Insert_Input>;
+  updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  voteScore?: InputMaybe<Scalars['smallint']['input']>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Vulnerability_Report_Issue_Rating_Max_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  ratedByUserId?: Maybe<Scalars['uuid']['output']>;
+  updatedDate?: Maybe<Scalars['timestamptz']['output']>;
+  voteScore?: Maybe<Scalars['smallint']['output']>;
+  vulnerabilityReportIssueRatingTag?: Maybe<Scalars['String']['output']>;
+  vulnerabilityReportIssueSharedStateId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Max_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  ratedByUserId?: InputMaybe<Order_By>;
+  updatedDate?: InputMaybe<Order_By>;
+  voteScore?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Vulnerability_Report_Issue_Rating_Min_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  ratedByUserId?: Maybe<Scalars['uuid']['output']>;
+  updatedDate?: Maybe<Scalars['timestamptz']['output']>;
+  voteScore?: Maybe<Scalars['smallint']['output']>;
+  vulnerabilityReportIssueRatingTag?: Maybe<Scalars['String']['output']>;
+  vulnerabilityReportIssueSharedStateId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Min_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  ratedByUserId?: InputMaybe<Order_By>;
+  updatedDate?: InputMaybe<Order_By>;
+  voteScore?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Mutation_Response = {
+  __typename?: 'vulnerability_report_issue_rating_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Vulnerability_Report_Issue_Rating>;
+};
+
+/** on_conflict condition type for table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_On_Conflict = {
+  constraint: Vulnerability_Report_Issue_Rating_Constraint;
+  update_columns?: Array<Vulnerability_Report_Issue_Rating_Update_Column>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "vulnerability_report_issue_rating". */
+export type Vulnerability_Report_Issue_Rating_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  ratedByUserId?: InputMaybe<Order_By>;
+  sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Order_By>;
+  updatedDate?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  voteScore?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Order_By>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: vulnerability_report_issue_rating */
+export type Vulnerability_Report_Issue_Rating_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "vulnerability_report_issue_rating" */
+export enum Vulnerability_Report_Issue_Rating_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RatedByUserId = 'ratedByUserId',
+  /** column name */
+  UpdatedDate = 'updatedDate',
+  /** column name */
+  VoteScore = 'voteScore',
+  /** column name */
+  VulnerabilityReportIssueRatingTag = 'vulnerabilityReportIssueRatingTag',
+  /** column name */
+  VulnerabilityReportIssueSharedStateId = 'vulnerabilityReportIssueSharedStateId'
+}
+
+/** input type for updating data in table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ratedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  voteScore?: InputMaybe<Scalars['smallint']['input']>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Vulnerability_Report_Issue_Rating_Stddev_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_stddev_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Stddev_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Vulnerability_Report_Issue_Rating_Stddev_Pop_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_stddev_pop_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Stddev_Pop_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Vulnerability_Report_Issue_Rating_Stddev_Samp_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_stddev_samp_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Stddev_Samp_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Vulnerability_Report_Issue_Rating_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Vulnerability_Report_Issue_Rating_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  ratedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedDate?: InputMaybe<Scalars['timestamptz']['input']>;
+  voteScore?: InputMaybe<Scalars['smallint']['input']>;
+  vulnerabilityReportIssueRatingTag?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityReportIssueSharedStateId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Vulnerability_Report_Issue_Rating_Sum_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_sum_fields';
+  voteScore?: Maybe<Scalars['smallint']['output']>;
+};
+
+/** order by sum() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Sum_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "vulnerability_report_issue_rating" */
+export enum Vulnerability_Report_Issue_Rating_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  RatedByUserId = 'ratedByUserId',
+  /** column name */
+  UpdatedDate = 'updatedDate',
+  /** column name */
+  VoteScore = 'voteScore',
+  /** column name */
+  VulnerabilityReportIssueRatingTag = 'vulnerabilityReportIssueRatingTag',
+  /** column name */
+  VulnerabilityReportIssueSharedStateId = 'vulnerabilityReportIssueSharedStateId'
+}
+
+export type Vulnerability_Report_Issue_Rating_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Vulnerability_Report_Issue_Rating_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Vulnerability_Report_Issue_Rating_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Vulnerability_Report_Issue_Rating_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Vulnerability_Report_Issue_Rating_Var_Pop_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_var_pop_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Var_Pop_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Vulnerability_Report_Issue_Rating_Var_Samp_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_var_samp_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Var_Samp_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Vulnerability_Report_Issue_Rating_Variance_Fields = {
+  __typename?: 'vulnerability_report_issue_rating_variance_fields';
+  voteScore?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "vulnerability_report_issue_rating" */
+export type Vulnerability_Report_Issue_Rating_Variance_Order_By = {
+  voteScore?: InputMaybe<Order_By>;
+};
+
 /** select columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
@@ -58954,6 +59463,10 @@ export type Vulnerability_Report_Issue_Shared_State = {
   id: Scalars['uuid']['output'];
   isArchived: Scalars['Boolean']['output'];
   issueFingerprintHash: Scalars['String']['output'];
+  /** An array relationship */
+  issueRatings: Array<Vulnerability_Report_Issue_Rating>;
+  /** An aggregate relationship */
+  issueRatings_aggregate: Vulnerability_Report_Issue_Rating_Aggregate;
   /** An object relationship */
   project: Project;
   projectId: Scalars['uuid']['output'];
@@ -58967,6 +59480,26 @@ export type Vulnerability_Report_Issue_Shared_State = {
   vulnerabilityReportIssues: Array<Vulnerability_Report_Issue>;
   /** An aggregate relationship */
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateIssueRatingsArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report_issue_shared_state" */
+export type Vulnerability_Report_Issue_Shared_StateIssueRatings_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Vulnerability_Report_Issue_Rating_Order_By>>;
+  where?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
 };
 
 
@@ -59040,6 +59573,8 @@ export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
   issueFingerprintHash?: InputMaybe<String_Comparison_Exp>;
+  issueRatings?: InputMaybe<Vulnerability_Report_Issue_Rating_Bool_Exp>;
+  issueRatings_aggregate?: InputMaybe<Vulnerability_Report_Issue_Rating_Aggregate_Bool_Exp>;
   project?: InputMaybe<Project_Bool_Exp>;
   projectId?: InputMaybe<Uuid_Comparison_Exp>;
   repoUrl?: InputMaybe<String_Comparison_Exp>;
@@ -59064,6 +59599,7 @@ export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
+  issueRatings?: InputMaybe<Vulnerability_Report_Issue_Rating_Arr_Rel_Insert_Input>;
   project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
   repoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -59123,6 +59659,7 @@ export type Vulnerability_Report_Issue_Shared_State_Order_By = {
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
   issueFingerprintHash?: InputMaybe<Order_By>;
+  issueRatings_aggregate?: InputMaybe<Vulnerability_Report_Issue_Rating_Aggregate_Order_By>;
   project?: InputMaybe<Project_Order_By>;
   projectId?: InputMaybe<Order_By>;
   repoUrl?: InputMaybe<Order_By>;

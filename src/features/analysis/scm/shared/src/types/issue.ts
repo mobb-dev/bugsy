@@ -10,6 +10,16 @@ import { ParsedSeverityZ } from './shared'
 
 export const MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES = 100_000 // 100kB
 
+export const VulnerabilityReportIssueRatingZ = z.object({
+  voteScore: z.number(),
+  comment: z.string().nullable().default(null),
+  updatedDate: z.string().nullable(),
+  user: z.object({
+    email: z.string(),
+    name: z.string(),
+  }),
+})
+
 export const VulnerabilityReportIssueSharedStateZ = z
   .object({
     id: z.string().uuid(),
@@ -21,6 +31,7 @@ export const VulnerabilityReportIssueSharedStateZ = z
         url: z.string(),
       })
     ),
+    issueRatings: z.array(VulnerabilityReportIssueRatingZ).default([]),
   })
   .nullish()
 

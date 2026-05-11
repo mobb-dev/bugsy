@@ -24,6 +24,10 @@ export type UploadContextRecordsOpts = {
   /** InferencePlatform enum value (serialized as string) */
   platform: string
   repositoryUrl?: string
+  /** Git branch at sample time. `null` for detached HEAD; `undefined` to omit. */
+  branch?: string | null
+  /** HEAD commit SHA at sample time. `null` when unavailable; `undefined` to omit. */
+  commitSha?: string | null
   clientVersion?: string
   onFileError?: (name: string, err: unknown) => void
   onSkillError?: (name: string, err: unknown) => void
@@ -57,6 +61,8 @@ export async function uploadContextRecords(
     now,
     platform,
     repositoryUrl,
+    branch,
+    commitSha,
     clientVersion,
     onFileError,
     onSkillError,
@@ -68,6 +74,8 @@ export async function uploadContextRecords(
   const limit = pLimit(UPLOAD_CONCURRENCY)
   const extraFields = {
     ...(repositoryUrl !== undefined && { repositoryUrl }),
+    ...(branch !== undefined && { branch }),
+    ...(commitSha !== undefined && { commitSha }),
     ...(clientVersion !== undefined && { clientVersion }),
   }
 
@@ -156,6 +164,8 @@ export type ContextUploadPipelineOpts = {
   uploadFieldsJSON: string
   keyPrefix: string
   repositoryUrl?: string
+  branch?: string | null
+  commitSha?: string | null
   clientVersion?: string
   /**
    * Submits Tracy records to the backend. Called only when at least one file
@@ -188,6 +198,8 @@ export async function runContextFileUploadPipeline(
     uploadFieldsJSON,
     keyPrefix,
     repositoryUrl,
+    branch,
+    commitSha,
     clientVersion,
     submitRecords,
     onFileError,
@@ -214,6 +226,8 @@ export async function runContextFileUploadPipeline(
       now,
       platform,
       repositoryUrl,
+      branch,
+      commitSha,
       clientVersion,
       onFileError,
       onSkillError,

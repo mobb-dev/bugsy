@@ -376,6 +376,7 @@ describe('PatchApplicationService', () => {
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}
@@ -443,6 +444,7 @@ def get_user_file(filename):
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}
@@ -502,6 +504,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${newFile} b/${newFile}
 new file mode 100644
 index 0000000..1234567
@@ -555,6 +558,7 @@ index 0000000..1234567
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'invalid patch content that cannot be parsed',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -598,6 +602,7 @@ index 0000000..1234567
           vulnerabilityReportIssues: [],
           patchAndQuestions: {
             __typename: 'FixData',
+            questions: [],
             patch: `diff --git a/${jsFile} b/${jsFile}
 index 1234567..abcdefg 100644
 --- a/${jsFile}
@@ -622,6 +627,7 @@ index 1234567..abcdefg 100644
           vulnerabilityReportIssues: [],
           patchAndQuestions: {
             __typename: 'FixData',
+            questions: [],
             patch: `diff --git a/${pyFile} b/${pyFile}
 index 1234567..abcdefg 100644
 --- a/${pyFile}
@@ -673,6 +679,7 @@ index 1234567..abcdefg 100644
           vulnerabilityReportIssues: [],
           patchAndQuestions: {
             __typename: 'FixData',
+            questions: [],
             patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}
@@ -697,6 +704,7 @@ index 1234567..abcdefg 100644
           vulnerabilityReportIssues: [],
           patchAndQuestions: {
             __typename: 'FixData',
+            questions: [],
             patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}
@@ -783,6 +791,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'not a valid patch at all - no diff header',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -815,6 +824,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: '',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -876,6 +886,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${deepFile} b/${deepFile}
 new file mode 100644
 index 0000000..1234567
@@ -919,6 +930,7 @@ index 0000000..1234567
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${unusualFile} b/${unusualFile}
 new file mode 100644
 index 0000000..1234567
@@ -963,6 +975,7 @@ index 0000000..1234567
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${nonExistentFile} b/${nonExistentFile}
 index 1234567..abcdefg 100644
 --- a/${nonExistentFile}
@@ -1021,6 +1034,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}
@@ -1068,6 +1082,7 @@ index 1234567..abcdefg 100644
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${testFile} b/${testFile}
 deleted file mode 100644
 index 1234567..0000000
@@ -1128,6 +1143,7 @@ index 1234567..0000000
         vulnerabilityReportIssues: [],
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/${testFile} b/${testFile}
 index 1234567..abcdefg 100644
 --- a/${testFile}

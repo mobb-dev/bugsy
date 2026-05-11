@@ -6,6 +6,7 @@ import { promisify } from 'node:util'
 
 import Configstore from 'configstore'
 
+import { readRepoState } from '../../args/commands/upload_ai_blame'
 import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import { processContextFiles } from '../../features/analysis/context_file_processor'
 import { scanContextFiles } from '../../features/analysis/context_file_scanner'
@@ -633,6 +634,10 @@ export async function processTranscript(
   // invocations, cleaned up with other cursor keys after 14 days of inactivity).
   const cursorForModel = sessionStore.get(cursorKey) as CursorValue | undefined
   let lastSeenModel: string | null = cursorForModel?.lastModel ?? null
+  // Sample git state once per transcript batch; stamp every entry. A Claude
+  // Code session is single-cwd by nature, so per-batch granularity matches
+  // reality. Read fresh — no cross-batch cache.
+  const sampledRepoState = await readRepoState(input.cwd)
   const records = entries.map((entry) => {
     const { _recordId, ...rawEntry } = entry
     const message = rawEntry['message'] as Record<string, unknown> | undefined
@@ -661,6 +666,9 @@ export async function processTranscript(
       recordTimestamp: entry.timestamp ?? new Date().toISOString(),
       blameType: AiBlameInferenceType.Chat,
       rawData: rawEntry,
+      repositoryUrl: sampledRepoState.repositoryUrl ?? undefined,
+      branch: sampledRepoState.branch,
+      commitSha: sampledRepoState.commitSha,
     }
   })
 

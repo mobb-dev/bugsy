@@ -53,11 +53,18 @@ const FixExtraContextResponseSchema = z.object({
   fixDescription: z.string(),
 })
 
+// Schema for a single fix question (matches GraphQL FixQuestion subset selected by FixDetails fragment)
+const FixQuestionSchema = z.object({
+  __typename: z.literal('FixQuestion').optional(),
+  name: z.string(),
+})
+
 // Schema for FixData variant of patchAndQuestions
 const FixDataSchema = z.object({
   __typename: z.literal('FixData'),
   patch: z.string(),
   patchOriginalEncodingBase64: z.string(),
+  questions: z.array(FixQuestionSchema),
   extraContext: FixExtraContextResponseSchema,
 })
 

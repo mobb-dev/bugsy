@@ -48,6 +48,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             ],
             patchAndQuestions: {
               __typename: 'FixData' as const,
+              questions: [],
               patch: `diff --git a/src/database/queries.js b/src/database/queries.js
   index 1234567..abcdefg 100644
   --- a/src/database/queries.js
@@ -96,6 +97,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             ],
             patchAndQuestions: {
               __typename: 'FixData' as const,
+              questions: [],
               patch: `diff --git a/src/components/UserProfile.jsx b/src/components/UserProfile.jsx
   index 9876543..fedcba9 100644
   --- a/src/components/UserProfile.jsx
@@ -139,6 +141,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             ],
             patchAndQuestions: {
               __typename: 'FixData' as const,
+              questions: [],
               patch: 'User fix patch content',
               patchOriginalEncodingBase64: 'VXNlciBmaXggcGF0Y2ggY29udGVudA==',
               extraContext: {

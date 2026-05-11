@@ -96,6 +96,7 @@ export class FetchAvailableFixesService {
         offset: effectiveOffset,
         limit,
         gqlClient,
+        skippedInteractiveCount: fixReport.skippedRuleIds?.length ?? 0,
       })
       this.currentOffset = effectiveOffset + (fixReport.fixes?.length || 0)
       return prompt

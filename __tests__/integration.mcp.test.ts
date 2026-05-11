@@ -143,6 +143,12 @@ describe('mcp tests', () => {
   }
 
   beforeAll(async () => {
+    // Existing fixtures pre-date the interactive-fix filter (MOBB-3607);
+    // disable it so the server returns the same fix set the assertions expect.
+    // Read at call time inside InteractiveFixFilter, so setting it here is
+    // effective even though configs are imported above.
+    process.env['MOBB_MCP_DISABLE_INTERACTIVE_FILTER'] = '1'
+
     // Wire up mock implementations now that static imports are resolved
     _createOpenMock.mockImplementation(createOpenMockImplementation())
     _createSnykMock.mockImplementation(createSnykMockImplementation())

@@ -150,6 +150,75 @@ export function getGithubSdk(
   params: OctokitOptions & { isEnableRetries?: boolean } = {}
 ) {
   const octokit = getOctoKit(params)
+
+  // T-500 — Octokit Git Data API recipe shared by `createPr` and
+  // `createPrWithContent`. Builds a fresh branch from the default
+  // branch, writes the supplied files in one tree+commit, and opens
+  // a PR. Caller provides the file contents already decoded.
+  async function openPrWithFiles(params: {
+    userRepoUrl: string
+    files: { path: string; content: string }[]
+    branch: string
+    title: string
+    body: string
+    commitMessage?: string
+    headRepo?: string
+  }): Promise<{ pull_request_url: string }> {
+    const { owner, repo } = parseGithubOwnerAndRepo(params.userRepoUrl)
+    const { data: repository } = await octokit.rest.repos.get({ owner, repo })
+    const defaultBranch = repository.default_branch
+
+    const baseSha = await octokit.rest.git
+      .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
+      .then((r) => r.data.object.sha)
+
+    await octokit.rest.git.createRef({
+      owner,
+      repo,
+      ref: `refs/heads/${params.branch}`,
+      sha: baseSha,
+    })
+
+    const tree = await octokit.rest.git.createTree({
+      owner,
+      repo,
+      base_tree: baseSha,
+      tree: params.files.map((f) => ({
+        path: f.path,
+        mode: '100644' as const,
+        type: 'blob' as const,
+        content: f.content,
+      })),
+    })
+
+    const commit = await octokit.rest.git.createCommit({
+      owner,
+      repo,
+      message: params.commitMessage ?? params.title,
+      tree: tree.data.sha,
+      parents: [baseSha],
+    })
+
+    await octokit.rest.git.updateRef({
+      owner,
+      repo,
+      ref: `heads/${params.branch}`,
+      sha: commit.data.sha,
+    })
+
+    const pr = await octokit.rest.pulls.create({
+      owner,
+      repo,
+      title: params.title,
+      head: params.branch,
+      ...(params.headRepo ? { head_repo: params.headRepo } : {}),
+      body: safeBody(params.body, MAX_GH_PR_BODY_LENGTH),
+      base: defaultBranch,
+    })
+
+    return { pull_request_url: pr.data.html_url }
+  }
+
   return {
     async postPrComment(
       params: PostCommentParams
@@ -522,121 +591,37 @@ export function getGithubSdk(
       body: string
     }) {
       const { sourceRepoUrl, filesPaths, userRepoUrl, title, body } = params
-
       const { owner: sourceOwner, repo: sourceRepo } =
         parseGithubOwnerAndRepo(sourceRepoUrl)
-      const { owner, repo } = parseGithubOwnerAndRepo(userRepoUrl)
 
-      const [sourceFilePath, secondFilePath] = filesPaths
-
-      const sourceFileContentResponse = await octokit.rest.repos.getContent({
-        owner: sourceOwner,
-        repo: sourceRepo,
-        path: `/${sourceFilePath}`,
-      })
-
-      const { data: repository } = await octokit.rest.repos.get({ owner, repo })
-      const defaultBranch = repository.default_branch
-
-      // Create a new branch
-      const newBranchName = `mobb/workflow-${Date.now()}`
-      await octokit.rest.git.createRef({
-        owner,
-        repo,
-        ref: `refs/heads/${newBranchName}`,
-        sha: await octokit.rest.git
-          .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
-          .then((response) => response.data.object.sha),
-      })
-      const decodedContent = Buffer.from(
-        // Check if file content exists and handle different response types
-        typeof sourceFileContentResponse.data === 'object' &&
-          !Array.isArray(sourceFileContentResponse.data) &&
-          'content' in sourceFileContentResponse.data &&
-          typeof sourceFileContentResponse.data.content === 'string'
-          ? sourceFileContentResponse.data.content
-          : '',
-        'base64'
-      ).toString('utf-8')
-
-      const tree = [
-        {
-          path: sourceFilePath,
-          mode: '100644' as const,
-          type: 'blob' as const,
-          content: decodedContent,
-        },
-      ]
-
-      if (secondFilePath) {
-        const secondFileContentResponse = await octokit.rest.repos.getContent({
-          owner: sourceOwner,
-          repo: sourceRepo,
-          path: `/${secondFilePath}`,
+      const files = await Promise.all(
+        filesPaths.map(async (filePath) => {
+          const response = await octokit.rest.repos.getContent({
+            owner: sourceOwner,
+            repo: sourceRepo,
+            path: `/${filePath}`,
+          })
+          // getContent returns a union; only the file-blob shape carries `content`.
+          const content =
+            typeof response.data === 'object' &&
+            !Array.isArray(response.data) &&
+            'content' in response.data &&
+            typeof response.data.content === 'string'
+              ? Buffer.from(response.data.content, 'base64').toString('utf-8')
+              : ''
+          return { path: filePath, content }
         })
-        const secondDecodedContent = Buffer.from(
-          // Check if file content exists and handle different response types
-          typeof secondFileContentResponse.data === 'object' &&
-            !Array.isArray(secondFileContentResponse.data) &&
-            'content' in secondFileContentResponse.data &&
-            typeof secondFileContentResponse.data.content === 'string'
-            ? secondFileContentResponse.data.content
-            : '',
-          'base64'
-        ).toString('utf-8')
+      )
 
-        tree.push({
-          path: secondFilePath,
-          mode: '100644' as const,
-          type: 'blob' as const,
-          content: secondDecodedContent,
-        })
-      }
-
-      // Create a new commit with the file from the source repository
-      const createTreeResponse = await octokit.rest.git.createTree({
-        owner,
-        repo,
-        base_tree: await octokit.rest.git
-          .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
-          .then((response) => response.data.object.sha),
-        tree,
-      })
-
-      const createCommitResponse = await octokit.rest.git.createCommit({
-        owner,
-        repo,
-        message: 'Add new yaml file',
-        tree: createTreeResponse.data.sha,
-        parents: [
-          await octokit.rest.git
-            .getRef({ owner, repo, ref: `heads/${defaultBranch}` })
-            .then((response) => response.data.object.sha),
-        ],
-      })
-
-      // Update the branch reference to point to the new commit
-      await octokit.rest.git.updateRef({
-        owner,
-        repo,
-        ref: `heads/${newBranchName}`,
-        sha: createCommitResponse.data.sha,
-      })
-
-      // Create the Pull Request
-      const createPRResponse = await octokit.rest.pulls.create({
-        owner,
-        repo,
+      return openPrWithFiles({
+        userRepoUrl,
+        files,
+        branch: `mobb/workflow-${Date.now()}`,
         title,
-        head: newBranchName,
-        head_repo: sourceRepo,
-        body: safeBody(body, MAX_GH_PR_BODY_LENGTH),
-        base: defaultBranch,
+        body,
+        commitMessage: 'Add new yaml file',
+        headRepo: sourceRepo,
       })
-
-      return {
-        pull_request_url: createPRResponse.data.html_url,
-      }
     },
     async getGithubBranchList(repoUrl: string) {
       const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)
@@ -646,6 +631,48 @@ export function getGithubSdk(
         per_page: MAX_BRANCHES_FETCH,
         page: 1,
       })
+    },
+    // T-500 — open a PR adding a single inline file. Used by the
+    // openSecuritySkillPR resolver to deliver `.claude/skills/<slug>/SKILL.md`.
+    async createPrWithContent(params: {
+      userRepoUrl: string
+      filePath: string
+      content: string
+      branch: string
+      title: string
+      body: string
+    }): Promise<{ pull_request_url: string }> {
+      return openPrWithFiles({
+        userRepoUrl: params.userRepoUrl,
+        files: [{ path: params.filePath, content: params.content }],
+        branch: params.branch,
+        title: params.title,
+        body: params.body,
+      })
+    },
+    // T-500 — best-effort branch cleanup for openSecuritySkillPR retry.
+    // Swallows 422/404 so callers can call it unconditionally before
+    // a fresh PR-creation attempt.
+    async deleteBranchIfExists(params: {
+      userRepoUrl: string
+      branch: string
+    }): Promise<void> {
+      const { owner, repo } = parseGithubOwnerAndRepo(params.userRepoUrl)
+      try {
+        await octokit.rest.git.deleteRef({
+          owner,
+          repo,
+          ref: `heads/${params.branch}`,
+        })
+      } catch (err) {
+        if (
+          err instanceof RequestError &&
+          (err.status === 422 || err.status === 404)
+        ) {
+          return
+        }
+        throw err
+      }
     },
     async createPullRequest(options: {
       targetBranchName: string

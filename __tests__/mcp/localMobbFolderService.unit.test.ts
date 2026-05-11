@@ -72,6 +72,7 @@ ${patch}`
     sharedState: null,
     patchAndQuestions: {
       __typename: 'FixData',
+      questions: [],
       patch: formattedPatch,
       patchOriginalEncodingBase64: '',
       extraContext: {
@@ -315,6 +316,7 @@ describe('LocalMobbFolderService', () => {
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: '',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -340,6 +342,7 @@ describe('LocalMobbFolderService', () => {
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'invalid patch without proper format',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -383,6 +386,7 @@ describe('LocalMobbFolderService', () => {
         },
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: `diff --git a/test.java b/test.java
 index 1234567..abcdefg 100644
 --- a/test.java
@@ -442,6 +446,7 @@ index 1234567..abcdefg 100644
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'diff --git a/file1.js b/file1.js\n+// Fixed XSS',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -462,6 +467,7 @@ index 1234567..abcdefg 100644
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'diff --git a/file2.js b/file2.js\n+// Fixed CSRF',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -639,6 +645,7 @@ ${largePatchLines.join('\n')}`
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: largePatch,
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -684,6 +691,7 @@ ${largePatchLines.join('\n')}`
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'test patch',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -775,6 +783,7 @@ ${largePatchLines.join('\n')}`
           sharedState: null,
           patchAndQuestions: {
             __typename: 'FixData',
+            questions: [],
             patch: 'test patch for read error',
             patchOriginalEncodingBase64: '',
             extraContext: {
@@ -861,6 +870,7 @@ ${largePatchLines.join('\n')}`
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'small patch',
           patchOriginalEncodingBase64: '',
           extraContext: {
@@ -949,6 +959,7 @@ ${largePatchLines.join('\n')}`
         sharedState: null,
         patchAndQuestions: {
           __typename: 'FixData',
+          questions: [],
           patch: 'workflow test patch content',
           patchOriginalEncodingBase64: '',
           extraContext: {

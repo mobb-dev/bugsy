@@ -1,8 +1,8 @@
 import Debug from 'debug'
 
 import {
-  getRepositoryUrl,
   getSystemInfo,
+  readRepoState,
 } from '../../../args/commands/upload_ai_blame'
 import { packageJson } from '../../../utils/check_node_version'
 import { sanitizeData } from '../../../utils/sanitize-sensitive-data'
@@ -37,6 +37,8 @@ export type TracyRecordClientInput = Omit<
   TracyRecordInput,
   | 'rawDataS3Key'
   | 'repositoryUrl'
+  | 'branch'
+  | 'commitSha'
   | 'computerName'
   | 'userName'
   | 'clientVersion'
@@ -49,6 +51,10 @@ export type TracyRecordClientInput = Omit<
   rawDataS3Key?: string
   /** Override auto-detected repo URL (e.g. from extension metadata) */
   repositoryUrl?: string
+  /** Git branch at sample time (null when detached HEAD or non-git dir) */
+  branch?: string | null
+  /** HEAD commit SHA at sample time (null when non-git dir) */
+  commitSha?: string | null
   /** Override auto-detected client version (e.g. extension version instead of CLI version) */
   clientVersion?: string
 }
@@ -90,10 +96,20 @@ export async function prepareAndSendTracyRecords(
   const defaultClientVersion = packageJson.version
   const shouldSanitize = options?.sanitize ?? true
 
-  // Only resolve default repo URL if the caller didn't provide one per-record.
-  const defaultRepoUrl = rawRecords[0]?.repositoryUrl
-    ? undefined
-    : ((await getRepositoryUrl(workingDir)) ?? undefined)
+  // Read git state fresh on every upload — no cross-batch cache. Per-record
+  // values (sampled at event time by the daemon or extension) take precedence.
+  // We only resolve defaults when a workingDir is supplied (the CLI daemon
+  // path); the VS Code extension passes records pre-stamped per-file via
+  // getNormalizedRepo, so falling back to a single shared workingDir would
+  // misattribute events from secondary repos in multi-root workspaces.
+  const defaults: {
+    repositoryUrl: string | null
+    branch: string | null
+    commitSha: string | null
+  } =
+    workingDir != null
+      ? await readRepoState(workingDir)
+      : { repositoryUrl: null, branch: null, commitSha: null }
 
   // 1. Enrich records and optionally sanitize rawData
   debug(
@@ -123,7 +139,10 @@ export async function prepareAndSendTracyRecords(
         const { rawData: _rawData, ...rest } = record
         results.push({
           ...rest,
-          repositoryUrl: record.repositoryUrl ?? defaultRepoUrl,
+          repositoryUrl:
+            record.repositoryUrl ?? defaults.repositoryUrl ?? undefined,
+          branch: record.branch ?? defaults.branch ?? undefined,
+          commitSha: record.commitSha ?? defaults.commitSha ?? undefined,
           computerName,
           userName,
           clientVersion: record.clientVersion ?? defaultClientVersion,

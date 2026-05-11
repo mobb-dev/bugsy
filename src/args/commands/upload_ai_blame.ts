@@ -103,6 +103,63 @@ type SessionInput = {
   repositoryUrl?: string | null
 }
 
+export type RepoState = {
+  repositoryUrl: string | null
+  branch: string | null
+  commitSha: string | null
+}
+
+const NULL_REPO_STATE: RepoState = {
+  repositoryUrl: null,
+  branch: null,
+  commitSha: null,
+}
+
+/**
+ * Reads git state for tracy event attribution: repo URL, current branch, and
+ * HEAD commit SHA. Each field is read fresh — no caching across calls. Detached
+ * HEAD (rebase, bisect) returns `branch: null` rather than the literal string
+ * "HEAD" that `git rev-parse --abbrev-ref HEAD` would produce.
+ *
+ * Both the CLI daemon and the VS Code extension flow through the shared
+ * `GitService.getCurrentRepoState()` so detached-HEAD handling and SHA
+ * normalization stay in lockstep across the two clients.
+ *
+ * Never throws — non-existent dirs, missing git binaries, and unrecognized
+ * remotes all resolve to nulls so the daemon hot path can rely on a value.
+ */
+export async function readRepoState(workingDir?: string): Promise<RepoState> {
+  const dir = workingDir ?? process.cwd()
+  // GitService's constructor calls simpleGit() which throws synchronously when
+  // the directory does not exist. Catch here so callers can rely on a value.
+  let gitService: GitService
+  try {
+    gitService = new GitService(dir)
+  } catch {
+    return NULL_REPO_STATE
+  }
+
+  const repoStatePromise = gitService
+    .getCurrentRepoState()
+    .catch(() => ({ branch: null, commitSha: null }))
+
+  const repositoryUrlPromise = gitService
+    .getRemoteUrl()
+    .then((url) => {
+      if (!url) return null
+      const parsed = parseScmURL(url)
+      return parsed?.scmType && parsed.scmType !== 'Unknown' ? url : null
+    })
+    .catch(() => null)
+
+  const [{ branch, commitSha }, repositoryUrl] = await Promise.all([
+    repoStatePromise,
+    repositoryUrlPromise,
+  ])
+
+  return { repositoryUrl, branch, commitSha }
+}
+
 /**
  * Gets the normalized GitHub repository URL from the current working directory.
  * Returns null if not in a git repository or if not a GitHub repository.
@@ -110,18 +167,7 @@ type SessionInput = {
 export async function getRepositoryUrl(
   workingDir?: string
 ): Promise<string | null> {
-  try {
-    const gitService = new GitService(workingDir ?? process.cwd())
-    const isRepo = await gitService.isGitRepository()
-    if (!isRepo) {
-      return null
-    }
-    const remoteUrl = await gitService.getRemoteUrl()
-    const parsed = parseScmURL(remoteUrl)
-    return parsed?.scmType && parsed.scmType !== 'Unknown' ? remoteUrl : null
-  } catch {
-    return null
-  }
+  return (await readRepoState(workingDir)).repositoryUrl
 }
 
 /**

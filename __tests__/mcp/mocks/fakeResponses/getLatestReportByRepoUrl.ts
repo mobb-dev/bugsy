@@ -70,6 +70,7 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             ],
             patchAndQuestions: {
               __typename: 'FixData',
+              questions: [],
               patch: 'test patch',
               patchOriginalEncodingBase64: 'dGVzdCBwYXRjaA==',
               extraContext: {
@@ -99,6 +100,7 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             ],
             patchAndQuestions: {
               __typename: 'FixData',
+              questions: [],
               patch: 'user test patch',
               patchOriginalEncodingBase64: 'dXNlciB0ZXN0IHBhdGNo',
               extraContext: {

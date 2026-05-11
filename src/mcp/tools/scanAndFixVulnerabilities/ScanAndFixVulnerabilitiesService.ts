@@ -132,6 +132,7 @@ export class ScanAndFixVulnerabilitiesService {
         scannedFiles: [...fileList],
         limit: effectiveLimit,
         gqlClient: this.gqlClient,
+        skippedInteractiveCount: fixes.skippedRuleIds.length,
       })
 
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
@@ -189,6 +190,7 @@ export class ScanAndFixVulnerabilitiesService {
   }): Promise<{
     fixes: McpFix[]
     totalCount: number
+    skippedRuleIds: string[]
   }> {
     logDebug('getReportFixes', { fixReportId, offset, limit })
     if (!this.gqlClient) {
@@ -204,6 +206,7 @@ export class ScanAndFixVulnerabilitiesService {
     return {
       fixes: fixes?.fixes || [],
       totalCount: fixes?.totalCount || 0,
+      skippedRuleIds: fixes?.skippedRuleIds || [],
     }
   }
 }

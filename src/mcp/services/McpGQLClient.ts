@@ -32,6 +32,7 @@ import {
 } from '../core/Errors'
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
+import { partitionInteractiveFixes } from './InteractiveFixFilter'
 import { LoginContext } from './types'
 
 // Re-export for existing consumers
@@ -401,8 +402,8 @@ export class McpGQLClient extends GQLClient {
   }: {
     reportData: FixReportSummary | undefined
     limit: number
-  }): McpFix[] {
-    if (!reportData) return []
+  }): { applicableFixes: McpFix[]; skippedRuleIds: string[] } {
+    if (!reportData) return { applicableFixes: [], skippedRuleIds: [] }
 
     const reportMetadata = {
       id: reportData.id,
@@ -447,8 +448,18 @@ export class McpGQLClient extends GQLClient {
       }
     }
 
-    // Convert to array and apply limit
-    return Array.from(fixMap.values()).slice(0, limit)
+    const merged = Array.from(fixMap.values())
+
+    // Drop fixes that require user input that MCP cannot provide. Filter on
+    // the merged set (before applying the limit) so the limit is honored only
+    // for fixes that will actually be applied.
+    const { applicableFixes, skippedRuleIds } =
+      partitionInteractiveFixes(merged)
+
+    return {
+      applicableFixes: applicableFixes.slice(0, limit),
+      skippedRuleIds,
+    }
   }
 
   async updateFixesDownloadStatus(fixIds: string[]) {
@@ -532,7 +543,9 @@ export class McpGQLClient extends GQLClient {
     offset?: number
     fileFilter?: string[]
   }): Promise<{
-    fixReport: Omit<FixReportSummary, 'userFixes'> | null
+    fixReport:
+      | (Omit<FixReportSummary, 'userFixes'> & { skippedRuleIds: string[] })
+      | null
     expiredReport: { id: string; expirationOn?: string } | null
   }> {
     try {
@@ -580,7 +593,7 @@ export class McpGQLClient extends GQLClient {
       const latestReport =
         resp.fixReport?.[0] && FixReportSummarySchema.parse(resp.fixReport?.[0])
 
-      const fixes = this.mergeUserAndSystemFixes({
+      const { applicableFixes, skippedRuleIds } = this.mergeUserAndSystemFixes({
         reportData: latestReport,
         limit,
       })
@@ -589,7 +602,8 @@ export class McpGQLClient extends GQLClient {
         fixReport: latestReport
           ? {
               ...latestReport,
-              fixes,
+              fixes: applicableFixes,
+              skippedRuleIds,
             }
           : null,
         expiredReport: resp.expiredReport?.[0] || null,
@@ -620,6 +634,7 @@ export class McpGQLClient extends GQLClient {
     fileFilter?: string[]
   }): Promise<{
     fixes: McpFix[]
+    skippedRuleIds: string[]
     totalCount: number
     expiredReport: { id: string; expirationOn?: string } | null
     fixReport?: {
@@ -691,15 +706,19 @@ export class McpGQLClient extends GQLClient {
 
       const latestReport = FixReportSummarySchema.parse(res.fixReport?.[0])
 
-      const fixes = this.mergeUserAndSystemFixes({
+      const { applicableFixes, skippedRuleIds } = this.mergeUserAndSystemFixes({
         reportData: latestReport,
         limit,
       })
 
-      logDebug('[GraphQL] GetReportFixes response parsed', { fixes: fixes })
+      logDebug('[GraphQL] GetReportFixes response parsed', {
+        fixes: applicableFixes,
+        skippedCount: skippedRuleIds.length,
+      })
 
       return {
-        fixes,
+        fixes: applicableFixes,
+        skippedRuleIds,
         totalCount:
           res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
         expiredReport: res.expiredReport?.[0] || null,

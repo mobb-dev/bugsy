@@ -657,6 +657,11 @@ export type FpSummarySuccess = {
   fpId: Scalars['String']['output'];
 };
 
+export type GenerateSecuritySkillsResult = {
+  __typename?: 'GenerateSecuritySkillsResult';
+  skillIds: Array<Scalars['ID']['output']>;
+};
+
 export type GetAiBlameInferencePromptResponse = {
   __typename?: 'GetAIBlameInferencePromptResponse';
   conversationMessages?: Maybe<Array<ConversationMessage>>;
@@ -1094,6 +1099,13 @@ export type OpenFixTicketResponseSuccess = {
   __typename?: 'OpenFixTicketResponseSuccess';
   id: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type OpenSecuritySkillPrResult = {
+  __typename?: 'OpenSecuritySkillPRResult';
+  prStatus: Scalars['String']['output'];
+  prUrl: Scalars['String']['output'];
+  skillId: Scalars['ID']['output'];
 };
 
 export type OrgSkill = {
@@ -1937,7 +1949,14 @@ export type TracyRecordInput = {
    * For edit records, these fields should be omitted.
    */
   blameType?: InputMaybe<AiBlameInferenceType>;
+  /**
+   * Git branch checked out when the event was sampled. Null when in detached-HEAD state
+   * (rebase, bisect, "open this commit") or when the working dir is not a git repo.
+   */
+  branch?: InputMaybe<Scalars['String']['input']>;
   clientVersion: Scalars['String']['input'];
+  /** Lowercase 40-hex git commit SHA at sample time. Null when the working dir is not a git repo. */
+  commitSha?: InputMaybe<Scalars['String']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   /**
    * Opaque metadata blob. For CONTEXT_FILE events, carries: md5, category, name, sizeBytes, filePath, sessionId.
@@ -21139,6 +21158,10 @@ export type Mutation_Root = {
   delete_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_inference_event" */
   delete_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** delete data from the table: "tracy.tracy_sec_skill" */
+  delete_tracy_tracy_sec_skill?: Maybe<Tracy_Tracy_Sec_Skill_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_sec_skill" */
+  delete_tracy_tracy_sec_skill_by_pk?: Maybe<Tracy_Tracy_Sec_Skill>;
   /** delete data from the table: "tracy.tracy_session" */
   delete_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
   /** delete data from the table: "tracy.tracy_session_available_skill" */
@@ -21239,6 +21262,7 @@ export type Mutation_Root = {
   finalizeAIBlameInferencesUpload: AiBlameValidationResponse;
   forkRepo?: Maybe<ForkRepoResponse>;
   generateDiffsFile?: Maybe<FileDiffsResponse>;
+  generateSecuritySkills: GenerateSecuritySkillsResult;
   /**
    * Get a presigned S3 URL for uploading a commit diff.
    * Used by the extension to upload diffs before calling analyzeCommitForAIBlame.
@@ -21651,6 +21675,10 @@ export type Mutation_Root = {
   insert_tracy_tracy_inference_event?: Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>;
   /** insert a single row into the table: "tracy.tracy_inference_event" */
   insert_tracy_tracy_inference_event_one?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** insert data into the table: "tracy.tracy_sec_skill" */
+  insert_tracy_tracy_sec_skill?: Maybe<Tracy_Tracy_Sec_Skill_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_sec_skill" */
+  insert_tracy_tracy_sec_skill_one?: Maybe<Tracy_Tracy_Sec_Skill>;
   /** insert data into the table: "tracy.tracy_session" */
   insert_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
   /** insert data into the table: "tracy.tracy_session_available_skill" */
@@ -21740,6 +21768,7 @@ export type Mutation_Root = {
   /** insert a single row into the table: "vulnerability_severity" */
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
   openFixTicket?: Maybe<OpenFixTicketResponse>;
+  openSecuritySkillPR: OpenSecuritySkillPrResult;
   performCliLogin?: Maybe<StatusQueryResponse>;
   /** Get attributions related to a specific vulnerability report. */
   processVulnerabilityAttributions: ProcessVulnerabilityAttributionsResponse;
@@ -22382,6 +22411,12 @@ export type Mutation_Root = {
   update_tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** update multiples rows of table: "tracy.tracy_inference_event" */
   update_tracy_tracy_inference_event_many?: Maybe<Array<Maybe<Tracy_Tracy_Inference_Event_Mutation_Response>>>;
+  /** update data of the table: "tracy.tracy_sec_skill" */
+  update_tracy_tracy_sec_skill?: Maybe<Tracy_Tracy_Sec_Skill_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_sec_skill" */
+  update_tracy_tracy_sec_skill_by_pk?: Maybe<Tracy_Tracy_Sec_Skill>;
+  /** update multiples rows of table: "tracy.tracy_sec_skill" */
+  update_tracy_tracy_sec_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Sec_Skill_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_session" */
   update_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
   /** update data of the table: "tracy.tracy_session_available_skill" */
@@ -23902,6 +23937,18 @@ export type Mutation_RootDelete_Tracy_Tracy_Inference_Event_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Sec_SkillArgs = {
+  where: Tracy_Tracy_Sec_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Sec_Skill_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_SessionArgs = {
   where: Tracy_Tracy_Session_Bool_Exp;
 };
@@ -24195,6 +24242,13 @@ export type Mutation_RootForkRepoArgs = {
 export type Mutation_RootGenerateDiffsFileArgs = {
   fixIds: Array<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootGenerateSecuritySkillsArgs = {
+  orgId: Scalars['ID']['input'];
+  sinceDays?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -25611,6 +25665,20 @@ export type Mutation_RootInsert_Tracy_Tracy_Inference_Event_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Sec_SkillArgs = {
+  objects: Array<Tracy_Tracy_Sec_Skill_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Sec_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Sec_Skill_OneArgs = {
+  object: Tracy_Tracy_Sec_Skill_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Sec_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Tracy_Tracy_SessionArgs = {
   objects: Array<Tracy_Tracy_Session_Insert_Input>;
   on_conflict?: InputMaybe<Tracy_Tracy_Session_On_Conflict>;
@@ -25924,6 +25992,12 @@ export type Mutation_RootOpenFixTicketArgs = {
   commitTitle: Scalars['String']['input'];
   organizationId: Scalars['String']['input'];
   projectId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootOpenSecuritySkillPrArgs = {
+  skillId: Scalars['ID']['input'];
 };
 
 
@@ -28253,6 +28327,26 @@ export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Inference_Event_ManyArgs = {
   updates: Array<Tracy_Tracy_Inference_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Sec_SkillArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Sec_Skill_Set_Input>;
+  where: Tracy_Tracy_Sec_Skill_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Sec_Skill_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Sec_Skill_Set_Input>;
+  pk_columns: Tracy_Tracy_Sec_Skill_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Sec_Skill_ManyArgs = {
+  updates: Array<Tracy_Tracy_Sec_Skill_Updates>;
 };
 
 
@@ -34731,6 +34825,12 @@ export type Query_Root = {
   tracy_tracy_inference_event_aggregate: Tracy_Tracy_Inference_Event_Aggregate;
   /** fetch data from the table: "tracy.tracy_inference_event" using primary key columns */
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_sec_skill" */
+  tracy_tracy_sec_skill: Array<Tracy_Tracy_Sec_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_sec_skill" */
+  tracy_tracy_sec_skill_aggregate: Tracy_Tracy_Sec_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_sec_skill" using primary key columns */
+  tracy_tracy_sec_skill_by_pk?: Maybe<Tracy_Tracy_Sec_Skill>;
   /** fetch data from the table: "tracy.tracy_session" */
   tracy_tracy_session: Array<Tracy_Tracy_Session>;
   /** fetch aggregated fields from the table: "tracy.tracy_session" */
@@ -37791,6 +37891,29 @@ export type Query_RootTracy_Tracy_Inference_Event_AggregateArgs = {
 
 
 export type Query_RootTracy_Tracy_Inference_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Sec_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Sec_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Sec_Skill_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -43140,6 +43263,14 @@ export type Subscription_Root = {
   tracy_tracy_inference_event_by_pk?: Maybe<Tracy_Tracy_Inference_Event>;
   /** fetch data from the table in a streaming manner: "tracy.tracy_inference_event" */
   tracy_tracy_inference_event_stream: Array<Tracy_Tracy_Inference_Event>;
+  /** fetch data from the table: "tracy.tracy_sec_skill" */
+  tracy_tracy_sec_skill: Array<Tracy_Tracy_Sec_Skill>;
+  /** fetch aggregated fields from the table: "tracy.tracy_sec_skill" */
+  tracy_tracy_sec_skill_aggregate: Tracy_Tracy_Sec_Skill_Aggregate;
+  /** fetch data from the table: "tracy.tracy_sec_skill" using primary key columns */
+  tracy_tracy_sec_skill_by_pk?: Maybe<Tracy_Tracy_Sec_Skill>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_sec_skill" */
+  tracy_tracy_sec_skill_stream: Array<Tracy_Tracy_Sec_Skill>;
   /** fetch data from the table: "tracy.tracy_session" */
   tracy_tracy_session: Array<Tracy_Tracy_Session>;
   /** fetch aggregated fields from the table: "tracy.tracy_session" */
@@ -46767,6 +46898,36 @@ export type Subscription_RootTracy_Tracy_Inference_Event_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Tracy_Tracy_Inference_Event_Stream_Cursor_Input>>;
   where?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Sec_SkillArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Sec_Skill_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Sec_Skill_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Sec_Skill_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Sec_Skill_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
 };
 
 
@@ -50901,7 +51062,9 @@ export type Tracy_Tracy_Edit_Event_Updates = {
 /** columns and relationships of "tracy.tracy_event" */
 export type Tracy_Tracy_Event = {
   __typename?: 'tracy_tracy_event';
+  branch?: Maybe<Scalars['String']['output']>;
   clientVersion?: Maybe<Scalars['String']['output']>;
+  commitSha?: Maybe<Scalars['String']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
@@ -50946,7 +51109,9 @@ export type Tracy_Tracy_Event_Bool_Exp = {
   _and?: InputMaybe<Array<Tracy_Tracy_Event_Bool_Exp>>;
   _not?: InputMaybe<Tracy_Tracy_Event_Bool_Exp>;
   _or?: InputMaybe<Array<Tracy_Tracy_Event_Bool_Exp>>;
+  branch?: InputMaybe<String_Comparison_Exp>;
   clientVersion?: InputMaybe<String_Comparison_Exp>;
+  commitSha?: InputMaybe<String_Comparison_Exp>;
   computerName?: InputMaybe<String_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -50971,7 +51136,9 @@ export enum Tracy_Tracy_Event_Constraint {
 
 /** input type for inserting data into table "tracy.tracy_event" */
 export type Tracy_Tracy_Event_Insert_Input = {
+  branch?: InputMaybe<Scalars['String']['input']>;
   clientVersion?: InputMaybe<Scalars['String']['input']>;
+  commitSha?: InputMaybe<Scalars['String']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -50989,7 +51156,9 @@ export type Tracy_Tracy_Event_Insert_Input = {
 /** aggregate max on columns */
 export type Tracy_Tracy_Event_Max_Fields = {
   __typename?: 'tracy_tracy_event_max_fields';
+  branch?: Maybe<Scalars['String']['output']>;
   clientVersion?: Maybe<Scalars['String']['output']>;
+  commitSha?: Maybe<Scalars['String']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -51004,7 +51173,9 @@ export type Tracy_Tracy_Event_Max_Fields = {
 /** aggregate min on columns */
 export type Tracy_Tracy_Event_Min_Fields = {
   __typename?: 'tracy_tracy_event_min_fields';
+  branch?: Maybe<Scalars['String']['output']>;
   clientVersion?: Maybe<Scalars['String']['output']>;
+  commitSha?: Maybe<Scalars['String']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -51041,7 +51212,9 @@ export type Tracy_Tracy_Event_On_Conflict = {
 
 /** Ordering options when selecting data from "tracy.tracy_event". */
 export type Tracy_Tracy_Event_Order_By = {
+  branch?: InputMaybe<Order_By>;
   clientVersion?: InputMaybe<Order_By>;
+  commitSha?: InputMaybe<Order_By>;
   computerName?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -51064,7 +51237,11 @@ export type Tracy_Tracy_Event_Pk_Columns_Input = {
 /** select columns of table "tracy.tracy_event" */
 export enum Tracy_Tracy_Event_Select_Column {
   /** column name */
+  Branch = 'branch',
+  /** column name */
   ClientVersion = 'clientVersion',
+  /** column name */
+  CommitSha = 'commitSha',
   /** column name */
   ComputerName = 'computerName',
   /** column name */
@@ -51087,7 +51264,9 @@ export enum Tracy_Tracy_Event_Select_Column {
 
 /** input type for updating data in table "tracy.tracy_event" */
 export type Tracy_Tracy_Event_Set_Input = {
+  branch?: InputMaybe<Scalars['String']['input']>;
   clientVersion?: InputMaybe<Scalars['String']['input']>;
+  commitSha?: InputMaybe<Scalars['String']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -51109,7 +51288,9 @@ export type Tracy_Tracy_Event_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Tracy_Tracy_Event_Stream_Cursor_Value_Input = {
+  branch?: InputMaybe<Scalars['String']['input']>;
   clientVersion?: InputMaybe<Scalars['String']['input']>;
+  commitSha?: InputMaybe<Scalars['String']['input']>;
   computerName?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -51124,7 +51305,11 @@ export type Tracy_Tracy_Event_Stream_Cursor_Value_Input = {
 /** update columns of table "tracy.tracy_event" */
 export enum Tracy_Tracy_Event_Update_Column {
   /** column name */
+  Branch = 'branch',
+  /** column name */
   ClientVersion = 'clientVersion',
+  /** column name */
+  CommitSha = 'commitSha',
   /** column name */
   ComputerName = 'computerName',
   /** column name */
@@ -51462,6 +51647,250 @@ export type Tracy_Tracy_Inference_Event_Var_Samp_Fields = {
 export type Tracy_Tracy_Inference_Event_Variance_Fields = {
   __typename?: 'tracy_tracy_inference_event_variance_fields';
   charCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill = {
+  __typename?: 'tracy_tracy_sec_skill';
+  body: Scalars['String']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  mobbIssueType: Scalars['String']['output'];
+  orgId: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  prStatus: Scalars['String']['output'];
+  prUrl?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  repo: Repo;
+  repoId: Scalars['uuid']['output'];
+  slug: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Aggregate = {
+  __typename?: 'tracy_tracy_sec_skill_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Sec_Skill_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Sec_Skill>;
+};
+
+/** aggregate fields of "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_sec_skill_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Sec_Skill_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Sec_Skill_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_sec_skill". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Sec_Skill_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Sec_Skill_Bool_Exp>>;
+  body?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  mobbIssueType?: InputMaybe<String_Comparison_Exp>;
+  orgId?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  prStatus?: InputMaybe<String_Comparison_Exp>;
+  prUrl?: InputMaybe<String_Comparison_Exp>;
+  repo?: InputMaybe<Repo_Bool_Exp>;
+  repoId?: InputMaybe<Uuid_Comparison_Exp>;
+  slug?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_sec_skill" */
+export enum Tracy_Tracy_Sec_Skill_Constraint {
+  /** unique or primary key constraint on columns "repo_id", "mobb_issue_type", "org_id" */
+  TracySecSkillOrgRepoIssueTypeKey = 'tracy_sec_skill_org_repo_issue_type_key',
+  /** unique or primary key constraint on columns "id" */
+  TracySecSkillPkey = 'tracy_sec_skill_pkey',
+  /** unique or primary key constraint on columns "slug" */
+  TracySecSkillSlugKey = 'tracy_sec_skill_slug_key'
+}
+
+/** input type for inserting data into table "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Insert_Input = {
+  body?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mobbIssueType?: InputMaybe<Scalars['String']['input']>;
+  orgId?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  prStatus?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repo?: InputMaybe<Repo_Obj_Rel_Insert_Input>;
+  repoId?: InputMaybe<Scalars['uuid']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Sec_Skill_Max_Fields = {
+  __typename?: 'tracy_tracy_sec_skill_max_fields';
+  body?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mobbIssueType?: Maybe<Scalars['String']['output']>;
+  orgId?: Maybe<Scalars['uuid']['output']>;
+  prStatus?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  repoId?: Maybe<Scalars['uuid']['output']>;
+  slug?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Sec_Skill_Min_Fields = {
+  __typename?: 'tracy_tracy_sec_skill_min_fields';
+  body?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  mobbIssueType?: Maybe<Scalars['String']['output']>;
+  orgId?: Maybe<Scalars['uuid']['output']>;
+  prStatus?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  repoId?: Maybe<Scalars['uuid']['output']>;
+  slug?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Mutation_Response = {
+  __typename?: 'tracy_tracy_sec_skill_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Sec_Skill>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_On_Conflict = {
+  constraint: Tracy_Tracy_Sec_Skill_Constraint;
+  update_columns?: Array<Tracy_Tracy_Sec_Skill_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Sec_Skill_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_sec_skill". */
+export type Tracy_Tracy_Sec_Skill_Order_By = {
+  body?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  mobbIssueType?: InputMaybe<Order_By>;
+  orgId?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  prStatus?: InputMaybe<Order_By>;
+  prUrl?: InputMaybe<Order_By>;
+  repo?: InputMaybe<Repo_Order_By>;
+  repoId?: InputMaybe<Order_By>;
+  slug?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_sec_skill */
+export type Tracy_Tracy_Sec_Skill_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "tracy.tracy_sec_skill" */
+export enum Tracy_Tracy_Sec_Skill_Select_Column {
+  /** column name */
+  Body = 'body',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MobbIssueType = 'mobbIssueType',
+  /** column name */
+  OrgId = 'orgId',
+  /** column name */
+  PrStatus = 'prStatus',
+  /** column name */
+  PrUrl = 'prUrl',
+  /** column name */
+  RepoId = 'repoId',
+  /** column name */
+  Slug = 'slug',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "tracy.tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Set_Input = {
+  body?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mobbIssueType?: InputMaybe<Scalars['String']['input']>;
+  orgId?: InputMaybe<Scalars['uuid']['input']>;
+  prStatus?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repoId?: InputMaybe<Scalars['uuid']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_sec_skill" */
+export type Tracy_Tracy_Sec_Skill_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Sec_Skill_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Sec_Skill_Stream_Cursor_Value_Input = {
+  body?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  mobbIssueType?: InputMaybe<Scalars['String']['input']>;
+  orgId?: InputMaybe<Scalars['uuid']['input']>;
+  prStatus?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  repoId?: InputMaybe<Scalars['uuid']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** update columns of table "tracy.tracy_sec_skill" */
+export enum Tracy_Tracy_Sec_Skill_Update_Column {
+  /** column name */
+  Body = 'body',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MobbIssueType = 'mobbIssueType',
+  /** column name */
+  OrgId = 'orgId',
+  /** column name */
+  PrStatus = 'prStatus',
+  /** column name */
+  PrUrl = 'prUrl',
+  /** column name */
+  RepoId = 'repoId',
+  /** column name */
+  Slug = 'slug',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Tracy_Tracy_Sec_Skill_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Sec_Skill_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Sec_Skill_Bool_Exp;
 };
 
 /** columns and relationships of "tracy.tracy_session" */
@@ -61492,9 +61921,9 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
-export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
-export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
+export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
 
 export type GetFixReportsByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -61512,7 +61941,7 @@ export type GetReportFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type GetLatestReportByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -61523,7 +61952,7 @@ export type GetLatestReportByRepoUrlQueryVariables = Exact<{
 }>;
 
 
-export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type UpdateDownloadedFixDataMutationVariables = Exact<{
   fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -61595,6 +62024,9 @@ export const FixDetailsFragmentDoc = `
     ... on FixData {
       patch
       patchOriginalEncodingBase64
+      questions {
+        name
+      }
       extraContext {
         extraContext {
           key

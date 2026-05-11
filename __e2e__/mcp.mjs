@@ -99,6 +99,7 @@ test('Bugsy MCP E2E tests', async (t) => {
       {
         API_URL: 'http://localhost:8080/v1/graphql',
         MOBB_API_KEY: apiKey,
+        MOBB_MCP_DISABLE_INTERACTIVE_FILTER: '1',
       }
     )
     console.log('connected to MCP server')

@@ -141,6 +141,30 @@ export class GithubSCMLib extends SCMLib {
     return { pull_request_url: pull_request_url }
   }
 
+  // T-500 — sibling of `createPullRequestWithNewFile` that takes inline
+  // content rather than reading from a source repo. Used by
+  // openSecuritySkillPR to deliver `.claude/skills/<slug>/SKILL.md`.
+  async createPullRequestWithInlineFile(params: {
+    userRepoUrl: string
+    filePath: string
+    content: string
+    branch: string
+    title: string
+    body: string
+  }) {
+    const { pull_request_url } =
+      await this.githubSdk.createPrWithContent(params)
+    return { pull_request_url }
+  }
+
+  // T-500 — used by the openSecuritySkillPR resolver to clean up a
+  // branch left behind by a prior failed PR-creation attempt before
+  // retrying. Swallows missing-branch responses; only real network
+  // errors propagate.
+  async deleteBranchIfExists(params: { userRepoUrl: string; branch: string }) {
+    return this.githubSdk.deleteBranchIfExists(params)
+  }
+
   async validateParams() {
     return await githubValidateParams(this.url, this.accessToken)
   }

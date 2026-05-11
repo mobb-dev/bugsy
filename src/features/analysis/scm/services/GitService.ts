@@ -294,6 +294,43 @@ export class GitService {
   }
 
   /**
+   * Reads `{ branch, commitSha }` for tracy event attribution. Detached-HEAD
+   * (rebase, bisect, "open this commit") returns `branch: null` rather than
+   * the literal string `"HEAD"` that `getCurrentBranch()` produces — that
+   * literal would silently corrupt downstream branch dashboards.
+   *
+   * The two reads run in parallel so the wall-time cost is one `git`
+   * round-trip rather than two. Never throws — failures resolve to nulls so
+   * the daemon hot path can rely on a value, not an exception.
+   */
+  public async getCurrentRepoState(): Promise<{
+    branch: string | null
+    commitSha: string | null
+  }> {
+    const branchPromise = this.git
+      .raw(['symbolic-ref', '--short', '-q', 'HEAD'])
+      .then((s) => {
+        const trimmed = s.trim()
+        return trimmed.length > 0 ? trimmed : null
+      })
+      .catch(() => null)
+
+    const commitShaPromise = this.git
+      .raw(['rev-parse', 'HEAD'])
+      .then((s) => {
+        const trimmed = s.trim().toLowerCase()
+        return /^[0-9a-f]{40}$/.test(trimmed) ? trimmed : null
+      })
+      .catch(() => null)
+
+    const [branch, commitSha] = await Promise.all([
+      branchPromise,
+      commitShaPromise,
+    ])
+    return { branch, commitSha }
+  }
+
+  /**
    * Gets both the current commit hash and current branch name
    */
   public async getCurrentCommitAndBranch(): Promise<{

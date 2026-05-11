@@ -18,6 +18,14 @@ function friendlyType(s: string) {
 export const noFixesReturnedForParameters = `No fixes returned for the given offset and limit parameters.
 `
 
+export const skippedInteractiveFixesNotice = (skippedCount: number) => {
+  if (skippedCount <= 0) return ''
+  const s = skippedCount === 1 ? '' : 'es'
+  const verb = skippedCount === 1 ? 'requires' : 'require'
+  const wasWere = skippedCount === 1 ? 'was' : 'were'
+  return `\n## Skipped fixes\n\n${skippedCount} fix${s} ${verb} user input that is not available over MCP and ${wasWere} skipped. Mention this to the user when summarizing results.\n`
+}
+
 export const noFixesReturnedForParametersWithGuidance = ({
   offset,
   limit,
@@ -309,16 +317,21 @@ export const fixesFoundPrompt = ({
   offset,
   limit,
   gqlClient,
+  skippedInteractiveCount = 0,
 }: {
   fixReport: Omit<FixReportSummary, 'userFixes'>
   offset: number
   limit: number
   gqlClient: McpGQLClient
+  skippedInteractiveCount?: number
 }) => {
   const totalFixes = fixReport.filteredFixesCount.aggregate?.count || 0
 
   if (totalFixes === 0) {
-    return noFixesAvailablePrompt
+    return (
+      noFixesAvailablePrompt +
+      skippedInteractiveFixesNotice(skippedInteractiveCount)
+    )
   }
 
   const criticalFixes = fixReport.CRITICAL?.aggregate?.count || 0
@@ -370,7 +383,7 @@ ${applyFixesPrompt({
   offset,
   limit,
   gqlClient,
-})}`
+})}${skippedInteractiveFixesNotice(skippedInteractiveCount)}`
 }
 
 const nextStepsPrompt = ({ scannedFiles }: { scannedFiles: string[] }) => `
@@ -422,6 +435,7 @@ export const fixesPrompt = ({
   scannedFiles,
   limit,
   gqlClient,
+  skippedInteractiveCount = 0,
 }: {
   fixes: McpFix[]
   totalCount: number
@@ -429,9 +443,13 @@ export const fixesPrompt = ({
   scannedFiles: string[]
   limit: number
   gqlClient: McpGQLClient
+  skippedInteractiveCount?: number
 }) => {
   if (totalCount === 0) {
-    return noFixesFoundPrompt({ scannedFiles })
+    return (
+      noFixesFoundPrompt({ scannedFiles }) +
+      skippedInteractiveFixesNotice(skippedInteractiveCount)
+    )
   }
 
   const shownCount = fixes.length
@@ -451,7 +469,7 @@ ${applyFixesPrompt({
   limit,
   gqlClient,
 })}
-
+${skippedInteractiveFixesNotice(skippedInteractiveCount)}
 ${nextStepsPrompt({ scannedFiles })}
 `
 }
@@ -533,10 +551,12 @@ export const freshFixesPrompt = ({
   fixes,
   limit,
   gqlClient,
+  skippedInteractiveCount = 0,
 }: {
   fixes: McpFix[]
   limit: number
   gqlClient: McpGQLClient
+  skippedInteractiveCount?: number
 }) => {
   return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
 
@@ -551,6 +571,7 @@ ${applyFixesPrompt({
   limit,
   gqlClient,
 })}
+${skippedInteractiveFixesNotice(skippedInteractiveCount)}
 `
 }
 
@@ -603,9 +624,11 @@ function formatSeverity(
 export const appliedFixesSummaryPrompt = ({
   fixes,
   gqlClient,
+  skippedInteractiveCount = 0,
 }: {
   fixes: McpFix[]
   gqlClient: McpGQLClient
+  skippedInteractiveCount?: number
 }) => {
   const fixIds = fixes.map((fix) => fix.id)
   void gqlClient.updateFixesDownloadStatus(fixIds)
@@ -652,11 +675,11 @@ ${fixes
 ${continuousMonitoringSection}
 
 ${autoFixSettingsSection}
-
+${skippedInteractiveFixesNotice(skippedInteractiveCount)}
 ## 📋 Next Steps
 
 1. **Review the changes** - Check the modified files to understand what was fixed
-2. **Test your application** - Ensure the fixes don't break existing functionality  
+2. **Test your application** - Ensure the fixes don't break existing functionality
 3. **Commit the changes** - Add and commit the security fixes to your repository
 4. **Continue coding** - Mobb will keep protecting your code automatically
 

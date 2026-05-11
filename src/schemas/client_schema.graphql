@@ -764,6 +764,9 @@ fragment FixDetails on fix {
     ... on FixData {
       patch
       patchOriginalEncodingBase64
+      questions {
+        name
+      }
       extraContext {
         extraContext {
           key

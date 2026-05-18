@@ -49,10 +49,3 @@ export const MCP_DEFAULT_REST_API_URL = 'https://api.mobb.ai/api/rest/mcp/track'
 
 // Timeout in ms for locating all MCP config files on the system
 export const MCP_SYSTEM_FIND_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
-
-// MOBB_MCP_DISABLE_INTERACTIVE_FILTER (env-only): when set to '1' or 'true',
-// disables the interactive-fix filter so fixes that require user input are
-// passed through as if they were non-interactive. Intended for canary
-// rollout, short-term operational rollback, and existing e2e/integration
-// fixtures that pre-date the filter. Read at call time inside
-// InteractiveFixFilter so tests can set it via process.env after module load.

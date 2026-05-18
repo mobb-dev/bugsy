@@ -13,6 +13,7 @@ import {
   GetAnalysisSubscriptionDocument,
   GetAnalysisSubscriptionSubscription,
   GetAnalysisSubscriptionSubscriptionVariables,
+  GetFixWithAnswersQuery,
   MeQuery,
   SubmitVulnerabilityReportMutation,
   SubmitVulnerabilityReportMutationVariables,
@@ -402,8 +403,8 @@ export class McpGQLClient extends GQLClient {
   }: {
     reportData: FixReportSummary | undefined
     limit: number
-  }): { applicableFixes: McpFix[]; skippedRuleIds: string[] } {
-    if (!reportData) return { applicableFixes: [], skippedRuleIds: [] }
+  }): { applicableFixes: McpFix[]; interactiveFixes: McpFix[] } {
+    if (!reportData) return { applicableFixes: [], interactiveFixes: [] }
 
     const reportMetadata = {
       id: reportData.id,
@@ -450,15 +451,13 @@ export class McpGQLClient extends GQLClient {
 
     const merged = Array.from(fixMap.values())
 
-    // Drop fixes that require user input that MCP cannot provide. Filter on
-    // the merged set (before applying the limit) so the limit is honored only
-    // for fixes that will actually be applied.
-    const { applicableFixes, skippedRuleIds } =
+    // Separate limits so interactive fixes don't consume the whole page (and vice versa).
+    const { applicableFixes, interactiveFixes } =
       partitionInteractiveFixes(merged)
 
     return {
       applicableFixes: applicableFixes.slice(0, limit),
-      skippedRuleIds,
+      interactiveFixes: interactiveFixes.slice(0, limit),
     }
   }
 
@@ -544,7 +543,7 @@ export class McpGQLClient extends GQLClient {
     fileFilter?: string[]
   }): Promise<{
     fixReport:
-      | (Omit<FixReportSummary, 'userFixes'> & { skippedRuleIds: string[] })
+      | (Omit<FixReportSummary, 'userFixes'> & { interactiveFixes: McpFix[] })
       | null
     expiredReport: { id: string; expirationOn?: string } | null
   }> {
@@ -593,17 +592,18 @@ export class McpGQLClient extends GQLClient {
       const latestReport =
         resp.fixReport?.[0] && FixReportSummarySchema.parse(resp.fixReport?.[0])
 
-      const { applicableFixes, skippedRuleIds } = this.mergeUserAndSystemFixes({
-        reportData: latestReport,
-        limit,
-      })
+      const { applicableFixes, interactiveFixes } =
+        this.mergeUserAndSystemFixes({
+          reportData: latestReport,
+          limit,
+        })
 
       return {
         fixReport: latestReport
           ? {
               ...latestReport,
               fixes: applicableFixes,
-              skippedRuleIds,
+              interactiveFixes,
             }
           : null,
         expiredReport: resp.expiredReport?.[0] || null,
@@ -634,7 +634,7 @@ export class McpGQLClient extends GQLClient {
     fileFilter?: string[]
   }): Promise<{
     fixes: McpFix[]
-    skippedRuleIds: string[]
+    interactiveFixes: McpFix[]
     totalCount: number
     expiredReport: { id: string; expirationOn?: string } | null
     fixReport?: {
@@ -706,19 +706,20 @@ export class McpGQLClient extends GQLClient {
 
       const latestReport = FixReportSummarySchema.parse(res.fixReport?.[0])
 
-      const { applicableFixes, skippedRuleIds } = this.mergeUserAndSystemFixes({
-        reportData: latestReport,
-        limit,
-      })
+      const { applicableFixes, interactiveFixes } =
+        this.mergeUserAndSystemFixes({
+          reportData: latestReport,
+          limit,
+        })
 
       logDebug('[GraphQL] GetReportFixes response parsed', {
         fixes: applicableFixes,
-        skippedCount: skippedRuleIds.length,
+        interactiveCount: interactiveFixes.length,
       })
 
       return {
         fixes: applicableFixes,
-        skippedRuleIds,
+        interactiveFixes,
         totalCount:
           res.fixReport?.[0]?.filteredFixesCount?.aggregate?.count || 0,
         expiredReport: res.expiredReport?.[0] || null,
@@ -735,6 +736,46 @@ export class McpGQLClient extends GQLClient {
       logError('[GraphQL] GetReportFixes failed', {
         error: e,
         reportId,
+        ...this.getErrorContext(),
+      })
+      throw e
+    }
+  }
+
+  /** Root getFix recomputes the patch; fix_by_pk.patchAndQuestions(userInput) does not (stale questions looked like cascading). */
+  async getFixWithAnswers({
+    fixId,
+    answers,
+  }: {
+    fixId: string
+    answers: { key: string; value: string }[]
+  }): Promise<{ fixData: GetFixWithAnswersQuery['fixData'] | null }> {
+    try {
+      logDebug('[GraphQL] Calling getFixWithAnswers query', {
+        fixId,
+        answerCount: answers.length,
+        userInput: answers,
+      })
+
+      const resp = await this._clientSdk.getFixWithAnswers({
+        fixId,
+        userInput: answers,
+      })
+
+      logDebug('[GraphQL] getFixWithAnswers successful', {
+        fixId,
+        responseTypename: resp.fixData?.__typename,
+        remainingQuestionKeys:
+          resp.fixData?.__typename === 'FixData'
+            ? resp.fixData.questions.map((q) => q.key)
+            : undefined,
+      })
+
+      return { fixData: resp.fixData ?? null }
+    } catch (e) {
+      logError('[GraphQL] getFixWithAnswers failed', {
+        error: e,
+        fixId,
         ...this.getErrorContext(),
       })
       throw e

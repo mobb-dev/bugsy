@@ -1,16 +1,16 @@
+import { FixQuestionInputType } from '../../features/analysis/scm/generates/client_generates'
+import storedQuestionDataLanguages from '../../features/analysis/scm/shared/src/storedQuestionData'
 import { McpGQLClient } from '../services/McpGQLClient'
 import {
   MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
   MCP_TOOL_FETCH_AVAILABLE_FIXES,
   MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
 } from '../tools/toolNames'
-import { FixReportSummary, type McpFix } from '../types'
+import { FixQuestion, FixReportSummary, type McpFix } from '../types'
 import { MCP_DEFAULT_LIMIT, MCP_DEFAULT_MAX_FILES_TO_SCAN } from './configs'
 
 function friendlyType(s: string) {
-  // First replace underscores with spaces
   const withoutUnderscores = s.replace(/_/g, ' ')
-  // Then handle camelCase by adding spaces before capital letters (but not at the start)
   const result = withoutUnderscores.replace(/([a-z])([A-Z])/g, '$1 $2')
   return result.charAt(0).toUpperCase() + result.slice(1)
 }
@@ -18,13 +18,157 @@ function friendlyType(s: string) {
 export const noFixesReturnedForParameters = `No fixes returned for the given offset and limit parameters.
 `
 
-export const skippedInteractiveFixesNotice = (skippedCount: number) => {
-  if (skippedCount <= 0) return ''
-  const s = skippedCount === 1 ? '' : 'es'
-  const verb = skippedCount === 1 ? 'requires' : 'require'
-  const wasWere = skippedCount === 1 ? 'was' : 'were'
-  return `\n## Skipped fixes\n\n${skippedCount} fix${s} ${verb} user input that is not available over MCP and ${wasWere} skipped. Mention this to the user when summarizing results.\n`
+/** Labels from storedQuestionData (fallback: question.name). Inline lookup avoids typing McpFix into guidances#getQuestionInformation. */
+const resolveQuestionText = ({
+  fix,
+  question,
+}: {
+  fix: McpFix
+  question: FixQuestion
+}): { content: string; description: string } => {
+  const language = fix.safeIssueLanguage ?? undefined
+  const issueType = fix.safeIssueType ?? undefined
+  if (!language || !issueType) {
+    return { content: question.name, description: '' }
+  }
+  const item =
+    storedQuestionDataLanguages[language]?.[issueType]?.[question.name]
+  if (!item) {
+    return { content: question.name, description: '' }
+  }
+  const args = question.extraContext.reduce<Record<string, unknown>>(
+    (acc, ctx) => {
+      acc[ctx.key] = ctx.value
+      return acc
+    },
+    {}
+  )
+  try {
+    return {
+      content: item.content(args) || question.name,
+      description: item.description(args) || '',
+    }
+  } catch {
+    return { content: question.name, description: '' }
+  }
 }
+
+const formatQuestionInputContract = (question: FixQuestion): string => {
+  switch (question.inputType) {
+    case FixQuestionInputType.Select:
+      return `Pick exactly ONE of: ${question.options
+        .map((o) => `\`${o}\``)
+        .join(', ')}`
+    case FixQuestionInputType.Number:
+      return 'Provide a numeric string (e.g. "60").'
+    case FixQuestionInputType.Text:
+      return 'Provide a free-form string (or an empty string to accept the default).'
+  }
+}
+
+const renderInteractiveFix = (fix: McpFix, index: number): string => {
+  if (fix.patchAndQuestions.__typename !== 'FixData') return ''
+  const { questions, extraContext } = fix.patchAndQuestions
+  const vulnerabilityType = friendlyType(fix.safeIssueType ?? 'Unknown')
+  const questionsBlock = questions
+    .slice()
+    .sort((a, b) => a.index - b.index)
+    .map((q, qIdx) => {
+      const { content, description } = resolveQuestionText({ fix, question: q })
+      const desc = description ? `\n  *Why it matters:* ${description}` : ''
+      const defaultLine = q.defaultValue
+        ? `\n  *Default if you don't decide:* \`${q.defaultValue}\``
+        : ''
+      return `${qIdx + 1}. **\`${q.key}\`** — ${content}
+  *Input:* ${formatQuestionInputContract(q)}${defaultLine}${desc}`
+    })
+    .join('\n\n')
+
+  return `### Interactive fix ${index + 1}: ${vulnerabilityType}
+
+**Fix id:** \`${fix.id}\`
+**Description:** ${extraContext?.fixDescription || 'Security vulnerability fix that requires answers before it can be tailored.'}
+
+**Questions you must answer before this fix can be applied:**
+
+${questionsBlock}
+`
+}
+
+export const interactiveFixesPrompt = ({
+  interactiveFixes,
+  repositoryPath,
+}: {
+  interactiveFixes: McpFix[]
+  repositoryPath: string
+}): string => {
+  if (interactiveFixes.length === 0) return ''
+  const fixesBlock = interactiveFixes
+    .map((fix, idx) => renderInteractiveFix(fix, idx))
+    .join('\n---\n')
+
+  return `\n## Interactive fixes — decide from code, then apply or abstain
+
+The Mobb backend produced ${interactiveFixes.length} fix${
+    interactiveFixes.length === 1 ? '' : 'es'
+  } that need context before the patch can be tailored. **Infer answers only from the real code**: touched files, imports, framework, and how untrusted data flows (SSR/XSS/PT/SSRF, etc.). **Do NOT ask the end user** — use tooling/read-only repo inspection only.
+
+### CRITICAL INSTRUCTIONS — READ CAREFULLY
+
+1. **Defaults are hints from Mobb, not autopilot.** The line *Default if you don't decide* shows what the backend would fall back to. Prefer answers **consistent with the codebase**. Do **not** pick an answer **only** because it equals that default — a mismatched default can produce the wrong tailored patch.
+2. **Time budget — ~5 seconds per interactive fix, as one shared pool.** With ${interactiveFixes.length} interactive fix${interactiveFixes.length === 1 ? '' : 'es'} above, spend **at most ~${interactiveFixes.length * 5} seconds total** inspecting the codebase before re-calling \`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\` with \`interactiveAnswers\`. The budget is a pool — one fix may take 8s if it's genuinely ambiguous while another takes 2s if the call site is obvious, as long as the total stays near the bound. If a fix is still uncertain when its share runs out, **omit it from \`interactiveAnswers\`** (rule 4) rather than over-deliberating.
+3. **Confidence required.** Include in \`interactiveAnswers\` **only** fixes where your answers are justified by what you see in code (exact SELECT strings where applicable).
+4. **Abstain rather than guess.** If you **cannot** justify any responsible answer after inspecting the code (ambiguous flows, missing callers, isomorphic bundles, unclear SSRF allowlists, etc.), **omit that fix id entirely** from \`interactiveAnswers\`. Tell the user in prose what was skipped and why so they can fix manually or follow up later — **do not fabricate answers**.
+5. **Skipping everything.** If you skip **all** interactive fixes, still call **\`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\`** once with \`"interactiveAnswers": []\` (empty array) together with \`path\`. That acknowledges abstention **without** starting a new scan. Omitting \`interactiveAnswers\` entirely falls back to scan mode instead — avoid that when you intend purely to abstain.
+6. **Use exact option strings for SELECT questions.** Copy them character-for-character from the option list. Do **not** append explanation, rationale, or commentary to the value — that turns the answer into a non-matching string and the backend silently falls back to its default.
+7. **Use the \`key\` verbatim, not the human label.** Each question shows a backtick-quoted key (e.g. \`is_server_side_code\`, \`tainted_term_type\`). That exact string goes into \`answers[].key\`. The display name (e.g. \`isServerSideCode\`, \`taintedTermType\`) is for humans only — sending it as a key means the backend won't recognise the answer and falls back to the default.
+8. **After the tool call**, summarize: fixes applied with reasoning; fixes skipped (confidence/abstention/time-budget); tool failures.
+
+### Decision heuristics for common questions
+
+(Keys shown in snake_case — copy them verbatim from each fix's question block.)
+
+- **\`is_server_side_code\` (XSS)** — \`yes\` when server-render or Node HTTP handlers dominate; \`no\` when clearly browser-only. If bundle/context is genuinely ambiguous after inspection, **omit** this fix from \`interactiveAnswers\`.
+- **\`tainted_term_type\` (Path Traversal)** — match how user input is joined/consumed (single filename vs path segments vs absolute). If usage cannot be determined, **omit**.
+- **\`iframe_restrictions\`** — strict sandbox (\`""\`) unless embedded content clearly needs listed capabilities.
+
+### How to call \`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\`
+
+Apply fixes you are confident about (subset allowed):
+
+\`\`\`json
+{
+  "path": "${repositoryPath}",
+  "interactiveAnswers": [
+    {
+      "fixId": "<fix id from below>",
+      "answers": [
+        { "key": "<question key, exactly as shown>", "value": "<your decided value>" }
+      ]
+    }
+  ]
+}
+\`\`\`
+
+Explicit abstention — skip **all** interactive fixes without rescanning:
+
+\`\`\`json
+{
+  "path": "${repositoryPath}",
+  "interactiveAnswers": []
+}
+\`\`\`
+
+${fixesBlock}
+`
+}
+
+/** Shown when the model calls apply-with-answers with an empty interactiveAnswers array (abstain from all; no rescan). */
+export const interactiveAnswersAbstainAllToolResponse = `## Interactive fixes — none applied
+
+\`interactiveAnswers\` was an empty array: **no** tailored patches were requested and **no** scan was run.
+
+State clearly for the user which interactive fixes you **skipped**, why the code did not support a confident answer, and that they can apply those manually or re-run after clarifying the codebase.`
 
 export const noFixesReturnedForParametersWithGuidance = ({
   offset,
@@ -91,6 +235,7 @@ export const applyFixesPrompt = ({
   offset,
   limit,
   gqlClient,
+  hasInteractiveFixes = false,
 }: {
   fixes: McpFix[]
   hasMore: boolean
@@ -101,8 +246,15 @@ export const applyFixesPrompt = ({
   offset: number
   limit: number
   gqlClient: McpGQLClient
+  hasInteractiveFixes?: boolean
 }) => {
   if (fixes.length === 0) {
+    // When this page has no auto-applicable fixes but the response carries
+    // interactive ones, suppress the "no fixes returned / offset beyond range"
+    // guidance — the interactive block tells the agent what to do next.
+    if (hasInteractiveFixes) {
+      return ''
+    }
     if (totalCount > 0) {
       return noFixesReturnedForParametersWithGuidance({
         offset,
@@ -317,21 +469,24 @@ export const fixesFoundPrompt = ({
   offset,
   limit,
   gqlClient,
-  skippedInteractiveCount = 0,
+  interactiveFixes = [],
+  repositoryPath,
 }: {
   fixReport: Omit<FixReportSummary, 'userFixes'>
   offset: number
   limit: number
   gqlClient: McpGQLClient
-  skippedInteractiveCount?: number
+  interactiveFixes?: McpFix[]
+  repositoryPath: string
 }) => {
   const totalFixes = fixReport.filteredFixesCount.aggregate?.count || 0
+  const interactiveBlock = interactiveFixesPrompt({
+    interactiveFixes,
+    repositoryPath,
+  })
 
   if (totalFixes === 0) {
-    return (
-      noFixesAvailablePrompt +
-      skippedInteractiveFixesNotice(skippedInteractiveCount)
-    )
+    return noFixesAvailablePrompt + interactiveBlock
   }
 
   const criticalFixes = fixReport.CRITICAL?.aggregate?.count || 0
@@ -383,7 +538,8 @@ ${applyFixesPrompt({
   offset,
   limit,
   gqlClient,
-})}${skippedInteractiveFixesNotice(skippedInteractiveCount)}`
+  hasInteractiveFixes: interactiveFixes.length > 0,
+})}${interactiveBlock}`
 }
 
 const nextStepsPrompt = ({ scannedFiles }: { scannedFiles: string[] }) => `
@@ -435,7 +591,8 @@ export const fixesPrompt = ({
   scannedFiles,
   limit,
   gqlClient,
-  skippedInteractiveCount = 0,
+  interactiveFixes = [],
+  repositoryPath,
 }: {
   fixes: McpFix[]
   totalCount: number
@@ -443,13 +600,16 @@ export const fixesPrompt = ({
   scannedFiles: string[]
   limit: number
   gqlClient: McpGQLClient
-  skippedInteractiveCount?: number
+  interactiveFixes?: McpFix[]
+  repositoryPath: string
 }) => {
+  const interactiveBlock = interactiveFixesPrompt({
+    interactiveFixes,
+    repositoryPath,
+  })
+
   if (totalCount === 0) {
-    return (
-      noFixesFoundPrompt({ scannedFiles }) +
-      skippedInteractiveFixesNotice(skippedInteractiveCount)
-    )
+    return noFixesFoundPrompt({ scannedFiles }) + interactiveBlock
   }
 
   const shownCount = fixes.length
@@ -468,8 +628,9 @@ ${applyFixesPrompt({
   offset,
   limit,
   gqlClient,
+  hasInteractiveFixes: interactiveFixes.length > 0,
 })}
-${skippedInteractiveFixesNotice(skippedInteractiveCount)}
+${interactiveBlock}
 ${nextStepsPrompt({ scannedFiles })}
 `
 }
@@ -551,12 +712,14 @@ export const freshFixesPrompt = ({
   fixes,
   limit,
   gqlClient,
-  skippedInteractiveCount = 0,
+  interactiveFixes = [],
+  repositoryPath,
 }: {
   fixes: McpFix[]
   limit: number
   gqlClient: McpGQLClient
-  skippedInteractiveCount?: number
+  interactiveFixes?: McpFix[]
+  repositoryPath: string
 }) => {
   return `Here are the fresh fixes to the vulnerabilities discovered by Mobb MCP
 
@@ -570,8 +733,9 @@ ${applyFixesPrompt({
   offset: 0,
   limit,
   gqlClient,
+  hasInteractiveFixes: interactiveFixes.length > 0,
 })}
-${skippedInteractiveFixesNotice(skippedInteractiveCount)}
+${interactiveFixesPrompt({ interactiveFixes, repositoryPath })}
 `
 }
 
@@ -624,11 +788,13 @@ function formatSeverity(
 export const appliedFixesSummaryPrompt = ({
   fixes,
   gqlClient,
-  skippedInteractiveCount = 0,
+  interactiveFixes = [],
+  repositoryPath,
 }: {
   fixes: McpFix[]
   gqlClient: McpGQLClient
-  skippedInteractiveCount?: number
+  interactiveFixes?: McpFix[]
+  repositoryPath: string
 }) => {
   const fixIds = fixes.map((fix) => fix.id)
   void gqlClient.updateFixesDownloadStatus(fixIds)
@@ -675,7 +841,7 @@ ${fixes
 ${continuousMonitoringSection}
 
 ${autoFixSettingsSection}
-${skippedInteractiveFixesNotice(skippedInteractiveCount)}
+${interactiveFixesPrompt({ interactiveFixes, repositoryPath })}
 ## 📋 Next Steps
 
 1. **Review the changes** - Check the modified files to understand what was fixed

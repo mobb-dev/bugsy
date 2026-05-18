@@ -15,9 +15,23 @@ const ADO_PAT_PATTERN: PIIPattern = {
   validator: (match: string) => match.length >= 52 && match.length <= 100,
 }
 
+// Datadog Application Keys are prefixed with `ddapp_` followed by 30+
+// alphanumeric chars. The prefix is unique enough to anchor on without
+// entropy checks — `GENERIC_API_KEY` was missing this format because it
+// triggers on labels like "api key" / "apikey" but not the "Application
+// Key" label Datadog's UI uses.
+const DATADOG_APP_KEY_PATTERN: PIIPattern = {
+  type: 'DATADOG_APP_KEY',
+  regex: /\bddapp_[a-zA-Z0-9]{30,}\b/g,
+  priority: 95,
+  placeholder: '[DATADOG_APP_KEY_{n}]',
+  description: 'Datadog Application Key',
+  severity: 'high',
+}
+
 // Initialize OpenRedaction with comprehensive PII and secrets patterns while avoiding false-positive-prone patterns
 const openRedaction = new OpenRedaction({
-  customPatterns: [ADO_PAT_PATTERN],
+  customPatterns: [ADO_PAT_PATTERN, DATADOG_APP_KEY_PATTERN],
   patterns: [
     // Core Personal Data
     // Removed EMAIL - causes false positives in code/test snippets (e.g. --author="Eve Author <eve@example.com>")

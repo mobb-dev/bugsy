@@ -477,6 +477,7 @@ export type DeveloperStatistic = {
   aiLinesCount: Scalars['Int']['output'];
   aiLinesInMergedPrs: Scalars['Int']['output'];
   autocompleteLinesCount: Scalars['Int']['output'];
+  availableMcps: Array<Scalars['String']['output']>;
   availableSkills: Array<Scalars['String']['output']>;
   computerName?: Maybe<Scalars['String']['output']>;
   groupId?: Maybe<Scalars['String']['output']>;
@@ -490,6 +491,7 @@ export type DeveloperStatistic = {
   mainTool?: Maybe<Scalars['String']['output']>;
   totalOriginalLines: Scalars['Int']['output'];
   totalSurvivedLines: Scalars['Int']['output'];
+  usedMcps: Array<Scalars['String']['output']>;
   usedSkills: Array<Scalars['String']['output']>;
   userName: Scalars['String']['output'];
 };
@@ -839,6 +841,20 @@ export type GetLinearIntegrationDataSuccess = {
   teamId?: Maybe<Scalars['String']['output']>;
 };
 
+export type GetOrgMcpServersError = {
+  __typename?: 'GetOrgMcpServersError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetOrgMcpServersResponse = GetOrgMcpServersError | GetOrgMcpServersSuccess;
+
+export type GetOrgMcpServersSuccess = {
+  __typename?: 'GetOrgMcpServersSuccess';
+  mcpServers: Array<OrgMcpServer>;
+  status: Status;
+};
+
 export type GetOrgSkillsError = {
   __typename?: 'GetOrgSkillsError';
   error?: Maybe<Scalars['String']['output']>;
@@ -875,6 +891,108 @@ export type GetReposSuccess = {
   repos: Array<ScmRepo>;
   status: Status;
   totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type GetRepositoryAiAgentStatsError = {
+  __typename?: 'GetRepositoryAiAgentStatsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryAiAgentStatsResponse = GetRepositoryAiAgentStatsError | GetRepositoryAiAgentStatsSuccess;
+
+export type GetRepositoryAiAgentStatsSuccess = {
+  __typename?: 'GetRepositoryAiAgentStatsSuccess';
+  agentStats: Array<RepositoryAiAgentStat>;
+  status: Status;
+};
+
+export type GetRepositoryDistinctAiAgentsCountError = {
+  __typename?: 'GetRepositoryDistinctAiAgentsCountError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryDistinctAiAgentsCountResponse = GetRepositoryDistinctAiAgentsCountError | GetRepositoryDistinctAiAgentsCountSuccess;
+
+export type GetRepositoryDistinctAiAgentsCountSuccess = {
+  __typename?: 'GetRepositoryDistinctAiAgentsCountSuccess';
+  /** Sorted unique agent_key values (tool_name when set, else tracy_platform); same keys as the count. */
+  distinctAiAgents: Array<Scalars['String']['output']>;
+  distinctAiAgentsCount: Scalars['Int']['output'];
+  status: Status;
+};
+
+export type GetRepositoryDistinctDevelopersWithAiCountError = {
+  __typename?: 'GetRepositoryDistinctDevelopersWithAiCountError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryDistinctDevelopersWithAiCountResponse = GetRepositoryDistinctDevelopersWithAiCountError | GetRepositoryDistinctDevelopersWithAiCountSuccess;
+
+export type GetRepositoryDistinctDevelopersWithAiCountSuccess = {
+  __typename?: 'GetRepositoryDistinctDevelopersWithAiCountSuccess';
+  distinctDevelopersWithAiCount: Scalars['Int']['output'];
+  status: Status;
+};
+
+export type GetRepositoryDistinctModelsCountError = {
+  __typename?: 'GetRepositoryDistinctModelsCountError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryDistinctModelsCountResponse = GetRepositoryDistinctModelsCountError | GetRepositoryDistinctModelsCountSuccess;
+
+export type GetRepositoryDistinctModelsCountSuccess = {
+  __typename?: 'GetRepositoryDistinctModelsCountSuccess';
+  /** Sorted unique non-empty model strings on deduped line rows (same cohort as distinct agents). */
+  distinctModels: Array<Scalars['String']['output']>;
+  distinctModelsCount: Scalars['Int']['output'];
+  status: Status;
+};
+
+export type GetRepositoryDistinctSkillsCountError = {
+  __typename?: 'GetRepositoryDistinctSkillsCountError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryDistinctSkillsCountResponse = GetRepositoryDistinctSkillsCountError | GetRepositoryDistinctSkillsCountSuccess;
+
+export type GetRepositoryDistinctSkillsCountSuccess = {
+  __typename?: 'GetRepositoryDistinctSkillsCountSuccess';
+  distinctSkillsCount: Scalars['Int']['output'];
+  status: Status;
+};
+
+export type GetRepositoryModelStatsError = {
+  __typename?: 'GetRepositoryModelStatsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryModelStatsResponse = GetRepositoryModelStatsError | GetRepositoryModelStatsSuccess;
+
+export type GetRepositoryModelStatsSuccess = {
+  __typename?: 'GetRepositoryModelStatsSuccess';
+  modelStats: Array<RepositoryModelStat>;
+  status: Status;
+};
+
+export type GetRepositorySkillStatsError = {
+  __typename?: 'GetRepositorySkillStatsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositorySkillStatsResponse = GetRepositorySkillStatsError | GetRepositorySkillStatsSuccess;
+
+export type GetRepositorySkillStatsSuccess = {
+  __typename?: 'GetRepositorySkillStatsSuccess';
+  skillStats: Array<RepositorySkillStat>;
+  status: Status;
 };
 
 export type GetRoiTrendsTimeSeriesError = {
@@ -1108,6 +1226,14 @@ export type OpenSecuritySkillPrResult = {
   skillId: Scalars['ID']['output'];
 };
 
+export type OrgMcpServer = {
+  __typename?: 'OrgMcpServer';
+  firstSeen?: Maybe<Scalars['String']['output']>;
+  installationCount: Scalars['Int']['output'];
+  invocationCount: Scalars['Int']['output'];
+  mcpServer: Scalars['String']['output'];
+};
+
 export type OrgSkill = {
   __typename?: 'OrgSkill';
   contextFileId?: Maybe<Scalars['String']['output']>;
@@ -1302,6 +1428,36 @@ export type ReportValidationError = BaseError & {
   __typename?: 'ReportValidationError';
   error?: Maybe<Scalars['String']['output']>;
   status: Status;
+};
+
+export type RepositoryAiAgentStat = {
+  __typename?: 'RepositoryAiAgentStat';
+  agentKey: Scalars['String']['output'];
+  firstSeen?: Maybe<Scalars['String']['output']>;
+  lastSeen?: Maybe<Scalars['String']['output']>;
+  linesAttributed: Scalars['Int']['output'];
+  prCount: Scalars['Int']['output'];
+  sessionCount: Scalars['Int']['output'];
+};
+
+export type RepositoryModelStat = {
+  __typename?: 'RepositoryModelStat';
+  firstSeen?: Maybe<Scalars['String']['output']>;
+  lastSeen?: Maybe<Scalars['String']['output']>;
+  linesAttributed: Scalars['Int']['output'];
+  modelKey: Scalars['String']['output'];
+  prCount: Scalars['Int']['output'];
+  sessionCount: Scalars['Int']['output'];
+};
+
+export type RepositorySkillStat = {
+  __typename?: 'RepositorySkillStat';
+  firstSeen?: Maybe<Scalars['String']['output']>;
+  lastSeen?: Maybe<Scalars['String']['output']>;
+  linesAttributed?: Maybe<Scalars['Int']['output']>;
+  prCount: Scalars['Int']['output'];
+  sessionCount: Scalars['Int']['output'];
+  skillName: Scalars['String']['output'];
 };
 
 export type ResendInvitationResponse = {
@@ -1851,6 +2007,14 @@ export type TracyContextFile = {
   uploadedAt?: Maybe<Scalars['String']['output']>;
 };
 
+export type TracyConversationTurn = {
+  __typename?: 'TracyConversationTurn';
+  content: Scalars['String']['output'];
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  role: Scalars['String']['output'];
+};
+
 export type TracyDecision = {
   __typename?: 'TracyDecision';
   eventIndex: Scalars['Int']['output'];
@@ -1995,6 +2159,28 @@ export type TracySessionContext = {
   rules: Array<TracyRule>;
 };
 
+/**
+ * Phase-2 detail returned by getTracySessionDetail. Phase-1 fields
+ * (title, userName, platform, mainModel, startedAt, endedAt,
+ * durationSeconds, tokens, prUrl, aiSummary) live on Hasura's
+ * tracy_tracy_session table and are queried directly by the frontend.
+ */
+export type TracySessionDetailResponse = {
+  __typename?: 'TracySessionDetailResponse';
+  context?: Maybe<TracySessionContext>;
+  conversation?: Maybe<Array<TracyConversationTurn>>;
+  finalPlan?: Maybe<Scalars['String']['output']>;
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  mcpCalls?: Maybe<Array<TracyMcpCall>>;
+  models?: Maybe<Array<Scalars['String']['output']>>;
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  planningPhaseCount?: Maybe<Scalars['Int']['output']>;
+  sessionId: Scalars['String']['output'];
+  summary?: Maybe<TracyPromptSummary>;
+  summaryStatus: TracySummaryStatus;
+  tokensByModel?: Maybe<Array<TracyModelTokensEntry>>;
+};
+
 export type TracySessionEventEntry = {
   __typename?: 'TracySessionEventEntry';
   content?: Maybe<Scalars['String']['output']>;
@@ -2004,6 +2190,12 @@ export type TracySessionEventEntry = {
   outputTokens: Scalars['Int']['output'];
   recordType: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+export type TracySessionMcpActivity = {
+  __typename?: 'TracySessionMcpActivity';
+  availableServers: Array<Scalars['String']['output']>;
+  invokedTools: Array<TracyMcpCall>;
 };
 
 export type TracySessionMetadata = {
@@ -2044,6 +2236,32 @@ export type TracySessionResponse = {
   tokensByModel: Array<TracyModelTokensEntry>;
   userName: Scalars['String']['output'];
 };
+
+/**
+ * Lightweight response from the polling endpoint. Caller already has the
+ * detail loaded from getTracySessionDetail; only summary + status here.
+ */
+export type TracySessionSummaryResponse = {
+  __typename?: 'TracySessionSummaryResponse';
+  sessionId: Scalars['String']['output'];
+  summary?: Maybe<TracyPromptSummary>;
+  summaryStatus: TracySummaryStatus;
+};
+
+/**
+ * State of the LLM-generated summary cache for a session.
+ *   - READY: summary is populated in the response.
+ *   - GENERATING: cache miss; background generation kicked off; client
+ *     should poll getTracySessionSummary until READY (or until the
+ *     polling budget expires).
+ *   - UNAVAILABLE: session has no events to summarize, or generation
+ *     has terminally failed for this revision.
+ */
+export enum TracySummaryStatus {
+  Generating = 'GENERATING',
+  Ready = 'READY',
+  Unavailable = 'UNAVAILABLE'
+}
 
 export type TriggerBackfillResult = {
   __typename?: 'TriggerBackfillResult';
@@ -20454,6 +20672,8 @@ export enum IssueType_Enum {
   NoVar = 'NO_VAR',
   /** Null Dereference */
   NullDereference = 'NULL_DEREFERENCE',
+  /** OFTEN_MISUSED_BOOLEAN_GET_BOOLEAN */
+  OftenMisusedBooleanGetBoolean = 'OFTEN_MISUSED_BOOLEAN_GET_BOOLEAN',
   /** Open Redirect */
   OpenRedirect = 'OPEN_REDIRECT',
   /** The catch block handles a broad swath of exceptions, potentially trapping dissimilar issues or problems that should not be dealt with at this point in the program */
@@ -21164,10 +21384,18 @@ export type Mutation_Root = {
   delete_tracy_tracy_sec_skill_by_pk?: Maybe<Tracy_Tracy_Sec_Skill>;
   /** delete data from the table: "tracy.tracy_session" */
   delete_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** delete data from the table: "tracy.tracy_session_available_mcp" */
+  delete_tracy_tracy_session_available_mcp?: Maybe<Tracy_Tracy_Session_Available_Mcp_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_session_available_mcp" */
+  delete_tracy_tracy_session_available_mcp_by_pk?: Maybe<Tracy_Tracy_Session_Available_Mcp>;
   /** delete data from the table: "tracy.tracy_session_available_skill" */
   delete_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_session" */
   delete_tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** delete data from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  delete_tracy_tracy_session_invoked_mcp_tool?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Mutation_Response>;
+  /** delete single row from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  delete_tracy_tracy_session_invoked_mcp_tool_by_pk?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** delete data from the table: "tracy.tracy_session_used_skill" */
   delete_tracy_tracy_session_used_skill?: Maybe<Tracy_Tracy_Session_Used_Skill_Mutation_Response>;
   /** delete single row from the table: "tracy.tracy_session_used_skill" */
@@ -21681,10 +21909,18 @@ export type Mutation_Root = {
   insert_tracy_tracy_sec_skill_one?: Maybe<Tracy_Tracy_Sec_Skill>;
   /** insert data into the table: "tracy.tracy_session" */
   insert_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** insert data into the table: "tracy.tracy_session_available_mcp" */
+  insert_tracy_tracy_session_available_mcp?: Maybe<Tracy_Tracy_Session_Available_Mcp_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_session_available_mcp" */
+  insert_tracy_tracy_session_available_mcp_one?: Maybe<Tracy_Tracy_Session_Available_Mcp>;
   /** insert data into the table: "tracy.tracy_session_available_skill" */
   insert_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
   /** insert a single row into the table: "tracy.tracy_session_available_skill" */
   insert_tracy_tracy_session_available_skill_one?: Maybe<Tracy_Tracy_Session_Available_Skill>;
+  /** insert data into the table: "tracy.tracy_session_invoked_mcp_tool" */
+  insert_tracy_tracy_session_invoked_mcp_tool?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Mutation_Response>;
+  /** insert a single row into the table: "tracy.tracy_session_invoked_mcp_tool" */
+  insert_tracy_tracy_session_invoked_mcp_tool_one?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** insert a single row into the table: "tracy.tracy_session" */
   insert_tracy_tracy_session_one?: Maybe<Tracy_Tracy_Session>;
   /** insert data into the table: "tracy.tracy_session_used_skill" */
@@ -21788,6 +22024,8 @@ export type Mutation_Root = {
   submitCheckmarxVulnerabilityReport?: Maybe<SubmitCheckmarxVulnerabilityReportResponse>;
   submitExternalVulnerabilityReport: VulnerabilityReportResponse;
   submitVulnerabilityReport: VulnerabilityReportResponse;
+  /** execute VOLATILE function "tracy.upsert_session_invoked_mcp_tools" which returns "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_upsert_session_invoked_mcp_tools: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** execute VOLATILE function "tracy.upsert_tracy_session" which returns "tracy.tracy_session" */
   tracy_upsert_tracy_session: Array<Tracy_Tracy_Session>;
   /** Admin only. Queue main-branch survival computation for one repo (RabbitMQ). */
@@ -22419,12 +22657,24 @@ export type Mutation_Root = {
   update_tracy_tracy_sec_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Sec_Skill_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_session" */
   update_tracy_tracy_session?: Maybe<Tracy_Tracy_Session_Mutation_Response>;
+  /** update data of the table: "tracy.tracy_session_available_mcp" */
+  update_tracy_tracy_session_available_mcp?: Maybe<Tracy_Tracy_Session_Available_Mcp_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_session_available_mcp" */
+  update_tracy_tracy_session_available_mcp_by_pk?: Maybe<Tracy_Tracy_Session_Available_Mcp>;
+  /** update multiples rows of table: "tracy.tracy_session_available_mcp" */
+  update_tracy_tracy_session_available_mcp_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Available_Mcp_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_session_available_skill" */
   update_tracy_tracy_session_available_skill?: Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>;
   /** update multiples rows of table: "tracy.tracy_session_available_skill" */
   update_tracy_tracy_session_available_skill_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Available_Skill_Mutation_Response>>>;
   /** update single row of the table: "tracy.tracy_session" */
   update_tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** update data of the table: "tracy.tracy_session_invoked_mcp_tool" */
+  update_tracy_tracy_session_invoked_mcp_tool?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Mutation_Response>;
+  /** update single row of the table: "tracy.tracy_session_invoked_mcp_tool" */
+  update_tracy_tracy_session_invoked_mcp_tool_by_pk?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+  /** update multiples rows of table: "tracy.tracy_session_invoked_mcp_tool" */
+  update_tracy_tracy_session_invoked_mcp_tool_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Mutation_Response>>>;
   /** update multiples rows of table: "tracy.tracy_session" */
   update_tracy_tracy_session_many?: Maybe<Array<Maybe<Tracy_Tracy_Session_Mutation_Response>>>;
   /** update data of the table: "tracy.tracy_session_used_skill" */
@@ -23955,6 +24205,19 @@ export type Mutation_RootDelete_Tracy_Tracy_SessionArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Available_McpArgs = {
+  where: Tracy_Tracy_Session_Available_Mcp_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Available_Mcp_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Session_Available_SkillArgs = {
   where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
 };
@@ -23963,6 +24226,20 @@ export type Mutation_RootDelete_Tracy_Tracy_Session_Available_SkillArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Tracy_Tracy_Session_By_PkArgs = {
   id: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Invoked_Mcp_ToolArgs = {
+  where: Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Tracy_Tracy_Session_Invoked_Mcp_Tool_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  mcpTool: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
 };
 
 
@@ -25686,6 +25963,20 @@ export type Mutation_RootInsert_Tracy_Tracy_SessionArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Available_McpArgs = {
+  objects: Array<Tracy_Tracy_Session_Available_Mcp_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Available_Mcp_OneArgs = {
+  object: Tracy_Tracy_Session_Available_Mcp_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Tracy_Tracy_Session_Available_SkillArgs = {
   objects: Array<Tracy_Tracy_Session_Available_Skill_Insert_Input>;
   on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Skill_On_Conflict>;
@@ -25696,6 +25987,20 @@ export type Mutation_RootInsert_Tracy_Tracy_Session_Available_SkillArgs = {
 export type Mutation_RootInsert_Tracy_Tracy_Session_Available_Skill_OneArgs = {
   object: Tracy_Tracy_Session_Available_Skill_Insert_Input;
   on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Skill_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Invoked_Mcp_ToolArgs = {
+  objects: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Insert_Input>;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Tracy_Tracy_Session_Invoked_Mcp_Tool_OneArgs = {
+  object: Tracy_Tracy_Session_Invoked_Mcp_Tool_Insert_Input;
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_On_Conflict>;
 };
 
 
@@ -26138,6 +26443,17 @@ export type Mutation_RootSubmitVulnerabilityReportArgs = {
   scanSource: Scalars['String']['input'];
   sha?: InputMaybe<Scalars['String']['input']>;
   vulnerabilityReportFileName?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootTracy_Upsert_Session_Invoked_Mcp_ToolsArgs = {
+  args: Tracy_Upsert_Session_Invoked_Mcp_Tools_Args;
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
 };
 
 
@@ -28359,6 +28675,26 @@ export type Mutation_RootUpdate_Tracy_Tracy_SessionArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_McpArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Set_Input>;
+  where: Tracy_Tracy_Session_Available_Mcp_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Mcp_By_PkArgs = {
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Set_Input>;
+  pk_columns: Tracy_Tracy_Session_Available_Mcp_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_Mcp_ManyArgs = {
+  updates: Array<Tracy_Tracy_Session_Available_Mcp_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Tracy_Tracy_Session_Available_SkillArgs = {
   _set?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Set_Input>;
   where: Tracy_Tracy_Session_Available_Skill_Bool_Exp;
@@ -28376,6 +28712,28 @@ export type Mutation_RootUpdate_Tracy_Tracy_Session_By_PkArgs = {
   _inc?: InputMaybe<Tracy_Tracy_Session_Inc_Input>;
   _set?: InputMaybe<Tracy_Tracy_Session_Set_Input>;
   pk_columns: Tracy_Tracy_Session_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Invoked_Mcp_ToolArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Inc_Input>;
+  _set?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Set_Input>;
+  where: Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Invoked_Mcp_Tool_By_PkArgs = {
+  _inc?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Inc_Input>;
+  _set?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Set_Input>;
+  pk_columns: Tracy_Tracy_Session_Invoked_Mcp_Tool_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Tracy_Tracy_Session_Invoked_Mcp_Tool_ManyArgs = {
+  updates: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Updates>;
 };
 
 
@@ -29201,6 +29559,13 @@ export type Organization = {
   repoContributors: Array<Repo_Contributor>;
   /** An aggregate relationship */
   repoContributors_aggregate: Repo_Contributor_Aggregate;
+  repositoryAiAgentStats: GetRepositoryAiAgentStatsResponse;
+  repositoryDistinctAiAgentsCount: GetRepositoryDistinctAiAgentsCountResponse;
+  repositoryDistinctDevelopersWithAiCount: GetRepositoryDistinctDevelopersWithAiCountResponse;
+  repositoryDistinctModelsCount: GetRepositoryDistinctModelsCountResponse;
+  repositoryDistinctSkillsCount: GetRepositoryDistinctSkillsCountResponse;
+  repositoryModelStats: GetRepositoryModelStatsResponse;
+  repositorySkillStats: GetRepositorySkillStatsResponse;
   /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
   /** A computed field, executes function "organization_review_time_stats" */
@@ -29605,6 +29970,62 @@ export type OrganizationRepoContributors_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Repo_Contributor_Order_By>>;
   where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryAiAgentStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryDistinctAiAgentsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryDistinctDevelopersWithAiCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryDistinctModelsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryDistinctSkillsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryModelStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositorySkillStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -32087,6 +32508,7 @@ export type PercentAiCodeStats_Organization_Args = {
 
 export type PercentPrsWithAiStats_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
+  repository_url?: InputMaybe<Scalars['String']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -34444,6 +34866,14 @@ export type Query_Root = {
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
   /**
+   * Get aggregated MCP-server data for the organization. Per-server: first
+   * seen date, installation count (distinct users who had the server
+   * declared in their MCP config), invocation count (distinct sessions
+   * where at least one tool of that server was actually invoked). Mirror
+   * of getOrgSkills.
+   */
+  getOrgMcpServers: GetOrgMcpServersResponse;
+  /**
    * Get aggregated skill data for all skills observed across the organization.
    * Returns per-skill: first seen date, installation count (unique users), invocation count
    * (unique sessions where skill was used), scan verdict, and quarantine status.
@@ -34465,6 +34895,30 @@ export type Query_Root = {
    */
   getPromptSummary: GetPromptSummaryResponse;
   getReportsApiV2: GetReportsV2Response;
+  /** Per-agent breakdown (sessions, PRs, lines attributed, first/last seen) for one repository in a time window. Owner-only. */
+  getRepositoryAiAgentStats: GetRepositoryAiAgentStatsResponse;
+  /**
+   * Distinct AI agent/product count for one repository in a time window from PR-linked attributions.
+   * PR population matches percent PRs with AI (MERGED/CLOSED, pr_created_at in range). Owner-only.
+   */
+  getRepositoryDistinctAiAgentsCount: GetRepositoryDistinctAiAgentsCountResponse;
+  /**
+   * Count of distinct developers (user_id) who authored AI PRs (ai_lines_added > human_lines_added,
+   * MERGED/CLOSED, pr_created_at in range) for one repository. Owner-only.
+   */
+  getRepositoryDistinctDevelopersWithAiCount: GetRepositoryDistinctDevelopersWithAiCountResponse;
+  /** Distinct model count for one repository in a time window from PR-linked attributions (same cohort/dedup as distinct agents). Owner-only. */
+  getRepositoryDistinctModelsCount: GetRepositoryDistinctModelsCountResponse;
+  /**
+   * Distinct skill count for one repository in a time window.
+   * Bridges PR-linked session IDs (from ai_blame_attribution) to tracy_session_skills.
+   * Counts all skill_name values (invoked and available) across those sessions. Owner-only.
+   */
+  getRepositoryDistinctSkillsCount: GetRepositoryDistinctSkillsCountResponse;
+  /** Per-model breakdown (sessions, PRs, lines attributed, first/last seen) for one repository in a time window. Owner-only. */
+  getRepositoryModelStats: GetRepositoryModelStatsResponse;
+  /** Per-skill breakdown (sessions, PRs, first/last seen) for one repository in a time window. Owner-only. */
+  getRepositorySkillStats: GetRepositorySkillStatsResponse;
   /**
    * Get ROI trends time series data with cumulative avg cycle/coding/review time per date.
    * Uses first_inference_date for time calculations. Returns one data point per date with
@@ -34494,6 +34948,37 @@ export type Query_Root = {
    * Restricted to admin users.
    */
   getTracySession: TracySessionResponse;
+  /**
+   * Get the full S3-reconstructed summary for a tracy session: token
+   * breakdown, planning phases, MCP calls, applied skills, conversation,
+   * and the AI-generated prompt summary. Single-purpose stitched resolver
+   * because the underlying work (S3 reconstruction, Bedrock invocation,
+   * summary cache) can't be expressed via Hasura. Org-owner permission is
+   * enforced server-side. The session list and phase-1 detail are queried
+   * against Hasura's tracy_tracy_session table directly.
+   *
+   * Heavyweight: full reconstruction. Result (minus summary) is cached in
+   * S3 by (sessionId, eventCount), so subsequent calls within the same
+   * event-count window are cheap. Returns the summary if it's already
+   * cached at call time; otherwise summaryStatus is GENERATING and the
+   * client should poll getTracySessionSummary.
+   */
+  getTracySessionDetail: TracySessionDetailResponse;
+  /**
+   * Per-session MCP activity: the set of MCP servers declared in the session's
+   * uploaded MCP config(s), and the tool-level invocations actually performed.
+   * Note: `availableServers` reports servers *declared* in the config — it
+   * does not subtract servers disabled via the user's settings.json. See
+   * contextFileHandler.ts for the TODO.
+   * Restricted to admin users.
+   */
+  getTracySessionMcpActivity: TracySessionMcpActivity;
+  /**
+   * Lightweight: returns just the summary + status. Used for polling
+   * while the heavyweight getTracySessionDetail kicked off generation.
+   * Reads the summary cache only — no S3 reconstruction.
+   */
+  getTracySessionSummary: TracySessionSummaryResponse;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -34797,6 +35282,10 @@ export type Query_Root = {
   tracy_org_skill_stats_row: Array<Tracy_Org_Skill_Stats_Row>;
   /** fetch aggregated fields from the table: "tracy.org_skill_stats_row" */
   tracy_org_skill_stats_row_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
+  /** fetch data from the table: "tracy.session_mcp_status" */
+  tracy_session_mcp_status: Array<Tracy_Session_Mcp_Status>;
+  /** fetch aggregated fields from the table: "tracy.session_mcp_status" */
+  tracy_session_mcp_status_aggregate: Tracy_Session_Mcp_Status_Aggregate;
   /** fetch data from the table: "tracy.session_skill_status" */
   tracy_session_skill_status: Array<Tracy_Session_Skill_Status>;
   /** fetch aggregated fields from the table: "tracy.session_skill_status" */
@@ -34835,12 +35324,24 @@ export type Query_Root = {
   tracy_tracy_session: Array<Tracy_Tracy_Session>;
   /** fetch aggregated fields from the table: "tracy.tracy_session" */
   tracy_tracy_session_aggregate: Tracy_Tracy_Session_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_mcp" */
+  tracy_tracy_session_available_mcp: Array<Tracy_Tracy_Session_Available_Mcp>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_available_mcp" */
+  tracy_tracy_session_available_mcp_aggregate: Tracy_Tracy_Session_Available_Mcp_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_mcp" using primary key columns */
+  tracy_tracy_session_available_mcp_by_pk?: Maybe<Tracy_Tracy_Session_Available_Mcp>;
   /** fetch data from the table: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
   /** fetch data from the table: "tracy.tracy_session" using primary key columns */
   tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** fetch data from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_tracy_session_invoked_mcp_tool: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_tracy_session_invoked_mcp_tool_aggregate: Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_invoked_mcp_tool" using primary key columns */
+  tracy_tracy_session_invoked_mcp_tool_by_pk?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** fetch data from the table: "tracy.tracy_session_used_skill" */
   tracy_tracy_session_used_skill: Array<Tracy_Tracy_Session_Used_Skill>;
   /** fetch aggregated fields from the table: "tracy.tracy_session_used_skill" */
@@ -36518,6 +37019,12 @@ export type Query_RootGetLinearTeamsArgs = {
 };
 
 
+export type Query_RootGetOrgMcpServersArgs = {
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetOrgSkillsArgs = {
   fromDate?: InputMaybe<Scalars['String']['input']>;
   organizationId: Scalars['String']['input'];
@@ -36536,6 +37043,62 @@ export type Query_RootGetPromptSummaryArgs = {
 
 export type Query_RootGetReportsApiV2Args = {
   reportId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type Query_RootGetRepositoryAiAgentStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositoryDistinctAiAgentsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositoryDistinctDevelopersWithAiCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositoryDistinctModelsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositoryDistinctSkillsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositoryModelStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+export type Query_RootGetRepositorySkillStatsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
 };
 
 
@@ -36587,6 +37150,23 @@ export type Query_RootGetSubmitRequestsArgs = {
 
 export type Query_RootGetTracySessionArgs = {
   includeSummary?: InputMaybe<Scalars['Boolean']['input']>;
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetTracySessionDetailArgs = {
+  organizationId: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetTracySessionMcpActivityArgs = {
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetTracySessionSummaryArgs = {
+  organizationId: Scalars['String']['input'];
   sessionId: Scalars['String']['input'];
 };
 
@@ -37785,6 +38365,24 @@ export type Query_RootTracy_Org_Skill_Stats_Row_AggregateArgs = {
 };
 
 
+export type Query_RootTracy_Session_Mcp_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Mcp_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Mcp_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Session_Mcp_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Mcp_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Mcp_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+};
+
+
 export type Query_RootTracy_Session_Skill_StatusArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -37936,6 +38534,30 @@ export type Query_RootTracy_Tracy_Session_AggregateArgs = {
 };
 
 
+export type Query_RootTracy_Tracy_Session_Available_McpArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Available_Mcp_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Available_Mcp_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+
 export type Query_RootTracy_Tracy_Session_Available_SkillArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -37956,6 +38578,31 @@ export type Query_RootTracy_Tracy_Session_Available_Skill_AggregateArgs = {
 
 export type Query_RootTracy_Tracy_Session_By_PkArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type Query_RootTracy_Tracy_Session_Invoked_Mcp_ToolArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Invoked_Mcp_Tool_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Tracy_Session_Invoked_Mcp_Tool_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  mcpTool: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
 };
 
 
@@ -43225,6 +43872,12 @@ export type Subscription_Root = {
   tracy_org_skill_stats_row_aggregate: Tracy_Org_Skill_Stats_Row_Aggregate;
   /** fetch data from the table in a streaming manner: "tracy.org_skill_stats_row" */
   tracy_org_skill_stats_row_stream: Array<Tracy_Org_Skill_Stats_Row>;
+  /** fetch data from the table: "tracy.session_mcp_status" */
+  tracy_session_mcp_status: Array<Tracy_Session_Mcp_Status>;
+  /** fetch aggregated fields from the table: "tracy.session_mcp_status" */
+  tracy_session_mcp_status_aggregate: Tracy_Session_Mcp_Status_Aggregate;
+  /** fetch data from the table in a streaming manner: "tracy.session_mcp_status" */
+  tracy_session_mcp_status_stream: Array<Tracy_Session_Mcp_Status>;
   /** fetch data from the table: "tracy.session_skill_status" */
   tracy_session_skill_status: Array<Tracy_Session_Skill_Status>;
   /** fetch aggregated fields from the table: "tracy.session_skill_status" */
@@ -43275,6 +43928,14 @@ export type Subscription_Root = {
   tracy_tracy_session: Array<Tracy_Tracy_Session>;
   /** fetch aggregated fields from the table: "tracy.tracy_session" */
   tracy_tracy_session_aggregate: Tracy_Tracy_Session_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_mcp" */
+  tracy_tracy_session_available_mcp: Array<Tracy_Tracy_Session_Available_Mcp>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_available_mcp" */
+  tracy_tracy_session_available_mcp_aggregate: Tracy_Tracy_Session_Available_Mcp_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_available_mcp" using primary key columns */
+  tracy_tracy_session_available_mcp_by_pk?: Maybe<Tracy_Tracy_Session_Available_Mcp>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_session_available_mcp" */
+  tracy_tracy_session_available_mcp_stream: Array<Tracy_Tracy_Session_Available_Mcp>;
   /** fetch data from the table: "tracy.tracy_session_available_skill" */
   tracy_tracy_session_available_skill: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch aggregated fields from the table: "tracy.tracy_session_available_skill" */
@@ -43283,6 +43944,14 @@ export type Subscription_Root = {
   tracy_tracy_session_available_skill_stream: Array<Tracy_Tracy_Session_Available_Skill>;
   /** fetch data from the table: "tracy.tracy_session" using primary key columns */
   tracy_tracy_session_by_pk?: Maybe<Tracy_Tracy_Session>;
+  /** fetch data from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_tracy_session_invoked_mcp_tool: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+  /** fetch aggregated fields from the table: "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_tracy_session_invoked_mcp_tool_aggregate: Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate;
+  /** fetch data from the table: "tracy.tracy_session_invoked_mcp_tool" using primary key columns */
+  tracy_tracy_session_invoked_mcp_tool_by_pk?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+  /** fetch data from the table in a streaming manner: "tracy.tracy_session_invoked_mcp_tool" */
+  tracy_tracy_session_invoked_mcp_tool_stream: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** fetch data from the table in a streaming manner: "tracy.tracy_session" */
   tracy_tracy_session_stream: Array<Tracy_Tracy_Session>;
   /** fetch data from the table: "tracy.tracy_session_used_skill" */
@@ -46756,6 +47425,31 @@ export type Subscription_RootTracy_Org_Skill_Stats_Row_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Session_Mcp_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Mcp_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Mcp_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Session_Mcp_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Session_Mcp_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Session_Mcp_Status_Order_By>>;
+  where?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Session_Mcp_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Session_Mcp_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Session_Skill_StatusArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Session_Skill_Status_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -46949,6 +47643,37 @@ export type Subscription_RootTracy_Tracy_Session_AggregateArgs = {
 };
 
 
+export type Subscription_RootTracy_Tracy_Session_Available_McpArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Mcp_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Mcp_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Available_Mcp_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Session_Available_Mcp_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Tracy_Session_Available_SkillArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -46976,6 +47701,38 @@ export type Subscription_RootTracy_Tracy_Session_Available_Skill_StreamArgs = {
 
 export type Subscription_RootTracy_Tracy_Session_By_PkArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Invoked_Mcp_ToolArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Invoked_Mcp_Tool_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Invoked_Mcp_Tool_By_PkArgs = {
+  mcpServer: Scalars['String']['input'];
+  mcpTool: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootTracy_Tracy_Session_Invoked_Mcp_Tool_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
 };
 
 
@@ -48512,6 +49269,8 @@ export type Tracy_Ai_Blame_Pr = {
   numberOfOriginalLines?: Maybe<Scalars['Int']['output']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
   numberOfSurvivedLines?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  organization: Organization;
   organizationId: Scalars['uuid']['output'];
   /** An array relationship */
   prAttributions: Array<Tracy_Ai_Blame_Pr_Attribution>;
@@ -48812,6 +49571,7 @@ export type Tracy_Ai_Blame_Pr_Bool_Exp = {
   mergeCommitShas?: InputMaybe<String_Array_Comparison_Exp>;
   numberOfOriginalLines?: InputMaybe<Int_Comparison_Exp>;
   numberOfSurvivedLines?: InputMaybe<Int_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   prAttributions?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Bool_Exp>;
   prAttributions_aggregate?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Bool_Exp>;
@@ -48874,6 +49634,7 @@ export type Tracy_Ai_Blame_Pr_Insert_Input = {
   numberOfOriginalLines?: InputMaybe<Scalars['Int']['input']>;
   /** Sum over content_hash of LEAST(open_instance_count, current_instance_count) with char_count >= 35 and inference_type = CODE_GENERATION — how many of the open snapshot instances still appear as that text in the current snapshot. NULL for the first snapshot itself. */
   numberOfSurvivedLines?: InputMaybe<Scalars['Int']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   prAttributions?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Arr_Rel_Insert_Input>;
   prCreatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -49296,6 +50057,7 @@ export type Tracy_Ai_Blame_Pr_Order_By = {
   mergeCommitShas?: InputMaybe<Order_By>;
   numberOfOriginalLines?: InputMaybe<Order_By>;
   numberOfSurvivedLines?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   prAttributions_aggregate?: InputMaybe<Tracy_Ai_Blame_Pr_Attribution_Aggregate_Order_By>;
   prCreatedAt?: InputMaybe<Order_By>;
@@ -50377,6 +51139,132 @@ export type Tracy_Org_Skill_Stats_Row_Variance_Fields = {
   __typename?: 'tracy_org_skill_stats_row_variance_fields';
   installation_count?: Maybe<Scalars['Float']['output']>;
   invocation_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.session_mcp_status" */
+export type Tracy_Session_Mcp_Status = {
+  __typename?: 'tracy_session_mcp_status';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  serverInvoked?: Maybe<Scalars['Boolean']['output']>;
+  /** An object relationship */
+  session?: Maybe<Tracy_Tracy_Session>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  user?: Maybe<User>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "tracy.session_mcp_status" */
+export type Tracy_Session_Mcp_Status_Aggregate = {
+  __typename?: 'tracy_session_mcp_status_aggregate';
+  aggregate?: Maybe<Tracy_Session_Mcp_Status_Aggregate_Fields>;
+  nodes: Array<Tracy_Session_Mcp_Status>;
+};
+
+/** aggregate fields of "tracy.session_mcp_status" */
+export type Tracy_Session_Mcp_Status_Aggregate_Fields = {
+  __typename?: 'tracy_session_mcp_status_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Session_Mcp_Status_Max_Fields>;
+  min?: Maybe<Tracy_Session_Mcp_Status_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.session_mcp_status" */
+export type Tracy_Session_Mcp_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Session_Mcp_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.session_mcp_status". All fields are combined with a logical 'AND'. */
+export type Tracy_Session_Mcp_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Session_Mcp_Status_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Session_Mcp_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Session_Mcp_Status_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  mcpServer?: InputMaybe<String_Comparison_Exp>;
+  prUrl?: InputMaybe<String_Comparison_Exp>;
+  serverInvoked?: InputMaybe<Boolean_Comparison_Exp>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+  userName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Session_Mcp_Status_Max_Fields = {
+  __typename?: 'tracy_session_mcp_status_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Session_Mcp_Status_Min_Fields = {
+  __typename?: 'tracy_session_mcp_status_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  prUrl?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+  userName?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "tracy.session_mcp_status". */
+export type Tracy_Session_Mcp_Status_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  prUrl?: InputMaybe<Order_By>;
+  serverInvoked?: InputMaybe<Order_By>;
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+  userName?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "tracy.session_mcp_status" */
+export enum Tracy_Session_Mcp_Status_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  McpServer = 'mcpServer',
+  /** column name */
+  PrUrl = 'prUrl',
+  /** column name */
+  ServerInvoked = 'serverInvoked',
+  /** column name */
+  SessionId = 'sessionId',
+  /** column name */
+  UserId = 'userId',
+  /** column name */
+  UserName = 'userName'
+}
+
+/** Streaming cursor of the table "tracy_session_mcp_status" */
+export type Tracy_Session_Mcp_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Session_Mcp_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Session_Mcp_Status_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  prUrl?: InputMaybe<Scalars['String']['input']>;
+  serverInvoked?: InputMaybe<Scalars['Boolean']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+  userName?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "tracy.session_skill_status" */
@@ -51898,12 +52786,21 @@ export type Tracy_Tracy_Session = {
   __typename?: 'tracy_tracy_session';
   aiSummary?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
+  availableMcpServers: Array<Tracy_Tracy_Session_Available_Mcp>;
+  /** An aggregate relationship */
+  availableMcpServers_aggregate: Tracy_Tracy_Session_Available_Mcp_Aggregate;
+  /** An array relationship */
   availableSkills: Array<Tracy_Tracy_Session_Available_Skill>;
   /** An aggregate relationship */
   availableSkills_aggregate: Tracy_Tracy_Session_Available_Skill_Aggregate;
   createdAt: Scalars['timestamptz']['output'];
+  durationSeconds?: Maybe<Scalars['Int']['output']>;
   endedAt?: Maybe<Scalars['timestamptz']['output']>;
   id: Scalars['String']['output'];
+  /** An array relationship */
+  invokedMcpTools: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+  /** An aggregate relationship */
+  invokedMcpTools_aggregate: Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate;
   mainModel?: Maybe<Scalars['String']['output']>;
   platform: Scalars['String']['output'];
   prUrl?: Maybe<Scalars['String']['output']>;
@@ -51924,6 +52821,26 @@ export type Tracy_Tracy_Session = {
 
 
 /** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionAvailableMcpServersArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionAvailableMcpServers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
 export type Tracy_Tracy_SessionAvailableSkillsArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -51940,6 +52857,26 @@ export type Tracy_Tracy_SessionAvailableSkills_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Tracy_Tracy_Session_Available_Skill_Order_By>>;
   where?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionInvokedMcpToolsArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+
+/** columns and relationships of "tracy.tracy_session" */
+export type Tracy_Tracy_SessionInvokedMcpTools_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By>>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
 };
 
 
@@ -51990,6 +52927,197 @@ export type Tracy_Tracy_Session_Aggregate_Fields = {
 export type Tracy_Tracy_Session_Aggregate_FieldsCountArgs = {
   columns?: InputMaybe<Array<Tracy_Tracy_Session_Select_Column>>;
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** columns and relationships of "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp = {
+  __typename?: 'tracy_tracy_session_available_mcp';
+  insertedAt: Scalars['timestamptz']['output'];
+  mcpServer: Scalars['String']['output'];
+  /** An object relationship */
+  session: Tracy_Tracy_Session;
+  sessionId: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate = {
+  __typename?: 'tracy_tracy_session_available_mcp_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Session_Available_Mcp_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Session_Available_Mcp>;
+};
+
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_session_available_mcp_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Session_Available_Mcp_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Session_Available_Mcp_Min_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Max_Order_By>;
+  min?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Tracy_Session_Available_Mcp_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_session_available_mcp". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Session_Available_Mcp_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>>;
+  insertedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  mcpServer?: InputMaybe<String_Comparison_Exp>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_session_available_mcp" */
+export enum Tracy_Tracy_Session_Available_Mcp_Constraint {
+  /** unique or primary key constraint on columns "mcp_server", "session_id" */
+  TracySessionAvailableMcpPkey = 'tracy_session_available_mcp_pkey'
+}
+
+/** input type for inserting data into table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Insert_Input = {
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  session?: InputMaybe<Tracy_Tracy_Session_Obj_Rel_Insert_Input>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Session_Available_Mcp_Max_Fields = {
+  __typename?: 'tracy_tracy_session_available_mcp_max_fields';
+  insertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Max_Order_By = {
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Session_Available_Mcp_Min_Fields = {
+  __typename?: 'tracy_tracy_session_available_mcp_min_fields';
+  insertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Min_Order_By = {
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Mutation_Response = {
+  __typename?: 'tracy_tracy_session_available_mcp_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Session_Available_Mcp>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_On_Conflict = {
+  constraint: Tracy_Tracy_Session_Available_Mcp_Constraint;
+  update_columns?: Array<Tracy_Tracy_Session_Available_Mcp_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_session_available_mcp". */
+export type Tracy_Tracy_Session_Available_Mcp_Order_By = {
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_session_available_mcp */
+export type Tracy_Tracy_Session_Available_Mcp_Pk_Columns_Input = {
+  mcpServer: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+/** select columns of table "tracy.tracy_session_available_mcp" */
+export enum Tracy_Tracy_Session_Available_Mcp_Select_Column {
+  /** column name */
+  InsertedAt = 'insertedAt',
+  /** column name */
+  McpServer = 'mcpServer',
+  /** column name */
+  SessionId = 'sessionId'
+}
+
+/** input type for updating data in table "tracy.tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Set_Input = {
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_session_available_mcp" */
+export type Tracy_Tracy_Session_Available_Mcp_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Session_Available_Mcp_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Session_Available_Mcp_Stream_Cursor_Value_Input = {
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "tracy.tracy_session_available_mcp" */
+export enum Tracy_Tracy_Session_Available_Mcp_Update_Column {
+  /** column name */
+  InsertedAt = 'insertedAt',
+  /** column name */
+  McpServer = 'mcpServer',
+  /** column name */
+  SessionId = 'sessionId'
+}
+
+export type Tracy_Tracy_Session_Available_Mcp_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Session_Available_Mcp_Bool_Exp;
 };
 
 /** columns and relationships of "tracy.tracy_session_available_skill" */
@@ -52194,6 +53322,7 @@ export type Tracy_Tracy_Session_Available_Skill_Updates = {
 /** aggregate avg on columns */
 export type Tracy_Tracy_Session_Avg_Fields = {
   __typename?: 'tracy_tracy_session_avg_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52204,11 +53333,16 @@ export type Tracy_Tracy_Session_Bool_Exp = {
   _not?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
   _or?: InputMaybe<Array<Tracy_Tracy_Session_Bool_Exp>>;
   aiSummary?: InputMaybe<String_Comparison_Exp>;
+  availableMcpServers?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Bool_Exp>;
+  availableMcpServers_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Aggregate_Bool_Exp>;
   availableSkills?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Bool_Exp>;
   availableSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  durationSeconds?: InputMaybe<Int_Comparison_Exp>;
   endedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
+  invokedMcpTools?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+  invokedMcpTools_aggregate?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Bool_Exp>;
   mainModel?: InputMaybe<String_Comparison_Exp>;
   platform?: InputMaybe<String_Comparison_Exp>;
   prUrl?: InputMaybe<String_Comparison_Exp>;
@@ -52239,10 +53373,12 @@ export type Tracy_Tracy_Session_Inc_Input = {
 /** input type for inserting data into table "tracy.tracy_session" */
 export type Tracy_Tracy_Session_Insert_Input = {
   aiSummary?: InputMaybe<Scalars['String']['input']>;
+  availableMcpServers?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Arr_Rel_Insert_Input>;
   availableSkills?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   endedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
+  invokedMcpTools?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Arr_Rel_Insert_Input>;
   mainModel?: InputMaybe<Scalars['String']['input']>;
   platform?: InputMaybe<Scalars['String']['input']>;
   prUrl?: InputMaybe<Scalars['String']['input']>;
@@ -52257,11 +53393,343 @@ export type Tracy_Tracy_Session_Insert_Input = {
   userName?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** columns and relationships of "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool';
+  callCount: Scalars['Int']['output'];
+  insertedAt: Scalars['timestamptz']['output'];
+  mcpServer: Scalars['String']['output'];
+  mcpTool: Scalars['String']['output'];
+  /** An object relationship */
+  session: Tracy_Tracy_Session;
+  sessionId: Scalars['String']['output'];
+};
+
+/** aggregated selection of "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_aggregate';
+  aggregate?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Fields>;
+  nodes: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+};
+
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Bool_Exp_Count>;
+};
+
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_aggregate_fields';
+  avg?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Max_Fields>;
+  min?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Min_Fields>;
+  stddev?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Order_By = {
+  avg?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Max_Order_By>;
+  min?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Min_Order_By>;
+  stddev?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Sum_Order_By>;
+  var_pop?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Samp_Order_By>;
+  variance?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Arr_Rel_Insert_Input = {
+  data: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Avg_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_avg_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Avg_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.tracy_session_invoked_mcp_tool". All fields are combined with a logical 'AND'. */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>>;
+  callCount?: InputMaybe<Int_Comparison_Exp>;
+  insertedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  mcpServer?: InputMaybe<String_Comparison_Exp>;
+  mcpTool?: InputMaybe<String_Comparison_Exp>;
+  session?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+  sessionId?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "tracy.tracy_session_invoked_mcp_tool" */
+export enum Tracy_Tracy_Session_Invoked_Mcp_Tool_Constraint {
+  /** unique or primary key constraint on columns "mcp_tool", "mcp_server", "session_id" */
+  TracySessionInvokedMcpToolPkey = 'tracy_session_invoked_mcp_tool_pkey'
+}
+
+/** input type for incrementing numeric columns in table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Inc_Input = {
+  callCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Insert_Input = {
+  callCount?: InputMaybe<Scalars['Int']['input']>;
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  mcpTool?: InputMaybe<Scalars['String']['input']>;
+  session?: InputMaybe<Tracy_Tracy_Session_Obj_Rel_Insert_Input>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Max_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_max_fields';
+  callCount?: Maybe<Scalars['Int']['output']>;
+  insertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  mcpTool?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Max_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  mcpTool?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Min_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_min_fields';
+  callCount?: Maybe<Scalars['Int']['output']>;
+  insertedAt?: Maybe<Scalars['timestamptz']['output']>;
+  mcpServer?: Maybe<Scalars['String']['output']>;
+  mcpTool?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Min_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  mcpTool?: InputMaybe<Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Mutation_Response = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
+};
+
+/** on_conflict condition type for table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_On_Conflict = {
+  constraint: Tracy_Tracy_Session_Invoked_Mcp_Tool_Constraint;
+  update_columns?: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool_Update_Column>;
+  where?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "tracy.tracy_session_invoked_mcp_tool". */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+  insertedAt?: InputMaybe<Order_By>;
+  mcpServer?: InputMaybe<Order_By>;
+  mcpTool?: InputMaybe<Order_By>;
+  session?: InputMaybe<Tracy_Tracy_Session_Order_By>;
+  sessionId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: tracy.tracy_session_invoked_mcp_tool */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Pk_Columns_Input = {
+  mcpServer: Scalars['String']['input'];
+  mcpTool: Scalars['String']['input'];
+  sessionId: Scalars['String']['input'];
+};
+
+/** select columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export enum Tracy_Tracy_Session_Invoked_Mcp_Tool_Select_Column {
+  /** column name */
+  CallCount = 'callCount',
+  /** column name */
+  InsertedAt = 'insertedAt',
+  /** column name */
+  McpServer = 'mcpServer',
+  /** column name */
+  McpTool = 'mcpTool',
+  /** column name */
+  SessionId = 'sessionId'
+}
+
+/** input type for updating data in table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Set_Input = {
+  callCount?: InputMaybe<Scalars['Int']['input']>;
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  mcpTool?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_stddev_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Pop_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_stddev_pop_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Pop_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Samp_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_stddev_samp_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stddev_Samp_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "tracy_tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Tracy_Session_Invoked_Mcp_Tool_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Stream_Cursor_Value_Input = {
+  callCount?: InputMaybe<Scalars['Int']['input']>;
+  insertedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mcpServer?: InputMaybe<Scalars['String']['input']>;
+  mcpTool?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Sum_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_sum_fields';
+  callCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Sum_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export enum Tracy_Tracy_Session_Invoked_Mcp_Tool_Update_Column {
+  /** column name */
+  CallCount = 'callCount',
+  /** column name */
+  InsertedAt = 'insertedAt',
+  /** column name */
+  McpServer = 'mcpServer',
+  /** column name */
+  McpTool = 'mcpTool',
+  /** column name */
+  SessionId = 'sessionId'
+}
+
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Tracy_Tracy_Session_Invoked_Mcp_Tool_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Pop_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_var_pop_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Pop_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Samp_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_var_samp_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Var_Samp_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Variance_Fields = {
+  __typename?: 'tracy_tracy_session_invoked_mcp_tool_variance_fields';
+  callCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "tracy.tracy_session_invoked_mcp_tool" */
+export type Tracy_Tracy_Session_Invoked_Mcp_Tool_Variance_Order_By = {
+  callCount?: InputMaybe<Order_By>;
+};
+
 /** aggregate max on columns */
 export type Tracy_Tracy_Session_Max_Fields = {
   __typename?: 'tracy_tracy_session_max_fields';
   aiSummary?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  durationSeconds?: Maybe<Scalars['Int']['output']>;
   endedAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   mainModel?: Maybe<Scalars['String']['output']>;
@@ -52281,6 +53749,7 @@ export type Tracy_Tracy_Session_Min_Fields = {
   __typename?: 'tracy_tracy_session_min_fields';
   aiSummary?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  durationSeconds?: Maybe<Scalars['Int']['output']>;
   endedAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   mainModel?: Maybe<Scalars['String']['output']>;
@@ -52321,10 +53790,13 @@ export type Tracy_Tracy_Session_On_Conflict = {
 /** Ordering options when selecting data from "tracy.tracy_session". */
 export type Tracy_Tracy_Session_Order_By = {
   aiSummary?: InputMaybe<Order_By>;
+  availableMcpServers_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Mcp_Aggregate_Order_By>;
   availableSkills_aggregate?: InputMaybe<Tracy_Tracy_Session_Available_Skill_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
+  durationSeconds?: InputMaybe<Order_By>;
   endedAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  invokedMcpTools_aggregate?: InputMaybe<Tracy_Tracy_Session_Invoked_Mcp_Tool_Aggregate_Order_By>;
   mainModel?: InputMaybe<Order_By>;
   platform?: InputMaybe<Order_By>;
   prUrl?: InputMaybe<Order_By>;
@@ -52350,6 +53822,8 @@ export enum Tracy_Tracy_Session_Select_Column {
   AiSummary = 'aiSummary',
   /** column name */
   CreatedAt = 'createdAt',
+  /** column name */
+  DurationSeconds = 'durationSeconds',
   /** column name */
   EndedAt = 'endedAt',
   /** column name */
@@ -52397,6 +53871,7 @@ export type Tracy_Tracy_Session_Set_Input = {
 /** aggregate stddev on columns */
 export type Tracy_Tracy_Session_Stddev_Fields = {
   __typename?: 'tracy_tracy_session_stddev_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52404,6 +53879,7 @@ export type Tracy_Tracy_Session_Stddev_Fields = {
 /** aggregate stddev_pop on columns */
 export type Tracy_Tracy_Session_Stddev_Pop_Fields = {
   __typename?: 'tracy_tracy_session_stddev_pop_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52411,6 +53887,7 @@ export type Tracy_Tracy_Session_Stddev_Pop_Fields = {
 /** aggregate stddev_samp on columns */
 export type Tracy_Tracy_Session_Stddev_Samp_Fields = {
   __typename?: 'tracy_tracy_session_stddev_samp_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52427,6 +53904,7 @@ export type Tracy_Tracy_Session_Stream_Cursor_Input = {
 export type Tracy_Tracy_Session_Stream_Cursor_Value_Input = {
   aiSummary?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  durationSeconds?: InputMaybe<Scalars['Int']['input']>;
   endedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   mainModel?: InputMaybe<Scalars['String']['input']>;
@@ -52444,6 +53922,7 @@ export type Tracy_Tracy_Session_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Tracy_Tracy_Session_Sum_Fields = {
   __typename?: 'tracy_tracy_session_sum_fields';
+  durationSeconds?: Maybe<Scalars['Int']['output']>;
   tokens?: Maybe<Scalars['Int']['output']>;
   totalEvents?: Maybe<Scalars['Int']['output']>;
 };
@@ -52669,6 +54148,7 @@ export type Tracy_Tracy_Session_Used_Skill_Updates = {
 /** aggregate var_pop on columns */
 export type Tracy_Tracy_Session_Var_Pop_Fields = {
   __typename?: 'tracy_tracy_session_var_pop_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52676,6 +54156,7 @@ export type Tracy_Tracy_Session_Var_Pop_Fields = {
 /** aggregate var_samp on columns */
 export type Tracy_Tracy_Session_Var_Samp_Fields = {
   __typename?: 'tracy_tracy_session_var_samp_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52683,6 +54164,7 @@ export type Tracy_Tracy_Session_Var_Samp_Fields = {
 /** aggregate variance on columns */
 export type Tracy_Tracy_Session_Variance_Fields = {
   __typename?: 'tracy_tracy_session_variance_fields';
+  durationSeconds?: Maybe<Scalars['Float']['output']>;
   tokens?: Maybe<Scalars['Float']['output']>;
   totalEvents?: Maybe<Scalars['Float']['output']>;
 };
@@ -52933,6 +54415,11 @@ export type Tracy_Tracy_Skill_Scan_Updates = {
   _set?: InputMaybe<Tracy_Tracy_Skill_Scan_Set_Input>;
   /** filter the rows which have to be updated */
   where: Tracy_Tracy_Skill_Scan_Bool_Exp;
+};
+
+export type Tracy_Upsert_Session_Invoked_Mcp_Tools_Args = {
+  p_rows?: InputMaybe<Scalars['jsonb']['input']>;
+  p_session_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Tracy_Upsert_Tracy_Session_Args = {
@@ -61921,9 +63408,17 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
-export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
-export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
+export type GetFixWithAnswersQueryVariables = Exact<{
+  fixId: Scalars['uuid']['input'];
+  userInput: Array<QuestionAnswer> | QuestionAnswer;
+}>;
+
+
+export type GetFixWithAnswersQuery = { __typename?: 'query_root', fixData: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+
+export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
 
 export type GetFixReportsByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -61941,7 +63436,7 @@ export type GetReportFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type GetLatestReportByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -61952,7 +63447,7 @@ export type GetLatestReportByRepoUrlQueryVariables = Exact<{
 }>;
 
 
-export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', name: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type UpdateDownloadedFixDataMutationVariables = Exact<{
   fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -62002,6 +63497,7 @@ export const FixDetailsFragmentDoc = `
   id
   confidence
   safeIssueType
+  safeIssueLanguage
   severityText
   gitBlameLogin
   severityValue
@@ -62025,7 +63521,17 @@ export const FixDetailsFragmentDoc = `
       patch
       patchOriginalEncodingBase64
       questions {
+        key
         name
+        defaultValue
+        value
+        inputType
+        options
+        index
+        extraContext {
+          key
+          value
+        }
       }
       extraContext {
         extraContext {
@@ -62744,6 +64250,37 @@ export const AutoPrAnalysisDocument = `
   }
 }
     `;
+export const GetFixWithAnswersDocument = `
+    query getFixWithAnswers($fixId: uuid!, $userInput: [QuestionAnswer!]!) {
+  fixData: getFix(fixId: $fixId, userInput: $userInput, loadAnswers: false) {
+    __typename
+    ... on FixData {
+      patch
+      patchOriginalEncodingBase64
+      questions {
+        key
+        name
+        defaultValue
+        value
+        inputType
+        options
+        index
+        extraContext {
+          key
+          value
+        }
+      }
+      extraContext {
+        extraContext {
+          key
+          value
+        }
+        fixDescription
+      }
+    }
+  }
+}
+    `;
 export const GetFixReportsByRepoUrlDocument = `
     query GetFixReportsByRepoUrl($repoUrl: String!) {
   fixReport(where: {repo: {originalUrl: {_eq: $repoUrl}}}) {
@@ -62975,6 +64512,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     autoPrAnalysis(variables: AutoPrAnalysisMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<AutoPrAnalysisMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<AutoPrAnalysisMutation>({ document: AutoPrAnalysisDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'autoPrAnalysis', 'mutation', variables);
+    },
+    getFixWithAnswers(variables: GetFixWithAnswersQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFixWithAnswersQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetFixWithAnswersQuery>({ document: GetFixWithAnswersDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getFixWithAnswers', 'query', variables);
     },
     GetFixReportsByRepoUrl(variables: GetFixReportsByRepoUrlQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetFixReportsByRepoUrlQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetFixReportsByRepoUrlQuery>({ document: GetFixReportsByRepoUrlDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFixReportsByRepoUrl', 'query', variables);

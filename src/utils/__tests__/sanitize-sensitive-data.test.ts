@@ -1051,5 +1051,29 @@ public class MortgageProduct {
         expect(result).toBe(input)
       })
     })
+
+    describe('Datadog Application Key detection', () => {
+      const DD_APP_KEY = 'ddapp_aqY3iElG4SGtYseC5F6b5jE5FJSe3IQ9Pz'
+
+      it('should mask Datadog Application Key under "Application Key:" label', async () => {
+        // Real-world surface from a Tracy session — GENERIC_API_KEY misses
+        // this because it triggers on "api key" but not "Application Key".
+        const input = `Application Key: ${DD_APP_KEY}`
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain(DD_APP_KEY)
+      })
+
+      it('should mask standalone Datadog Application Key', async () => {
+        const input = `Use this token: ${DD_APP_KEY}`
+        const result = (await sanitizeData(input)) as string
+        expect(result).not.toContain(DD_APP_KEY)
+      })
+
+      it('should NOT flag strings without the ddapp_ prefix', async () => {
+        const input = 'aqY3iElG4SGtYseC5F6b5jE5FJSe3IQ9Pz' // same chars, no prefix
+        const result = (await sanitizeData(input)) as string
+        expect(result).toBe(input)
+      })
+    })
   })
 })

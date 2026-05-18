@@ -9,6 +9,7 @@ import fs from 'fs/promises'
 import parseDiff from 'parse-diff'
 import path from 'path'
 
+import { FixDownloadSource } from '../../features/analysis/scm/generates/client_generates'
 import { MCP_AUTO_FIX_DEBUG_MODE } from '../core/configs'
 import { logDebug, logError, logInfo, logWarn } from '../Logger'
 import { McpFix } from '../types'
@@ -686,12 +687,14 @@ export class PatchApplicationService {
     scanStartTime,
     gqlClient,
     scanContext,
+    downloadSource = FixDownloadSource.AutoMvs,
   }: {
     fixes: McpFix[]
     repositoryPath: string
     scanStartTime?: number
     gqlClient?: McpGQLClient
     scanContext: string
+    downloadSource?: FixDownloadSource
   }): Promise<PatchApplicationResult> {
     const appliedFixes: McpFix[] = []
     const failedFixes: { fix: McpFix; error: string }[] = []
@@ -772,20 +775,26 @@ export class PatchApplicationService {
     if (appliedFixes.length > 0 && gqlClient) {
       try {
         const appliedFixIds = appliedFixes.map((fix) => fix.id).filter(Boolean)
-        await gqlClient.updateAutoAppliedFixesStatus(appliedFixIds)
+        if (downloadSource === FixDownloadSource.Mcp) {
+          await gqlClient.updateFixesDownloadStatus(appliedFixIds)
+        } else {
+          await gqlClient.updateAutoAppliedFixesStatus(appliedFixIds)
+        }
         logDebug(
-          `[${scanContext}] Successfully updated download status for auto-applied fixes`,
+          `[${scanContext}] Successfully updated download status for applied fixes`,
           {
             appliedFixIds,
             count: appliedFixIds.length,
+            downloadSource,
           }
         )
       } catch (error) {
         logError(
-          `[${scanContext}] Failed to update download status for auto-applied fixes`,
+          `[${scanContext}] Failed to update download status for applied fixes`,
           {
             error: error instanceof Error ? error.message : String(error),
             appliedFixCount: appliedFixes.length,
+            downloadSource,
           }
         )
       }

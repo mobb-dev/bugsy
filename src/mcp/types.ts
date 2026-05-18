@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import {
+  FixQuestionInputType,
   IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Severity_Enum,
@@ -53,11 +54,20 @@ const FixExtraContextResponseSchema = z.object({
   fixDescription: z.string(),
 })
 
-// Schema for a single fix question (matches GraphQL FixQuestion subset selected by FixDetails fragment)
-const FixQuestionSchema = z.object({
+// name → storedQuestionData registry; key → QuestionAnswer payload.
+export const FixQuestionSchema = z.object({
   __typename: z.literal('FixQuestion').optional(),
+  key: z.string(),
   name: z.string(),
+  defaultValue: z.string(),
+  value: z.string().nullable().optional(),
+  inputType: z.nativeEnum(FixQuestionInputType),
+  options: z.array(z.string()),
+  index: z.number(),
+  extraContext: z.array(UnstructuredFixExtraContextSchema),
 })
+
+export type FixQuestion = z.infer<typeof FixQuestionSchema>
 
 // Schema for FixData variant of patchAndQuestions
 const FixDataSchema = z.object({
@@ -82,6 +92,7 @@ export const McpFixSchema = z.object({
   id: z.any(), // GraphQL uses `any` type for UUID
   confidence: z.number(),
   safeIssueType: z.string().nullable(),
+  safeIssueLanguage: z.string().nullable().optional(),
   severityText: z.string().nullable(),
   gitBlameLogin: z.string().nullable().optional(), // Optional in GraphQL
   severityValue: z.number().nullable(),

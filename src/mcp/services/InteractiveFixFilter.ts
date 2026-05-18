@@ -3,12 +3,7 @@ import { McpFix } from '../types'
 
 export type InteractiveFixPartition = {
   applicableFixes: McpFix[]
-  skippedRuleIds: string[]
-}
-
-const isFilterDisabled = (): boolean => {
-  const raw = process.env['MOBB_MCP_DISABLE_INTERACTIVE_FILTER']
-  return raw === '1' || raw === 'true'
+  interactiveFixes: McpFix[]
 }
 
 const isInteractiveFix = (fix: McpFix): boolean => {
@@ -28,30 +23,52 @@ const countByRule = (ruleIds: string[]): Record<string, number> => {
   return counts
 }
 
+// Opt-out kill switch. Default false = MOBB-3604 interactive routing stays on.
+// Truthy ('1'/'true', case-insensitive) drops interactive fixes from the response.
+const MOBB_MCP_DISABLE_INTERACTIVE_FILTER_DEFAULT = false
+
+const isInteractiveRoutingDisabled = (): boolean => {
+  const raw = process.env['MOBB_MCP_DISABLE_INTERACTIVE_FILTER']
+  if (!raw) return MOBB_MCP_DISABLE_INTERACTIVE_FILTER_DEFAULT
+  const normalized = raw.toLowerCase()
+  return normalized === '1' || normalized === 'true'
+}
+
 export const partitionInteractiveFixes = (
   fixes: McpFix[]
 ): InteractiveFixPartition => {
-  if (isFilterDisabled()) {
-    return { applicableFixes: fixes, skippedRuleIds: [] }
-  }
-
+  const disabled = isInteractiveRoutingDisabled()
   const applicableFixes: McpFix[] = []
-  const skippedRuleIds: string[] = []
+  const interactiveFixes: McpFix[] = []
+  const droppedInteractive: McpFix[] = []
   for (const fix of fixes) {
     if (isInteractiveFix(fix)) {
-      skippedRuleIds.push(ruleIdFor(fix))
+      if (disabled) {
+        droppedInteractive.push(fix)
+      } else {
+        interactiveFixes.push(fix)
+      }
     } else {
       applicableFixes.push(fix)
     }
   }
 
-  if (skippedRuleIds.length > 0) {
-    logInfo('[InteractiveFixFilter] Skipped interactive fixes', {
+  if (disabled && droppedInteractive.length > 0) {
+    logInfo(
+      '[InteractiveFixFilter] Dropping interactive fixes (MOBB_MCP_DISABLE_INTERACTIVE_FILTER=true)',
+      {
+        totalFixes: fixes.length,
+        droppedCount: droppedInteractive.length,
+        droppedByRule: countByRule(droppedInteractive.map(ruleIdFor)),
+      }
+    )
+  } else if (interactiveFixes.length > 0) {
+    logInfo('[InteractiveFixFilter] Routing interactive fixes to LLM', {
       totalFixes: fixes.length,
-      skippedCount: skippedRuleIds.length,
-      skippedByRule: countByRule(skippedRuleIds),
+      interactiveCount: interactiveFixes.length,
+      interactiveByRule: countByRule(interactiveFixes.map(ruleIdFor)),
     })
   }
 
-  return { applicableFixes, skippedRuleIds }
+  return { applicableFixes, interactiveFixes }
 }

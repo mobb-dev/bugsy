@@ -1,3 +1,7 @@
+import {
+  FixDownloadSource,
+  FixQuestionInputType,
+} from '../../../features/analysis/scm/generates/client_generates'
 import { ScanContext } from '../../../types'
 import {
   MCP_DEFAULT_LIMIT,
@@ -14,9 +18,10 @@ import {
   createAuthenticatedMcpGQLClient,
   McpGQLClient,
 } from '../../services/McpGQLClient'
+import { PatchApplicationService } from '../../services/PatchApplicationService'
 import { scanFiles } from '../../services/ScanFiles'
 import { createMcpLoginContext } from '../../services/types'
-import { McpFix } from '../../types'
+import { McpFix, McpFixSchema } from '../../types'
 
 export class ScanAndFixVulnerabilitiesService {
   private static instance: ScanAndFixVulnerabilitiesService
@@ -132,7 +137,8 @@ export class ScanAndFixVulnerabilitiesService {
         scannedFiles: [...fileList],
         limit: effectiveLimit,
         gqlClient: this.gqlClient,
-        skippedInteractiveCount: fixes.skippedRuleIds.length,
+        interactiveFixes: fixes.interactiveFixes,
+        repositoryPath,
       })
 
       this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
@@ -190,7 +196,7 @@ export class ScanAndFixVulnerabilitiesService {
   }): Promise<{
     fixes: McpFix[]
     totalCount: number
-    skippedRuleIds: string[]
+    interactiveFixes: McpFix[]
   }> {
     logDebug('getReportFixes', { fixReportId, offset, limit })
     if (!this.gqlClient) {
@@ -206,7 +212,224 @@ export class ScanAndFixVulnerabilitiesService {
     return {
       fixes: fixes?.fixes || [],
       totalCount: fixes?.totalCount || 0,
-      skippedRuleIds: fixes?.skippedRuleIds || [],
+      interactiveFixes: fixes?.interactiveFixes || [],
     }
   }
+
+  /** Applies patches from interactiveAnswers only (no scan). */
+  public async applyInteractiveAnswers({
+    interactiveAnswers,
+    repositoryPath,
+  }: {
+    interactiveAnswers: {
+      fixId: string
+      answers: { key: string; value: string }[]
+    }[]
+    repositoryPath: string
+  }): Promise<string> {
+    this.gqlClient = await this.initializeGqlClient()
+
+    logInfo(
+      `Applying ${interactiveAnswers.length} interactive fix(es) with LLM-supplied answers`,
+      { repositoryPath }
+    )
+
+    const applied: AppliedEntry[] = []
+    const failed: { fixId: string; reason: string }[] = []
+    const skipped: SkippedEntry[] = []
+
+    for (const entry of interactiveAnswers) {
+      try {
+        const { fixData } = await this.gqlClient.getFixWithAnswers({
+          fixId: entry.fixId,
+          answers: entry.answers,
+        })
+
+        if (!fixData) {
+          failed.push({
+            fixId: entry.fixId,
+            reason: 'Fix not found on the server (may have expired)',
+          })
+          continue
+        }
+
+        if (fixData.__typename !== 'FixData') {
+          failed.push({
+            fixId: entry.fixId,
+            reason: `Backend returned ${fixData.__typename} — could not produce a patch with the supplied answers`,
+          })
+          continue
+        }
+
+        if (!fixData.patch) {
+          failed.push({
+            fixId: entry.fixId,
+            reason:
+              'Backend returned FixData with no patch — answers did not yield an applicable fix',
+          })
+          continue
+        }
+
+        // Guardrail: skip the fix if any SELECT value we sent isn't in the
+        // question's options[]. Backend would otherwise fall back to its
+        // default sanitizer and produce a clean-applying but wrong patch.
+        const sentByKey = new Map(entry.answers.map((a) => [a.key, a.value]))
+        const invalidSelectAnswers: {
+          key: string
+          sentValue: string
+          options: string[]
+        }[] = []
+        for (const q of fixData.questions) {
+          if (q.inputType !== FixQuestionInputType.Select) continue
+          const sentValue = sentByKey.get(q.key)
+          if (sentValue === undefined) continue
+          if (!q.options.includes(sentValue)) {
+            invalidSelectAnswers.push({
+              key: q.key,
+              sentValue,
+              options: [...q.options],
+            })
+          }
+        }
+        if (invalidSelectAnswers.length > 0) {
+          skipped.push({
+            fixId: entry.fixId,
+            invalidSelectAnswers,
+          })
+          continue
+        }
+
+        // Question keys we didn't send — either true cascading or a
+        // wrong-key fallback (camelCase vs snake_case). Surface as a hint.
+        const newPendingKeys = fixData.questions
+          .map((q) => q.key)
+          .filter((k) => !sentByKey.has(k))
+
+        const mcpFix = McpFixSchema.parse({
+          __typename: 'fix',
+          id: entry.fixId,
+          confidence: 0,
+          safeIssueType: null,
+          safeIssueLanguage: null,
+          severityText: null,
+          severityValue: null,
+          vulnerabilityReportIssues: [],
+          patchAndQuestions: fixData,
+        })
+
+        const result = await PatchApplicationService.applyFixes({
+          fixes: [mcpFix],
+          repositoryPath,
+          gqlClient: this.gqlClient,
+          scanContext: ScanContext.USER_REQUEST,
+          downloadSource: FixDownloadSource.Mcp,
+        })
+
+        if (result.appliedFixes.length > 0) {
+          const targetFile = extractTargetFile(fixData.patch) ?? 'unknown file'
+          applied.push({
+            fixId: entry.fixId,
+            targetFile,
+            newPendingKeys,
+          })
+        } else {
+          failed.push({
+            fixId: entry.fixId,
+            reason: result.failedFixes[0]?.error ?? 'patch application failed',
+          })
+        }
+      } catch (error) {
+        failed.push({
+          fixId: entry.fixId,
+          reason: (error as Error).message,
+        })
+      }
+    }
+
+    return formatApplyAnswersSummary({ applied, failed, skipped })
+  }
+}
+
+type AppliedEntry = {
+  fixId: string
+  targetFile: string
+  newPendingKeys: string[]
+}
+
+type SkippedEntry = {
+  fixId: string
+  invalidSelectAnswers: {
+    key: string
+    sentValue: string
+    options: string[]
+  }[]
+}
+
+function extractTargetFile(patch: string): string | null {
+  const match = patch.match(/^\+\+\+ b\/(.+)$/m)
+  return match?.[1] ?? null
+}
+
+function formatApplyAnswersSummary({
+  applied,
+  failed,
+  skipped,
+}: {
+  applied: AppliedEntry[]
+  failed: { fixId: string; reason: string }[]
+  skipped: SkippedEntry[]
+}): string {
+  const sections: string[] = []
+
+  if (applied.length > 0) {
+    sections.push(
+      `## ✅ Applied ${applied.length} fix${applied.length === 1 ? '' : 'es'}\n\n` +
+        applied
+          .map((a) => {
+            const hint =
+              a.newPendingKeys.length > 0
+                ? `\n  ⚠️ The backend returned additional question key(s) we didn't send: [${a.newPendingKeys
+                    .map((k) => `\`${k}\``)
+                    .join(
+                      ', '
+                    )}]. This is either (a) a true cascading question — re-call \`scan_and_fix_vulnerabilities\` with those added to \`interactiveAnswers\` if you have a confident answer; or (b) the key we sent was wrong (e.g. camelCase vs snake_case) and the backend fell back to its default — copy the echoed key verbatim and retry. The patch above was already applied using defaults.`
+                : ''
+            return `- **\`${a.fixId}\`** → \`${a.targetFile}\`${hint}`
+          })
+          .join('\n')
+    )
+  }
+
+  if (skipped.length > 0) {
+    sections.push(
+      `## ⏭️ Skipped ${skipped.length} fix${skipped.length === 1 ? '' : 'es'} — invalid SELECT answer value(s)\n\n` +
+        skipped
+          .map((s) => {
+            const detail = s.invalidSelectAnswers
+              .map(
+                (a) =>
+                  `\`${a.key}\` got \`"${a.sentValue}"\` — allowed options: [${a.options
+                    .map((o) => `\`"${o}"\``)
+                    .join(', ')}]`
+              )
+              .join('; ')
+            return `- **\`${s.fixId}\`** — ${detail}\n  The file was **not modified**. Re-call \`scan_and_fix_vulnerabilities\` with one of the exact allowed option strings (copy character-for-character, no commentary appended) or omit this fix entirely if no option is justified by the code.`
+          })
+          .join('\n') +
+        `\n\nThis guardrail exists to prevent the backend from silently falling back to its default sanitizer for an answer it didn't recognize — which could apply a semantically-wrong patch and break legitimate code paths.`
+    )
+  }
+
+  if (failed.length > 0) {
+    sections.push(
+      `## ❌ Failed\n\n` +
+        failed.map((f) => `- **\`${f.fixId}\`** — ${f.reason}`).join('\n')
+    )
+  }
+
+  if (sections.length === 0) {
+    return 'No fixes were processed.'
+  }
+
+  return sections.join('\n\n')
 }

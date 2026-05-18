@@ -4,11 +4,7 @@ import path from 'path'
 import { expect } from 'expect'
 import { SnapshotState, toMatchSnapshot } from 'jest-snapshot'
 import { dumpLogs } from './helpers/dumpLogs.mjs'
-import {
-  assert,
-  assertDeepEqual,
-  assertIncludes,
-} from './helpers/assertions.mjs'
+import { assert, assertDeepEqual } from './helpers/assertions.mjs'
 
 import {
   addSpaceToSpecificFiles,
@@ -99,7 +95,6 @@ test('Bugsy MCP E2E tests', async (t) => {
       {
         API_URL: 'http://localhost:8080/v1/graphql',
         MOBB_API_KEY: apiKey,
-        MOBB_MCP_DISABLE_INTERACTIVE_FILTER: '1',
       }
     )
     console.log('connected to MCP server')
@@ -137,12 +132,23 @@ test('Bugsy MCP E2E tests', async (t) => {
         tools: [
           {
             name: MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
-            description: `Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
+            description: `Scans a given local repository for security vulnerabilities, applies the auto-fixable ones, and surfaces any fix that needs your input as an "Interactive fix". Re-invoke with "interactiveAnswers" to apply those.
+
+Two modes of operation:
+
+A) SCAN MODE (default — interactiveAnswers omitted)
+   - Scans changed/recent files at "path"
+   - Auto-applies fixes that need no input
+   - Returns "Interactive fix" entries for fixes that need decisions; you (the AI) decide answers from the surrounding code
+
+B) APPLY-WITH-ANSWERS MODE (interactiveAnswers field supplied — array may be empty or partial)
+   - SKIPS scanning entirely (does NOT fall back to scan mode just because some fixes were skipped)
+   - Include ONLY fixes where answers are justified by code/context; omit fix IDs you are not confident about
+   - Empty array []: abstain from applying ALL interactive fixes (no patches fetched — summarize skips for the user)
 
 When to invoke:
-• Use when the user explicitly asks to "scan for vulnerabilities", "run a security check", or "test for security issues" in a local repository.
-• The repository must exist on disk; supply its absolute path with the required "path" argument.
-• Ideal after the user makes code changes (added/modified/staged files) but before committing, or whenever they request a full rescan.
+• Mode A — when the user asks to "scan for vulnerabilities", "run a security check", or after they make code changes.
+• Mode B — immediately after Mode A returns interactive fixes; pass confident answers only; use [] only when abstaining from every interactive fix.
 
 How to invoke:
 • Required argument:
@@ -152,25 +158,32 @@ How to invoke:
   – limit (number): maximum number of fixes to include in the response.
   – maxFiles (number): maximum number of files to scan (default: 10). Provide this value to increase the scope of the scan.
   – rescan (boolean): true to force a complete rescan even if cached results exist.
+  – interactiveAnswers (array): triggers Mode B. Each entry: { fixId, answers: [{ key, value }] }. SELECT values MUST be exact strings from the option list. Omit fixes you cannot answer confidently. Use [] to abstain from all interactive fixes without rescanning.
 
-Behaviour:
-• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the las commit.
+Behaviour (Mode A):
+• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the last commit.
 • If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
 • If maxFiles is provided, the tool scans the maxFiles most recently changed files in the repository.
-• By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
-• The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
+• The tool NEVER commits or pushes changes.
 
 Return value:
-The response is an object with a single "content" array containing one text element. The text is either:
-• A human-readable summary of the fixes / patches, or
-• A diagnostic or error message if the scan fails or finds nothing to fix.
+A "content" array with one text element. Either a human-readable summary of fixes/patches, an interactive-fix prompt, an apply-with-answers result, or an error message.
 
-Example payload:
+Example payload (Mode A):
+{ "path": "/home/user/my-project", "limit": 20, "maxFiles": 50 }
+
+Example payload (Mode B — subset or abstain):
 {
   "path": "/home/user/my-project",
-  "limit": 20,
-  "maxFiles": 50,
-  "rescan": false
+  "interactiveAnswers": [
+    { "fixId": "abc-123", "answers": [{ "key": "isServerSideCode", "value": "yes" }] }
+  ]
+}
+
+Example payload (Mode B — abstain from every interactive fix, no rescan):
+{
+  "path": "/home/user/my-project",
+  "interactiveAnswers": []
 }`,
             inputSchema: {
               type: 'object',
@@ -180,27 +193,61 @@ Example payload:
                   description:
                     'Full local path to repository to scan and fix vulnerabilities',
                 },
-                rescan: {
-                  type: 'boolean',
-                  description: '[Optional] whether to rescan the repository',
+                offset: {
+                  type: 'number',
+                  description: '[Optional] offset for pagination',
                 },
                 limit: {
                   type: 'number',
                   description: '[Optional] maximum number of results to return',
-                },
-                offset: {
-                  type: 'number',
-                  description: '[Optional] offset for pagination',
                 },
                 maxFiles: {
                   type: 'number',
                   description:
                     '[Optional] maximum number of files to scan (default: 10). Use higher values for more comprehensive scans or lower values for faster performance.',
                 },
+                rescan: {
+                  type: 'boolean',
+                  description: '[Optional] whether to rescan the repository',
+                },
                 scanRecentlyChangedFiles: {
                   type: 'boolean',
                   description:
                     '[Optional] whether to automatically scan recently changed files when no changed files are found in git status. If false, the tool will prompt the user instead.',
+                },
+                interactiveAnswers: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      fixId: {
+                        type: 'string',
+                        description:
+                          'Fix id from a previous "Interactive fix" prompt.',
+                      },
+                      answers: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            key: {
+                              type: 'string',
+                              description: 'FixQuestion key.',
+                            },
+                            value: {
+                              type: 'string',
+                              description:
+                                'Decided value (SELECT must match an option exactly).',
+                            },
+                          },
+                          required: ['key', 'value'],
+                        },
+                      },
+                    },
+                    required: ['fixId', 'answers'],
+                  },
+                  description:
+                    '[Optional] When supplied (including []), skips scanning. Non-empty: apply interactive fixes with answers. Empty []: abstain from all interactive fixes without rescanning. Omit for scan mode.',
                 },
               },
               required: ['path'],
@@ -317,6 +364,11 @@ Example payload:
     }
   })
 
+  // Any fix block — `## Fix N:` is applicable, `### Interactive fix N:`
+  // is one requiring user-supplied answers (MOBB-3604). Either proves the
+  // backend returned a fix that this response is surfacing.
+  const FIX_MARKER_RE = /^(## Fix \d+:|### Interactive fix \d+:)/m
+
   await t.test('MCP: scan and fix vulnerabilities', async () => {
     try {
       console.log('scanning and fixing vulnerabilities')
@@ -327,25 +379,19 @@ Example payload:
         }
       )
 
-      // console.log('scan_and_fix_vulnerabilities response', response)
-
-      // Basic assertion to ensure we have a response
       assert(response, 'Response should exist')
       assert(response.content, 'Response should have content property')
       assert(Array.isArray(response.content), 'Content should be an array')
       assert(response.content.length > 0, 'Content array should not be empty')
 
-      // Extract the actual text from the response
       const actualText = response.content[0].text
 
-      // Check that the response contains at least one fix
-      assertIncludes(
-        actualText,
-        '## Fix 1:',
-        'Response should include at least one fix'
+      assert(
+        FIX_MARKER_RE.test(actualText),
+        'Response should include at least one fix (applicable or interactive)'
       )
 
-      // Make a second call to get the next batch of fixes
+      // Second call: pagination should yield a different page than the first.
       console.log('getting next batch of fixes')
       const nextBatchResponse = await client.callTool(
         MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -354,9 +400,6 @@ Example payload:
         }
       )
 
-      // console.log('next batch response', nextBatchResponse)
-
-      // Basic assertion to ensure we have a response for the next batch
       assert(nextBatchResponse, 'Next batch response should exist')
       assert(
         nextBatchResponse.content,
@@ -371,25 +414,19 @@ Example payload:
         'Next batch content array should not be empty'
       )
 
-      // Extract the actual text from the next batch response
       const nextBatchText = nextBatchResponse.content[0].text
 
-      // Check that the next batch response contains the expected fix numbers
-      assertIncludes(
-        nextBatchText,
-        '## Fix 4:',
-        'Next batch should include Fix 4'
+      assert(
+        FIX_MARKER_RE.test(nextBatchText),
+        'Next batch should include at least one fix entry'
+      )
+      assert(
+        nextBatchText !== actualText,
+        'Next batch should not be identical to the first batch (pagination advanced)'
       )
 
-      // Verify we're not getting the same fixes as the first batch
-      assertIncludes(
-        nextBatchText,
-        '## Fix 1:',
-        'Next batch should not include Fix 1',
-        false
-      )
-
-      // Make a third call with a larger limit that overlaps with previous batches
+      // Third call with explicit offset and larger limit — content should
+      // differ from the default-limit calls above.
       console.log('getting comprehensive batch of fixes')
       const largeBatchResponse = await client.callTool(
         MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -400,9 +437,6 @@ Example payload:
         }
       )
 
-      // console.log('large batch response', largeBatchResponse)
-
-      // Basic assertion to ensure we have a response for the large batch
       assert(largeBatchResponse, 'Large batch response should exist')
       assert(
         largeBatchResponse.content,
@@ -417,37 +451,14 @@ Example payload:
         'Large batch content array should not be empty'
       )
 
-      // Extract the actual text from the large batch response
       const largeBatchText = largeBatchResponse.content[0].text
 
-      // Check that the large batch response contains the expected fix numbers
-      assertIncludes(
-        largeBatchText,
-        '## Fix 6:',
-        'Large batch should include Fix 6'
+      assert(
+        FIX_MARKER_RE.test(largeBatchText),
+        'Large batch should include at least one fix entry'
       )
 
-      assertIncludes(
-        largeBatchText,
-        '## Fix 13:',
-        'Large batch should include Fix 13'
-      )
-
-      // Verify that we don't have fixes from the first batch
-      assertIncludes(
-        largeBatchText,
-        '## Fix 14:',
-        'Large batch should include Fix 14',
-        false
-      )
-      assertIncludes(
-        largeBatchText,
-        '## Fix 5:',
-        'Large batch should include Fix 5 (overlapping with previous batch)',
-        false
-      )
-
-      // Make a fourth call with rescan=true to test reanalysis
+      // Fourth call with rescan=true to test reanalysis
       console.log('rescanning for vulnerabilities')
       const rescanResponse = await client.callTool(
         MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES,
@@ -457,7 +468,6 @@ Example payload:
         }
       )
 
-      // Basic assertion to ensure we have a response for the rescan
       assert(rescanResponse, 'Rescan response should exist')
       assert(
         rescanResponse.content,
@@ -472,21 +482,11 @@ Example payload:
         'Rescan content array should not be empty'
       )
 
-      // Extract the actual text from the rescan response
       const rescanText = rescanResponse.content[0].text
 
-      // Check that the rescan response contains the expected fix format
-      assertIncludes(
-        rescanText,
-        '## Fix 1:',
-        'Rescan should include the first fix'
-      )
-
-      // Verify rescan found at least 3 fixes (the same number as our first batch)
-      assertIncludes(
-        rescanText,
-        '## Fix 3:',
-        'Rescan should find at least 3 fixes'
+      assert(
+        FIX_MARKER_RE.test(rescanText),
+        'Rescan should surface at least one fix'
       )
     } catch (error) {
       dumpLogs(tempDir)
@@ -550,28 +550,28 @@ Example payload:
       }
       const responseText = response.content[0].text
 
-      assertIncludes(
-        responseText,
-        '## Fix 1:',
-        'Rescan should include the first fix'
+      // SVJP returns 2 fixes (one applicable, one interactive). With limit=1
+      // the page may carry either kind; assert any fix marker is present.
+      assert(
+        FIX_MARKER_RE.test(responseText),
+        'Fetch available fixes response should include at least one fix entry'
       )
-      assertIncludes(
-        responseText,
-        '## Fix 2:',
-        'Response should NOT include Fix 2',
-        false
-      )
+
       const response2 = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
         path: tempDirExistingReport,
         offset: 1,
         limit: 1,
       })
       const response2Text = response2.content[0].text
-      assertIncludes(
-        response2Text,
-        '## Fix 2:',
-        'Rescan should include the second fix'
+      assert(
+        FIX_MARKER_RE.test(response2Text),
+        'Second page should also include at least one fix entry'
       )
+      assert(
+        response2Text !== responseText,
+        'Second page should differ from first (pagination advanced)'
+      )
+
       const response3 = await client.callTool(MCP_TOOL_FETCH_AVAILABLE_FIXES, {
         path: tempDirExistingReport,
         limit: 10,
@@ -579,16 +579,9 @@ Example payload:
       })
       const response3Text = response3.content[0].text
 
-      assertIncludes(
-        response3Text,
-        '## Fix 2:',
-        'Rescan should include Fix 2 (third check)'
-      )
-      assertIncludes(
-        response3Text,
-        '## Fix 3:',
-        'Rescan should not include Fix 3',
-        false
+      assert(
+        FIX_MARKER_RE.test(response3Text),
+        'Large-limit fetch should include at least one fix entry'
       )
     } catch (error) {
       dumpLogs(tempDirExistingReport)

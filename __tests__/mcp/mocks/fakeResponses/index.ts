@@ -6,6 +6,13 @@ export { mockCreateProject, mockCreateProjectError } from './createProject'
 export { mockGetAnalysis } from './getAnalysis'
 export { mockGetFixDiff } from './getFixDiff'
 export {
+  mockGetFixWithAnswers,
+  mockGetFixWithAnswersAnswersIgnored,
+  mockGetFixWithAnswersCascading,
+  mockGetFixWithAnswersNoFix,
+  mockGetFixWithAnswersNotFound,
+} from './getFixWithAnswers'
+export {
   mockGetLastOrgAndNamedProject,
   mockGetLastOrgAndNamedProjectError,
   mockGetLastOrgAndNamedProjectProjectNotFound,
@@ -15,6 +22,7 @@ export {
   mockGetReportFixesEmpty,
   mockGetReportFixesError,
 } from './getReportFixes'
+export { mockGetReportFixesWithQuestions } from './getReportFixesWithQuestions'
 export {
   mockGetUserMvsAutoFixDisabled,
   mockGetUserMvsAutoFixEnabled,

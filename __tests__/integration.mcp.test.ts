@@ -143,12 +143,6 @@ describe('mcp tests', () => {
   }
 
   beforeAll(async () => {
-    // Existing fixtures pre-date the interactive-fix filter (MOBB-3607);
-    // disable it so the server returns the same fix set the assertions expect.
-    // Read at call time inside InteractiveFixFilter, so setting it here is
-    // effective even though configs are imported above.
-    process.env['MOBB_MCP_DISABLE_INTERACTIVE_FILTER'] = '1'
-
     // Wire up mock implementations now that static imports are resolved
     _createOpenMock.mockImplementation(createOpenMockImplementation())
     _createSnykMock.mockImplementation(createSnykMockImplementation())
@@ -1023,9 +1017,12 @@ describe('mcp tests', () => {
         delete process.env['MVS_AUTO_FIX']
       })
 
-      // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
-      // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
-      it('should apply fixes to multiple files with different comment styles', async () => {
+      // MOBB-3604: HTML CSRF requires user-context questions (e.g. isServerSideCode),
+      // so the backend returns it as an interactive fix. The MVS_AUTO_FIX path
+      // intentionally skips interactive fixes — they are surfaced in the response
+      // for the LLM to answer via scan_and_fix_vulnerabilities(interactiveAnswers).
+      // JS and Python fixes are non-interactive and remain auto-applied.
+      it('auto-applies non-interactive fixes and routes interactive ones to the LLM', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
 
         const testRepo = new ActiveGitRepo()
@@ -1034,9 +1031,6 @@ describe('mcp tests', () => {
         testRepo.addFile('vulnerable.js', jsVulnerableFileContent)
         testRepo.addFile('vulnerable.py', pyVulnerableFileContent)
         testRepo.addFile('vulnerable.html', htmlVulnerableFileContent)
-
-        /// uncomment after server fix of irrelevant detection
-        testRepo.addFile('__tests__/vulnerable.js', jsVulnerableFileContent)
 
         try {
           process.env['WORKSPACE_FOLDER_PATHS'] = testRepoPath
@@ -1047,21 +1041,14 @@ describe('mcp tests', () => {
             testRepoPath
           )
           const firstContent = scanResult.content[0]
+          const responseText = getTextContent(firstContent) as string
 
           expect(firstContent).toBeDefined()
-          expect(
-            (getTextContent(firstContent) as string).length
-          ).toBeGreaterThan(0)
+          expect(responseText.length).toBeGreaterThan(0)
 
           await expectLoggerMessage(logs, 'Successfully auto-applied')
-
           await expectLoggerMessage(logs, 'MVS_AUTO_FIX override')
-
           await expectLoggerMessage(logs, 'mvs_auto_fix setting: true')
-          /// uncomment after server fix of irrelevant detection
-          // await expectLoggerMessage(logs, 'MVS_AUTO_FIX filtering completed')
-
-          // await expectLoggerMessage(logs, 'Fix.*filtered out')
 
           const autoApplicationLogs = logs.filter(
             (log) =>
@@ -1086,44 +1073,17 @@ describe('mcp tests', () => {
           const pyContent = readFileSync(pyFilePath, 'utf8')
           const htmlContent = readFileSync(htmlFilePath, 'utf8')
 
-          const hasJsComment = jsContent.includes(
-            '// Mobb security fix applied'
-          )
-          const hasPyComment = pyContent.includes('# Mobb security fix applied')
+          // Non-interactive fixes were auto-applied with the per-language comment.
+          expect(jsContent).toContain('// Mobb security fix applied')
+          expect(pyContent).toContain('# Mobb security fix applied')
 
-          const jsAndPyPatched = hasJsComment && hasPyComment
-          expect(jsAndPyPatched).toBe(true)
+          // Interactive HTML CSRF fix was NOT auto-applied — file untouched, and
+          // the fix is surfaced in the response for the LLM to answer.
+          expect(htmlContent).toBe(htmlVulnerableFileContent)
+          expect(responseText).toContain('## Interactive fixes')
 
-          expect(htmlContent).toContain('Mobb security fix applied')
-
-          expect(hasJsComment).toBe(true)
-
-          expect(hasPyComment).toBe(true)
-
-          /// uncomment after server fix of irrelevant detection
-          // const testFilePath = join(testRepoPath, '__tests__/vulnerable.js')
-          // const testFileContent = readFileSync(testFilePath, 'utf8')
-          // console.log(
-          // )
-          // const hasTestFileComment = testFileContent.includes(
-          //   '# Mobb security fix applied'
-          // )
-          // expect(hasTestFileComment).toBe(false)
-
-          // expect(testFileContent).toBe(pyVulnerableFileContent)
-
-          // console.log(
-          // )
-          // const patchApplicationLogs = logs.filter(
-          //   (log) =>
-          //     typeof log.message === 'string' &&
-          //     log.message.includes('Successfully applied fix')
-          // )
-          // expect(patchApplicationLogs.length).toBe(3)
-
-          expect(getTextContent(firstContent)).toContain('fix')
-
-          expect(getTextContent(firstContent)).toContain('vulnerability')
+          expect(responseText).toContain('fix')
+          expect(responseText).toContain('vulnerability')
         } finally {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
@@ -1418,8 +1378,10 @@ describe('mcp tests', () => {
           await testRepo.commitFiles(['committed1.py', 'committed2.js'])
           await sleep(100)
 
-          // Add uncommitted vulnerable files
-          testRepo.addFile('uncommitted1.html', htmlVulnerableFileContent)
+          // Add uncommitted vulnerable files. Both are non-interactive
+          // (SQL injection) so MVS_AUTO_FIX will auto-apply both — the test is
+          // about git-status routing (uncommitted vs committed), not language coverage.
+          testRepo.addFile('uncommitted1.js', jsVulnerableFileContent)
           testRepo.addFile('uncommitted2.py', pyVulnerableFileContent)
           await sleep(100)
 
@@ -1436,7 +1398,7 @@ describe('mcp tests', () => {
           // Check file contents - committed files should NOT be patched
           const committed1Path = join(testRepoPath, 'committed1.py')
           const committed2Path = join(testRepoPath, 'committed2.js')
-          const uncommitted1Path = join(testRepoPath, 'uncommitted1.html')
+          const uncommitted1Path = join(testRepoPath, 'uncommitted1.js')
           const uncommitted2Path = join(testRepoPath, 'uncommitted2.py')
 
           const committed1Content = readFileSync(committed1Path, 'utf8')
@@ -1457,7 +1419,7 @@ describe('mcp tests', () => {
           expect(uncommitted2Content).toContain('Mobb security fix applied')
 
           // Verify uncommitted files were actually modified (not just original content)
-          expect(uncommitted1Content).not.toBe(htmlVulnerableFileContent)
+          expect(uncommitted1Content).not.toBe(jsVulnerableFileContent)
           expect(uncommitted2Content).not.toBe(pyVulnerableFileContent)
 
           // Verify logs show auto-fix was applied

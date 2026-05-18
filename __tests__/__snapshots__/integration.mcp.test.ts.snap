@@ -1614,12 +1614,23 @@ exports[`mcp tests > should respond to mcp list_tools call 1`] = `
 {
   "tools": [
     {
-      "description": "Scans a given local repository for security vulnerabilities and returns auto-generated code fixes.
+      "description": "Scans a given local repository for security vulnerabilities, applies the auto-fixable ones, and surfaces any fix that needs your input as an "Interactive fix". Re-invoke with "interactiveAnswers" to apply those.
+
+Two modes of operation:
+
+A) SCAN MODE (default — interactiveAnswers omitted)
+   - Scans changed/recent files at "path"
+   - Auto-applies fixes that need no input
+   - Returns "Interactive fix" entries for fixes that need decisions; you (the AI) decide answers from the surrounding code
+
+B) APPLY-WITH-ANSWERS MODE (interactiveAnswers field supplied — array may be empty or partial)
+   - SKIPS scanning entirely (does NOT fall back to scan mode just because some fixes were skipped)
+   - Include ONLY fixes where answers are justified by code/context; omit fix IDs you are not confident about
+   - Empty array []: abstain from applying ALL interactive fixes (no patches fetched — summarize skips for the user)
 
 When to invoke:
-• Use when the user explicitly asks to "scan for vulnerabilities", "run a security check", or "test for security issues" in a local repository.
-• The repository must exist on disk; supply its absolute path with the required "path" argument.
-• Ideal after the user makes code changes (added/modified/staged files) but before committing, or whenever they request a full rescan.
+• Mode A — when the user asks to "scan for vulnerabilities", "run a security check", or after they make code changes.
+• Mode B — immediately after Mode A returns interactive fixes; pass confident answers only; use [] only when abstaining from every interactive fix.
 
 How to invoke:
 • Required argument:
@@ -1629,28 +1640,72 @@ How to invoke:
   – limit (number): maximum number of fixes to include in the response.
   – maxFiles (number): maximum number of files to scan (default: 10). Provide this value to increase the scope of the scan.
   – rescan (boolean): true to force a complete rescan even if cached results exist.
+  – interactiveAnswers (array): triggers Mode B. Each entry: { fixId, answers: [{ key, value }] }. SELECT values MUST be exact strings from the option list. Omit fixes you cannot answer confidently. Use [] to abstain from all interactive fixes without rescanning.
 
-Behaviour:
-• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the las commit.
+Behaviour (Mode A):
+• If the directory is a valid Git repository, the tool scans the changed files in the repository. If there are no changes, it scans the files included in the last commit.
 • If the directory is not a valid Git repository, the tool falls back to scanning recently changed files in the folder.
 • If maxFiles is provided, the tool scans the maxFiles most recently changed files in the repository.
-• By default, only new, modified, or staged files are scanned; if none are found, it checks recently changed files.
-• The tool NEVER commits or pushes changes; it only returns proposed diffs/fixes as text.
+• The tool NEVER commits or pushes changes.
 
 Return value:
-The response is an object with a single "content" array containing one text element. The text is either:
-• A human-readable summary of the fixes / patches, or
-• A diagnostic or error message if the scan fails or finds nothing to fix.
+A "content" array with one text element. Either a human-readable summary of fixes/patches, an interactive-fix prompt, an apply-with-answers result, or an error message.
 
-Example payload:
+Example payload (Mode A):
+{ "path": "/home/user/my-project", "limit": 20, "maxFiles": 50 }
+
+Example payload (Mode B — subset or abstain):
 {
   "path": "/home/user/my-project",
-  "limit": 20,
-  "maxFiles": 50,
-  "rescan": false
+  "interactiveAnswers": [
+    { "fixId": "abc-123", "answers": [{ "key": "isServerSideCode", "value": "yes" }] }
+  ]
+}
+
+Example payload (Mode B — abstain from every interactive fix, no rescan):
+{
+  "path": "/home/user/my-project",
+  "interactiveAnswers": []
 }",
       "inputSchema": {
         "properties": {
+          "interactiveAnswers": {
+            "description": "[Optional] When supplied (including []), skips scanning. Non-empty: apply interactive fixes with answers. Empty []: abstain from all interactive fixes without rescanning. Omit for scan mode.",
+            "items": {
+              "properties": {
+                "answers": {
+                  "items": {
+                    "properties": {
+                      "key": {
+                        "description": "FixQuestion key.",
+                        "type": "string",
+                      },
+                      "value": {
+                        "description": "Decided value (SELECT must match an option exactly).",
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "key",
+                      "value",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "fixId": {
+                  "description": "Fix id from a previous "Interactive fix" prompt.",
+                  "type": "string",
+                },
+              },
+              "required": [
+                "fixId",
+                "answers",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
           "limit": {
             "description": "[Optional] maximum number of results to return",
             "type": "number",

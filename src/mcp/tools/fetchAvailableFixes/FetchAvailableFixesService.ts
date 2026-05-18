@@ -41,11 +41,13 @@ export class FetchAvailableFixesService {
 
   public async checkForAvailableFixes({
     repoUrl,
+    repositoryPath,
     limit = MCP_DEFAULT_LIMIT,
     offset,
     fileFilter,
   }: {
     repoUrl: string
+    repositoryPath: string
     limit?: number
     offset?: number
     fileFilter?: string[]
@@ -96,7 +98,8 @@ export class FetchAvailableFixesService {
         offset: effectiveOffset,
         limit,
         gqlClient,
-        skippedInteractiveCount: fixReport.skippedRuleIds?.length ?? 0,
+        interactiveFixes: fixReport.interactiveFixes ?? [],
+        repositoryPath,
       })
       this.currentOffset = effectiveOffset + (fixReport.fixes?.length || 0)
       return prompt

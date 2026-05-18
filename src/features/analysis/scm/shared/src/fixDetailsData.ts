@@ -421,4 +421,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.ImproperValidationOfArrayIndex]: undefined,
   [IssueType_Enum.IncorrectIntegerConversion]: undefined,
   [IssueType_Enum.ImproperCertificateValidation]: undefined,
+  [IssueType_Enum.OftenMisusedBooleanGetBoolean]: undefined,
 }

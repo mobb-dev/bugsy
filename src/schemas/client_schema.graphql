@@ -742,6 +742,7 @@ fragment FixDetails on fix {
   id
   confidence
   safeIssueType
+  safeIssueLanguage
   severityText
   gitBlameLogin
   severityValue
@@ -765,7 +766,47 @@ fragment FixDetails on fix {
       patch
       patchOriginalEncodingBase64
       questions {
+        key
         name
+        defaultValue
+        value
+        inputType
+        options
+        index
+        extraContext {
+          key
+          value
+        }
+      }
+      extraContext {
+        extraContext {
+          key
+          value
+        }
+        fixDescription
+      }
+    }
+  }
+}
+
+query getFixWithAnswers($fixId: uuid!, $userInput: [QuestionAnswer!]!) {
+  fixData: getFix(fixId: $fixId, userInput: $userInput, loadAnswers: false) {
+    __typename
+    ... on FixData {
+      patch
+      patchOriginalEncodingBase64
+      questions {
+        key
+        name
+        defaultValue
+        value
+        inputType
+        options
+        index
+        extraContext {
+          key
+          value
+        }
       }
       extraContext {
         extraContext {

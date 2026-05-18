@@ -175,6 +175,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.IncorrectIntegerConversion]: 'Incorrect Integer Conversion',
   [IssueType_Enum.ImproperCertificateValidation]:
     'Improper Certificate Validation',
+  [IssueType_Enum.OftenMisusedBooleanGetBoolean]:
+    'Often Misused: Boolean.getBoolean()',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

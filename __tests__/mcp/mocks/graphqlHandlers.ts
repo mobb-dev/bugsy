@@ -7,6 +7,8 @@ import type {
   CreateProjectMutationVariables,
   GetAnalysisQuery,
   GetAnalysisQueryVariables,
+  GetFixWithAnswersQuery,
+  GetFixWithAnswersQueryVariables,
   GetLastOrgAndNamedProjectQuery,
   GetLastOrgAndNamedProjectQueryVariables,
   GetLatestReportByRepoUrlQuery,
@@ -30,12 +32,18 @@ import {
   mockCreateProject,
   mockCreateProjectError,
   mockGetAnalysis,
+  mockGetFixWithAnswers,
+  mockGetFixWithAnswersAnswersIgnored,
+  mockGetFixWithAnswersCascading,
+  mockGetFixWithAnswersNoFix,
+  mockGetFixWithAnswersNotFound,
   mockGetLastOrgAndNamedProject,
   mockGetLastOrgAndNamedProjectError,
   mockGetLastOrgAndNamedProjectProjectNotFound,
   mockGetReportFixes,
   mockGetReportFixesEmpty,
   mockGetReportFixesError,
+  mockGetReportFixesWithQuestions,
   mockGetUserMvsAutoFixDisabled,
   mockGetUserMvsAutoFixEnabled,
   mockGetUserMvsAutoFixError,
@@ -80,7 +88,13 @@ type MockState = {
   createCommunityUser: 'success' | 'error' | 'badApiKey'
   getUserMvsAutoFix: 'enabled' | 'disabled' | 'noSettings' | 'error'
   errorMessages: Record<string, string>
-  getReportFixes: 'success' | 'empty' | 'error'
+  getReportFixes: 'success' | 'empty' | 'error' | 'withQuestions'
+  getFixWithAnswers:
+    | 'success'
+    | 'cascading'
+    | 'notFound'
+    | 'noFix'
+    | 'answersIgnored'
 }
 
 // Initialize the mock state
@@ -99,6 +113,7 @@ const mockState: MockState = {
   getUserMvsAutoFix: 'enabled',
   errorMessages: {},
   getReportFixes: 'success',
+  getFixWithAnswers: 'success',
 }
 
 // Share the mock state with auth handlers
@@ -286,7 +301,29 @@ export const graphqlHandlers = [
       if (mockState.getReportFixes === 'empty') {
         return HttpResponse.json(mockGetReportFixesEmpty)
       }
+      if (mockState.getReportFixes === 'withQuestions') {
+        return HttpResponse.json(mockGetReportFixesWithQuestions)
+      }
       return HttpResponse.json(mockGetReportFixes)
+    }
+  ),
+
+  graphql.query<GetFixWithAnswersQuery, GetFixWithAnswersQueryVariables>(
+    'getFixWithAnswers',
+    () => {
+      if (mockState.getFixWithAnswers === 'cascading') {
+        return HttpResponse.json(mockGetFixWithAnswersCascading)
+      }
+      if (mockState.getFixWithAnswers === 'notFound') {
+        return HttpResponse.json(mockGetFixWithAnswersNotFound)
+      }
+      if (mockState.getFixWithAnswers === 'noFix') {
+        return HttpResponse.json(mockGetFixWithAnswersNoFix)
+      }
+      if (mockState.getFixWithAnswers === 'answersIgnored') {
+        return HttpResponse.json(mockGetFixWithAnswersAnswersIgnored)
+      }
+      return HttpResponse.json(mockGetFixWithAnswers)
     }
   ),
 ]

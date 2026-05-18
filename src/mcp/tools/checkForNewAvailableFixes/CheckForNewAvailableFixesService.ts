@@ -49,6 +49,7 @@ export class CheckForNewAvailableFixesService {
   private path: string = ''
   private filesLastScanned: Record<string, number> = {}
   private freshFixes: McpFix[] = []
+  private interactiveFixes: McpFix[] = []
   private reportedFixes: McpFix[] = []
   private intervalId: NodeJS.Timeout | null = null
   private isInitialScanComplete: boolean = false
@@ -75,6 +76,7 @@ export class CheckForNewAvailableFixesService {
   public reset(): void {
     this.filesLastScanned = {}
     this.freshFixes = []
+    this.interactiveFixes = []
     this.reportedFixes = []
     this.hasAuthenticationFailed = false
     this.fullScanPathsScanned = configStore.get('fullScanPathsScanned') || []
@@ -180,6 +182,18 @@ export class CheckForNewAvailableFixesService {
       const newFixes = fixes?.fixes?.filter(
         (fix) => !this.isFixAlreadyReported(fix)
       )
+
+      const newInteractiveFixes =
+        fixes?.interactiveFixes?.filter(
+          (fix) => !this.isFixAlreadyReported(fix)
+        ) ?? []
+      if (newInteractiveFixes.length > 0) {
+        this.interactiveFixes.push(...newInteractiveFixes)
+        logInfo(
+          `[${scanContext}] Buffered ${newInteractiveFixes.length} interactive fixes for next response`,
+          { totalBuffered: this.interactiveFixes.length }
+        )
+      }
 
       logInfo(
         `[${scanContext}] Security fixes retrieved, total: ${fixes?.fixes?.length || 0}, new: ${
@@ -744,6 +758,8 @@ export class CheckForNewAvailableFixesService {
         fixes: freshFixes,
         limit: MCP_DEFAULT_LIMIT,
         gqlClient: this.gqlClient!,
+        interactiveFixes: this.interactiveFixes.splice(0, MCP_DEFAULT_LIMIT),
+        repositoryPath: this.path,
       })
     }
     logInfo(`[${scanContext}] No fresh fixes to report`)
@@ -764,6 +780,8 @@ export class CheckForNewAvailableFixesService {
       return appliedFixesSummaryPrompt({
         fixes: appliedFixesToShow,
         gqlClient: this.gqlClient!,
+        interactiveFixes: this.interactiveFixes.splice(0, MCP_DEFAULT_LIMIT),
+        repositoryPath: this.path,
       })
     }
     logInfo(`[${scanContext}] No applied fixes to report`)

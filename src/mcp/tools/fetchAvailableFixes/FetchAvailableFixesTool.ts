@@ -174,6 +174,7 @@ Call this tool instead of ${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES} when you only
     // Check for available fixes using the origin URL
     const fixResult = await this.availableFixesService.checkForAvailableFixes({
       repoUrl: originUrl,
+      repositoryPath: path,
       limit: args.limit,
       offset: args.offset,
       fileFilter: actualFileFilter,

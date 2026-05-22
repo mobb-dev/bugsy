@@ -411,6 +411,7 @@ export class GQLClient {
     reference,
     sha,
     shouldScan,
+    baselineCommit,
   }: {
     fixReportId: string
     projectId: string
@@ -419,6 +420,7 @@ export class GQLClient {
     reference?: string
     sha?: string
     shouldScan?: boolean
+    baselineCommit?: string
   }) {
     const res = await this._clientSdk.DigestVulnerabilityReport({
       fixReportId,
@@ -430,6 +432,7 @@ export class GQLClient {
       repoUrl,
       reference,
       sha,
+      baselineCommit,
     })
     if (res.digestVulnerabilityReport.__typename !== 'VulnerabilityReport') {
       throw new Error('Digesting vulnerability report failed')

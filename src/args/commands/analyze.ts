@@ -8,6 +8,7 @@ import { CliError } from '../../utils'
 import {
   apiKeyOption,
   autoPrOption,
+  baselineCommitOption,
   ciOption,
   commitDirectlyOption,
   commitHashOption,
@@ -67,9 +68,14 @@ export function analyzeBuilder(
       demandOption: false,
     })
     .option('polling', pollingOption)
+    .option('baseline-commit', baselineCommitOption)
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'
+    )
+    .example(
+      'npx mobbdev@latest analyze -r https://github.com/org/repo --baseline-commit <sha>',
+      'analyze only findings introduced since <sha> (PR-mode scan)'
     )
     .help()
 }

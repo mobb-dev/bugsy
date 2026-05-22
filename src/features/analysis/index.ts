@@ -175,6 +175,7 @@ export type AnalysisParams = {
   createOnePr?: boolean
   commitDirectly?: boolean
   polling?: boolean
+  baselineCommit?: string
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -355,6 +356,7 @@ export async function _scan(
     commitDirectly,
     pullRequest,
     polling,
+    baselineCommit,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -497,6 +499,8 @@ export async function _scan(
     reference,
     shouldScan,
     polling,
+    // Only meaningful when opengrep is going to run (no user-supplied report).
+    baselineCommit: shouldScan ? baselineCommit : undefined,
   })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
@@ -680,6 +684,10 @@ export async function _scan(
         ci,
         shouldScan,
         polling,
+        // shouldScan is false here (user provided a report); baseline filter
+        // only applies to the opengrep code path. Drop it to keep the contract
+        // honest with the CLI help text.
+        baselineCommit: undefined,
       })
 
       const res = await _zipAndUploadRepo({
@@ -706,6 +714,7 @@ export async function _scan(
         ci,
         shouldScan,
         polling,
+        baselineCommit,
       })
     }
 
@@ -829,6 +838,7 @@ export async function _digestReport({
   reference,
   shouldScan,
   polling,
+  baselineCommit,
 }: {
   gqlClient: GQLClient
   fixReportId: string
@@ -840,6 +850,7 @@ export async function _digestReport({
   reference?: string
   shouldScan?: boolean
   polling?: boolean
+  baselineCommit?: string
 }) {
   const digestSpinner = createSpinner(
     progressMassages.processingVulnerabilityReport
@@ -854,6 +865,7 @@ export async function _digestReport({
         sha,
         reference,
         shouldScan,
+        baselineCommit,
       }
     )
 

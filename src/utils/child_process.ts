@@ -13,6 +13,7 @@ type BaseChildProcessArgs = {
   processPath: string
   name: string
   cwd?: string
+  env?: NodeJS.ProcessEnv
 }
 
 type SpawnWithStdinArgs = BaseChildProcessArgs & {
@@ -34,12 +35,12 @@ export function createFork(
   return createChildProcess({ childProcess: child, name }, options)
 }
 export function createSpawn(
-  { args, processPath, name, cwd }: BaseChildProcessArgs,
+  { args, processPath, name, cwd, env }: BaseChildProcessArgs,
   options: ChildProcessOptions
 ) {
   const child = cp.spawn(processPath, args, {
     stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-    env: { ...process.env },
+    env: { ...process.env, ...env },
     cwd,
   })
   return createChildProcess({ childProcess: child, name }, options)

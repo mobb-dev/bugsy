@@ -99,11 +99,13 @@ export const getCommitIssueDescription = ({
   issueType,
   irrelevantIssueWithTags,
   fpDescription,
+  unfixableDescription,
 }: {
   issueType: string
   vendor: Vulnerability_Report_Vendor_Enum
   irrelevantIssueWithTags?: { tag: Vulnerability_Report_Issue_Tag_Enum }[]
   fpDescription: string | null
+  unfixableDescription?: string | null
 }): string => {
   const issueTypeString = getIssueTypeFriendlyString(issueType)
 
@@ -119,7 +121,7 @@ export const getCommitIssueDescription = ({
 > Mobb recommends to ignore this issue, however fix is available if you think differently. \n
 
 ## Justification
-${fpDescription ?? issueDescription[irrelevantIssueWithTags[0].tag]}
+${fpDescription ?? unfixableDescription ?? issueDescription[irrelevantIssueWithTags[0].tag]}
 `
     }
 

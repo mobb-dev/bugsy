@@ -810,7 +810,12 @@ export class GithubSCMLib extends SCMLib {
       // This handles both 'updated' and 'created' field values
       const aDate = a.repoUpdatedAt ? Date.parse(a.repoUpdatedAt) : 0
       const bDate = b.repoUpdatedAt ? Date.parse(b.repoUpdatedAt) : 0
-      return (aDate - bDate) * sortOrder
+      const dateCmp = (aDate - bDate) * sortOrder
+      if (dateCmp !== 0) {
+        return dateCmp
+      }
+      // Stable tie-breaker so offset pagination is consistent across requests
+      return a.repoName.localeCompare(b.repoName) * sortOrder
     })
 
     const limit = params.limit || 10

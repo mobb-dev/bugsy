@@ -2,19 +2,26 @@ import simpleGit, { SimpleGit } from 'simple-git'
 
 // Logger interface that can work with different logging systems
 type Logger = {
-  info: (data: unknown, msg?: string) => void
+  debug: (data: unknown, msg?: string) => void
+  warn: (data: unknown, msg?: string) => void
 }
 
-// Default console logger fallback
-const defaultLogger: Logger = {
-  info: (data: unknown, msg?: string) => {
+// Default console logger fallback. `console.debug` is silent by default in
+// Node unless NODE_DEBUG/--inspect is set, so the debug path routes through
+// `console.log` to remain visible to a fallback caller.
+const tag =
+  (sink: (...args: unknown[]) => void) =>
+  (data: unknown, msg?: string): void => {
     if (msg) {
       const sanitizedMsg = String(msg).replace(/\n|\r/g, '')
-      console.log(`[GIT] ${sanitizedMsg}`, data)
+      sink(`[GIT] ${sanitizedMsg}`, data)
     } else {
-      console.log('[GIT]', data)
+      sink('[GIT]', data)
     }
-  },
+  }
+const defaultLogger: Logger = {
+  debug: tag(console.log),
+  warn: tag(console.warn),
 }
 
 /** Creates a SimpleGit instance with output logging configured. */
@@ -27,7 +34,7 @@ export function createGitWithLogging(
   }).outputHandler((bin, stdout, stderr) => {
     const callID = Math.random()
 
-    logger.info({ callID, bin }, 'Start git CLI call')
+    logger.debug({ callID, bin }, 'Start git CLI call')
 
     let errChunks: string[] = []
     let outChunks: string[] = []
@@ -54,7 +61,7 @@ export function createGitWithLogging(
         err: `${errChunks.join('').slice(0, 200)}...`,
         out: `${outChunks.join('').slice(0, 200)}...`,
       }
-      logger.info(logObj, 'git log output')
+      logger.debug(logObj, 'git log output')
 
       // Remove listeners and free chunk arrays to prevent FD/memory leaks
       stderr.removeListener('data', onStderrData)
@@ -74,11 +81,11 @@ export function createGitWithLogging(
 
     // Handle stream errors to prevent unhandled error events and ensure cleanup
     stderr.on('error', (error) => {
-      logger.info({ callID, error: String(error) }, 'git stderr stream error')
+      logger.warn({ callID, error: String(error) }, 'git stderr stream error')
       markDone('stderr')
     })
     stdout.on('error', (error) => {
-      logger.info({ callID, error: String(error) }, 'git stdout stream error')
+      logger.warn({ callID, error: String(error) }, 'git stdout stream error')
       markDone('stdout')
     })
   })

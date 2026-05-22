@@ -577,8 +577,11 @@ export class McpGQLClient extends GQLClient {
         }
       }
 
+      // GetLatestReportByRepoUrl uses _ilike (case-insensitive) on repo.originalUrl,
+      // so %/_ in the URL would be interpreted as LIKE wildcards. Escape them.
+      const escapedRepoUrl = repoUrl.replace(/[%_\\]/g, (c) => `\\${c}`)
       const resp = await this._clientSdk.GetLatestReportByRepoUrl({
-        repoUrl,
+        repoUrl: escapedRepoUrl,
         limit,
         offset,
         currentUserEmail,

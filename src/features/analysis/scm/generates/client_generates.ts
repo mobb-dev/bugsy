@@ -967,6 +967,21 @@ export type GetRepositoryDistinctSkillsCountSuccess = {
   status: Status;
 };
 
+export type GetRepositoryMcpServersAndToolsCountsError = {
+  __typename?: 'GetRepositoryMcpServersAndToolsCountsError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type GetRepositoryMcpServersAndToolsCountsResponse = GetRepositoryMcpServersAndToolsCountsError | GetRepositoryMcpServersAndToolsCountsSuccess;
+
+export type GetRepositoryMcpServersAndToolsCountsSuccess = {
+  __typename?: 'GetRepositoryMcpServersAndToolsCountsSuccess';
+  distinctMcpServersCount: Scalars['Int']['output'];
+  distinctMcpToolsCount: Scalars['Int']['output'];
+  status: Status;
+};
+
 export type GetRepositoryModelStatsError = {
   __typename?: 'GetRepositoryModelStatsError';
   error?: Maybe<Scalars['String']['output']>;
@@ -1019,6 +1034,8 @@ export type GetTracyDiffUploadUrlResponse = {
   status: Status;
   uploadInfo?: Maybe<TracyDiffUploadInfo>;
 };
+
+export type GetUnfixableResponseUnion = GetFixNoFixError | UnfixableData;
 
 export type GitIdentityInput = {
   email: Scalars['String']['input'];
@@ -1456,6 +1473,17 @@ export type RepositorySkillStat = {
   lastSeen?: Maybe<Scalars['String']['output']>;
   linesAttributed?: Maybe<Scalars['Int']['output']>;
   prCount: Scalars['Int']['output'];
+  /**
+   * Human-readable summary attached to the worst-case scan, suitable for
+   * a row-level tooltip. Null when there's no verdict.
+   */
+  scanSummary?: Maybe<Scalars['String']['output']>;
+  /**
+   * Worst-case scan verdict observed across scanner_name × scanner_version
+   * tuples for this skill's content. Null when never scanned.
+   * Values: BENIGN | WARNING | SUSPICIOUS | MALICIOUS.
+   */
+  scanVerdict?: Maybe<Scalars['String']['output']>;
   sessionCount: Scalars['Int']['output'];
   skillName: Scalars['String']['output'];
 };
@@ -2274,6 +2302,14 @@ export type TriggerBranchSurvivalInput = {
   repositoryUrl: Scalars['String']['input'];
   /** When set, survival runs against this branch instead of the repo default (e.g. E2E temp base branch). */
   targetBranchOverride?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UnfixableData = {
+  __typename?: 'UnfixableData';
+  extraContext: Array<UnstructuredFixExtraContext>;
+  fixDescription: Scalars['String']['output'];
+  isFalsePositive: Scalars['Boolean']['output'];
+  manifestActionsRequired: Array<FixExtraContextManifestActionRequiredResponse>;
 };
 
 export type UnstructuredFixExtraContext = {
@@ -24486,6 +24522,7 @@ export type Mutation_RootDelete_Vulnerability_Severity_By_PkArgs = {
 
 /** mutation root */
 export type Mutation_RootDigestVulnerabilityReportArgs = {
+  baselineCommit?: InputMaybe<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
@@ -29564,6 +29601,7 @@ export type Organization = {
   repositoryDistinctDevelopersWithAiCount: GetRepositoryDistinctDevelopersWithAiCountResponse;
   repositoryDistinctModelsCount: GetRepositoryDistinctModelsCountResponse;
   repositoryDistinctSkillsCount: GetRepositoryDistinctSkillsCountResponse;
+  repositoryMcpServersAndToolsCounts: GetRepositoryMcpServersAndToolsCountsResponse;
   repositoryModelStats: GetRepositoryModelStatsResponse;
   repositorySkillStats: GetRepositorySkillStatsResponse;
   /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
@@ -30007,6 +30045,14 @@ export type OrganizationRepositoryDistinctModelsCountArgs = {
 
 /** columns and relationships of "organization" */
 export type OrganizationRepositoryDistinctSkillsCountArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRepositoryMcpServersAndToolsCountsArgs = {
   endDate: Scalars['Timestamp']['input'];
   repositoryUrl: Scalars['String']['input'];
   startDate: Scalars['Timestamp']['input'];
@@ -34915,6 +34961,12 @@ export type Query_Root = {
    * Counts all skill_name values (invoked and available) across those sessions. Owner-only.
    */
   getRepositoryDistinctSkillsCount: GetRepositoryDistinctSkillsCountResponse;
+  /**
+   * Distinct MCP server + tool counts for one repository in a time window.
+   * Bridges PR-linked sessions (ai_blame_attribution) to tracy_session_mcp_tools.
+   * Drives the "MCP servers" tile in the AI-BOM dashboard. Owner-only.
+   */
+  getRepositoryMcpServersAndToolsCounts: GetRepositoryMcpServersAndToolsCountsResponse;
   /** Per-model breakdown (sessions, PRs, lines attributed, first/last seen) for one repository in a time window. Owner-only. */
   getRepositoryModelStats: GetRepositoryModelStatsResponse;
   /** Per-skill breakdown (sessions, PRs, first/last seen) for one repository in a time window. Owner-only. */
@@ -34979,6 +35031,7 @@ export type Query_Root = {
    * Reads the summary cache only — no S3 reconstruction.
    */
   getTracySessionSummary: TracySessionSummaryResponse;
+  getUnfixable: GetUnfixableResponseUnion;
   /** execute function "get_developer_statistics" which returns "developer_statistics_row" */
   get_developer_statistics: Array<Developer_Statistics_Row>;
   /** execute function "get_developer_statistics" and query aggregates on result of table type "developer_statistics_row" */
@@ -35270,6 +35323,10 @@ export type Query_Root = {
   tracy_ai_blame_pr_main_survival_aggregate: Tracy_Ai_Blame_Pr_Main_Survival_Aggregate;
   /** fetch data from the table: "tracy.ai_blame_pr_main_survival" using primary key columns */
   tracy_ai_blame_pr_main_survival_by_pk?: Maybe<Tracy_Ai_Blame_Pr_Main_Survival>;
+  /** fetch data from the table: "tracy.ai_bom_repository_activity" */
+  tracy_ai_bom_repository_activity: Array<Tracy_Ai_Bom_Repository_Activity>;
+  /** fetch aggregated fields from the table: "tracy.ai_bom_repository_activity" */
+  tracy_ai_bom_repository_activity_aggregate: Tracy_Ai_Bom_Repository_Activity_Aggregate;
   /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
   tracy_compute_pr_survived_lines: Array<View_Types_Pr_Survival_Result>;
   /** execute function "tracy.compute_pr_survived_lines" and query aggregates on result of table type "view_types.pr_survival_result" */
@@ -37086,6 +37143,14 @@ export type Query_RootGetRepositoryDistinctSkillsCountArgs = {
 };
 
 
+export type Query_RootGetRepositoryMcpServersAndToolsCountsArgs = {
+  endDate: Scalars['Timestamp']['input'];
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  startDate: Scalars['Timestamp']['input'];
+};
+
+
 export type Query_RootGetRepositoryModelStatsArgs = {
   endDate: Scalars['Timestamp']['input'];
   organizationId: Scalars['String']['input'];
@@ -37168,6 +37233,11 @@ export type Query_RootGetTracySessionMcpActivityArgs = {
 export type Query_RootGetTracySessionSummaryArgs = {
   organizationId: Scalars['String']['input'];
   sessionId: Scalars['String']['input'];
+};
+
+
+export type Query_RootGetUnfixableArgs = {
+  unfixableId: Scalars['uuid']['input'];
 };
 
 
@@ -38304,6 +38374,24 @@ export type Query_RootTracy_Ai_Blame_Pr_Main_Survival_AggregateArgs = {
 
 export type Query_RootTracy_Ai_Blame_Pr_Main_Survival_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootTracy_Ai_Bom_Repository_ActivityArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
+};
+
+
+export type Query_RootTracy_Ai_Bom_Repository_Activity_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
 };
 
 
@@ -43852,6 +43940,12 @@ export type Subscription_Root = {
   tracy_ai_blame_pr_main_survival_stream: Array<Tracy_Ai_Blame_Pr_Main_Survival>;
   /** fetch data from the table in a streaming manner: "tracy.ai_blame_pr" */
   tracy_ai_blame_pr_stream: Array<Tracy_Ai_Blame_Pr>;
+  /** fetch data from the table: "tracy.ai_bom_repository_activity" */
+  tracy_ai_bom_repository_activity: Array<Tracy_Ai_Bom_Repository_Activity>;
+  /** fetch aggregated fields from the table: "tracy.ai_bom_repository_activity" */
+  tracy_ai_bom_repository_activity_aggregate: Tracy_Ai_Bom_Repository_Activity_Aggregate;
+  /** fetch data from the table in a streaming manner: "tracy.ai_bom_repository_activity" */
+  tracy_ai_bom_repository_activity_stream: Array<Tracy_Ai_Bom_Repository_Activity>;
   /** execute function "tracy.compute_pr_survived_lines" which returns "view_types.pr_survival_result" */
   tracy_compute_pr_survived_lines: Array<View_Types_Pr_Survival_Result>;
   /** execute function "tracy.compute_pr_survived_lines" and query aggregates on result of table type "view_types.pr_survival_result" */
@@ -47339,6 +47433,31 @@ export type Subscription_RootTracy_Ai_Blame_Pr_StreamArgs = {
 };
 
 
+export type Subscription_RootTracy_Ai_Bom_Repository_ActivityArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Bom_Repository_Activity_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Order_By>>;
+  where?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
+};
+
+
+export type Subscription_RootTracy_Ai_Bom_Repository_Activity_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Tracy_Ai_Bom_Repository_Activity_Stream_Cursor_Input>>;
+  where?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
+};
+
+
 export type Subscription_RootTracy_Compute_Pr_Survived_LinesArgs = {
   args: Tracy_Compute_Pr_Survived_Lines_Args;
   distinct_on?: InputMaybe<Array<View_Types_Pr_Survival_Result_Select_Column>>;
@@ -50431,6 +50550,178 @@ export type Tracy_Ai_Blame_Pr_Variance_Fields = {
   totalInferenceCharCount?: Maybe<Scalars['Float']['output']>;
   /** DEPRECATED: use total_inference_char_count instead. Line-based metric; inaccurate when code is reformatted. */
   totalInferenceLines?: Maybe<Scalars['Float']['output']>;
+};
+
+/** columns and relationships of "tracy.ai_bom_repository_activity" */
+export type Tracy_Ai_Bom_Repository_Activity = {
+  __typename?: 'tracy_ai_bom_repository_activity';
+  lastPrAt?: Maybe<Scalars['timestamptz']['output']>;
+  mergedPrCount?: Maybe<Scalars['bigint']['output']>;
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prCount?: Maybe<Scalars['bigint']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "tracy.ai_bom_repository_activity" */
+export type Tracy_Ai_Bom_Repository_Activity_Aggregate = {
+  __typename?: 'tracy_ai_bom_repository_activity_aggregate';
+  aggregate?: Maybe<Tracy_Ai_Bom_Repository_Activity_Aggregate_Fields>;
+  nodes: Array<Tracy_Ai_Bom_Repository_Activity>;
+};
+
+/** aggregate fields of "tracy.ai_bom_repository_activity" */
+export type Tracy_Ai_Bom_Repository_Activity_Aggregate_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_aggregate_fields';
+  avg?: Maybe<Tracy_Ai_Bom_Repository_Activity_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Tracy_Ai_Bom_Repository_Activity_Max_Fields>;
+  min?: Maybe<Tracy_Ai_Bom_Repository_Activity_Min_Fields>;
+  stddev?: Maybe<Tracy_Ai_Bom_Repository_Activity_Stddev_Fields>;
+  stddev_pop?: Maybe<Tracy_Ai_Bom_Repository_Activity_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Tracy_Ai_Bom_Repository_Activity_Stddev_Samp_Fields>;
+  sum?: Maybe<Tracy_Ai_Bom_Repository_Activity_Sum_Fields>;
+  var_pop?: Maybe<Tracy_Ai_Bom_Repository_Activity_Var_Pop_Fields>;
+  var_samp?: Maybe<Tracy_Ai_Bom_Repository_Activity_Var_Samp_Fields>;
+  variance?: Maybe<Tracy_Ai_Bom_Repository_Activity_Variance_Fields>;
+};
+
+
+/** aggregate fields of "tracy.ai_bom_repository_activity" */
+export type Tracy_Ai_Bom_Repository_Activity_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Avg_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_avg_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "tracy.ai_bom_repository_activity". All fields are combined with a logical 'AND'. */
+export type Tracy_Ai_Bom_Repository_Activity_Bool_Exp = {
+  _and?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>>;
+  _not?: InputMaybe<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>;
+  _or?: InputMaybe<Array<Tracy_Ai_Bom_Repository_Activity_Bool_Exp>>;
+  lastPrAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  mergedPrCount?: InputMaybe<Bigint_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  prCount?: InputMaybe<Bigint_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Max_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_max_fields';
+  lastPrAt?: Maybe<Scalars['timestamptz']['output']>;
+  mergedPrCount?: Maybe<Scalars['bigint']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prCount?: Maybe<Scalars['bigint']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Min_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_min_fields';
+  lastPrAt?: Maybe<Scalars['timestamptz']['output']>;
+  mergedPrCount?: Maybe<Scalars['bigint']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  prCount?: Maybe<Scalars['bigint']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "tracy.ai_bom_repository_activity". */
+export type Tracy_Ai_Bom_Repository_Activity_Order_By = {
+  lastPrAt?: InputMaybe<Order_By>;
+  mergedPrCount?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  prCount?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "tracy.ai_bom_repository_activity" */
+export enum Tracy_Ai_Bom_Repository_Activity_Select_Column {
+  /** column name */
+  LastPrAt = 'lastPrAt',
+  /** column name */
+  MergedPrCount = 'mergedPrCount',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  PrCount = 'prCount',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl'
+}
+
+/** aggregate stddev on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Stddev_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_stddev_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Stddev_Pop_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_stddev_pop_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Stddev_Samp_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_stddev_samp_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "tracy_ai_bom_repository_activity" */
+export type Tracy_Ai_Bom_Repository_Activity_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Tracy_Ai_Bom_Repository_Activity_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Tracy_Ai_Bom_Repository_Activity_Stream_Cursor_Value_Input = {
+  lastPrAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  mergedPrCount?: InputMaybe<Scalars['bigint']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  prCount?: InputMaybe<Scalars['bigint']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Sum_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_sum_fields';
+  mergedPrCount?: Maybe<Scalars['bigint']['output']>;
+  prCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Var_Pop_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_var_pop_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Var_Samp_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_var_samp_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Tracy_Ai_Bom_Repository_Activity_Variance_Fields = {
+  __typename?: 'tracy_ai_bom_repository_activity_variance_fields';
+  mergedPrCount?: Maybe<Scalars['Float']['output']>;
+  prCount?: Maybe<Scalars['Float']['output']>;
 };
 
 export type Tracy_Compute_Pr_Survived_Lines_Args = {
@@ -63326,6 +63617,7 @@ export type DigestVulnerabilityReportMutationVariables = Exact<{
   repoUrl?: InputMaybe<Scalars['String']['input']>;
   reference?: InputMaybe<Scalars['String']['input']>;
   sha?: InputMaybe<Scalars['String']['input']>;
+  baselineCommit?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -64088,7 +64380,7 @@ export const GetTracyRawDataUploadUrlDocument = `
 }
     `;
 export const DigestVulnerabilityReportDocument = `
-    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String) {
+    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String, $baselineCommit: String) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
@@ -64097,6 +64389,7 @@ export const DigestVulnerabilityReportDocument = `
     repoUrl: $repoUrl
     reference: $reference
     sha: $sha
+    baselineCommit: $baselineCommit
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -64313,14 +64606,14 @@ export const GetReportFixesDocument = `
 export const GetLatestReportByRepoUrlDocument = `
     query GetLatestReportByRepoUrl($repoUrl: String!, $filters: fix_bool_exp = {}, $limit: Int!, $offset: Int!, $currentUserEmail: String!) {
   fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Finished}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
+    where: {_and: [{repo: {originalUrl: {_ilike: $repoUrl}}}, {state: {_eq: Finished}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {
     ...FixReportSummaryFields
   }
   expiredReport: fixReport(
-    where: {_and: [{repo: {originalUrl: {_eq: $repoUrl}}}, {state: {_eq: Expired}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
+    where: {_and: [{repo: {originalUrl: {_ilike: $repoUrl}}}, {state: {_eq: Expired}}, {vulnerabilityReport: {scanSource: {_neq: MCP}}}]}
     order_by: {createdOn: desc}
     limit: 1
   ) {

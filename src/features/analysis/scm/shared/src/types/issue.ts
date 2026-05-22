@@ -105,6 +105,7 @@ export const BaseIssuePartsZ = z.object({
     })
     .nullish(),
   sharedState: VulnerabilityReportIssueSharedStateZ,
+  unfixableId: z.string().uuid().nullish(),
 })
 
 export const FalsePositivePartsZ = z.object({
@@ -112,6 +113,12 @@ export const FalsePositivePartsZ = z.object({
   fixDescription: z.string(),
 })
 export type FalsePositiveParts = z.infer<typeof FalsePositivePartsZ>
+
+export const UnfixablePartsZ = z.object({
+  extraContext: z.array(z.object({ key: z.string(), value: z.string() })),
+  fixDescription: z.string(),
+})
+export type UnfixableParts = z.infer<typeof UnfixablePartsZ>
 
 const IssuePartsWithFixZ = BaseIssuePartsZ.merge(
   z.object({
@@ -137,6 +144,7 @@ const GeneralIssueZ = BaseIssuePartsZ.merge(
       z.literal(Vulnerability_Report_Issue_Category_Enum.Filtered),
       z.literal(Vulnerability_Report_Issue_Category_Enum.Pending),
     ]),
+    getUnfixable: UnfixablePartsZ.nullish(),
   })
 )
 

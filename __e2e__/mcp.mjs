@@ -501,7 +501,11 @@ Example payload:
           'mobbdev',
           'analyze',
           '-r',
-          'https://github.com/mobb-dev/simple-vulnerable-java-project',
+          // Mixed-case org/repo exercises the case-insensitive lookup path:
+          // parseScmURL lowercases the URL fetch_available_fixes sends, while
+          // the row stored here keeps the original case. Without _ilike on
+          // repo.originalUrl, this test would fail to find the report.
+          'https://github.com/Mobb-Dev/Simple-Vulnerable-Java-Project',
           '-f',
           SVJP_CX_REPORT,
         ],

@@ -336,25 +336,20 @@ export function getScmConfig({
   const virtualUrl = virtualDomain
     ? `https://${virtualDomain}${urlObject.pathname}${urlObject.search}`
     : undefined
-  const scmOrgConfig = filteredScmConfigs.find((scm) => scm.orgId && scm.token)
-  if (scmOrgConfig && includeOrgTokens) {
+  // Walk in caller-supplied order; getUserInfo pre-ranks user vs org via
+  // `prioritizeOrgScmConfigs`, so a single pass preserves that signal.
+  const matched = filteredScmConfigs.find((scm) => {
+    if (!scm.token) return false
+    if (scm.userId) return true
+    if (scm.orgId) return includeOrgTokens
+    return false
+  })
+  if (matched) {
     return {
-      id: scmOrgConfig.id,
-      accessToken: scmOrgConfig.token || undefined,
-      scmLibType: getScmLibTypeFromScmType(scmOrgConfig.scmType),
-      scmOrg: scmOrgConfig.scmOrg || undefined,
-      virtualUrl,
-    }
-  }
-  const scmUserConfig = filteredScmConfigs.find(
-    (scm) => scm.userId && scm.token
-  )
-  if (scmUserConfig) {
-    return {
-      id: scmUserConfig.id,
-      accessToken: scmUserConfig.token || undefined,
-      scmLibType: getScmLibTypeFromScmType(scmUserConfig.scmType),
-      scmOrg: scmUserConfig.scmOrg || undefined,
+      id: matched.id,
+      accessToken: matched.token || undefined,
+      scmLibType: getScmLibTypeFromScmType(matched.scmType),
+      scmOrg: matched.scmOrg || undefined,
       virtualUrl,
     }
   }

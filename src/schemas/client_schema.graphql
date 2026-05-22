@@ -562,6 +562,7 @@ mutation DigestVulnerabilityReport(
   $repoUrl: String
   $reference: String
   $sha: String
+  $baselineCommit: String
 ) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
@@ -571,6 +572,7 @@ mutation DigestVulnerabilityReport(
     repoUrl: $repoUrl
     reference: $reference
     sha: $sha
+    baselineCommit: $baselineCommit
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -992,7 +994,7 @@ query GetLatestReportByRepoUrl(
   fixReport(
     where: {
       _and: [
-        { repo: { originalUrl: { _eq: $repoUrl } } }
+        { repo: { originalUrl: { _ilike: $repoUrl } } }
         { state: { _eq: Finished } }
         { vulnerabilityReport: { scanSource: { _neq: MCP } } }
       ]
@@ -1005,7 +1007,7 @@ query GetLatestReportByRepoUrl(
   expiredReport: fixReport(
     where: {
       _and: [
-        { repo: { originalUrl: { _eq: $repoUrl } } }
+        { repo: { originalUrl: { _ilike: $repoUrl } } }
         { state: { _eq: Expired } }
         { vulnerabilityReport: { scanSource: { _neq: MCP } } }
       ]

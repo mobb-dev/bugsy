@@ -145,6 +145,13 @@ export const convertToSarifCodePathPatternsOption = {
   array: true,
 } as const
 
+export const baselineCommitOption = {
+  describe: chalk.bold(
+    'Only report findings introduced since this commit (PR mode). The sha must be reachable from the scanned repository — unreachable baselines fail the scan loudly. Effective only when no scan file is provided.'
+  ),
+  type: 'string',
+} as const
+
 export const pollingOption = {
   describe: chalk.bold(
     'Use HTTP polling instead of WebSocket for status updates. Useful for proxy environments or firewalls that block WebSocket connections. Polling interval: 5 seconds, timeout: 30 minutes.'

@@ -31,6 +31,7 @@ export type BaseAnalyzeOptions = {
   commitDirectly?: boolean
   pullRequest?: number
   polling?: boolean
+  baselineCommit?: string
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>

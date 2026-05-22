@@ -29506,6 +29506,7 @@ export type Organization = {
   aiToolToken_aggregate: Ai_Tool_Token_Aggregate;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: Maybe<Scalars['jsonb']['output']>;
+  autoPrIncludeAiFixes: Scalars['Boolean']['output'];
   /** A computed field, executes function "top_available_fixes" */
   availableUniqueFixes?: Maybe<Array<Fix>>;
   /** An array relationship */
@@ -30211,6 +30212,7 @@ export type Organization_Bool_Exp = {
   aiToolToken?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
   aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Bool_Exp>;
   allowedIssueTypes?: InputMaybe<Jsonb_Comparison_Exp>;
+  autoPrIncludeAiFixes?: InputMaybe<Boolean_Comparison_Exp>;
   availableUniqueFixes?: InputMaybe<Fix_Bool_Exp>;
   brokerHosts?: InputMaybe<Broker_Host_Bool_Exp>;
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Bool_Exp>;
@@ -30686,6 +30688,7 @@ export type Organization_Insert_Input = {
   aiToolToken?: InputMaybe<Ai_Tool_Token_Arr_Rel_Insert_Input>;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   brokerHosts?: InputMaybe<Broker_Host_Arr_Rel_Insert_Input>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -31057,6 +31060,7 @@ export type Organization_On_Conflict = {
 export type Organization_Order_By = {
   aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Order_By>;
   allowedIssueTypes?: InputMaybe<Order_By>;
+  autoPrIncludeAiFixes?: InputMaybe<Order_By>;
   availableUniqueFixes_aggregate?: InputMaybe<Fix_Aggregate_Order_By>;
   brokerHosts_aggregate?: InputMaybe<Broker_Host_Aggregate_Order_By>;
   brokerTokenExpiryInDays?: InputMaybe<Order_By>;
@@ -31687,6 +31691,8 @@ export enum Organization_Select_Column {
   /** column name */
   AllowedIssueTypes = 'allowedIssueTypes',
   /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
+  /** column name */
   BrokerTokenExpiryInDays = 'brokerTokenExpiryInDays',
   /** column name */
   CreatedOn = 'createdOn',
@@ -31742,6 +31748,7 @@ export enum Organization_Select_Column {
 export type Organization_Set_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
@@ -31868,6 +31875,7 @@ export type Organization_Stream_Cursor_Input = {
 export type Organization_Stream_Cursor_Value_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   disablePrSessionSummary?: InputMaybe<Scalars['Boolean']['input']>;
@@ -32393,6 +32401,8 @@ export enum Organization_Update_Column {
   /** column name */
   AllowedIssueTypes = 'allowedIssueTypes',
   /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
+  /** column name */
   BrokerTokenExpiryInDays = 'brokerTokenExpiryInDays',
   /** column name */
   CreatedOn = 'createdOn',
@@ -32728,6 +32738,7 @@ export type Project = {
   aggregatedVulnerabilitySeveritiesView: Array<View_Project_Vulnerability_Severities>;
   /** An aggregate relationship */
   aggregatedVulnerabilitySeveritiesView_aggregate: View_Project_Vulnerability_Severities_Aggregate;
+  autoPrIncludeAiFixes: Scalars['Boolean']['output'];
   createdOn: Scalars['timestamptz']['output'];
   /** A computed field, executes function "project_deployed_fixes_count" */
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
@@ -33026,6 +33037,7 @@ export type Project_Bool_Exp = {
   aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Bool_Exp>;
   aggregatedVulnerabilitySeveritiesView?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
   aggregatedVulnerabilitySeveritiesView_aggregate?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Bool_Exp>;
+  autoPrIncludeAiFixes?: InputMaybe<Boolean_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isDefault?: InputMaybe<Boolean_Comparison_Exp>;
@@ -33060,6 +33072,7 @@ export enum Project_Constraint {
 export type Project_Insert_Input = {
   aggregatedResolvedVulnerabilitiesView?: InputMaybe<View_Project_Resolved_Vulnerabilities_Arr_Rel_Insert_Input>;
   aggregatedVulnerabilitySeveritiesView?: InputMaybe<View_Project_Vulnerability_Severities_Arr_Rel_Insert_Input>;
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
@@ -33417,6 +33430,7 @@ export type Project_On_Conflict = {
 export type Project_Order_By = {
   aggregatedResolvedVulnerabilitiesView_aggregate?: InputMaybe<View_Project_Resolved_Vulnerabilities_Aggregate_Order_By>;
   aggregatedVulnerabilitySeveritiesView_aggregate?: InputMaybe<View_Project_Vulnerability_Severities_Aggregate_Order_By>;
+  autoPrIncludeAiFixes?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isDefault?: InputMaybe<Order_By>;
@@ -33832,6 +33846,8 @@ export type Project_Role_Updates = {
 /** select columns of table "project" */
 export enum Project_Select_Column {
   /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
+  /** column name */
   CreatedOn = 'createdOn',
   /** column name */
   Id = 'id',
@@ -33850,6 +33866,8 @@ export enum Project_Select_Column {
 /** select "project_aggregate_bool_exp_bool_and_arguments_columns" columns of table "project" */
 export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
   /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
+  /** column name */
   IsDefault = 'isDefault',
   /** column name */
   IsDeleted = 'isDeleted'
@@ -33858,6 +33876,8 @@ export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_And_Arguments_
 /** select "project_aggregate_bool_exp_bool_or_arguments_columns" columns of table "project" */
 export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
   /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
+  /** column name */
   IsDefault = 'isDefault',
   /** column name */
   IsDeleted = 'isDeleted'
@@ -33865,6 +33885,7 @@ export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_Or_Arguments_C
 
 /** input type for updating data in table "project" */
 export type Project_Set_Input = {
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
@@ -33953,6 +33974,7 @@ export type Project_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Project_Stream_Cursor_Value_Input = {
+  autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
@@ -34422,6 +34444,8 @@ export type Project_To_User_Updates = {
 
 /** update columns of table "project" */
 export enum Project_Update_Column {
+  /** column name */
+  AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
   /** column name */
   CreatedOn = 'createdOn',
   /** column name */

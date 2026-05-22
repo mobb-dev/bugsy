@@ -462,6 +462,10 @@ export const ProjectPageQueryResultZ = z.object({
   isDefault: z.boolean().default(false),
   organizationId: z.string().uuid(),
   vulnerabilityReports: z.array(ProjectVulnerabilityReport),
+  autoPrIncludeAiFixes: z.preprocess(
+    (val) => (val === null || val === undefined ? false : val),
+    z.boolean()
+  ),
   projectIssueTypeSettings: z.array(
     IssueTypeSettingZ.merge(z.object({ id: z.string() }))
   ),

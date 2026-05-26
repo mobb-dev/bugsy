@@ -1139,6 +1139,7 @@ export enum Language {
   Default = 'DEFAULT',
   Dockerfile = 'DOCKERFILE',
   Go = 'GO',
+  Hcl = 'HCL',
   Java = 'JAVA',
   Js = 'JS',
   Php = 'PHP',
@@ -20344,6 +20345,8 @@ export enum IssueLanguage_Enum {
   Dockerfile = 'Dockerfile',
   /** Go */
   Go = 'Go',
+  /** Hcl */
+  Hcl = 'Hcl',
   /** Java */
   Java = 'Java',
   /** JavaScript */
@@ -20770,6 +20773,8 @@ export enum IssueType_Enum {
   TypeConfusion = 'TYPE_CONFUSION',
   /** Unchecked loop condition */
   UncheckedLoopCondition = 'UNCHECKED_LOOP_CONDITION',
+  /** UNENCRYPTED_AWS_SQS_QUEUE */
+  UnencryptedAwsSqsQueue = 'UNENCRYPTED_AWS_SQS_QUEUE',
   /** UNNECESSARY_IMPORTS */
   UnnecessaryImports = 'UNNECESSARY_IMPORTS',
   /** Unsafe deserialization of untrusted data */

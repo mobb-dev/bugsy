@@ -177,6 +177,7 @@ export const SUPPORTED_EXTENSIONS = [
   '.tf',
   '.hcl',
   '.tfvars',
+  '.tofu',
   // TypeScript
   '.ts',
   '.tsx',

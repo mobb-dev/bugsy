@@ -422,4 +422,10 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.IncorrectIntegerConversion]: undefined,
   [IssueType_Enum.ImproperCertificateValidation]: undefined,
   [IssueType_Enum.OftenMisusedBooleanGetBoolean]: undefined,
+  [IssueType_Enum.UnencryptedAwsSqsQueue]: {
+    issueDescription:
+      'AWS SQS queue contents are unencrypted; data could be read if the queue is compromised.',
+    fixInstructions:
+      'Enable server-side encryption by setting sqs_managed_sse_enabled = true, or supply a KMS key via kms_master_key_id.',
+  },
 }

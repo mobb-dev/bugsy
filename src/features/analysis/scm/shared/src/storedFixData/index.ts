@@ -4,6 +4,7 @@ import { IssueLanguage_Enum } from '../../../generates/client_generates'
 import csharp from './csharp'
 import dockerfile from './dockerfile'
 import go from './go'
+import hcl from './hcl'
 import java from './java'
 import javascript from './javascript'
 import php from './php'
@@ -25,6 +26,7 @@ export const languages = {
   [IssueLanguage_Enum.Php as string]: php,
   [IssueLanguage_Enum.Go as string]: go,
   [IssueLanguage_Enum.Dockerfile as string]: dockerfile,
+  [IssueLanguage_Enum.Hcl as string]: hcl,
 }
 
 export type SQLInjection = typeof javascript.SQL_Injection

@@ -177,6 +177,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'Improper Certificate Validation',
   [IssueType_Enum.OftenMisusedBooleanGetBoolean]:
     'Often Misused: Boolean.getBoolean()',
+  [IssueType_Enum.UnencryptedAwsSqsQueue]: 'AWS SQS Queue Unencrypted',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

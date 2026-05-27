@@ -325,6 +325,11 @@ async function drainTranscript(
           session_id: transcript.sessionId,
           transcript_path: transcript.filePath,
           cwd,
+          // T-510: forward sub-agent attribution from transcript_scanner.ts.
+          // For main-session files these are false / null and behave
+          // identically to the pre-T-510 wire.
+          isSubagent: transcript.isSubagent,
+          agentType: transcript.agentType,
         },
         sessionStore,
         log,

@@ -535,12 +535,18 @@ export async function cleanupStaleSessions(configDir: string): Promise<void> {
 }
 
 /**
- * Input for processTranscript — the 3 fields that the daemon provides.
+ * Input for processTranscript. The daemon provides session_id + transcript_path
+ * + cwd; T-510 adds the sub-agent attribution carried over from
+ * transcript_scanner.ts so each record uploaded from a `<sessionId>/subagents/
+ * agent-*.jsonl` file carries `isSubagent=true` plus the agent_type from the
+ * sibling .meta.json sidecar.
  */
 export type TranscriptProcessInput = {
   session_id: string
   transcript_path: string
   cwd: string | undefined
+  isSubagent?: boolean
+  agentType?: string | null
 }
 
 export type HookResult = {
@@ -669,6 +675,11 @@ export async function processTranscript(
       repositoryUrl: sampledRepoState.repositoryUrl ?? undefined,
       branch: sampledRepoState.branch,
       commitSha: sampledRepoState.commitSha,
+      // T-510: sub-agent attribution stamped per record. Defaults preserve
+      // main-session semantics so the upload schema's `isSubagent` defaults
+      // to false on the wire for older clients / main-transcript files.
+      isSubagent: input.isSubagent ?? false,
+      agentType: input.agentType ?? null,
     }
   })
 
@@ -715,9 +726,25 @@ export async function processTranscript(
       lastModel: lastSeenModel ?? undefined,
     }
     sessionStore.set(cursorKey, cursor)
+    // T-510: surface sub-agent ingestion separately so Datadog can spot
+    // silent breakage (sub-agent entries dropping to 0 while main stays
+    // healthy). Each `processTranscript` call is bound to exactly one of
+    // main / sub-agent (per the transcript_scanner.ts file type), so we
+    // attribute the whole entry count to one or the other. Datadog query
+    // for the alarm: `sum:subagent_entries_uploaded{}.as_count()` averaged
+    // over a 1h window — should be steadily > 0 for active users; sudden
+    // 0 means the scanner gate broke (e.g. .meta.json convention changed).
+    const isSubagentBatch = input.isSubagent === true
     log.heartbeat('Upload ok', {
       entriesUploaded: entries.length,
       entriesSkipped: filteredOut,
+      subagentEntriesUploaded: isSubagentBatch ? entries.length : 0,
+      // Renamed for clarity: this counts rows uploaded with no agent_type
+      // because the sibling .meta.json was missing/unreadable at scan
+      // time. Should be ~0 in steady state; a non-zero rate is a signal
+      // that Claude Code's meta convention may have changed.
+      subagentEntriesUploadedMissingMeta:
+        isSubagentBatch && input.agentType == null ? entries.length : 0,
       claudeCodeVersion: getClaudeCodeVersion(),
     })
 

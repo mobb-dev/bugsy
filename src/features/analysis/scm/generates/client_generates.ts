@@ -1883,6 +1883,24 @@ export type String_Comparison_Exp = {
   _similar?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type SubagentBreakdownRow = {
+  __typename?: 'SubagentBreakdownRow';
+  agentType?: Maybe<Scalars['String']['output']>;
+  count: Scalars['Int']['output'];
+  inputTokens: Scalars['Int']['output'];
+  model: Scalars['String']['output'];
+  outputTokens: Scalars['Int']['output'];
+};
+
+/** T-510: per-(agentType, model) breakdown of sub-agent activity for a session. */
+export type SubagentStats = {
+  __typename?: 'SubagentStats';
+  /** One row per (agentType, model) pair. agentType may be null for sub-agent rows whose .meta.json sidecar was missing on the CLI side. */
+  breakdown: Array<SubagentBreakdownRow>;
+  /** Total number of sub-agent events in the session. */
+  count: Scalars['Int']['output'];
+};
+
 export type SubmitCheckmarxVulnerabilityReportError = {
   __typename?: 'SubmitCheckmarxVulnerabilityReportError';
   error?: Maybe<Scalars['String']['output']>;
@@ -2136,6 +2154,12 @@ export type TracyRawDataUploadUrlResponse = {
 export type TracyRecordInput = {
   additions?: InputMaybe<Scalars['String']['input']>;
   /**
+   * T-510: sub-agent type from the sibling slug.meta.json (e.g. "Explore",
+   * "general-purpose"). Null when isSubagent=false, or when the meta sidecar
+   * was missing on the CLI side at upload time.
+   */
+  agentType?: InputMaybe<Scalars['String']['input']>;
+  /**
    * Raw inference fields — required together when uploading a raw inference record.
    * Upload rawData to S3 first via getTracyRawDataUploadUrl, then pass the key here.
    * Both blameType and rawDataS3Key must be set for raw inference records.
@@ -2159,6 +2183,13 @@ export type TracyRecordInput = {
   /** Edit fields (required when uploading an edit record) */
   editType?: InputMaybe<EditType>;
   filePath?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * T-510: sub-agent attribution. Set true for rows uploaded from a
+   * sessionId/subagents/agent-*.jsonl file. Defaults to false on the wire
+   * so older CLI clients (omitting the field entirely) keep main-session
+   * semantics for back-compat.
+   */
+  isSubagent?: InputMaybe<Scalars['Boolean']['input']>;
   platform: InferencePlatform;
   rawDataS3Key?: InputMaybe<Scalars['String']['input']>;
   recordId: Scalars['String']['input'];
@@ -2205,6 +2236,13 @@ export type TracySessionDetailResponse = {
   outputTokens?: Maybe<Scalars['Int']['output']>;
   planningPhaseCount?: Maybe<Scalars['Int']['output']>;
   sessionId: Scalars['String']['output'];
+  /**
+   * T-510: sub-agent stats. Null when the session has no sub-agent activity.
+   * Already-rolled-up inputTokens/outputTokens/tokensByModel include sub-agent
+   * tokens; this field is the per-(agentType, model) breakdown for the
+   * Sub-Agents block in the session Details tab.
+   */
+  subagentStats?: Maybe<TracySubagentStats>;
   summary?: Maybe<TracyPromptSummary>;
   summaryStatus: TracySummaryStatus;
   tokensByModel?: Maybe<Array<TracyModelTokensEntry>>;
@@ -2212,10 +2250,14 @@ export type TracySessionDetailResponse = {
 
 export type TracySessionEventEntry = {
   __typename?: 'TracySessionEventEntry';
+  /** T-510: agent type for sub-agent events (e.g. "Explore"). Null on main-thread events. */
+  agentType?: Maybe<Scalars['String']['output']>;
   content?: Maybe<Scalars['String']['output']>;
   conversationType?: Maybe<Scalars['String']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   inputTokens: Scalars['Int']['output'];
+  /** T-510: surfaces the per-event sub-agent attribution carried from the DB row, so consumers can group events by origin sub-agent. */
+  isSubagent?: Maybe<Scalars['Boolean']['output']>;
   outputTokens: Scalars['Int']['output'];
   recordType: Scalars['String']['output'];
   type: Scalars['String']['output'];
@@ -2261,6 +2303,13 @@ export type TracySessionResponse = {
   prLink?: Maybe<TracyPrLink>;
   readFiles: Array<Scalars['String']['output']>;
   sessionId: Scalars['String']['output'];
+  /**
+   * T-510: sub-agent stats. Null when the session has no sub-agent activity.
+   * inputTokens / outputTokens / tokensByModel above already include sub-agent
+   * tokens in their roll-up; this field surfaces the per-(agentType, model)
+   * breakdown so the UI can render the Sub-Agents block in the Details tab.
+   */
+  subagentStats?: Maybe<SubagentStats>;
   summary?: Maybe<TracyPromptSummary>;
   tokensByModel: Array<TracyModelTokensEntry>;
   userName: Scalars['String']['output'];
@@ -2275,6 +2324,22 @@ export type TracySessionSummaryResponse = {
   sessionId: Scalars['String']['output'];
   summary?: Maybe<TracyPromptSummary>;
   summaryStatus: TracySummaryStatus;
+};
+
+export type TracySubagentBreakdownRow = {
+  __typename?: 'TracySubagentBreakdownRow';
+  agentType?: Maybe<Scalars['String']['output']>;
+  count: Scalars['Int']['output'];
+  inputTokens: Scalars['Int']['output'];
+  model: Scalars['String']['output'];
+  outputTokens: Scalars['Int']['output'];
+};
+
+/** T-510: sub-agent breakdown for the session Details tab. */
+export type TracySubagentStats = {
+  __typename?: 'TracySubagentStats';
+  breakdown: Array<TracySubagentBreakdownRow>;
+  count: Scalars['Int']['output'];
 };
 
 /**
@@ -52553,12 +52618,14 @@ export type Tracy_Tracy_Event_Updates = {
 export type Tracy_Tracy_Inference_Event = {
   __typename?: 'tracy_tracy_inference_event';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  agentType?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   contextFile?: Maybe<Tracy_Tracy_Context_File>;
   contextFileId?: Maybe<Scalars['uuid']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
+  isSubagent: Scalars['Boolean']['output'];
   model?: Maybe<Scalars['String']['output']>;
   rawDataS3Path?: Maybe<Scalars['String']['output']>;
   recordType: Scalars['String']['output'];
@@ -52610,11 +52677,13 @@ export type Tracy_Tracy_Inference_Event_Bool_Exp = {
   _not?: InputMaybe<Tracy_Tracy_Inference_Event_Bool_Exp>;
   _or?: InputMaybe<Array<Tracy_Tracy_Inference_Event_Bool_Exp>>;
   additionsS3Path?: InputMaybe<String_Comparison_Exp>;
+  agentType?: InputMaybe<String_Comparison_Exp>;
   charCount?: InputMaybe<Int_Comparison_Exp>;
   contextFile?: InputMaybe<Tracy_Tracy_Context_File_Bool_Exp>;
   contextFileId?: InputMaybe<Uuid_Comparison_Exp>;
   filePath?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  isSubagent?: InputMaybe<Boolean_Comparison_Exp>;
   model?: InputMaybe<String_Comparison_Exp>;
   rawDataS3Path?: InputMaybe<String_Comparison_Exp>;
   recordType?: InputMaybe<String_Comparison_Exp>;
@@ -52639,11 +52708,13 @@ export type Tracy_Tracy_Inference_Event_Inc_Input = {
 /** input type for inserting data into table "tracy.tracy_inference_event" */
 export type Tracy_Tracy_Inference_Event_Insert_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  agentType?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   contextFile?: InputMaybe<Tracy_Tracy_Context_File_Obj_Rel_Insert_Input>;
   contextFileId?: InputMaybe<Scalars['uuid']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  isSubagent?: InputMaybe<Scalars['Boolean']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
   recordType?: InputMaybe<Scalars['String']['input']>;
@@ -52656,6 +52727,7 @@ export type Tracy_Tracy_Inference_Event_Insert_Input = {
 export type Tracy_Tracy_Inference_Event_Max_Fields = {
   __typename?: 'tracy_tracy_inference_event_max_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  agentType?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   contextFileId?: Maybe<Scalars['uuid']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
@@ -52671,6 +52743,7 @@ export type Tracy_Tracy_Inference_Event_Max_Fields = {
 export type Tracy_Tracy_Inference_Event_Min_Fields = {
   __typename?: 'tracy_tracy_inference_event_min_fields';
   additionsS3Path?: Maybe<Scalars['String']['output']>;
+  agentType?: Maybe<Scalars['String']['output']>;
   charCount?: Maybe<Scalars['Int']['output']>;
   contextFileId?: Maybe<Scalars['uuid']['output']>;
   filePath?: Maybe<Scalars['String']['output']>;
@@ -52708,11 +52781,13 @@ export type Tracy_Tracy_Inference_Event_On_Conflict = {
 /** Ordering options when selecting data from "tracy.tracy_inference_event". */
 export type Tracy_Tracy_Inference_Event_Order_By = {
   additionsS3Path?: InputMaybe<Order_By>;
+  agentType?: InputMaybe<Order_By>;
   charCount?: InputMaybe<Order_By>;
   contextFile?: InputMaybe<Tracy_Tracy_Context_File_Order_By>;
   contextFileId?: InputMaybe<Order_By>;
   filePath?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  isSubagent?: InputMaybe<Order_By>;
   model?: InputMaybe<Order_By>;
   rawDataS3Path?: InputMaybe<Order_By>;
   recordType?: InputMaybe<Order_By>;
@@ -52731,6 +52806,8 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
   /** column name */
   AdditionsS3Path = 'additionsS3Path',
   /** column name */
+  AgentType = 'agentType',
+  /** column name */
   CharCount = 'charCount',
   /** column name */
   ContextFileId = 'contextFileId',
@@ -52738,6 +52815,8 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
   FilePath = 'filePath',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsSubagent = 'isSubagent',
   /** column name */
   Model = 'model',
   /** column name */
@@ -52753,10 +52832,12 @@ export enum Tracy_Tracy_Inference_Event_Select_Column {
 /** input type for updating data in table "tracy.tracy_inference_event" */
 export type Tracy_Tracy_Inference_Event_Set_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  agentType?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   contextFileId?: InputMaybe<Scalars['uuid']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  isSubagent?: InputMaybe<Scalars['Boolean']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
   recordType?: InputMaybe<Scalars['String']['input']>;
@@ -52793,10 +52874,12 @@ export type Tracy_Tracy_Inference_Event_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Tracy_Tracy_Inference_Event_Stream_Cursor_Value_Input = {
   additionsS3Path?: InputMaybe<Scalars['String']['input']>;
+  agentType?: InputMaybe<Scalars['String']['input']>;
   charCount?: InputMaybe<Scalars['Int']['input']>;
   contextFileId?: InputMaybe<Scalars['uuid']['input']>;
   filePath?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  isSubagent?: InputMaybe<Scalars['Boolean']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
   rawDataS3Path?: InputMaybe<Scalars['String']['input']>;
   recordType?: InputMaybe<Scalars['String']['input']>;
@@ -52815,6 +52898,8 @@ export enum Tracy_Tracy_Inference_Event_Update_Column {
   /** column name */
   AdditionsS3Path = 'additionsS3Path',
   /** column name */
+  AgentType = 'agentType',
+  /** column name */
   CharCount = 'charCount',
   /** column name */
   ContextFileId = 'contextFileId',
@@ -52822,6 +52907,8 @@ export enum Tracy_Tracy_Inference_Event_Update_Column {
   FilePath = 'filePath',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsSubagent = 'isSubagent',
   /** column name */
   Model = 'model',
   /** column name */

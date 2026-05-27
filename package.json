@@ -1,6 +1,6 @@
 {
   "name": "mobbdev",
-  "version": "1.4.18",
+  "version": "1.4.19",
   "description": "Automated secure code remediation tool",
   "repository": "git+https://github.com/mobb-dev/bugsy.git",
   "main": "dist/index.mjs",

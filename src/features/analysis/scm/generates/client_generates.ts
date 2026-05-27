@@ -20543,6 +20543,8 @@ export enum IssueType_Enum {
   AvoidBuiltinShadowing = 'AVOID_BUILTIN_SHADOWING',
   /** AVOID_IDENTITY_COMPARISON_CACHED_TYPES */
   AvoidIdentityComparisonCachedTypes = 'AVOID_IDENTITY_COMPARISON_CACHED_TYPES',
+  /** AWS_DYNAMODB_POINT_IN_TIME_RECOVERY_DISABLED */
+  AwsDynamodbPointInTimeRecoveryDisabled = 'AWS_DYNAMODB_POINT_IN_TIME_RECOVERY_DISABLED',
   /** Buffer Overflow */
   BufferOverflow = 'BUFFER_OVERFLOW',
   /** Client DOM Stored Code Injection */
@@ -20641,6 +20643,8 @@ export enum IssueType_Enum {
   InsecureBinderConfiguration = 'INSECURE_BINDER_CONFIGURATION',
   /** HTTP insecure cookie */
   InsecureCookie = 'INSECURE_COOKIE',
+  /** insecure_deserialization */
+  InsecureDeserialization = 'INSECURE_DESERIALIZATION',
   /** INSECURE_POSTMESSAGE */
   InsecurePostmessage = 'INSECURE_POSTMESSAGE',
   /** Insecure Randomness */

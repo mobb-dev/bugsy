@@ -178,6 +178,9 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.OftenMisusedBooleanGetBoolean]:
     'Often Misused: Boolean.getBoolean()',
   [IssueType_Enum.UnencryptedAwsSqsQueue]: 'AWS SQS Queue Unencrypted',
+  [IssueType_Enum.InsecureDeserialization]: 'Insecure Deserialization',
+  [IssueType_Enum.AwsDynamodbPointInTimeRecoveryDisabled]:
+    'AWS DynamoDB Point-in-Time Recovery Disabled',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

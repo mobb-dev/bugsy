@@ -428,4 +428,11 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
     fixInstructions:
       'Enable server-side encryption by setting sqs_managed_sse_enabled = true, or supply a KMS key via kms_master_key_id.',
   },
+  [IssueType_Enum.InsecureDeserialization]: undefined,
+  [IssueType_Enum.AwsDynamodbPointInTimeRecoveryDisabled]: {
+    issueDescription:
+      'AWS DynamoDB table has point-in-time recovery disabled; accidental or malicious writes/deletes cannot be rolled back from a known-good snapshot.',
+    fixInstructions:
+      'Enable point-in-time recovery by adding `point_in_time_recovery { enabled = true }` to the aws_dynamodb_table resource.',
+  },
 }

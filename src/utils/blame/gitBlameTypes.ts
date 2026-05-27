@@ -8,6 +8,22 @@ import { z } from 'zod'
 export const PrepareGitBlameMessageZ = z.object({
   reportId: z.string(),
   repoArchivePath: z.string(),
+  // Optional list of file paths to blame. Producers must pick one of two modes:
+  //
+  //  - **Omit `filePaths`** = "blame every file in the archive". Used by the
+  //    legacy side-effect producer in scm_agent's PrepareRepository handler
+  //    (consumers/scm_agent/src/index.ts) where the archive is already
+  //    sparse-checkout-narrowed to the report's file set.
+  //
+  //  - **Provide `filePaths`** = "filter the walked tree to this set". Used by
+  //    report_init's `_ensure_git_blame_enqueued` (Python) when the archive is
+  //    a full-repo scan-mode zip that wasn't pre-narrowed.
+  //
+  // Entries should be repo-root-relative paths, but basename-only forms (e.g.
+  // "Login.java" when the actual file is "src/main/java/Login.java") are
+  // tolerated — scm_agent's filter matches exact-or-trailing-basename. Empty
+  // strings are filtered out defensively.
+  filePaths: z.array(z.string()).optional(),
 })
 // Preferred: Use Schema suffix for new code
 export const PrepareGitBlameMessageSchema = PrepareGitBlameMessageZ

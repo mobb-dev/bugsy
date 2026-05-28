@@ -422,6 +422,7 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
   [IssueType_Enum.IncorrectIntegerConversion]: undefined,
   [IssueType_Enum.ImproperCertificateValidation]: undefined,
   [IssueType_Enum.OftenMisusedBooleanGetBoolean]: undefined,
+  [IssueType_Enum.UnsafeReflection]: undefined,
   [IssueType_Enum.UnencryptedAwsSqsQueue]: {
     issueDescription:
       'AWS SQS queue contents are unencrypted; data could be read if the queue is compromised.',
@@ -434,5 +435,11 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
       'AWS DynamoDB table has point-in-time recovery disabled; accidental or malicious writes/deletes cannot be rolled back from a known-good snapshot.',
     fixInstructions:
       'Enable point-in-time recovery by adding `point_in_time_recovery { enabled = true }` to the aws_dynamodb_table resource.',
+  },
+  [IssueType_Enum.JwtDecodeWithoutVerify]: {
+    issueDescription:
+      'Decoding a JWT with `JWT.decode()` only base64-decodes the token without checking its signature, so an attacker can forge a token with arbitrary claims (identity, roles, expiration) and have it trusted. CWE-345, OWASP A08:2021 Software and Data Integrity Failures.',
+    fixInstructions:
+      'Verify the signature before trusting any claims: build a verifier with the expected algorithm and secret/key (e.g. `JWT.require(Algorithm.HMAC256(secret)).build().verify(token)`) instead of calling `JWT.decode(token)`. After merging, confirm the verifier is configured with the same algorithm and secret/key used to sign your tokens — an incorrect or placeholder secret will make verification throw `JWTVerificationException` at runtime and reject legitimate tokens.',
   },
 }

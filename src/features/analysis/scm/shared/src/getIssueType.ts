@@ -42,6 +42,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.TrustBoundaryViolation]: 'Trust Boundary Violation',
   [IssueType_Enum.NullDereference]: 'Null Dereference',
   [IssueType_Enum.UnsafeDeserialization]: 'Unsafe deserialization',
+  [IssueType_Enum.UnsafeReflection]: 'Unsafe Reflection',
   [IssueType_Enum.InsecureBinderConfiguration]: 'Insecure Binder Configuration',
   [IssueType_Enum.UnsafeTargetBlank]: 'Unsafe use of target blank',
   [IssueType_Enum.IframeWithoutSandbox]: 'Client use of iframe without sandbox',
@@ -181,6 +182,8 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
   [IssueType_Enum.InsecureDeserialization]: 'Insecure Deserialization',
   [IssueType_Enum.AwsDynamodbPointInTimeRecoveryDisabled]:
     'AWS DynamoDB Point-in-Time Recovery Disabled',
+  [IssueType_Enum.JwtDecodeWithoutVerify]:
+    'JWT Decoded Without Signature Verification',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

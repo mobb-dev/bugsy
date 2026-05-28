@@ -111,6 +111,7 @@ export const ReportQueryResultZ = z.object({
     expirationOn: z.string().nullable(),
     state: z.nativeEnum(Fix_Report_State_Enum),
     failReason: z.string().nullable(),
+    candidateToRerun: z.boolean(),
     fixes: z.array(
       z.object({
         id: z.string().uuid(),

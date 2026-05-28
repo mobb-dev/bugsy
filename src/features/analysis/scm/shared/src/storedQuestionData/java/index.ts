@@ -21,6 +21,7 @@ import { ssrf } from './ssrf'
 import { sysLeak } from './sysLeak'
 import { trustBoundaryViolation } from './trustBoundaryViolation'
 import { uncheckedLoopCondition } from './uncheckedLoopCondition'
+import { unsafeReflection } from './unsafeReflection'
 import { useOfSystemOutputStream } from './useOfSystemOutputStream'
 import { xss } from './xss'
 import { xxe } from './xxe'
@@ -48,6 +49,7 @@ const vulnerabilities = {
   [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
   [IssueType_Enum.InsecureCookie as string]: insecureCookie,
   [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
+  [IssueType_Enum.UnsafeReflection as string]: unsafeReflection,
   [IssueType_Enum.J2EeGetConnection as string]: j2eeGetConnection,
   [IssueType_Enum.LeftoverDebugCode as string]: leftoverDebugCode,
   [IssueType_Enum.ErroneousStringCompare as string]: erroneousStringCompare,

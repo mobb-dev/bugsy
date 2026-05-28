@@ -15529,6 +15529,7 @@ export type FixReport = {
   analysisUrl?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_git_blame_logins" */
   assignedTo?: Maybe<Scalars['json']['output']>;
+  candidateToRerun: Scalars['Boolean']['output'];
   /** A computed field, executes function "get_fix_report_confidence" */
   confidences?: Maybe<Scalars['json']['output']>;
   /** An object relationship */
@@ -15737,6 +15738,7 @@ export type FixReport_Bool_Exp = {
   _or?: InputMaybe<Array<FixReport_Bool_Exp>>;
   analysisUrl?: InputMaybe<String_Comparison_Exp>;
   assignedTo?: InputMaybe<Json_Comparison_Exp>;
+  candidateToRerun?: InputMaybe<Boolean_Comparison_Exp>;
   confidences?: InputMaybe<Json_Comparison_Exp>;
   createdByUser?: InputMaybe<User_Bool_Exp>;
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -15784,6 +15786,7 @@ export type FixReport_Inc_Input = {
 
 /** input type for inserting data into table "fix_report" */
 export type FixReport_Insert_Input = {
+  candidateToRerun?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -15880,6 +15883,7 @@ export type FixReport_On_Conflict = {
 export type FixReport_Order_By = {
   analysisUrl?: InputMaybe<Order_By>;
   assignedTo?: InputMaybe<Order_By>;
+  candidateToRerun?: InputMaybe<Order_By>;
   confidences?: InputMaybe<Order_By>;
   createdByUser?: InputMaybe<User_Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
@@ -15917,6 +15921,8 @@ export type FixReport_Pk_Columns_Input = {
 /** select columns of table "fix_report" */
 export enum FixReport_Select_Column {
   /** column name */
+  CandidateToRerun = 'candidateToRerun',
+  /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
   CreatedOn = 'createdOn',
@@ -15944,6 +15950,7 @@ export enum FixReport_Select_Column {
 
 /** input type for updating data in table "fix_report" */
 export type FixReport_Set_Input = {
+  candidateToRerun?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -16011,6 +16018,7 @@ export type FixReport_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type FixReport_Stream_Cursor_Value_Input = {
+  candidateToRerun?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -16042,6 +16050,8 @@ export type FixReport_Sum_Fields = {
 
 /** update columns of table "fix_report" */
 export enum FixReport_Update_Column {
+  /** column name */
+  CandidateToRerun = 'candidateToRerun',
   /** column name */
   CreatedByUserId = 'createdByUserId',
   /** column name */
@@ -20724,6 +20734,8 @@ export enum IssueType_Enum {
   J2EeGetConnection = 'J2EE_GET_CONNECTION',
   /** Client jQuery deprecated symbols */
   JqueryDeprecatedSymbols = 'JQUERY_DEPRECATED_SYMBOLS',
+  /** JWT_DECODE_WITHOUT_VERIFY */
+  JwtDecodeWithoutVerify = 'JWT_DECODE_WITHOUT_VERIFY',
   /** Leftover debug code */
   LeftoverDebugCode = 'LEFTOVER_DEBUG_CODE',
   /** A string is used in locale dependent comparison which can cause bugs */
@@ -20848,6 +20860,8 @@ export enum IssueType_Enum {
   UnnecessaryImports = 'UNNECESSARY_IMPORTS',
   /** Unsafe deserialization of untrusted data */
   UnsafeDeserialization = 'UNSAFE_DESERIALIZATION',
+  /** Unsafe reflection via Class.forName with externally-controlled input */
+  UnsafeReflection = 'UNSAFE_REFLECTION',
   /** Unsafe use of target blank */
   UnsafeTargetBlank = 'UNSAFE_TARGET_BLANK',
   /** UNSAFE_WEB_THREAD */

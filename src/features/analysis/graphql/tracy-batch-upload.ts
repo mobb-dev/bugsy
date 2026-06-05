@@ -8,10 +8,19 @@ import { packageJson } from '../../../utils/check_node_version'
 import { sanitizeData } from '../../../utils/sanitize-sensitive-data'
 import { withTimeout } from '../../../utils/with-timeout'
 import type { TracyRecordInput } from '../scm/generates/client_generates'
-import { uploadFile } from '../upload-file'
 import type { GQLClient } from './gql'
+import { uploadRawDataToS3 } from './s3-raw-data-upload'
+
+// Re-exported so existing importers keep a single entry point for upload types.
+export {
+  classifyUploadError,
+  type UploadFailureKind,
+} from './s3-raw-data-upload'
 
 const debug = Debug('mobbdev:tracy-batch-upload')
+
+const errorMessage = (e: unknown): string =>
+  e instanceof Error ? e.message : String(e)
 
 function timedStep<T>(label: string, fn: () => T | Promise<T>): Promise<T> {
   const start = Date.now()
@@ -30,8 +39,27 @@ function timedStep<T>(label: string, fn: () => T | Promise<T>): Promise<T> {
   )
 }
 
-/** Max time for the entire batch upload flow (GQL + S3 + submit). */
+/** Per-operation timeout for the GraphQL submit step. The S3 phase has its own
+ * per-operation and whole-phase budgets (see s3-raw-data-upload.ts). */
 const BATCH_TIMEOUT_MS = 30_000 // 30 seconds
+
+/**
+ * Minimum serialized rawData size we bother uploading. S3's presigned POST
+ * policy enforces `content-length-range [1, MAX]`, and anything this tiny is a
+ * degenerate payload (`null`, `1`, `""`, `{}`, `[]`, …) with no useful content
+ * — skip it client-side instead of wasting a guaranteed-failed round-trip.
+ */
+const MIN_RAWDATA_BYTES = 5
+
+/** Cap on the degenerate-record content sample we surface for investigation. */
+const MAX_DEGENERATE_SAMPLE_CHARS = 500
+
+/** Placeholder used instead of raw content when sanitization is disabled, so
+ * the degenerate-record log can never carry unsanitized user data. */
+const REDACTED_SAMPLE = '<redacted: sanitization disabled>'
+
+/** Max degenerate records included in a single warning log line. */
+const MAX_DEGENERATE_LOG_RECORDS = 20
 
 export type TracyRecordClientInput = Omit<
   TracyRecordInput,
@@ -59,9 +87,58 @@ export type TracyRecordClientInput = Omit<
   clientVersion?: string
 }
 
+/**
+ * A record whose serialized rawData was empty/structurally-empty and was
+ * skipped before S3 upload (it would 400 against the content-length-range
+ * floor). Surfaced so callers can log it for investigation — the metadata
+ * record is still submitted, just without a rawDataS3Key.
+ */
+export type DegenerateRawDataRecord = {
+  recordId: string
+  platform: string
+  filePath?: string | null
+  editType?: string | null
+  bytes: number
+  /** Content sample, capped at MAX_DEGENERATE_SAMPLE_CHARS. Only the real
+   * (sanitized) content when sanitization is enabled; otherwise REDACTED_SAMPLE
+   * so unsanitized user data is never logged. */
+  sample: string
+}
+
 export type TracyBatchUploadResult = {
   ok: boolean
   errors: string[] | null
+  /** Records skipped pre-upload because their rawData serialized to empty. */
+  degenerate?: DegenerateRawDataRecord[]
+}
+
+/** Stable warning message for the degenerate-skip log (shared by all callers). */
+export const DEGENERATE_RECORDS_LOG_MESSAGE =
+  'Skipped empty/degenerate rawData records before S3 upload'
+
+/** Shared structured fields for the degenerate-skip warning so every upload
+ * caller logs the same shape (count + a capped sample of records). */
+export function degenerateRecordsLogFields(
+  degenerate: DegenerateRawDataRecord[]
+): { count: number; records: DegenerateRawDataRecord[] } {
+  return {
+    count: degenerate.length,
+    records: degenerate.slice(0, MAX_DEGENERATE_LOG_RECORDS),
+  }
+}
+
+/**
+ * True when a serialized payload carries no data: empty/whitespace, `null`,
+ * `""`, or an object/array that is empty even allowing internal whitespace
+ * (`{}`, `{ }`, `[]`, `[  ]`).
+ */
+export function isStructurallyEmptyPayload(serialized: string): boolean {
+  const trimmed = serialized.trim()
+  if (trimmed === '' || trimmed === 'null' || trimmed === '""') return true
+  const isObject = trimmed.startsWith('{') && trimmed.endsWith('}')
+  const isArray = trimmed.startsWith('[') && trimmed.endsWith(']')
+  if (isObject || isArray) return trimmed.slice(1, -1).trim() === ''
+  return false
 }
 
 async function sanitizeRawData(rawData: unknown): Promise<string> {
@@ -77,10 +154,10 @@ async function sanitizeRawData(rawData: unknown): Promise<string> {
     return serialized
   } catch (err) {
     // Sanitization should never break JSON when operating on parsed objects,
-    // but if it does: log warning and fall back to unsanitized data.
-    console.warn(
-      '[tracy] sanitizeRawData failed, falling back to unsanitized:',
-      (err as Error).message
+    // but if it does: note it and fall back to unsanitized data.
+    debug(
+      '[tracy] sanitizeRawData failed, falling back to unsanitized: %s',
+      errorMessage(err)
     )
     return JSON.stringify(rawData)
   }
@@ -118,6 +195,9 @@ export async function prepareAndSendTracyRecords(
     rawRecords.length
   )
   const serializedRawDataByIndex = new Map<number, string>()
+  // Records whose rawData serialized to empty — skipped before S3 (would 400),
+  // surfaced to the caller for investigation.
+  const degenerate: DegenerateRawDataRecord[] = []
 
   const records: TracyRecordInput[] = await timedStep(
     `${shouldSanitize ? 'sanitize' : 'serialize'} ${rawRecords.length} records`,
@@ -134,7 +214,29 @@ export async function prepareAndSendTracyRecords(
           const serialized = shouldSanitize
             ? await sanitizeRawData(record.rawData)
             : JSON.stringify(record.rawData)
-          serializedRawDataByIndex.set(index, serialized)
+          const bytes = Buffer.byteLength(serialized, 'utf-8')
+          if (
+            bytes < MIN_RAWDATA_BYTES ||
+            isStructurallyEmptyPayload(serialized)
+          ) {
+            // Empty/tiny payload — would 400 (EntityTooSmall) at S3. Skip the
+            // upload (the metadata record still ships, sans rawDataS3Key) and
+            // record it for investigation. The sample is only included when
+            // sanitization ran; on the sanitize-off path (CLI daemon default)
+            // we redact it so raw user content can never reach warn-level logs.
+            degenerate.push({
+              recordId: record.recordId,
+              platform: record.platform,
+              filePath: record.filePath,
+              editType: record.editType,
+              bytes,
+              sample: shouldSanitize
+                ? serialized.slice(0, MAX_DEGENERATE_SAMPLE_CHARS)
+                : REDACTED_SAMPLE,
+            })
+          } else {
+            serializedRawDataByIndex.set(index, serialized)
+          }
         }
         const { rawData: _rawData, ...rest } = record
         results.push({
@@ -152,134 +254,25 @@ export async function prepareAndSendTracyRecords(
     }
   )
 
+  // Empty payloads are skipped pre-upload; attach them to every return path.
+  const degenerateOut = degenerate.length > 0 ? degenerate : undefined
+  const finish = (
+    result: Omit<TracyBatchUploadResult, 'degenerate'>
+  ): TracyBatchUploadResult => ({ ...result, degenerate: degenerateOut })
+
   // 2. Upload rawData to S3 for records that have it
   const recordsWithRawData = rawRecords
-    .map((r, i) => ({ recordId: r.recordId, index: i }))
+    .map((record, index) => ({ recordId: record.recordId, index }))
     .filter((entry) => serializedRawDataByIndex.has(entry.index))
 
   if (recordsWithRawData.length > 0) {
-    debug(
-      '[step:s3-url] Requesting presigned URL for %d rawData files',
-      recordsWithRawData.length
+    const { uploaded, errors } = await uploadRawDataToS3(
+      client,
+      recordsWithRawData,
+      serializedRawDataByIndex
     )
-
-    let uploadUrlResult
-    try {
-      uploadUrlResult = await withTimeout(
-        client.getTracyRawDataUploadUrl(),
-        BATCH_TIMEOUT_MS,
-        '[step:s3-url] getTracyRawDataUploadUrl'
-      )
-    } catch (err) {
-      return {
-        ok: false,
-        errors: [
-          `[step:s3-url] Failed to fetch S3 upload URL: ${(err as Error).message}`,
-        ],
-      }
-    }
-    const { url, uploadFieldsJSON, keyPrefix } =
-      uploadUrlResult.getTracyRawDataUploadUrl
-
-    if (!url || !uploadFieldsJSON || !keyPrefix) {
-      return {
-        ok: false,
-        errors: [
-          `[step:s3-url] Missing S3 upload fields (url=${!!url}, fields=${!!uploadFieldsJSON}, prefix=${!!keyPrefix})`,
-        ],
-      }
-    }
-
-    let uploadFields: Record<string, string>
-    try {
-      uploadFields = JSON.parse(uploadFieldsJSON)
-    } catch {
-      return {
-        ok: false,
-        errors: ['[step:s3-url] Malformed uploadFieldsJSON from server'],
-      }
-    }
-
-    // Upload rawData files to S3 with bounded concurrency. Without a cap,
-    // 50 records × their serialized Buffers all in flight simultaneously
-    // caused a 309MB RSS spike in the A4 stress test. With MAX_CONCURRENT
-    // = 5, only 5 Buffers + HTTP streams exist at once — peak RSS drops
-    // proportionally while total throughput is unaffected (latency is not
-    // a concern for background uploads).
-    const MAX_CONCURRENT_S3_UPLOADS = 5
-    debug(
-      '[step:s3-upload] Uploading %d files to S3 (concurrency=%d)',
-      recordsWithRawData.length,
-      MAX_CONCURRENT_S3_UPLOADS
-    )
-    const s3Start = Date.now()
-
-    // Chunked Promise.allSettled: process MAX_CONCURRENT at a time
-    const uploadResults: PromiseSettledResult<void>[] = []
-    for (
-      let i = 0;
-      i < recordsWithRawData.length;
-      i += MAX_CONCURRENT_S3_UPLOADS
-    ) {
-      const chunk = recordsWithRawData.slice(i, i + MAX_CONCURRENT_S3_UPLOADS)
-      const chunkResults = await Promise.allSettled(
-        chunk.map(async (entry) => {
-          const rawDataJson = serializedRawDataByIndex.get(entry.index)
-          if (!rawDataJson) {
-            debug('No serialized rawData for recordId=%s', entry.recordId)
-            return
-          }
-
-          const uploadKey = `${keyPrefix}${entry.recordId}.json`
-
-          await withTimeout(
-            uploadFile({
-              file: Buffer.from(rawDataJson, 'utf-8'),
-              url,
-              uploadKey,
-              uploadFields,
-            }),
-            BATCH_TIMEOUT_MS,
-            `[step:s3-upload] uploadFile ${entry.recordId}`
-          )
-
-          records[entry.index]!.rawDataS3Key = uploadKey
-        })
-      )
-      uploadResults.push(...chunkResults)
-    }
-
-    debug(
-      '[perf] s3-upload %d files: %dms',
-      recordsWithRawData.length,
-      Date.now() - s3Start
-    )
-
-    const uploadErrors = uploadResults
-      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-      .map((r) => (r.reason as Error).message)
-
-    if (uploadErrors.length > 0) {
-      debug('[step:s3-upload] S3 upload errors: %O', uploadErrors)
-    }
-
-    // Verify all records that need S3 keys actually got them
-    const missingS3Keys = recordsWithRawData.filter(
-      (entry) => !records[entry.index]!.rawDataS3Key
-    )
-    if (missingS3Keys.length > 0) {
-      const missingIds = missingS3Keys.map((e) => e.recordId)
-      debug('[step:s3-upload] Records missing S3 keys: %O', missingIds)
-      return {
-        ok: false,
-        errors: [
-          `[step:s3-upload] Failed to upload rawData for ${missingS3Keys.length} record(s): ${missingIds.join(', ')}`,
-          ...uploadErrors,
-        ],
-      }
-    }
-
-    debug('[step:s3-upload] S3 uploads complete')
+    for (const [index, key] of uploaded) records[index]!.rawDataS3Key = key
+    if (errors) return finish({ ok: false, errors })
   }
 
   // 3. Submit all records in a single call
@@ -293,20 +286,20 @@ export async function prepareAndSendTracyRecords(
       )
     )
     if (result.uploadTracyRecords.status !== 'OK') {
-      return {
+      return finish({
         ok: false,
         errors: [
           `[step:gql-submit] Server rejected: ${result.uploadTracyRecords.error ?? 'Unknown server error'}`,
         ],
-      }
+      })
     }
   } catch (err) {
-    debug('[step:gql-submit] Upload failed: %s', (err as Error).message)
-    return {
+    debug('[step:gql-submit] Upload failed: %s', errorMessage(err))
+    return finish({
       ok: false,
-      errors: [`[step:gql-submit] ${(err as Error).message}`],
-    }
+      errors: [`[step:gql-submit] ${errorMessage(err)}`],
+    })
   }
 
-  return { ok: true, errors: null }
+  return finish({ ok: true, errors: null })
 }

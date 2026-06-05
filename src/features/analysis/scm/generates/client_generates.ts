@@ -638,6 +638,19 @@ export enum FixerStatus {
   Ok = 'OK'
 }
 
+/** Boolean expression to compare columns of type "Float". All fields are combined with logical 'AND'. */
+export type Float_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['Float']['input']>;
+  _gt?: InputMaybe<Scalars['Float']['input']>;
+  _gte?: InputMaybe<Scalars['Float']['input']>;
+  _in?: InputMaybe<Array<Scalars['Float']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['Float']['input']>;
+  _lte?: InputMaybe<Scalars['Float']['input']>;
+  _neq?: InputMaybe<Scalars['Float']['input']>;
+  _nin?: InputMaybe<Array<Scalars['Float']['input']>>;
+};
+
 export type ForkRepoResponse = ForkRepoSuccess | ScmError;
 
 export type ForkRepoSuccess = {
@@ -2635,6 +2648,1404 @@ export type VulnerabilityReportIssueV5 = {
 };
 
 export type VulnerabilityReportResponse = BadShaError | MobbProjectAccessError | RabbitSendError | ReferenceNotFoundError | RepoValidationError | ReportValidationError | UploadReportS3Error | VulnerabilityReport | VulnerabilityReportDownloadError;
+
+/** Cache of (provider, rule_id) -> CWE classification. Populated by the worker's KB normalization step after the LLM stage resolves a finding. UNIQUE(provider, rule_id) enforces the cache key; concurrent workers writing the same key are serialized via INSERT ON CONFLICT DO NOTHING. */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping';
+  category: Scalars['String']['output'];
+  confidence: Scalars['Float']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  cweId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['uuid']['output'];
+  isSecurityIssue: Scalars['Boolean']['output'];
+  normalizedTitle?: Maybe<Scalars['String']['output']>;
+  provider: Scalars['String']['output'];
+  ruleId: Scalars['String']['output'];
+  shortDescription?: Maybe<Scalars['String']['output']>;
+  source: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_aggregate';
+  aggregate?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate_Fields>;
+  nodes: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+};
+
+/** aggregate fields of "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_aggregate_fields';
+  avg?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Max_Fields>;
+  min?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Min_Fields>;
+  stddev?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Fields>;
+  stddev_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Samp_Fields>;
+  sum?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Sum_Fields>;
+  var_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Var_Pop_Fields>;
+  var_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Var_Samp_Fields>;
+  variance?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Variance_Fields>;
+};
+
+
+/** aggregate fields of "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Avg_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_avg_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "agentic_remediation.knowledge_base_cwe_mapping". All fields are combined with a logical 'AND'. */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp = {
+  _and?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>>;
+  _not?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+  _or?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>>;
+  category?: InputMaybe<String_Comparison_Exp>;
+  confidence?: InputMaybe<Float_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  cweId?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  isSecurityIssue?: InputMaybe<Boolean_Comparison_Exp>;
+  normalizedTitle?: InputMaybe<String_Comparison_Exp>;
+  provider?: InputMaybe<String_Comparison_Exp>;
+  ruleId?: InputMaybe<String_Comparison_Exp>;
+  shortDescription?: InputMaybe<String_Comparison_Exp>;
+  source?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "agentic_remediation.knowledge_base_cwe_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  KnowledgeBaseCweMappingPkey = 'knowledge_base_cwe_mapping_pkey',
+  /** unique or primary key constraint on columns "provider", "rule_id" */
+  KnowledgeBaseCweMappingProviderRuleIdKey = 'knowledge_base_cwe_mapping_provider_rule_id_key'
+}
+
+/** input type for incrementing numeric columns in table "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Inc_Input = {
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+};
+
+/** input type for inserting data into table "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Insert_Input = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isSecurityIssue?: InputMaybe<Scalars['Boolean']['input']>;
+  normalizedTitle?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  shortDescription?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Max_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_max_fields';
+  category?: Maybe<Scalars['String']['output']>;
+  confidence?: Maybe<Scalars['Float']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  cweId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  normalizedTitle?: Maybe<Scalars['String']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  shortDescription?: Maybe<Scalars['String']['output']>;
+  source?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Min_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_min_fields';
+  category?: Maybe<Scalars['String']['output']>;
+  confidence?: Maybe<Scalars['Float']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  cweId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  normalizedTitle?: Maybe<Scalars['String']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  shortDescription?: Maybe<Scalars['String']['output']>;
+  source?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+};
+
+/** on_conflict condition type for table "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_On_Conflict = {
+  constraint: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Constraint;
+  update_columns?: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Update_Column>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "agentic_remediation.knowledge_base_cwe_mapping". */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Order_By = {
+  category?: InputMaybe<Order_By>;
+  confidence?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  cweId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  isSecurityIssue?: InputMaybe<Order_By>;
+  normalizedTitle?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  ruleId?: InputMaybe<Order_By>;
+  shortDescription?: InputMaybe<Order_By>;
+  source?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: agentic_remediation.knowledge_base_cwe_mapping */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "agentic_remediation.knowledge_base_cwe_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column {
+  /** column name */
+  Category = 'category',
+  /** column name */
+  Confidence = 'confidence',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsSecurityIssue = 'isSecurityIssue',
+  /** column name */
+  NormalizedTitle = 'normalizedTitle',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  ShortDescription = 'shortDescription',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "agentic_remediation.knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Set_Input = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isSecurityIssue?: InputMaybe<Scalars['Boolean']['input']>;
+  normalizedTitle?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  shortDescription?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_stddev_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_stddev_pop_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stddev_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_stddev_samp_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "agentic_remediation_knowledge_base_cwe_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stream_Cursor_Value_Input = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  isSecurityIssue?: InputMaybe<Scalars['Boolean']['input']>;
+  normalizedTitle?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  shortDescription?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Sum_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_sum_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** update columns of table "agentic_remediation.knowledge_base_cwe_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Update_Column {
+  /** column name */
+  Category = 'category',
+  /** column name */
+  Confidence = 'confidence',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IsSecurityIssue = 'isSecurityIssue',
+  /** column name */
+  NormalizedTitle = 'normalizedTitle',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  ShortDescription = 'shortDescription',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Var_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_var_pop_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Var_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_var_samp_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Variance_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_mapping_variance_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** CWE enrichment data (description, OWASP categories, related CWEs) pulled from MITRE the first time a worker classifies that CWE. cwe_id is the natural primary key (no surrogate UUID). */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+  cweId: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  lastUpdated: Scalars['timestamptz']['output'];
+  name: Scalars['String']['output'];
+  owasp2017?: Maybe<Scalars['String']['output']>;
+  owasp2021?: Maybe<Scalars['String']['output']>;
+  relatedCwes?: Maybe<Scalars['jsonb']['output']>;
+  remediationGuidance?: Maybe<Scalars['String']['output']>;
+  sourceUrl?: Maybe<Scalars['String']['output']>;
+  typicalSeverity?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** CWE enrichment data (description, OWASP categories, related CWEs) pulled from MITRE the first time a worker classifies that CWE. cwe_id is the natural primary key (no surrogate UUID). */
+export type Agentic_Remediation_Knowledge_Base_Cwe_MetadataRelatedCwesArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregated selection of "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_aggregate';
+  aggregate?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate_Fields>;
+  nodes: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+};
+
+/** aggregate fields of "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_aggregate_fields';
+  avg?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Max_Fields>;
+  min?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Min_Fields>;
+  stddev?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Fields>;
+  stddev_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Samp_Fields>;
+  sum?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Sum_Fields>;
+  var_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Var_Pop_Fields>;
+  var_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Var_Samp_Fields>;
+  variance?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Variance_Fields>;
+};
+
+
+/** aggregate fields of "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Append_Input = {
+  relatedCwes?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Avg_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_avg_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "agentic_remediation.knowledge_base_cwe_metadata". All fields are combined with a logical 'AND'. */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp = {
+  _and?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>>;
+  _not?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+  _or?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>>;
+  baseCvss?: InputMaybe<Float_Comparison_Exp>;
+  cweId?: InputMaybe<String_Comparison_Exp>;
+  description?: InputMaybe<String_Comparison_Exp>;
+  lastUpdated?: InputMaybe<Timestamptz_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  owasp2017?: InputMaybe<String_Comparison_Exp>;
+  owasp2021?: InputMaybe<String_Comparison_Exp>;
+  relatedCwes?: InputMaybe<Jsonb_Comparison_Exp>;
+  remediationGuidance?: InputMaybe<String_Comparison_Exp>;
+  sourceUrl?: InputMaybe<String_Comparison_Exp>;
+  typicalSeverity?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "agentic_remediation.knowledge_base_cwe_metadata" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Constraint {
+  /** unique or primary key constraint on columns "cwe_id" */
+  KnowledgeBaseCweMetadataPkey = 'knowledge_base_cwe_metadata_pkey'
+}
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_At_Path_Input = {
+  relatedCwes?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Elem_Input = {
+  relatedCwes?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Key_Input = {
+  relatedCwes?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** input type for incrementing numeric columns in table "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Inc_Input = {
+  baseCvss?: InputMaybe<Scalars['Float']['input']>;
+};
+
+/** input type for inserting data into table "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Insert_Input = {
+  baseCvss?: InputMaybe<Scalars['Float']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  lastUpdated?: InputMaybe<Scalars['timestamptz']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  owasp2017?: InputMaybe<Scalars['String']['input']>;
+  owasp2021?: InputMaybe<Scalars['String']['input']>;
+  relatedCwes?: InputMaybe<Scalars['jsonb']['input']>;
+  remediationGuidance?: InputMaybe<Scalars['String']['input']>;
+  sourceUrl?: InputMaybe<Scalars['String']['input']>;
+  typicalSeverity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Max_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_max_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+  cweId?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  lastUpdated?: Maybe<Scalars['timestamptz']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  owasp2017?: Maybe<Scalars['String']['output']>;
+  owasp2021?: Maybe<Scalars['String']['output']>;
+  remediationGuidance?: Maybe<Scalars['String']['output']>;
+  sourceUrl?: Maybe<Scalars['String']['output']>;
+  typicalSeverity?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Min_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_min_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+  cweId?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  lastUpdated?: Maybe<Scalars['timestamptz']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  owasp2017?: Maybe<Scalars['String']['output']>;
+  owasp2021?: Maybe<Scalars['String']['output']>;
+  remediationGuidance?: Maybe<Scalars['String']['output']>;
+  sourceUrl?: Maybe<Scalars['String']['output']>;
+  typicalSeverity?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Mutation_Response = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+};
+
+/** on_conflict condition type for table "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_On_Conflict = {
+  constraint: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Constraint;
+  update_columns?: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Update_Column>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "agentic_remediation.knowledge_base_cwe_metadata". */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Order_By = {
+  baseCvss?: InputMaybe<Order_By>;
+  cweId?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  lastUpdated?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  owasp2017?: InputMaybe<Order_By>;
+  owasp2021?: InputMaybe<Order_By>;
+  relatedCwes?: InputMaybe<Order_By>;
+  remediationGuidance?: InputMaybe<Order_By>;
+  sourceUrl?: InputMaybe<Order_By>;
+  typicalSeverity?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: agentic_remediation.knowledge_base_cwe_metadata */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Pk_Columns_Input = {
+  cweId: Scalars['String']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Prepend_Input = {
+  relatedCwes?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** select columns of table "agentic_remediation.knowledge_base_cwe_metadata" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column {
+  /** column name */
+  BaseCvss = 'baseCvss',
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  LastUpdated = 'lastUpdated',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  Owasp2017 = 'owasp2017',
+  /** column name */
+  Owasp2021 = 'owasp2021',
+  /** column name */
+  RelatedCwes = 'relatedCwes',
+  /** column name */
+  RemediationGuidance = 'remediationGuidance',
+  /** column name */
+  SourceUrl = 'sourceUrl',
+  /** column name */
+  TypicalSeverity = 'typicalSeverity'
+}
+
+/** input type for updating data in table "agentic_remediation.knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Set_Input = {
+  baseCvss?: InputMaybe<Scalars['Float']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  lastUpdated?: InputMaybe<Scalars['timestamptz']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  owasp2017?: InputMaybe<Scalars['String']['input']>;
+  owasp2021?: InputMaybe<Scalars['String']['input']>;
+  relatedCwes?: InputMaybe<Scalars['jsonb']['input']>;
+  remediationGuidance?: InputMaybe<Scalars['String']['input']>;
+  sourceUrl?: InputMaybe<Scalars['String']['input']>;
+  typicalSeverity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_stddev_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_stddev_pop_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stddev_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_stddev_samp_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "agentic_remediation_knowledge_base_cwe_metadata" */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stream_Cursor_Value_Input = {
+  baseCvss?: InputMaybe<Scalars['Float']['input']>;
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  lastUpdated?: InputMaybe<Scalars['timestamptz']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  owasp2017?: InputMaybe<Scalars['String']['input']>;
+  owasp2021?: InputMaybe<Scalars['String']['input']>;
+  relatedCwes?: InputMaybe<Scalars['jsonb']['input']>;
+  remediationGuidance?: InputMaybe<Scalars['String']['input']>;
+  sourceUrl?: InputMaybe<Scalars['String']['input']>;
+  typicalSeverity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Sum_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_sum_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** update columns of table "agentic_remediation.knowledge_base_cwe_metadata" */
+export enum Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Update_Column {
+  /** column name */
+  BaseCvss = 'baseCvss',
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  LastUpdated = 'lastUpdated',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  Owasp2017 = 'owasp2017',
+  /** column name */
+  Owasp2021 = 'owasp2021',
+  /** column name */
+  RelatedCwes = 'relatedCwes',
+  /** column name */
+  RemediationGuidance = 'remediationGuidance',
+  /** column name */
+  SourceUrl = 'sourceUrl',
+  /** column name */
+  TypicalSeverity = 'typicalSeverity'
+}
+
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Key_Input>;
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Inc_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Prepend_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Var_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_var_pop_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Var_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_var_samp_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Variance_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_cwe_metadata_variance_fields';
+  baseCvss?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Log of (cwe_id, language) tuples the engine has seen but could not classify. occurrence_count accumulates rather than inflating the row count. Operators query this to discover which CWE/language combos need a knowledge-base entry. */
+export type Agentic_Remediation_Knowledge_Base_Gap = {
+  __typename?: 'agentic_remediation_knowledge_base_gap';
+  cweId?: Maybe<Scalars['String']['output']>;
+  firstSeen: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  language?: Maybe<Scalars['String']['output']>;
+  lastSeen: Scalars['timestamptz']['output'];
+  occurrenceCount: Scalars['Int']['output'];
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  vulnerabilityType?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Aggregate = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_aggregate';
+  aggregate?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Aggregate_Fields>;
+  nodes: Array<Agentic_Remediation_Knowledge_Base_Gap>;
+};
+
+/** aggregate fields of "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Aggregate_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_aggregate_fields';
+  avg?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Max_Fields>;
+  min?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Min_Fields>;
+  stddev?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Stddev_Fields>;
+  stddev_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Stddev_Samp_Fields>;
+  sum?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Sum_Fields>;
+  var_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Var_Pop_Fields>;
+  var_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Var_Samp_Fields>;
+  variance?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Variance_Fields>;
+};
+
+
+/** aggregate fields of "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Avg_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_avg_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "agentic_remediation.knowledge_base_gap". All fields are combined with a logical 'AND'. */
+export type Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp = {
+  _and?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>>;
+  _not?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+  _or?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>>;
+  cweId?: InputMaybe<String_Comparison_Exp>;
+  firstSeen?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  language?: InputMaybe<String_Comparison_Exp>;
+  lastSeen?: InputMaybe<Timestamptz_Comparison_Exp>;
+  occurrenceCount?: InputMaybe<Int_Comparison_Exp>;
+  provider?: InputMaybe<String_Comparison_Exp>;
+  ruleId?: InputMaybe<String_Comparison_Exp>;
+  vulnerabilityType?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "agentic_remediation.knowledge_base_gap" */
+export enum Agentic_Remediation_Knowledge_Base_Gap_Constraint {
+  /** unique or primary key constraint on columns  */
+  KnowledgeBaseGapCweIdLanguageKey = 'knowledge_base_gap_cwe_id_language_key',
+  /** unique or primary key constraint on columns "id" */
+  KnowledgeBaseGapPkey = 'knowledge_base_gap_pkey'
+}
+
+/** input type for incrementing numeric columns in table "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Inc_Input = {
+  occurrenceCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Insert_Input = {
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  firstSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  language?: InputMaybe<Scalars['String']['input']>;
+  lastSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  occurrenceCount?: InputMaybe<Scalars['Int']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Max_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_max_fields';
+  cweId?: Maybe<Scalars['String']['output']>;
+  firstSeen?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+  lastSeen?: Maybe<Scalars['timestamptz']['output']>;
+  occurrenceCount?: Maybe<Scalars['Int']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  vulnerabilityType?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Min_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_min_fields';
+  cweId?: Maybe<Scalars['String']['output']>;
+  firstSeen?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+  lastSeen?: Maybe<Scalars['timestamptz']['output']>;
+  occurrenceCount?: Maybe<Scalars['Int']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  vulnerabilityType?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Mutation_Response = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Agentic_Remediation_Knowledge_Base_Gap>;
+};
+
+/** on_conflict condition type for table "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_On_Conflict = {
+  constraint: Agentic_Remediation_Knowledge_Base_Gap_Constraint;
+  update_columns?: Array<Agentic_Remediation_Knowledge_Base_Gap_Update_Column>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "agentic_remediation.knowledge_base_gap". */
+export type Agentic_Remediation_Knowledge_Base_Gap_Order_By = {
+  cweId?: InputMaybe<Order_By>;
+  firstSeen?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  language?: InputMaybe<Order_By>;
+  lastSeen?: InputMaybe<Order_By>;
+  occurrenceCount?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  ruleId?: InputMaybe<Order_By>;
+  vulnerabilityType?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: agentic_remediation.knowledge_base_gap */
+export type Agentic_Remediation_Knowledge_Base_Gap_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "agentic_remediation.knowledge_base_gap" */
+export enum Agentic_Remediation_Knowledge_Base_Gap_Select_Column {
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  FirstSeen = 'firstSeen',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Language = 'language',
+  /** column name */
+  LastSeen = 'lastSeen',
+  /** column name */
+  OccurrenceCount = 'occurrenceCount',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  VulnerabilityType = 'vulnerabilityType'
+}
+
+/** input type for updating data in table "agentic_remediation.knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Set_Input = {
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  firstSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  language?: InputMaybe<Scalars['String']['input']>;
+  lastSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  occurrenceCount?: InputMaybe<Scalars['Int']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Stddev_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_stddev_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Stddev_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_stddev_pop_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Stddev_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_stddev_samp_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "agentic_remediation_knowledge_base_gap" */
+export type Agentic_Remediation_Knowledge_Base_Gap_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Agentic_Remediation_Knowledge_Base_Gap_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Agentic_Remediation_Knowledge_Base_Gap_Stream_Cursor_Value_Input = {
+  cweId?: InputMaybe<Scalars['String']['input']>;
+  firstSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  language?: InputMaybe<Scalars['String']['input']>;
+  lastSeen?: InputMaybe<Scalars['timestamptz']['input']>;
+  occurrenceCount?: InputMaybe<Scalars['Int']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  vulnerabilityType?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Sum_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_sum_fields';
+  occurrenceCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "agentic_remediation.knowledge_base_gap" */
+export enum Agentic_Remediation_Knowledge_Base_Gap_Update_Column {
+  /** column name */
+  CweId = 'cweId',
+  /** column name */
+  FirstSeen = 'firstSeen',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Language = 'language',
+  /** column name */
+  LastSeen = 'lastSeen',
+  /** column name */
+  OccurrenceCount = 'occurrenceCount',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  VulnerabilityType = 'vulnerabilityType'
+}
+
+export type Agentic_Remediation_Knowledge_Base_Gap_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Var_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_var_pop_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Var_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_var_samp_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Agentic_Remediation_Knowledge_Base_Gap_Variance_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_gap_variance_fields';
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Per-provider rule_id -> canonical topic slug. Worker checks this first when classifying a (provider, rule_id); a hit short-circuits the LLM call. UNIQUE(provider, rule_id). */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping';
+  confidence: Scalars['Float']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  provider: Scalars['String']['output'];
+  ruleId: Scalars['String']['output'];
+  source: Scalars['String']['output'];
+  topicSlug: Scalars['String']['output'];
+  topicTitle?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_aggregate';
+  aggregate?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate_Fields>;
+  nodes: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+};
+
+/** aggregate fields of "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_aggregate_fields';
+  avg?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Max_Fields>;
+  min?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Min_Fields>;
+  stddev?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Fields>;
+  stddev_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Samp_Fields>;
+  sum?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Sum_Fields>;
+  var_pop?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Var_Pop_Fields>;
+  var_samp?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Var_Samp_Fields>;
+  variance?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Variance_Fields>;
+};
+
+
+/** aggregate fields of "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Avg_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_avg_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "agentic_remediation.knowledge_base_rule_topic_mapping". All fields are combined with a logical 'AND'. */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp = {
+  _and?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>>;
+  _not?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+  _or?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>>;
+  confidence?: InputMaybe<Float_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  provider?: InputMaybe<String_Comparison_Exp>;
+  ruleId?: InputMaybe<String_Comparison_Exp>;
+  source?: InputMaybe<String_Comparison_Exp>;
+  topicSlug?: InputMaybe<String_Comparison_Exp>;
+  topicTitle?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  KnowledgeBaseRuleTopicMappingPkey = 'knowledge_base_rule_topic_mapping_pkey',
+  /** unique or primary key constraint on columns "provider", "rule_id" */
+  KnowledgeBaseRuleTopicMappingProviderRuleIdKey = 'knowledge_base_rule_topic_mapping_provider_rule_id_key'
+}
+
+/** input type for incrementing numeric columns in table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Inc_Input = {
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+};
+
+/** input type for inserting data into table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Insert_Input = {
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  topicTitle?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Max_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_max_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  source?: Maybe<Scalars['String']['output']>;
+  topicSlug?: Maybe<Scalars['String']['output']>;
+  topicTitle?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Min_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_min_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  provider?: Maybe<Scalars['String']['output']>;
+  ruleId?: Maybe<Scalars['String']['output']>;
+  source?: Maybe<Scalars['String']['output']>;
+  topicSlug?: Maybe<Scalars['String']['output']>;
+  topicTitle?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Mutation_Response = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+};
+
+/** on_conflict condition type for table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_On_Conflict = {
+  constraint: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Constraint;
+  update_columns?: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Update_Column>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "agentic_remediation.knowledge_base_rule_topic_mapping". */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Order_By = {
+  confidence?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  provider?: InputMaybe<Order_By>;
+  ruleId?: InputMaybe<Order_By>;
+  source?: InputMaybe<Order_By>;
+  topicSlug?: InputMaybe<Order_By>;
+  topicTitle?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: agentic_remediation.knowledge_base_rule_topic_mapping */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column {
+  /** column name */
+  Confidence = 'confidence',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  TopicSlug = 'topicSlug',
+  /** column name */
+  TopicTitle = 'topicTitle',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Set_Input = {
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  topicTitle?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_stddev_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_stddev_pop_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stddev_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_stddev_samp_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "agentic_remediation_knowledge_base_rule_topic_mapping" */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stream_Cursor_Value_Input = {
+  confidence?: InputMaybe<Scalars['Float']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  provider?: InputMaybe<Scalars['String']['input']>;
+  ruleId?: InputMaybe<Scalars['String']['input']>;
+  source?: InputMaybe<Scalars['String']['input']>;
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  topicTitle?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Sum_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_sum_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** update columns of table "agentic_remediation.knowledge_base_rule_topic_mapping" */
+export enum Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Update_Column {
+  /** column name */
+  Confidence = 'confidence',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Provider = 'provider',
+  /** column name */
+  RuleId = 'ruleId',
+  /** column name */
+  Source = 'source',
+  /** column name */
+  TopicSlug = 'topicSlug',
+  /** column name */
+  TopicTitle = 'topicTitle',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Var_Pop_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_var_pop_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Var_Samp_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_var_samp_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Variance_Fields = {
+  __typename?: 'agentic_remediation_knowledge_base_rule_topic_mapping_variance_fields';
+  confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Global blacklist of vulnerability topic slugs the agent will not attempt. Worker emits Unfixable with reason when a VRI resolves to a blacklisted slug. */
+export type Agentic_Remediation_Vulnerability_Blacklist = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist';
+  createdAt: Scalars['timestamptz']['output'];
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason: Scalars['String']['output'];
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug: Scalars['String']['output'];
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Aggregate = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist_aggregate';
+  aggregate?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Aggregate_Fields>;
+  nodes: Array<Agentic_Remediation_Vulnerability_Blacklist>;
+};
+
+/** aggregate fields of "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Aggregate_Fields = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Max_Fields>;
+  min?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Min_Fields>;
+};
+
+
+/** aggregate fields of "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "agentic_remediation.vulnerability_blacklist". All fields are combined with a logical 'AND'. */
+export type Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp = {
+  _and?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>>;
+  _not?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+  _or?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  reason?: InputMaybe<String_Comparison_Exp>;
+  topicSlug?: InputMaybe<String_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "agentic_remediation.vulnerability_blacklist" */
+export enum Agentic_Remediation_Vulnerability_Blacklist_Constraint {
+  /** unique or primary key constraint on columns "topic_slug" */
+  VulnerabilityBlacklistPkey = 'vulnerability_blacklist_pkey'
+}
+
+/** input type for inserting data into table "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason?: InputMaybe<Scalars['String']['input']>;
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Agentic_Remediation_Vulnerability_Blacklist_Max_Fields = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Agentic_Remediation_Vulnerability_Blacklist_Min_Fields = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason?: Maybe<Scalars['String']['output']>;
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Mutation_Response = {
+  __typename?: 'agentic_remediation_vulnerability_blacklist_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Agentic_Remediation_Vulnerability_Blacklist>;
+};
+
+/** on_conflict condition type for table "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_On_Conflict = {
+  constraint: Agentic_Remediation_Vulnerability_Blacklist_Constraint;
+  update_columns?: Array<Agentic_Remediation_Vulnerability_Blacklist_Update_Column>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "agentic_remediation.vulnerability_blacklist". */
+export type Agentic_Remediation_Vulnerability_Blacklist_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  reason?: InputMaybe<Order_By>;
+  topicSlug?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: agentic_remediation.vulnerability_blacklist */
+export type Agentic_Remediation_Vulnerability_Blacklist_Pk_Columns_Input = {
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug: Scalars['String']['input'];
+};
+
+/** select columns of table "agentic_remediation.vulnerability_blacklist" */
+export enum Agentic_Remediation_Vulnerability_Blacklist_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Reason = 'reason',
+  /** column name */
+  TopicSlug = 'topicSlug',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "agentic_remediation.vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason?: InputMaybe<Scalars['String']['input']>;
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** Streaming cursor of the table "agentic_remediation_vulnerability_blacklist" */
+export type Agentic_Remediation_Vulnerability_Blacklist_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Agentic_Remediation_Vulnerability_Blacklist_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Agentic_Remediation_Vulnerability_Blacklist_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** User-facing reason text; surfaced to the customer in the UI when an issue is rejected. Example: "Weak crypto migrations typically need a coordinated rotation of keys, certs, and dependent code that the agent cannot safely auto-patch." */
+  reason?: InputMaybe<Scalars['String']['input']>;
+  /** KB topic slug (e.g. "weak_crypto"). One per row; the knowledge_base_* tables + mappings.toml resolve raw provider rule_ids onto these slugs. */
+  topicSlug?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** update columns of table "agentic_remediation.vulnerability_blacklist" */
+export enum Agentic_Remediation_Vulnerability_Blacklist_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Reason = 'reason',
+  /** column name */
+  TopicSlug = 'topicSlug',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Agentic_Remediation_Vulnerability_Blacklist_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp;
+};
 
 export type AggregatedUnexpiredVulnerabilitiesState_Organization_Args = {
   linear_vul_count_limit?: InputMaybe<Scalars['Int']['input']>;
@@ -21106,6 +22517,26 @@ export type Mutation_Root = {
   deleteIntegration: DeleteIntegrationResponse;
   deleteProject?: Maybe<StatusQueryResponse>;
   deleteUserFromOrganization?: Maybe<StatusQueryResponse>;
+  /** delete data from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  delete_agentic_remediation_knowledge_base_cwe_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response>;
+  /** delete single row from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  delete_agentic_remediation_knowledge_base_cwe_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** delete data from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  delete_agentic_remediation_knowledge_base_cwe_metadata?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Mutation_Response>;
+  /** delete single row from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  delete_agentic_remediation_knowledge_base_cwe_metadata_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** delete data from the table: "agentic_remediation.knowledge_base_gap" */
+  delete_agentic_remediation_knowledge_base_gap?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Mutation_Response>;
+  /** delete single row from the table: "agentic_remediation.knowledge_base_gap" */
+  delete_agentic_remediation_knowledge_base_gap_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** delete data from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  delete_agentic_remediation_knowledge_base_rule_topic_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Mutation_Response>;
+  /** delete single row from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  delete_agentic_remediation_knowledge_base_rule_topic_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** delete data from the table: "agentic_remediation.vulnerability_blacklist" */
+  delete_agentic_remediation_vulnerability_blacklist?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Mutation_Response>;
+  /** delete single row from the table: "agentic_remediation.vulnerability_blacklist" */
+  delete_agentic_remediation_vulnerability_blacklist_by_pk?: Maybe<Agentic_Remediation_Vulnerability_Blacklist>;
   /** delete data from the table: "ai_blame_attribution" */
   delete_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
   /** delete single row from the table: "ai_blame_attribution" */
@@ -21631,6 +23062,26 @@ export type Mutation_Root = {
   handleGithubWebhook: GithubWebhookResponse;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
+  /** insert data into the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  insert_agentic_remediation_knowledge_base_cwe_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response>;
+  /** insert a single row into the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  insert_agentic_remediation_knowledge_base_cwe_mapping_one?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** insert data into the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  insert_agentic_remediation_knowledge_base_cwe_metadata?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Mutation_Response>;
+  /** insert a single row into the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  insert_agentic_remediation_knowledge_base_cwe_metadata_one?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** insert data into the table: "agentic_remediation.knowledge_base_gap" */
+  insert_agentic_remediation_knowledge_base_gap?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Mutation_Response>;
+  /** insert a single row into the table: "agentic_remediation.knowledge_base_gap" */
+  insert_agentic_remediation_knowledge_base_gap_one?: Maybe<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** insert data into the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  insert_agentic_remediation_knowledge_base_rule_topic_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Mutation_Response>;
+  /** insert a single row into the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  insert_agentic_remediation_knowledge_base_rule_topic_mapping_one?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** insert data into the table: "agentic_remediation.vulnerability_blacklist" */
+  insert_agentic_remediation_vulnerability_blacklist?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Mutation_Response>;
+  /** insert a single row into the table: "agentic_remediation.vulnerability_blacklist" */
+  insert_agentic_remediation_vulnerability_blacklist_one?: Maybe<Agentic_Remediation_Vulnerability_Blacklist>;
   /** insert data into the table: "ai_blame_attribution" */
   insert_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
   /** insert a single row into the table: "ai_blame_attribution" */
@@ -22179,6 +23630,36 @@ export type Mutation_Root = {
   updateLinearConfiguration: UpdateLinearConfigurationResponse;
   updateLinearToken: TicketAccessToken;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
+  /** update data of the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  update_agentic_remediation_knowledge_base_cwe_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response>;
+  /** update single row of the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  update_agentic_remediation_knowledge_base_cwe_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** update multiples rows of table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  update_agentic_remediation_knowledge_base_cwe_mapping_many?: Maybe<Array<Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response>>>;
+  /** update data of the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  update_agentic_remediation_knowledge_base_cwe_metadata?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Mutation_Response>;
+  /** update single row of the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  update_agentic_remediation_knowledge_base_cwe_metadata_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** update multiples rows of table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  update_agentic_remediation_knowledge_base_cwe_metadata_many?: Maybe<Array<Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Mutation_Response>>>;
+  /** update data of the table: "agentic_remediation.knowledge_base_gap" */
+  update_agentic_remediation_knowledge_base_gap?: Maybe<Agentic_Remediation_Knowledge_Base_Gap_Mutation_Response>;
+  /** update single row of the table: "agentic_remediation.knowledge_base_gap" */
+  update_agentic_remediation_knowledge_base_gap_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** update multiples rows of table: "agentic_remediation.knowledge_base_gap" */
+  update_agentic_remediation_knowledge_base_gap_many?: Maybe<Array<Maybe<Agentic_Remediation_Knowledge_Base_Gap_Mutation_Response>>>;
+  /** update data of the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  update_agentic_remediation_knowledge_base_rule_topic_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Mutation_Response>;
+  /** update single row of the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  update_agentic_remediation_knowledge_base_rule_topic_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** update multiples rows of table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  update_agentic_remediation_knowledge_base_rule_topic_mapping_many?: Maybe<Array<Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Mutation_Response>>>;
+  /** update data of the table: "agentic_remediation.vulnerability_blacklist" */
+  update_agentic_remediation_vulnerability_blacklist?: Maybe<Agentic_Remediation_Vulnerability_Blacklist_Mutation_Response>;
+  /** update single row of the table: "agentic_remediation.vulnerability_blacklist" */
+  update_agentic_remediation_vulnerability_blacklist_by_pk?: Maybe<Agentic_Remediation_Vulnerability_Blacklist>;
+  /** update multiples rows of table: "agentic_remediation.vulnerability_blacklist" */
+  update_agentic_remediation_vulnerability_blacklist_many?: Maybe<Array<Maybe<Agentic_Remediation_Vulnerability_Blacklist_Mutation_Response>>>;
   /** update data of the table: "ai_blame_attribution" */
   update_ai_blame_attribution?: Maybe<Ai_Blame_Attribution_Mutation_Response>;
   /** update single row of the table: "ai_blame_attribution" */
@@ -23116,6 +24597,66 @@ export type Mutation_RootDeleteProjectArgs = {
 export type Mutation_RootDeleteUserFromOrganizationArgs = {
   organizationId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Cwe_MappingArgs = {
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Cwe_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Cwe_MetadataArgs = {
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Cwe_Metadata_By_PkArgs = {
+  cweId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_GapArgs = {
+  where: Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Gap_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Rule_Topic_MappingArgs = {
+  where: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Vulnerability_BlacklistArgs = {
+  where: Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Agentic_Remediation_Vulnerability_Blacklist_By_PkArgs = {
+  topicSlug: Scalars['String']['input'];
 };
 
 
@@ -24677,6 +26218,76 @@ export type Mutation_RootHandleGithubWebhookArgs = {
 export type Mutation_RootInitOrganizationAndProjectAdminArgs = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   userEmail: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Cwe_MappingArgs = {
+  objects: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Insert_Input>;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Cwe_Mapping_OneArgs = {
+  object: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Insert_Input;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Cwe_MetadataArgs = {
+  objects: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Insert_Input>;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Cwe_Metadata_OneArgs = {
+  object: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Insert_Input;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_GapArgs = {
+  objects: Array<Agentic_Remediation_Knowledge_Base_Gap_Insert_Input>;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Gap_OneArgs = {
+  object: Agentic_Remediation_Knowledge_Base_Gap_Insert_Input;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Rule_Topic_MappingArgs = {
+  objects: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Insert_Input>;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_OneArgs = {
+  object: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Insert_Input;
+  on_conflict?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Vulnerability_BlacklistArgs = {
+  objects: Array<Agentic_Remediation_Vulnerability_Blacklist_Insert_Input>;
+  on_conflict?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Agentic_Remediation_Vulnerability_Blacklist_OneArgs = {
+  object: Agentic_Remediation_Vulnerability_Blacklist_Insert_Input;
+  on_conflict?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_On_Conflict>;
 };
 
 
@@ -26692,6 +28303,124 @@ export type Mutation_RootUpdateScmTokenArgs = {
   scmType: Scalars['String']['input'];
   token: Scalars['String']['input'];
   url: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_MappingArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Set_Input>;
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_Mapping_By_PkArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Set_Input>;
+  pk_columns: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_Mapping_ManyArgs = {
+  updates: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_MetadataArgs = {
+  _append?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Append_Input>;
+  _delete_at_path?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Key_Input>;
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Inc_Input>;
+  _prepend?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Prepend_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Set_Input>;
+  where: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_Metadata_By_PkArgs = {
+  _append?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Append_Input>;
+  _delete_at_path?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Delete_Key_Input>;
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Inc_Input>;
+  _prepend?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Prepend_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Set_Input>;
+  pk_columns: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Cwe_Metadata_ManyArgs = {
+  updates: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_GapArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Set_Input>;
+  where: Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Gap_By_PkArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Set_Input>;
+  pk_columns: Agentic_Remediation_Knowledge_Base_Gap_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Gap_ManyArgs = {
+  updates: Array<Agentic_Remediation_Knowledge_Base_Gap_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Rule_Topic_MappingArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Set_Input>;
+  where: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_By_PkArgs = {
+  _inc?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Inc_Input>;
+  _set?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Set_Input>;
+  pk_columns: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_ManyArgs = {
+  updates: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Vulnerability_BlacklistArgs = {
+  _set?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Set_Input>;
+  where: Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Vulnerability_Blacklist_By_PkArgs = {
+  _set?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Set_Input>;
+  pk_columns: Agentic_Remediation_Vulnerability_Blacklist_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Agentic_Remediation_Vulnerability_Blacklist_ManyArgs = {
+  updates: Array<Agentic_Remediation_Vulnerability_Blacklist_Updates>;
 };
 
 
@@ -29584,6 +31313,8 @@ export type Organization = {
   __typename?: 'organization';
   activeDevelopers: GetActiveDevelopersResponse;
   adoptionTrendsTimeSeries: GetAdoptionTrendsTimeSeriesResponse;
+  /** Per-org feature flag controlling whether NoFix issues are routed to consumers/agentic_remediation for a second remediation pass. Off by default; flipped per-organization during controlled rollout. */
+  agenticRemediationEnabled: Scalars['Boolean']['output'];
   /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v3" */
   aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
@@ -30297,6 +32028,7 @@ export type Organization_Bool_Exp = {
   _and?: InputMaybe<Array<Organization_Bool_Exp>>;
   _not?: InputMaybe<Organization_Bool_Exp>;
   _or?: InputMaybe<Array<Organization_Bool_Exp>>;
+  agenticRemediationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   aiToolToken?: InputMaybe<Ai_Tool_Token_Bool_Exp>;
   aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Bool_Exp>;
   allowedIssueTypes?: InputMaybe<Jsonb_Comparison_Exp>;
@@ -30773,6 +32505,8 @@ export type Organization_Inc_Input = {
 
 /** input type for inserting data into table "organization" */
 export type Organization_Insert_Input = {
+  /** Per-org feature flag controlling whether NoFix issues are routed to consumers/agentic_remediation for a second remediation pass. Off by default; flipped per-organization during controlled rollout. */
+  agenticRemediationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   aiToolToken?: InputMaybe<Ai_Tool_Token_Arr_Rel_Insert_Input>;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
@@ -31146,6 +32880,7 @@ export type Organization_On_Conflict = {
 
 /** Ordering options when selecting data from "organization". */
 export type Organization_Order_By = {
+  agenticRemediationEnabled?: InputMaybe<Order_By>;
   aiToolToken_aggregate?: InputMaybe<Ai_Tool_Token_Aggregate_Order_By>;
   allowedIssueTypes?: InputMaybe<Order_By>;
   autoPrIncludeAiFixes?: InputMaybe<Order_By>;
@@ -31777,6 +33512,8 @@ export type Organization_Role_Updates = {
 /** select columns of table "organization" */
 export enum Organization_Select_Column {
   /** column name */
+  AgenticRemediationEnabled = 'agenticRemediationEnabled',
+  /** column name */
   AllowedIssueTypes = 'allowedIssueTypes',
   /** column name */
   AutoPrIncludeAiFixes = 'autoPrIncludeAiFixes',
@@ -31834,6 +33571,8 @@ export enum Organization_Select_Column {
 
 /** input type for updating data in table "organization" */
 export type Organization_Set_Input = {
+  /** Per-org feature flag controlling whether NoFix issues are routed to consumers/agentic_remediation for a second remediation pass. Off by default; flipped per-organization during controlled rollout. */
+  agenticRemediationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
   autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
@@ -31961,6 +33700,8 @@ export type Organization_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Organization_Stream_Cursor_Value_Input = {
+  /** Per-org feature flag controlling whether NoFix issues are routed to consumers/agentic_remediation for a second remediation pass. Off by default; flipped per-organization during controlled rollout. */
+  agenticRemediationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
   autoPrIncludeAiFixes?: InputMaybe<Scalars['Boolean']['input']>;
@@ -32486,6 +34227,8 @@ export type Organization_To_User_Updates = {
 
 /** update columns of table "organization" */
 export enum Organization_Update_Column {
+  /** column name */
+  AgenticRemediationEnabled = 'agenticRemediationEnabled',
   /** column name */
   AllowedIssueTypes = 'allowedIssueTypes',
   /** column name */
@@ -34631,6 +36374,36 @@ export type Query_Root = {
   /** Placeholder query - GraphQL requires at least one query */
   _empty?: Maybe<Scalars['String']['output']>;
   _tracyManagementEmpty?: Maybe<Scalars['String']['output']>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  agentic_remediation_knowledge_base_cwe_mapping: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  agentic_remediation_knowledge_base_cwe_mapping_aggregate: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_mapping" using primary key columns */
+  agentic_remediation_knowledge_base_cwe_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  agentic_remediation_knowledge_base_cwe_metadata: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  agentic_remediation_knowledge_base_cwe_metadata_aggregate: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_metadata" using primary key columns */
+  agentic_remediation_knowledge_base_cwe_metadata_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_gap" */
+  agentic_remediation_knowledge_base_gap: Array<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_gap" */
+  agentic_remediation_knowledge_base_gap_aggregate: Agentic_Remediation_Knowledge_Base_Gap_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_gap" using primary key columns */
+  agentic_remediation_knowledge_base_gap_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  agentic_remediation_knowledge_base_rule_topic_mapping: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  agentic_remediation_knowledge_base_rule_topic_mapping_aggregate: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" using primary key columns */
+  agentic_remediation_knowledge_base_rule_topic_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** fetch data from the table: "agentic_remediation.vulnerability_blacklist" */
+  agentic_remediation_vulnerability_blacklist: Array<Agentic_Remediation_Vulnerability_Blacklist>;
+  /** fetch aggregated fields from the table: "agentic_remediation.vulnerability_blacklist" */
+  agentic_remediation_vulnerability_blacklist_aggregate: Agentic_Remediation_Vulnerability_Blacklist_Aggregate;
+  /** fetch data from the table: "agentic_remediation.vulnerability_blacklist" using primary key columns */
+  agentic_remediation_vulnerability_blacklist_by_pk?: Maybe<Agentic_Remediation_Vulnerability_Blacklist>;
   /** fetch data from the table: "aggregated_fix_state" */
   aggregated_fix_state: Array<Aggregated_Fix_State>;
   /** fetch aggregated fields from the table: "aggregated_fix_state" */
@@ -35716,6 +37489,121 @@ export type Query_Root = {
   vulnerability_severity_aggregate: Vulnerability_Severity_Aggregate;
   /** fetch data from the table: "vulnerability_severity" using primary key columns */
   vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_MappingArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_Mapping_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_MetadataArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_Metadata_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Cwe_Metadata_By_PkArgs = {
+  cweId: Scalars['String']['input'];
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_GapArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Gap_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Gap_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_MappingArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootAgentic_Remediation_Vulnerability_BlacklistArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Vulnerability_Blacklist_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+};
+
+
+export type Query_RootAgentic_Remediation_Vulnerability_Blacklist_By_PkArgs = {
+  topicSlug: Scalars['String']['input'];
 };
 
 
@@ -43238,6 +45126,46 @@ export type Submit_Fix_Request_Updates = {
 
 export type Subscription_Root = {
   __typename?: 'subscription_root';
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  agentic_remediation_knowledge_base_cwe_mapping: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_cwe_mapping" */
+  agentic_remediation_knowledge_base_cwe_mapping_aggregate: Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_mapping" using primary key columns */
+  agentic_remediation_knowledge_base_cwe_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** fetch data from the table in a streaming manner: "agentic_remediation.knowledge_base_cwe_mapping" */
+  agentic_remediation_knowledge_base_cwe_mapping_stream: Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  agentic_remediation_knowledge_base_cwe_metadata: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_cwe_metadata" */
+  agentic_remediation_knowledge_base_cwe_metadata_aggregate: Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_cwe_metadata" using primary key columns */
+  agentic_remediation_knowledge_base_cwe_metadata_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** fetch data from the table in a streaming manner: "agentic_remediation.knowledge_base_cwe_metadata" */
+  agentic_remediation_knowledge_base_cwe_metadata_stream: Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_gap" */
+  agentic_remediation_knowledge_base_gap: Array<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_gap" */
+  agentic_remediation_knowledge_base_gap_aggregate: Agentic_Remediation_Knowledge_Base_Gap_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_gap" using primary key columns */
+  agentic_remediation_knowledge_base_gap_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** fetch data from the table in a streaming manner: "agentic_remediation.knowledge_base_gap" */
+  agentic_remediation_knowledge_base_gap_stream: Array<Agentic_Remediation_Knowledge_Base_Gap>;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  agentic_remediation_knowledge_base_rule_topic_mapping: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** fetch aggregated fields from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  agentic_remediation_knowledge_base_rule_topic_mapping_aggregate: Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Aggregate;
+  /** fetch data from the table: "agentic_remediation.knowledge_base_rule_topic_mapping" using primary key columns */
+  agentic_remediation_knowledge_base_rule_topic_mapping_by_pk?: Maybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** fetch data from the table in a streaming manner: "agentic_remediation.knowledge_base_rule_topic_mapping" */
+  agentic_remediation_knowledge_base_rule_topic_mapping_stream: Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping>;
+  /** fetch data from the table: "agentic_remediation.vulnerability_blacklist" */
+  agentic_remediation_vulnerability_blacklist: Array<Agentic_Remediation_Vulnerability_Blacklist>;
+  /** fetch aggregated fields from the table: "agentic_remediation.vulnerability_blacklist" */
+  agentic_remediation_vulnerability_blacklist_aggregate: Agentic_Remediation_Vulnerability_Blacklist_Aggregate;
+  /** fetch data from the table: "agentic_remediation.vulnerability_blacklist" using primary key columns */
+  agentic_remediation_vulnerability_blacklist_by_pk?: Maybe<Agentic_Remediation_Vulnerability_Blacklist>;
+  /** fetch data from the table in a streaming manner: "agentic_remediation.vulnerability_blacklist" */
+  agentic_remediation_vulnerability_blacklist_stream: Array<Agentic_Remediation_Vulnerability_Blacklist>;
   /** fetch data from the table: "aggregated_fix_state" */
   aggregated_fix_state: Array<Aggregated_Fix_State>;
   /** fetch aggregated fields from the table: "aggregated_fix_state" */
@@ -44440,6 +46368,156 @@ export type Subscription_Root = {
   vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
   /** fetch data from the table in a streaming manner: "vulnerability_severity" */
   vulnerability_severity_stream: Array<Vulnerability_Severity>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_MappingArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Mapping_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Mapping_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Stream_Cursor_Input>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_MetadataArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Metadata_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Metadata_By_PkArgs = {
+  cweId: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Cwe_Metadata_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Stream_Cursor_Input>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Cwe_Metadata_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_GapArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Gap_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Gap_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Gap_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Gap_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Stream_Cursor_Input>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Gap_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_MappingArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootAgentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Stream_Cursor_Input>>;
+  where?: InputMaybe<Agentic_Remediation_Knowledge_Base_Rule_Topic_Mapping_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Vulnerability_BlacklistArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Vulnerability_Blacklist_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Agentic_Remediation_Vulnerability_Blacklist_Order_By>>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
+};
+
+
+export type Subscription_RootAgentic_Remediation_Vulnerability_Blacklist_By_PkArgs = {
+  topicSlug: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAgentic_Remediation_Vulnerability_Blacklist_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Stream_Cursor_Input>>;
+  where?: InputMaybe<Agentic_Remediation_Vulnerability_Blacklist_Bool_Exp>;
 };
 
 
@@ -62361,6 +64439,8 @@ export enum Vulnerability_Report_Issue_Tag_Constraint {
 }
 
 export enum Vulnerability_Report_Issue_Tag_Enum {
+  /** consumers/agentic_remediation is currently retrying remediation for this issue */
+  AgenticRemediationInProgress = 'AGENTIC_REMEDIATION_IN_PROGRESS',
   /** Autogenerated code */
   AutogeneratedCode = 'AUTOGENERATED_CODE',
   /** Auxiliary code */
@@ -62479,6 +64559,8 @@ export type Vulnerability_Report_Issue_Tag_Updates = {
 /** columns and relationships of "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag = {
   __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag';
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
   vulnerability_report_issue_id: Scalars['uuid']['output'];
   vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum;
@@ -62536,6 +64618,7 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Ex
   _and?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>>;
   _not?: InputMaybe<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerability_report_issue_id?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum_Comparison_Exp>;
@@ -62551,6 +64634,8 @@ export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Constra
 
 /** input type for inserting data into table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_Input = {
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
@@ -62559,12 +64644,16 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_
 /** aggregate max on columns */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Fields = {
   __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_max_fields';
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   vulnerability_report_issue_id?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by max() on columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Order_By = {
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   vulnerability_report_issue_id?: InputMaybe<Order_By>;
 };
@@ -62572,12 +64661,16 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Max_Ord
 /** aggregate min on columns */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Fields = {
   __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag_min_fields';
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   vulnerability_report_issue_id?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by min() on columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Min_Order_By = {
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   vulnerability_report_issue_id?: InputMaybe<Order_By>;
 };
@@ -62600,6 +64693,7 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conf
 
 /** Ordering options when selecting data from "vulnerability_report_issue_to_vulnerability_report_issue_tag". */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   vulnerability_report_issue_id?: InputMaybe<Order_By>;
   vulnerability_report_issue_tag_value?: InputMaybe<Order_By>;
@@ -62613,6 +64707,8 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Pk_Colu
 /** select columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_Column {
   /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
   Id = 'id',
   /** column name */
   VulnerabilityReportIssueId = 'vulnerability_report_issue_id',
@@ -62622,6 +64718,8 @@ export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Select_
 
 /** input type for updating data in table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Set_Input = {
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
@@ -62637,6 +64735,8 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_
 
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_Cursor_Value_Input = {
+  /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
@@ -62644,6 +64744,8 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Stream_
 
 /** update columns of table "vulnerability_report_issue_to_vulnerability_report_issue_tag" */
 export enum Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */

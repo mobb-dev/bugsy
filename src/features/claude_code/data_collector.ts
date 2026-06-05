@@ -12,7 +12,11 @@ import { processContextFiles } from '../../features/analysis/context_file_proces
 import { scanContextFiles } from '../../features/analysis/context_file_scanner'
 import { runContextFileUploadPipeline } from '../../features/analysis/context_file_uploader'
 import { GQLClient } from '../../features/analysis/graphql/gql'
-import { prepareAndSendTracyRecords } from '../../features/analysis/graphql/tracy-batch-upload'
+import {
+  DEGENERATE_RECORDS_LOG_MESSAGE,
+  degenerateRecordsLogFields,
+  prepareAndSendTracyRecords,
+} from '../../features/analysis/graphql/tracy-batch-upload'
 import {
   AiBlameInferenceType,
   InferencePlatform,
@@ -715,6 +719,13 @@ export async function processTranscript(
       sanitize,
     })
   )
+
+  if (result.degenerate?.length) {
+    log.warn(
+      { data: degenerateRecordsLogFields(result.degenerate) },
+      DEGENERATE_RECORDS_LOG_MESSAGE
+    )
+  }
 
   if (result.ok) {
     // Advance cursor to end of file (including filtered entries)

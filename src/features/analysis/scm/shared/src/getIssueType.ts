@@ -269,6 +269,8 @@ export const issueDescription: Record<
     "The flagged code originates from a third-party library or dependency maintained externally. This categorization suggests that **the issue lies outside the application's direct control** and should be addressed by the vendor if necessary.",
   [Vulnerability_Report_Issue_Tag_Enum.Suppressed]:
     'Suppressed in the scan report.',
+  [Vulnerability_Report_Issue_Tag_Enum.AgenticRemediationInProgress]:
+    'Mobb is currently retrying remediation on this issue. The state will refresh automatically once the run finishes.',
 }
 
 type FalsePositiveData = IssuePartsFp['getFalsePositive']

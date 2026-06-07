@@ -386,51 +386,79 @@ export function getGithubSdk(
         return false
       }
     },
-    async getGithubRepoList(): Promise<ScmRepoInfo[]> {
+    async listAuthenticatedUserReposPage(params: {
+      sort?: { field: 'updated' | 'name' | 'created'; order: 'asc' | 'desc' }
+      perPage?: number
+      page?: number
+    }): Promise<{ items: ScmRepoInfo[]; hasMore: boolean }> {
+      const {
+        sort = { field: 'updated', order: 'desc' },
+        perPage = 10,
+        page = 1,
+      } = params
+
+      const githubSort =
+        sort.field === 'name'
+          ? 'full_name'
+          : sort.field === 'created'
+            ? 'created'
+            : 'updated'
+
       try {
-        const allRepos: ScmRepoInfo[] = []
-        let page = 1
-        const perPage = 100
+        const githubRepos = await octokit.request(GET_USER_REPOS, {
+          sort: githubSort,
+          direction: sort.order,
+          per_page: perPage,
+          page,
+        })
 
-        let hasMore = true
-        while (hasMore) {
-          const githubRepos = await octokit.request(GET_USER_REPOS, {
-            sort: 'updated',
-            per_page: perPage,
-            page,
-          })
+        const items: ScmRepoInfo[] = githubRepos.data.map((repo) => ({
+          repoName: repo.name,
+          repoUrl: repo.html_url,
+          repoOwner: repo.owner.login,
+          repoLanguages: repo.language ? [repo.language] : [],
+          repoIsPublic: !repo.private,
+          repoUpdatedAt: repo.updated_at,
+        }))
 
-          for (const repo of githubRepos.data) {
-            allRepos.push({
-              repoName: repo.name,
-              repoUrl: repo.html_url,
-              repoOwner: repo.owner.login,
-              repoLanguages: repo.language ? [repo.language] : [],
-              repoIsPublic: !repo.private,
-              repoUpdatedAt: repo.updated_at,
-            })
-          }
-
-          hasMore = githubRepos.data.length >= perPage
-          page++
+        return {
+          items,
+          hasMore: githubRepos.data.length >= perPage,
         }
-
-        return allRepos
       } catch (e) {
         if (e instanceof RequestError && e.status === 401) {
           console.warn(
             'GitHub API returned 401 Unauthorized when listing repos - token may be expired or lack repo scope'
           )
-          return []
+          return { items: [], hasMore: false }
         }
         if (e instanceof RequestError && e.status === 404) {
           console.warn(
             'GitHub API returned 404 Not Found when listing repos - user may not exist'
           )
-          return []
+          return { items: [], hasMore: false }
         }
         throw e
       }
+    },
+    async getGithubRepoList(): Promise<ScmRepoInfo[]> {
+      const allRepos: ScmRepoInfo[] = []
+      let page = 1
+      const perPage = 100
+      let hasMore = true
+
+      while (hasMore) {
+        const pageResult = await this.listAuthenticatedUserReposPage({
+          sort: { field: 'updated', order: 'desc' },
+          perPage,
+          page,
+        })
+        allRepos.push(...pageResult.items)
+        hasMore = pageResult.hasMore
+        page++
+      }
+
+      return allRepos
     },
     async getGithubRepoDefaultBranch(repoUrl: string) {
       const { owner, repo } = parseGithubOwnerAndRepo(repoUrl)

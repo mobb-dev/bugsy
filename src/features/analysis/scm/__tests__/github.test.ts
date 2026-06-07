@@ -505,7 +505,7 @@ describe('GithubSCMLib pagination methods', () => {
       }
     })
 
-    it('should fallback to base implementation when scmOrg is undefined', async () => {
+    it('should paginate via GET /user/repos when scmOrg is undefined', async () => {
       const scmLib = new GithubSCMLib(
         undefined,
         env.PLAYWRIGHT_GH_CLOUD_PAT,
@@ -520,7 +520,8 @@ describe('GithubSCMLib pagination methods', () => {
 
       expect(result.results).toBeDefined()
       expect(Array.isArray(result.results)).toBe(true)
-      // Should use base class implementation (getRepoList + in-memory pagination)
+      expect(result.results.length).toBeGreaterThan(0)
+      expect(result.results.length).toBeLessThanOrEqual(5)
       expect(result.hasMore).toBeDefined()
     })
 

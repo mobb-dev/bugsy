@@ -31346,6 +31346,8 @@ export type Organization = {
   /** This is a deprecated field it should be deleted */
   enableIssueFilter: Scalars['Boolean']['output'];
   enableV2Fixes: Scalars['Boolean']['output'];
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota: Scalars['Int']['output'];
   /** A computed field, executes function "organization_generated_fix_and_vul_unique" */
   generatedFixAndVulUnique?: Maybe<Scalars['json']['output']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
@@ -31378,6 +31380,8 @@ export type Organization = {
   onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
   /** An aggregate relationship */
   onPremScmOauthConfigs_aggregate: On_Prem_Scm_Oauth_Config_Aggregate;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota: Scalars['Int']['output'];
   orgDomainsAutoAdd: Scalars['Boolean']['output'];
   orgDomainsAutoAddRole?: Maybe<Organization_Role_Type_Enum>;
   /** An array relationship */
@@ -32003,7 +32007,11 @@ export type Organization_Avg_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -32042,6 +32050,7 @@ export type Organization_Bool_Exp = {
   disablePrSessionSummary?: InputMaybe<Boolean_Comparison_Exp>;
   enableIssueFilter?: InputMaybe<Boolean_Comparison_Exp>;
   enableV2Fixes?: InputMaybe<Boolean_Comparison_Exp>;
+  externalScannerBatchQuota?: InputMaybe<Int_Comparison_Exp>;
   ghFixerNoFixComments?: InputMaybe<Boolean_Comparison_Exp>;
   githubApps?: InputMaybe<Github_App_Bool_Exp>;
   githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Bool_Exp>;
@@ -32060,6 +32069,7 @@ export type Organization_Bool_Exp = {
   name?: InputMaybe<String_Comparison_Exp>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp>;
+  opengrepBatchQuota?: InputMaybe<Int_Comparison_Exp>;
   orgDomainsAutoAdd?: InputMaybe<Boolean_Comparison_Exp>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum_Comparison_Exp>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
@@ -32495,7 +32505,11 @@ export type Organization_Files_Matching_Settings_Updates = {
 /** input type for incrementing numeric columns in table "organization" */
 export type Organization_Inc_Input = {
   brokerTokenExpiryInDays?: InputMaybe<Scalars['Int']['input']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
@@ -32518,6 +32532,8 @@ export type Organization_Insert_Input = {
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   githubApps?: InputMaybe<Github_App_Arr_Rel_Insert_Input>;
@@ -32535,6 +32551,8 @@ export type Organization_Insert_Input = {
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   name?: InputMaybe<Scalars['String']['input']>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Arr_Rel_Insert_Input>;
@@ -32802,9 +32820,13 @@ export type Organization_Max_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -32833,9 +32855,13 @@ export type Organization_Min_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -32892,6 +32918,7 @@ export type Organization_Order_By = {
   disablePrSessionSummary?: InputMaybe<Order_By>;
   enableIssueFilter?: InputMaybe<Order_By>;
   enableV2Fixes?: InputMaybe<Order_By>;
+  externalScannerBatchQuota?: InputMaybe<Order_By>;
   ghFixerNoFixComments?: InputMaybe<Order_By>;
   githubApps_aggregate?: InputMaybe<Github_App_Aggregate_Order_By>;
   github_app_installation_id?: InputMaybe<Order_By>;
@@ -32907,6 +32934,7 @@ export type Organization_Order_By = {
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
+  opengrepBatchQuota?: InputMaybe<Order_By>;
   orgDomainsAutoAdd?: InputMaybe<Order_By>;
   orgDomainsAutoAddRole?: InputMaybe<Order_By>;
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Order_By>;
@@ -33528,6 +33556,8 @@ export enum Organization_Select_Column {
   /** column name */
   EnableV2Fixes = 'enableV2Fixes',
   /** column name */
+  ExternalScannerBatchQuota = 'externalScannerBatchQuota',
+  /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
   GithubAppInstallationId = 'github_app_installation_id',
@@ -33551,6 +33581,8 @@ export enum Organization_Select_Column {
   IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
   /** column name */
   Name = 'name',
+  /** column name */
+  OpengrepBatchQuota = 'opengrepBatchQuota',
   /** column name */
   OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
   /** column name */
@@ -33582,6 +33614,8 @@ export type Organization_Set_Input = {
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
@@ -33596,6 +33630,8 @@ export type Organization_Set_Input = {
   /** Enable Tracy vulnerability attribution processing for this organization */
   isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -33614,7 +33650,11 @@ export type Organization_Stddev_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -33642,7 +33682,11 @@ export type Organization_Stddev_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -33670,7 +33714,11 @@ export type Organization_Stddev_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -33711,6 +33759,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   /** This is a deprecated field it should be deleted */
   enableIssueFilter?: InputMaybe<Scalars['Boolean']['input']>;
   enableV2Fixes?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   /** If true, the GH Fixer won't add comments when no fixes are available */
   ghFixerNoFixComments?: InputMaybe<Scalars['Boolean']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
@@ -33725,6 +33775,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   /** Enable Tracy vulnerability attribution processing for this organization */
   isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
   quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -33743,7 +33795,11 @@ export type Organization_Sum_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -34244,6 +34300,8 @@ export enum Organization_Update_Column {
   /** column name */
   EnableV2Fixes = 'enableV2Fixes',
   /** column name */
+  ExternalScannerBatchQuota = 'externalScannerBatchQuota',
+  /** column name */
   GhFixerNoFixComments = 'ghFixerNoFixComments',
   /** column name */
   GithubAppInstallationId = 'github_app_installation_id',
@@ -34267,6 +34325,8 @@ export enum Organization_Update_Column {
   IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
   /** column name */
   Name = 'name',
+  /** column name */
+  OpengrepBatchQuota = 'opengrepBatchQuota',
   /** column name */
   OrgDomainsAutoAdd = 'orgDomainsAutoAdd',
   /** column name */
@@ -34312,7 +34372,11 @@ export type Organization_Var_Pop_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -34340,7 +34404,11 @@ export type Organization_Var_Samp_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;
@@ -34368,7 +34436,11 @@ export type Organization_Variance_Fields = {
   deployedFixesCount?: Maybe<Scalars['Int']['output']>;
   /** A computed field, executes function "organization_submitted_vulnerability_issues_count" */
   deployedVulnerabilityIssuesCount?: Maybe<Scalars['Int']['output']>;
+  /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
+  externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
+  opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Float']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Float']['output']>;

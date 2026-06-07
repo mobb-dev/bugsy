@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { IssueLanguage_Enum } from '../../../generates/client_generates'
+import cpp from './cpp'
 import csharp from './csharp'
 import go from './go'
 import java from './java'
@@ -31,6 +32,7 @@ export const languages: {
   [IssueLanguage_Enum.CSharp as string]: csharp,
   [IssueLanguage_Enum.Python as string]: python,
   [IssueLanguage_Enum.Go as string]: go,
+  [IssueLanguage_Enum.Cpp as string]: cpp,
   [IssueLanguage_Enum.Yaml as string]: yaml,
 }
 

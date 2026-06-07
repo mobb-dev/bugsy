@@ -767,11 +767,10 @@ export class GithubSCMLib extends SCMLib {
   }
 
   /**
-   * Override searchRepos to use GitHub's Search API for efficient pagination.
-   * This is much faster than fetching all repos and filtering in-memory.
-   *
-   * Note: GitHub Search API doesn't support sorting by name, so when name sorting
-   * is requested, we fall back to fetching all repos and sorting in-memory.
+   * Override searchRepos for efficient server-side pagination.
+   * - With scmOrg: GitHub Search API (`org:…`)
+   * - Without scmOrg: paginated `GET /user/repos`
+   * - Name sort: in-memory over full list
    */
   override async searchRepos(
     params: SearchReposParams
@@ -780,19 +779,20 @@ export class GithubSCMLib extends SCMLib {
 
     const sort = params.sort || { field: 'updated', order: 'desc' }
 
-    // GitHub Search API doesn't support name sorting, so use in-memory sorting
-    // Also use in-memory sorting when no organization is provided
-    if (!params.scmOrg || sort.field === 'name') {
+    if (sort.field === 'name') {
       return this.searchReposInMemory(params)
     }
 
-    // Use GitHub Search API for date-based sorting (more efficient)
+    if (!params.scmOrg) {
+      return this.searchReposWithUserReposApi(params)
+    }
+
     return this.searchReposWithApi(params)
   }
 
   /**
    * Search repos by fetching all and sorting/paginating in-memory.
-   * Used when name sorting is requested or no organization is provided.
+   * Used only when name sorting is requested.
    */
   private async searchReposInMemory(
     params: SearchReposParams
@@ -828,6 +828,29 @@ export class GithubSCMLib extends SCMLib {
       nextCursor:
         nextOffset < sortedRepos.length ? String(nextOffset) : undefined,
       hasMore: nextOffset < sortedRepos.length,
+    }
+  }
+
+  /**
+   * Paginated repo list for authenticated user when no GitHub org is configured.
+   */
+  private async searchReposWithUserReposApi(
+    params: SearchReposParams
+  ): Promise<SearchReposResult> {
+    const page = parseCursorSafe(params.cursor, 1)
+    const perPage = params.limit || 10
+    const sort = params.sort || { field: 'updated', order: 'desc' }
+
+    const pageResult = await this.githubSdk.listAuthenticatedUserReposPage({
+      sort,
+      perPage,
+      page,
+    })
+
+    return {
+      results: pageResult.items,
+      nextCursor: pageResult.hasMore ? String(page + 1) : undefined,
+      hasMore: pageResult.hasMore,
     }
   }
 

@@ -1,3 +1,7 @@
+import os from 'node:os'
+
+import { packageJson } from '../../utils/check_node_version'
+
 /**
  * Supported IDE/editor types for tracking and analytics.
  * Keep in sync with clients/tracer_ext/src/shared/repositoryInfo.ts
@@ -71,26 +75,77 @@ export function createCliLoginContext(trigger: string): LoginContext {
 }
 
 /**
- * Builds a URL with login context query parameters
+ * Machine details forwarded to the web login so the MVS page can show the
+ * developer's device (computer name + OS username) and client version.
+ */
+export type LoginMachineInfo = {
+  hostname: string
+  computerUser?: string
+  clientVersion?: string
+}
+
+/**
+ * Builds a URL with machine details and optional login-context query params.
  * @param baseUrl - The base URL for the login endpoint
  * @param loginId - The unique login session ID
- * @param hostname - The hostname of the client machine
- * @param context - The login context with trigger, source, and optional IDE info
+ * @param machine - The client machine details (hostname + OS user + version)
+ * @param context - The login context with trigger, source, and optional IDE
+ *   info. When omitted, only the machine params are appended.
  * @returns The complete URL with query parameters
  * @throws {TypeError} If baseUrl is not a valid URL
  */
 export function buildLoginUrl(
   baseUrl: string,
   loginId: string,
-  hostname: string,
-  context: LoginContext
+  machine: LoginMachineInfo,
+  context?: LoginContext
 ): string {
   const url = new URL(`${baseUrl}/${loginId}`)
-  url.searchParams.set('hostname', hostname)
-  url.searchParams.set('trigger', context.trigger)
-  url.searchParams.set('source', context.source)
-  if (context.ide) {
-    url.searchParams.set('ide', context.ide)
+  url.searchParams.set('hostname', machine.hostname)
+  if (machine.computerUser) {
+    url.searchParams.set('computerUser', machine.computerUser)
+  }
+  if (machine.clientVersion) {
+    url.searchParams.set('clientVersion', machine.clientVersion)
+  }
+  if (context) {
+    url.searchParams.set('trigger', context.trigger)
+    url.searchParams.set('source', context.source)
+    if (context.ide) {
+      url.searchParams.set('ide', context.ide)
+    }
   }
   return url.toString()
+}
+
+/**
+ * Best-effort OS username for MVS device attribution. os.userInfo() can throw
+ * when there's no passwd entry (some containers), so it's guarded.
+ */
+export function getComputerUser(): string | undefined {
+  try {
+    return os.userInfo().username || undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function getLoginMachineInfo(): LoginMachineInfo {
+  return {
+    hostname: os.hostname(),
+    computerUser: getComputerUser(),
+    clientVersion: packageJson.version,
+  }
+}
+
+/**
+ * Shared entry point for the browser login URL (CLI + MCP flows): gathers the
+ * local machine details and appends the optional login context.
+ */
+export function buildLoginBrowserUrl(
+  baseUrl: string,
+  loginId: string,
+  context?: LoginContext
+): string {
+  return buildLoginUrl(baseUrl, loginId, getLoginMachineInfo(), context)
 }

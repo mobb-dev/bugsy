@@ -963,13 +963,11 @@ describe('MCP Server', () => {
         })
       })
 
-      it('should handle getLastOrgAndNamedProject failure gracefully', async () => {
-        // Configure GraphQL mocks with getLastOrgAndNamedProject failure
+      it('should handle getLastOrg failure gracefully', async () => {
+        // Configure GraphQL mocks with getLastOrg failure
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL()
-          .getLastOrgAndNamedProject()
-          .failsWithError('Organization error')
+        mockGraphQL().getLastOrg().failsWithError('Organization error')
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
@@ -987,25 +985,25 @@ describe('MCP Server', () => {
         })
       })
 
-      it('should handle createProject failure gracefully', async () => {
-        // Configure GraphQL mocks with createProject failure
+      it('should handle getMvsProject failure gracefully', async () => {
+        // Configure GraphQL mocks with getMvsProject failure (getLastOrg ok)
         mockGraphQL().me().succeeds()
         mockGraphQL().uploadS3BucketInfo().succeeds()
-        mockGraphQL().getLastOrgAndNamedProject().projectNotFound()
-        mockGraphQL().createProject().failsWithError('Create project failed')
+        mockGraphQL().getLastOrg().succeeds()
+        mockGraphQL().getMvsProject().failsWithError('MVS project failed')
 
         const tool = new FixVulnerabilitiesTool()
         const result = await tool.execute({ path: activeRepoPath })
 
         // Verify that the error was handled and logged
         expectValidResult(result)
-        expect(result.content[0]?.text).toContain('Create project failed')
+        expect(result.content[0]?.text).toContain('MVS project failed')
 
         // Verify error was logged with enhanced context
         expect(loggerMock.mocks.logError.mock.calls.length).toBeGreaterThan(0)
         expectErrorLogWithData('[GraphQL] getProjectId failed', {
           error: expect.objectContaining({
-            message: expect.stringContaining('Create project failed'),
+            message: expect.stringContaining('MVS project failed'),
           }),
         })
       })

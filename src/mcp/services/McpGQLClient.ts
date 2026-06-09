@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import os from 'node:os'
 
 import { AuthManager } from '../../commands/AuthManager'
 import {
@@ -19,6 +19,7 @@ import {
   SubmitVulnerabilityReportMutationVariables,
   UploadS3BucketInfoMutation,
 } from '../../features/analysis/scm/generates/client_generates'
+import { packageJson } from '../../utils'
 import { configStore } from '../../utils/ConfigStoreService'
 import { getProxyAgent, httpToWsUrl } from '../../utils/proxy'
 import { subscribeStream } from '../../utils/subscribe/subscribe'
@@ -34,7 +35,7 @@ import {
 import { logDebug, logError } from '../Logger'
 import { FixReportSummary, FixReportSummarySchema, McpFix } from '../types'
 import { partitionInteractiveFixes } from './InteractiveFixFilter'
-import { LoginContext } from './types'
+import { getComputerUser, LoginContext } from './types'
 
 // Re-export for existing consumers
 export { isAuthError, isTransientError }
@@ -255,118 +256,25 @@ export class McpGQLClient extends GQLClient {
         throw new Error('User email not found')
       }
 
-      const shortEmailHash = crypto
-        .createHash('sha256')
-        .update(userEmail)
-        .digest('hex')
-        .slice(0, 8)
-        .toUpperCase()
-
-      const projectName = `MCP Scans ${shortEmailHash}`
-      logDebug('[GraphQL] Calling getLastOrgAndNamedProject query', {
-        projectName,
-      })
-      const orgAndProjectRes = await this._clientSdk.getLastOrgAndNamedProject({
-        email: userEmail,
-        projectName,
-      })
-      logDebug('[GraphQL] getLastOrgAndNamedProject successful', {
-        result: orgAndProjectRes,
-      })
-
-      if (
-        !orgAndProjectRes.user?.[0]
-          ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization?.id
-      ) {
+      const orgRes = await this._clientSdk.getLastOrg({ email: userEmail })
+      const organizationId =
+        orgRes.user?.[0]?.userOrganizationsAndUserOrganizationRoles?.[0]
+          ?.organization?.id
+      if (!organizationId) {
         throw new Error(
-          `The user with email:${userEmail}  is not associated with any organization`
+          `The user with email:${userEmail} is not associated with any organization`
         )
       }
-      const organization =
-        orgAndProjectRes.user?.[0]
-          ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization
-      const projectId = organization?.projects?.[0]?.id
 
-      if (projectId) {
-        logDebug('[GraphQL] Found existing project', {
-          projectId,
-          projectName,
-        })
-        return projectId
+      // Resolved server-side: members lack canCreateProject, so the developer's
+      // own MVS project is find-or-created there with elevated rights.
+      const mvsRes = await this._clientSdk.getMvsProject({ organizationId })
+      const projectId = mvsRes.getMvsProject?.projectId
+      if (!projectId) {
+        throw new Error('Failed to resolve the MVS project')
       }
-
-      logDebug('[GraphQL] Project not found, creating new project', {
-        organizationId: organization.id,
-        projectName,
-      })
-
-      try {
-        const createdProject = await this._clientSdk.CreateProject({
-          organizationId: organization.id,
-          projectName: projectName,
-        })
-        logDebug('[GraphQL] CreateProject successful', {
-          result: createdProject,
-        })
-        return createdProject.createProject.projectId
-      } catch (createError: unknown) {
-        // Check if the error is a uniqueness constraint violation
-        const errorMessage =
-          createError instanceof Error
-            ? createError.message
-            : String(createError)
-        const isConstraintViolation =
-          errorMessage.includes(
-            'duplicate key value violates unique constraint'
-          ) && errorMessage.includes('project_name_organization_id_key')
-
-        if (isConstraintViolation) {
-          logDebug(
-            '[GraphQL] Project creation failed due to constraint violation, retrying fetch',
-            {
-              organizationId: organization.id,
-              projectName,
-              error: errorMessage,
-            }
-          )
-
-          // Retry fetching the project that was created by another process
-          const retryOrgAndProjectRes =
-            await this._clientSdk.getLastOrgAndNamedProject({
-              email: userEmail,
-              projectName,
-            })
-
-          const retryProjectId =
-            retryOrgAndProjectRes.user?.[0]
-              ?.userOrganizationsAndUserOrganizationRoles?.[0]?.organization
-              ?.projects?.[0]?.id
-
-          if (retryProjectId) {
-            logDebug(
-              '[GraphQL] Successfully found existing project after constraint violation',
-              {
-                projectId: retryProjectId,
-                projectName,
-              }
-            )
-            return retryProjectId
-          }
-
-          // If we still can't find the project after retry, throw the original error
-          logError(
-            '[GraphQL] Failed to find project even after constraint violation retry',
-            {
-              organizationId: organization.id,
-              projectName,
-              retryResult: retryOrgAndProjectRes,
-            }
-          )
-        }
-
-        // Re-throw the original error if it's not a constraint violation or retry failed
-        throw createError
-      }
+      logDebug('[GraphQL] Resolved MVS project', { projectId })
+      return projectId
     } catch (e) {
       logError('[GraphQL] getProjectId failed', {
         error: e,
@@ -489,6 +397,33 @@ export class McpGQLClient extends GQLClient {
       })
     } else {
       logDebug('[GraphQL] No auto-applied fixes to update status')
+    }
+  }
+
+  /** Best-effort: a telemetry failure must never break a scan/fix, so errors are swallowed. */
+  async logMvsEvent(params: {
+    eventType: 'RISK_DETECTED' | 'FIXES_VIEWED'
+    fixReportId?: string
+    projectId?: string
+    repoUrl?: string
+    riskCount?: number
+  }): Promise<void> {
+    try {
+      await this._clientSdk.LogMvsEvent({
+        eventType: params.eventType,
+        fixReportId: params.fixReportId ?? null,
+        projectId: params.projectId ?? null,
+        repoUrl: params.repoUrl ?? null,
+        riskCount: params.riskCount ?? null,
+        computerName: os.hostname(),
+        computerUser: getComputerUser() ?? null,
+        clientVersion: packageJson.version,
+      })
+    } catch (error) {
+      logDebug('[GraphQL] logMvsEvent failed (ignored)', {
+        eventType: params.eventType,
+        error: (error as Error).message,
+      })
     }
   }
 

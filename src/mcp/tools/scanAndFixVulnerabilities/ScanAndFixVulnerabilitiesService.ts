@@ -90,6 +90,9 @@ export class ScanAndFixVulnerabilitiesService {
       })
 
       let fixReportId: string | undefined = this.storedFixReportId
+      // Whether a fresh scan ran this call (vs. paging a stored report) —
+      // used to log RISK_DETECTED only for new scan results.
+      let didScan = false
 
       // Reset and rescan if:
       // 1. No stored fixReportId exists
@@ -106,6 +109,7 @@ export class ScanAndFixVulnerabilitiesService {
           scanContext: ScanContext.USER_REQUEST,
         })
         fixReportId = scanResult.fixReportId
+        didScan = true
       } else {
         logInfo('Using stored fixReportId')
       }
@@ -123,6 +127,31 @@ export class ScanAndFixVulnerabilitiesService {
 
       // Only store fixReportId if fixes were found
       logInfo(`Found ${fixes.totalCount} fixes`)
+
+      // MVS activity log (best-effort), only when fixes were actually
+      // surfaced — an empty result isn't a meaningful "fixes viewed" row (and
+      // the scan itself is already recorded server-side as a SCAN event).
+      // A fresh scan that surfaced fixes is a RISK_DETECTED with the vuln
+      // count; viewing the first page of fixes is FIXES_VIEWED. Only on the
+      // first page so pagination doesn't double-log.
+      if (fixReportId && effectiveOffset === 0 && fixes.totalCount > 0) {
+        if (didScan) {
+          await this.gqlClient.logMvsEvent({
+            eventType: 'RISK_DETECTED',
+            fixReportId,
+            riskCount: fixes.totalCount,
+          })
+        }
+        await this.gqlClient.logMvsEvent({
+          eventType: 'FIXES_VIEWED',
+          fixReportId,
+          // Count of fixes shown, so the Event Log row mirrors Fixable Issues
+          // Detected ("N issues"). Not summed into the Fixable Issues KPI,
+          // which only counts RISK_DETECTED.
+          riskCount: fixes.totalCount,
+        })
+      }
+
       if (fixes.totalCount > 0) {
         this.storedFixReportId = fixReportId
         this.fixReportIdTimestamp = Date.now()

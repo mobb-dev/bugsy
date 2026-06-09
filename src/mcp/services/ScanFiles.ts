@@ -1,3 +1,5 @@
+import os from 'node:os'
+
 import {
   Fix_Report_State_Enum,
   Scan_Source_Enum,
@@ -7,6 +9,7 @@ import {
 import { GitService } from '../../features/analysis/scm/services/GitService'
 import { uploadFile } from '../../features/analysis/upload-file'
 import { ScanContext } from '../../types'
+import { packageJson } from '../../utils'
 import {
   MCP_MAX_FILE_SIZE,
   MCP_VUL_REPORT_DIGEST_TIMEOUT_MS,
@@ -20,6 +23,7 @@ import {
 import { logDebug, logError, logInfo } from '../Logger'
 import { FileOperations } from './FileOperations'
 import { McpGQLClient } from './McpGQLClient'
+import { getComputerUser } from './types'
 
 export const scanFiles = async ({
   fileList,
@@ -207,6 +211,11 @@ const executeSecurityScan = async ({
       sha,
       scanContext,
       fileCount,
+      // MVS device attribution: a developer appears in the MVS Developers grid
+      // from scanning alone (no fresh login needed).
+      computerName: os.hostname(),
+      computerUser: getComputerUser(),
+      clientVersion: packageJson.version,
     }
 
   logInfo(`[${scanContext}] Submitting vulnerability report`)

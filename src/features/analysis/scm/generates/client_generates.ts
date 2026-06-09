@@ -147,6 +147,22 @@ export type AdoptionTrendsTimeSeriesPoint = {
   date: Scalars['String']['output'];
 };
 
+/**
+ * Reason a per-issue 'Fix this one' dispatch was declined. Stable
+ * values the client maps to a toast; the order mirrors the gate
+ * sequence in the triggerAgenticRemediationForIssue resolver.
+ */
+export enum AgenticRemediationRejectReason {
+  AlreadyInProgress = 'already_in_progress',
+  NotAuthorized = 'not_authorized',
+  OrgDisabled = 'org_disabled',
+  PreviouslyFailedUnrecoverable = 'previously_failed_unrecoverable',
+  PublishFailed = 'publish_failed',
+  SourceFileUnavailable = 'source_file_unavailable',
+  Unfixable = 'unfixable',
+  VriNotFound = 'vri_not_found'
+}
+
 export type AiToolDailyUsage = {
   __typename?: 'AiToolDailyUsage';
   date: Scalars['String']['output'];
@@ -2369,6 +2385,27 @@ export enum TracySummaryStatus {
   Ready = 'READY',
   Unavailable = 'UNAVAILABLE'
 }
+
+export type TriggerAgenticRemediationForIssueError = {
+  __typename?: 'TriggerAgenticRemediationForIssueError';
+  error?: Maybe<Scalars['String']['output']>;
+  reason: AgenticRemediationRejectReason;
+  status: Status;
+};
+
+export type TriggerAgenticRemediationForIssueResponse = TriggerAgenticRemediationForIssueError | TriggerAgenticRemediationForIssueSuccess;
+
+/**
+ * Per-issue 'Fix this one' result. Same union shape as the other
+ * endpoints in this service (e.g. FpSummaryResponse,
+ * DeleteIntegrationResponse): the Success member means a single-vuln
+ * workunit was published to the worker queue; the Error member carries
+ * a typed reason (and an optional error message) for the client toast.
+ */
+export type TriggerAgenticRemediationForIssueSuccess = {
+  __typename?: 'TriggerAgenticRemediationForIssueSuccess';
+  status: Status;
+};
 
 export type TriggerBackfillResult = {
   __typename?: 'TriggerBackfillResult';
@@ -22785,6 +22822,18 @@ export type Mutation_Root = {
   delete_issueType?: Maybe<IssueType_Mutation_Response>;
   /** delete single row from the table: "issue_type" */
   delete_issueType_by_pk?: Maybe<IssueType>;
+  /** delete data from the table: "mvs.mvs_device" */
+  delete_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
+  /** delete single row from the table: "mvs.mvs_device" */
+  delete_mvs_mvs_device_by_pk?: Maybe<Mvs_Mvs_Device>;
+  /** delete data from the table: "mvs.mvs_event" */
+  delete_mvs_mvs_event?: Maybe<Mvs_Mvs_Event_Mutation_Response>;
+  /** delete single row from the table: "mvs.mvs_event" */
+  delete_mvs_mvs_event_by_pk?: Maybe<Mvs_Mvs_Event>;
+  /** delete data from the table: "mvs.mvs_event_type" */
+  delete_mvs_mvs_event_type?: Maybe<Mvs_Mvs_Event_Type_Mutation_Response>;
+  /** delete single row from the table: "mvs.mvs_event_type" */
+  delete_mvs_mvs_event_type_by_pk?: Maybe<Mvs_Mvs_Event_Type>;
   /** delete data from the table: "on_prem_scm_oauth_config" */
   delete_on_prem_scm_oauth_config?: Maybe<On_Prem_Scm_Oauth_Config_Mutation_Response>;
   /** delete single row from the table: "on_prem_scm_oauth_config" */
@@ -23046,6 +23095,7 @@ export type Mutation_Root = {
   forkRepo?: Maybe<ForkRepoResponse>;
   generateDiffsFile?: Maybe<FileDiffsResponse>;
   generateSecuritySkills: GenerateSecuritySkillsResult;
+  getMvsProject: CreateProjectResponse;
   /**
    * Get a presigned S3 URL for uploading a commit diff.
    * Used by the extension to upload diffs before calling analyzeCommitForAIBlame.
@@ -23330,6 +23380,18 @@ export type Mutation_Root = {
   insert_issueType?: Maybe<IssueType_Mutation_Response>;
   /** insert a single row into the table: "issue_type" */
   insert_issueType_one?: Maybe<IssueType>;
+  /** insert data into the table: "mvs.mvs_device" */
+  insert_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
+  /** insert a single row into the table: "mvs.mvs_device" */
+  insert_mvs_mvs_device_one?: Maybe<Mvs_Mvs_Device>;
+  /** insert data into the table: "mvs.mvs_event" */
+  insert_mvs_mvs_event?: Maybe<Mvs_Mvs_Event_Mutation_Response>;
+  /** insert a single row into the table: "mvs.mvs_event" */
+  insert_mvs_mvs_event_one?: Maybe<Mvs_Mvs_Event>;
+  /** insert data into the table: "mvs.mvs_event_type" */
+  insert_mvs_mvs_event_type?: Maybe<Mvs_Mvs_Event_Type_Mutation_Response>;
+  /** insert a single row into the table: "mvs.mvs_event_type" */
+  insert_mvs_mvs_event_type_one?: Maybe<Mvs_Mvs_Event_Type>;
   /** insert data into the table: "on_prem_scm_oauth_config" */
   insert_on_prem_scm_oauth_config?: Maybe<On_Prem_Scm_Oauth_Config_Mutation_Response>;
   /** insert a single row into the table: "on_prem_scm_oauth_config" */
@@ -23578,6 +23640,7 @@ export type Mutation_Root = {
   insert_vulnerability_severity?: Maybe<Vulnerability_Severity_Mutation_Response>;
   /** insert a single row into the table: "vulnerability_severity" */
   insert_vulnerability_severity_one?: Maybe<Vulnerability_Severity>;
+  logMvsEvent?: Maybe<StatusQueryResponse>;
   openFixTicket?: Maybe<OpenFixTicketResponse>;
   openSecuritySkillPR: OpenSecuritySkillPrResult;
   performCliLogin?: Maybe<StatusQueryResponse>;
@@ -23603,6 +23666,17 @@ export type Mutation_Root = {
   tracy_upsert_session_invoked_mcp_tools: Array<Tracy_Tracy_Session_Invoked_Mcp_Tool>;
   /** execute VOLATILE function "tracy.upsert_tracy_session" which returns "tracy.tracy_session" */
   tracy_upsert_tracy_session: Array<Tracy_Tracy_Session>;
+  /**
+   * Per-issue 'Fix this one' trigger. Authorizes the calling user
+   * against the issue's org, validates the org has agentic remediation
+   * enabled, the issue is in a dispatchable state, and its source file
+   * is available; then atomically claims the IN_PROGRESS tag and
+   * publishes a single-vuln agentic-remediation workunit to the worker
+   * queue. Returns the Success member once published, or the Error
+   * member with a typed reason on any gate failure (including
+   * already_in_progress on a double-click).
+   */
+  triggerAgenticRemediationForIssue: TriggerAgenticRemediationForIssueResponse;
   /** Admin only. Queue main-branch survival computation for one repo (RabbitMQ). */
   triggerBranchSurvival: DeveloperGroupResult;
   /**
@@ -24028,6 +24102,24 @@ export type Mutation_Root = {
   update_issueType_by_pk?: Maybe<IssueType>;
   /** update multiples rows of table: "issue_type" */
   update_issueType_many?: Maybe<Array<Maybe<IssueType_Mutation_Response>>>;
+  /** update data of the table: "mvs.mvs_device" */
+  update_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
+  /** update single row of the table: "mvs.mvs_device" */
+  update_mvs_mvs_device_by_pk?: Maybe<Mvs_Mvs_Device>;
+  /** update multiples rows of table: "mvs.mvs_device" */
+  update_mvs_mvs_device_many?: Maybe<Array<Maybe<Mvs_Mvs_Device_Mutation_Response>>>;
+  /** update data of the table: "mvs.mvs_event" */
+  update_mvs_mvs_event?: Maybe<Mvs_Mvs_Event_Mutation_Response>;
+  /** update single row of the table: "mvs.mvs_event" */
+  update_mvs_mvs_event_by_pk?: Maybe<Mvs_Mvs_Event>;
+  /** update multiples rows of table: "mvs.mvs_event" */
+  update_mvs_mvs_event_many?: Maybe<Array<Maybe<Mvs_Mvs_Event_Mutation_Response>>>;
+  /** update data of the table: "mvs.mvs_event_type" */
+  update_mvs_mvs_event_type?: Maybe<Mvs_Mvs_Event_Type_Mutation_Response>;
+  /** update single row of the table: "mvs.mvs_event_type" */
+  update_mvs_mvs_event_type_by_pk?: Maybe<Mvs_Mvs_Event_Type>;
+  /** update multiples rows of table: "mvs.mvs_event_type" */
+  update_mvs_mvs_event_type_many?: Maybe<Array<Maybe<Mvs_Mvs_Event_Type_Mutation_Response>>>;
   /** update data of the table: "on_prem_scm_oauth_config" */
   update_on_prem_scm_oauth_config?: Maybe<On_Prem_Scm_Oauth_Config_Mutation_Response>;
   /** update single row of the table: "on_prem_scm_oauth_config" */
@@ -25406,6 +25498,42 @@ export type Mutation_RootDelete_IssueType_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_DeviceArgs = {
+  where: Mvs_Mvs_Device_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_Device_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_EventArgs = {
+  where: Mvs_Mvs_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_Event_TypeArgs = {
+  where: Mvs_Mvs_Event_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Mvs_Mvs_Event_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_On_Prem_Scm_Oauth_ConfigArgs = {
   where: On_Prem_Scm_Oauth_Config_Bool_Exp;
 };
@@ -26192,6 +26320,12 @@ export type Mutation_RootGenerateDiffsFileArgs = {
 export type Mutation_RootGenerateSecuritySkillsArgs = {
   orgId: Scalars['ID']['input'];
   sinceDays?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootGetMvsProjectArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 
@@ -27160,6 +27294,48 @@ export type Mutation_RootInsert_IssueType_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_DeviceArgs = {
+  objects: Array<Mvs_Mvs_Device_Insert_Input>;
+  on_conflict?: InputMaybe<Mvs_Mvs_Device_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_Device_OneArgs = {
+  object: Mvs_Mvs_Device_Insert_Input;
+  on_conflict?: InputMaybe<Mvs_Mvs_Device_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_EventArgs = {
+  objects: Array<Mvs_Mvs_Event_Insert_Input>;
+  on_conflict?: InputMaybe<Mvs_Mvs_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_Event_OneArgs = {
+  object: Mvs_Mvs_Event_Insert_Input;
+  on_conflict?: InputMaybe<Mvs_Mvs_Event_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_Event_TypeArgs = {
+  objects: Array<Mvs_Mvs_Event_Type_Insert_Input>;
+  on_conflict?: InputMaybe<Mvs_Mvs_Event_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Mvs_Mvs_Event_Type_OneArgs = {
+  object: Mvs_Mvs_Event_Type_Insert_Input;
+  on_conflict?: InputMaybe<Mvs_Mvs_Event_Type_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_On_Prem_Scm_Oauth_ConfigArgs = {
   objects: Array<On_Prem_Scm_Oauth_Config_Insert_Input>;
   on_conflict?: InputMaybe<On_Prem_Scm_Oauth_Config_On_Conflict>;
@@ -28028,6 +28204,21 @@ export type Mutation_RootInsert_Vulnerability_Severity_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootLogMvsEventArgs = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  detail?: InputMaybe<Scalars['String']['input']>;
+  eventType: Scalars['String']['input'];
+  fixReportId?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** mutation root */
 export type Mutation_RootOpenFixTicketArgs = {
   commitDescription: Scalars['String']['input'];
   commitTitle: Scalars['String']['input'];
@@ -28044,6 +28235,9 @@ export type Mutation_RootOpenSecuritySkillPrArgs = {
 
 /** mutation root */
 export type Mutation_RootPerformCliLoginArgs = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
   hostname?: InputMaybe<Scalars['String']['input']>;
   loginId: Scalars['String']['input'];
 };
@@ -28165,6 +28359,9 @@ export type Mutation_RootSubmitExternalVulnerabilityReportArgs = {
 
 /** mutation root */
 export type Mutation_RootSubmitVulnerabilityReportArgs = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
   experimentalEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   fileCount?: InputMaybe<Scalars['Int']['input']>;
   fixReportId: Scalars['String']['input'];
@@ -28201,6 +28398,12 @@ export type Mutation_RootTracy_Upsert_Tracy_SessionArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Tracy_Tracy_Session_Order_By>>;
   where?: InputMaybe<Tracy_Tracy_Session_Bool_Exp>;
+};
+
+
+/** mutation root */
+export type Mutation_RootTriggerAgenticRemediationForIssueArgs = {
+  vulnerabilityReportIssueId: Scalars['String']['input'];
 };
 
 
@@ -29711,6 +29914,78 @@ export type Mutation_RootUpdate_IssueType_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_DeviceArgs = {
+  _set?: InputMaybe<Mvs_Mvs_Device_Set_Input>;
+  where: Mvs_Mvs_Device_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Device_By_PkArgs = {
+  _set?: InputMaybe<Mvs_Mvs_Device_Set_Input>;
+  pk_columns: Mvs_Mvs_Device_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Device_ManyArgs = {
+  updates: Array<Mvs_Mvs_Device_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_EventArgs = {
+  _append?: InputMaybe<Mvs_Mvs_Event_Append_Input>;
+  _delete_at_path?: InputMaybe<Mvs_Mvs_Event_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Mvs_Mvs_Event_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Mvs_Mvs_Event_Delete_Key_Input>;
+  _inc?: InputMaybe<Mvs_Mvs_Event_Inc_Input>;
+  _prepend?: InputMaybe<Mvs_Mvs_Event_Prepend_Input>;
+  _set?: InputMaybe<Mvs_Mvs_Event_Set_Input>;
+  where: Mvs_Mvs_Event_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Event_By_PkArgs = {
+  _append?: InputMaybe<Mvs_Mvs_Event_Append_Input>;
+  _delete_at_path?: InputMaybe<Mvs_Mvs_Event_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Mvs_Mvs_Event_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Mvs_Mvs_Event_Delete_Key_Input>;
+  _inc?: InputMaybe<Mvs_Mvs_Event_Inc_Input>;
+  _prepend?: InputMaybe<Mvs_Mvs_Event_Prepend_Input>;
+  _set?: InputMaybe<Mvs_Mvs_Event_Set_Input>;
+  pk_columns: Mvs_Mvs_Event_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Event_ManyArgs = {
+  updates: Array<Mvs_Mvs_Event_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Event_TypeArgs = {
+  _set?: InputMaybe<Mvs_Mvs_Event_Type_Set_Input>;
+  where: Mvs_Mvs_Event_Type_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Event_Type_By_PkArgs = {
+  _set?: InputMaybe<Mvs_Mvs_Event_Type_Set_Input>;
+  pk_columns: Mvs_Mvs_Event_Type_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Mvs_Mvs_Event_Type_ManyArgs = {
+  updates: Array<Mvs_Mvs_Event_Type_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_On_Prem_Scm_Oauth_ConfigArgs = {
   _set?: InputMaybe<On_Prem_Scm_Oauth_Config_Set_Input>;
   where: On_Prem_Scm_Oauth_Config_Bool_Exp;
@@ -31049,6 +31324,828 @@ export type Mutation_RootVoteOnIssueArgs = {
   issueId: Scalars['String']['input'];
   projectId: Scalars['String']['input'];
   voteScore: Scalars['Int']['input'];
+};
+
+/** columns and relationships of "mvs.mvs_device" */
+export type Mvs_Mvs_Device = {
+  __typename?: 'mvs_mvs_device';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName: Scalars['String']['output'];
+  computerUser?: Maybe<Scalars['String']['output']>;
+  /** An array relationship */
+  events: Array<Mvs_Mvs_Event>;
+  /** An aggregate relationship */
+  events_aggregate: Mvs_Mvs_Event_Aggregate;
+  firstSeenAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  lastActivityAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+};
+
+
+/** columns and relationships of "mvs.mvs_device" */
+export type Mvs_Mvs_DeviceEventsArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+/** columns and relationships of "mvs.mvs_device" */
+export type Mvs_Mvs_DeviceEvents_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+/** aggregated selection of "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Aggregate = {
+  __typename?: 'mvs_mvs_device_aggregate';
+  aggregate?: Maybe<Mvs_Mvs_Device_Aggregate_Fields>;
+  nodes: Array<Mvs_Mvs_Device>;
+};
+
+/** aggregate fields of "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Aggregate_Fields = {
+  __typename?: 'mvs_mvs_device_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Mvs_Mvs_Device_Max_Fields>;
+  min?: Maybe<Mvs_Mvs_Device_Min_Fields>;
+};
+
+
+/** aggregate fields of "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Mvs_Mvs_Device_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "mvs.mvs_device". All fields are combined with a logical 'AND'. */
+export type Mvs_Mvs_Device_Bool_Exp = {
+  _and?: InputMaybe<Array<Mvs_Mvs_Device_Bool_Exp>>;
+  _not?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+  _or?: InputMaybe<Array<Mvs_Mvs_Device_Bool_Exp>>;
+  clientVersion?: InputMaybe<String_Comparison_Exp>;
+  computerName?: InputMaybe<String_Comparison_Exp>;
+  computerUser?: InputMaybe<String_Comparison_Exp>;
+  events?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+  events_aggregate?: InputMaybe<Mvs_Mvs_Event_Aggregate_Bool_Exp>;
+  firstSeenAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  lastActivityAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "mvs.mvs_device" */
+export enum Mvs_Mvs_Device_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  MvsDevicePkey = 'mvs_device_pkey',
+  /** unique or primary key constraint on columns "user_id", "computer_name" */
+  MvsDeviceUserMachineKey = 'mvs_device_user_machine_key'
+}
+
+/** input type for inserting data into table "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Insert_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  events?: InputMaybe<Mvs_Mvs_Event_Arr_Rel_Insert_Input>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lastActivityAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Mvs_Mvs_Device_Max_Fields = {
+  __typename?: 'mvs_mvs_device_max_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName?: Maybe<Scalars['String']['output']>;
+  computerUser?: Maybe<Scalars['String']['output']>;
+  firstSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastActivityAt?: Maybe<Scalars['timestamptz']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Mvs_Mvs_Device_Min_Fields = {
+  __typename?: 'mvs_mvs_device_min_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  computerName?: Maybe<Scalars['String']['output']>;
+  computerUser?: Maybe<Scalars['String']['output']>;
+  firstSeenAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  lastActivityAt?: Maybe<Scalars['timestamptz']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Mutation_Response = {
+  __typename?: 'mvs_mvs_device_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Mvs_Mvs_Device>;
+};
+
+/** input type for inserting object relation for remote table "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Obj_Rel_Insert_Input = {
+  data: Mvs_Mvs_Device_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Mvs_Mvs_Device_On_Conflict>;
+};
+
+/** on_conflict condition type for table "mvs.mvs_device" */
+export type Mvs_Mvs_Device_On_Conflict = {
+  constraint: Mvs_Mvs_Device_Constraint;
+  update_columns?: Array<Mvs_Mvs_Device_Update_Column>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "mvs.mvs_device". */
+export type Mvs_Mvs_Device_Order_By = {
+  clientVersion?: InputMaybe<Order_By>;
+  computerName?: InputMaybe<Order_By>;
+  computerUser?: InputMaybe<Order_By>;
+  events_aggregate?: InputMaybe<Mvs_Mvs_Event_Aggregate_Order_By>;
+  firstSeenAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  lastActivityAt?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: mvs.mvs_device */
+export type Mvs_Mvs_Device_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "mvs.mvs_device" */
+export enum Mvs_Mvs_Device_Select_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  ComputerName = 'computerName',
+  /** column name */
+  ComputerUser = 'computerUser',
+  /** column name */
+  FirstSeenAt = 'firstSeenAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LastActivityAt = 'lastActivityAt',
+  /** column name */
+  UserId = 'userId'
+}
+
+/** input type for updating data in table "mvs.mvs_device" */
+export type Mvs_Mvs_Device_Set_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lastActivityAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "mvs_mvs_device" */
+export type Mvs_Mvs_Device_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Mvs_Mvs_Device_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Mvs_Mvs_Device_Stream_Cursor_Value_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  firstSeenAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  lastActivityAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "mvs.mvs_device" */
+export enum Mvs_Mvs_Device_Update_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  ComputerName = 'computerName',
+  /** column name */
+  ComputerUser = 'computerUser',
+  /** column name */
+  FirstSeenAt = 'firstSeenAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  LastActivityAt = 'lastActivityAt',
+  /** column name */
+  UserId = 'userId'
+}
+
+export type Mvs_Mvs_Device_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Mvs_Mvs_Device_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Mvs_Mvs_Device_Bool_Exp;
+};
+
+/** columns and relationships of "mvs.mvs_event" */
+export type Mvs_Mvs_Event = {
+  __typename?: 'mvs_mvs_event';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  device?: Maybe<Mvs_Mvs_Device>;
+  deviceId?: Maybe<Scalars['uuid']['output']>;
+  eventType: Mvs_Mvs_Event_Type_Enum;
+  id: Scalars['uuid']['output'];
+  metadata?: Maybe<Scalars['jsonb']['output']>;
+  occurredAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  organization?: Maybe<Organization>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  riskCount?: Maybe<Scalars['Int']['output']>;
+  /** An object relationship */
+  user: User;
+  userId: Scalars['uuid']['output'];
+};
+
+
+/** columns and relationships of "mvs.mvs_event" */
+export type Mvs_Mvs_EventMetadataArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregated selection of "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Aggregate = {
+  __typename?: 'mvs_mvs_event_aggregate';
+  aggregate?: Maybe<Mvs_Mvs_Event_Aggregate_Fields>;
+  nodes: Array<Mvs_Mvs_Event>;
+};
+
+export type Mvs_Mvs_Event_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Mvs_Mvs_Event_Aggregate_Bool_Exp_Count>;
+};
+
+export type Mvs_Mvs_Event_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Aggregate_Fields = {
+  __typename?: 'mvs_mvs_event_aggregate_fields';
+  avg?: Maybe<Mvs_Mvs_Event_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Mvs_Mvs_Event_Max_Fields>;
+  min?: Maybe<Mvs_Mvs_Event_Min_Fields>;
+  stddev?: Maybe<Mvs_Mvs_Event_Stddev_Fields>;
+  stddev_pop?: Maybe<Mvs_Mvs_Event_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Mvs_Mvs_Event_Stddev_Samp_Fields>;
+  sum?: Maybe<Mvs_Mvs_Event_Sum_Fields>;
+  var_pop?: Maybe<Mvs_Mvs_Event_Var_Pop_Fields>;
+  var_samp?: Maybe<Mvs_Mvs_Event_Var_Samp_Fields>;
+  variance?: Maybe<Mvs_Mvs_Event_Variance_Fields>;
+};
+
+
+/** aggregate fields of "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Aggregate_Order_By = {
+  avg?: InputMaybe<Mvs_Mvs_Event_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Mvs_Mvs_Event_Max_Order_By>;
+  min?: InputMaybe<Mvs_Mvs_Event_Min_Order_By>;
+  stddev?: InputMaybe<Mvs_Mvs_Event_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Mvs_Mvs_Event_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Mvs_Mvs_Event_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Mvs_Mvs_Event_Sum_Order_By>;
+  var_pop?: InputMaybe<Mvs_Mvs_Event_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Mvs_Mvs_Event_Var_Samp_Order_By>;
+  variance?: InputMaybe<Mvs_Mvs_Event_Variance_Order_By>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Mvs_Mvs_Event_Append_Input = {
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** input type for inserting array relation for remote table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Arr_Rel_Insert_Input = {
+  data: Array<Mvs_Mvs_Event_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Mvs_Mvs_Event_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Mvs_Mvs_Event_Avg_Fields = {
+  __typename?: 'mvs_mvs_event_avg_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Avg_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "mvs.mvs_event". All fields are combined with a logical 'AND'. */
+export type Mvs_Mvs_Event_Bool_Exp = {
+  _and?: InputMaybe<Array<Mvs_Mvs_Event_Bool_Exp>>;
+  _not?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+  _or?: InputMaybe<Array<Mvs_Mvs_Event_Bool_Exp>>;
+  clientVersion?: InputMaybe<String_Comparison_Exp>;
+  device?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+  deviceId?: InputMaybe<Uuid_Comparison_Exp>;
+  eventType?: InputMaybe<Mvs_Mvs_Event_Type_Enum_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  metadata?: InputMaybe<Jsonb_Comparison_Exp>;
+  occurredAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  riskCount?: InputMaybe<Int_Comparison_Exp>;
+  user?: InputMaybe<User_Bool_Exp>;
+  userId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "mvs.mvs_event" */
+export enum Mvs_Mvs_Event_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  MvsEventPkey = 'mvs_event_pkey'
+}
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Mvs_Mvs_Event_Delete_At_Path_Input = {
+  metadata?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Mvs_Mvs_Event_Delete_Elem_Input = {
+  metadata?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Mvs_Mvs_Event_Delete_Key_Input = {
+  metadata?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** input type for incrementing numeric columns in table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Inc_Input = {
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Insert_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  device?: InputMaybe<Mvs_Mvs_Device_Obj_Rel_Insert_Input>;
+  deviceId?: InputMaybe<Scalars['uuid']['input']>;
+  eventType?: InputMaybe<Mvs_Mvs_Event_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  occurredAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Mvs_Mvs_Event_Max_Fields = {
+  __typename?: 'mvs_mvs_event_max_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  deviceId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  occurredAt?: Maybe<Scalars['timestamptz']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  riskCount?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Max_Order_By = {
+  clientVersion?: InputMaybe<Order_By>;
+  deviceId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  occurredAt?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  riskCount?: InputMaybe<Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Mvs_Mvs_Event_Min_Fields = {
+  __typename?: 'mvs_mvs_event_min_fields';
+  clientVersion?: Maybe<Scalars['String']['output']>;
+  deviceId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  occurredAt?: Maybe<Scalars['timestamptz']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  riskCount?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Min_Order_By = {
+  clientVersion?: InputMaybe<Order_By>;
+  deviceId?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  occurredAt?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  riskCount?: InputMaybe<Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Mutation_Response = {
+  __typename?: 'mvs_mvs_event_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Mvs_Mvs_Event>;
+};
+
+/** on_conflict condition type for table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_On_Conflict = {
+  constraint: Mvs_Mvs_Event_Constraint;
+  update_columns?: Array<Mvs_Mvs_Event_Update_Column>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "mvs.mvs_event". */
+export type Mvs_Mvs_Event_Order_By = {
+  clientVersion?: InputMaybe<Order_By>;
+  device?: InputMaybe<Mvs_Mvs_Device_Order_By>;
+  deviceId?: InputMaybe<Order_By>;
+  eventType?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  metadata?: InputMaybe<Order_By>;
+  occurredAt?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  riskCount?: InputMaybe<Order_By>;
+  user?: InputMaybe<User_Order_By>;
+  userId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: mvs.mvs_event */
+export type Mvs_Mvs_Event_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Mvs_Mvs_Event_Prepend_Input = {
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** select columns of table "mvs.mvs_event" */
+export enum Mvs_Mvs_Event_Select_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  DeviceId = 'deviceId',
+  /** column name */
+  EventType = 'eventType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Metadata = 'metadata',
+  /** column name */
+  OccurredAt = 'occurredAt',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RiskCount = 'riskCount',
+  /** column name */
+  UserId = 'userId'
+}
+
+/** input type for updating data in table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Set_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  deviceId?: InputMaybe<Scalars['uuid']['input']>;
+  eventType?: InputMaybe<Mvs_Mvs_Event_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  occurredAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Mvs_Mvs_Event_Stddev_Fields = {
+  __typename?: 'mvs_mvs_event_stddev_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Stddev_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Mvs_Mvs_Event_Stddev_Pop_Fields = {
+  __typename?: 'mvs_mvs_event_stddev_pop_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Stddev_Pop_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Mvs_Mvs_Event_Stddev_Samp_Fields = {
+  __typename?: 'mvs_mvs_event_stddev_samp_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Stddev_Samp_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "mvs_mvs_event" */
+export type Mvs_Mvs_Event_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Mvs_Mvs_Event_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Mvs_Mvs_Event_Stream_Cursor_Value_Input = {
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+  deviceId?: InputMaybe<Scalars['uuid']['input']>;
+  eventType?: InputMaybe<Mvs_Mvs_Event_Type_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  metadata?: InputMaybe<Scalars['jsonb']['input']>;
+  occurredAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+  userId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Mvs_Mvs_Event_Sum_Fields = {
+  __typename?: 'mvs_mvs_event_sum_fields';
+  riskCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Sum_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type = {
+  __typename?: 'mvs_mvs_event_type';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Aggregate = {
+  __typename?: 'mvs_mvs_event_type_aggregate';
+  aggregate?: Maybe<Mvs_Mvs_Event_Type_Aggregate_Fields>;
+  nodes: Array<Mvs_Mvs_Event_Type>;
+};
+
+/** aggregate fields of "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Aggregate_Fields = {
+  __typename?: 'mvs_mvs_event_type_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Mvs_Mvs_Event_Type_Max_Fields>;
+  min?: Maybe<Mvs_Mvs_Event_Type_Min_Fields>;
+};
+
+
+/** aggregate fields of "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Mvs_Mvs_Event_Type_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "mvs.mvs_event_type". All fields are combined with a logical 'AND'. */
+export type Mvs_Mvs_Event_Type_Bool_Exp = {
+  _and?: InputMaybe<Array<Mvs_Mvs_Event_Type_Bool_Exp>>;
+  _not?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+  _or?: InputMaybe<Array<Mvs_Mvs_Event_Type_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "mvs.mvs_event_type" */
+export enum Mvs_Mvs_Event_Type_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  MvsEventTypePkey = 'mvs_event_type_pkey'
+}
+
+export enum Mvs_Mvs_Event_Type_Enum {
+  /** Developer fetched available fixes for a scan via MCP */
+  FixesViewed = 'FIXES_VIEWED',
+  /** Fix downloaded/applied via MCP or AUTO_MVS */
+  FixApplied = 'FIX_APPLIED',
+  /** CLI/MCP token issuance (performCliLogin) */
+  Login = 'LOGIN',
+  /** A scan returned one or more findings */
+  RiskDetected = 'RISK_DETECTED',
+  /** MVS scan executed via the MCP channel */
+  Scan = 'SCAN',
+  /** User changed an MVS preference (e.g. mvs_auto_fix) */
+  SettingsChanged = 'SETTINGS_CHANGED'
+}
+
+/** Boolean expression to compare columns of type "mvs_mvs_event_type_enum". All fields are combined with logical 'AND'. */
+export type Mvs_Mvs_Event_Type_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Mvs_Mvs_Event_Type_Enum>;
+  _in?: InputMaybe<Array<Mvs_Mvs_Event_Type_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Mvs_Mvs_Event_Type_Enum>;
+  _nin?: InputMaybe<Array<Mvs_Mvs_Event_Type_Enum>>;
+};
+
+/** input type for inserting data into table "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Mvs_Mvs_Event_Type_Max_Fields = {
+  __typename?: 'mvs_mvs_event_type_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Mvs_Mvs_Event_Type_Min_Fields = {
+  __typename?: 'mvs_mvs_event_type_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Mutation_Response = {
+  __typename?: 'mvs_mvs_event_type_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Mvs_Mvs_Event_Type>;
+};
+
+/** on_conflict condition type for table "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_On_Conflict = {
+  constraint: Mvs_Mvs_Event_Type_Constraint;
+  update_columns?: Array<Mvs_Mvs_Event_Type_Update_Column>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "mvs.mvs_event_type". */
+export type Mvs_Mvs_Event_Type_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: mvs.mvs_event_type */
+export type Mvs_Mvs_Event_Type_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "mvs.mvs_event_type" */
+export enum Mvs_Mvs_Event_Type_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "mvs.mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "mvs_mvs_event_type" */
+export type Mvs_Mvs_Event_Type_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Mvs_Mvs_Event_Type_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Mvs_Mvs_Event_Type_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "mvs.mvs_event_type" */
+export enum Mvs_Mvs_Event_Type_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Mvs_Mvs_Event_Type_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Mvs_Mvs_Event_Type_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Mvs_Mvs_Event_Type_Bool_Exp;
+};
+
+/** update columns of table "mvs.mvs_event" */
+export enum Mvs_Mvs_Event_Update_Column {
+  /** column name */
+  ClientVersion = 'clientVersion',
+  /** column name */
+  DeviceId = 'deviceId',
+  /** column name */
+  EventType = 'eventType',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Metadata = 'metadata',
+  /** column name */
+  OccurredAt = 'occurredAt',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RiskCount = 'riskCount',
+  /** column name */
+  UserId = 'userId'
+}
+
+export type Mvs_Mvs_Event_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Mvs_Mvs_Event_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Mvs_Mvs_Event_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Mvs_Mvs_Event_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Mvs_Mvs_Event_Delete_Key_Input>;
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Mvs_Mvs_Event_Inc_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Mvs_Mvs_Event_Prepend_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Mvs_Mvs_Event_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Mvs_Mvs_Event_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Mvs_Mvs_Event_Var_Pop_Fields = {
+  __typename?: 'mvs_mvs_event_var_pop_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Var_Pop_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Mvs_Mvs_Event_Var_Samp_Fields = {
+  __typename?: 'mvs_mvs_event_var_samp_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Var_Samp_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Mvs_Mvs_Event_Variance_Fields = {
+  __typename?: 'mvs_mvs_event_variance_fields';
+  riskCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "mvs.mvs_event" */
+export type Mvs_Mvs_Event_Variance_Order_By = {
+  riskCount?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to compare columns of type "numeric". All fields are combined with logical 'AND'. */
@@ -34652,6 +35749,7 @@ export type Project = {
   id: Scalars['uuid']['output'];
   isDefault?: Maybe<Scalars['Boolean']['output']>;
   isDeleted: Scalars['Boolean']['output'];
+  isMvs: Scalars['Boolean']['output'];
   /** fetches the latest vul report for  repo-url, reference, vendor tuple */
   lastAnalysedVulReports?: Maybe<Array<Vulnerability_Report>>;
   name: Scalars['String']['output'];
@@ -34945,6 +36043,7 @@ export type Project_Bool_Exp = {
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isDefault?: InputMaybe<Boolean_Comparison_Exp>;
   isDeleted?: InputMaybe<Boolean_Comparison_Exp>;
+  isMvs?: InputMaybe<Boolean_Comparison_Exp>;
   lastAnalysedVulReports?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   numberOfUniqueRepos?: InputMaybe<Int_Comparison_Exp>;
@@ -34980,6 +36079,7 @@ export type Project_Insert_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -35338,6 +36438,7 @@ export type Project_Order_By = {
   id?: InputMaybe<Order_By>;
   isDefault?: InputMaybe<Order_By>;
   isDeleted?: InputMaybe<Order_By>;
+  isMvs?: InputMaybe<Order_By>;
   lastAnalysedVulReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Order_By>;
   name?: InputMaybe<Order_By>;
   numberOfUniqueRepos?: InputMaybe<Order_By>;
@@ -35759,6 +36860,8 @@ export enum Project_Select_Column {
   /** column name */
   IsDeleted = 'isDeleted',
   /** column name */
+  IsMvs = 'isMvs',
+  /** column name */
   Name = 'name',
   /** column name */
   OrganizationId = 'organizationId',
@@ -35773,7 +36876,9 @@ export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_And_Arguments_
   /** column name */
   IsDefault = 'isDefault',
   /** column name */
-  IsDeleted = 'isDeleted'
+  IsDeleted = 'isDeleted',
+  /** column name */
+  IsMvs = 'isMvs'
 }
 
 /** select "project_aggregate_bool_exp_bool_or_arguments_columns" columns of table "project" */
@@ -35783,7 +36888,9 @@ export enum Project_Select_Column_Project_Aggregate_Bool_Exp_Bool_Or_Arguments_C
   /** column name */
   IsDefault = 'isDefault',
   /** column name */
-  IsDeleted = 'isDeleted'
+  IsDeleted = 'isDeleted',
+  /** column name */
+  IsMvs = 'isMvs'
 }
 
 /** input type for updating data in table "project" */
@@ -35793,6 +36900,7 @@ export type Project_Set_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -35882,6 +36990,7 @@ export type Project_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDefault?: InputMaybe<Scalars['Boolean']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -36357,6 +37466,8 @@ export enum Project_Update_Column {
   IsDefault = 'isDefault',
   /** column name */
   IsDeleted = 'isDeleted',
+  /** column name */
+  IsMvs = 'isMvs',
   /** column name */
   Name = 'name',
   /** column name */
@@ -37065,6 +38176,24 @@ export type Query_Root = {
   me?: Maybe<MeResponse>;
   meAdmin?: Maybe<MeResponse>;
   meContext?: Maybe<MeContextResponse>;
+  /** fetch data from the table: "mvs.mvs_device" */
+  mvs_mvs_device: Array<Mvs_Mvs_Device>;
+  /** fetch aggregated fields from the table: "mvs.mvs_device" */
+  mvs_mvs_device_aggregate: Mvs_Mvs_Device_Aggregate;
+  /** fetch data from the table: "mvs.mvs_device" using primary key columns */
+  mvs_mvs_device_by_pk?: Maybe<Mvs_Mvs_Device>;
+  /** fetch data from the table: "mvs.mvs_event" */
+  mvs_mvs_event: Array<Mvs_Mvs_Event>;
+  /** fetch aggregated fields from the table: "mvs.mvs_event" */
+  mvs_mvs_event_aggregate: Mvs_Mvs_Event_Aggregate;
+  /** fetch data from the table: "mvs.mvs_event" using primary key columns */
+  mvs_mvs_event_by_pk?: Maybe<Mvs_Mvs_Event>;
+  /** fetch data from the table: "mvs.mvs_event_type" */
+  mvs_mvs_event_type: Array<Mvs_Mvs_Event_Type>;
+  /** fetch aggregated fields from the table: "mvs.mvs_event_type" */
+  mvs_mvs_event_type_aggregate: Mvs_Mvs_Event_Type_Aggregate;
+  /** fetch data from the table: "mvs.mvs_event_type" using primary key columns */
+  mvs_mvs_event_type_by_pk?: Maybe<Mvs_Mvs_Event_Type>;
   /** fetch data from the table: "on_prem_scm_oauth_config" */
   on_prem_scm_oauth_config: Array<On_Prem_Scm_Oauth_Config>;
   /** fetch aggregated fields from the table: "on_prem_scm_oauth_config" */
@@ -39608,6 +40737,75 @@ export type Query_RootIssueType_By_PkArgs = {
 
 export type Query_RootMeAdminArgs = {
   email: Scalars['String']['input'];
+};
+
+
+export type Query_RootMvs_Mvs_DeviceArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Device_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Device_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Device_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Device_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Device_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Device_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootMvs_Mvs_EventArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootMvs_Mvs_Event_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Type_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Event_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Type_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+};
+
+
+export type Query_RootMvs_Mvs_Event_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -45024,6 +46222,8 @@ export enum Submit_Fix_Request_State_Constraint {
 export enum Submit_Fix_Request_State_Enum {
   /** The submit fix request was sent to the scm agent and the scm agent returned an error */
   Error = 'Error',
+  /** The row exists and its patch data is being resolved asynchronously before the request is handed off to the scm agent */
+  Preparing = 'Preparing',
   /** The submit fix request was created and sent to the scm agent */
   Requested = 'Requested',
   /** The submit fix request was completed successfully */
@@ -45780,6 +46980,30 @@ export type Subscription_Root = {
   issueType_by_pk?: Maybe<IssueType>;
   /** fetch data from the table in a streaming manner: "issue_type" */
   issueType_stream: Array<IssueType>;
+  /** fetch data from the table: "mvs.mvs_device" */
+  mvs_mvs_device: Array<Mvs_Mvs_Device>;
+  /** fetch aggregated fields from the table: "mvs.mvs_device" */
+  mvs_mvs_device_aggregate: Mvs_Mvs_Device_Aggregate;
+  /** fetch data from the table: "mvs.mvs_device" using primary key columns */
+  mvs_mvs_device_by_pk?: Maybe<Mvs_Mvs_Device>;
+  /** fetch data from the table in a streaming manner: "mvs.mvs_device" */
+  mvs_mvs_device_stream: Array<Mvs_Mvs_Device>;
+  /** fetch data from the table: "mvs.mvs_event" */
+  mvs_mvs_event: Array<Mvs_Mvs_Event>;
+  /** fetch aggregated fields from the table: "mvs.mvs_event" */
+  mvs_mvs_event_aggregate: Mvs_Mvs_Event_Aggregate;
+  /** fetch data from the table: "mvs.mvs_event" using primary key columns */
+  mvs_mvs_event_by_pk?: Maybe<Mvs_Mvs_Event>;
+  /** fetch data from the table in a streaming manner: "mvs.mvs_event" */
+  mvs_mvs_event_stream: Array<Mvs_Mvs_Event>;
+  /** fetch data from the table: "mvs.mvs_event_type" */
+  mvs_mvs_event_type: Array<Mvs_Mvs_Event_Type>;
+  /** fetch aggregated fields from the table: "mvs.mvs_event_type" */
+  mvs_mvs_event_type_aggregate: Mvs_Mvs_Event_Type_Aggregate;
+  /** fetch data from the table: "mvs.mvs_event_type" using primary key columns */
+  mvs_mvs_event_type_by_pk?: Maybe<Mvs_Mvs_Event_Type>;
+  /** fetch data from the table in a streaming manner: "mvs.mvs_event_type" */
+  mvs_mvs_event_type_stream: Array<Mvs_Mvs_Event_Type>;
   /** fetch data from the table: "on_prem_scm_oauth_config" */
   on_prem_scm_oauth_config: Array<On_Prem_Scm_Oauth_Config>;
   /** fetch aggregated fields from the table: "on_prem_scm_oauth_config" */
@@ -48660,6 +49884,96 @@ export type Subscription_RootIssueType_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<IssueType_Stream_Cursor_Input>>;
   where?: InputMaybe<IssueType_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_DeviceArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Device_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Device_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Device_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Device_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Device_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Device_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootMvs_Mvs_Device_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Mvs_Mvs_Device_Stream_Cursor_Input>>;
+  where?: InputMaybe<Mvs_Mvs_Device_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_EventArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Mvs_Mvs_Event_Stream_Cursor_Input>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_TypeArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Type_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_Type_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Mvs_Mvs_Event_Type_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Mvs_Mvs_Event_Type_Order_By>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_Type_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootMvs_Mvs_Event_Type_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Mvs_Mvs_Event_Type_Stream_Cursor_Input>>;
+  where?: InputMaybe<Mvs_Mvs_Event_Type_Bool_Exp>;
 };
 
 
@@ -65944,6 +67258,9 @@ export type SubmitVulnerabilityReportMutationVariables = Exact<{
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   scanContext: Scalars['String']['input'];
   fileCount?: InputMaybe<Scalars['Int']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -66091,6 +67408,27 @@ export type SkillVerdictsByMd5QueryVariables = Exact<{
 
 
 export type SkillVerdictsByMd5Query = { __typename?: 'query_root', skillVerdictsByMd5: { __typename?: 'SkillVerdictsResponse', quarantineEnabled: boolean, verdicts: Array<{ __typename?: 'SkillVerdict', md5: string, verdict: string, summary?: string | null, scannerName: string, scannerVersion: string, scannedAt: string }> } };
+
+export type LogMvsEventMutationVariables = Exact<{
+  eventType: Scalars['String']['input'];
+  fixReportId?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['String']['input']>;
+  repoUrl?: InputMaybe<Scalars['String']['input']>;
+  riskCount?: InputMaybe<Scalars['Int']['input']>;
+  computerName?: InputMaybe<Scalars['String']['input']>;
+  computerUser?: InputMaybe<Scalars['String']['input']>;
+  clientVersion?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type LogMvsEventMutation = { __typename?: 'mutation_root', logMvsEvent?: { __typename?: 'StatusQueryResponse', status: Status } | null };
+
+export type GetMvsProjectMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
+}>;
+
+
+export type GetMvsProjectMutation = { __typename?: 'mutation_root', getMvsProject: { __typename?: 'CreateProjectResponse', projectId: string } };
 
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
@@ -66720,7 +68058,7 @@ export const DigestVulnerabilityReportDocument = `
 }
     `;
 export const SubmitVulnerabilityReportDocument = `
-    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int, $isFullScan: Boolean, $scanContext: String!, $fileCount: Int) {
+    mutation SubmitVulnerabilityReport($fixReportId: String!, $repoUrl: String!, $reference: String!, $projectId: String!, $scanSource: String!, $sha: String, $experimentalEnabled: Boolean, $vulnerabilityReportFileName: String, $pullRequest: Int, $isFullScan: Boolean, $scanContext: String!, $fileCount: Int, $computerName: String, $computerUser: String, $clientVersion: String) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
     repoUrl: $repoUrl
@@ -66734,6 +68072,9 @@ export const SubmitVulnerabilityReportDocument = `
     scanSource: $scanSource
     scanContext: $scanContext
     fileCount: $fileCount
+    computerName: $computerName
+    computerUser: $computerUser
+    clientVersion: $clientVersion
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -67010,6 +68351,29 @@ export const SkillVerdictsByMd5Document = `
   }
 }
     `;
+export const LogMvsEventDocument = `
+    mutation LogMvsEvent($eventType: String!, $fixReportId: String, $projectId: String, $repoUrl: String, $riskCount: Int, $computerName: String, $computerUser: String, $clientVersion: String) {
+  logMvsEvent(
+    eventType: $eventType
+    fixReportId: $fixReportId
+    projectId: $projectId
+    repoUrl: $repoUrl
+    riskCount: $riskCount
+    computerName: $computerName
+    computerUser: $computerUser
+    clientVersion: $clientVersion
+  ) {
+    status
+  }
+}
+    `;
+export const GetMvsProjectDocument = `
+    mutation getMvsProject($organizationId: String!) {
+  getMvsProject(organizationId: $organizationId) {
+    projectId
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -67143,6 +68507,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     SkillVerdictsByMd5(variables: SkillVerdictsByMd5QueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<SkillVerdictsByMd5Query> {
       return withWrapper((wrappedRequestHeaders) => client.request<SkillVerdictsByMd5Query>({ document: SkillVerdictsByMd5Document, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'SkillVerdictsByMd5', 'query', variables);
+    },
+    LogMvsEvent(variables: LogMvsEventMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<LogMvsEventMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<LogMvsEventMutation>({ document: LogMvsEventDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'LogMvsEvent', 'mutation', variables);
+    },
+    getMvsProject(variables: GetMvsProjectMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetMvsProjectMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetMvsProjectMutation>({ document: GetMvsProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getMvsProject', 'mutation', variables);
     }
   };
 }

@@ -11,12 +11,18 @@ import type {
   GetFixWithAnswersQueryVariables,
   GetLastOrgAndNamedProjectQuery,
   GetLastOrgAndNamedProjectQueryVariables,
+  GetLastOrgQuery,
+  GetLastOrgQueryVariables,
   GetLatestReportByRepoUrlQuery,
   GetLatestReportByRepoUrlQueryVariables,
+  GetMvsProjectMutation,
+  GetMvsProjectMutationVariables,
   GetReportFixesQuery,
   GetReportFixesQueryVariables,
   GetUserMvsAutoFixQuery,
   GetUserMvsAutoFixQueryVariables,
+  LogMvsEventMutation,
+  LogMvsEventMutationVariables,
   MeQuery,
   MeQueryVariables,
   SubmitVulnerabilityReportMutation,
@@ -79,6 +85,8 @@ type MockState = {
   uploadS3BucketInfo: 'success' | 'error'
   getLastOrgAndNamedProject: 'success' | 'projectNotFound' | 'error'
   createProject: 'success' | 'error'
+  getLastOrg: 'success' | 'error'
+  getMvsProject: 'success' | 'error'
   submitVulnerabilityReport: 'success' | 'error'
   getAnalysis: 'success' | 'missing'
   getLatestReportByRepoUrl: 'success' | 'error' | 'empty' | 'expired'
@@ -103,6 +111,8 @@ const mockState: MockState = {
   uploadS3BucketInfo: 'success',
   getLastOrgAndNamedProject: 'success',
   createProject: 'success',
+  getLastOrg: 'success',
+  getMvsProject: 'success',
   submitVulnerabilityReport: 'success',
   getAnalysis: 'success',
   getLatestReportByRepoUrl: 'success',
@@ -202,6 +212,67 @@ export const graphqlHandlers = [
       }
       return HttpResponse.json(mockCreateProject)
     }
+  ),
+
+  // MVS per-developer project resolution (replaces getLastOrgAndNamedProject +
+  // CreateProject): getProjectId calls getLastOrg then getMvsProject.
+  graphql.query<GetLastOrgQuery, GetLastOrgQueryVariables>('getLastOrg', () => {
+    if (mockState.getLastOrg === 'error') {
+      return HttpResponse.json(
+        {
+          errors: [
+            { message: mockState.errorMessages['getLastOrg'] || 'Org Error' },
+          ],
+        },
+        { status: 500 }
+      )
+    }
+    return HttpResponse.json({
+      data: {
+        user: [
+          {
+            id: 'test-user-id',
+            name: 'Test User',
+            userOrganizationsAndUserOrganizationRoles: [
+              {
+                id: 'test-user-org-role-id',
+                organization: { id: 'test-org-id', enableV2Fixes: false },
+              },
+            ],
+          },
+        ],
+      },
+    })
+  }),
+
+  graphql.mutation<GetMvsProjectMutation, GetMvsProjectMutationVariables>(
+    'getMvsProject',
+    () => {
+      if (mockState.getMvsProject === 'error') {
+        return HttpResponse.json(
+          {
+            errors: [
+              {
+                message:
+                  mockState.errorMessages['getMvsProject'] ||
+                  'MVS Project Error',
+              },
+            ],
+          },
+          { status: 500 }
+        )
+      }
+      return HttpResponse.json({
+        data: { getMvsProject: { projectId: 'test-project-id-1' } },
+      })
+    }
+  ),
+
+  // Best-effort MVS activity log; the client swallows failures, so a null
+  // payload is enough to keep the request handled.
+  graphql.mutation<LogMvsEventMutation, LogMvsEventMutationVariables>(
+    'LogMvsEvent',
+    () => HttpResponse.json({ data: { logMvsEvent: null } })
   ),
 
   graphql.mutation<
@@ -347,6 +418,8 @@ export const mockGraphQL = (
         mockState.uploadS3BucketInfo = 'success'
         mockState.getLastOrgAndNamedProject = 'success'
         mockState.createProject = 'success'
+        mockState.getLastOrg = 'success'
+        mockState.getMvsProject = 'success'
         mockState.submitVulnerabilityReport = 'success'
         mockState.getAnalysis = 'success'
         mockState.getLatestReportByRepoUrl = 'success'
@@ -425,6 +498,32 @@ export const mockGraphQL = (
       failsWithError(message: string) {
         mockState.createProject = 'error'
         mockState.errorMessages['createProject'] = message
+        return this
+      },
+    }
+  },
+  getLastOrg: () => {
+    return {
+      succeeds() {
+        mockState.getLastOrg = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getLastOrg = 'error'
+        mockState.errorMessages['getLastOrg'] = message
+        return this
+      },
+    }
+  },
+  getMvsProject: () => {
+    return {
+      succeeds() {
+        mockState.getMvsProject = 'success'
+        return this
+      },
+      failsWithError(message: string) {
+        mockState.getMvsProject = 'error'
+        mockState.errorMessages['getMvsProject'] = message
         return this
       },
     }

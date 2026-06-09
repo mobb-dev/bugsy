@@ -1,5 +1,4 @@
 import crypto from 'node:crypto'
-import os from 'node:os'
 
 import open from 'open'
 
@@ -17,7 +16,7 @@ import {
 } from '../core/Errors'
 import { logDebug } from '../Logger'
 import { McpGQLClient } from './McpGQLClient'
-import { buildLoginUrl, LoginContext } from './types'
+import { buildLoginBrowserUrl, LoginContext } from './types'
 
 /**
  * Service for handling authentication operations with the Mobb API
@@ -84,10 +83,7 @@ export class McpAuthService {
     logDebug(`cli login created ${loginId}`)
     const webLoginUrl = `${WEB_APP_URL}/mvs-login`
 
-    // Build URL with context query parameters if provided
-    const browserUrl = loginContext
-      ? buildLoginUrl(webLoginUrl, loginId, os.hostname(), loginContext)
-      : `${webLoginUrl}/${loginId}?hostname=${os.hostname()}`
+    const browserUrl = buildLoginBrowserUrl(webLoginUrl, loginId, loginContext)
 
     const browserOpened = await this.openBrowser(browserUrl, isBackgoundCall)
     if (!browserOpened) {

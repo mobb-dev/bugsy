@@ -54,7 +54,7 @@ export class MobbApi {
         authorization: `Bearer ${this.#auth0Token}`,
         'content-type': 'application/json',
       },
-      body: `{"query":"\\n    mutation performCliLogin($loginId: String!, $hostname: String) {\\n  performCliLogin(loginId: $loginId, hostname: $hostname) {\\n    status\\n  }\\n}\\n    ","variables":{"loginId":"${loginId}","hostname":"example-hostname"},"operationName":"performCliLogin"}`,
+      body: `{"query":"\\n    mutation performCliLogin($loginId: String!, $hostname: String, $computerUser: String, $clientVersion: String) {\\n  performCliLogin(loginId: $loginId, hostname: $hostname, computerUser: $computerUser, clientVersion: $clientVersion) {\\n    status\\n  }\\n}\\n    ","variables":{"loginId":"${loginId}","hostname":"example-hostname"},"operationName":"performCliLogin"}`,
       method: 'POST',
     })
 

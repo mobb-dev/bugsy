@@ -607,6 +607,9 @@ mutation SubmitVulnerabilityReport(
   $isFullScan: Boolean
   $scanContext: String!
   $fileCount: Int
+  $computerName: String
+  $computerUser: String
+  $clientVersion: String
 ) {
   submitVulnerabilityReport(
     fixReportId: $fixReportId
@@ -621,6 +624,9 @@ mutation SubmitVulnerabilityReport(
     scanSource: $scanSource
     scanContext: $scanContext
     fileCount: $fileCount
+    computerName: $computerName
+    computerUser: $computerUser
+    clientVersion: $clientVersion
   ) {
     __typename
     ... on VulnerabilityReport {
@@ -1100,5 +1106,40 @@ query SkillVerdictsByMd5($md5s: [String!]!) {
       scannerVersion
       scannedAt
     }
+  }
+}
+
+# MVS: log a client-derived activity (RISK_DETECTED with a vuln count,
+# FIXES_VIEWED). The client calls this once at the right moment so the MVS
+# Event Log captures the full usage picture without server-side dedup.
+mutation LogMvsEvent(
+  $eventType: String!
+  $fixReportId: String
+  $projectId: String
+  $repoUrl: String
+  $riskCount: Int
+  $computerName: String
+  $computerUser: String
+  $clientVersion: String
+) {
+  logMvsEvent(
+    eventType: $eventType
+    fixReportId: $fixReportId
+    projectId: $projectId
+    repoUrl: $repoUrl
+    riskCount: $riskCount
+    computerName: $computerName
+    computerUser: $computerUser
+    clientVersion: $clientVersion
+  ) {
+    status
+  }
+}
+
+# MVS: resolve (provisioning if needed) the org's shared MVS system project.
+# Replaces per-developer "MCP Scans <hash>" projects.
+mutation getMvsProject($organizationId: String!) {
+  getMvsProject(organizationId: $organizationId) {
+    projectId
   }
 }

@@ -1,12 +1,11 @@
 import crypto from 'node:crypto'
-import os from 'node:os'
 
 import Debug from 'debug'
 import open from 'open'
 
 import { API_URL, WEB_APP_URL } from '../constants'
 import { GQLClient, isTransientError } from '../features/analysis/graphql'
-import { buildLoginUrl, LoginContext } from '../mcp/services/types'
+import { buildLoginBrowserUrl, LoginContext } from '../mcp/services/types'
 import { sleep } from '../utils'
 import { configStore } from '../utils/ConfigStoreService'
 
@@ -213,9 +212,11 @@ export class AuthManager {
 
       // Build the login URL
       const webLoginUrl = `${this.resolvedWebAppUrl}${loginPath || '/cli-login'}`
-      const browserUrl = loginContext
-        ? buildLoginUrl(webLoginUrl, this.loginId, os.hostname(), loginContext)
-        : `${webLoginUrl}/${this.loginId}?hostname=${os.hostname()}`
+      const browserUrl = buildLoginBrowserUrl(
+        webLoginUrl,
+        this.loginId,
+        loginContext
+      )
 
       // Store current URL for potential reuse
       this.currentBrowserUrl = browserUrl

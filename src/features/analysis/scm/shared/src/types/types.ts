@@ -230,6 +230,7 @@ export const ReportQueryResultZ = z.object({
             missing_files: z.string().array().nullish(),
             large_files: z.string().array().nullish(),
             error_files: z.string().array().nullish(),
+            ai_cost_limit_exceeded: z.string().nullish(),
           }),
         })
         .array(),
@@ -275,6 +276,7 @@ export const BaseVulnerabilityReportIssueZ = z.object({
     missing_files: z.string().array().nullish(),
     large_files: z.string().array().nullish(),
     error_files: z.string().array().nullish(),
+    ai_cost_limit_exceeded: z.string().nullish(),
   }),
   fix: ReportFixesQueryFixZ.nullable(),
   falsePositive: z

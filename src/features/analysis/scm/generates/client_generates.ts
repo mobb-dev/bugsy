@@ -32472,6 +32472,10 @@ export type Organization = {
   issuesByCategories?: Maybe<Array<View_Types_Aggregated_Categories>>;
   /** A computed field, executes function "organization_lines_of_code_stats" */
   linesOfCodeStats?: Maybe<Array<View_Types_Lines_Of_Code_Stats>>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay: Scalars['numeric']['output'];
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport: Scalars['numeric']['output'];
   name: Scalars['String']['output'];
   /** An array relationship */
   onPremScmOauthConfigs: Array<On_Prem_Scm_Oauth_Config>;
@@ -33107,6 +33111,10 @@ export type Organization_Avg_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -33163,6 +33171,8 @@ export type Organization_Bool_Exp = {
   isTracyAttributionEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Bool_Exp>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Bool_Exp>;
+  maxAiCostPerOrgPerDay?: InputMaybe<Numeric_Comparison_Exp>;
+  maxAiCostPerReport?: InputMaybe<Numeric_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Bool_Exp>;
@@ -33605,6 +33615,10 @@ export type Organization_Inc_Input = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   github_app_installation_id?: InputMaybe<Scalars['Int']['input']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: InputMaybe<Scalars['numeric']['input']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: InputMaybe<Scalars['numeric']['input']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
@@ -33646,6 +33660,10 @@ export type Organization_Insert_Input = {
   /** Enable Tracy vulnerability attribution processing for this organization */
   isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   issueTypeSettings?: InputMaybe<Organization_Issue_Type_Settings_Arr_Rel_Insert_Input>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: InputMaybe<Scalars['numeric']['input']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: InputMaybe<Scalars['numeric']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   onPremScmOauthConfigs?: InputMaybe<On_Prem_Scm_Oauth_Config_Arr_Rel_Insert_Input>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
@@ -33921,6 +33939,10 @@ export type Organization_Max_Fields = {
   externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['numeric']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['numeric']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
@@ -33956,6 +33978,10 @@ export type Organization_Min_Fields = {
   externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['numeric']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['numeric']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
@@ -34029,6 +34055,8 @@ export type Organization_Order_By = {
   isSendInvitationEnabled?: InputMaybe<Order_By>;
   isTracyAttributionEnabled?: InputMaybe<Order_By>;
   issueTypeSettings_aggregate?: InputMaybe<Organization_Issue_Type_Settings_Aggregate_Order_By>;
+  maxAiCostPerOrgPerDay?: InputMaybe<Order_By>;
+  maxAiCostPerReport?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   onPremScmOauthConfigs_aggregate?: InputMaybe<On_Prem_Scm_Oauth_Config_Aggregate_Order_By>;
   opengrepBatchQuota?: InputMaybe<Order_By>;
@@ -34677,6 +34705,10 @@ export enum Organization_Select_Column {
   /** column name */
   IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
   /** column name */
+  MaxAiCostPerOrgPerDay = 'maxAiCostPerOrgPerDay',
+  /** column name */
+  MaxAiCostPerReport = 'maxAiCostPerReport',
+  /** column name */
   Name = 'name',
   /** column name */
   OpengrepBatchQuota = 'opengrepBatchQuota',
@@ -34726,6 +34758,10 @@ export type Organization_Set_Input = {
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** Enable Tracy vulnerability attribution processing for this organization */
   isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: InputMaybe<Scalars['numeric']['input']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: InputMaybe<Scalars['numeric']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
@@ -34750,6 +34786,10 @@ export type Organization_Stddev_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -34782,6 +34822,10 @@ export type Organization_Stddev_Pop_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -34814,6 +34858,10 @@ export type Organization_Stddev_Samp_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -34871,6 +34919,10 @@ export type Organization_Stream_Cursor_Value_Input = {
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** Enable Tracy vulnerability attribution processing for this organization */
   isTracyAttributionEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: InputMaybe<Scalars['numeric']['input']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: InputMaybe<Scalars['numeric']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
@@ -34895,6 +34947,10 @@ export type Organization_Sum_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Int']['output']>;
   github_app_installation_id?: Maybe<Scalars['Int']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['numeric']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['numeric']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
@@ -35421,6 +35477,10 @@ export enum Organization_Update_Column {
   /** column name */
   IsTracyAttributionEnabled = 'isTracyAttributionEnabled',
   /** column name */
+  MaxAiCostPerOrgPerDay = 'maxAiCostPerOrgPerDay',
+  /** column name */
+  MaxAiCostPerReport = 'maxAiCostPerReport',
+  /** column name */
   Name = 'name',
   /** column name */
   OpengrepBatchQuota = 'opengrepBatchQuota',
@@ -35472,6 +35532,10 @@ export type Organization_Var_Pop_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -35504,6 +35568,10 @@ export type Organization_Var_Samp_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;
@@ -35536,6 +35604,10 @@ export type Organization_Variance_Fields = {
   /** Maximum number of repos that can run an external scanner (CodeQL, and future Checkmarx/Snyk) within a single batch scan. 0 = external-scanner batches disabled. Default 3. Managed via the Hasura console. */
   externalScannerBatchQuota?: Maybe<Scalars['Float']['output']>;
   github_app_installation_id?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD per organization per day across all reports. Default 20. Managed via the Hasura console. */
+  maxAiCostPerOrgPerDay?: Maybe<Scalars['Float']['output']>;
+  /** Maximum AI (Bedrock) spend in USD for a single fix report. Default 5. Managed via the Hasura console. */
+  maxAiCostPerReport?: Maybe<Scalars['Float']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Float']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Float']['output']>;

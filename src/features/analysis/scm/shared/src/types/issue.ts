@@ -45,6 +45,7 @@ export const BaseIssuePartsZ = z.object({
   extraData: z.object({
     missing_files: z.string().array().nullish(),
     error_files: z.string().array().nullish(),
+    ai_cost_limit_exceeded: z.string().nullish(),
   }),
   vulnerabilityReportIssueTags: z.array(
     z.object({

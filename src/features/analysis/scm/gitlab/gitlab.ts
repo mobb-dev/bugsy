@@ -1,4 +1,5 @@
 import querystring from 'node:querystring'
+import { setTimeout as delay } from 'node:timers/promises'
 
 import {
   createRequesterFn,
@@ -1132,6 +1133,16 @@ async function processBody(response: UndiciResponse) {
 //we added this function which is mostly copied from the gitbeaker library (the original default request handler).
 //The main change is the addition of the dispatcher parameter to the undiciFetch call instead of just calling the original fetch function
 //without the dispatcher (HTTP proxy) parameter.
+// GitLab intermittently returns 429 (Too Many Requests) and 5xx under load — CI
+// runs share a rate limit. Without retry a single 429 fails the whole operation;
+// e.g. a failed `list branches` leaves the app's Apply-Fix branch list empty and
+// its submit button permanently disabled. Retry transient responses (and request
+// timeouts) with backoff, honouring Retry-After for 429s. A non-transient status
+// (e.g. 4xx) is thrown immediately, unchanged. See MOBB-3644.
+const GITLAB_RETRYABLE_STATUSES = new Set([429, 502, 503, 504])
+const GITLAB_REQUEST_MAX_ATTEMPTS = 4
+const GITLAB_REQUEST_BASE_BACKOFF_MS = 1_000
+
 async function brokerRequestHandler(
   endpoint: string,
   options?: RequestOptions
@@ -1155,27 +1166,55 @@ async function brokerRequestHandler(
         })
       : undefined
 
-  const response = await undiciFetch(url, {
-    headers: options?.headers,
-    method: options?.method,
-    body: options?.body ? String(options?.body) : undefined,
-    dispatcher,
-  }).catch((e) => {
-    if (e.name === 'TimeoutError' || e.name === 'AbortError') {
-      throw new Error('Query timeout was reached')
+  let lastError: Error | undefined
+  for (let attempt = 1; attempt <= GITLAB_REQUEST_MAX_ATTEMPTS; attempt++) {
+    let response: UndiciResponse | undefined
+
+    try {
+      response = await undiciFetch(url, {
+        headers: options?.headers,
+        method: options?.method,
+        body: options?.body ? String(options?.body) : undefined,
+        dispatcher,
+      })
+    } catch (e) {
+      // Treat request timeouts as transient and retry; rethrow anything else.
+      if (
+        (e as Error).name === 'TimeoutError' ||
+        (e as Error).name === 'AbortError'
+      ) {
+        lastError = new Error('Query timeout was reached')
+      } else {
+        throw e
+      }
     }
 
-    throw e
-  })
-
-  if (response.ok)
-    return {
-      body: await processBody(response),
-      headers: Object.fromEntries(response.headers.entries()),
-      status: response.status,
+    if (response) {
+      if (response.ok) {
+        return {
+          body: await processBody(response),
+          headers: Object.fromEntries(response.headers.entries()),
+          status: response.status,
+        }
+      }
+      if (!GITLAB_RETRYABLE_STATUSES.has(response.status)) {
+        throw new Error(`gitbeaker: ${response.statusText}`)
+      }
+      lastError = new Error(`gitbeaker: ${response.statusText}`)
     }
 
-  throw new Error(`gitbeaker: ${response.statusText}`)
+    if (attempt === GITLAB_REQUEST_MAX_ATTEMPTS) break
+
+    // Honour Retry-After (seconds) when present (429s); otherwise exponential backoff.
+    const retryAfter = Number(response?.headers.get('retry-after'))
+    const waitMs =
+      Number.isFinite(retryAfter) && retryAfter > 0
+        ? retryAfter * 1_000
+        : GITLAB_REQUEST_BASE_BACKOFF_MS * 2 ** (attempt - 1)
+    await delay(waitMs)
+  }
+
+  throw lastError ?? new Error('gitbeaker: request failed')
 }
 
 export async function listGitlabProjectMembers({

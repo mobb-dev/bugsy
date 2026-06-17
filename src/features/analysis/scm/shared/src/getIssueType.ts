@@ -184,6 +184,7 @@ export const issueTypeMap: Record<IssueType_Enum, string> = {
     'AWS DynamoDB Point-in-Time Recovery Disabled',
   [IssueType_Enum.JwtDecodeWithoutVerify]:
     'JWT Decoded Without Signature Verification',
+  [IssueType_Enum.UncheckedReturnValue]: 'Unchecked Return Value',
 } as const
 
 const issueTypeZ = z.nativeEnum(IssueType_Enum)

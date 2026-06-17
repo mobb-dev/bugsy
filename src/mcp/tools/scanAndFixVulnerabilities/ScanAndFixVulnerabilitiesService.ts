@@ -170,7 +170,14 @@ export class ScanAndFixVulnerabilitiesService {
         repositoryPath,
       })
 
-      this.currentOffset = effectiveOffset + (fixes.fixes?.length || 0)
+      // Advance the cursor by every fix surfaced this page — applicable AND
+      // interactive. The DB query pages over the combined fixable set, so
+      // counting applicable fixes alone leaves the cursor stuck (re-serving the
+      // same page) whenever a page contains only interactive fixes.
+      this.currentOffset =
+        effectiveOffset +
+        (fixes.fixes?.length || 0) +
+        (fixes.interactiveFixes?.length || 0)
       return prompt
     } catch (error) {
       // if (

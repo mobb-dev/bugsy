@@ -442,4 +442,5 @@ export const fixDetailsData: Record<IssueType_Enum, FixDetailsData> = {
     fixInstructions:
       'Verify the signature before trusting any claims: build a verifier with the expected algorithm and secret/key (e.g. `JWT.require(Algorithm.HMAC256(secret)).build().verify(token)`) instead of calling `JWT.decode(token)`. After merging, confirm the verifier is configured with the same algorithm and secret/key used to sign your tokens — an incorrect or placeholder secret will make verification throw `JWTVerificationException` at runtime and reject legitimate tokens.',
   },
+  [IssueType_Enum.UncheckedReturnValue]: undefined,
 }

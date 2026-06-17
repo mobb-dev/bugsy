@@ -22302,6 +22302,8 @@ export enum IssueType_Enum {
   TypeConfusion = 'TYPE_CONFUSION',
   /** Unchecked loop condition */
   UncheckedLoopCondition = 'UNCHECKED_LOOP_CONDITION',
+  /** UNCHECKED_RETURN_VALUE */
+  UncheckedReturnValue = 'UNCHECKED_RETURN_VALUE',
   /** UNENCRYPTED_AWS_SQS_QUEUE */
   UnencryptedAwsSqsQueue = 'UNENCRYPTED_AWS_SQS_QUEUE',
   /** UNNECESSARY_IMPORTS */

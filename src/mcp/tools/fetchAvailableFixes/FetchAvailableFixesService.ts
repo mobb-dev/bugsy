@@ -101,7 +101,14 @@ export class FetchAvailableFixesService {
         interactiveFixes: fixReport.interactiveFixes ?? [],
         repositoryPath,
       })
-      this.currentOffset = effectiveOffset + (fixReport.fixes?.length || 0)
+      // Advance the cursor by every fix surfaced this page — applicable AND
+      // interactive. The DB query pages over the combined fixable set, so
+      // counting applicable fixes alone leaves the cursor stuck (re-serving the
+      // same page) whenever a page contains only interactive fixes.
+      this.currentOffset =
+        effectiveOffset +
+        (fixReport.fixes?.length || 0) +
+        (fixReport.interactiveFixes?.length || 0)
       return prompt
     } catch (error) {
       logError('Failed to check for available fixes', {

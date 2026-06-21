@@ -1,17 +1,54 @@
+import { setTimeout as sleep } from 'node:timers/promises'
+
 import pLimit from 'p-limit'
 
 import type { ProcessedFile, ProcessedSkill } from './context_file_processor'
 import type { ContextFileEntry, SkillGroup } from './context_file_scanner'
 import {
   markContextFilesUploaded,
+  markContextUploadFailed,
   SKILL_CATEGORY,
 } from './context_file_scanner'
 import type { TracyRecordClientInput } from './graphql/tracy-batch-upload'
 import { AiBlameInferenceType } from './scm/generates/client_generates'
-import { uploadFile } from './upload-file'
+import { isTransientUploadError, uploadFile } from './upload-file'
 
 /** Number of concurrent S3 uploads. */
 const UPLOAD_CONCURRENCY = 5
+
+/**
+ * Max upload attempts per file/skill within a single cycle (1 try + retries).
+ * Kept low: 1 retry recovers the common single-blip transient, while the
+ * cross-cycle failure backoff (in the scanner) handles persistent failures —
+ * so we don't multiply per-file latency on a hostile network's first cycle.
+ */
+const UPLOAD_MAX_ATTEMPTS = 2
+/** Base delay between in-cycle retries; grows exponentially with jitter. */
+const UPLOAD_RETRY_BASE_MS = 250
+
+/**
+ * Upload a single file/skill to S3, retrying transient transport failures
+ * (e.g. ECONNRESET from a proxy resetting the connection) a few times within
+ * the cycle. Non-transient failures (HTTP errors from S3) throw immediately.
+ */
+async function uploadWithRetry(
+  args: Parameters<typeof uploadFile>[0]
+): Promise<void> {
+  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt++) {
+    try {
+      await uploadFile(args)
+      return
+    } catch (err) {
+      const isLastAttempt = attempt === UPLOAD_MAX_ATTEMPTS
+      if (isLastAttempt || !isTransientUploadError(err)) {
+        throw err
+      }
+      const backoff =
+        UPLOAD_RETRY_BASE_MS * 2 ** (attempt - 1) * (1 + Math.random())
+      await sleep(backoff)
+    }
+  }
+}
 
 export type UploadContextRecordsOpts = {
   processedFiles: ProcessedFile[]
@@ -39,6 +76,10 @@ export type UploadContextRecordsResult = {
   uploadedFiles: ContextFileEntry[]
   /** Only the skill groups that were successfully uploaded */
   uploadedSkillGroups: SkillGroup[]
+  /** Files whose S3 upload failed (for upload-failure backoff) */
+  failedFiles: ContextFileEntry[]
+  /** Skill groups whose S3 upload failed (for upload-failure backoff) */
+  failedSkillGroups: SkillGroup[]
 }
 
 /**
@@ -71,6 +112,8 @@ export async function uploadContextRecords(
   const records: TracyRecordClientInput[] = []
   const uploadedFiles: ContextFileEntry[] = []
   const uploadedSkillGroups: SkillGroup[] = []
+  const failedFiles: ContextFileEntry[] = []
+  const failedSkillGroups: SkillGroup[] = []
   const limit = pLimit(UPLOAD_CONCURRENCY)
   const extraFields = {
     ...(repositoryUrl !== undefined && { repositoryUrl }),
@@ -84,13 +127,14 @@ export async function uploadContextRecords(
       limit(async () => {
         const s3Key = `${keyPrefix}ctx-${pf.md5}.bin`
         try {
-          await uploadFile({
+          await uploadWithRetry({
             file: Buffer.from(pf.sanitizedContent, 'utf-8'),
             url,
             uploadKey: s3Key,
             uploadFields,
           })
         } catch (err) {
+          failedFiles.push(pf.entry)
           onFileError?.(pf.entry.name, err)
           return
         }
@@ -118,13 +162,14 @@ export async function uploadContextRecords(
       limit(async () => {
         const s3Key = `${keyPrefix}skill-${ps.md5}.zip`
         try {
-          await uploadFile({
+          await uploadWithRetry({
             file: ps.zipBuffer,
             url,
             uploadKey: s3Key,
             uploadFields,
           })
         } catch (err) {
+          failedSkillGroups.push(ps.group)
           onSkillError?.(ps.group.name, err)
           return
         }
@@ -152,7 +197,13 @@ export async function uploadContextRecords(
 
   await Promise.allSettled(tasks)
 
-  return { records, uploadedFiles, uploadedSkillGroups }
+  return {
+    records,
+    uploadedFiles,
+    uploadedSkillGroups,
+    failedFiles,
+    failedSkillGroups,
+  }
 }
 
 export type ContextUploadPipelineOpts = {
@@ -215,23 +266,34 @@ export async function runContextFileUploadPipeline(
 
   const now = new Date().toISOString()
 
-  const { records, uploadedFiles, uploadedSkillGroups } =
-    await uploadContextRecords({
-      processedFiles,
-      processedSkills,
-      keyPrefix,
-      url,
-      uploadFields,
-      sessionId,
-      now,
-      platform,
-      repositoryUrl,
-      branch,
-      commitSha,
-      clientVersion,
-      onFileError,
-      onSkillError,
-    })
+  const {
+    records,
+    uploadedFiles,
+    uploadedSkillGroups,
+    failedFiles,
+    failedSkillGroups,
+  } = await uploadContextRecords({
+    processedFiles,
+    processedSkills,
+    keyPrefix,
+    url,
+    uploadFields,
+    sessionId,
+    now,
+    platform,
+    repositoryUrl,
+    branch,
+    commitSha,
+    clientVersion,
+    onFileError,
+    onSkillError,
+  })
+
+  // Back off re-attempting uploads that just failed so a persistently-failing
+  // file/skill isn't re-emitted (and re-logged) on every poll cycle.
+  if (failedFiles.length > 0 || failedSkillGroups.length > 0) {
+    markContextUploadFailed(sessionId, failedFiles, failedSkillGroups)
+  }
 
   if (records.length === 0) {
     return { fileCount: 0, skillCount: 0 }

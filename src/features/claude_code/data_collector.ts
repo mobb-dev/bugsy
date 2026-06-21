@@ -237,7 +237,7 @@ export async function readNewTranscriptEntries(
       const stat = await fh.stat()
       fileSize = stat.size
       if (cursor.byteOffset >= stat.size) {
-        hookLog.info({ data: { sessionId } }, 'No new data in transcript file')
+        hookLog.debug({ data: { sessionId } }, 'No new data in transcript file')
         return {
           entries: [],
           endByteOffset: fileSize,
@@ -586,13 +586,13 @@ export async function processTranscript(
   const cursorKey = getCursorKey(resolvedTranscriptPath)
 
   if (rawEntries.length === 0) {
-    log.info('No new entries to upload')
+    log.debug('No new entries to upload')
     return { entriesUploaded: 0, entriesSkipped: 0, errors: 0 }
   }
 
   const { filtered: entries, filteredOut } = filterEntries(rawEntries)
   if (filteredOut > 0) {
-    log.info(
+    log.debug(
       { data: { filteredOut, remaining: entries.length } },
       'Filtered out noise entries'
     )

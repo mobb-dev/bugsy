@@ -125,8 +125,12 @@ const NULL_REPO_STATE: RepoState = {
  * `GitService.getCurrentRepoState()` so detached-HEAD handling and SHA
  * normalization stay in lockstep across the two clients.
  *
- * Never throws — non-existent dirs, missing git binaries, and unrecognized
- * remotes all resolve to nulls so the daemon hot path can rely on a value.
+ * The repository URL is the canonical form (parseScmURL().canonicalUrl) for any
+ * SCM host, including self-hosted / enterprise remotes (scmType "Unknown"); only
+ * an absent or genuinely unparseable remote resolves to `repositoryUrl: null`.
+ *
+ * Never throws — a non-existent dir, missing git binary, or absent/unparseable
+ * remote resolves to null so the daemon hot path can rely on a value.
  */
 export async function readRepoState(workingDir?: string): Promise<RepoState> {
   const dir = workingDir ?? process.cwd()
@@ -146,9 +150,19 @@ export async function readRepoState(workingDir?: string): Promise<RepoState> {
   const repositoryUrlPromise = gitService
     .getRemoteUrl()
     .then((url) => {
+      // Store the same canonical form the AI-blame query computes for the commit's
+      // repo URL (parseScmURL().canonicalUrl) — including self-hosted / enterprise
+      // hosts that parseScmURL classifies as scmType "Unknown" (GitHub Enterprise,
+      // self-hosted GitLab, Bitbucket Server, ...). Keeping those is what lets a
+      // self-hosted event match its commit by repo instead of being forced into the
+      // non-selective "repository_url IS NULL" branch (discarding "Unknown" here is
+      // what previously left enterprise users' events repo-less).
+      //
+      // Re-canonicalizing keeps the write side symmetric with the query side: a
+      // genuinely unparseable remote (parseScmURL -> null) resolves to null on BOTH
+      // sides, rather than the client storing a raw string the query can never equal.
       if (!url) return null
-      const parsed = parseScmURL(url)
-      return parsed?.scmType && parsed.scmType !== 'Unknown' ? url : null
+      return parseScmURL(url)?.canonicalUrl ?? null
     })
     .catch(() => null)
 
@@ -161,8 +175,9 @@ export async function readRepoState(workingDir?: string): Promise<RepoState> {
 }
 
 /**
- * Gets the normalized GitHub repository URL from the current working directory.
- * Returns null if not in a git repository or if not a GitHub repository.
+ * Gets the canonical remote repository URL for the working directory's repo, for
+ * any SCM host (GitHub, GitLab, Azure DevOps, Bitbucket, and self-hosted /
+ * enterprise). Returns null when there is no remote or it can't be parsed.
  */
 export async function getRepositoryUrl(
   workingDir?: string

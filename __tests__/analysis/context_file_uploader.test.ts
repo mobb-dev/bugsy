@@ -9,11 +9,14 @@ import { runContextFileUploadPipeline } from '../../src/features/analysis/contex
 
 const mocks = vi.hoisted(() => ({
   uploadFile: vi.fn(),
+  isTransientUploadError: vi.fn(() => false),
   markContextFilesUploaded: vi.fn(),
+  markContextUploadFailed: vi.fn(),
 }))
 
 vi.mock('../../src/features/analysis/upload-file', () => ({
   uploadFile: mocks.uploadFile,
+  isTransientUploadError: mocks.isTransientUploadError,
 }))
 
 vi.mock('../../src/features/analysis/context_file_scanner', async (orig) => {
@@ -21,7 +24,11 @@ vi.mock('../../src/features/analysis/context_file_scanner', async (orig) => {
     await orig<
       typeof import('../../src/features/analysis/context_file_scanner')
     >()
-  return { ...actual, markContextFilesUploaded: mocks.markContextFilesUploaded }
+  return {
+    ...actual,
+    markContextFilesUploaded: mocks.markContextFilesUploaded,
+    markContextUploadFailed: mocks.markContextUploadFailed,
+  }
 })
 
 const VALID_FIELDS = JSON.stringify({ key: 'value' })
@@ -178,5 +185,37 @@ describe('runContextFileUploadPipeline — partial S3 failure', () => {
     const markedPaths = (firstCall[1] as { path: string }[]).map((f) => f.path)
     expect(markedPaths).toContain(goodFile.entry.path)
     expect(markedPaths).not.toContain(badFile.entry.path)
+
+    // the failed file must be recorded for upload-failure backoff
+    expect(mocks.markContextUploadFailed).toHaveBeenCalledOnce()
+    const failCall = mocks.markContextUploadFailed.mock.calls[0]!
+    const failedPaths = (failCall[1] as { path: string }[]).map((f) => f.path)
+    expect(failedPaths).toEqual([badFile.entry.path])
+  })
+})
+
+describe('runContextFileUploadPipeline — transient retry', () => {
+  it('retries transient upload errors and does not record a failure on eventual success', async () => {
+    // First attempt rejects with a transient error, second succeeds.
+    mocks.uploadFile
+      .mockRejectedValueOnce(
+        Object.assign(new Error('reset'), { code: 'ECONNRESET' })
+      )
+      .mockResolvedValueOnce(undefined)
+    mocks.isTransientUploadError.mockReturnValueOnce(true)
+
+    const submitRecords = vi.fn().mockResolvedValue(undefined)
+    const result = await runContextFileUploadPipeline({
+      ...baseOpts,
+      processedFiles: [makeFile()],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords,
+    })
+
+    expect(mocks.uploadFile).toHaveBeenCalledTimes(2)
+    expect(result).toEqual({ fileCount: 1, skillCount: 0 })
+    expect(mocks.markContextUploadFailed).not.toHaveBeenCalled()
+    expect(mocks.markContextFilesUploaded).toHaveBeenCalledOnce()
   })
 })

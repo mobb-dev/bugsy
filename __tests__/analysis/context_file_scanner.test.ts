@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 import tmp from 'tmp-promise'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -339,7 +340,7 @@ describe('scanContextFiles', () => {
 
       // Touch one file by rewriting it (updates mtime)
       // Small delay to ensure mtime differs
-      await new Promise((r) => setTimeout(r, 50))
+      await sleep(50)
       await fs.writeFile(
         path.join(workspace.path, 'CLAUDE.md'),
         'modified',
@@ -366,6 +367,82 @@ describe('scanContextFiles', () => {
       const names = differentSession.regularFiles.map((f) => f.name).sort()
       expect(names).toContain('CLAUDE.md')
       expect(names).toContain('.claude/rules/a.md')
+    })
+
+    it('backs off re-emitting a file whose upload failed', async () => {
+      vi.resetModules()
+      const mod =
+        await import('../../src/features/analysis/context_file_scanner')
+
+      await writeFile(workspace.path, 'CLAUDE.md', 'original')
+
+      const first = await mod.scanContextFiles(
+        workspace.path,
+        'claude-code',
+        'sess-backoff'
+      )
+      const claude = first.regularFiles.find((f) => f.name === 'CLAUDE.md')!
+      expect(claude).toBeDefined()
+
+      // Upload failed — record it for backoff (NOT marked uploaded).
+      mod.markContextUploadFailed('sess-backoff', [claude])
+
+      // Rescan: the failed file must be suppressed rather than re-emitted
+      // every cycle.
+      const second = await mod.scanContextFiles(
+        workspace.path,
+        'claude-code',
+        'sess-backoff'
+      )
+      expect(second.regularFiles.map((f) => f.name)).not.toContain('CLAUDE.md')
+
+      // Still suppressed even after the file is edited (mtime changes), since
+      // backoff is time-based, not content-based.
+      await sleep(50)
+      await fs.writeFile(
+        path.join(workspace.path, 'CLAUDE.md'),
+        'edited during backoff',
+        'utf-8'
+      )
+      const third = await mod.scanContextFiles(
+        workspace.path,
+        'claude-code',
+        'sess-backoff'
+      )
+      expect(third.regularFiles.map((f) => f.name)).not.toContain('CLAUDE.md')
+    })
+
+    it('clears backoff once the upload succeeds', async () => {
+      vi.resetModules()
+      const mod =
+        await import('../../src/features/analysis/context_file_scanner')
+
+      await writeFile(workspace.path, 'CLAUDE.md', 'original')
+      const first = await mod.scanContextFiles(
+        workspace.path,
+        'claude-code',
+        'sess-clear'
+      )
+      const claude = first.regularFiles.find((f) => f.name === 'CLAUDE.md')!
+
+      mod.markContextUploadFailed('sess-clear', [claude])
+      // A later successful upload clears the failure state and records mtime.
+      mod.markContextFilesUploaded('sess-clear', [claude])
+
+      // An edit after success should be picked up immediately (no lingering
+      // backoff blocking it).
+      await sleep(50)
+      await fs.writeFile(
+        path.join(workspace.path, 'CLAUDE.md'),
+        'edited after success',
+        'utf-8'
+      )
+      const second = await mod.scanContextFiles(
+        workspace.path,
+        'claude-code',
+        'sess-clear'
+      )
+      expect(second.regularFiles.map((f) => f.name)).toContain('CLAUDE.md')
     })
   })
 

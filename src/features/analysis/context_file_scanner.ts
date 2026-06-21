@@ -18,11 +18,35 @@ const MAX_CONTEXT_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
 /** 24 hours in milliseconds — sessions older than this are pruned. */
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000
 
+/**
+ * Backoff for context/skill uploads that keep failing (e.g. a corporate proxy
+ * resetting the S3 POST). Without this, a failed upload is never recorded as
+ * done, so the scanner re-emits it every poll cycle forever — one error logged
+ * per file per cycle. On a large corpus behind a hostile network that compounds
+ * into millions of errors/day. We instead skip re-attempting a failed key until
+ * its backoff window elapses, doubling the window on each consecutive failure.
+ */
+const FAILURE_BACKOFF_BASE_MS = 60 * 1000 // 1 minute
+const FAILURE_BACKOFF_MAX_MS = 60 * 60 * 1000 // 1 hour
+
+/** Per-key upload-failure backoff state. */
+type FailureState = {
+  /** Consecutive failed attempts (drives exponential backoff). */
+  attempts: number
+  /** Epoch ms before which the key must not be re-attempted. */
+  nextRetryAt: number
+}
+
 type SessionMtimeEntry = {
   /** Per-file mtime map */
   files: Map<string, number>
   /** Per-skill mtime map — key is "skill:{root}:{name}", value is maxMtimeMs */
   skills: Map<string, number>
+  /**
+   * Per-key (file path or skill sessionKey) upload-failure backoff state.
+   * Entries are added on failed uploads and cleared on success.
+   */
+  failures: Map<string, FailureState>
   /** Timestamp of the last update to this session entry */
   lastUpdatedAt: number
 }
@@ -44,20 +68,74 @@ export function markContextFilesUploaded(
   files: ContextFileEntry[],
   skills?: SkillGroup[]
 ): void {
-  let entry = sessionMtimes.get(sessionId)
-  if (!entry) {
-    entry = { files: new Map(), skills: new Map(), lastUpdatedAt: Date.now() }
-    sessionMtimes.set(sessionId, entry)
-  }
+  const entry = getOrCreateSessionEntry(sessionId)
   for (const f of files) {
     entry.files.set(f.path, f.mtimeMs)
+    entry.failures.delete(f.path) // success clears any backoff
   }
   if (skills) {
     for (const sg of skills) {
       entry.skills.set(sg.sessionKey, sg.maxMtimeMs)
+      entry.failures.delete(sg.sessionKey)
     }
   }
   entry.lastUpdatedAt = Date.now()
+}
+
+/**
+ * Record failed context/skill uploads so the scanner backs off re-emitting
+ * them instead of retrying (and re-logging) every poll cycle. Backoff grows
+ * exponentially per consecutive failure, capped at `FAILURE_BACKOFF_MAX_MS`.
+ * Keys mirror the success maps: file `path` for files, `sessionKey` for skills.
+ */
+export function markContextUploadFailed(
+  sessionId: string,
+  files: ContextFileEntry[],
+  skills?: SkillGroup[]
+): void {
+  const entry = getOrCreateSessionEntry(sessionId)
+  const now = Date.now()
+  const recordFailure = (key: string): void => {
+    const attempts = (entry.failures.get(key)?.attempts ?? 0) + 1
+    const delay = Math.min(
+      FAILURE_BACKOFF_BASE_MS * 2 ** (attempts - 1),
+      FAILURE_BACKOFF_MAX_MS
+    )
+    entry.failures.set(key, { attempts, nextRetryAt: now + delay })
+  }
+  for (const f of files) {
+    recordFailure(f.path)
+  }
+  if (skills) {
+    for (const sg of skills) {
+      recordFailure(sg.sessionKey)
+    }
+  }
+  entry.lastUpdatedAt = now
+}
+
+function getOrCreateSessionEntry(sessionId: string): SessionMtimeEntry {
+  let entry = sessionMtimes.get(sessionId)
+  if (!entry) {
+    entry = {
+      files: new Map(),
+      skills: new Map(),
+      failures: new Map(),
+      lastUpdatedAt: Date.now(),
+    }
+    sessionMtimes.set(sessionId, entry)
+  }
+  return entry
+}
+
+/** True when `key` is within its post-failure backoff window. */
+function isInUploadBackoff(
+  entry: SessionMtimeEntry,
+  key: string,
+  now: number
+): boolean {
+  const failure = entry.failures.get(key)
+  return failure !== undefined && failure.nextRetryAt > now
 }
 
 /**
@@ -736,6 +814,11 @@ export async function scanContextFiles(
           if (prevMtime !== undefined && fileStat.mtimeMs <= prevMtime) {
             continue
           }
+          // Skip files whose upload keeps failing until their backoff elapses,
+          // so a persistently-failing upload isn't re-attempted every cycle.
+          if (sessionEntry && isInUploadBackoff(sessionEntry, filePath, now)) {
+            continue
+          }
           allFiles.push(fileEntry)
         }
       } catch {
@@ -749,10 +832,14 @@ export async function scanContextFiles(
   for (const { root, baseDir, files } of skillBatches.values()) {
     const groups = groupSkills(files, root, baseDir)
     for (const group of groups) {
-      // Skip if no file in the group has changed since last upload
+      // Skip if no file in the group has changed since last upload, or if the
+      // skill's upload is in post-failure backoff.
       if (sessionEntry) {
         const prevMtime = sessionEntry.skills.get(group.sessionKey)
         if (prevMtime !== undefined && group.maxMtimeMs <= prevMtime) {
+          continue
+        }
+        if (isInUploadBackoff(sessionEntry, group.sessionKey, now)) {
           continue
         }
       }

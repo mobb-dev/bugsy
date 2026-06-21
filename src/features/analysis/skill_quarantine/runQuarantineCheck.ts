@@ -64,6 +64,13 @@ const lastDirsMtimeMs = new Map<string, number>()
 /** md5s of skills that have already passed through a quarantine check this process lifetime. */
 const seenSkillMd5s = new Set<string>()
 let killSwitchLogged = false
+/**
+ * Whether we've already logged the "opt-in not enabled" notice this process.
+ * The check runs on (almost) every poll cycle, so logging it each time floods
+ * Datadog (tens of thousands/day). Once per process preserves the opt-in
+ * telemetry signal without the per-cycle spam.
+ */
+let optInDisabledLogged = false
 
 export async function runQuarantineCheckIfNeeded(
   opts: RunQuarantineCheckOpts
@@ -112,7 +119,7 @@ export async function runQuarantineCheckIfNeeded(
 
   lastDirsMtimeMs.set(sessionId, dirsMtime)
 
-  log.info(
+  log.debug(
     { sessionId, metric: Metric.CHECK_TRIGGERED, hasNewSkills },
     'skill_quarantine: check start'
   )
@@ -122,7 +129,7 @@ export async function runQuarantineCheckIfNeeded(
     // Step 1: finish any leftover tmp archives and clean stale partials.
     await reconcileAndSweep(log)
 
-    log.info(
+    log.debug(
       { sessionId, count: installed.length, metric: Metric.SKILLS_CHECKED },
       'skill_quarantine: skills enumerated'
     )
@@ -156,10 +163,14 @@ export async function runQuarantineCheckIfNeeded(
     // not skipped — only the file-moving step. Logged once per check so
     // we can observe the opt-in distribution in DD.
     if (!quarantineEnabled) {
-      log.info(
-        { sessionId, metric: Metric.CHECK_DISABLED_ORG },
-        'skill_quarantine: opt-in not enabled for any org of caller; skipping enforcement'
-      )
+      // Once per process — this fires on (almost) every poll cycle otherwise.
+      if (!optInDisabledLogged) {
+        log.info(
+          { sessionId, metric: Metric.CHECK_DISABLED_ORG },
+          'skill_quarantine: opt-in not enabled for any org of caller; skipping enforcement'
+        )
+        optInDisabledLogged = true
+      }
       return
     }
 
@@ -188,7 +199,7 @@ export async function runQuarantineCheckIfNeeded(
       }
     }
   } finally {
-    log.info(
+    log.debug(
       {
         sessionId,
         duration_ms: Date.now() - t0,
@@ -205,4 +216,5 @@ export function __resetQuarantineCheckStateForTests(): void {
   lastDirsMtimeMs.clear()
   seenSkillMd5s.clear()
   killSwitchLogged = false
+  optInDisabledLogged = false
 }

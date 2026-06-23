@@ -22264,6 +22264,8 @@ export enum IssueType_Enum {
   RaceConditionFormatFlaw = 'RACE_CONDITION_FORMAT_FLAW',
   /** REDOS */
   Redos = 'REDOS',
+  /** REDUNDANT_CONDITION */
+  RedundantCondition = 'REDUNDANT_CONDITION',
   /** REDUNDANT_NIL_ERROR_CHECK */
   RedundantNilErrorCheck = 'REDUNDANT_NIL_ERROR_CHECK',
   /** Regular Expression Injection */

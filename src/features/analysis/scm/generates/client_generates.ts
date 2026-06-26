@@ -1150,6 +1150,14 @@ export type InvitationBaseError = {
   status: Status;
 };
 
+export type IssueTypeResponse = {
+  __typename?: 'IssueTypeResponse';
+  fixInstructions?: Maybe<Scalars['String']['output']>;
+  issueDescription?: Maybe<Scalars['String']['output']>;
+  label: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type IssueTypeStats = {
   __typename?: 'IssueTypeStats';
   count_fixable: Scalars['Int']['output'];
@@ -38248,6 +38256,7 @@ export type Query_Root = {
   issueType_aggregate: IssueType_Aggregate;
   /** fetch data from the table: "issue_type" using primary key columns */
   issueType_by_pk?: Maybe<IssueType>;
+  issueTypes: Array<IssueTypeResponse>;
   listTokens?: Maybe<Array<Maybe<ListTokenResponse>>>;
   me?: Maybe<MeResponse>;
   meAdmin?: Maybe<MeResponse>;
@@ -67506,6 +67515,11 @@ export type GetMvsProjectMutationVariables = Exact<{
 
 export type GetMvsProjectMutation = { __typename?: 'mutation_root', getMvsProject: { __typename?: 'CreateProjectResponse', projectId: string } };
 
+export type IssueTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type IssueTypesQuery = { __typename?: 'query_root', issueTypes: Array<{ __typename?: 'IssueTypeResponse', value: string, label: string, issueDescription?: string | null, fixInstructions?: string | null }> };
+
 export const FixDetailsFragmentDoc = `
     fragment FixDetails on fix {
   id
@@ -68450,6 +68464,16 @@ export const GetMvsProjectDocument = `
   }
 }
     `;
+export const IssueTypesDocument = `
+    query IssueTypes {
+  issueTypes {
+    value
+    label
+    issueDescription
+    fixInstructions
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -68589,6 +68613,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     getMvsProject(variables: GetMvsProjectMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<GetMvsProjectMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetMvsProjectMutation>({ document: GetMvsProjectDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'getMvsProject', 'mutation', variables);
+    },
+    IssueTypes(variables?: IssueTypesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<IssueTypesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<IssueTypesQuery>({ document: IssueTypesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'IssueTypes', 'query', variables);
     }
   };
 }

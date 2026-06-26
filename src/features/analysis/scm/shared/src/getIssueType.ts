@@ -5,6 +5,7 @@ import {
   Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
 } from '../../generates/client_generates'
+import { getIssueTypeCatalogEntry } from './issueTypeCatalog'
 import { IssuePartsFp } from './types/issue'
 
 export const issueTypeMap: Record<IssueType_Enum, string> = {
@@ -192,6 +193,15 @@ const issueTypeZ = z.nativeEnum(IssueType_Enum)
 export const getIssueTypeFriendlyString = (
   issueType: string | null | undefined
 ): string => {
+  // Prefer the analyzer-served catalog when hydrated; otherwise fall back to
+  // the curated map (retained during the migration), then a derived label.
+  // TODO(E-2015): remove the curated-map fallback once the DB enum is dropped
+  // and the analyzer catalog is the sole source of truth (collapses the dual
+  // source of truth this migration temporarily introduces).
+  const fromCatalog = getIssueTypeCatalogEntry(issueType)?.label
+  if (fromCatalog) {
+    return fromCatalog
+  }
   const issueTypeZParseRes = issueTypeZ.safeParse(issueType)
   if (!issueTypeZParseRes.success) {
     return issueType ? issueType.replaceAll('_', ' ') : 'Other'

@@ -1143,3 +1143,15 @@ mutation getMvsProject($organizationId: String!) {
     projectId
   }
 }
+
+# Analyzer-owned issue-type catalog (value + display metadata), served by the
+# interactive_fixer remote schema. Fetched once and used to hydrate the
+# in-memory catalog so the FE holds no per-type display content of its own.
+query IssueTypes {
+  issueTypes {
+    value
+    label
+    issueDescription
+    fixInstructions
+  }
+}

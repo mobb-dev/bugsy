@@ -330,8 +330,37 @@ export class BitbucketSCMLib extends SCMLib {
     throw new Error('getPullRequestMetrics not implemented for Bitbucket')
   }
 
-  async getRecentCommits(_since: string): Promise<RecentCommitsResult> {
-    throw new Error('getRecentCommits not implemented for Bitbucket')
+  async getRecentCommits(since: string): Promise<RecentCommitsResult> {
+    this._validateAccessTokenAndUrl()
+    const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(this.url)
+    const bitbucketSdk = createBitbucketSdk(this.accessToken)
+    const rawCommits = await bitbucketSdk.listRecentCommits({
+      workspace,
+      repo_slug,
+      since,
+    })
+    return {
+      data: rawCommits.map((commit) => {
+        const c = commit as Record<string, unknown>
+        const author = c['author'] as
+          | { raw?: string; user?: { account_id?: string } }
+          | undefined
+        const match = author?.raw?.match(/^(.+?)\s*<([^>]+)>/)
+        return {
+          sha: (c['hash'] as string) ?? '',
+          commit: {
+            committer: c['date'] ? { date: c['date'] as string } : undefined,
+            author: match
+              ? { name: match[1]?.trim(), email: match[2] }
+              : undefined,
+            message: (c['message'] as string) ?? '',
+          },
+          // Bitbucket resolves the commit to an account when it can; account_id
+          // matches repo_contributor.external_id for Bitbucket rows.
+          authorExternalId: author?.user?.account_id ?? null,
+        }
+      }),
+    }
   }
 
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {

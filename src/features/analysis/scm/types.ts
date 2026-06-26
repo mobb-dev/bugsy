@@ -242,6 +242,16 @@ export type CommitLite = {
     message?: string
   }
   parents?: { sha: string }[]
+  // SCM-resolved account id that authored the commit (distinct from the
+  // free-text git author email/name). Populated where the SCM provides it —
+  // GitHub (`author.id`) and Bitbucket (`author.user.account_id`) — and lets a
+  // committer be matched to their linked contributor row even when the commit
+  // email differs from the account email. Undefined for GitLab/ADO.
+  authorExternalId?: string | null
+  // True when the SCM resolved the commit author to a bot/App account
+  // (GitHub `author.type === 'Bot'`). Authoritative bot signal, independent of
+  // username/email heuristics. Undefined where the SCM doesn't report it.
+  authorIsBot?: boolean
 }
 
 export type RecentCommitsResult = {

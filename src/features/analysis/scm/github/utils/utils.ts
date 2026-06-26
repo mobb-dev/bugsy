@@ -125,8 +125,9 @@ export function getOctoKit(
               `Request quota exhausted for request ${options.method} ${options.url}`
             )
 
-            // Retry once after hitting rate limit
-            if (retryCount === 0) {
+            // Honor GitHub's Retry-After across a few attempts (bulk syncs can
+            // hit the limit repeatedly), then give up.
+            if (retryCount < 3) {
               octokit.log.info(`Retrying after ${retryAfter} seconds!`)
               return true
             }
@@ -142,8 +143,8 @@ export function getOctoKit(
               `SecondaryRateLimit detected for request ${options.method} ${options.url}`
             )
 
-            // Retry once after hitting secondary rate limit
-            if (retryCount === 0) {
+            // Honor the backoff across a few attempts before giving up.
+            if (retryCount < 3) {
               octokit.log.info(`Retrying after ${retryAfter} seconds!`)
               return true
             }

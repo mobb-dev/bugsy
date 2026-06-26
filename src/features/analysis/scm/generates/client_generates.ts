@@ -42984,9 +42984,11 @@ export type Repo_Contributor = {
   createdAt: Scalars['timestamptz']['output'];
   displayName?: Maybe<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
+  excludedFromCount: Scalars['Boolean']['output'];
   externalId: Scalars['String']['output'];
   id: Scalars['uuid']['output'];
   isActive: Scalars['Boolean']['output'];
+  lastCommittedAt?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   mobbUser?: Maybe<User>;
   mobbUserId?: Maybe<Scalars['uuid']['output']>;
@@ -43380,9 +43382,11 @@ export type Repo_Contributor_Bool_Exp = {
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   displayName?: InputMaybe<String_Comparison_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
+  excludedFromCount?: InputMaybe<Boolean_Comparison_Exp>;
   externalId?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isActive?: InputMaybe<Boolean_Comparison_Exp>;
+  lastCommittedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   mobbUser?: InputMaybe<User_Bool_Exp>;
   mobbUserId?: InputMaybe<Uuid_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
@@ -43408,9 +43412,11 @@ export type Repo_Contributor_Insert_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  excludedFromCount?: InputMaybe<Scalars['Boolean']['input']>;
   externalId?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastCommittedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   mobbUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
@@ -43430,6 +43436,7 @@ export type Repo_Contributor_Max_Fields = {
   email?: Maybe<Scalars['String']['output']>;
   externalId?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastCommittedAt?: Maybe<Scalars['timestamptz']['output']>;
   mobbUserId?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   scmUrl?: Maybe<Scalars['String']['output']>;
@@ -43444,6 +43451,7 @@ export type Repo_Contributor_Max_Order_By = {
   email?: InputMaybe<Order_By>;
   externalId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastCommittedAt?: InputMaybe<Order_By>;
   mobbUserId?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   scmUrl?: InputMaybe<Order_By>;
@@ -43459,6 +43467,7 @@ export type Repo_Contributor_Min_Fields = {
   email?: Maybe<Scalars['String']['output']>;
   externalId?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastCommittedAt?: Maybe<Scalars['timestamptz']['output']>;
   mobbUserId?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   scmUrl?: Maybe<Scalars['String']['output']>;
@@ -43473,6 +43482,7 @@ export type Repo_Contributor_Min_Order_By = {
   email?: InputMaybe<Order_By>;
   externalId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastCommittedAt?: InputMaybe<Order_By>;
   mobbUserId?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   scmUrl?: InputMaybe<Order_By>;
@@ -43508,9 +43518,11 @@ export type Repo_Contributor_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   displayName?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
+  excludedFromCount?: InputMaybe<Order_By>;
   externalId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isActive?: InputMaybe<Order_By>;
+  lastCommittedAt?: InputMaybe<Order_By>;
   mobbUser?: InputMaybe<User_Order_By>;
   mobbUserId?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
@@ -43536,11 +43548,15 @@ export enum Repo_Contributor_Select_Column {
   /** column name */
   Email = 'email',
   /** column name */
+  ExcludedFromCount = 'excludedFromCount',
+  /** column name */
   ExternalId = 'externalId',
   /** column name */
   Id = 'id',
   /** column name */
   IsActive = 'isActive',
+  /** column name */
+  LastCommittedAt = 'lastCommittedAt',
   /** column name */
   MobbUserId = 'mobbUserId',
   /** column name */
@@ -43558,11 +43574,15 @@ export enum Repo_Contributor_Select_Column {
 /** select "repo_contributor_aggregate_bool_exp_bool_and_arguments_columns" columns of table "repo_contributor" */
 export enum Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
   /** column name */
+  ExcludedFromCount = 'excludedFromCount',
+  /** column name */
   IsActive = 'isActive'
 }
 
 /** select "repo_contributor_aggregate_bool_exp_bool_or_arguments_columns" columns of table "repo_contributor" */
 export enum Repo_Contributor_Select_Column_Repo_Contributor_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  ExcludedFromCount = 'excludedFromCount',
   /** column name */
   IsActive = 'isActive'
 }
@@ -43572,9 +43592,11 @@ export type Repo_Contributor_Set_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  excludedFromCount?: InputMaybe<Scalars['Boolean']['input']>;
   externalId?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastCommittedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
@@ -43589,6 +43611,7 @@ export type Repo_Contributor_Snapshot = {
   activeContributors: Scalars['Int']['output'];
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
+  lastContributors: Scalars['Int']['output'];
   linkedContributors: Scalars['Int']['output'];
   /** An object relationship */
   organization: Organization;
@@ -43664,6 +43687,7 @@ export type Repo_Contributor_Snapshot_Arr_Rel_Insert_Input = {
 export type Repo_Contributor_Snapshot_Avg_Fields = {
   __typename?: 'repo_contributor_snapshot_avg_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43671,6 +43695,7 @@ export type Repo_Contributor_Snapshot_Avg_Fields = {
 /** order by avg() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Avg_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43683,6 +43708,7 @@ export type Repo_Contributor_Snapshot_Bool_Exp = {
   activeContributors?: InputMaybe<Int_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  lastContributors?: InputMaybe<Int_Comparison_Exp>;
   linkedContributors?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -43701,6 +43727,7 @@ export enum Repo_Contributor_Snapshot_Constraint {
 /** input type for incrementing numeric columns in table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Inc_Input = {
   activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  lastContributors?: InputMaybe<Scalars['Int']['input']>;
   linkedContributors?: InputMaybe<Scalars['Int']['input']>;
   totalContributors?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -43710,6 +43737,7 @@ export type Repo_Contributor_Snapshot_Insert_Input = {
   activeContributors?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastContributors?: InputMaybe<Scalars['Int']['input']>;
   linkedContributors?: InputMaybe<Scalars['Int']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -43723,6 +43751,7 @@ export type Repo_Contributor_Snapshot_Max_Fields = {
   activeContributors?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastContributors?: Maybe<Scalars['Int']['output']>;
   linkedContributors?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
@@ -43734,6 +43763,7 @@ export type Repo_Contributor_Snapshot_Max_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
@@ -43746,6 +43776,7 @@ export type Repo_Contributor_Snapshot_Min_Fields = {
   activeContributors?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastContributors?: Maybe<Scalars['Int']['output']>;
   linkedContributors?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
@@ -43757,6 +43788,7 @@ export type Repo_Contributor_Snapshot_Min_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
@@ -43784,6 +43816,7 @@ export type Repo_Contributor_Snapshot_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
@@ -43805,6 +43838,8 @@ export enum Repo_Contributor_Snapshot_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
+  LastContributors = 'lastContributors',
+  /** column name */
   LinkedContributors = 'linkedContributors',
   /** column name */
   OrganizationId = 'organizationId',
@@ -43819,6 +43854,7 @@ export type Repo_Contributor_Snapshot_Set_Input = {
   activeContributors?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastContributors?: InputMaybe<Scalars['Int']['input']>;
   linkedContributors?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
@@ -43829,6 +43865,7 @@ export type Repo_Contributor_Snapshot_Set_Input = {
 export type Repo_Contributor_Snapshot_Stddev_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43836,6 +43873,7 @@ export type Repo_Contributor_Snapshot_Stddev_Fields = {
 /** order by stddev() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43844,6 +43882,7 @@ export type Repo_Contributor_Snapshot_Stddev_Order_By = {
 export type Repo_Contributor_Snapshot_Stddev_Pop_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_pop_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43851,6 +43890,7 @@ export type Repo_Contributor_Snapshot_Stddev_Pop_Fields = {
 /** order by stddev_pop() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Pop_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43859,6 +43899,7 @@ export type Repo_Contributor_Snapshot_Stddev_Pop_Order_By = {
 export type Repo_Contributor_Snapshot_Stddev_Samp_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_samp_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43866,6 +43907,7 @@ export type Repo_Contributor_Snapshot_Stddev_Samp_Fields = {
 /** order by stddev_samp() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Samp_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43883,6 +43925,7 @@ export type Repo_Contributor_Snapshot_Stream_Cursor_Value_Input = {
   activeContributors?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastContributors?: InputMaybe<Scalars['Int']['input']>;
   linkedContributors?: InputMaybe<Scalars['Int']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
@@ -43893,6 +43936,7 @@ export type Repo_Contributor_Snapshot_Stream_Cursor_Value_Input = {
 export type Repo_Contributor_Snapshot_Sum_Fields = {
   __typename?: 'repo_contributor_snapshot_sum_fields';
   activeContributors?: Maybe<Scalars['Int']['output']>;
+  lastContributors?: Maybe<Scalars['Int']['output']>;
   linkedContributors?: Maybe<Scalars['Int']['output']>;
   totalContributors?: Maybe<Scalars['Int']['output']>;
 };
@@ -43900,6 +43944,7 @@ export type Repo_Contributor_Snapshot_Sum_Fields = {
 /** order by sum() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Sum_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43912,6 +43957,8 @@ export enum Repo_Contributor_Snapshot_Update_Column {
   CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
+  /** column name */
+  LastContributors = 'lastContributors',
   /** column name */
   LinkedContributors = 'linkedContributors',
   /** column name */
@@ -43935,6 +43982,7 @@ export type Repo_Contributor_Snapshot_Updates = {
 export type Repo_Contributor_Snapshot_Var_Pop_Fields = {
   __typename?: 'repo_contributor_snapshot_var_pop_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43942,6 +43990,7 @@ export type Repo_Contributor_Snapshot_Var_Pop_Fields = {
 /** order by var_pop() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Var_Pop_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43950,6 +43999,7 @@ export type Repo_Contributor_Snapshot_Var_Pop_Order_By = {
 export type Repo_Contributor_Snapshot_Var_Samp_Fields = {
   __typename?: 'repo_contributor_snapshot_var_samp_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43957,6 +44007,7 @@ export type Repo_Contributor_Snapshot_Var_Samp_Fields = {
 /** order by var_samp() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Var_Samp_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43965,6 +44016,7 @@ export type Repo_Contributor_Snapshot_Var_Samp_Order_By = {
 export type Repo_Contributor_Snapshot_Variance_Fields = {
   __typename?: 'repo_contributor_snapshot_variance_fields';
   activeContributors?: Maybe<Scalars['Float']['output']>;
+  lastContributors?: Maybe<Scalars['Float']['output']>;
   linkedContributors?: Maybe<Scalars['Float']['output']>;
   totalContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -43972,6 +44024,7 @@ export type Repo_Contributor_Snapshot_Variance_Fields = {
 /** order by variance() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Variance_Order_By = {
   activeContributors?: InputMaybe<Order_By>;
+  lastContributors?: InputMaybe<Order_By>;
   linkedContributors?: InputMaybe<Order_By>;
   totalContributors?: InputMaybe<Order_By>;
 };
@@ -43989,9 +44042,11 @@ export type Repo_Contributor_Stream_Cursor_Value_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   displayName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  excludedFromCount?: InputMaybe<Scalars['Boolean']['input']>;
   externalId?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastCommittedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   mobbUserId?: InputMaybe<Scalars['uuid']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
@@ -44009,11 +44064,15 @@ export enum Repo_Contributor_Update_Column {
   /** column name */
   Email = 'email',
   /** column name */
+  ExcludedFromCount = 'excludedFromCount',
+  /** column name */
   ExternalId = 'externalId',
   /** column name */
   Id = 'id',
   /** column name */
   IsActive = 'isActive',
+  /** column name */
+  LastCommittedAt = 'lastCommittedAt',
   /** column name */
   MobbUserId = 'mobbUserId',
   /** column name */

@@ -74,12 +74,20 @@ export class GithubSCMLib extends SCMLib {
   constructor(
     url: string | undefined,
     accessToken: string | undefined,
-    scmOrg: string | undefined
+    scmOrg: string | undefined,
+    options?: {
+      enableThrottling?: boolean
+      userProfileCache?: Map<string, unknown>
+    }
   ) {
     super(url, accessToken, scmOrg)
     this.githubSdk = getGithubSdk({
       auth: accessToken,
       url,
+      // Honor GitHub's rate-limit/Retry-After backoff for bulk callers
+      // (e.g. the contributor sync) instead of failing fast.
+      isEnableRetries: options?.enableThrottling,
+      userProfileCache: options?.userProfileCache,
     })
   }
   async createSubmitRequest(
@@ -254,6 +262,12 @@ export class GithubSCMLib extends SCMLib {
           message: c.commit.message,
         },
         parents: c.parents?.map((p) => ({ sha: p.sha })),
+        // Top-level `author` is GitHub's resolution of the commit to an account
+        // (null when GitHub can't tie the commit email to a user). Its numeric
+        // id matches repo_contributor.external_id (stored as String(id)), and
+        // its type marks GitHub App / bot accounts authoritatively.
+        authorExternalId: c.author?.id != null ? String(c.author.id) : null,
+        authorIsBot: c.author?.type === 'Bot',
       })),
     }
   }
@@ -337,7 +351,11 @@ export class GithubSCMLib extends SCMLib {
                     author: c.login,
                   }
                 )
-                const commitEmail = commit?.commit?.author?.email
+                const commitAuthor = commit?.commit?.author
+                const commitEmail = commitAuthor?.email
+                if (commitAuthor?.name && displayName === c.login) {
+                  displayName = commitAuthor.name
+                }
                 if (commitEmail) {
                   if (isRealEmail(commitEmail)) {
                     profileEmail = commitEmail
@@ -422,6 +440,12 @@ export class GithubSCMLib extends SCMLib {
               username: c.login,
             })
           }
+
+          contextLogger.info('[GitHub] Contributor resolved', {
+            username: c.login,
+            profileName: displayName,
+            displayNameIsNull: displayName === null,
+          })
 
           return {
             externalId: String(c.id),

@@ -147,7 +147,14 @@ async function executeBatchGraphQL<TKey, TResult>(
 }
 
 export function getGithubSdk(
-  params: OctokitOptions & { isEnableRetries?: boolean } = {}
+  params: OctokitOptions & {
+    isEnableRetries?: boolean
+    // Opt-in run-scoped cache (login -> profile). When provided, getUserProfile
+    // serves repeat lookups of the same user from memory instead of re-hitting
+    // the API per repo — a major request-volume cut for bulk callers like the
+    // contributor sync. Omitted by default, so other callers are unaffected.
+    userProfileCache?: Map<string, unknown>
+  } = {}
 ) {
   const octokit = getOctoKit(params)
 
@@ -1036,10 +1043,18 @@ export function getGithubSdk(
       return members
     },
 
-    async getUserProfile(params: { username: string }) {
+    async getUserProfile(getProfileParams: { username: string }) {
+      const cache = params.userProfileCache
+      const cached = cache?.get(getProfileParams.username)
+      if (cached) {
+        return cached as Awaited<
+          ReturnType<typeof octokit.rest.users.getByUsername>
+        >['data']
+      }
       const { data } = await octokit.rest.users.getByUsername({
-        username: params.username,
+        username: getProfileParams.username,
       })
+      cache?.set(getProfileParams.username, data)
       return data
     },
 

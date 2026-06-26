@@ -464,6 +464,49 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       }
     },
 
+    async listRecentCommits(params: {
+      workspace: string
+      repo_slug: string
+      since: string
+    }) {
+      const sinceDate = new Date(params.since)
+      const commits: unknown[] = []
+      // hard page cap (100 pages × 100 = 10k commits) so a busy repo
+      // can't run the loop unbounded; raise if 90-day windows ever exceed it.
+      const MAX_PAGES = 100
+      let page = 1
+      let done = false
+      while (!done && page <= MAX_PAGES) {
+        const res = await bitbucketClient.repositories.listCommits({
+          repo_slug: params.repo_slug,
+          workspace: params.workspace,
+          page: String(page),
+          pagelen: 100,
+        } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
+        const data = res.data as { values?: unknown[]; next?: string }
+        const values = data?.values ?? []
+        if (values.length === 0) break
+        for (const commit of values) {
+          const date = (commit as Record<string, unknown>)?.['date'] as
+            | string
+            | undefined
+          if (date && new Date(date) < sinceDate) {
+            // Reached the age boundary — don't fetch further pages, but keep
+            // scanning this page: commits aren't strictly date-ordered (merges
+            // can interleave), so a newer commit may follow an older one here.
+            done = true
+            continue
+          }
+          commits.push(commit)
+        }
+        // Bitbucket returns commits newest-first; stop once the page ran out
+        // or the API reports no further pages.
+        if (!data?.next) break
+        page++
+      }
+      return commits
+    },
+
     async getRepoCommitAuthors(params: {
       workspace: string
       repo_slug: string

@@ -11,7 +11,17 @@ import { ScmInitParams, ScmLibScmType, scmLibScmTypeToScmType } from './types'
 
 export async function createScmLib(
   { url, accessToken, scmType, scmOrg }: ScmInitParams,
-  { propagateExceptions = false, skipValidation = false } = {}
+  {
+    propagateExceptions = false,
+    skipValidation = false,
+    enableThrottling = false,
+    githubUserProfileCache,
+  }: {
+    propagateExceptions?: boolean
+    skipValidation?: boolean
+    enableThrottling?: boolean
+    githubUserProfileCache?: Map<string, unknown>
+  } = {}
 ): Promise<SCMLib> {
   const trimmedUrl = url
     ? url.trim().replace(/\/$/, '').replace(/.git$/i, '')
@@ -19,7 +29,10 @@ export async function createScmLib(
   try {
     switch (scmType) {
       case ScmLibScmType.GITHUB: {
-        const scm = new GithubSCMLib(trimmedUrl, accessToken, scmOrg)
+        const scm = new GithubSCMLib(trimmedUrl, accessToken, scmOrg, {
+          enableThrottling,
+          userProfileCache: githubUserProfileCache,
+        })
         if (!skipValidation) await scm.validateParams()
         return scm
       }

@@ -1,4 +1,3 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 import { httpOnlyCookie } from './httpOnlyCookie'
 import { insecureBinderConfiguration } from './insecureBinderConfiguration'
 import { insecureCookie } from './insecureCookie'
@@ -20,28 +19,26 @@ import { xss } from './xss'
 import { xxe } from './xxe'
 
 const vulnerabilities = {
-  [IssueType_Enum.LogForging as string]: logForging,
-  [IssueType_Enum.Ssrf as string]: ssrf,
-  [IssueType_Enum.Xxe as string]: xxe,
-  [IssueType_Enum.Xss as string]: xss,
-  [IssueType_Enum.UseOfSystemOutputStream as string]: useOfSystemOutputStream,
-  [IssueType_Enum.SystemInformationLeak as string]: sysLeak,
-  [IssueType_Enum.OverlyBroadCatch as string]: overlyBroadCatch,
-  [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
-  [IssueType_Enum.Pt as string]: pt,
-  [IssueType_Enum.RegexMissingTimeout as string]: regexMissingTimeout,
-  [IssueType_Enum.HttpOnlyCookie as string]: httpOnlyCookie,
-  [IssueType_Enum.InsecureCookie as string]: insecureCookie,
-  [IssueType_Enum.WcfMisconfigurationThrottlingNotEnabled]:
+  ['LOG_FORGING']: logForging,
+  ['SSRF']: ssrf,
+  ['XXE']: xxe,
+  ['XSS']: xss,
+  ['USE_OF_SYSTEM_OUTPUT_STREAM']: useOfSystemOutputStream,
+  ['SYSTEM_INFORMATION_LEAK']: sysLeak,
+  ['OVERLY_BROAD_CATCH']: overlyBroadCatch,
+  ['TRUST_BOUNDARY_VIOLATION']: trustBoundaryViolation,
+  ['PT']: pt,
+  ['REGEX_MISSING_TIMEOUT']: regexMissingTimeout,
+  ['HTTP_ONLY_COOKIE']: httpOnlyCookie,
+  ['INSECURE_COOKIE']: insecureCookie,
+  ['WCF_MISCONFIGURATION_THROTTLING_NOT_ENABLED']:
     wcfMisconfigurationThrottlingNotEnabled,
-  [IssueType_Enum.InsecureBinderConfiguration as string]:
-    insecureBinderConfiguration,
-  [IssueType_Enum.ValueShadowing as string]: valueShadowing,
-  [IssueType_Enum.InsecureRandomness as string]: insecureRandomness,
-  [IssueType_Enum.InsufficientLogging as string]: insufficientLogging,
-  [IssueType_Enum.SqlInjection as string]: sqlInjection,
-  [IssueType_Enum.RequestParametersBoundViaInput as string]:
-    requestParametersBoundViaInput,
+  ['INSECURE_BINDER_CONFIGURATION']: insecureBinderConfiguration,
+  ['VALUE_SHADOWING']: valueShadowing,
+  ['INSECURE_RANDOMNESS']: insecureRandomness,
+  ['INSUFFICIENT_LOGGING']: insufficientLogging,
+  ['SQL_Injection']: sqlInjection,
+  ['REQUEST_PARAMETERS_BOUND_VIA_INPUT']: requestParametersBoundViaInput,
 }
 
 export default vulnerabilities

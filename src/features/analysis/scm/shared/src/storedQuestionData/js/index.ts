@@ -1,4 +1,3 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 // Note: we use a guidance from Python on purpose. CSRF is detected in HTML
 // and treated as Python by Semgrep, but as JS by Fortify.
 import { csrf } from '../python/csrf'
@@ -24,28 +23,27 @@ import { uncheckedLoopCondition } from './uncheckedLoopCondition'
 import { xss } from './xss'
 
 const vulnerabilities = {
-  [IssueType_Enum.CmDi as string]: commandInjection,
-  [IssueType_Enum.GraphqlDepthLimit as string]: graphqlDepthLimit,
-  [IssueType_Enum.InsecureRandomness as string]: insecureRandomness,
-  [IssueType_Enum.Ssrf as string]: ssrf,
-  [IssueType_Enum.TypeConfusion as string]: typeConfusion,
-  [IssueType_Enum.IncompleteUrlSanitization as string]:
-    incompleteUrlSanitization,
-  [IssueType_Enum.LogForging as string]: logForging,
-  [IssueType_Enum.Xss as string]: xss,
-  [IssueType_Enum.OpenRedirect as string]: openRedirect,
-  [IssueType_Enum.SystemInformationLeak as string]: sysLeak,
-  [IssueType_Enum.SystemInformationLeakExternal as string]: sysLeakExternal,
-  [IssueType_Enum.IframeWithoutSandbox as string]: iframeWithoutSandbox,
-  [IssueType_Enum.Pt as string]: pt,
-  [IssueType_Enum.HardcodedSecrets as string]: hardcodedSecrets,
-  [IssueType_Enum.MissingHstsHeader as string]: headerMaxAge,
-  [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
-  [IssueType_Enum.NoLimitsOrThrottling as string]: noLimitsOrThrottling,
-  [IssueType_Enum.MissingCspHeader as string]: cspHeaderValue,
-  [IssueType_Enum.MissingXFrameOptions as string]: xFrameOptionsValue,
-  [IssueType_Enum.HardcodedDomainInHtml as string]: hardcodedDomainInHtml,
-  [IssueType_Enum.Csrf as string]: csrf,
+  ['CMDi']: commandInjection,
+  ['GRAPHQL_DEPTH_LIMIT']: graphqlDepthLimit,
+  ['INSECURE_RANDOMNESS']: insecureRandomness,
+  ['SSRF']: ssrf,
+  ['TYPE_CONFUSION']: typeConfusion,
+  ['INCOMPLETE_URL_SANITIZATION']: incompleteUrlSanitization,
+  ['LOG_FORGING']: logForging,
+  ['XSS']: xss,
+  ['OPEN_REDIRECT']: openRedirect,
+  ['SYSTEM_INFORMATION_LEAK']: sysLeak,
+  ['SYSTEM_INFORMATION_LEAK_EXTERNAL']: sysLeakExternal,
+  ['IFRAME_WITHOUT_SANDBOX']: iframeWithoutSandbox,
+  ['PT']: pt,
+  ['HARDCODED_SECRETS']: hardcodedSecrets,
+  ['MISSING_HSTS_HEADER']: headerMaxAge,
+  ['UNCHECKED_LOOP_CONDITION']: uncheckedLoopCondition,
+  ['NO_LIMITS_OR_THROTTLING']: noLimitsOrThrottling,
+  ['MISSING_CSP_HEADER']: cspHeaderValue,
+  ['MISSING_X_FRAME_OPTIONS']: xFrameOptionsValue,
+  ['HARDCODED_DOMAIN_IN_HTML']: hardcodedDomainInHtml,
+  ['CSRF']: csrf,
 }
 
 export default vulnerabilities

@@ -12,7 +12,11 @@ import {
   httpToWsUrl,
 } from '../../../utils/proxy'
 import { subscribeStream } from '../../../utils/subscribe/subscribe'
-import { REPORT_DEFAULT_FILE_NAME } from '../scm'
+import {
+  hydrateIssueTypeCatalog,
+  isIssueTypeCatalogHydrated,
+  REPORT_DEFAULT_FILE_NAME,
+} from '../scm'
 import {
   AnalyzeCommitForExtensionAiBlameMutation,
   AnalyzeCommitForExtensionAiBlameMutationVariables,
@@ -167,6 +171,23 @@ export class GQLClient {
       },
     })
     this._clientSdk = getSdk(this._client)
+  }
+
+  // Fetch the analyzer-owned issue-type catalog once and hydrate the shared
+  // in-memory cache so the synchronous display helpers serve analyzer labels
+  // and descriptions. NO FALLBACK: a fetch error or an empty response throws so
+  // the CLI fails loudly instead of silently rendering degraded labels.
+  async loadIssueTypeCatalog(): Promise<void> {
+    if (isIssueTypeCatalogHydrated()) {
+      return
+    }
+    const { issueTypes } = await this._clientSdk.IssueTypes()
+    if (issueTypes.length === 0) {
+      throw new Error(
+        'Issue-type catalog is empty: the issueTypes query returned no entries'
+      )
+    }
+    hydrateIssueTypeCatalog(issueTypes)
   }
 
   async getUserInfo() {

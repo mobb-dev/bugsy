@@ -50,6 +50,10 @@ export async function getAuthenticatedGQLClient({
     authManager,
   })
 
+  // NOTE: issue-type catalog hydration is intentionally NOT done here. It is
+  // label-scoped — only flows that render issue-type labels (e.g. analyze) call
+  // gqlClient.loadIssueTypeCatalog(), so a catalog outage cannot break unrelated
+  // commands (addScmToken, upload_ai_blame, ...).
   return gqlClient
 }
 

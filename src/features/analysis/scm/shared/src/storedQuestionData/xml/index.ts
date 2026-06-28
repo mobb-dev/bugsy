@@ -1,9 +1,7 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 import { unboundedOccurrences } from './unboundedOccurrences'
 
 const vulnerabilities = {
-  [IssueType_Enum.WeakXmlSchemaUnboundedOccurrences as string]:
-    unboundedOccurrences,
+  ['WEAK_XML_SCHEMA_UNBOUNDED_OCCURRENCES']: unboundedOccurrences,
 }
 
 export default vulnerabilities

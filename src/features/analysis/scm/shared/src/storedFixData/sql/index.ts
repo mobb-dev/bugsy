@@ -1,9 +1,7 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 import { defaultRightsInObjDefinition } from './defaultRightsInObjDefinition'
 
 const vulnerabilities = {
-  [IssueType_Enum.DefaultRightsInObjDefinition as string]:
-    defaultRightsInObjDefinition,
+  ['DEFAULT_RIGHTS_IN_OBJ_DEFINITION']: defaultRightsInObjDefinition,
 }
 
 export default vulnerabilities

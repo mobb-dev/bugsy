@@ -365,6 +365,9 @@ export async function _scan(
     inputApiKey: apiKey,
     isSkipPrompts: skipPrompts,
   })
+  // The analyze flow renders analyzer-served issue-type labels/descriptions, so
+  // hydrate the catalog here (label-scoped). No fallback: throws if it fails.
+  await gqlClient.loadIssueTypeCatalog()
 
   if (!mobbProjectName) {
     throw new Error('mobbProjectName is required')

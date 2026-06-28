@@ -1,11 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { z } from 'zod'
-
-import { IssueType_Enum } from '../../features/analysis/scm/generates/client_generates'
 import { GitService } from '../../features/analysis/scm/services/GitService'
-import { fixDetailsData } from '../../features/analysis/scm/shared/src/fixDetailsData'
+import { getIssueTypeCatalogEntry } from '../../features/analysis/scm/shared/src/issueTypeCatalog'
 import { logDebug, logError, logInfo } from '../Logger'
 import { McpFix } from '../types'
 
@@ -17,15 +14,6 @@ import { McpFix } from '../types'
 function extractPathFromPatch(patch?: string): string | null {
   const match = patch?.match(/diff --git a\/([^\s]+) b\//)
   return match?.[1] ?? null
-}
-
-/**
- * Parses issue type string to enum using zod validation
- * @param issueType Issue type string
- * @returns Parsed result with success/failure status
- */
-function parsedIssueTypeRes(issueType: string | undefined) {
-  return z.nativeEnum(IssueType_Enum).safeParse(issueType)
 }
 
 export type FolderInfo = {
@@ -600,11 +588,8 @@ export class LocalMobbFolderService {
     }
 
     // Add vulnerability details using same content as WrappedFixInfo
-    const parseIssueTypeRes = parsedIssueTypeRes(fix.safeIssueType || undefined)
-    const staticData = parseIssueTypeRes.success
-      ? fixDetailsData[parseIssueTypeRes.data]
-      : null
-    const { issueDescription, fixInstructions } = staticData || {}
+    const catalogEntry = getIssueTypeCatalogEntry(fix.safeIssueType)
+    const { issueDescription, fixInstructions } = catalogEntry ?? {}
 
     // Add vulnerability details section
     markdown += `\n## Vulnerability Details\n\n`

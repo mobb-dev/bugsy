@@ -44,3 +44,12 @@ export function getIssueTypeCatalogEntry(
   }
   return catalog.get(value)
 }
+
+/**
+ * All hydrated catalog entries. Used to enumerate issue types where the FE
+ * previously iterated the generated issue-type enum (settings defaults,
+ * filter option lists). Empty until hydrated.
+ */
+export function listIssueTypeCatalog(): IssueTypeCatalogEntry[] {
+  return catalog ? [...catalog.values()] : []
+}

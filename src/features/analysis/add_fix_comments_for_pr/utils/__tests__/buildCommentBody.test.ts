@@ -1,18 +1,28 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { Vulnerability_Severity_Enum } from '../../../scm/generates/client_generates'
 import {
-  IssueType_Enum,
-  Vulnerability_Severity_Enum,
-} from '../../../scm/generates/client_generates'
+  hydrateIssueTypeCatalog,
+  resetIssueTypeCatalog,
+} from '../../../scm/shared/src/issueTypeCatalog'
 import {
   buildFixCommentBody,
   BuildFixCommentBodyParams,
 } from '../buildCommentBody'
 
+const XSS_CATALOG_ENTRY = {
+  value: 'XSS',
+  label: 'XSS',
+  issueDescription:
+    'Cross-Site Scripting (XSS) allows attackers to inject malicious scripts into web pages viewed by other users. This can lead to theft of session cookies, redirection to malicious websites, or defacement of the webpage.',
+  fixInstructions:
+    'Implement input validation and output encoding. This includes sanitizing user input and escaping special characters to prevent execution of injected scripts.',
+}
+
 const params: BuildFixCommentBodyParams = {
   fix: {
     id: 'fix123',
-    safeIssueType: IssueType_Enum.Xss,
+    safeIssueType: 'XSS',
     safeIssueLanguage: 'JavaScript',
     severityText: Vulnerability_Severity_Enum.High,
     patchAndQuestions: {
@@ -41,6 +51,13 @@ const params: BuildFixCommentBodyParams = {
 }
 
 describe('buildCommentBody', () => {
+  beforeEach(() => {
+    hydrateIssueTypeCatalog([XSS_CATALOG_ENTRY])
+  })
+  afterEach(() => {
+    resetIssueTypeCatalog()
+  })
+
   it('should build a comment body with all required elements', () => {
     const result = buildFixCommentBody(params)
     expect(result).toMatchInlineSnapshot(`
@@ -49,7 +66,7 @@ describe('buildCommentBody', () => {
 
       ## Issue description
       Cross-Site Scripting (XSS) allows attackers to inject malicious scripts into web pages viewed by other users. This can lead to theft of session cookies, redirection to malicious websites, or defacement of the webpage.
-       
+
       ## Fix instructions
       Implement input validation and output encoding. This includes sanitizing user input and escaping special characters to prevent execution of injected scripts.
 

@@ -2,10 +2,10 @@ import { z } from 'zod'
 
 import {
   IssueLanguage_Enum,
-  IssueType_Enum,
   Language,
   ManifestAction,
 } from '../../generates/client_generates'
+import { SafeIssueTypeStringZ } from './getIssueType'
 import {
   languages as fixDataLanguages,
   StoredFixDataItemZ,
@@ -34,7 +34,7 @@ export function getQuestionInformation({
   language,
 }: {
   fixQuestionData: FixQuestionData
-  issueType: IssueType_Enum
+  issueType: string
   language: IssueLanguage_Enum
 }) {
   const { name } = fixQuestionData
@@ -55,7 +55,7 @@ export function curriedQuestionInformationByQuestion({
   issueType,
   language,
 }: {
-  issueType: IssueType_Enum
+  issueType: string
   language: IssueLanguage_Enum
 }) {
   return (fixQuestionData: FixQuestionData) =>
@@ -108,7 +108,7 @@ export function getFixGuidances({
   fixExtraContext,
   questions,
 }: {
-  issueType: IssueType_Enum | null
+  issueType: string | null
   issueLanguage: IssueLanguage_Enum | null
   fixExtraContext: FixExtraContext
   questions: Question[]
@@ -133,7 +133,7 @@ export function getFixGuidances({
 }
 
 const IssueTypeAndLanguageZ = z.object({
-  issueType: z.nativeEnum(IssueType_Enum),
+  issueType: SafeIssueTypeStringZ,
   issueLanguage: z.nativeEnum(IssueLanguage_Enum),
 })
 

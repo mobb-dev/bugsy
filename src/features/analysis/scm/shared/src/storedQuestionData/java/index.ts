@@ -1,4 +1,3 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 import { commandInjection } from './commandInjection'
 import { confusingNaming } from './confusingNaming'
 import { duplicatedStrings } from './duplicatedStrings'
@@ -27,33 +26,32 @@ import { xss } from './xss'
 import { xxe } from './xxe'
 
 const vulnerabilities = {
-  [IssueType_Enum.SqlInjection as string]: sqlInjection,
-  [IssueType_Enum.CmDiRelativePathCommand as string]: relativePathCommand,
-  [IssueType_Enum.CmDi as string]: commandInjection,
-  [IssueType_Enum.ConfusingNaming as string]: confusingNaming,
-  [IssueType_Enum.ErrorCondtionWithoutAction]: errorConditionWithoutAction,
-  [IssueType_Enum.Xxe as string]: xxe,
-  [IssueType_Enum.Xss as string]: xss,
-  [IssueType_Enum.PrivacyViolation as string]: privacyViolation,
-  [IssueType_Enum.Pt as string]: pt,
-  [IssueType_Enum.Ssrf as string]: ssrf,
-  [IssueType_Enum.LogForging as string]: logForging,
-  [IssueType_Enum.LocaleDependentComparison as string]:
-    localeDependentComparison,
-  [IssueType_Enum.MissingCheckAgainstNull as string]: missingCheckAgainstNull,
-  [IssueType_Enum.OpenRedirect as string]: openRedirect,
-  [IssueType_Enum.OverlyBroadCatch as string]: overlyBroadCatch,
-  [IssueType_Enum.SystemInformationLeak as string]: sysLeak,
-  [IssueType_Enum.UseOfSystemOutputStream as string]: useOfSystemOutputStream,
-  [IssueType_Enum.HttpOnlyCookie as string]: httpOnlyCookie,
-  [IssueType_Enum.UncheckedLoopCondition as string]: uncheckedLoopCondition,
-  [IssueType_Enum.InsecureCookie as string]: insecureCookie,
-  [IssueType_Enum.TrustBoundaryViolation as string]: trustBoundaryViolation,
-  [IssueType_Enum.UnsafeReflection as string]: unsafeReflection,
-  [IssueType_Enum.J2EeGetConnection as string]: j2eeGetConnection,
-  [IssueType_Enum.LeftoverDebugCode as string]: leftoverDebugCode,
-  [IssueType_Enum.ErroneousStringCompare as string]: erroneousStringCompare,
-  [IssueType_Enum.DuplicatedStrings as string]: duplicatedStrings,
+  ['SQL_Injection']: sqlInjection,
+  ['CMDi_relative_path_command']: relativePathCommand,
+  ['CMDi']: commandInjection,
+  ['CONFUSING_NAMING']: confusingNaming,
+  ['ERROR_CONDTION_WITHOUT_ACTION']: errorConditionWithoutAction,
+  ['XXE']: xxe,
+  ['XSS']: xss,
+  ['PRIVACY_VIOLATION']: privacyViolation,
+  ['PT']: pt,
+  ['SSRF']: ssrf,
+  ['LOG_FORGING']: logForging,
+  ['LOCALE_DEPENDENT_COMPARISON']: localeDependentComparison,
+  ['MISSING_CHECK_AGAINST_NULL']: missingCheckAgainstNull,
+  ['OPEN_REDIRECT']: openRedirect,
+  ['OVERLY_BROAD_CATCH']: overlyBroadCatch,
+  ['SYSTEM_INFORMATION_LEAK']: sysLeak,
+  ['USE_OF_SYSTEM_OUTPUT_STREAM']: useOfSystemOutputStream,
+  ['HTTP_ONLY_COOKIE']: httpOnlyCookie,
+  ['UNCHECKED_LOOP_CONDITION']: uncheckedLoopCondition,
+  ['INSECURE_COOKIE']: insecureCookie,
+  ['TRUST_BOUNDARY_VIOLATION']: trustBoundaryViolation,
+  ['UNSAFE_REFLECTION']: unsafeReflection,
+  ['J2EE_GET_CONNECTION']: j2eeGetConnection,
+  ['LEFTOVER_DEBUG_CODE']: leftoverDebugCode,
+  ['ERRONEOUS_STRING_COMPARE']: erroneousStringCompare,
+  ['DUPLICATED_STRINGS']: duplicatedStrings,
 }
 
 export default vulnerabilities

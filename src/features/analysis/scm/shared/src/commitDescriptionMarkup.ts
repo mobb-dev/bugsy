@@ -1,17 +1,14 @@
-import { z } from 'zod'
-
 import {
-  IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
 } from '../../generates/client_generates'
-import { fixDetailsData } from './fixDetailsData'
 import {
   getIssueTypeFriendlyString,
   getTagTooltip,
   issueDescription,
 } from './getIssueType'
+import { getIssueTypeCatalogEntry } from './issueTypeCatalog'
 
 function capitalizeFirstLetter(str: string) {
   return str?.length ? str[0]!.toUpperCase() + str.slice(1) : ''
@@ -59,8 +56,7 @@ export const getCommitDescription = ({
 
 `
 
-  const parseIssueTypeRes = z.nativeEnum(IssueType_Enum).safeParse(issueType)
-  if (issueType && parseIssueTypeRes.success) {
+  if (issueType) {
     if (irrelevantIssueWithTags?.[0]?.tag) {
       description += `
 > [!tip]
@@ -72,14 +68,17 @@ ${issueDescription[irrelevantIssueWithTags[0].tag]}
 `
     }
 
-    const staticData = fixDetailsData[parseIssueTypeRes.data]
-    if (staticData) {
+    const catalogEntry = getIssueTypeCatalogEntry(issueType)
+    if (catalogEntry?.issueDescription) {
       description += `## Issue description
-${staticData.issueDescription}
- 
-## Fix instructions
-${staticData.fixInstructions}
+${catalogEntry.issueDescription}
 `
+      if (catalogEntry.fixInstructions) {
+        description += `
+## Fix instructions
+${catalogEntry.fixInstructions}
+`
+      }
     }
   }
 
@@ -111,8 +110,7 @@ export const getCommitIssueDescription = ({
 
   let description = `The following issues reported by ${capitalizeFirstLetter(vendor)} on this PR were found to be irrelevant to your project:\n`
 
-  const parseIssueTypeRes = z.nativeEnum(IssueType_Enum).safeParse(issueType)
-  if (issueType && parseIssueTypeRes.success) {
+  if (issueType) {
     if (irrelevantIssueWithTags?.[0]?.tag) {
       description = `
 > [!tip]
@@ -125,10 +123,10 @@ ${fpDescription ?? unfixableDescription ?? issueDescription[irrelevantIssueWithT
 `
     }
 
-    const staticData = fixDetailsData[parseIssueTypeRes.data]
-    if (staticData) {
+    const catalogEntry = getIssueTypeCatalogEntry(issueType)
+    if (catalogEntry?.issueDescription) {
       description += `## Issue description
-${staticData.issueDescription}
+${catalogEntry.issueDescription}
 `
     }
   }

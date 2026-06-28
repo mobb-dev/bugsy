@@ -15,12 +15,12 @@ import {
   getIssueTypeFriendlyString,
   getIssueUrlWithRedirect,
   PatchAndQuestionsZ,
+  SafeIssueTypeStringZ,
   toQuestion,
 } from '../../scm'
 import { Vulnerability_Report_Issue_Tag_Enum } from '../../scm/generates/client_generates'
 import {
   IssueLanguage_Enum,
-  IssueType_Enum,
   Vulnerability_Severity_Enum,
 } from '../../scm/generates/client_generates'
 import { COMMIT_FIX_SVG, MobbIconMarkdown } from '../constants'
@@ -108,7 +108,7 @@ export function buildFixCommentBody({
       patchAndQuestions: PatchAndQuestionsZ,
       safeIssueLanguage: z.nativeEnum(IssueLanguage_Enum),
       severityText: z.nativeEnum(Vulnerability_Severity_Enum),
-      safeIssueType: z.nativeEnum(IssueType_Enum),
+      safeIssueType: SafeIssueTypeStringZ,
     })
     .safeParse(fix)
   if (!validFixParseRes.success) {

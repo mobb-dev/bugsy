@@ -1,4 +1,3 @@
-import { IssueType_Enum } from '../../../../generates/client_generates'
 import { passwordInComment } from '../passwordInComment'
 import { insecureDeserialization } from './insecureDeserialization'
 import { j2eeGetConnection } from './j2eeGetConnection'
@@ -6,11 +5,11 @@ import { sqlInjection } from './sqlInjection'
 import { systemInformationLeak } from './systemInformationLeak'
 
 const vulnerabilities = {
-  [IssueType_Enum.PasswordInComment as string]: passwordInComment,
-  [IssueType_Enum.InsecureDeserialization as string]: insecureDeserialization,
-  [IssueType_Enum.J2EeGetConnection as string]: j2eeGetConnection,
-  [IssueType_Enum.SqlInjection as string]: sqlInjection,
-  [IssueType_Enum.SystemInformationLeak as string]: systemInformationLeak,
+  ['PASSWORD_IN_COMMENT']: passwordInComment,
+  ['INSECURE_DESERIALIZATION']: insecureDeserialization,
+  ['J2EE_GET_CONNECTION']: j2eeGetConnection,
+  ['SQL_Injection']: sqlInjection,
+  ['SYSTEM_INFORMATION_LEAK']: systemInformationLeak,
 }
 
 export default vulnerabilities

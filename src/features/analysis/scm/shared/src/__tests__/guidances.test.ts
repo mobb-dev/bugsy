@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import {
   FixQuestionInputType,
   IssueLanguage_Enum,
-  IssueType_Enum,
   Language,
   ManifestAction,
 } from '../../../generates/client_generates'
@@ -60,7 +59,7 @@ describe('getGuidances', () => {
 
     const result = getGuidances({
       questions: mockQuestions,
-      issueType: IssueType_Enum.SqlInjection,
+      issueType: 'SQL_Injection',
       issueLanguage: IssueLanguage_Enum.Java,
       fixExtraContext: mockFixExtraContext,
     })

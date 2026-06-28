@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
+import { SafeIssueTypeStringZ } from '../features/analysis/scm'
 import {
   FixQuestionInputType,
-  IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Severity_Enum,
 } from '../features/analysis/scm/generates/client_generates'
@@ -25,7 +25,7 @@ const VulnerabilityReportIssueTagSchema = z.object({
 // Schema for vulnerability report issues
 const VulnerabilityReportIssueSchema = z.object({
   category: z.any().optional().nullable(),
-  parsedIssueType: z.nativeEnum(IssueType_Enum).nullable().optional(),
+  parsedIssueType: SafeIssueTypeStringZ.nullable().optional(),
   parsedSeverity: z
     .nativeEnum(Vulnerability_Severity_Enum)
     .nullable()

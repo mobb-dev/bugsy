@@ -44947,6 +44947,7 @@ export type Scm_Config = {
   scmUrl: Scalars['String']['output'];
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
+  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   user?: Maybe<User>;
@@ -45060,6 +45061,7 @@ export type Scm_Config_Bool_Exp = {
   scmUrl?: InputMaybe<String_Comparison_Exp>;
   scmUsername?: InputMaybe<String_Comparison_Exp>;
   token?: InputMaybe<String_Comparison_Exp>;
+  tokenInvalidAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tokenLastUpdate?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
   userId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -45090,6 +45092,7 @@ export type Scm_Config_Insert_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
+  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -45107,6 +45110,7 @@ export type Scm_Config_Max_Fields = {
   scmUrl?: Maybe<Scalars['String']['output']>;
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
+  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -45122,6 +45126,7 @@ export type Scm_Config_Max_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
+  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
 };
@@ -45138,6 +45143,7 @@ export type Scm_Config_Min_Fields = {
   scmUrl?: Maybe<Scalars['String']['output']>;
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
+  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -45153,6 +45159,7 @@ export type Scm_Config_Min_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
+  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
 };
@@ -45185,6 +45192,7 @@ export type Scm_Config_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
+  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
   userId?: InputMaybe<Order_By>;
@@ -45218,6 +45226,8 @@ export enum Scm_Config_Select_Column {
   /** column name */
   Token = 'token',
   /** column name */
+  TokenInvalidAt = 'tokenInvalidAt',
+  /** column name */
   TokenLastUpdate = 'tokenLastUpdate',
   /** column name */
   UserId = 'userId'
@@ -45248,6 +45258,7 @@ export type Scm_Config_Set_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
+  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -45312,6 +45323,7 @@ export type Scm_Config_Stream_Cursor_Value_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
+  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -45351,6 +45363,8 @@ export enum Scm_Config_Update_Column {
   ScmUsername = 'scmUsername',
   /** column name */
   Token = 'token',
+  /** column name */
+  TokenInvalidAt = 'tokenInvalidAt',
   /** column name */
   TokenLastUpdate = 'tokenLastUpdate',
   /** column name */

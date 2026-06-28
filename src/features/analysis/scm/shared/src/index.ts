@@ -1,5 +1,4 @@
 export * from './commitDescriptionMarkup'
-export * from './fixDetailsData'
 export * from './getIssueType'
 export * from './guidances'
 export * from './issueTypeCatalog'

@@ -13,10 +13,13 @@ import sql from './sql'
 import xml from './xml'
 
 export const StoredFixDataItemZ = z.object({
-  guidance: z.function().returns(z.string()),
+  guidance: z.function().args(z.any()).returns(z.string()),
 })
 
-export const languages = {
+// String-indexed (issue types are opaque strings keyed by their DB value). The
+// per-issue-type entries have heterogeneous guidance arities, so the value is
+// `unknown` and validated at the lookup site via StoredFixDataItemZ.safeParse.
+export const languages: Record<string, Record<string, unknown>> = {
   [IssueLanguage_Enum.Java as string]: java,
   [IssueLanguage_Enum.JavaScript as string]: javascript,
   [IssueLanguage_Enum.CSharp as string]: csharp,
@@ -29,5 +32,4 @@ export const languages = {
   [IssueLanguage_Enum.Hcl as string]: hcl,
 }
 
-export type SQLInjection = typeof javascript.SQL_Injection
 export default languages

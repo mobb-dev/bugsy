@@ -1,212 +1,33 @@
 import { z } from 'zod'
 
 import {
-  IssueType_Enum,
   Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
 } from '../../generates/client_generates'
 import { getIssueTypeCatalogEntry } from './issueTypeCatalog'
 import { IssuePartsFp } from './types/issue'
 
-export const issueTypeMap: Record<IssueType_Enum, string> = {
-  [IssueType_Enum.NoLimitsOrThrottling]: 'Missing Rate Limiting',
-  [IssueType_Enum.SqlInjection]: 'SQL Injection',
-  [IssueType_Enum.CmDiRelativePathCommand]: 'Relative Path Command Injection',
-  [IssueType_Enum.CmDi]: 'Command Injection',
-  [IssueType_Enum.ConfusingNaming]: 'Confusing Naming',
-  [IssueType_Enum.Xxe]: 'XXE',
-  [IssueType_Enum.Xss]: 'XSS',
-  [IssueType_Enum.Pt]: 'Path Traversal',
-  [IssueType_Enum.ZipSlip]: 'Zip Slip',
-  [IssueType_Enum.InsecureRandomness]: 'Insecure Randomness',
-  [IssueType_Enum.Ssrf]: 'Server Side Request Forgery',
-  [IssueType_Enum.TypeConfusion]: 'Type Confusion',
-  [IssueType_Enum.RegexInjection]: 'Regular Expression Injection',
-  [IssueType_Enum.IncompleteUrlSanitization]: 'Incomplete URL Sanitization',
-  [IssueType_Enum.LocaleDependentComparison]: 'Locale Dependent Comparison',
-  [IssueType_Enum.LogForging]: 'Log Forging',
-  [IssueType_Enum.MissingCheckAgainstNull]: 'Missing Check against Null',
-  [IssueType_Enum.PasswordInComment]: 'Password in Comment',
-  [IssueType_Enum.OverlyBroadCatch]: 'Poor Error Handling: Overly Broad Catch',
-  [IssueType_Enum.UseOfSystemOutputStream]: 'Use of System.out/System.err',
-  [IssueType_Enum.DangerousFunctionOverflow]: 'Use of dangerous function',
-  [IssueType_Enum.DosStringBuilder]: 'Denial of Service: StringBuilder',
-  [IssueType_Enum.OpenRedirect]: 'Open Redirect',
-  [IssueType_Enum.WeakXmlSchemaUnboundedOccurrences]:
-    'Weak XML Schema: Unbounded Occurrences',
-  [IssueType_Enum.SystemInformationLeak]: 'System Information Leak',
-  [IssueType_Enum.SystemInformationLeakExternal]:
-    'External System Information Leak',
-  [IssueType_Enum.HttpResponseSplitting]: 'HTTP response splitting',
-  [IssueType_Enum.HttpOnlyCookie]: 'Cookie is not HttpOnly',
-  [IssueType_Enum.InsecureCookie]: 'Insecure Cookie',
-  [IssueType_Enum.TrustBoundaryViolation]: 'Trust Boundary Violation',
-  [IssueType_Enum.NullDereference]: 'Null Dereference',
-  [IssueType_Enum.UnsafeDeserialization]: 'Unsafe deserialization',
-  [IssueType_Enum.UnsafeReflection]: 'Unsafe Reflection',
-  [IssueType_Enum.InsecureBinderConfiguration]: 'Insecure Binder Configuration',
-  [IssueType_Enum.UnsafeTargetBlank]: 'Unsafe use of target blank',
-  [IssueType_Enum.IframeWithoutSandbox]: 'Client use of iframe without sandbox',
-  [IssueType_Enum.JqueryDeprecatedSymbols]: 'jQuery deprecated symbols',
-  [IssueType_Enum.MissingAntiforgeryValidation]:
-    'Missing Anti-Forgery Validation',
-  [IssueType_Enum.GraphqlDepthLimit]: 'GraphQL Depth Limit',
-  [IssueType_Enum.UncheckedLoopCondition]: 'Unchecked Loop Condition',
-  [IssueType_Enum.ImproperResourceShutdownOrRelease]:
-    'Improper Resource Shutdown or Release',
-  [IssueType_Enum.ImproperExceptionHandling]: 'Improper Exception Handling',
-  [IssueType_Enum.DefaultRightsInObjDefinition]:
-    'Default Definer Rights in Package or Object Definition',
-  [IssueType_Enum.HtmlCommentInJsp]: 'HTML Comment in JSP',
-  [IssueType_Enum.ErrorCondtionWithoutAction]: 'Error Condition Without Action',
-  [IssueType_Enum.DeprecatedFunction]: 'Deprecated Function',
-  [IssueType_Enum.HardcodedSecrets]: 'Hardcoded Secrets',
-  [IssueType_Enum.PrototypePollution]: 'Prototype Pollution',
-  [IssueType_Enum.RaceConditionFormatFlaw]: 'Race Condition Format Flaw',
-  [IssueType_Enum.NonFinalPublicStaticField]: 'Non-final Public Static Field',
-  [IssueType_Enum.MissingHstsHeader]: 'Missing HSTS Header',
-  [IssueType_Enum.DeadCodeUnusedField]: 'Dead Code: Unused Field',
-  [IssueType_Enum.HeaderManipulation]: 'Header Manipulation',
-  [IssueType_Enum.MissingEqualsOrHashcode]: 'Missing equals or hashcode method',
-  [IssueType_Enum.WcfMisconfigurationInsufficientLogging]:
-    'WCF Misconfiguration: Insufficient Logging',
-  [IssueType_Enum.WcfMisconfigurationThrottlingNotEnabled]:
-    'WCF Misconfiguration: Throttling Not Enabled',
-  [IssueType_Enum.UselessRegexpCharEscape]:
-    'Useless regular-expression character escape',
-  [IssueType_Enum.IncompleteHostnameRegex]: 'Incomplete Hostname Regex',
-  [IssueType_Enum.OverlyLargeRange]: 'Regex: Overly Large Range',
-  [IssueType_Enum.InsufficientLogging]:
-    'Insufficient Logging of Sensitive Operations',
-  [IssueType_Enum.PrivacyViolation]: 'Privacy Violation',
-  [IssueType_Enum.IncompleteUrlSchemeCheck]: 'Incomplete URL Scheme Check',
-  [IssueType_Enum.ValueNeverRead]: 'Value Never Read',
-  [IssueType_Enum.ValueShadowing]: 'Value Shadowing',
-  [IssueType_Enum.NoEquivalenceMethod]:
-    'Class Does Not Implement Equivalence Method',
-  [IssueType_Enum.InformationExposureViaHeaders]:
-    'Information Exposure via Headers',
-  [IssueType_Enum.DebugEnabled]: 'Debug Enabled',
-  [IssueType_Enum.J2EeGetConnection]: 'J2EE Bad Practices: getConnection()',
-  [IssueType_Enum.LeftoverDebugCode]: 'Leftover Debug Code',
-  [IssueType_Enum.PoorErrorHandlingEmptyCatchBlock]:
-    'Poor Error Handling: Empty Catch Block',
-  [IssueType_Enum.ErroneousStringCompare]: 'Erroneous String Compare',
-  [IssueType_Enum.UnvalidatedPublicMethodArgument]:
-    'Unvalidated Public Method Argument',
-  [IssueType_Enum.AutoEscapeFalse]: 'Auto-escape False',
-  [IssueType_Enum.MissingCspHeader]: 'Missing CSP Header',
-  [IssueType_Enum.HardcodedDomainInHtml]: 'Hardcoded Domain in HTML',
-  [IssueType_Enum.HeapInspection]: 'Heap Inspection',
-  [IssueType_Enum.ClientDomStoredCodeInjection]: 'Client Code Injection',
-  [IssueType_Enum.StringFormatMisuse]: 'String Format Misuse',
-  [IssueType_Enum.NonReadonlyField]: 'Non Readonly Field',
-  [IssueType_Enum.Csrf]: 'Cross-Site Request Forgery (CSRF)',
-  [IssueType_Enum.WeakEncryption]: 'Weak Encryption Mechanism',
-  [IssueType_Enum.CodeInComment]: 'Code in Comment',
-  [IssueType_Enum.RegexMissingTimeout]: 'Regex Missing Timeout',
-  [IssueType_Enum.FrameableLoginPage]: 'Frameable Login Page',
-  [IssueType_Enum.UseOfHardCodedCryptographicKey]:
-    'Use of Hardcoded Cryptographic Key',
-  [IssueType_Enum.MissingSslMinversion]: 'Missing SSL MinVersion',
-  [IssueType_Enum.WebsocketMissingOriginCheck]:
-    'Missing Websocket Origin Check',
-  [IssueType_Enum.DuplicatedStrings]:
-    'String Literals Should not Be Duplicated',
-  [IssueType_Enum.InsecureUuidVersion]: 'Insecure UUID Version',
-  [IssueType_Enum.GhActionsShellInjection]: 'GitHub Actions Shell Injection',
-  [IssueType_Enum.ModifiedDefaultParam]: 'Modified Default Param',
-  [IssueType_Enum.UnsafeWebThread]: 'Unsafe Web Thread',
-  [IssueType_Enum.NoVar]: 'Prefer "let" or "const"',
-  [IssueType_Enum.InsecureTmpFile]: 'Insecure Temporary File',
-  [IssueType_Enum.ReturnShouldNotBeInvariant]: 'Return Should Not Be Invariant',
-  [IssueType_Enum.SystemExitShouldReraise]: 'SystemExit Should Reraise',
-  [IssueType_Enum.NoReturnInFinally]: 'No Return in Finally Block',
-  [IssueType_Enum.WildcardImports]: 'Wildcard Imports should not be used',
-  [IssueType_Enum.AvoidIdentityComparisonCachedTypes]:
-    'Avoid Identity Comparison of Cached Types',
-  [IssueType_Enum.AvoidBuiltinShadowing]: 'Avoid Builtin Shadowing',
-  [IssueType_Enum.ImproperStringFormatting]: 'Improper String Formatting',
-  [IssueType_Enum.TarSlip]: 'Tar Slip',
-  [IssueType_Enum.MissingWhitespace]: 'Missing Whitespace',
-  [IssueType_Enum.NoPrintStatement]: 'Python 2 "print" Statement Is Obsolete',
-  [IssueType_Enum.NoOpOverhead]: 'Expensive Arguments in Conditional Methods',
-  [IssueType_Enum.DoNotRaiseException]: 'Do Not Raise Exception',
-  [IssueType_Enum.DeclareVariableExplicitly]: 'Declare Variable Explicitly',
-  [IssueType_Enum.NoNestedTry]: 'No Nested Try',
-  [IssueType_Enum.UnnecessaryImports]: 'Unnecessary Imports',
-  [IssueType_Enum.Redos]: 'Regular Expression Denial of Service',
-  [IssueType_Enum.DoNotThrowGenericException]: 'Do Not Throw Generic Exception',
-  [IssueType_Enum.BufferOverflow]: 'Buffer Overflow',
-  [IssueType_Enum.StringTerminationError]: 'String Termination Error',
-  [IssueType_Enum.HttpParameterPollution]: 'HTTP Parameter Pollution',
-  [IssueType_Enum.IncompleteSanitization]: 'Incomplete Sanitization',
-  [IssueType_Enum.CredentialDisclosure]: 'Credential Disclosure',
-  [IssueType_Enum.InsecurePostmessage]: 'Insecure Postmessage',
-  [IssueType_Enum.MissingUser]: 'Missing User',
-  [IssueType_Enum.MissingEncodingFileOpen]: 'Missing Encoding File Open',
-  [IssueType_Enum.PortAllInterfaces]: 'Port All Interfaces',
-  [IssueType_Enum.WritableFilesystemService]: 'Writable Filesystem Service',
-  [IssueType_Enum.NoNewPrivileges]: 'No New Privileges',
-  [IssueType_Enum.MissingTemplateStringIndicator]:
-    'Missing Template String Indicator',
-  [IssueType_Enum.UselessTernary]: 'Useless Ternary',
-  [IssueType_Enum.RequestParametersBoundViaInput]:
-    'Request Parameters Bound Via Input',
-  [IssueType_Enum.UseSysExit]: 'Use Sys Exit',
-  [IssueType_Enum.IncorrectSqlApiUsage]: 'Incorrect SQL API Usage',
-  [IssueType_Enum.UseRaiseForStatus]: 'Use Raise For Status',
-  [IssueType_Enum.UseTimeout]: 'Use Timeout',
-  [IssueType_Enum.UselessIfBody]: 'Useless If Body',
-  [IssueType_Enum.NoAssert]: 'No Assert',
-  [IssueType_Enum.FunctionCallWithoutParentheses]:
-    'Function Call Without Parentheses',
-  [IssueType_Enum.SpringDefaultPermit]: 'Spring Default Permit',
-  [IssueType_Enum.ReturnInInit]: 'Return in Init',
-  [IssueType_Enum.ActionNotPinnedToCommitSha]:
-    'Action Not Pinned to Commit Sha',
-  [IssueType_Enum.DjangoBlankFieldNeedsNullOrDefault]:
-    'Django Blank Field Needs Null or Default',
-  [IssueType_Enum.RedundantCondition]: 'Insider Threat: Redundant Condition',
-  [IssueType_Enum.RedundantNilErrorCheck]: 'Redundant Nil Error Check',
-  [IssueType_Enum.MissingWorkflowPermissions]: 'Missing Workflow Permissions',
-  [IssueType_Enum.ExcessiveSecretsExposure]: 'Excessive Secrets Exposure',
-  [IssueType_Enum.TaintedNumericCast]: 'Tainted Numeric Cast',
-  [IssueType_Enum.MissingXFrameOptions]: 'Missing X-Frame-Options Header',
-  [IssueType_Enum.ImproperValidationOfArrayIndex]:
-    'Improper Validation of Array Index',
-  [IssueType_Enum.IncorrectIntegerConversion]: 'Incorrect Integer Conversion',
-  [IssueType_Enum.ImproperCertificateValidation]:
-    'Improper Certificate Validation',
-  [IssueType_Enum.OftenMisusedBooleanGetBoolean]:
-    'Often Misused: Boolean.getBoolean()',
-  [IssueType_Enum.UnencryptedAwsSqsQueue]: 'AWS SQS Queue Unencrypted',
-  [IssueType_Enum.InsecureDeserialization]: 'Insecure Deserialization',
-  [IssueType_Enum.AwsDynamodbPointInTimeRecoveryDisabled]:
-    'AWS DynamoDB Point-in-Time Recovery Disabled',
-  [IssueType_Enum.JwtDecodeWithoutVerify]:
-    'JWT Decoded Without Signature Verification',
-  [IssueType_Enum.UncheckedReturnValue]: 'Unchecked Return Value',
-} as const
+// Defense-in-depth bound for opaque issue-type strings (the closed
+// IssueType_Enum allowlist was removed in E-2015). DB/analyzer values are
+// UPPER_SNAKE / PascalCase identifiers, so this charset + length holds while
+// rejecting injection-shaped input. A bounded value also guarantees the derived
+// friendly-label fallback below contains no Markdown metacharacters.
+export const SafeIssueTypeStringZ = z
+  .string()
+  .regex(/^[A-Za-z0-9_]+$/)
+  .max(128)
 
-const issueTypeZ = z.nativeEnum(IssueType_Enum)
 export const getIssueTypeFriendlyString = (
   issueType: string | null | undefined
 ): string => {
-  // Prefer the analyzer-served catalog when hydrated; otherwise fall back to
-  // the curated map (retained during the migration), then a derived label.
-  // TODO(E-2015): remove the curated-map fallback once the DB enum is dropped
-  // and the analyzer catalog is the sole source of truth (collapses the dual
-  // source of truth this migration temporarily introduces).
+  // Issue types are opaque strings. Prefer the analyzer-served catalog label;
+  // fall back to a derived label (the curated issueTypeMap was removed in
+  // E-2015 — every runtime hydrates the catalog at its entry point).
   const fromCatalog = getIssueTypeCatalogEntry(issueType)?.label
   if (fromCatalog) {
     return fromCatalog
   }
-  const issueTypeZParseRes = issueTypeZ.safeParse(issueType)
-  if (!issueTypeZParseRes.success) {
-    return issueType ? issueType.replaceAll('_', ' ') : 'Other'
-  }
-  return issueTypeMap[issueTypeZParseRes.data]
+  return issueType ? issueType.replaceAll('_', ' ') : 'Other'
 }
 
 export const statusMap: Record<Vulnerability_Report_Issue_State_Enum, string> =

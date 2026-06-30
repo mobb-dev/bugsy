@@ -1,6 +1,5 @@
 import {
   type GetReportFixesQuery,
-  IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
@@ -34,7 +33,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.SqlInjection,
+                parsedIssueType: 'SQL_Injection',
                 parsedSeverity: Vulnerability_Severity_Enum.High,
                 vulnerabilityReportIssueTags: [
                   {
@@ -83,7 +82,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.Xss,
+                parsedIssueType: 'XSS',
                 parsedSeverity: Vulnerability_Severity_Enum.Medium,
                 vulnerabilityReportIssueTags: [
                   {
@@ -134,7 +133,7 @@ export const mockGetReportFixes: { data: GetReportFixesQuery } = {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.Csrf,
+                parsedIssueType: 'CSRF',
                 parsedSeverity: Vulnerability_Severity_Enum.High,
                 vulnerabilityReportIssueTags: [],
               },

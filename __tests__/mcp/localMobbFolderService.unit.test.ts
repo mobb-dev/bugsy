@@ -7,7 +7,6 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Severity_Enum,
 } from '../../src/features/analysis/scm/generates/client_generates'
@@ -59,7 +58,7 @@ ${patch}`
     gitBlameLogin: null,
     vulnerabilityReportIssues: [
       {
-        parsedIssueType: IssueType_Enum.SqlInjection,
+        parsedIssueType: issueType,
         parsedSeverity: Vulnerability_Severity_Enum.High,
         vulnerabilityReportIssueTags: [
           {
@@ -371,7 +370,7 @@ describe('LocalMobbFolderService', () => {
         gitBlameLogin: null,
         vulnerabilityReportIssues: [
           {
-            parsedIssueType: IssueType_Enum.SqlInjection,
+            parsedIssueType: 'SQL_Injection',
             parsedSeverity: Vulnerability_Severity_Enum.High,
             vulnerabilityReportIssueTags: [
               {
@@ -862,7 +861,7 @@ ${largePatchLines.join('\n')}`
         gitBlameLogin: null,
         vulnerabilityReportIssues: [
           {
-            parsedIssueType: IssueType_Enum.SqlInjection,
+            parsedIssueType: 'SQL_Injection',
             parsedSeverity: Vulnerability_Severity_Enum.Low,
             vulnerabilityReportIssueTags: [], // Empty tags array
           },

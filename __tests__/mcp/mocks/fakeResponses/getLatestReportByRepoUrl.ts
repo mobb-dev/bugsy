@@ -1,6 +1,5 @@
 import type { GetLatestReportByRepoUrlQuery } from '../../../../src/features/analysis/scm/generates/client_generates'
 import {
-  IssueType_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
 } from '../../../../src/features/analysis/scm/generates/client_generates'
@@ -63,7 +62,7 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue',
-                parsedIssueType: IssueType_Enum.SqlInjection,
+                parsedIssueType: 'SQL_Injection',
                 parsedSeverity: Vulnerability_Severity_Enum.Critical,
                 vulnerabilityReportIssueTags: [],
               },
@@ -93,7 +92,7 @@ export const mockGetLatestReportByRepoUrl: MockResponse = {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue',
-                parsedIssueType: IssueType_Enum.Xss,
+                parsedIssueType: 'XSS',
                 parsedSeverity: Vulnerability_Severity_Enum.High,
                 vulnerabilityReportIssueTags: [],
               },

@@ -1,7 +1,6 @@
 import {
   FixQuestionInputType,
   type GetReportFixesQuery,
-  IssueType_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
   Vulnerability_Report_Vendor_Enum,
   Vulnerability_Severity_Enum,
@@ -40,7 +39,7 @@ export const mockGetReportFixesWithQuestions: {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.Xss,
+                parsedIssueType: 'XSS',
                 parsedSeverity: Vulnerability_Severity_Enum.High,
                 vulnerabilityReportIssueTags: [],
               },
@@ -90,7 +89,7 @@ export const mockGetReportFixesWithQuestions: {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.IframeWithoutSandbox,
+                parsedIssueType: 'IFRAME_WITHOUT_SANDBOX',
                 parsedSeverity: Vulnerability_Severity_Enum.Medium,
                 vulnerabilityReportIssueTags: [],
               },
@@ -139,7 +138,7 @@ export const mockGetReportFixesWithQuestions: {
             vulnerabilityReportIssues: [
               {
                 __typename: 'vulnerability_report_issue' as const,
-                parsedIssueType: IssueType_Enum.Pt,
+                parsedIssueType: 'PT',
                 parsedSeverity: Vulnerability_Severity_Enum.High,
                 vulnerabilityReportIssueTags: [
                   {

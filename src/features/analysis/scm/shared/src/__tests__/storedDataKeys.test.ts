@@ -1,18 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
-import { IssueType_Enum } from '../../../generates/client_generates'
+import { SafeIssueTypeStringZ } from '../getIssueType'
 import { languages as fixDataLanguages } from '../storedFixData'
 import { languages as questionDataLanguages } from '../storedQuestionData'
 
-// After E-2015 re-keyed storedFixData/storedQuestionData from `IssueType_Enum.X`
-// to string-literal DB values, the compiler no longer guards those keys. These
-// tests restore that guard: every issue-type key must be a canonical value
-// (the generated enum is still the source of truth until the DB enum is dropped
-// in PR4). A typo'd or renamed key fails here instead of silently serving no
-// guidance/question copy at runtime.
+// E-2015 removed the closed `IssueType_Enum` allowlist: issue types are now
+// opaque, analyzer-served strings, so there is no committed TS list to validate
+// these keys against at build time. Semantic validity ("is this a real issue
+// type?") is enforced at runtime by the hydrated catalog (a key with no catalog
+// entry simply serves no stored copy — handled by the lookup returning
+// undefined). What this suite still guards is well-formedness: every key must
+// satisfy the same `SafeIssueTypeStringZ` bound production applies to issue-type
+// strings, so a stray empty/whitespace/metacharacter key (a copy-paste slip in a
+// per-language `index.ts`) fails here instead of producing a key that can never
+// match a canonical catalog value.
 describe('stored data issue-type keys', () => {
-  const validIssueTypeValues = new Set<string>(Object.values(IssueType_Enum))
-
   const collectIssueTypeKeys = (
     languagesMap: Record<string, Record<string, unknown>>
   ): string[] => {
@@ -25,17 +27,14 @@ describe('stored data issue-type keys', () => {
     return [...keys]
   }
 
-  it('every storedFixData key is a canonical issue-type value', () => {
-    const unknownKeys = collectIssueTypeKeys(fixDataLanguages).filter(
-      (key) => !validIssueTypeValues.has(key)
-    )
-    expect(unknownKeys).toEqual([])
+  const malformed = (keys: string[]): string[] =>
+    keys.filter((key) => !SafeIssueTypeStringZ.safeParse(key).success)
+
+  it('every storedFixData key is a well-formed issue-type value', () => {
+    expect(malformed(collectIssueTypeKeys(fixDataLanguages))).toEqual([])
   })
 
-  it('every storedQuestionData key is a canonical issue-type value', () => {
-    const unknownKeys = collectIssueTypeKeys(questionDataLanguages).filter(
-      (key) => !validIssueTypeValues.has(key)
-    )
-    expect(unknownKeys).toEqual([])
+  it('every storedQuestionData key is a well-formed issue-type value', () => {
+    expect(malformed(collectIssueTypeKeys(questionDataLanguages))).toEqual([])
   })
 })

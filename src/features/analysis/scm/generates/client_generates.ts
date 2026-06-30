@@ -16357,7 +16357,7 @@ export type Fix = {
   isExpired: Scalars['Boolean']['output'];
   /** This field is deprecated */
   issueLanguageOld?: Maybe<IssueLanguage_Enum>;
-  issueTypeOld?: Maybe<IssueType_Enum>;
+  issueTypeOld?: Maybe<Scalars['String']['output']>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "fix_number_of_vulnerability_issue" */
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
@@ -17707,7 +17707,7 @@ export type Fix_Bool_Exp = {
   isArchivedDeprecated?: InputMaybe<Boolean_Comparison_Exp>;
   isExpired?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
-  issueTypeOld?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  issueTypeOld?: InputMaybe<String_Comparison_Exp>;
   modifiedBy?: InputMaybe<String_Comparison_Exp>;
   numberOfVulnerabilityIssues?: InputMaybe<Int_Comparison_Exp>;
   patchFile?: InputMaybe<File_Bool_Exp>;
@@ -18163,7 +18163,7 @@ export type Fix_Insert_Input = {
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
-  issueTypeOld?: InputMaybe<IssueType_Enum>;
+  issueTypeOld?: InputMaybe<Scalars['String']['input']>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   patchFile?: InputMaybe<File_Obj_Rel_Insert_Input>;
   /** this a deprecated relationship */
@@ -18192,6 +18192,7 @@ export type Fix_Max_Fields = {
   fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  issueTypeOld?: Maybe<Scalars['String']['output']>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "fix_number_of_vulnerability_issue" */
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
@@ -18226,6 +18227,7 @@ export type Fix_Max_Order_By = {
   fix_shared_state_id?: InputMaybe<Order_By>;
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  issueTypeOld?: InputMaybe<Order_By>;
   modifiedBy?: InputMaybe<Order_By>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Order_By>;
@@ -18247,6 +18249,7 @@ export type Fix_Min_Fields = {
   fix_shared_state_id?: Maybe<Scalars['uuid']['output']>;
   gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  issueTypeOld?: Maybe<Scalars['String']['output']>;
   modifiedBy?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "fix_number_of_vulnerability_issue" */
   numberOfVulnerabilityIssues?: Maybe<Scalars['Int']['output']>;
@@ -18281,6 +18284,7 @@ export type Fix_Min_Order_By = {
   fix_shared_state_id?: InputMaybe<Order_By>;
   gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  issueTypeOld?: InputMaybe<Order_By>;
   modifiedBy?: InputMaybe<Order_By>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Order_By>;
@@ -19135,7 +19139,7 @@ export type Fix_Set_Input = {
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
-  issueTypeOld?: InputMaybe<IssueType_Enum>;
+  issueTypeOld?: InputMaybe<Scalars['String']['input']>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
@@ -19678,7 +19682,7 @@ export type Fix_Stream_Cursor_Value_Input = {
   isExpired?: InputMaybe<Scalars['Boolean']['input']>;
   /** This field is deprecated */
   issueLanguageOld?: InputMaybe<IssueLanguage_Enum>;
-  issueTypeOld?: InputMaybe<IssueType_Enum>;
+  issueTypeOld?: InputMaybe<Scalars['String']['input']>;
   modifiedBy?: InputMaybe<Scalars['String']['input']>;
   /** this a deprecated relationship */
   patchFileId?: InputMaybe<Scalars['uuid']['input']>;
@@ -21995,482 +21999,6 @@ export type IssueLanguage_Updates = {
   where: IssueLanguage_Bool_Exp;
 };
 
-/** columns and relationships of "issue_type" */
-export type IssueType = {
-  __typename?: 'issueType';
-  comment: Scalars['String']['output'];
-  /** An array relationship */
-  fixes: Array<Fix>;
-  /** An aggregate relationship */
-  fixes_aggregate: Fix_Aggregate;
-  value: Scalars['String']['output'];
-};
-
-
-/** columns and relationships of "issue_type" */
-export type IssueTypeFixesArgs = {
-  distinct_on?: InputMaybe<Array<Fix_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Fix_Order_By>>;
-  where?: InputMaybe<Fix_Bool_Exp>;
-};
-
-
-/** columns and relationships of "issue_type" */
-export type IssueTypeFixes_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Fix_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Fix_Order_By>>;
-  where?: InputMaybe<Fix_Bool_Exp>;
-};
-
-/** aggregated selection of "issue_type" */
-export type IssueType_Aggregate = {
-  __typename?: 'issueType_aggregate';
-  aggregate?: Maybe<IssueType_Aggregate_Fields>;
-  nodes: Array<IssueType>;
-};
-
-/** aggregate fields of "issue_type" */
-export type IssueType_Aggregate_Fields = {
-  __typename?: 'issueType_aggregate_fields';
-  count: Scalars['Int']['output'];
-  max?: Maybe<IssueType_Max_Fields>;
-  min?: Maybe<IssueType_Min_Fields>;
-};
-
-
-/** aggregate fields of "issue_type" */
-export type IssueType_Aggregate_FieldsCountArgs = {
-  columns?: InputMaybe<Array<IssueType_Select_Column>>;
-  distinct?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-/** Boolean expression to filter rows from the table "issue_type". All fields are combined with a logical 'AND'. */
-export type IssueType_Bool_Exp = {
-  _and?: InputMaybe<Array<IssueType_Bool_Exp>>;
-  _not?: InputMaybe<IssueType_Bool_Exp>;
-  _or?: InputMaybe<Array<IssueType_Bool_Exp>>;
-  comment?: InputMaybe<String_Comparison_Exp>;
-  fixes?: InputMaybe<Fix_Bool_Exp>;
-  fixes_aggregate?: InputMaybe<Fix_Aggregate_Bool_Exp>;
-  value?: InputMaybe<String_Comparison_Exp>;
-};
-
-/** unique or primary key constraints on table "issue_type" */
-export enum IssueType_Constraint {
-  /** unique or primary key constraint on columns "value" */
-  IssueTypePkey = 'issue_type_pkey'
-}
-
-export enum IssueType_Enum {
-  /** ACTION_NOT_PINNED_TO_COMMIT_SHA */
-  ActionNotPinnedToCommitSha = 'ACTION_NOT_PINNED_TO_COMMIT_SHA',
-  /** Disabling auto-escaping makes the code more vulnerable to XSS */
-  AutoEscapeFalse = 'AUTO_ESCAPE_FALSE',
-  /** AVOID_BUILTIN_SHADOWING */
-  AvoidBuiltinShadowing = 'AVOID_BUILTIN_SHADOWING',
-  /** AVOID_IDENTITY_COMPARISON_CACHED_TYPES */
-  AvoidIdentityComparisonCachedTypes = 'AVOID_IDENTITY_COMPARISON_CACHED_TYPES',
-  /** AWS_DYNAMODB_POINT_IN_TIME_RECOVERY_DISABLED */
-  AwsDynamodbPointInTimeRecoveryDisabled = 'AWS_DYNAMODB_POINT_IN_TIME_RECOVERY_DISABLED',
-  /** Buffer Overflow */
-  BufferOverflow = 'BUFFER_OVERFLOW',
-  /** Client DOM Stored Code Injection */
-  ClientDomStoredCodeInjection = 'CLIENT_DOM_STORED_CODE_INJECTION',
-  /** Command Injection */
-  CmDi = 'CMDi',
-  /** Command Injection: relative path command */
-  CmDiRelativePathCommand = 'CMDi_relative_path_command',
-  /** Sections of code should not be commented out */
-  CodeInComment = 'CODE_IN_COMMENT',
-  /** A data member and a function have the same name which can be confusing to the developer */
-  ConfusingNaming = 'CONFUSING_NAMING',
-  /** CREDENTIAL_DISCLOSURE */
-  CredentialDisclosure = 'CREDENTIAL_DISCLOSURE',
-  /** Cross-Site Request Forgery (CSRF) occurs when an attacker tricks a user into performing actions they did not intend on a web application in which they are authenticated, potentially leading to unauthorized actions or data manipulation */
-  Csrf = 'CSRF',
-  /** Use of dangerous function */
-  DangerousFunctionOverflow = 'DANGEROUS_FUNCTION_OVERFLOW',
-  /** Dead Code: Unused Field */
-  DeadCodeUnusedField = 'DEAD_CODE_UNUSED_FIELD',
-  /** Running the application in debug mode */
-  DebugEnabled = 'DEBUG_ENABLED',
-  /** DECLARE_VARIABLE_EXPLICITLY */
-  DeclareVariableExplicitly = 'DECLARE_VARIABLE_EXPLICITLY',
-  /** Default definer rights in package or object definition */
-  DefaultRightsInObjDefinition = 'DEFAULT_RIGHTS_IN_OBJ_DEFINITION',
-  /** Deprecated Function */
-  DeprecatedFunction = 'DEPRECATED_FUNCTION',
-  /** DJANGO_BLANK_FIELD_NEEDS_NULL_OR_DEFAULT */
-  DjangoBlankFieldNeedsNullOrDefault = 'DJANGO_BLANK_FIELD_NEEDS_NULL_OR_DEFAULT',
-  /** A denial of service by exploiting string builder */
-  DosStringBuilder = 'DOS_STRING_BUILDER',
-  /** DO_NOT_RAISE_EXCEPTION */
-  DoNotRaiseException = 'DO_NOT_RAISE_EXCEPTION',
-  /** DO_NOT_THROW_GENERIC_EXCEPTION */
-  DoNotThrowGenericException = 'DO_NOT_THROW_GENERIC_EXCEPTION',
-  /** String literals should not be duplicated */
-  DuplicatedStrings = 'DUPLICATED_STRINGS',
-  /** Erroneous string compare */
-  ErroneousStringCompare = 'ERRONEOUS_STRING_COMPARE',
-  /** Error Condition Without Action */
-  ErrorCondtionWithoutAction = 'ERROR_CONDTION_WITHOUT_ACTION',
-  /** EXCESSIVE_SECRETS_EXPOSURE */
-  ExcessiveSecretsExposure = 'EXCESSIVE_SECRETS_EXPOSURE',
-  /** frameable_login_page */
-  FrameableLoginPage = 'FRAMEABLE_LOGIN_PAGE',
-  /** FUNCTION_CALL_WITHOUT_PARENTHESES */
-  FunctionCallWithoutParentheses = 'FUNCTION_CALL_WITHOUT_PARENTHESES',
-  /** GH_ACTIONS_SHELL_INJECTION */
-  GhActionsShellInjection = 'GH_ACTIONS_SHELL_INJECTION',
-  /** GraphQl Depth Limit */
-  GraphqlDepthLimit = 'GRAPHQL_DEPTH_LIMIT',
-  /** Hardcoded Domain in HTML */
-  HardcodedDomainInHtml = 'HARDCODED_DOMAIN_IN_HTML',
-  /** Hardcoded Secrets */
-  HardcodedSecrets = 'HARDCODED_SECRETS',
-  /** Header Manipulation */
-  HeaderManipulation = 'HEADER_MANIPULATION',
-  /** Heap Inspection by an attacker to discover secrets in memory */
-  HeapInspection = 'HEAP_INSPECTION',
-  /** System Information Leak: HTML Comment in JSP */
-  HtmlCommentInJsp = 'HTML_COMMENT_IN_JSP',
-  /** HTTP only cookie */
-  HttpOnlyCookie = 'HTTP_ONLY_COOKIE',
-  /** HTTP_PARAMETER_POLLUTION */
-  HttpParameterPollution = 'HTTP_PARAMETER_POLLUTION',
-  /** HTTP response splitting */
-  HttpResponseSplitting = 'HTTP_RESPONSE_SPLITTING',
-  /** Client use of iframe without sandbox */
-  IframeWithoutSandbox = 'IFRAME_WITHOUT_SANDBOX',
-  /** IMPROPER_CERTIFICATE_VALIDATION */
-  ImproperCertificateValidation = 'IMPROPER_CERTIFICATE_VALIDATION',
-  /** Improper Exception Handling */
-  ImproperExceptionHandling = 'IMPROPER_EXCEPTION_HANDLING',
-  /** A resource was defined without proper release */
-  ImproperResourceShutdownOrRelease = 'IMPROPER_RESOURCE_SHUTDOWN_OR_RELEASE',
-  /** IMPROPER_STRING_FORMATTING */
-  ImproperStringFormatting = 'IMPROPER_STRING_FORMATTING',
-  /** IMPROPER_VALIDATION_OF_ARRAY_INDEX */
-  ImproperValidationOfArrayIndex = 'IMPROPER_VALIDATION_OF_ARRAY_INDEX',
-  /** Incomplete Hostname Regex */
-  IncompleteHostnameRegex = 'INCOMPLETE_HOSTNAME_REGEX',
-  /** INCOMPLETE_SANITIZATION */
-  IncompleteSanitization = 'INCOMPLETE_SANITIZATION',
-  /** A case where the validation on the url is partial */
-  IncompleteUrlSanitization = 'INCOMPLETE_URL_SANITIZATION',
-  /** Incomplete URL Scheme Check */
-  IncompleteUrlSchemeCheck = 'INCOMPLETE_URL_SCHEME_CHECK',
-  /** INCORRECT_INTEGER_CONVERSION */
-  IncorrectIntegerConversion = 'INCORRECT_INTEGER_CONVERSION',
-  /** INCORRECT_SQL_API_USAGE */
-  IncorrectSqlApiUsage = 'INCORRECT_SQL_API_USAGE',
-  /** Information Exposure via Headers */
-  InformationExposureViaHeaders = 'INFORMATION_EXPOSURE_VIA_HEADERS',
-  /** Insecure Binder Configuration */
-  InsecureBinderConfiguration = 'INSECURE_BINDER_CONFIGURATION',
-  /** HTTP insecure cookie */
-  InsecureCookie = 'INSECURE_COOKIE',
-  /** insecure_deserialization */
-  InsecureDeserialization = 'INSECURE_DESERIALIZATION',
-  /** INSECURE_POSTMESSAGE */
-  InsecurePostmessage = 'INSECURE_POSTMESSAGE',
-  /** Insecure Randomness */
-  InsecureRandomness = 'INSECURE_RANDOMNESS',
-  /** INSECURE_TMP_FILE */
-  InsecureTmpFile = 'INSECURE_TMP_FILE',
-  /** Insecure UUID version */
-  InsecureUuidVersion = 'INSECURE_UUID_VERSION',
-  /** Insufficient Logging of Sensitive Operations */
-  InsufficientLogging = 'INSUFFICIENT_LOGGING',
-  /** J2EE_GET_CONNECTION */
-  J2EeGetConnection = 'J2EE_GET_CONNECTION',
-  /** Client jQuery deprecated symbols */
-  JqueryDeprecatedSymbols = 'JQUERY_DEPRECATED_SYMBOLS',
-  /** JWT_DECODE_WITHOUT_VERIFY */
-  JwtDecodeWithoutVerify = 'JWT_DECODE_WITHOUT_VERIFY',
-  /** Leftover debug code */
-  LeftoverDebugCode = 'LEFTOVER_DEBUG_CODE',
-  /** A string is used in locale dependent comparison which can cause bugs */
-  LocaleDependentComparison = 'LOCALE_DEPENDENT_COMPARISON',
-  /** Log Forging / Injection */
-  LogForging = 'LOG_FORGING',
-  /** Missing Anti-Forgery Validation */
-  MissingAntiforgeryValidation = 'MISSING_ANTIFORGERY_VALIDATION',
-  /** The program might dereference a null-pointer because it does not check the return value of a function that might return null */
-  MissingCheckAgainstNull = 'MISSING_CHECK_AGAINST_NULL',
-  /** Missing CSP Header */
-  MissingCspHeader = 'MISSING_CSP_HEADER',
-  /** MISSING_ENCODING_FILE_OPEN */
-  MissingEncodingFileOpen = 'MISSING_ENCODING_FILE_OPEN',
-  /** Missing equals or hashcode method */
-  MissingEqualsOrHashcode = 'MISSING_EQUALS_OR_HASHCODE',
-  /** Missing HSTS Header */
-  MissingHstsHeader = 'MISSING_HSTS_HEADER',
-  /** Missing TLS MinVersion */
-  MissingSslMinversion = 'MISSING_SSL_MINVERSION',
-  /** MISSING_TEMPLATE_STRING_INDICATOR */
-  MissingTemplateStringIndicator = 'MISSING_TEMPLATE_STRING_INDICATOR',
-  /** MISSING_USER */
-  MissingUser = 'MISSING_USER',
-  /** MISSING_WHITESPACE */
-  MissingWhitespace = 'MISSING_WHITESPACE',
-  /** MISSING_WORKFLOW_PERMISSIONS */
-  MissingWorkflowPermissions = 'MISSING_WORKFLOW_PERMISSIONS',
-  /** MISSING_X_FRAME_OPTIONS */
-  MissingXFrameOptions = 'MISSING_X_FRAME_OPTIONS',
-  /** MODIFIED_DEFAULT_PARAM */
-  ModifiedDefaultParam = 'MODIFIED_DEFAULT_PARAM',
-  /** Non-final public static field */
-  NonFinalPublicStaticField = 'NON_FINAL_PUBLIC_STATIC_FIELD',
-  /** Fields that are only assigned in the constructor should be readonly */
-  NonReadonlyField = 'NON_READONLY_FIELD',
-  /** NO_ASSERT */
-  NoAssert = 'NO_ASSERT',
-  /** No equals method */
-  NoEquivalenceMethod = 'NO_EQUIVALENCE_METHOD',
-  /** Missing rate limiting */
-  NoLimitsOrThrottling = 'NO_LIMITS_OR_THROTTLING',
-  /** NO_NESTED_TRY */
-  NoNestedTry = 'NO_NESTED_TRY',
-  /** NO_NEW_PRIVILEGES */
-  NoNewPrivileges = 'NO_NEW_PRIVILEGES',
-  /** NO_OP_OVERHEAD */
-  NoOpOverhead = 'NO_OP_OVERHEAD',
-  /** NO_PRINT_STATEMENT */
-  NoPrintStatement = 'NO_PRINT_STATEMENT',
-  /** NO_RETURN_IN_FINALLY */
-  NoReturnInFinally = 'NO_RETURN_IN_FINALLY',
-  /** NO_VAR */
-  NoVar = 'NO_VAR',
-  /** Null Dereference */
-  NullDereference = 'NULL_DEREFERENCE',
-  /** OFTEN_MISUSED_BOOLEAN_GET_BOOLEAN */
-  OftenMisusedBooleanGetBoolean = 'OFTEN_MISUSED_BOOLEAN_GET_BOOLEAN',
-  /** Open Redirect */
-  OpenRedirect = 'OPEN_REDIRECT',
-  /** The catch block handles a broad swath of exceptions, potentially trapping dissimilar issues or problems that should not be dealt with at this point in the program */
-  OverlyBroadCatch = 'OVERLY_BROAD_CATCH',
-  /** Overly Large Range */
-  OverlyLargeRange = 'OVERLY_LARGE_RANGE',
-  /** The code has a password stored in a comment */
-  PasswordInComment = 'PASSWORD_IN_COMMENT',
-  /** Catch blocks with nothing inside or just a comment. */
-  PoorErrorHandlingEmptyCatchBlock = 'POOR_ERROR_HANDLING_EMPTY_CATCH_BLOCK',
-  /** PORT_ALL_INTERFACES */
-  PortAllInterfaces = 'PORT_ALL_INTERFACES',
-  /** Privacy Violation */
-  PrivacyViolation = 'PRIVACY_VIOLATION',
-  /** Prototype Pollution */
-  PrototypePollution = 'PROTOTYPE_POLLUTION',
-  /** Path Traversal */
-  Pt = 'PT',
-  /** Race Condition: Format Flaw */
-  RaceConditionFormatFlaw = 'RACE_CONDITION_FORMAT_FLAW',
-  /** REDOS */
-  Redos = 'REDOS',
-  /** REDUNDANT_CONDITION */
-  RedundantCondition = 'REDUNDANT_CONDITION',
-  /** REDUNDANT_NIL_ERROR_CHECK */
-  RedundantNilErrorCheck = 'REDUNDANT_NIL_ERROR_CHECK',
-  /** Regular Expression Injection */
-  RegexInjection = 'REGEX_INJECTION',
-  /** REGEX_MISSING_TIMEOUT */
-  RegexMissingTimeout = 'REGEX_MISSING_TIMEOUT',
-  /** REQUEST_PARAMETERS_BOUND_VIA_INPUT */
-  RequestParametersBoundViaInput = 'REQUEST_PARAMETERS_BOUND_VIA_INPUT',
-  /** RETURN_IN_INIT */
-  ReturnInInit = 'RETURN_IN_INIT',
-  /** RETURN_SHOULD_NOT_BE_INVARIANT */
-  ReturnShouldNotBeInvariant = 'RETURN_SHOULD_NOT_BE_INVARIANT',
-  /** SPRING_DEFAULT_PERMIT */
-  SpringDefaultPermit = 'SPRING_DEFAULT_PERMIT',
-  /** SQL Injection */
-  SqlInjection = 'SQL_Injection',
-  /** Server Side Request Forgery */
-  Ssrf = 'SSRF',
-  /** Composite format strings should be used correctly */
-  StringFormatMisuse = 'STRING_FORMAT_MISUSE',
-  /** STRING_TERMINATION_ERROR */
-  StringTerminationError = 'STRING_TERMINATION_ERROR',
-  /** SYSTEM_EXIT_SHOULD_RERAISE */
-  SystemExitShouldReraise = 'SYSTEM_EXIT_SHOULD_RERAISE',
-  /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
-  SystemInformationLeak = 'SYSTEM_INFORMATION_LEAK',
-  /** Revealing system data or debugging information helps an adversary learn about the system and form a plan of attack */
-  SystemInformationLeakExternal = 'SYSTEM_INFORMATION_LEAK_EXTERNAL',
-  /** TAINTED_NUMERIC_CAST */
-  TaintedNumericCast = 'TAINTED_NUMERIC_CAST',
-  /** TAR_SLIP */
-  TarSlip = 'TAR_SLIP',
-  /** Trust Boundary Violation */
-  TrustBoundaryViolation = 'TRUST_BOUNDARY_VIOLATION',
-  /** HTTP request parameter may be either an array or a string */
-  TypeConfusion = 'TYPE_CONFUSION',
-  /** Unchecked loop condition */
-  UncheckedLoopCondition = 'UNCHECKED_LOOP_CONDITION',
-  /** UNCHECKED_RETURN_VALUE */
-  UncheckedReturnValue = 'UNCHECKED_RETURN_VALUE',
-  /** UNENCRYPTED_AWS_SQS_QUEUE */
-  UnencryptedAwsSqsQueue = 'UNENCRYPTED_AWS_SQS_QUEUE',
-  /** UNNECESSARY_IMPORTS */
-  UnnecessaryImports = 'UNNECESSARY_IMPORTS',
-  /** Unsafe deserialization of untrusted data */
-  UnsafeDeserialization = 'UNSAFE_DESERIALIZATION',
-  /** Unsafe reflection via Class.forName with externally-controlled input */
-  UnsafeReflection = 'UNSAFE_REFLECTION',
-  /** Unsafe use of target blank */
-  UnsafeTargetBlank = 'UNSAFE_TARGET_BLANK',
-  /** UNSAFE_WEB_THREAD */
-  UnsafeWebThread = 'UNSAFE_WEB_THREAD',
-  /** A public method agument is not checked for null */
-  UnvalidatedPublicMethodArgument = 'UNVALIDATED_PUBLIC_METHOD_ARGUMENT',
-  /** USELESS_IF_BODY */
-  UselessIfBody = 'USELESS_IF_BODY',
-  /** Useless regular-expression character escape */
-  UselessRegexpCharEscape = 'USELESS_REGEXP_CHAR_ESCAPE',
-  /** USELESS_TERNARY */
-  UselessTernary = 'USELESS_TERNARY',
-  /** Use_of_Hard_coded_Cryptographic_Key */
-  UseOfHardCodedCryptographicKey = 'USE_OF_HARD_CODED_CRYPTOGRAPHIC_KEY',
-  /** Printing logs in assorted way to the sys out/err */
-  UseOfSystemOutputStream = 'USE_OF_SYSTEM_OUTPUT_STREAM',
-  /** USE_RAISE_FOR_STATUS */
-  UseRaiseForStatus = 'USE_RAISE_FOR_STATUS',
-  /** USE_SYS_EXIT */
-  UseSysExit = 'USE_SYS_EXIT',
-  /** USE_TIMEOUT */
-  UseTimeout = 'USE_TIMEOUT',
-  /** A variable is assigned a value that is never read */
-  ValueNeverRead = 'VALUE_NEVER_READ',
-  /** Value Shadowing */
-  ValueShadowing = 'VALUE_SHADOWING',
-  /** WCF Misconfiguration: Insufficient Logging */
-  WcfMisconfigurationInsufficientLogging = 'WCF_MISCONFIGURATION_INSUFFICIENT_LOGGING',
-  /** WCF Misconfiguration: Throttling Not Enabled */
-  WcfMisconfigurationThrottlingNotEnabled = 'WCF_MISCONFIGURATION_THROTTLING_NOT_ENABLED',
-  /** Encryption mechanisms are insufficiently secure due to outdated algorithms, short key lengths, or poor implementation, making sensitive data vulnerable to decryption by attackers */
-  WeakEncryption = 'WEAK_ENCRYPTION',
-  /** Unbounded occurrences can lead to resources exhaustion and ultimately a denial of service */
-  WeakXmlSchemaUnboundedOccurrences = 'WEAK_XML_SCHEMA_UNBOUNDED_OCCURRENCES',
-  /** Missing websocket origin check */
-  WebsocketMissingOriginCheck = 'WEBSOCKET_MISSING_ORIGIN_CHECK',
-  /** WILDCARD_IMPORTS */
-  WildcardImports = 'WILDCARD_IMPORTS',
-  /** WRITABLE_FILESYSTEM_SERVICE */
-  WritableFilesystemService = 'WRITABLE_FILESYSTEM_SERVICE',
-  /** Cross Site Scripting */
-  Xss = 'XSS',
-  /** XXE */
-  Xxe = 'XXE',
-  /** Zip Slip is a form of directory traversal that can be exploited by extracting files from an archive */
-  ZipSlip = 'ZIP_SLIP'
-}
-
-/** Boolean expression to compare columns of type "issueType_enum". All fields are combined with logical 'AND'. */
-export type IssueType_Enum_Comparison_Exp = {
-  _eq?: InputMaybe<IssueType_Enum>;
-  _in?: InputMaybe<Array<IssueType_Enum>>;
-  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
-  _neq?: InputMaybe<IssueType_Enum>;
-  _nin?: InputMaybe<Array<IssueType_Enum>>;
-};
-
-/** input type for inserting data into table "issue_type" */
-export type IssueType_Insert_Input = {
-  comment?: InputMaybe<Scalars['String']['input']>;
-  fixes?: InputMaybe<Fix_Arr_Rel_Insert_Input>;
-  value?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** aggregate max on columns */
-export type IssueType_Max_Fields = {
-  __typename?: 'issueType_max_fields';
-  comment?: Maybe<Scalars['String']['output']>;
-  value?: Maybe<Scalars['String']['output']>;
-};
-
-/** aggregate min on columns */
-export type IssueType_Min_Fields = {
-  __typename?: 'issueType_min_fields';
-  comment?: Maybe<Scalars['String']['output']>;
-  value?: Maybe<Scalars['String']['output']>;
-};
-
-/** response of any mutation on the table "issue_type" */
-export type IssueType_Mutation_Response = {
-  __typename?: 'issueType_mutation_response';
-  /** number of rows affected by the mutation */
-  affected_rows: Scalars['Int']['output'];
-  /** data from the rows affected by the mutation */
-  returning: Array<IssueType>;
-};
-
-/** on_conflict condition type for table "issue_type" */
-export type IssueType_On_Conflict = {
-  constraint: IssueType_Constraint;
-  update_columns?: Array<IssueType_Update_Column>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
-};
-
-/** Ordering options when selecting data from "issue_type". */
-export type IssueType_Order_By = {
-  comment?: InputMaybe<Order_By>;
-  fixes_aggregate?: InputMaybe<Fix_Aggregate_Order_By>;
-  value?: InputMaybe<Order_By>;
-};
-
-/** primary key columns input for table: issue_type */
-export type IssueType_Pk_Columns_Input = {
-  value: Scalars['String']['input'];
-};
-
-/** select columns of table "issue_type" */
-export enum IssueType_Select_Column {
-  /** column name */
-  Comment = 'comment',
-  /** column name */
-  Value = 'value'
-}
-
-/** input type for updating data in table "issue_type" */
-export type IssueType_Set_Input = {
-  comment?: InputMaybe<Scalars['String']['input']>;
-  value?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** Streaming cursor of the table "issueType" */
-export type IssueType_Stream_Cursor_Input = {
-  /** Stream column input with initial value */
-  initial_value: IssueType_Stream_Cursor_Value_Input;
-  /** cursor ordering */
-  ordering?: InputMaybe<Cursor_Ordering>;
-};
-
-/** Initial value of the column from where the streaming should start */
-export type IssueType_Stream_Cursor_Value_Input = {
-  comment?: InputMaybe<Scalars['String']['input']>;
-  value?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** update columns of table "issue_type" */
-export enum IssueType_Update_Column {
-  /** column name */
-  Comment = 'comment',
-  /** column name */
-  Value = 'value'
-}
-
-export type IssueType_Updates = {
-  /** sets the columns of the filtered rows to the given values */
-  _set?: InputMaybe<IssueType_Set_Input>;
-  /** filter the rows which have to be updated */
-  where: IssueType_Bool_Exp;
-};
-
 export type IssuesByCategories_Organization_Args = {
   categories?: InputMaybe<Scalars['_text']['input']>;
 };
@@ -22830,10 +22358,6 @@ export type Mutation_Root = {
   delete_issueLanguage?: Maybe<IssueLanguage_Mutation_Response>;
   /** delete single row from the table: "issue_language" */
   delete_issueLanguage_by_pk?: Maybe<IssueLanguage>;
-  /** delete data from the table: "issue_type" */
-  delete_issueType?: Maybe<IssueType_Mutation_Response>;
-  /** delete single row from the table: "issue_type" */
-  delete_issueType_by_pk?: Maybe<IssueType>;
   /** delete data from the table: "mvs.mvs_device" */
   delete_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
   /** delete single row from the table: "mvs.mvs_device" */
@@ -23388,10 +22912,6 @@ export type Mutation_Root = {
   insert_issueLanguage?: Maybe<IssueLanguage_Mutation_Response>;
   /** insert a single row into the table: "issue_language" */
   insert_issueLanguage_one?: Maybe<IssueLanguage>;
-  /** insert data into the table: "issue_type" */
-  insert_issueType?: Maybe<IssueType_Mutation_Response>;
-  /** insert a single row into the table: "issue_type" */
-  insert_issueType_one?: Maybe<IssueType>;
   /** insert data into the table: "mvs.mvs_device" */
   insert_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
   /** insert a single row into the table: "mvs.mvs_device" */
@@ -24108,12 +23628,6 @@ export type Mutation_Root = {
   update_issueLanguage_by_pk?: Maybe<IssueLanguage>;
   /** update multiples rows of table: "issue_language" */
   update_issueLanguage_many?: Maybe<Array<Maybe<IssueLanguage_Mutation_Response>>>;
-  /** update data of the table: "issue_type" */
-  update_issueType?: Maybe<IssueType_Mutation_Response>;
-  /** update single row of the table: "issue_type" */
-  update_issueType_by_pk?: Maybe<IssueType>;
-  /** update multiples rows of table: "issue_type" */
-  update_issueType_many?: Maybe<Array<Maybe<IssueType_Mutation_Response>>>;
   /** update data of the table: "mvs.mvs_device" */
   update_mvs_mvs_device?: Maybe<Mvs_Mvs_Device_Mutation_Response>;
   /** update single row of the table: "mvs.mvs_device" */
@@ -25493,18 +25007,6 @@ export type Mutation_RootDelete_IssueLanguageArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_IssueLanguage_By_PkArgs = {
-  value: Scalars['String']['input'];
-};
-
-
-/** mutation root */
-export type Mutation_RootDelete_IssueTypeArgs = {
-  where: IssueType_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootDelete_IssueType_By_PkArgs = {
   value: Scalars['String']['input'];
 };
 
@@ -27288,20 +26790,6 @@ export type Mutation_RootInsert_IssueLanguageArgs = {
 export type Mutation_RootInsert_IssueLanguage_OneArgs = {
   object: IssueLanguage_Insert_Input;
   on_conflict?: InputMaybe<IssueLanguage_On_Conflict>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_IssueTypeArgs = {
-  objects: Array<IssueType_Insert_Input>;
-  on_conflict?: InputMaybe<IssueType_On_Conflict>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_IssueType_OneArgs = {
-  object: IssueType_Insert_Input;
-  on_conflict?: InputMaybe<IssueType_On_Conflict>;
 };
 
 
@@ -29902,26 +29390,6 @@ export type Mutation_RootUpdate_IssueLanguage_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_IssueLanguage_ManyArgs = {
   updates: Array<IssueLanguage_Updates>;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_IssueTypeArgs = {
-  _set?: InputMaybe<IssueType_Set_Input>;
-  where: IssueType_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_IssueType_By_PkArgs = {
-  _set?: InputMaybe<IssueType_Set_Input>;
-  pk_columns: IssueType_Pk_Columns_Input;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_IssueType_ManyArgs = {
-  updates: Array<IssueType_Updates>;
 };
 
 
@@ -33704,7 +33172,7 @@ export type Organization_Issue_Type_Settings = {
   autoPrEnabled: Scalars['Boolean']['output'];
   enabled: Scalars['Boolean']['output'];
   id: Scalars['uuid']['output'];
-  issueType: IssueType_Enum;
+  issueType: Scalars['String']['output'];
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
@@ -33781,7 +33249,7 @@ export type Organization_Issue_Type_Settings_Bool_Exp = {
   autoPrEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   enabled?: InputMaybe<Boolean_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
-  issueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  issueType?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
 };
@@ -33799,7 +33267,7 @@ export type Organization_Issue_Type_Settings_Insert_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -33808,12 +33276,14 @@ export type Organization_Issue_Type_Settings_Insert_Input = {
 export type Organization_Issue_Type_Settings_Max_Fields = {
   __typename?: 'organization_issue_type_settings_max_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by max() on columns of table "organization_issue_type_settings" */
 export type Organization_Issue_Type_Settings_Max_Order_By = {
   id?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
 };
 
@@ -33821,12 +33291,14 @@ export type Organization_Issue_Type_Settings_Max_Order_By = {
 export type Organization_Issue_Type_Settings_Min_Fields = {
   __typename?: 'organization_issue_type_settings_min_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by min() on columns of table "organization_issue_type_settings" */
 export type Organization_Issue_Type_Settings_Min_Order_By = {
   id?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
 };
 
@@ -33896,7 +33368,7 @@ export type Organization_Issue_Type_Settings_Set_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -33913,7 +33385,7 @@ export type Organization_Issue_Type_Settings_Stream_Cursor_Value_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -36182,7 +35654,7 @@ export type Project_Issue_Type_Settings = {
   autoPrEnabled: Scalars['Boolean']['output'];
   enabled: Scalars['Boolean']['output'];
   id: Scalars['uuid']['output'];
-  issueType: IssueType_Enum;
+  issueType: Scalars['String']['output'];
   /** An object relationship */
   project: Project;
   projectId: Scalars['uuid']['output'];
@@ -36259,7 +35731,7 @@ export type Project_Issue_Type_Settings_Bool_Exp = {
   autoPrEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   enabled?: InputMaybe<Boolean_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
-  issueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  issueType?: InputMaybe<String_Comparison_Exp>;
   project?: InputMaybe<Project_Bool_Exp>;
   projectId?: InputMaybe<Uuid_Comparison_Exp>;
 };
@@ -36277,7 +35749,7 @@ export type Project_Issue_Type_Settings_Insert_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -36286,12 +35758,14 @@ export type Project_Issue_Type_Settings_Insert_Input = {
 export type Project_Issue_Type_Settings_Max_Fields = {
   __typename?: 'project_issue_type_settings_max_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by max() on columns of table "project_issue_type_settings" */
 export type Project_Issue_Type_Settings_Max_Order_By = {
   id?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
   projectId?: InputMaybe<Order_By>;
 };
 
@@ -36299,12 +35773,14 @@ export type Project_Issue_Type_Settings_Max_Order_By = {
 export type Project_Issue_Type_Settings_Min_Fields = {
   __typename?: 'project_issue_type_settings_min_fields';
   id?: Maybe<Scalars['uuid']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
 };
 
 /** order by min() on columns of table "project_issue_type_settings" */
 export type Project_Issue_Type_Settings_Min_Order_By = {
   id?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
   projectId?: InputMaybe<Order_By>;
 };
 
@@ -36374,7 +35850,7 @@ export type Project_Issue_Type_Settings_Set_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -36391,7 +35867,7 @@ export type Project_Issue_Type_Settings_Stream_Cursor_Value_Input = {
   autoPrEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  issueType?: InputMaybe<IssueType_Enum>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['uuid']['input']>;
 };
 
@@ -38250,12 +37726,6 @@ export type Query_Root = {
   issueLanguage_aggregate: IssueLanguage_Aggregate;
   /** fetch data from the table: "issue_language" using primary key columns */
   issueLanguage_by_pk?: Maybe<IssueLanguage>;
-  /** fetch data from the table: "issue_type" */
-  issueType: Array<IssueType>;
-  /** fetch aggregated fields from the table: "issue_type" */
-  issueType_aggregate: IssueType_Aggregate;
-  /** fetch data from the table: "issue_type" using primary key columns */
-  issueType_by_pk?: Maybe<IssueType>;
   issueTypes: Array<IssueTypeResponse>;
   listTokens?: Maybe<Array<Maybe<ListTokenResponse>>>;
   me?: Maybe<MeResponse>;
@@ -40793,29 +40263,6 @@ export type Query_RootIssueLanguage_AggregateArgs = {
 
 
 export type Query_RootIssueLanguage_By_PkArgs = {
-  value: Scalars['String']['input'];
-};
-
-
-export type Query_RootIssueTypeArgs = {
-  distinct_on?: InputMaybe<Array<IssueType_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<IssueType_Order_By>>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
-};
-
-
-export type Query_RootIssueType_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<IssueType_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<IssueType_Order_By>>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
-};
-
-
-export type Query_RootIssueType_By_PkArgs = {
   value: Scalars['String']['input'];
 };
 
@@ -44947,7 +44394,6 @@ export type Scm_Config = {
   scmUrl: Scalars['String']['output'];
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
-  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   user?: Maybe<User>;
@@ -45061,7 +44507,6 @@ export type Scm_Config_Bool_Exp = {
   scmUrl?: InputMaybe<String_Comparison_Exp>;
   scmUsername?: InputMaybe<String_Comparison_Exp>;
   token?: InputMaybe<String_Comparison_Exp>;
-  tokenInvalidAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   tokenLastUpdate?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
   userId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -45092,7 +44537,6 @@ export type Scm_Config_Insert_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
-  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
@@ -45110,7 +44554,6 @@ export type Scm_Config_Max_Fields = {
   scmUrl?: Maybe<Scalars['String']['output']>;
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
-  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -45126,7 +44569,6 @@ export type Scm_Config_Max_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
-  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
 };
@@ -45143,7 +44585,6 @@ export type Scm_Config_Min_Fields = {
   scmUrl?: Maybe<Scalars['String']['output']>;
   scmUsername?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
-  tokenInvalidAt?: Maybe<Scalars['timestamptz']['output']>;
   tokenLastUpdate?: Maybe<Scalars['timestamptz']['output']>;
   userId?: Maybe<Scalars['uuid']['output']>;
 };
@@ -45159,7 +44600,6 @@ export type Scm_Config_Min_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
-  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   userId?: InputMaybe<Order_By>;
 };
@@ -45192,7 +44632,6 @@ export type Scm_Config_Order_By = {
   scmUrl?: InputMaybe<Order_By>;
   scmUsername?: InputMaybe<Order_By>;
   token?: InputMaybe<Order_By>;
-  tokenInvalidAt?: InputMaybe<Order_By>;
   tokenLastUpdate?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
   userId?: InputMaybe<Order_By>;
@@ -45226,8 +44665,6 @@ export enum Scm_Config_Select_Column {
   /** column name */
   Token = 'token',
   /** column name */
-  TokenInvalidAt = 'tokenInvalidAt',
-  /** column name */
   TokenLastUpdate = 'tokenLastUpdate',
   /** column name */
   UserId = 'userId'
@@ -45258,7 +44695,6 @@ export type Scm_Config_Set_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
-  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -45323,7 +44759,6 @@ export type Scm_Config_Stream_Cursor_Value_Input = {
   scmUrl?: InputMaybe<Scalars['String']['input']>;
   scmUsername?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
-  tokenInvalidAt?: InputMaybe<Scalars['timestamptz']['input']>;
   tokenLastUpdate?: InputMaybe<Scalars['timestamptz']['input']>;
   userId?: InputMaybe<Scalars['uuid']['input']>;
 };
@@ -45363,8 +44798,6 @@ export enum Scm_Config_Update_Column {
   ScmUsername = 'scmUsername',
   /** column name */
   Token = 'token',
-  /** column name */
-  TokenInvalidAt = 'tokenInvalidAt',
   /** column name */
   TokenLastUpdate = 'tokenLastUpdate',
   /** column name */
@@ -47130,14 +46563,6 @@ export type Subscription_Root = {
   issueLanguage_by_pk?: Maybe<IssueLanguage>;
   /** fetch data from the table in a streaming manner: "issue_language" */
   issueLanguage_stream: Array<IssueLanguage>;
-  /** fetch data from the table: "issue_type" */
-  issueType: Array<IssueType>;
-  /** fetch aggregated fields from the table: "issue_type" */
-  issueType_aggregate: IssueType_Aggregate;
-  /** fetch data from the table: "issue_type" using primary key columns */
-  issueType_by_pk?: Maybe<IssueType>;
-  /** fetch data from the table in a streaming manner: "issue_type" */
-  issueType_stream: Array<IssueType>;
   /** fetch data from the table: "mvs.mvs_device" */
   mvs_mvs_device: Array<Mvs_Mvs_Device>;
   /** fetch aggregated fields from the table: "mvs.mvs_device" */
@@ -50012,36 +49437,6 @@ export type Subscription_RootIssueLanguage_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<IssueLanguage_Stream_Cursor_Input>>;
   where?: InputMaybe<IssueLanguage_Bool_Exp>;
-};
-
-
-export type Subscription_RootIssueTypeArgs = {
-  distinct_on?: InputMaybe<Array<IssueType_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<IssueType_Order_By>>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
-};
-
-
-export type Subscription_RootIssueType_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<IssueType_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<IssueType_Order_By>>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
-};
-
-
-export type Subscription_RootIssueType_By_PkArgs = {
-  value: Scalars['String']['input'];
-};
-
-
-export type Subscription_RootIssueType_StreamArgs = {
-  batch_size: Scalars['Int']['input'];
-  cursor: Array<InputMaybe<IssueType_Stream_Cursor_Input>>;
-  where?: InputMaybe<IssueType_Bool_Exp>;
 };
 
 
@@ -63832,7 +63227,7 @@ export type Vulnerability_Report_Issue = {
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
   parsedIssueLanguage?: Maybe<IssueLanguage_Enum>;
-  parsedIssueType?: Maybe<IssueType_Enum>;
+  parsedIssueType?: Maybe<Scalars['String']['output']>;
   parsedSeverity?: Maybe<Vulnerability_Severity_Enum>;
   /** A computed field, executes function "get_issue_language_from_vul_issue" */
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
@@ -64037,7 +63432,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   issueLanguage?: InputMaybe<String_Comparison_Exp>;
   issueType?: InputMaybe<String_Comparison_Exp>;
   parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum_Comparison_Exp>;
-  parsedIssueType?: InputMaybe<IssueType_Enum_Comparison_Exp>;
+  parsedIssueType?: InputMaybe<String_Comparison_Exp>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
   safeIssueLanguage?: InputMaybe<String_Comparison_Exp>;
   safeIssueType?: InputMaybe<String_Comparison_Exp>;
@@ -64780,7 +64175,7 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
   parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedIssueType?: InputMaybe<Scalars['String']['input']>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   sharedState?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Obj_Rel_Insert_Input>;
@@ -64814,6 +64209,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
+  parsedIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_issue_language_from_vul_issue" */
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_issue_type_from_vul_issue" */
@@ -64840,6 +64236,7 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
+  parsedIssueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   sharedStateId?: InputMaybe<Order_By>;
   unfixableId?: InputMaybe<Order_By>;
@@ -64861,6 +64258,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
+  parsedIssueType?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_issue_language_from_vul_issue" */
   safeIssueLanguage?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_issue_type_from_vul_issue" */
@@ -64887,6 +64285,7 @@ export type Vulnerability_Report_Issue_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
+  parsedIssueType?: InputMaybe<Order_By>;
   severity?: InputMaybe<Order_By>;
   sharedStateId?: InputMaybe<Order_By>;
   unfixableId?: InputMaybe<Order_By>;
@@ -65406,7 +64805,7 @@ export type Vulnerability_Report_Issue_Set_Input = {
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
   parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedIssueType?: InputMaybe<Scalars['String']['input']>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
@@ -65918,7 +65317,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
   parsedIssueLanguage?: InputMaybe<IssueLanguage_Enum>;
-  parsedIssueType?: InputMaybe<IssueType_Enum>;
+  parsedIssueType?: InputMaybe<Scalars['String']['input']>;
   parsedSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
   severity?: InputMaybe<Scalars['String']['input']>;
   sharedStateId?: InputMaybe<Scalars['uuid']['input']>;
@@ -67483,7 +66882,7 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
-export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
 export type GetFixWithAnswersQueryVariables = Exact<{
   fixId: Scalars['uuid']['input'];
@@ -67493,7 +66892,7 @@ export type GetFixWithAnswersQueryVariables = Exact<{
 
 export type GetFixWithAnswersQuery = { __typename?: 'query_root', fixData: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
-export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
+export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
 
 export type GetFixReportsByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -67511,7 +66910,7 @@ export type GetReportFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type GetLatestReportByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -67522,7 +66921,7 @@ export type GetLatestReportByRepoUrlQueryVariables = Exact<{
 }>;
 
 
-export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: IssueType_Enum | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type UpdateDownloadedFixDataMutationVariables = Exact<{
   fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];

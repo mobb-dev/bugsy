@@ -40,6 +40,9 @@ export const mockGetFixWithAnswersCascading: {
       questions: [
         {
           __typename: 'FixQuestion' as const,
+          content: '',
+          description: '',
+          guidance: '',
           key: 'shouldNormalizeUnicode',
           name: 'shouldNormalizeUnicode',
           inputType: FixQuestionInputType.Select,
@@ -72,6 +75,9 @@ export const mockGetFixWithAnswersAnswersIgnored: {
       questions: [
         {
           __typename: 'FixQuestion' as const,
+          content: '',
+          description: '',
+          guidance: '',
           key: 'isServerSideCode',
           name: 'isServerSideCode',
           inputType: FixQuestionInputType.Select,

@@ -37,7 +37,7 @@ export function getQuestionInformation({
   issueType: string
   language: IssueLanguage_Enum
 }) {
-  const { name } = fixQuestionData
+  const { name, content, description, guidance } = fixQuestionData
   const storedQuestionDataItem = languages[language]?.[issueType]?.[
     name as keyof Vulnerability
   ] ?? {
@@ -45,7 +45,18 @@ export function getQuestionInformation({
     description: () => '',
     guidance: () => '',
   }
-  return StoredQuestionDataItemZ.parse(storedQuestionDataItem)
+  const stored = StoredQuestionDataItemZ.parse(storedQuestionDataItem)
+  // E-2015 PR5: prefer analyzer-served copy; fall back to the TS
+  // storedQuestionData while the migration is in flight. Served guidance is
+  // already rendered for the current answer, so it ignores the render args.
+  return {
+    content: (args: Parameters<typeof stored.content>[0]) =>
+      content || stored.content(args),
+    description: (args: Parameters<typeof stored.description>[0]) =>
+      description || stored.description(args),
+    guidance: (args: Parameters<typeof stored.guidance>[0]) =>
+      guidance || stored.guidance(args),
+  }
 }
 
 export type CurriedQuestionInformationByQuestion =
@@ -126,9 +137,16 @@ export function getFixGuidances({
     },
     {} as { [key: string]: ExtraContext }
   )
-  const fixGuidance: string[] = storeFixResult.success
-    ? [storeFixResult.data.guidance({ questions, ...extraContext })]
-    : []
+  // E-2015 PR5c: prefer analyzer-served fix-level guidance; fall back to the TS
+  // storedFixData while the migration is in flight (a proven language drops its
+  // storedFixData/{lang} file and relies on the served guidances).
+  const servedFixGuidances = fixExtraContext.guidances ?? []
+  const fixGuidance: string[] =
+    servedFixGuidances.length > 0
+      ? servedFixGuidances
+      : storeFixResult.success
+        ? [storeFixResult.data.guidance({ questions, ...extraContext })]
+        : []
   return libGuidances.concat(fixGuidance).filter((guidance) => !!guidance)
 }
 

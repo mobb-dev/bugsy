@@ -135,6 +135,9 @@ query getFixes($filters: fix_bool_exp!) {
           name
           options
           value
+          content
+          description
+          guidance
           __typename
         }
         extraContext {
@@ -144,6 +147,7 @@ query getFixes($filters: fix_bool_exp!) {
             __typename
           }
           fixDescription
+          guidances
           manifestActionsRequired {
             action
             lib {
@@ -785,6 +789,9 @@ fragment FixDetails on fix {
           key
           value
         }
+        content
+        description
+        guidance
       }
       extraContext {
         extraContext {
@@ -815,6 +822,9 @@ query getFixWithAnswers($fixId: uuid!, $userInput: [QuestionAnswer!]!) {
           key
           value
         }
+        content
+        description
+        guidance
       }
       extraContext {
         extraContext {

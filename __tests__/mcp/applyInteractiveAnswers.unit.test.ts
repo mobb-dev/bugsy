@@ -146,6 +146,9 @@ describe('ScanAndFixVulnerabilitiesService.applyInteractiveAnswers', () => {
         questions: [
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'tainted_term_type',
             name: 'taintedTermType',
             defaultValue: 'a file name',
@@ -157,6 +160,9 @@ describe('ScanAndFixVulnerabilitiesService.applyInteractiveAnswers', () => {
           },
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'path_target_dir',
             name: 'pathTargetDir',
             defaultValue: '/tmp/replace/this/path',
@@ -204,6 +210,9 @@ describe('ScanAndFixVulnerabilitiesService.applyInteractiveAnswers', () => {
         questions: [
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'is_server_side_code',
             name: 'isServerSideCode',
             defaultValue: 'no',
@@ -284,6 +293,9 @@ function readReport(subdir) {
         questions: [
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'tainted_term_type',
             name: 'taintedTermType',
             defaultValue: 'a relative path',
@@ -383,6 +395,9 @@ function readReport(subdir) {
           questions: [
             {
               __typename: 'FixQuestion',
+              content: '',
+              description: '',
+              guidance: '',
               key: 'tainted_term_type',
               name: 'taintedTermType',
               defaultValue: 'a file name',
@@ -472,6 +487,9 @@ function readReport(subdir) {
           questions: [
             {
               __typename: 'FixQuestion',
+              content: '',
+              description: '',
+              guidance: '',
               key: 'is_server_side_code',
               name: 'isServerSideCode',
               defaultValue: 'no',
@@ -497,6 +515,9 @@ function readReport(subdir) {
           questions: [
             {
               __typename: 'FixQuestion',
+              content: '',
+              description: '',
+              guidance: '',
               key: 'tainted_term_type',
               name: 'taintedTermType',
               defaultValue: 'a file name',
@@ -560,6 +581,9 @@ function readReport(subdir) {
         questions: [
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'path_target_dir',
             name: 'pathTargetDir',
             defaultValue: '/tmp/replace/this/path',
@@ -591,6 +615,9 @@ function readReport(subdir) {
         questions: [
           {
             __typename: 'FixQuestion',
+            content: '',
+            description: '',
+            guidance: '',
             key: 'is_server_side_code',
             name: 'isServerSideCode',
             defaultValue: 'no',

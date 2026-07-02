@@ -20,6 +20,9 @@ const makeQuestion = (
   Extract<McpFix['patchAndQuestions'], { __typename: 'FixData' }>['questions']
 >[number] => ({
   __typename: 'FixQuestion' as const,
+  content: '',
+  description: '',
+  guidance: '',
   key: name,
   name,
   defaultValue: '',

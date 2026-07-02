@@ -20,6 +20,9 @@ const baseFix = (overrides: Partial<McpFix> = {}): McpFix => ({
     questions: [
       {
         __typename: 'FixQuestion' as const,
+        content: '',
+        description: '',
+        guidance: '',
         key: 'isServerSideCode',
         name: 'isServerSideCode',
         defaultValue: 'no',
@@ -93,6 +96,9 @@ describe('interactiveFixesPrompt', () => {
         questions: [
           {
             __typename: 'FixQuestion' as const,
+            content: '',
+            description: '',
+            guidance: '',
             key: 'iframeRestrictions',
             name: 'iframeRestrictions',
             defaultValue: '',
@@ -127,6 +133,9 @@ describe('interactiveFixesPrompt', () => {
         questions: [
           {
             __typename: 'FixQuestion' as const,
+            content: '',
+            description: '',
+            guidance: '',
             key: 'taintedTermType',
             name: 'taintedTermType',
             defaultValue: 'file name',

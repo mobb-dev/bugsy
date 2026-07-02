@@ -15,7 +15,6 @@ import { overlyBroadCatch } from './overlyBroadCatch'
 import { privacyViolation } from './privacyViolation'
 import { pt } from './pt'
 import { relativePathCommand } from './relativePathCommand'
-import { sqlInjection } from './sqlInjection'
 import { ssrf } from './ssrf'
 import { sysLeak } from './sysLeak'
 import { trustBoundaryViolation } from './trustBoundaryViolation'
@@ -26,7 +25,6 @@ import { xss } from './xss'
 import { xxe } from './xxe'
 
 const vulnerabilities = {
-  ['SQL_Injection']: sqlInjection,
   ['CMDi_relative_path_command']: relativePathCommand,
   ['CMDi']: commandInjection,
   ['CONFUSING_NAMING']: confusingNaming,

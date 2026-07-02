@@ -58,6 +58,9 @@ export const mockGetReportFixesWithQuestions: {
               questions: [
                 {
                   __typename: 'FixQuestion' as const,
+                  content: '',
+                  description: '',
+                  guidance: '',
                   key: 'isServerSideCode',
                   name: 'isServerSideCode',
                   inputType: FixQuestionInputType.Select,
@@ -107,6 +110,9 @@ export const mockGetReportFixesWithQuestions: {
               questions: [
                 {
                   __typename: 'FixQuestion' as const,
+                  content: '',
+                  description: '',
+                  guidance: '',
                   key: 'iframeRestrictions',
                   name: 'iframeRestrictions',
                   inputType: FixQuestionInputType.Text,
@@ -164,6 +170,9 @@ export const mockGetReportFixesWithQuestions: {
               questions: [
                 {
                   __typename: 'FixQuestion' as const,
+                  content: '',
+                  description: '',
+                  guidance: '',
                   key: 'taintedTermType',
                   name: 'taintedTermType',
                   inputType: FixQuestionInputType.Select,

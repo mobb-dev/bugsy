@@ -36,7 +36,7 @@ export const languages: {
   [IssueLanguage_Enum.Yaml as string]: yaml,
 }
 
-export type SQLInjection = typeof java.SQL_Injection
+// E-2015 PR5c: java SQL_Injection question copy dropped (served by the analyzer).
 export type CMDinjection = typeof java.CMDi_relative_path_command
-export type Vulnerability = SQLInjection | CMDinjection
+export type Vulnerability = CMDinjection
 export default languages

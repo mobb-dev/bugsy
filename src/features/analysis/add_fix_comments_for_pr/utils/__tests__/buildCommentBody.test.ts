@@ -32,6 +32,7 @@ const params: BuildFixCommentBodyParams = {
       questions: [],
       extraContext: {
         __typename: 'FixExtraContextResponse',
+        guidances: [],
         fixDescription: 'test description',
         extraContext: [],
         manifestActionsRequired: [],

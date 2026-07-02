@@ -26,6 +26,7 @@ index 1234567..abcdefg 100644
           questions: [],
           extraContext: {
             __typename: 'FixExtraContextResponse' as const,
+            guidances: [],
             fixDescription:
               'Fixed SQL injection vulnerability by using parameterized queries',
             extraContext: [],
@@ -56,6 +57,7 @@ index 9876543..fedcba9 100644
           questions: [],
           extraContext: {
             __typename: 'FixExtraContextResponse' as const,
+            guidances: [],
             fixDescription: 'Fixed XSS vulnerability by sanitizing user input',
             extraContext: [],
             manifestActionsRequired: [],

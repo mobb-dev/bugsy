@@ -26,6 +26,14 @@ const resolveQuestionText = ({
   fix: McpFix
   question: FixQuestion
 }): { content: string; description: string } => {
+  // E-2015 PR5: prefer analyzer-served copy; fall back to the TS
+  // storedQuestionData below while the migration is in flight.
+  if (question.content || question.description) {
+    return {
+      content: question.content || question.name,
+      description: question.description ?? '',
+    }
+  }
   const language = fix.safeIssueLanguage ?? undefined
   const issueType = fix.safeIssueType ?? undefined
   if (!language || !issueType) {

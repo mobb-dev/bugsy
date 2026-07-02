@@ -65,6 +65,11 @@ export const FixQuestionSchema = z.object({
   options: z.array(z.string()),
   index: z.number(),
   extraContext: z.array(UnstructuredFixExtraContextSchema),
+  // E-2015 PR5: analyzer-served question copy. default('') -> FE falls back when
+  // a query omits it, while the output type stays a required string.
+  content: z.string().default(''),
+  description: z.string().default(''),
+  guidance: z.string().default(''),
 })
 
 export type FixQuestion = z.infer<typeof FixQuestionSchema>

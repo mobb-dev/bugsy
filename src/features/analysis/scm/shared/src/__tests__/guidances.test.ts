@@ -25,6 +25,7 @@ describe('getGuidances', () => {
     ],
     extraContext: [],
     fixDescription: 'Mocked fix description',
+    guidances: [],
   }
 
   it('should return an empty array for invalid issue type or language', () => {
@@ -54,6 +55,9 @@ describe('getGuidances', () => {
         inputType: FixQuestionInputType.Select,
         options: [],
         index: 0,
+        content: '',
+        description: '',
+        guidance: '',
       },
     ]
 

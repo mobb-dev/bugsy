@@ -29,6 +29,15 @@ import {
   validateBitbucketParams,
 } from './bitbucket'
 
+// Bitbucket Cloud API tokens (which replace the deprecated app passwords) use a
+// different identity per protocol: the REST API authenticates with the Atlassian
+// account email, while git-over-HTTPS requires the Bitbucket username. Since our
+// basic-auth credential carries the email (for the REST API), we can't reuse it
+// as the git username. Atlassian publishes a static username for exactly this
+// case, which works for git regardless of the account's real username.
+// See https://support.atlassian.com/bitbucket-cloud/docs/using-api-tokens/
+const BITBUCKET_API_TOKEN_GIT_USERNAME = 'x-bitbucket-api-token-auth'
+
 function getUserAndPassword(token: string) {
   const [username, password] = token.split(':')
   const safePasswordAndUsername = z
@@ -101,8 +110,16 @@ export class BitbucketSCMLib extends SCMLib {
         })
       }
       case 'basic': {
-        const { username, password } = authData
-        return buildAuthorizedRepoUrl({ url, username, password })
+        const { password } = authData
+        // The basic-auth username is the Atlassian account email (required by
+        // the REST API), which git-over-HTTPS rejects — and its '@' would also
+        // corrupt the https://user:pass@host URL. Use Atlassian's static git
+        // username instead; the token remains the password.
+        return buildAuthorizedRepoUrl({
+          url,
+          username: BITBUCKET_API_TOKEN_GIT_USERNAME,
+          password,
+        })
       }
     }
   }

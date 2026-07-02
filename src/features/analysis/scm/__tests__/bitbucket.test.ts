@@ -210,13 +210,15 @@ describe('scm instance tests', () => {
       const [parsedUser, parsedPassword] = userAndPasswordString.split(':')
       expect(parsedUser).toBe(authUsername)
       expect(parsedPassword).toBe(authPassword)
+      // The clone URL uses Atlassian's static git username (not the REST
+      // email), since git-over-HTTPS with API tokens rejects the email identity.
       const authoriazedUrl = await scmLib.getUrlWithCredentials()
       expect(authoriazedUrl).toBe(
-        `https://${authUsername}:${authPassword}@bitbucket.org/mobbcitest/webgoat`
+        `https://x-bitbucket-api-token-auth:${authPassword}@bitbucket.org/mobbcitest/webgoat`
       )
     }
   )
-  it('should return the correct headers for token auth type', async () => {
+  it('should return the original URL for public/unauthenticated access', async () => {
     const scmLib = await createScmLib({
       url: PUBLIC_URL,
       scmType: ScmLibScmType.BITBUCKET,

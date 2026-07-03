@@ -1,21 +1,5 @@
-import { z } from 'zod'
-
+import { Language, ManifestAction } from '../../generates/client_generates'
 import {
-  IssueLanguage_Enum,
-  Language,
-  ManifestAction,
-} from '../../generates/client_generates'
-import { SafeIssueTypeStringZ } from './getIssueType'
-import {
-  languages as fixDataLanguages,
-  StoredFixDataItemZ,
-} from './storedFixData'
-import languages, {
-  StoredQuestionDataItemZ,
-  Vulnerability,
-} from './storedQuestionData'
-import {
-  ExtraContext,
   FixExtraContext,
   FixQuestionData,
   ManifestActionRequired,
@@ -28,54 +12,10 @@ export function toQuestion(userInput: FixQuestionData): Question {
   return { ...userInput, defaultValue, value, key, error: false }
 }
 
-export function getQuestionInformation({
-  fixQuestionData,
-  issueType,
-  language,
-}: {
-  fixQuestionData: FixQuestionData
-  issueType: string
-  language: IssueLanguage_Enum
-}) {
-  const { name, content, description, guidance } = fixQuestionData
-  const storedQuestionDataItem = languages[language]?.[issueType]?.[
-    name as keyof Vulnerability
-  ] ?? {
-    content: () => '',
-    description: () => '',
-    guidance: () => '',
-  }
-  const stored = StoredQuestionDataItemZ.parse(storedQuestionDataItem)
-  // E-2015 PR5: prefer analyzer-served copy; fall back to the TS
-  // storedQuestionData while the migration is in flight. Served guidance is
-  // already rendered for the current answer, so it ignores the render args.
-  return {
-    content: (args: Parameters<typeof stored.content>[0]) =>
-      content || stored.content(args),
-    description: (args: Parameters<typeof stored.description>[0]) =>
-      description || stored.description(args),
-    guidance: (args: Parameters<typeof stored.guidance>[0]) =>
-      guidance || stored.guidance(args),
-  }
-}
-
-export type CurriedQuestionInformationByQuestion =
-  typeof curriedQuestionInformationByQuestion
-
-export function curriedQuestionInformationByQuestion({
-  issueType,
-  language,
-}: {
-  issueType: string
-  language: IssueLanguage_Enum
-}) {
-  return (fixQuestionData: FixQuestionData) =>
-    getQuestionInformation({
-      issueType,
-      language,
-      fixQuestionData,
-    })
-}
+// E-2015: per-question text (content/description/guidance) is computed by
+// the owning fix in the analyzer and served directly on the FixQuestion, so the
+// FE reads it off the question — the getQuestionInformation/curried accessor and
+// its TS storedQuestionData fallback have been removed.
 
 export function getPackageFixGuidance(
   actionsRequired: ManifestActionRequired[]
@@ -114,46 +54,20 @@ export function getPackageFixGuidance(
 }
 
 export function getFixGuidances({
-  issueType,
-  issueLanguage,
   fixExtraContext,
-  questions,
 }: {
-  issueType: string | null
-  issueLanguage: IssueLanguage_Enum | null
   fixExtraContext: FixExtraContext
-  questions: Question[]
 }) {
-  const storedFixGuidanceDataItem =
-    fixDataLanguages[issueLanguage || '']?.[issueType || ''] ?? {}
-  const storeFixResult = StoredFixDataItemZ.safeParse(storedFixGuidanceDataItem)
+  // E-2015: fix-level guidance is served by the analyzer on
+  // FixExtraContext.guidances; the TS storedFixData fallback has been removed.
   const libGuidances = getPackageFixGuidance(
     fixExtraContext.manifestActionsRequired
   )
-  const extraContext = fixExtraContext.extraContext.reduce(
-    (acc, obj) => {
-      acc[obj.key] = obj.value
-      return acc
-    },
-    {} as { [key: string]: ExtraContext }
-  )
-  // E-2015 PR5c: prefer analyzer-served fix-level guidance; fall back to the TS
-  // storedFixData while the migration is in flight (a proven language drops its
-  // storedFixData/{lang} file and relies on the served guidances).
   const servedFixGuidances = fixExtraContext.guidances ?? []
-  const fixGuidance: string[] =
-    servedFixGuidances.length > 0
-      ? servedFixGuidances
-      : storeFixResult.success
-        ? [storeFixResult.data.guidance({ questions, ...extraContext })]
-        : []
-  return libGuidances.concat(fixGuidance).filter((guidance) => !!guidance)
+  return libGuidances
+    .concat(servedFixGuidances)
+    .filter((guidance) => !!guidance)
 }
-
-const IssueTypeAndLanguageZ = z.object({
-  issueType: SafeIssueTypeStringZ,
-  issueLanguage: z.nativeEnum(IssueLanguage_Enum),
-})
 
 // Note: we're merging the guidance from specific questions and from the fix general guidance
 export function getGuidances(args: {
@@ -162,41 +76,15 @@ export function getGuidances(args: {
   issueLanguage: string | null
   fixExtraContext: FixExtraContext
 }) {
-  const safeIssueTypeAndLanguage = IssueTypeAndLanguageZ.safeParse({
-    issueType: args.issueType,
-    issueLanguage: args.issueLanguage,
-  })
-  if (!safeIssueTypeAndLanguage.success) {
-    return []
-  }
   const { questions, fixExtraContext } = args
-  const { issueType, issueLanguage } = safeIssueTypeAndLanguage.data
-  const fixGuidances = getFixGuidances({
-    issueType,
-    issueLanguage,
-    fixExtraContext,
-    questions,
-  }).map((guidance, index) => ({ guidance, key: `fixGuidance_index_${index}` }))
+  // E-2015: guidance is served on the FixQuestion / FixExtraContext, so it is
+  // surfaced directly — regardless of whether the issue type/language are
+  // recognized enum members (issue types are opaque, analyzer-served strings).
+  const fixGuidances = getFixGuidances({ fixExtraContext }).map(
+    (guidance, index) => ({ guidance, key: `fixGuidance_index_${index}` })
+  )
   return questions
-    .map((question) => {
-      let questionGuidance = question.guidance
-      if (!questionGuidance && issueType && issueLanguage) {
-        const getFixInformation = curriedQuestionInformationByQuestion({
-          issueType,
-          language: issueLanguage,
-        })
-        const { guidance } = getFixInformation(question)
-
-        questionGuidance = guidance({
-          userInputValue: question.value,
-        })
-      }
-      return {
-        ...question,
-        guidance: questionGuidance,
-      }
-    })
+    .map((question) => ({ guidance: question.guidance, key: question.key }))
     .filter(({ guidance }) => !!guidance)
-    .map(({ guidance, key }) => ({ guidance, key }))
     .concat(fixGuidances)
 }

@@ -1,5 +1,4 @@
 import { FixQuestionInputType } from '../../features/analysis/scm/generates/client_generates'
-import storedQuestionDataLanguages from '../../features/analysis/scm/shared/src/storedQuestionData'
 import { McpGQLClient } from '../services/McpGQLClient'
 import {
   MCP_TOOL_CHECK_FOR_NEW_AVAILABLE_FIXES,
@@ -18,46 +17,15 @@ function friendlyType(s: string) {
 export const noFixesReturnedForParameters = `No fixes returned for the given offset and limit parameters.
 `
 
-/** Labels from storedQuestionData (fallback: question.name). Inline lookup avoids typing McpFix into guidances#getQuestionInformation. */
+/** Question copy is served by the analyzer on the FixQuestion (fallback: question.name). */
 const resolveQuestionText = ({
-  fix,
   question,
 }: {
-  fix: McpFix
   question: FixQuestion
 }): { content: string; description: string } => {
-  // E-2015 PR5: prefer analyzer-served copy; fall back to the TS
-  // storedQuestionData below while the migration is in flight.
-  if (question.content || question.description) {
-    return {
-      content: question.content || question.name,
-      description: question.description ?? '',
-    }
-  }
-  const language = fix.safeIssueLanguage ?? undefined
-  const issueType = fix.safeIssueType ?? undefined
-  if (!language || !issueType) {
-    return { content: question.name, description: '' }
-  }
-  const item =
-    storedQuestionDataLanguages[language]?.[issueType]?.[question.name]
-  if (!item) {
-    return { content: question.name, description: '' }
-  }
-  const args = question.extraContext.reduce<Record<string, unknown>>(
-    (acc, ctx) => {
-      acc[ctx.key] = ctx.value
-      return acc
-    },
-    {}
-  )
-  try {
-    return {
-      content: item.content(args) || question.name,
-      description: item.description(args) || '',
-    }
-  } catch {
-    return { content: question.name, description: '' }
+  return {
+    content: question.content || question.name,
+    description: question.description ?? '',
   }
 }
 
@@ -82,7 +50,7 @@ const renderInteractiveFix = (fix: McpFix, index: number): string => {
     .slice()
     .sort((a, b) => a.index - b.index)
     .map((q, qIdx) => {
-      const { content, description } = resolveQuestionText({ fix, question: q })
+      const { content, description } = resolveQuestionText({ question: q })
       const desc = description ? `\n  *Why it matters:* ${description}` : ''
       const defaultLine = q.defaultValue
         ? `\n  *Default if you don't decide:* \`${q.defaultValue}\``

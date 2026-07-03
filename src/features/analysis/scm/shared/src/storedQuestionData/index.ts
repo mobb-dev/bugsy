@@ -1,42 +1,5 @@
-import { z } from 'zod'
-
-import { IssueLanguage_Enum } from '../../../generates/client_generates'
-import cpp from './cpp'
-import csharp from './csharp'
-import go from './go'
-import java from './java'
-import js from './js'
-import python from './python'
-import xml from './xml'
-import yaml from './yaml'
-
+// E-2015: all per-question text (content/description/guidance) is now
+// computed in the analyzer's get_questions() and served on the FixQuestion, so
+// the TS storedQuestionData collection is gone. Only the option-label helper
+// remains (a generic, non-per-issue-type util consumed by the CLI and app).
 export * from './optionValues'
-
-export const StoredQuestionDataItemZ = z.object({
-  content: z.function().args(z.any()).returns(z.string()),
-  description: z.function().args(z.any()).returns(z.string()),
-  guidance: z.function().args(z.any()).returns(z.string()),
-})
-export type StoredQuestionDataItem = z.infer<typeof StoredQuestionDataItemZ>
-
-export const languages: {
-  [languageName: string]: {
-    [vulnerabilityName: string]: {
-      [questionKey: string]: StoredQuestionDataItem
-    }
-  }
-} = {
-  [IssueLanguage_Enum.Java as string]: java,
-  [IssueLanguage_Enum.JavaScript as string]: js,
-  [IssueLanguage_Enum.Xml as string]: xml,
-  [IssueLanguage_Enum.CSharp as string]: csharp,
-  [IssueLanguage_Enum.Python as string]: python,
-  [IssueLanguage_Enum.Go as string]: go,
-  [IssueLanguage_Enum.Cpp as string]: cpp,
-  [IssueLanguage_Enum.Yaml as string]: yaml,
-}
-
-// E-2015 PR5c: java SQL_Injection question copy dropped (served by the analyzer).
-export type CMDinjection = typeof java.CMDi_relative_path_command
-export type Vulnerability = CMDinjection
-export default languages

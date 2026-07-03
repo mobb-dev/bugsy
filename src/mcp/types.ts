@@ -65,8 +65,9 @@ export const FixQuestionSchema = z.object({
   options: z.array(z.string()),
   index: z.number(),
   extraContext: z.array(UnstructuredFixExtraContextSchema),
-  // E-2015 PR5: analyzer-served question copy. default('') -> FE falls back when
-  // a query omits it, while the output type stays a required string.
+  // E-2015: analyzer-served question text. default('') so a query that omits it
+  // still parses, while the output type stays a required string. The analyzer is
+  // the sole source; consumers use the served value directly (no fallback).
   content: z.string().default(''),
   description: z.string().default(''),
   guidance: z.string().default(''),

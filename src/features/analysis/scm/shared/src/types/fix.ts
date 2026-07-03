@@ -43,9 +43,10 @@ const FixExtraContextZ = z.object({
   fixDescription: z.string(),
   manifestActionsRequired: z.array(ManifestActionRequiredZ),
   extraContext: z.array(ExtraContextInternalZ),
-  // E-2015 PR5c: analyzer-served fix-level guidance. default([]) so a query that
+  // E-2015: analyzer-served fix-level guidance. default([]) so a query that
   // omits it still parses, while the output type is a required string[] to match
-  // the non-null GraphQL field. getFixGuidances prefers served then falls back.
+  // the non-null GraphQL field. The analyzer is the sole source; getFixGuidances
+  // uses the served value directly (no fallback).
   guidances: z.array(z.string()).default([]),
 })
 
@@ -63,10 +64,10 @@ export const PatchAndQuestionsZ = z.object({
       extraContext: z.array(ExtraContextInternalZ),
       inputType: z.nativeEnum(FixQuestionInputType),
       options: z.array(z.string()),
-      // E-2015 PR5: analyzer-served question copy. default('') so a query that
-      // omits these still parses (-> '' -> FE falls back to its own copy), while
-      // the output type stays a required `string` to match the non-null GraphQL
-      // fields. Consumers use `served || storedQuestionData`.
+      // E-2015: analyzer-served question text. default('') so a query that
+      // omits these still parses (-> ''), while the output type stays a required
+      // `string` to match the non-null GraphQL fields. The analyzer is the sole
+      // source; consumers use the served value directly (no fallback).
       content: z.string().default(''),
       description: z.string().default(''),
       guidance: z.string().default(''),

@@ -20,7 +20,8 @@ const baseFix = (overrides: Partial<McpFix> = {}): McpFix => ({
     questions: [
       {
         __typename: 'FixQuestion' as const,
-        content: '',
+        content:
+          'Is this code running on the server side (a NodeJS application)',
         description: '',
         guidance: '',
         key: 'isServerSideCode',
@@ -65,7 +66,7 @@ describe('interactiveFixesPrompt', () => {
     expect(out).toContain("*Default if you don't decide:* `no`")
   })
 
-  it('resolves human-readable text from the storedQuestionData registry (JS XSS isServerSideCode)', () => {
+  it('resolves the analyzer-served content on the FixQuestion (JS XSS isServerSideCode)', () => {
     const out = interactiveFixesPrompt({
       interactiveFixes: [baseFix()],
       repositoryPath: '/tmp/repo',
@@ -75,10 +76,34 @@ describe('interactiveFixesPrompt', () => {
     )
   })
 
-  it('falls back to the question name when language/issueType has no registered text', () => {
+  it('falls back to the question name when the served content is empty', () => {
     const fix = baseFix({
-      safeIssueType: 'NOT_REGISTERED',
-      safeIssueLanguage: 'JavaScript',
+      patchAndQuestions: {
+        __typename: 'FixData' as const,
+        patch: 'diff --git a/x.js b/x.js\n',
+        patchOriginalEncodingBase64: 'eA==',
+        questions: [
+          {
+            __typename: 'FixQuestion' as const,
+            content: '',
+            description: '',
+            guidance: '',
+            key: 'isServerSideCode',
+            name: 'isServerSideCode',
+            defaultValue: 'no',
+            value: null,
+            inputType: FixQuestionInputType.Select,
+            options: ['yes', 'no'],
+            index: 0,
+            extraContext: [],
+          },
+        ],
+        extraContext: {
+          __typename: 'FixExtraContextResponse' as const,
+          fixDescription: 'Replace innerHTML with textContent',
+          extraContext: [],
+        },
+      },
     })
     const out = interactiveFixesPrompt({
       interactiveFixes: [fix],
@@ -123,7 +148,7 @@ describe('interactiveFixesPrompt', () => {
     expect(out).toContain('Provide a free-form string')
   })
 
-  it('substitutes question template variables from extraContext', () => {
+  it('renders the analyzer-served content with the operand already interpolated', () => {
     const fix = baseFix({
       safeIssueType: 'PT',
       patchAndQuestions: {
@@ -133,7 +158,8 @@ describe('interactiveFixesPrompt', () => {
         questions: [
           {
             __typename: 'FixQuestion' as const,
-            content: '',
+            content:
+              'Does `userInput` represent a file name, a relative path or an absolute path?',
             description: '',
             guidance: '',
             key: 'taintedTermType',

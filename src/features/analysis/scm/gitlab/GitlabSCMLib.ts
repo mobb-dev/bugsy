@@ -10,6 +10,7 @@ import {
   GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
+  RecentCommitAuthor,
   RecentCommitsResult,
   RepositoryContributor,
   ScmLibScmType,
@@ -36,6 +37,7 @@ import {
   getGitlabMrDataBatch,
   getGitlabProjectLanguages,
   getGitlabRateLimitStatus,
+  getGitlabRecentCommitAuthors,
   getGitlabRecentCommits,
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
@@ -512,6 +514,15 @@ export class GitlabSCMLib extends SCMLib {
     return { data: commits }
   }
 
+  async getRecentCommitAuthors(since: string): Promise<RecentCommitAuthor[]> {
+    this._validateAccessTokenAndUrl()
+    return getGitlabRecentCommitAuthors({
+      repoUrl: this.url,
+      accessToken: this.accessToken,
+      since,
+    })
+  }
+
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
     this._validateAccessTokenAndUrl()
     return getGitlabRateLimitStatus({
@@ -522,7 +533,14 @@ export class GitlabSCMLib extends SCMLib {
 
   async getRepositoryContributors(): Promise<RepositoryContributor[]> {
     this._validateAccessTokenAndUrl()
-    const [members, repoContributors, authUser] = await Promise.all([
+    // Resilient gather: members and repoContributors are two independent ways to
+    // read the population. Use allSettled so a failure in one (e.g. the members
+    // endpoint needing elevated scope) doesn't discard data the other returned.
+    // But if BOTH fail we must NOT silently return [] (that would record the
+    // repo as accessible-with-zero-contributors); rethrow so the sync classifies
+    // the repo (token_invalid / rate_limited / no_access) and fails over to the
+    // next token. authUser is best-effort enrichment only.
+    const [membersRes, repoContribRes, authUserRes] = await Promise.allSettled([
       listGitlabProjectMembers({
         repoUrl: this.url,
         accessToken: this.accessToken,
@@ -536,6 +554,18 @@ export class GitlabSCMLib extends SCMLib {
         accessToken: this.accessToken,
       }),
     ])
+    if (
+      membersRes.status === 'rejected' &&
+      repoContribRes.status === 'rejected'
+    ) {
+      // Both population sources failed — surface the real error for classification.
+      throw membersRes.reason
+    }
+    const members = membersRes.status === 'fulfilled' ? membersRes.value : []
+    const repoContributors =
+      repoContribRes.status === 'fulfilled' ? repoContribRes.value : []
+    const authUser =
+      authUserRes.status === 'fulfilled' ? authUserRes.value : null
 
     contextLogger.info('[GitLab] Starting contributor enrichment', {
       memberCount: members.length,
@@ -610,6 +640,26 @@ export class GitlabSCMLib extends SCMLib {
         })
       )
     )
+
+    // Read-only fallback: listing members can need more than read_repository. If
+    // we got no members but could read commit contributors, count those so a
+    // read-only token still works instead of yielding zero contributors.
+    if (enriched.length === 0 && repoContributors.length > 0) {
+      return repoContributors
+        .filter((rc) => rc.email || rc.name)
+        .map((rc) => ({
+          // Synthetic key namespaced away from real numeric member ids so a
+          // commit-author row can't collide with (or later duplicate) the same
+          // person's member row once a privileged token lists them. Prefer email.
+          // Lowercased to match the 90-day stamp path (commit:<lowercased email>),
+          // so the same person isn't split into commit:John@X.com vs commit:john@x.com.
+          externalId: `commit:${(rc.email || (rc.name as string)).toLowerCase()}`,
+          username: null,
+          displayName: rc.name ?? null,
+          email: rc.email ?? null,
+          accessLevel: null,
+        }))
+    }
 
     const withEmail = enriched.filter((c) => c.email)
     contextLogger.info('[GitLab] Contributor enrichment summary', {

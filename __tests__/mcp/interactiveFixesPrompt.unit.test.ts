@@ -31,7 +31,6 @@ const baseFix = (overrides: Partial<McpFix> = {}): McpFix => ({
         inputType: FixQuestionInputType.Select,
         options: ['yes', 'no'],
         index: 0,
-        extraContext: [],
       },
     ],
     extraContext: {
@@ -95,7 +94,6 @@ describe('interactiveFixesPrompt', () => {
             inputType: FixQuestionInputType.Select,
             options: ['yes', 'no'],
             index: 0,
-            extraContext: [],
           },
         ],
         extraContext: {
@@ -131,7 +129,6 @@ describe('interactiveFixesPrompt', () => {
             inputType: FixQuestionInputType.Text,
             options: [],
             index: 0,
-            extraContext: [],
           },
         ],
         extraContext: {
@@ -169,7 +166,6 @@ describe('interactiveFixesPrompt', () => {
             inputType: FixQuestionInputType.Select,
             options: ['file name', 'relative path', 'absolute path'],
             index: 0,
-            extraContext: [{ key: 'expression', value: 'userInput' }],
           },
         ],
         extraContext: {

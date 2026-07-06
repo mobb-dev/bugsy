@@ -13,6 +13,7 @@ import {
   GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
+  RecentCommitAuthor,
   RecentCommitsResult,
   RepositoryContributor,
   ScmLibScmType,
@@ -380,6 +381,17 @@ export class BitbucketSCMLib extends SCMLib {
     }
   }
 
+  async getRecentCommitAuthors(since: string): Promise<RecentCommitAuthor[]> {
+    this._validateAccessTokenAndUrl()
+    const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(this.url)
+    const bitbucketSdk = createBitbucketSdk(this.accessToken)
+    return bitbucketSdk.streamRecentCommitAuthors({
+      workspace,
+      repo_slug,
+      since,
+    })
+  }
+
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
     // Bitbucket doesn't expose a dedicated rate limit API
     return null
@@ -388,11 +400,30 @@ export class BitbucketSCMLib extends SCMLib {
   async getRepositoryContributors(): Promise<RepositoryContributor[]> {
     this._validateAccessTokenAndUrl()
     const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(this.url)
-    const [members, commitAuthors, currentUser] = await Promise.all([
-      this.bitbucketSdk.getWorkspaceMembers({ workspace }),
-      this.bitbucketSdk.getRepoCommitAuthors({ workspace, repo_slug }),
-      this.bitbucketSdk.getCurrentUserWithEmail(),
-    ])
+    // Resilient gather (see GitlabSCMLib.getRepositoryContributors): members and
+    // commit authors are independent population sources — a failure in one must
+    // not discard the other, but if BOTH fail we rethrow so the sync classifies
+    // the repo instead of recording it accessible-with-zero-contributors.
+    // currentUser is best-effort enrichment only.
+    const [membersRes, commitAuthorsRes, currentUserRes] =
+      await Promise.allSettled([
+        this.bitbucketSdk.getWorkspaceMembers({ workspace }),
+        this.bitbucketSdk.getRepoCommitAuthors({ workspace, repo_slug }),
+        this.bitbucketSdk.getCurrentUserWithEmail(),
+      ])
+    if (
+      membersRes.status === 'rejected' &&
+      commitAuthorsRes.status === 'rejected'
+    ) {
+      throw membersRes.reason
+    }
+    const members = membersRes.status === 'fulfilled' ? membersRes.value : []
+    const commitAuthors =
+      commitAuthorsRes.status === 'fulfilled' ? commitAuthorsRes.value : []
+    const currentUser =
+      currentUserRes.status === 'fulfilled'
+        ? currentUserRes.value
+        : { accountId: null, email: null }
 
     const emailByAccountId = new Map<string, string>()
     const emailByName = new Map<string, string>()
@@ -470,6 +501,27 @@ export class BitbucketSCMLib extends SCMLib {
         accessLevel: null,
       }
     })
+
+    // Read-only fallback: listing workspace members can need more than repo
+    // read. If we got no members but could read commit authors, count those so a
+    // read-only token still works instead of yielding zero contributors.
+    if (result.length === 0 && commitAuthors.length > 0) {
+      return commitAuthors
+        .filter((a) => a.accountId || a.email || a.name)
+        .map((a) => ({
+          // Real Bitbucket account id keeps the member identity; otherwise use a
+          // synthetic commit key so email/display-name-only rows can't collide
+          // with numeric member rows (or, on Bitbucket, merge two distinct
+          // people who happen to share a display name). Lowercased to match the
+          // 90-day stamp path (commit:<lowercased email>).
+          externalId:
+            a.accountId ?? `commit:${(a.email || a.name).toLowerCase()}`,
+          username: null,
+          displayName: a.name ?? null,
+          email: a.email ?? null,
+          accessLevel: null,
+        }))
+    }
 
     const withEmail = result.filter((c) => c.email)
     contextLogger.info('[Bitbucket] Contributor enrichment summary', {

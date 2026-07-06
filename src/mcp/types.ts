@@ -64,7 +64,6 @@ export const FixQuestionSchema = z.object({
   inputType: z.nativeEnum(FixQuestionInputType),
   options: z.array(z.string()),
   index: z.number(),
-  extraContext: z.array(UnstructuredFixExtraContextSchema),
   // E-2015: analyzer-served question text. default('') so a query that omits it
   // still parses, while the output type stays a required string. The analyzer is
   // the sole source; consumers use the served value directly (no fallback).

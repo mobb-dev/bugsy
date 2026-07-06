@@ -30,7 +30,6 @@ const makeQuestion = (
   inputType: FixQuestionInputType.Text,
   options: [],
   index: 0,
-  extraContext: [],
 })
 
 const makeFix = (

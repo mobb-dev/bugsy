@@ -6,6 +6,7 @@ import { RefNotFoundError } from '../errors'
 import {
   ChangedLinesData,
   PrCommentData,
+  RecentCommitAuthor,
   ReferenceType,
   ScmRepoInfo,
 } from '../types'
@@ -755,6 +756,15 @@ export function getGithubSdk(
       repo: string
       since: string
     }) {
+      // NO commit cap: the exact count of contributors active in the last 90 days
+      // is a headline dashboard number, and a cap could drop an author whose only
+      // window commits fall in the truncated tail — under-reporting active
+      // contributors. `since` already bounds the walk to the 90-day window, and
+      // the per-repo 4-minute sync timeout is the safety net for a pathological
+      // monster repo (recorded as partial/timeout — honestly incomplete — never
+      // silently truncated). Returns the full commit item: this method is shared
+      // with GithubSCMLib (which needs sha/message/parents), so the shape can't
+      // be trimmed here.
       const commits = await octokit.paginate(octokit.rest.repos.listCommits, {
         owner: params.owner,
         repo: params.repo,
@@ -762,6 +772,50 @@ export function getGithubSdk(
         per_page: 100,
       })
       return { data: commits }
+    },
+    // Distinct commit authors in the window, streamed. Uses paginate.iterator so
+    // only ONE page is in memory at a time and we accumulate one row per author
+    // (keeping their latest commit date) — memory is bounded by author count, not
+    // commit volume, and the walk is uncapped so the 90-day count is exact even
+    // for a repo with hundreds of thousands of commits.
+    async streamRecentCommitAuthors(params: {
+      owner: string
+      repo: string
+      since: string
+    }): Promise<RecentCommitAuthor[]> {
+      const byAuthor = new Map<string, RecentCommitAuthor>()
+      for await (const { data } of octokit.paginate.iterator(
+        octokit.rest.repos.listCommits,
+        {
+          owner: params.owner,
+          repo: params.repo,
+          since: params.since,
+          per_page: 100,
+        }
+      )) {
+        for (const c of data) {
+          const email = c.commit?.author?.email
+          if (!email) continue
+          const externalId = c.author?.id != null ? String(c.author.id) : null
+          const date =
+            c.commit?.committer?.date ?? c.commit?.author?.date ?? params.since
+          const key = externalId ?? email.toLowerCase()
+          const prev = byAuthor.get(key)
+          if (
+            !prev ||
+            new Date(date).getTime() > new Date(prev.date).getTime()
+          ) {
+            byAuthor.set(key, {
+              email: email.toLowerCase(),
+              name: c.commit?.author?.name ?? null,
+              date,
+              externalId,
+              isBot: c.author?.type === 'Bot',
+            })
+          }
+        }
+      }
+      return [...byAuthor.values()]
     },
     async getRateLimitStatus() {
       const response = await octokit.rest.rateLimit.get()
@@ -1024,15 +1078,74 @@ export function getGithubSdk(
     },
 
     async listRepositoryCollaborators(params: { owner: string; repo: string }) {
-      const collaborators = await octokit.paginate(
-        octokit.rest.repos.listCollaborators,
+      try {
+        const collaborators = await octokit.paginate(
+          octokit.rest.repos.listCollaborators,
+          {
+            owner: params.owner,
+            repo: params.repo,
+            per_page: 100,
+          }
+        )
+        return collaborators
+      } catch (error) {
+        // Listing collaborators needs PUSH access ("Must have push access to
+        // view repository collaborators"). A read-only token can still read
+        // contributors/commits, so treat this as "no member list" (best-effort)
+        // rather than failing — the caller falls back to the read-only
+        // contributors endpoint. Non-permission errors still propagate.
+        //
+        // 404 is included: on org repos GitHub answers 404 (not 403) to this
+        // endpoint for a token with read-but-not-push access — observed live:
+        // /repos/X/collaborators -> 404 while /repos/X and /contributors -> 200
+        // for the same token. Without it, a readable repo is misreported as
+        // not_found. A genuinely missing repo still surfaces: the contributors
+        // fallback 404s too and THAT error propagates.
+        const status = (error as { status?: number })?.status
+        const message = error instanceof Error ? error.message : String(error)
+        // A rate-limit error is ALSO a 403 on GitHub — do NOT swallow it as
+        // "no member list", or the caller immediately spends more quota on the
+        // /contributors fallback. Let it propagate so the sync classifies it as
+        // rate_limited (and poisons the connection's quota) instead.
+        if (/rate limit|secondary rate|abuse detection/i.test(message)) {
+          throw error
+        }
+        if (
+          status === 403 ||
+          status === 404 ||
+          /push access|forbidden/i.test(message)
+        ) {
+          return []
+        }
+        throw error
+      }
+    },
+
+    // Read-only contributor list (commit authors, aggregated). Unlike
+    // listCollaborators this needs only read access, so it works for repos where
+    // we can read code but aren't a push-level collaborator.
+    async listRepositoryContributors(params: { owner: string; repo: string }) {
+      // NO cap: the exact contributor count is the whole point of the dashboard
+      // (customers are billed per contributor), so truncating would under-report
+      // paid seats. This endpoint returns ONE already-aggregated entry per
+      // contributor — bounded by the real contributor count, not commit volume —
+      // so a 10k-contributor repo is 10k small rows, which is acceptable. Keep
+      // the mapper minimal so per-item memory stays low even at that size.
+      const contributors = await octokit.paginate(
+        octokit.rest.repos.listContributors,
         {
           owner: params.owner,
           repo: params.repo,
           per_page: 100,
-        }
+        },
+        (response) =>
+          response.data.map((c) => ({
+            login: c.login,
+            id: c.id,
+            type: c.type,
+          }))
       )
-      return collaborators
+      return contributors
     },
 
     async listOrgMembers(params: { org: string }) {

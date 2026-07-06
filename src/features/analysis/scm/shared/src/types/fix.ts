@@ -61,7 +61,6 @@ export const PatchAndQuestionsZ = z.object({
       index: z.number(),
       defaultValue: z.string(),
       value: z.string().nullable(),
-      extraContext: z.array(ExtraContextInternalZ),
       inputType: z.nativeEnum(FixQuestionInputType),
       options: z.array(z.string()),
       // E-2015: analyzer-served question text. default('') so a query that

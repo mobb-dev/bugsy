@@ -300,6 +300,7 @@ export function getScmConfig({
   scmConfigs,
   brokerHosts,
   includeOrgTokens = true,
+  allowRelaxedProtocolMatch = false,
 }: {
   url: string
   scmConfigs: ScmConfig[]
@@ -308,17 +309,26 @@ export function getScmConfig({
     realDomain: string
   }[]
   includeOrgTokens?: boolean
+  // Opt-in: allow returning a token for a same-host connection that differs by
+  // protocol/port (e.g. http:// url vs https:// connection). ONLY the backend
+  // sets this — it reaches brokered hosts over the TLS inner tunnel via
+  // `virtualUrl`, so the token never rides cleartext. Direct callers (the CLI,
+  // which connects to the raw url and ignores virtualUrl) leave it false so an
+  // https token is never attached to a plain-http request.
+  allowRelaxedProtocolMatch?: boolean
 }) {
   const urlObject = new URL(url)
-  const filteredScmConfigs = scmConfigs.filter((scm) => {
+  //if we the user does an ADO oauth flow then the token is saved for dev.azure.com but
+  //sometimes the user uses the url dev.azure.com and sometimes the url visualstudio.com
+  //so we need to check both
+  const matchesHostname = (configUrl: URL) =>
+    urlObject.hostname.toLowerCase() === configUrl.hostname.toLowerCase() ||
+    (urlObject.hostname.toLowerCase().endsWith('.visualstudio.com') &&
+      configUrl.hostname.toLowerCase() === 'dev.azure.com')
+  const exactScmConfigs = scmConfigs.filter((scm) => {
     const configUrl = new URL(scm.scmUrl)
     return (
-      //if we the user does an ADO oauth flow then the token is saved for dev.azure.com but
-      //sometimes the user uses the url dev.azure.com and sometimes the url visualstudio.com
-      //so we need to check both
-      (urlObject.hostname.toLowerCase() === configUrl.hostname.toLowerCase() ||
-        (urlObject.hostname.toLowerCase().endsWith('.visualstudio.com') &&
-          configUrl.hostname.toLowerCase() === 'dev.azure.com')) &&
+      matchesHostname(configUrl) &&
       urlObject.protocol === configUrl.protocol &&
       urlObject.port === configUrl.port
     )
@@ -327,6 +337,26 @@ export function getScmConfig({
     const urlObject = new URL(url)
     return urlObject.hostname.toLowerCase() === broker.realDomain.toLowerCase()
   })
+  // Same host, different protocol/port (e.g. the user typed http:// for a
+  // connection saved as https://): reuse the existing connection instead of
+  // asking for new credentials and creating a duplicate scm_config for the same
+  // host. Exact protocol+port matches always win.
+  //
+  // SECURITY: the protocol/port-relaxed fallback fires ONLY when BOTH (a) the
+  // caller opted in (allowRelaxedProtocolMatch — i.e. the backend, which reaches
+  // the host over the broker's TLS inner tunnel via virtualUrl) AND (b) the host
+  // is actually broker-backed (so virtualUrl exists). A direct caller like the
+  // CLI connects to the raw url and ignores virtualUrl, so it leaves the flag
+  // false — otherwise an https connection's token would be attached to a plain
+  // http:// request on the wire. Without both, only exact protocol+port matches
+  // win and a mismatch returns no token (caller falls back to the connect flow).
+  const brokerBacked = filteredBrokerHosts.length > 0
+  const filteredScmConfigs =
+    exactScmConfigs.length > 0
+      ? exactScmConfigs
+      : allowRelaxedProtocolMatch && brokerBacked
+        ? scmConfigs.filter((scm) => matchesHostname(new URL(scm.scmUrl)))
+        : []
   //TODO: This is a hack for now. We go over the broker hosts configurations for all the organizations the user is part of.
   //It doesn't match the organization context of the current user action with the broker host configuration as we don't have organization context
   //in most API calls. We have to fix it and provide organization context to the API calls.

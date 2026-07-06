@@ -68,7 +68,6 @@ export const mockGetReportFixesWithQuestions: {
                   defaultValue: 'no',
                   value: null,
                   index: 0,
-                  extraContext: [],
                 },
               ],
               extraContext: {
@@ -120,7 +119,6 @@ export const mockGetReportFixesWithQuestions: {
                   defaultValue: '',
                   value: null,
                   index: 0,
-                  extraContext: [],
                 },
               ],
               extraContext: {
@@ -180,7 +178,6 @@ export const mockGetReportFixesWithQuestions: {
                   defaultValue: 'file name',
                   value: null,
                   index: 0,
-                  extraContext: [{ key: 'expression', value: 'userInput' }],
                 },
               ],
               extraContext: {

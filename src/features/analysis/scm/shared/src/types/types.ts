@@ -483,7 +483,6 @@ export type FixReportByProject = z.infer<typeof FixReportByProjectZ>
 export type FixQuestionsData =
   FixQueryResult['fix_by_pk']['patchAndQuestions']['questions']
 export type FixQuestionData = Unpacked<FixQuestionsData>
-export type ExtraContext = Unpacked<FixQuestionData['extraContext']>['value']
 export type FixOnReport = z.infer<typeof ReportFixesQueryFixZ>
 export type Fix = FixPageData['fix_by_pk']
 export type ProjectQueryResult = z.infer<typeof ProjectPageQueryResultZ>

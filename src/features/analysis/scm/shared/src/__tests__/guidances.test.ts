@@ -51,7 +51,6 @@ describe('getGuidances', () => {
         value: 'testValue',
         defaultValue: 'defaultValue',
         error: false,
-        extraContext: [],
         inputType: FixQuestionInputType.Select,
         options: [],
         index: 0,

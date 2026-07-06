@@ -32,7 +32,7 @@ import {
   RefNotFoundError,
 } from '../errors'
 import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
-import { RateLimitStatus, ReferenceType } from '../types'
+import { RateLimitStatus, RecentCommitAuthor, ReferenceType } from '../types'
 import { isBrokerUrl, safeBody, shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
 import {
@@ -935,6 +935,60 @@ export async function getGitlabRecentCommits({
   return allCommits
 }
 
+// Distinct commit authors in the window, streamed and UNCAPPED (unlike
+// getGitlabRecentCommits, which caps at 1024 for its full-commit consumers).
+// Accumulates one row per author as pages arrive, so memory is bounded by the
+// author count — the contributor sync's exact 90-day count. GitLab commits carry
+// no user id, so authors are keyed by email; bot detection is left to the
+// caller's heuristics (isBot flag is always false here).
+export async function getGitlabRecentCommitAuthors({
+  repoUrl,
+  accessToken,
+  since,
+}: {
+  repoUrl: string
+  accessToken: string
+  since: string
+}): Promise<RecentCommitAuthor[]> {
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+  const byEmail = new Map<string, RecentCommitAuthor>()
+  const perPage = GITLAB_PER_PAGE
+  let page = 1
+  let hasMore = true
+  while (hasMore) {
+    const response = await api.Commits.all(projectPath, {
+      since,
+      perPage,
+      page,
+      showExpanded: true,
+    })
+    const commits = response.data
+    if (commits.length === 0) {
+      break
+    }
+    for (const commit of commits) {
+      const email = commit.author_email
+      if (!email) continue
+      const date = commit.committed_date ?? since
+      const key = email.toLowerCase()
+      const prev = byEmail.get(key)
+      if (!prev || new Date(date).getTime() > new Date(prev.date).getTime()) {
+        byEmail.set(key, {
+          email: key,
+          name: commit.author_name ?? null,
+          date,
+          externalId: null,
+          isBot: false,
+        })
+      }
+    }
+    hasMore = response.paginationInfo.next !== null
+    page++
+  }
+  return [...byEmail.values()]
+}
+
 export async function getGitlabRateLimitStatus({
   repoUrl,
   accessToken,
@@ -1217,6 +1271,18 @@ async function brokerRequestHandler(
   throw lastError ?? new Error('gitbeaker: request failed')
 }
 
+// Permission-denied only (needs elevated scope) — safe to swallow and fall back
+// to commit authors. Everything else (401 unauthorized, 429 too many requests,
+// network/broker failures) must surface so the sync can classify the repo.
+// gitbeaker surfaces errors as `Error("gitbeaker: <statusText>")` (see the
+// broker request handler), so match on both a numeric status and the text.
+function isGitlabPermissionDenied(e: unknown): boolean {
+  const status = (e as { status?: number; response?: { status?: number } })
+    ?.status
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase()
+  return status === 403 || /forbidden|insufficient/.test(msg)
+}
+
 export async function listGitlabProjectMembers({
   repoUrl,
   accessToken,
@@ -1227,9 +1293,24 @@ export async function listGitlabProjectMembers({
   const { owner, projectPath } = parseGitlabOwnerAndRepo(repoUrl)
   const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
 
-  const projectMembers = await api.ProjectMembers.all(projectPath, {
-    includeInherited: true,
-  })
+  // Best-effort: listing members can require more than read_repository. A
+  // read-only token that can still read commits/contributors shouldn't fail the
+  // whole repo — return no members and let the caller use commit authors.
+  // But ONLY swallow permission-denied: auth (401), rate-limit (429) and
+  // connection errors MUST propagate so the contributor sync classifies the
+  // repo (failed/token_invalid/rate_limited) instead of recording it as
+  // accessible-with-zero-contributors (see getRepositoryContributors).
+  let projectMembers: Awaited<ReturnType<typeof api.ProjectMembers.all>>
+  try {
+    projectMembers = await api.ProjectMembers.all(projectPath, {
+      includeInherited: true,
+    })
+  } catch (e) {
+    if (isGitlabPermissionDenied(e)) {
+      return []
+    }
+    throw e
+  }
 
   if (projectMembers.length > 1 || !owner) return projectMembers
 
@@ -1278,18 +1359,19 @@ export async function listGitlabRepoContributors({
   repoUrl: string
   accessToken: string
 }): Promise<GitlabRepoContributor[]> {
-  try {
-    const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
-    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
-    const contributors = await api.Repositories.allContributors(projectPath)
-    return contributors.map((c) => ({
-      name: c.name,
-      email: c.email,
-      commits: c.commits,
-    }))
-  } catch {
-    return []
-  }
+  // The read-only contributor endpoint needs only read_repository. Do NOT
+  // swallow here: this is the fallback population source, so a failure means the
+  // repo genuinely can't be read on this token (401/403/404/429/network) and
+  // must propagate to the sync for classification and token failover. A repo
+  // with no commits simply returns an empty list (not an error).
+  const { projectPath } = parseGitlabOwnerAndRepo(repoUrl)
+  const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
+  const contributors = await api.Repositories.allContributors(projectPath)
+  return contributors.map((c) => ({
+    name: c.name,
+    email: c.email,
+    commits: c.commits,
+  }))
 }
 
 export async function getGitlabAuthenticatedUser({

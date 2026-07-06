@@ -258,6 +258,21 @@ export type RecentCommitsResult = {
   data: CommitLite[]
 }
 
+// One distinct commit author within a time window, with their latest commit
+// date. Produced by streaming the commit history and aggregating as we go, so
+// memory is bounded by the number of authors (not the commit count) and the
+// walk is uncapped — used by the contributor sync's exact 90-day count.
+export type RecentCommitAuthor = {
+  email: string
+  name: string | null
+  // ISO date of this author's most recent commit within the window.
+  date: string
+  // SCM account id when the provider exposes one on the commit (GitHub/Bitbucket);
+  // null otherwise (GitLab/ADO) — the sync then keys by email.
+  externalId: string | null
+  isBot: boolean
+}
+
 // Shared type for PR comment data
 export type PrCommentData = {
   author: { login: string; type: string } | null

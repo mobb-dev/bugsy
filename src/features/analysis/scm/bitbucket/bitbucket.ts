@@ -14,6 +14,7 @@ import { parseScmURL, ScmType } from '../shared/src'
 import {
   GetReferenceResult,
   GetReferenceResultZ,
+  RecentCommitAuthor,
   ReferenceType,
   ScmRepoInfo,
 } from '../types'
@@ -28,6 +29,16 @@ import {
 import { BitbucketAuthResultZ } from './validation'
 
 const debug = Debug('scm:bitbucket')
+
+// Permission-denied only (member listing needs elevated scope) — safe to
+// swallow and fall back to commit authors. Auth/rate-limit/network errors must
+// propagate so the contributor sync classifies the repo.
+function isBitbucketPermissionDenied(e: unknown): boolean {
+  const status = (e as { status?: number; response?: { status?: number } })
+    ?.status
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase()
+  return status === 403 || /forbidden|insufficient/.test(msg)
+}
 
 const BITBUCKET_HOSTNAME = 'bitbucket.org'
 
@@ -416,23 +427,37 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return res.data
     },
     async getWorkspaceMembers(params: { workspace: string }) {
-      const allMembers: Record<string, unknown>[] = []
-      let hasMore = true
-      let page = 1
-      while (hasMore) {
-        const res = await bitbucketClient.workspaces.getMembersForWorkspace({
-          workspace: params.workspace,
-          page: String(page),
-          pagelen: 100,
-        } as Parameters<
-          typeof bitbucketClient.workspaces.getMembersForWorkspace
-        >[0])
-        const values = res.data.values ?? []
-        allMembers.push(...values)
-        hasMore = Boolean(res.data.next) && values.length > 0
-        page++
+      // Best-effort: workspace member listing can require more than repo read.
+      // A token that can still read commits shouldn't fail the repo — return no
+      // members and let the caller fall back to commit authors.
+      try {
+        const allMembers: Record<string, unknown>[] = []
+        let hasMore = true
+        let page = 1
+        while (hasMore) {
+          const res = await bitbucketClient.workspaces.getMembersForWorkspace({
+            workspace: params.workspace,
+            page: String(page),
+            pagelen: 100,
+          } as Parameters<
+            typeof bitbucketClient.workspaces.getMembersForWorkspace
+          >[0])
+          const values = res.data.values ?? []
+          allMembers.push(...values)
+          hasMore = Boolean(res.data.next) && values.length > 0
+          page++
+        }
+        return allMembers
+      } catch (e) {
+        // Only swallow permission-denied (member listing needs workspace-admin
+        // scope) — fall back to commit authors. Auth/rate-limit/network errors
+        // must propagate so the sync classifies the repo instead of recording
+        // it accessible-with-zero-contributors.
+        if (isBitbucketPermissionDenied(e)) {
+          return []
+        }
+        throw e
       }
-      return allMembers
     },
 
     async getCurrentUserWithEmail(): Promise<{
@@ -507,21 +532,104 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return commits
     },
 
+    // Distinct authors of commits in the window (since), streamed and
+    // window-bounded by date rather than a fixed page cap, so the 90-day count
+    // is exact even on a busy repo. Accumulates one row per author (latest date)
+    // as pages arrive → memory bounded by author count. Errors propagate for
+    // classification (the repo is the read-commits population source).
+    async streamRecentCommitAuthors(params: {
+      workspace: string
+      repo_slug: string
+      since: string
+    }): Promise<RecentCommitAuthor[]> {
+      const sinceMs = new Date(params.since).getTime()
+      const byKey = new Map<string, RecentCommitAuthor>()
+      let page = 1
+      // Generous page ceiling purely as a runaway guard; the date boundary below
+      // is the real stop. The per-repo sync timeout bounds pathological repos.
+      const HARD_PAGE_CEILING = 10000
+      while (page <= HARD_PAGE_CEILING) {
+        const res = await bitbucketClient.repositories.listCommits({
+          repo_slug: params.repo_slug,
+          workspace: params.workspace,
+          page: String(page),
+          pagelen: 100,
+        } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
+        const data = res.data as { values?: unknown[]; next?: string }
+        const commits = data?.values ?? []
+        if (commits.length === 0) break
+        // Bitbucket has no server-side date filter and its commit list isn't
+        // strictly date-ordered (merges/imports/clock-skew interleave). Stop only
+        // after a FULL page with NO in-window commit — a single old commit on an
+        // otherwise in-window page must not truncate the walk and drop later
+        // in-window authors.
+        let sawInWindow = false
+        for (const commit of commits) {
+          const record = commit as Record<string, unknown>
+          const dateStr = record['date'] as string | undefined
+          if (dateStr && new Date(dateStr).getTime() < sinceMs) {
+            continue
+          }
+          sawInWindow = true
+          const author = record['author'] as
+            | { raw?: string; user?: { account_id?: string } }
+            | undefined
+          if (!author?.raw) continue
+          const match = author.raw.match(/^(.+?)\s*<([^>]+)>/)
+          if (!match) continue
+          const [, name, email] = match
+          if (!email) continue
+          const externalId = author.user?.account_id ?? null
+          const date = dateStr ?? params.since
+          const key = externalId ?? email.toLowerCase()
+          const prev = byKey.get(key)
+          if (
+            !prev ||
+            new Date(date).getTime() > new Date(prev.date).getTime()
+          ) {
+            byKey.set(key, {
+              email: email.toLowerCase(),
+              name: name!.trim() || null,
+              date,
+              externalId,
+              isBot: false,
+            })
+          }
+        }
+        // Whole page was older than the window → we've walked past it, stop.
+        if (!sawInWindow) break
+        if (!data?.next) break
+        page++
+      }
+      return [...byKey.values()]
+    },
+
     async getRepoCommitAuthors(params: {
       workspace: string
       repo_slug: string
     }) {
-      try {
+      // Distinct commit authors. This is the read-only fallback population, so
+      // it must (a) page beyond the first 100 commits — otherwise a busy repo
+      // reports only the last ~100 commits' authors as authoritative — and
+      // (b) NOT swallow errors: a failure means the repo can't be read, which
+      // must propagate for classification/failover. Capped like listRecentCommits.
+      const MAX_PAGES = 100
+      const authorMap = new Map<
+        string,
+        { name: string; email: string; accountId: string | null }
+      >()
+      let page = 1
+      // eslint-disable-next-line no-constant-condition
+      while (page <= MAX_PAGES) {
         const res = await bitbucketClient.repositories.listCommits({
           repo_slug: params.repo_slug,
           workspace: params.workspace,
+          page: String(page),
           pagelen: 100,
         } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
-        const commits = (res.data as { values?: unknown[] })?.values ?? []
-        const authorMap = new Map<
-          string,
-          { name: string; email: string; accountId: string | null }
-        >()
+        const data = res.data as { values?: unknown[]; next?: string }
+        const commits = data?.values ?? []
+        if (commits.length === 0) break
         for (const commit of commits) {
           const raw = (commit as Record<string, unknown>)?.['author'] as
             | {
@@ -544,10 +652,10 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
             })
           }
         }
-        return Array.from(authorMap.values())
-      } catch {
-        return []
+        if (!data?.next) break
+        page++
       }
+      return Array.from(authorMap.values())
     },
   }
 }

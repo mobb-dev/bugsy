@@ -597,7 +597,6 @@ export type FixQuestion = {
   content: Scalars['String']['output'];
   defaultValue: Scalars['String']['output'];
   description: Scalars['String']['output'];
-  extraContext: Array<UnstructuredFixExtraContext>;
   guidance: Scalars['String']['output'];
   index: Scalars['Int']['output'];
   inputType: FixQuestionInputType;
@@ -1308,13 +1307,23 @@ export type OrgRepoDashboardSuccess = {
   contributors90d: Scalars['Int']['output'];
   failedRepos: Array<OrgRepoAccessIssue>;
   lastCheckedAt?: Maybe<Scalars['String']['output']>;
+  processingRepos: Array<OrgRepoProcessing>;
+  runStatus?: Maybe<Scalars['String']['output']>;
   status: Status;
   successfulRepos: Array<OrgRepoSuccess>;
+};
+
+export type OrgRepoProcessing = {
+  __typename?: 'OrgRepoProcessing';
+  state: Scalars['String']['output'];
+  url: Scalars['String']['output'];
 };
 
 export type OrgRepoSuccess = {
   __typename?: 'OrgRepoSuccess';
   contributors: Scalars['Int']['output'];
+  incomplete?: Maybe<Scalars['String']['output']>;
+  partial: Scalars['Boolean']['output'];
   recentContributors: Scalars['Int']['output'];
   url: Scalars['String']['output'];
 };
@@ -22471,10 +22480,6 @@ export type Mutation_Root = {
   delete_project_to_user_by_pk?: Maybe<Project_To_User>;
   /** delete data from the table: "repo" */
   delete_repo?: Maybe<Repo_Mutation_Response>;
-  /** delete data from the table: "repo_access_status" */
-  delete_repo_access_status?: Maybe<Repo_Access_Status_Mutation_Response>;
-  /** delete single row from the table: "repo_access_status" */
-  delete_repo_access_status_by_pk?: Maybe<Repo_Access_Status>;
   /** delete single row from the table: "repo" */
   delete_repo_by_pk?: Maybe<Repo>;
   /** delete data from the table: "repo_contributor" */
@@ -22493,6 +22498,10 @@ export type Mutation_Root = {
   delete_repo_contributor_snapshot?: Maybe<Repo_Contributor_Snapshot_Mutation_Response>;
   /** delete single row from the table: "repo_contributor_snapshot" */
   delete_repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
+  /** delete data from the table: "repo_sync_status" */
+  delete_repo_sync_status?: Maybe<Repo_Sync_Status_Mutation_Response>;
+  /** delete single row from the table: "repo_sync_status" */
+  delete_repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
   /** delete data from the table: "scan" */
   delete_scan?: Maybe<Scan_Mutation_Response>;
   /** delete single row from the table: "scan" */
@@ -23033,10 +23042,6 @@ export type Mutation_Root = {
   insert_project_to_user_one?: Maybe<Project_To_User>;
   /** insert data into the table: "repo" */
   insert_repo?: Maybe<Repo_Mutation_Response>;
-  /** insert data into the table: "repo_access_status" */
-  insert_repo_access_status?: Maybe<Repo_Access_Status_Mutation_Response>;
-  /** insert a single row into the table: "repo_access_status" */
-  insert_repo_access_status_one?: Maybe<Repo_Access_Status>;
   /** insert data into the table: "repo_contributor" */
   insert_repo_contributor?: Maybe<Repo_Contributor_Mutation_Response>;
   /** insert data into the table: "repo_contributor_access" */
@@ -23055,6 +23060,10 @@ export type Mutation_Root = {
   insert_repo_contributor_snapshot_one?: Maybe<Repo_Contributor_Snapshot>;
   /** insert a single row into the table: "repo" */
   insert_repo_one?: Maybe<Repo>;
+  /** insert data into the table: "repo_sync_status" */
+  insert_repo_sync_status?: Maybe<Repo_Sync_Status_Mutation_Response>;
+  /** insert a single row into the table: "repo_sync_status" */
+  insert_repo_sync_status_one?: Maybe<Repo_Sync_Status>;
   /** insert data into the table: "scan" */
   insert_scan?: Maybe<Scan_Mutation_Response>;
   /** insert a single row into the table: "scan" */
@@ -23797,12 +23806,6 @@ export type Mutation_Root = {
   update_project_to_user_many?: Maybe<Array<Maybe<Project_To_User_Mutation_Response>>>;
   /** update data of the table: "repo" */
   update_repo?: Maybe<Repo_Mutation_Response>;
-  /** update data of the table: "repo_access_status" */
-  update_repo_access_status?: Maybe<Repo_Access_Status_Mutation_Response>;
-  /** update single row of the table: "repo_access_status" */
-  update_repo_access_status_by_pk?: Maybe<Repo_Access_Status>;
-  /** update multiples rows of table: "repo_access_status" */
-  update_repo_access_status_many?: Maybe<Array<Maybe<Repo_Access_Status_Mutation_Response>>>;
   /** update single row of the table: "repo" */
   update_repo_by_pk?: Maybe<Repo>;
   /** update data of the table: "repo_contributor" */
@@ -23831,6 +23834,12 @@ export type Mutation_Root = {
   update_repo_contributor_snapshot_many?: Maybe<Array<Maybe<Repo_Contributor_Snapshot_Mutation_Response>>>;
   /** update multiples rows of table: "repo" */
   update_repo_many?: Maybe<Array<Maybe<Repo_Mutation_Response>>>;
+  /** update data of the table: "repo_sync_status" */
+  update_repo_sync_status?: Maybe<Repo_Sync_Status_Mutation_Response>;
+  /** update single row of the table: "repo_sync_status" */
+  update_repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
+  /** update multiples rows of table: "repo_sync_status" */
+  update_repo_sync_status_many?: Maybe<Array<Maybe<Repo_Sync_Status_Mutation_Response>>>;
   /** update data of the table: "scan" */
   update_scan?: Maybe<Scan_Mutation_Response>;
   /** update single row of the table: "scan" */
@@ -25318,18 +25327,6 @@ export type Mutation_RootDelete_RepoArgs = {
 
 
 /** mutation root */
-export type Mutation_RootDelete_Repo_Access_StatusArgs = {
-  where: Repo_Access_Status_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootDelete_Repo_Access_Status_By_PkArgs = {
-  id: Scalars['uuid']['input'];
-};
-
-
-/** mutation root */
 export type Mutation_RootDelete_Repo_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
@@ -25379,6 +25376,18 @@ export type Mutation_RootDelete_Repo_Contributor_SnapshotArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Repo_Contributor_Snapshot_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Sync_StatusArgs = {
+  where: Repo_Sync_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Repo_Sync_Status_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -27164,20 +27173,6 @@ export type Mutation_RootInsert_RepoArgs = {
 
 
 /** mutation root */
-export type Mutation_RootInsert_Repo_Access_StatusArgs = {
-  objects: Array<Repo_Access_Status_Insert_Input>;
-  on_conflict?: InputMaybe<Repo_Access_Status_On_Conflict>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_Repo_Access_Status_OneArgs = {
-  object: Repo_Access_Status_Insert_Input;
-  on_conflict?: InputMaybe<Repo_Access_Status_On_Conflict>;
-};
-
-
-/** mutation root */
 export type Mutation_RootInsert_Repo_ContributorArgs = {
   objects: Array<Repo_Contributor_Insert_Input>;
   on_conflict?: InputMaybe<Repo_Contributor_On_Conflict>;
@@ -27237,6 +27232,20 @@ export type Mutation_RootInsert_Repo_Contributor_Snapshot_OneArgs = {
 export type Mutation_RootInsert_Repo_OneArgs = {
   object: Repo_Insert_Input;
   on_conflict?: InputMaybe<Repo_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Sync_StatusArgs = {
+  objects: Array<Repo_Sync_Status_Insert_Input>;
+  on_conflict?: InputMaybe<Repo_Sync_Status_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Repo_Sync_Status_OneArgs = {
+  object: Repo_Sync_Status_Insert_Input;
+  on_conflict?: InputMaybe<Repo_Sync_Status_On_Conflict>;
 };
 
 
@@ -29937,26 +29946,6 @@ export type Mutation_RootUpdate_RepoArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUpdate_Repo_Access_StatusArgs = {
-  _set?: InputMaybe<Repo_Access_Status_Set_Input>;
-  where: Repo_Access_Status_Bool_Exp;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_Repo_Access_Status_By_PkArgs = {
-  _set?: InputMaybe<Repo_Access_Status_Set_Input>;
-  pk_columns: Repo_Access_Status_Pk_Columns_Input;
-};
-
-
-/** mutation root */
-export type Mutation_RootUpdate_Repo_Access_Status_ManyArgs = {
-  updates: Array<Repo_Access_Status_Updates>;
-};
-
-
-/** mutation root */
 export type Mutation_RootUpdate_Repo_By_PkArgs = {
   _inc?: InputMaybe<Repo_Inc_Input>;
   _set?: InputMaybe<Repo_Set_Input>;
@@ -30026,12 +30015,7 @@ export type Mutation_RootUpdate_Repo_Contributor_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Repo_Contributor_SnapshotArgs = {
-  _append?: InputMaybe<Repo_Contributor_Snapshot_Append_Input>;
-  _delete_at_path?: InputMaybe<Repo_Contributor_Snapshot_Delete_At_Path_Input>;
-  _delete_elem?: InputMaybe<Repo_Contributor_Snapshot_Delete_Elem_Input>;
-  _delete_key?: InputMaybe<Repo_Contributor_Snapshot_Delete_Key_Input>;
   _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
-  _prepend?: InputMaybe<Repo_Contributor_Snapshot_Prepend_Input>;
   _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
   where: Repo_Contributor_Snapshot_Bool_Exp;
 };
@@ -30039,12 +30023,7 @@ export type Mutation_RootUpdate_Repo_Contributor_SnapshotArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Repo_Contributor_Snapshot_By_PkArgs = {
-  _append?: InputMaybe<Repo_Contributor_Snapshot_Append_Input>;
-  _delete_at_path?: InputMaybe<Repo_Contributor_Snapshot_Delete_At_Path_Input>;
-  _delete_elem?: InputMaybe<Repo_Contributor_Snapshot_Delete_Elem_Input>;
-  _delete_key?: InputMaybe<Repo_Contributor_Snapshot_Delete_Key_Input>;
   _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
-  _prepend?: InputMaybe<Repo_Contributor_Snapshot_Prepend_Input>;
   _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
   pk_columns: Repo_Contributor_Snapshot_Pk_Columns_Input;
 };
@@ -30059,6 +30038,28 @@ export type Mutation_RootUpdate_Repo_Contributor_Snapshot_ManyArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Repo_ManyArgs = {
   updates: Array<Repo_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Sync_StatusArgs = {
+  _inc?: InputMaybe<Repo_Sync_Status_Inc_Input>;
+  _set?: InputMaybe<Repo_Sync_Status_Set_Input>;
+  where: Repo_Sync_Status_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Sync_Status_By_PkArgs = {
+  _inc?: InputMaybe<Repo_Sync_Status_Inc_Input>;
+  _set?: InputMaybe<Repo_Sync_Status_Set_Input>;
+  pk_columns: Repo_Sync_Status_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Repo_Sync_Status_ManyArgs = {
+  updates: Array<Repo_Sync_Status_Updates>;
 };
 
 
@@ -38024,12 +38025,6 @@ export type Query_Root = {
   project_to_user_by_pk?: Maybe<Project_To_User>;
   /** fetch data from the table: "repo" */
   repo: Array<Repo>;
-  /** fetch data from the table: "repo_access_status" */
-  repo_access_status: Array<Repo_Access_Status>;
-  /** fetch aggregated fields from the table: "repo_access_status" */
-  repo_access_status_aggregate: Repo_Access_Status_Aggregate;
-  /** fetch data from the table: "repo_access_status" using primary key columns */
-  repo_access_status_by_pk?: Maybe<Repo_Access_Status>;
   /** fetch aggregated fields from the table: "repo" */
   repo_aggregate: Repo_Aggregate;
   /** fetch data from the table: "repo" using primary key columns */
@@ -38058,6 +38053,12 @@ export type Query_Root = {
   repo_contributor_snapshot_aggregate: Repo_Contributor_Snapshot_Aggregate;
   /** fetch data from the table: "repo_contributor_snapshot" using primary key columns */
   repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
+  /** fetch data from the table: "repo_sync_status" */
+  repo_sync_status: Array<Repo_Sync_Status>;
+  /** fetch aggregated fields from the table: "repo_sync_status" */
+  repo_sync_status_aggregate: Repo_Sync_Status_Aggregate;
+  /** fetch data from the table: "repo_sync_status" using primary key columns */
+  repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
   /** fetch data from the table: "scan" */
   scan: Array<Scan>;
   /** fetch aggregated fields from the table: "scan" */
@@ -40966,29 +40967,6 @@ export type Query_RootRepoArgs = {
 };
 
 
-export type Query_RootRepo_Access_StatusArgs = {
-  distinct_on?: InputMaybe<Array<Repo_Access_Status_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Repo_Access_Status_Order_By>>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-
-export type Query_RootRepo_Access_Status_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Repo_Access_Status_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Repo_Access_Status_Order_By>>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-
-export type Query_RootRepo_Access_Status_By_PkArgs = {
-  id: Scalars['uuid']['input'];
-};
-
-
 export type Query_RootRepo_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Repo_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -41091,6 +41069,29 @@ export type Query_RootRepo_Contributor_Snapshot_AggregateArgs = {
 
 
 export type Query_RootRepo_Contributor_Snapshot_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootRepo_Sync_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Sync_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Sync_Status_Order_By>>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Sync_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Sync_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Sync_Status_Order_By>>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Sync_Status_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -42590,241 +42591,6 @@ export type Repo = {
   reference: Scalars['String']['output'];
 };
 
-/** columns and relationships of "repo_access_status" */
-export type Repo_Access_Status = {
-  __typename?: 'repo_access_status';
-  canApplyFix?: Maybe<Scalars['Boolean']['output']>;
-  id: Scalars['uuid']['output'];
-  /** An object relationship */
-  organization: Organization;
-  organizationId: Scalars['uuid']['output'];
-  reason?: Maybe<Scalars['String']['output']>;
-  repositoryUrl: Scalars['String']['output'];
-  scmConfigId: Scalars['uuid']['output'];
-  scmType: Scalars['String']['output'];
-  status: Scalars['String']['output'];
-  updatedAt: Scalars['timestamptz']['output'];
-  userId?: Maybe<Scalars['uuid']['output']>;
-};
-
-/** aggregated selection of "repo_access_status" */
-export type Repo_Access_Status_Aggregate = {
-  __typename?: 'repo_access_status_aggregate';
-  aggregate?: Maybe<Repo_Access_Status_Aggregate_Fields>;
-  nodes: Array<Repo_Access_Status>;
-};
-
-/** aggregate fields of "repo_access_status" */
-export type Repo_Access_Status_Aggregate_Fields = {
-  __typename?: 'repo_access_status_aggregate_fields';
-  count: Scalars['Int']['output'];
-  max?: Maybe<Repo_Access_Status_Max_Fields>;
-  min?: Maybe<Repo_Access_Status_Min_Fields>;
-};
-
-
-/** aggregate fields of "repo_access_status" */
-export type Repo_Access_Status_Aggregate_FieldsCountArgs = {
-  columns?: InputMaybe<Array<Repo_Access_Status_Select_Column>>;
-  distinct?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-/** Boolean expression to filter rows from the table "repo_access_status". All fields are combined with a logical 'AND'. */
-export type Repo_Access_Status_Bool_Exp = {
-  _and?: InputMaybe<Array<Repo_Access_Status_Bool_Exp>>;
-  _not?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-  _or?: InputMaybe<Array<Repo_Access_Status_Bool_Exp>>;
-  canApplyFix?: InputMaybe<Boolean_Comparison_Exp>;
-  id?: InputMaybe<Uuid_Comparison_Exp>;
-  organization?: InputMaybe<Organization_Bool_Exp>;
-  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
-  reason?: InputMaybe<String_Comparison_Exp>;
-  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
-  scmConfigId?: InputMaybe<Uuid_Comparison_Exp>;
-  scmType?: InputMaybe<String_Comparison_Exp>;
-  status?: InputMaybe<String_Comparison_Exp>;
-  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
-  userId?: InputMaybe<Uuid_Comparison_Exp>;
-};
-
-/** unique or primary key constraints on table "repo_access_status" */
-export enum Repo_Access_Status_Constraint {
-  /** unique or primary key constraint on columns "repository_url", "organization_id", "scm_config_id" */
-  RepoAccessStatusOrganizationIdRepositoryUrlScmConfiKey = 'repo_access_status_organization_id_repository_url_scm_confi_key',
-  /** unique or primary key constraint on columns "id" */
-  RepoAccessStatusPkey = 'repo_access_status_pkey'
-}
-
-/** input type for inserting data into table "repo_access_status" */
-export type Repo_Access_Status_Insert_Input = {
-  canApplyFix?: InputMaybe<Scalars['Boolean']['input']>;
-  id?: InputMaybe<Scalars['uuid']['input']>;
-  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
-  organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  reason?: InputMaybe<Scalars['String']['input']>;
-  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
-  scmConfigId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
-  userId?: InputMaybe<Scalars['uuid']['input']>;
-};
-
-/** aggregate max on columns */
-export type Repo_Access_Status_Max_Fields = {
-  __typename?: 'repo_access_status_max_fields';
-  id?: Maybe<Scalars['uuid']['output']>;
-  organizationId?: Maybe<Scalars['uuid']['output']>;
-  reason?: Maybe<Scalars['String']['output']>;
-  repositoryUrl?: Maybe<Scalars['String']['output']>;
-  scmConfigId?: Maybe<Scalars['uuid']['output']>;
-  scmType?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
-  userId?: Maybe<Scalars['uuid']['output']>;
-};
-
-/** aggregate min on columns */
-export type Repo_Access_Status_Min_Fields = {
-  __typename?: 'repo_access_status_min_fields';
-  id?: Maybe<Scalars['uuid']['output']>;
-  organizationId?: Maybe<Scalars['uuid']['output']>;
-  reason?: Maybe<Scalars['String']['output']>;
-  repositoryUrl?: Maybe<Scalars['String']['output']>;
-  scmConfigId?: Maybe<Scalars['uuid']['output']>;
-  scmType?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<Scalars['String']['output']>;
-  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
-  userId?: Maybe<Scalars['uuid']['output']>;
-};
-
-/** response of any mutation on the table "repo_access_status" */
-export type Repo_Access_Status_Mutation_Response = {
-  __typename?: 'repo_access_status_mutation_response';
-  /** number of rows affected by the mutation */
-  affected_rows: Scalars['Int']['output'];
-  /** data from the rows affected by the mutation */
-  returning: Array<Repo_Access_Status>;
-};
-
-/** on_conflict condition type for table "repo_access_status" */
-export type Repo_Access_Status_On_Conflict = {
-  constraint: Repo_Access_Status_Constraint;
-  update_columns?: Array<Repo_Access_Status_Update_Column>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-/** Ordering options when selecting data from "repo_access_status". */
-export type Repo_Access_Status_Order_By = {
-  canApplyFix?: InputMaybe<Order_By>;
-  id?: InputMaybe<Order_By>;
-  organization?: InputMaybe<Organization_Order_By>;
-  organizationId?: InputMaybe<Order_By>;
-  reason?: InputMaybe<Order_By>;
-  repositoryUrl?: InputMaybe<Order_By>;
-  scmConfigId?: InputMaybe<Order_By>;
-  scmType?: InputMaybe<Order_By>;
-  status?: InputMaybe<Order_By>;
-  updatedAt?: InputMaybe<Order_By>;
-  userId?: InputMaybe<Order_By>;
-};
-
-/** primary key columns input for table: repo_access_status */
-export type Repo_Access_Status_Pk_Columns_Input = {
-  id: Scalars['uuid']['input'];
-};
-
-/** select columns of table "repo_access_status" */
-export enum Repo_Access_Status_Select_Column {
-  /** column name */
-  CanApplyFix = 'canApplyFix',
-  /** column name */
-  Id = 'id',
-  /** column name */
-  OrganizationId = 'organizationId',
-  /** column name */
-  Reason = 'reason',
-  /** column name */
-  RepositoryUrl = 'repositoryUrl',
-  /** column name */
-  ScmConfigId = 'scmConfigId',
-  /** column name */
-  ScmType = 'scmType',
-  /** column name */
-  Status = 'status',
-  /** column name */
-  UpdatedAt = 'updatedAt',
-  /** column name */
-  UserId = 'userId'
-}
-
-/** input type for updating data in table "repo_access_status" */
-export type Repo_Access_Status_Set_Input = {
-  canApplyFix?: InputMaybe<Scalars['Boolean']['input']>;
-  id?: InputMaybe<Scalars['uuid']['input']>;
-  organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  reason?: InputMaybe<Scalars['String']['input']>;
-  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
-  scmConfigId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
-  userId?: InputMaybe<Scalars['uuid']['input']>;
-};
-
-/** Streaming cursor of the table "repo_access_status" */
-export type Repo_Access_Status_Stream_Cursor_Input = {
-  /** Stream column input with initial value */
-  initial_value: Repo_Access_Status_Stream_Cursor_Value_Input;
-  /** cursor ordering */
-  ordering?: InputMaybe<Cursor_Ordering>;
-};
-
-/** Initial value of the column from where the streaming should start */
-export type Repo_Access_Status_Stream_Cursor_Value_Input = {
-  canApplyFix?: InputMaybe<Scalars['Boolean']['input']>;
-  id?: InputMaybe<Scalars['uuid']['input']>;
-  organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  reason?: InputMaybe<Scalars['String']['input']>;
-  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
-  scmConfigId?: InputMaybe<Scalars['uuid']['input']>;
-  scmType?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
-  userId?: InputMaybe<Scalars['uuid']['input']>;
-};
-
-/** update columns of table "repo_access_status" */
-export enum Repo_Access_Status_Update_Column {
-  /** column name */
-  CanApplyFix = 'canApplyFix',
-  /** column name */
-  Id = 'id',
-  /** column name */
-  OrganizationId = 'organizationId',
-  /** column name */
-  Reason = 'reason',
-  /** column name */
-  RepositoryUrl = 'repositoryUrl',
-  /** column name */
-  ScmConfigId = 'scmConfigId',
-  /** column name */
-  ScmType = 'scmType',
-  /** column name */
-  Status = 'status',
-  /** column name */
-  UpdatedAt = 'updatedAt',
-  /** column name */
-  UserId = 'userId'
-}
-
-export type Repo_Access_Status_Updates = {
-  /** sets the columns of the filtered rows to the given values */
-  _set?: InputMaybe<Repo_Access_Status_Set_Input>;
-  /** filter the rows which have to be updated */
-  where: Repo_Access_Status_Bool_Exp;
-};
-
 /** aggregated selection of "repo" */
 export type Repo_Aggregate = {
   __typename?: 'repo_aggregate';
@@ -43709,23 +43475,19 @@ export type Repo_Contributor_Set_Input = {
 /** columns and relationships of "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot = {
   __typename?: 'repo_contributor_snapshot';
-  activeContributors: Scalars['Int']['output'];
+  completedAt?: Maybe<Scalars['timestamptz']['output']>;
+  contributors90d?: Maybe<Scalars['Int']['output']>;
+  contributorsAll?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
-  lastContributors: Scalars['Int']['output'];
-  linkedContributors: Scalars['Int']['output'];
-  noAccessRepos: Scalars['jsonb']['output'];
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
+  reposAccessible?: Maybe<Scalars['Int']['output']>;
+  reposFailed?: Maybe<Scalars['Int']['output']>;
   snapshotDate: Scalars['date']['output'];
-  totalContributors: Scalars['Int']['output'];
-};
-
-
-/** columns and relationships of "repo_contributor_snapshot" */
-export type Repo_Contributor_SnapshotNoAccessReposArgs = {
-  path?: InputMaybe<Scalars['String']['input']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  status: Scalars['String']['output'];
 };
 
 /** aggregated selection of "repo_contributor_snapshot" */
@@ -43784,11 +43546,6 @@ export type Repo_Contributor_Snapshot_Aggregate_Order_By = {
   variance?: InputMaybe<Repo_Contributor_Snapshot_Variance_Order_By>;
 };
 
-/** append existing jsonb value of filtered columns with new jsonb value */
-export type Repo_Contributor_Snapshot_Append_Input = {
-  noAccessRepos?: InputMaybe<Scalars['jsonb']['input']>;
-};
-
 /** input type for inserting array relation for remote table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Arr_Rel_Insert_Input = {
   data: Array<Repo_Contributor_Snapshot_Insert_Input>;
@@ -43799,18 +43556,18 @@ export type Repo_Contributor_Snapshot_Arr_Rel_Insert_Input = {
 /** aggregate avg on columns */
 export type Repo_Contributor_Snapshot_Avg_Fields = {
   __typename?: 'repo_contributor_snapshot_avg_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Avg_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "repo_contributor_snapshot". All fields are combined with a logical 'AND'. */
@@ -43818,16 +43575,18 @@ export type Repo_Contributor_Snapshot_Bool_Exp = {
   _and?: InputMaybe<Array<Repo_Contributor_Snapshot_Bool_Exp>>;
   _not?: InputMaybe<Repo_Contributor_Snapshot_Bool_Exp>;
   _or?: InputMaybe<Array<Repo_Contributor_Snapshot_Bool_Exp>>;
-  activeContributors?: InputMaybe<Int_Comparison_Exp>;
+  completedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  contributors90d?: InputMaybe<Int_Comparison_Exp>;
+  contributorsAll?: InputMaybe<Int_Comparison_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
-  lastContributors?: InputMaybe<Int_Comparison_Exp>;
-  linkedContributors?: InputMaybe<Int_Comparison_Exp>;
-  noAccessRepos?: InputMaybe<Jsonb_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  reposAccessible?: InputMaybe<Int_Comparison_Exp>;
+  reposFailed?: InputMaybe<Int_Comparison_Exp>;
   snapshotDate?: InputMaybe<Date_Comparison_Exp>;
-  totalContributors?: InputMaybe<Int_Comparison_Exp>;
+  startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  status?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "repo_contributor_snapshot" */
@@ -43838,91 +43597,90 @@ export enum Repo_Contributor_Snapshot_Constraint {
   RepoContributorSnapshotPkey = 'repo_contributor_snapshot_pkey'
 }
 
-/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-export type Repo_Contributor_Snapshot_Delete_At_Path_Input = {
-  noAccessRepos?: InputMaybe<Array<Scalars['String']['input']>>;
-};
-
-/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-export type Repo_Contributor_Snapshot_Delete_Elem_Input = {
-  noAccessRepos?: InputMaybe<Scalars['Int']['input']>;
-};
-
-/** delete key/value pair or string element. key/value pairs are matched based on their key value */
-export type Repo_Contributor_Snapshot_Delete_Key_Input = {
-  noAccessRepos?: InputMaybe<Scalars['String']['input']>;
-};
-
 /** input type for incrementing numeric columns in table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Inc_Input = {
-  activeContributors?: InputMaybe<Scalars['Int']['input']>;
-  lastContributors?: InputMaybe<Scalars['Int']['input']>;
-  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
-  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+  contributors90d?: InputMaybe<Scalars['Int']['input']>;
+  contributorsAll?: InputMaybe<Scalars['Int']['input']>;
+  reposAccessible?: InputMaybe<Scalars['Int']['input']>;
+  reposFailed?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Insert_Input = {
-  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  completedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  contributors90d?: InputMaybe<Scalars['Int']['input']>;
+  contributorsAll?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  lastContributors?: InputMaybe<Scalars['Int']['input']>;
-  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
-  noAccessRepos?: InputMaybe<Scalars['jsonb']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reposAccessible?: InputMaybe<Scalars['Int']['input']>;
+  reposFailed?: InputMaybe<Scalars['Int']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
-  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
 export type Repo_Contributor_Snapshot_Max_Fields = {
   __typename?: 'repo_contributor_snapshot_max_fields';
-  activeContributors?: Maybe<Scalars['Int']['output']>;
+  completedAt?: Maybe<Scalars['timestamptz']['output']>;
+  contributors90d?: Maybe<Scalars['Int']['output']>;
+  contributorsAll?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
-  lastContributors?: Maybe<Scalars['Int']['output']>;
-  linkedContributors?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  reposAccessible?: Maybe<Scalars['Int']['output']>;
+  reposFailed?: Maybe<Scalars['Int']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
-  totalContributors?: Maybe<Scalars['Int']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Max_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
+  completedAt?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type Repo_Contributor_Snapshot_Min_Fields = {
   __typename?: 'repo_contributor_snapshot_min_fields';
-  activeContributors?: Maybe<Scalars['Int']['output']>;
+  completedAt?: Maybe<Scalars['timestamptz']['output']>;
+  contributors90d?: Maybe<Scalars['Int']['output']>;
+  contributorsAll?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
-  lastContributors?: Maybe<Scalars['Int']['output']>;
-  linkedContributors?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  reposAccessible?: Maybe<Scalars['Int']['output']>;
+  reposFailed?: Maybe<Scalars['Int']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
-  totalContributors?: Maybe<Scalars['Int']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Min_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
+  completedAt?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "repo_contributor_snapshot" */
@@ -43943,16 +43701,18 @@ export type Repo_Contributor_Snapshot_On_Conflict = {
 
 /** Ordering options when selecting data from "repo_contributor_snapshot". */
 export type Repo_Contributor_Snapshot_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
+  completedAt?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  noAccessRepos?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  status?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: repo_contributor_snapshot */
@@ -43960,95 +43720,96 @@ export type Repo_Contributor_Snapshot_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
 };
 
-/** prepend existing jsonb value of filtered columns with new jsonb value */
-export type Repo_Contributor_Snapshot_Prepend_Input = {
-  noAccessRepos?: InputMaybe<Scalars['jsonb']['input']>;
-};
-
 /** select columns of table "repo_contributor_snapshot" */
 export enum Repo_Contributor_Snapshot_Select_Column {
   /** column name */
-  ActiveContributors = 'activeContributors',
+  CompletedAt = 'completedAt',
+  /** column name */
+  Contributors90d = 'contributors90d',
+  /** column name */
+  ContributorsAll = 'contributorsAll',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */
-  LastContributors = 'lastContributors',
-  /** column name */
-  LinkedContributors = 'linkedContributors',
-  /** column name */
-  NoAccessRepos = 'noAccessRepos',
-  /** column name */
   OrganizationId = 'organizationId',
+  /** column name */
+  ReposAccessible = 'reposAccessible',
+  /** column name */
+  ReposFailed = 'reposFailed',
   /** column name */
   SnapshotDate = 'snapshotDate',
   /** column name */
-  TotalContributors = 'totalContributors'
+  StartedAt = 'startedAt',
+  /** column name */
+  Status = 'status'
 }
 
 /** input type for updating data in table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Set_Input = {
-  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  completedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  contributors90d?: InputMaybe<Scalars['Int']['input']>;
+  contributorsAll?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  lastContributors?: InputMaybe<Scalars['Int']['input']>;
-  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
-  noAccessRepos?: InputMaybe<Scalars['jsonb']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reposAccessible?: InputMaybe<Scalars['Int']['input']>;
+  reposFailed?: InputMaybe<Scalars['Int']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
-  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate stddev on columns */
 export type Repo_Contributor_Snapshot_Stddev_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Repo_Contributor_Snapshot_Stddev_Pop_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_pop_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Pop_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_samp on columns */
 export type Repo_Contributor_Snapshot_Stddev_Samp_Fields = {
   __typename?: 'repo_contributor_snapshot_stddev_samp_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Stddev_Samp_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "repo_contributor_snapshot" */
@@ -44061,69 +43822,65 @@ export type Repo_Contributor_Snapshot_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Repo_Contributor_Snapshot_Stream_Cursor_Value_Input = {
-  activeContributors?: InputMaybe<Scalars['Int']['input']>;
+  completedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  contributors90d?: InputMaybe<Scalars['Int']['input']>;
+  contributorsAll?: InputMaybe<Scalars['Int']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  lastContributors?: InputMaybe<Scalars['Int']['input']>;
-  linkedContributors?: InputMaybe<Scalars['Int']['input']>;
-  noAccessRepos?: InputMaybe<Scalars['jsonb']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reposAccessible?: InputMaybe<Scalars['Int']['input']>;
+  reposFailed?: InputMaybe<Scalars['Int']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
-  totalContributors?: InputMaybe<Scalars['Int']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate sum on columns */
 export type Repo_Contributor_Snapshot_Sum_Fields = {
   __typename?: 'repo_contributor_snapshot_sum_fields';
-  activeContributors?: Maybe<Scalars['Int']['output']>;
-  lastContributors?: Maybe<Scalars['Int']['output']>;
-  linkedContributors?: Maybe<Scalars['Int']['output']>;
-  totalContributors?: Maybe<Scalars['Int']['output']>;
+  contributors90d?: Maybe<Scalars['Int']['output']>;
+  contributorsAll?: Maybe<Scalars['Int']['output']>;
+  reposAccessible?: Maybe<Scalars['Int']['output']>;
+  reposFailed?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by sum() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Sum_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** update columns of table "repo_contributor_snapshot" */
 export enum Repo_Contributor_Snapshot_Update_Column {
   /** column name */
-  ActiveContributors = 'activeContributors',
+  CompletedAt = 'completedAt',
+  /** column name */
+  Contributors90d = 'contributors90d',
+  /** column name */
+  ContributorsAll = 'contributorsAll',
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
   Id = 'id',
   /** column name */
-  LastContributors = 'lastContributors',
-  /** column name */
-  LinkedContributors = 'linkedContributors',
-  /** column name */
-  NoAccessRepos = 'noAccessRepos',
-  /** column name */
   OrganizationId = 'organizationId',
+  /** column name */
+  ReposAccessible = 'reposAccessible',
+  /** column name */
+  ReposFailed = 'reposFailed',
   /** column name */
   SnapshotDate = 'snapshotDate',
   /** column name */
-  TotalContributors = 'totalContributors'
+  StartedAt = 'startedAt',
+  /** column name */
+  Status = 'status'
 }
 
 export type Repo_Contributor_Snapshot_Updates = {
-  /** append existing jsonb value of filtered columns with new jsonb value */
-  _append?: InputMaybe<Repo_Contributor_Snapshot_Append_Input>;
-  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
-  _delete_at_path?: InputMaybe<Repo_Contributor_Snapshot_Delete_At_Path_Input>;
-  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
-  _delete_elem?: InputMaybe<Repo_Contributor_Snapshot_Delete_Elem_Input>;
-  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
-  _delete_key?: InputMaybe<Repo_Contributor_Snapshot_Delete_Key_Input>;
   /** increments the numeric columns with given value of the filtered values */
   _inc?: InputMaybe<Repo_Contributor_Snapshot_Inc_Input>;
-  /** prepend existing jsonb value of filtered columns with new jsonb value */
-  _prepend?: InputMaybe<Repo_Contributor_Snapshot_Prepend_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Repo_Contributor_Snapshot_Set_Input>;
   /** filter the rows which have to be updated */
@@ -44133,52 +43890,52 @@ export type Repo_Contributor_Snapshot_Updates = {
 /** aggregate var_pop on columns */
 export type Repo_Contributor_Snapshot_Var_Pop_Fields = {
   __typename?: 'repo_contributor_snapshot_var_pop_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Var_Pop_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
 export type Repo_Contributor_Snapshot_Var_Samp_Fields = {
   __typename?: 'repo_contributor_snapshot_var_samp_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Var_Samp_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** aggregate variance on columns */
 export type Repo_Contributor_Snapshot_Variance_Fields = {
   __typename?: 'repo_contributor_snapshot_variance_fields';
-  activeContributors?: Maybe<Scalars['Float']['output']>;
-  lastContributors?: Maybe<Scalars['Float']['output']>;
-  linkedContributors?: Maybe<Scalars['Float']['output']>;
-  totalContributors?: Maybe<Scalars['Float']['output']>;
+  contributors90d?: Maybe<Scalars['Float']['output']>;
+  contributorsAll?: Maybe<Scalars['Float']['output']>;
+  reposAccessible?: Maybe<Scalars['Float']['output']>;
+  reposFailed?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "repo_contributor_snapshot" */
 export type Repo_Contributor_Snapshot_Variance_Order_By = {
-  activeContributors?: InputMaybe<Order_By>;
-  lastContributors?: InputMaybe<Order_By>;
-  linkedContributors?: InputMaybe<Order_By>;
-  totalContributors?: InputMaybe<Order_By>;
+  contributors90d?: InputMaybe<Order_By>;
+  contributorsAll?: InputMaybe<Order_By>;
+  reposAccessible?: InputMaybe<Order_By>;
+  reposFailed?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "repo_contributor" */
@@ -44413,6 +44170,380 @@ export type Repo_Stream_Cursor_Value_Input = {
 export type Repo_Sum_Fields = {
   __typename?: 'repo_sum_fields';
   pullRequest?: Maybe<Scalars['Int']['output']>;
+};
+
+/** columns and relationships of "repo_sync_status" */
+export type Repo_Sync_Status = {
+  __typename?: 'repo_sync_status';
+  allContributors?: Maybe<Scalars['Int']['output']>;
+  contributorsOk: Scalars['Boolean']['output'];
+  durationMs?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  recent90dContributors?: Maybe<Scalars['Int']['output']>;
+  recent90dOk: Scalars['Boolean']['output'];
+  repositoryUrl: Scalars['String']['output'];
+  snapshotDate: Scalars['date']['output'];
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  state: Scalars['String']['output'];
+  successfulScmConfigId?: Maybe<Scalars['uuid']['output']>;
+  successfulUserId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "repo_sync_status" */
+export type Repo_Sync_Status_Aggregate = {
+  __typename?: 'repo_sync_status_aggregate';
+  aggregate?: Maybe<Repo_Sync_Status_Aggregate_Fields>;
+  nodes: Array<Repo_Sync_Status>;
+};
+
+/** aggregate fields of "repo_sync_status" */
+export type Repo_Sync_Status_Aggregate_Fields = {
+  __typename?: 'repo_sync_status_aggregate_fields';
+  avg?: Maybe<Repo_Sync_Status_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Repo_Sync_Status_Max_Fields>;
+  min?: Maybe<Repo_Sync_Status_Min_Fields>;
+  stddev?: Maybe<Repo_Sync_Status_Stddev_Fields>;
+  stddev_pop?: Maybe<Repo_Sync_Status_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Repo_Sync_Status_Stddev_Samp_Fields>;
+  sum?: Maybe<Repo_Sync_Status_Sum_Fields>;
+  var_pop?: Maybe<Repo_Sync_Status_Var_Pop_Fields>;
+  var_samp?: Maybe<Repo_Sync_Status_Var_Samp_Fields>;
+  variance?: Maybe<Repo_Sync_Status_Variance_Fields>;
+};
+
+
+/** aggregate fields of "repo_sync_status" */
+export type Repo_Sync_Status_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Repo_Sync_Status_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Repo_Sync_Status_Avg_Fields = {
+  __typename?: 'repo_sync_status_avg_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "repo_sync_status". All fields are combined with a logical 'AND'. */
+export type Repo_Sync_Status_Bool_Exp = {
+  _and?: InputMaybe<Array<Repo_Sync_Status_Bool_Exp>>;
+  _not?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+  _or?: InputMaybe<Array<Repo_Sync_Status_Bool_Exp>>;
+  allContributors?: InputMaybe<Int_Comparison_Exp>;
+  contributorsOk?: InputMaybe<Boolean_Comparison_Exp>;
+  durationMs?: InputMaybe<Int_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  reason?: InputMaybe<String_Comparison_Exp>;
+  recent90dContributors?: InputMaybe<Int_Comparison_Exp>;
+  recent90dOk?: InputMaybe<Boolean_Comparison_Exp>;
+  repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  snapshotDate?: InputMaybe<Date_Comparison_Exp>;
+  startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  state?: InputMaybe<String_Comparison_Exp>;
+  successfulScmConfigId?: InputMaybe<Uuid_Comparison_Exp>;
+  successfulUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "repo_sync_status" */
+export enum Repo_Sync_Status_Constraint {
+  /** unique or primary key constraint on columns "repository_url", "organization_id" */
+  RepoSyncStatusOrganizationIdRepositoryUrlKey = 'repo_sync_status_organization_id_repository_url_key',
+  /** unique or primary key constraint on columns "id" */
+  RepoSyncStatusPkey = 'repo_sync_status_pkey'
+}
+
+/** input type for incrementing numeric columns in table "repo_sync_status" */
+export type Repo_Sync_Status_Inc_Input = {
+  allContributors?: InputMaybe<Scalars['Int']['input']>;
+  durationMs?: InputMaybe<Scalars['Int']['input']>;
+  recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "repo_sync_status" */
+export type Repo_Sync_Status_Insert_Input = {
+  allContributors?: InputMaybe<Scalars['Int']['input']>;
+  contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
+  durationMs?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reason?: InputMaybe<Scalars['String']['input']>;
+  recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
+  recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+  successfulScmConfigId?: InputMaybe<Scalars['uuid']['input']>;
+  successfulUserId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Repo_Sync_Status_Max_Fields = {
+  __typename?: 'repo_sync_status_max_fields';
+  allContributors?: Maybe<Scalars['Int']['output']>;
+  durationMs?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  recent90dContributors?: Maybe<Scalars['Int']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  snapshotDate?: Maybe<Scalars['date']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  successfulScmConfigId?: Maybe<Scalars['uuid']['output']>;
+  successfulUserId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Repo_Sync_Status_Min_Fields = {
+  __typename?: 'repo_sync_status_min_fields';
+  allContributors?: Maybe<Scalars['Int']['output']>;
+  durationMs?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  recent90dContributors?: Maybe<Scalars['Int']['output']>;
+  repositoryUrl?: Maybe<Scalars['String']['output']>;
+  snapshotDate?: Maybe<Scalars['date']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  successfulScmConfigId?: Maybe<Scalars['uuid']['output']>;
+  successfulUserId?: Maybe<Scalars['uuid']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "repo_sync_status" */
+export type Repo_Sync_Status_Mutation_Response = {
+  __typename?: 'repo_sync_status_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Repo_Sync_Status>;
+};
+
+/** on_conflict condition type for table "repo_sync_status" */
+export type Repo_Sync_Status_On_Conflict = {
+  constraint: Repo_Sync_Status_Constraint;
+  update_columns?: Array<Repo_Sync_Status_Update_Column>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "repo_sync_status". */
+export type Repo_Sync_Status_Order_By = {
+  allContributors?: InputMaybe<Order_By>;
+  contributorsOk?: InputMaybe<Order_By>;
+  durationMs?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  reason?: InputMaybe<Order_By>;
+  recent90dContributors?: InputMaybe<Order_By>;
+  recent90dOk?: InputMaybe<Order_By>;
+  repositoryUrl?: InputMaybe<Order_By>;
+  snapshotDate?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+  successfulScmConfigId?: InputMaybe<Order_By>;
+  successfulUserId?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: repo_sync_status */
+export type Repo_Sync_Status_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "repo_sync_status" */
+export enum Repo_Sync_Status_Select_Column {
+  /** column name */
+  AllContributors = 'allContributors',
+  /** column name */
+  ContributorsOk = 'contributorsOk',
+  /** column name */
+  DurationMs = 'durationMs',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  Reason = 'reason',
+  /** column name */
+  Recent90dContributors = 'recent90dContributors',
+  /** column name */
+  Recent90dOk = 'recent90dOk',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  SnapshotDate = 'snapshotDate',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  State = 'state',
+  /** column name */
+  SuccessfulScmConfigId = 'successfulScmConfigId',
+  /** column name */
+  SuccessfulUserId = 'successfulUserId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+/** input type for updating data in table "repo_sync_status" */
+export type Repo_Sync_Status_Set_Input = {
+  allContributors?: InputMaybe<Scalars['Int']['input']>;
+  contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
+  durationMs?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reason?: InputMaybe<Scalars['String']['input']>;
+  recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
+  recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+  successfulScmConfigId?: InputMaybe<Scalars['uuid']['input']>;
+  successfulUserId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Repo_Sync_Status_Stddev_Fields = {
+  __typename?: 'repo_sync_status_stddev_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Repo_Sync_Status_Stddev_Pop_Fields = {
+  __typename?: 'repo_sync_status_stddev_pop_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Repo_Sync_Status_Stddev_Samp_Fields = {
+  __typename?: 'repo_sync_status_stddev_samp_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "repo_sync_status" */
+export type Repo_Sync_Status_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Repo_Sync_Status_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Repo_Sync_Status_Stream_Cursor_Value_Input = {
+  allContributors?: InputMaybe<Scalars['Int']['input']>;
+  contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
+  durationMs?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  reason?: InputMaybe<Scalars['String']['input']>;
+  recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
+  recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
+  repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  snapshotDate?: InputMaybe<Scalars['date']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Scalars['String']['input']>;
+  successfulScmConfigId?: InputMaybe<Scalars['uuid']['input']>;
+  successfulUserId?: InputMaybe<Scalars['uuid']['input']>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Repo_Sync_Status_Sum_Fields = {
+  __typename?: 'repo_sync_status_sum_fields';
+  allContributors?: Maybe<Scalars['Int']['output']>;
+  durationMs?: Maybe<Scalars['Int']['output']>;
+  recent90dContributors?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "repo_sync_status" */
+export enum Repo_Sync_Status_Update_Column {
+  /** column name */
+  AllContributors = 'allContributors',
+  /** column name */
+  ContributorsOk = 'contributorsOk',
+  /** column name */
+  DurationMs = 'durationMs',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  Reason = 'reason',
+  /** column name */
+  Recent90dContributors = 'recent90dContributors',
+  /** column name */
+  Recent90dOk = 'recent90dOk',
+  /** column name */
+  RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  SnapshotDate = 'snapshotDate',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  State = 'state',
+  /** column name */
+  SuccessfulScmConfigId = 'successfulScmConfigId',
+  /** column name */
+  SuccessfulUserId = 'successfulUserId',
+  /** column name */
+  UpdatedAt = 'updatedAt'
+}
+
+export type Repo_Sync_Status_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Repo_Sync_Status_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Repo_Sync_Status_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Repo_Sync_Status_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Repo_Sync_Status_Var_Pop_Fields = {
+  __typename?: 'repo_sync_status_var_pop_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Repo_Sync_Status_Var_Samp_Fields = {
+  __typename?: 'repo_sync_status_var_samp_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Repo_Sync_Status_Variance_Fields = {
+  __typename?: 'repo_sync_status_variance_fields';
+  allContributors?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
+  recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
 
 /** update columns of table "repo" */
@@ -47438,14 +47569,6 @@ export type Subscription_Root = {
   project_to_user_stream: Array<Project_To_User>;
   /** fetch data from the table: "repo" */
   repo: Array<Repo>;
-  /** fetch data from the table: "repo_access_status" */
-  repo_access_status: Array<Repo_Access_Status>;
-  /** fetch aggregated fields from the table: "repo_access_status" */
-  repo_access_status_aggregate: Repo_Access_Status_Aggregate;
-  /** fetch data from the table: "repo_access_status" using primary key columns */
-  repo_access_status_by_pk?: Maybe<Repo_Access_Status>;
-  /** fetch data from the table in a streaming manner: "repo_access_status" */
-  repo_access_status_stream: Array<Repo_Access_Status>;
   /** fetch aggregated fields from the table: "repo" */
   repo_aggregate: Repo_Aggregate;
   /** fetch data from the table: "repo" using primary key columns */
@@ -47484,6 +47607,14 @@ export type Subscription_Root = {
   repo_contributor_stream: Array<Repo_Contributor>;
   /** fetch data from the table in a streaming manner: "repo" */
   repo_stream: Array<Repo>;
+  /** fetch data from the table: "repo_sync_status" */
+  repo_sync_status: Array<Repo_Sync_Status>;
+  /** fetch aggregated fields from the table: "repo_sync_status" */
+  repo_sync_status_aggregate: Repo_Sync_Status_Aggregate;
+  /** fetch data from the table: "repo_sync_status" using primary key columns */
+  repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
+  /** fetch data from the table in a streaming manner: "repo_sync_status" */
+  repo_sync_status_stream: Array<Repo_Sync_Status>;
   /** fetch data from the table: "scan" */
   scan: Array<Scan>;
   /** fetch aggregated fields from the table: "scan" */
@@ -50811,36 +50942,6 @@ export type Subscription_RootRepoArgs = {
 };
 
 
-export type Subscription_RootRepo_Access_StatusArgs = {
-  distinct_on?: InputMaybe<Array<Repo_Access_Status_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Repo_Access_Status_Order_By>>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-
-export type Subscription_RootRepo_Access_Status_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Repo_Access_Status_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Repo_Access_Status_Order_By>>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-
-export type Subscription_RootRepo_Access_Status_By_PkArgs = {
-  id: Scalars['uuid']['input'];
-};
-
-
-export type Subscription_RootRepo_Access_Status_StreamArgs = {
-  batch_size: Scalars['Int']['input'];
-  cursor: Array<InputMaybe<Repo_Access_Status_Stream_Cursor_Input>>;
-  where?: InputMaybe<Repo_Access_Status_Bool_Exp>;
-};
-
-
 export type Subscription_RootRepo_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Repo_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -50979,6 +51080,36 @@ export type Subscription_RootRepo_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Repo_Stream_Cursor_Input>>;
   where?: InputMaybe<Repo_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Sync_StatusArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Sync_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Sync_Status_Order_By>>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Sync_Status_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Sync_Status_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Sync_Status_Order_By>>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Sync_Status_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootRepo_Sync_Status_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Repo_Sync_Status_Stream_Cursor_Input>>;
+  where?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
 };
 
 
@@ -67467,7 +67598,7 @@ export type GetFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, severityText?: string | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, guidances: Array<string>, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
+export type GetFixesQuery = { __typename?: 'query_root', fixes: Array<{ __typename?: 'fix', safeIssueType?: string | null, id: any, severityText?: string | null, safeIssueLanguage?: string | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename: 'FixQuestion', defaultValue: string, index: number, inputType: FixQuestionInputType, key: string, name: string, options: Array<string>, value?: string | null, content: string, description: string, guidance: string }>, extraContext: { __typename: 'FixExtraContextResponse', fixDescription: string, guidances: Array<string>, extraContext: Array<{ __typename: 'UnstructuredFixExtraContext', key: string, value: any }>, manifestActionsRequired: Array<{ __typename: 'FixExtraContextManifestActionRequiredResponse', action: ManifestAction, language: Language, lib: { __typename?: 'PackageInfoResponse', name: string, version: string }, typesLib?: { __typename?: 'PackageInfoResponse', envName?: string | null, name: string, version: string } | null }> } } | { __typename: 'GetFixNoFixError' } }> };
 
 export type GetVulByNodesMetadataQueryVariables = Exact<{
   filters?: InputMaybe<Array<Vulnerability_Report_Issue_Code_Node_Bool_Exp> | Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
@@ -67663,7 +67794,7 @@ export type AutoPrAnalysisMutationVariables = Exact<{
 
 export type AutoPrAnalysisMutation = { __typename?: 'mutation_root', autoPrAnalysis?: { __typename: 'AutoPrError', status: Status, error: string } | { __typename: 'AutoPrSuccess', status: Status, appliedAutoPrIssueTypes: Array<string> } | null };
 
-export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type FixDetailsFragment = { __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
 export type GetFixWithAnswersQueryVariables = Exact<{
   fixId: Scalars['uuid']['input'];
@@ -67671,9 +67802,9 @@ export type GetFixWithAnswersQueryVariables = Exact<{
 }>;
 
 
-export type GetFixWithAnswersQuery = { __typename?: 'query_root', fixData: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
+export type GetFixWithAnswersQuery = { __typename?: 'query_root', fixData: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } };
 
-export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
+export type FixReportSummaryFieldsFragment = { __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } };
 
 export type GetFixReportsByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -67691,7 +67822,7 @@ export type GetReportFixesQueryVariables = Exact<{
 }>;
 
 
-export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetReportFixesQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type GetLatestReportByRepoUrlQueryVariables = Exact<{
   repoUrl: Scalars['String']['input'];
@@ -67702,7 +67833,7 @@ export type GetLatestReportByRepoUrlQueryVariables = Exact<{
 }>;
 
 
-export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
+export type GetLatestReportByRepoUrlQuery = { __typename?: 'query_root', fixReport: Array<{ __typename?: 'fixReport', id: any, createdOn: any, issueTypes?: any | null, repo?: { __typename?: 'repo', originalUrl: string } | null, CRITICAL: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, HIGH: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, MEDIUM: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, LOW: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, fixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, userFixes: Array<{ __typename?: 'fix', id: any, confidence: number, safeIssueType?: string | null, safeIssueLanguage?: string | null, severityText?: string | null, gitBlameLogin?: string | null, severityValue?: number | null, vulnerabilityReportIssues: Array<{ __typename?: 'vulnerability_report_issue', category?: Vulnerability_Report_Issue_Category_Enum | null, parsedIssueType?: string | null, parsedSeverity?: Vulnerability_Severity_Enum | null, vulnerabilityReportIssueTags: Array<{ __typename?: 'vulnerability_report_issue_to_vulnerability_report_issue_tag', vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum }> }>, sharedState?: { __typename?: 'fix_shared_state', id: any, downloadedBy: Array<{ __typename?: 'fix_download_to_user', downloadSource?: Fix_Download_Source_Enum | null }> } | null, patchAndQuestions: { __typename: 'FixData', patch: string, patchOriginalEncodingBase64: string, questions: Array<{ __typename?: 'FixQuestion', key: string, name: string, defaultValue: string, value?: string | null, inputType: FixQuestionInputType, options: Array<string>, index: number, content: string, description: string, guidance: string }>, extraContext: { __typename?: 'FixExtraContextResponse', fixDescription: string, extraContext: Array<{ __typename?: 'UnstructuredFixExtraContext', key: string, value: any }> } } | { __typename: 'GetFixNoFixError' } }>, filteredFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, totalFixesCount: { __typename?: 'fix_aggregate', aggregate?: { __typename?: 'fix_aggregate_fields', count: number } | null }, vulnerabilityReport: { __typename?: 'vulnerability_report', scanDate?: any | null, vendor?: Vulnerability_Report_Vendor_Enum | null, projectId: any, project: { __typename?: 'project', organizationId: any }, totalVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null }, notFixableVulnerabilityReportIssuesCount: { __typename?: 'vulnerability_report_issue_aggregate', aggregate?: { __typename?: 'vulnerability_report_issue_aggregate_fields', count: number } | null } } }>, expiredReport: Array<{ __typename?: 'fixReport', id: any, expirationOn?: any | null }> };
 
 export type UpdateDownloadedFixDataMutationVariables = Exact<{
   fixIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -67809,10 +67940,6 @@ export const FixDetailsFragmentDoc = `
         inputType
         options
         index
-        extraContext {
-          key
-          value
-        }
         content
         description
         guidance
@@ -68050,10 +68177,6 @@ export const GetFixesDocument = `
         patchOriginalEncodingBase64
         questions {
           defaultValue
-          extraContext {
-            key
-            value
-          }
           index
           inputType
           key
@@ -68557,10 +68680,6 @@ export const GetFixWithAnswersDocument = `
         inputType
         options
         index
-        extraContext {
-          key
-          value
-        }
         content
         description
         guidance

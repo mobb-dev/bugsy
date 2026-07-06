@@ -50,7 +50,6 @@ export const mockGetFixWithAnswersCascading: {
           defaultValue: 'no',
           value: null,
           index: 0,
-          extraContext: [],
         },
       ],
       extraContext: {
@@ -85,7 +84,6 @@ export const mockGetFixWithAnswersAnswersIgnored: {
           defaultValue: 'no',
           value: null,
           index: 0,
-          extraContext: [],
         },
       ],
       extraContext: {

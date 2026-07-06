@@ -1,7 +1,12 @@
 import pLimit from 'p-limit'
 
 import { contextLogger } from '../../../../utils/contextLogger'
-import { MAX_BRANCHES_FETCH, ReferenceType, ScmRepoInfo } from '..'
+import {
+  MAX_BRANCHES_FETCH,
+  RecentCommitAuthor,
+  ReferenceType,
+  ScmRepoInfo,
+} from '..'
 import {
   InvalidRepoUrlError,
   InvalidUrlPatternError,
@@ -372,6 +377,68 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
         projectName
       )
       return commits
+    },
+    // Distinct commit authors since `since`, paged with $skip (the plain
+    // getAdoRecentCommits above fetches only the first 100 — no pagination — so
+    // it under-reports 90-day contributors on any active repo). Accumulates one
+    // row per author as pages arrive → memory bounded by author count, uncapped
+    // walk (the per-repo sync timeout bounds pathological repos). ADO commits
+    // carry no stable author account id here, so authors are keyed by email.
+    async getAdoRecentCommitAuthors({
+      repoUrl,
+      since,
+    }: {
+      repoUrl: string
+      since: string
+    }): Promise<RecentCommitAuthor[]> {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const git = await api.getGitApi()
+      const repository = await git.getRepository(
+        decodeURI(repo),
+        projectName ? decodeURI(projectName) : undefined
+      )
+      const defaultBranch = repository.defaultBranch?.replace('refs/heads/', '')
+      const byEmail = new Map<string, RecentCommitAuthor>()
+      const PAGE = 100
+      let skip = 0
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const page = await git.getCommits(
+          repo,
+          {
+            fromDate: since,
+            itemVersion: defaultBranch ? { version: defaultBranch } : undefined,
+            $top: PAGE,
+            $skip: skip,
+          },
+          projectName
+        )
+        if (!page || page.length === 0) break
+        for (const c of page) {
+          const email = c.author?.email
+          if (!email) continue
+          const date = c.author?.date
+            ? new Date(c.author.date).toISOString()
+            : since
+          const key = email.toLowerCase()
+          const prev = byEmail.get(key)
+          if (
+            !prev ||
+            new Date(date).getTime() > new Date(prev.date).getTime()
+          ) {
+            byEmail.set(key, {
+              email: key,
+              name: c.author?.name ?? null,
+              date,
+              externalId: null,
+              isBot: false,
+            })
+          }
+        }
+        if (page.length < PAGE) break
+        skip += PAGE
+      }
+      return [...byEmail.values()]
     },
     async getAdoPrCommits({
       repoUrl,

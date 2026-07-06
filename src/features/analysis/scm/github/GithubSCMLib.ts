@@ -15,6 +15,7 @@ import {
   PostPRReviewCommentParams,
   PullRequestMetrics,
   RateLimitStatus,
+  RecentCommitAuthor,
   RecentCommitsResult,
   RepositoryContributor,
   SCMDeleteGeneralPrCommentParams,
@@ -272,6 +273,12 @@ export class GithubSCMLib extends SCMLib {
     }
   }
 
+  async getRecentCommitAuthors(since: string): Promise<RecentCommitAuthor[]> {
+    this._validateAccessTokenAndUrl()
+    const { owner, repo } = parseGithubOwnerAndRepo(this.url!)
+    return this.githubSdk.streamRecentCommitAuthors({ owner, repo, since })
+  }
+
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {
     const result = await this.githubSdk.getRateLimitStatus()
     return {
@@ -285,11 +292,34 @@ export class GithubSCMLib extends SCMLib {
     this._validateAccessTokenAndUrl()
     const { owner, repo } = parseGithubOwnerAndRepo(this.url)
 
-    const [collaborators, authUser, authEmails] = await Promise.all([
+    const [collaboratorsRaw, authUser, authEmails] = await Promise.all([
       this.githubSdk.listRepositoryCollaborators({ owner, repo }),
       this.githubSdk.getAuthenticatedUser(),
       this.githubSdk.getAuthenticatedUserEmails(),
     ])
+
+    // listCollaborators needs push access; a read-only token gets [] back. Fall
+    // back to the read-only /contributors endpoint (commit authors) so we still
+    // count contributors without requiring push. Return these rows UNENRICHED:
+    // the enrichment below spends up to ~4 API calls per contributor (profile +
+    // latest-commit + public-events + commit-search, the last on the 30/min
+    // search bucket), so enriching a large repo's full author list would
+    // guarantee a rate-limit burn / per-repo timeout every run. GitLab/Bitbucket
+    // return their read-only fallback rows unenriched too — match them.
+    if (collaboratorsRaw.length === 0) {
+      const fallback = await this.githubSdk.listRepositoryContributors({
+        owner,
+        repo,
+      })
+      return fallback.map((c) => ({
+        externalId: String(c.id),
+        username: c.login ?? null,
+        displayName: c.login ?? null,
+        email: null,
+        accessLevel: null,
+      }))
+    }
+    const collaborators = collaboratorsRaw
 
     let authUserPrimaryEmail: string | null = null
     if (authEmails.length > 0) {

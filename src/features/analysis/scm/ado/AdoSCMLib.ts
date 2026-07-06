@@ -12,6 +12,7 @@ import {
   GetSubmitRequestMetadataResult,
   PullRequestMetrics,
   RateLimitStatus,
+  RecentCommitAuthor,
   RecentCommitsResult,
   RepositoryContributor,
   ScmLibScmType,
@@ -485,6 +486,12 @@ export class AdoSCMLib extends SCMLib {
         parents: c.parents?.map((sha) => ({ sha })),
       })),
     }
+  }
+
+  async getRecentCommitAuthors(since: string): Promise<RecentCommitAuthor[]> {
+    this._validateAccessTokenAndUrl()
+    const adoSdk = await this.getAdoSdk()
+    return adoSdk.getAdoRecentCommitAuthors({ repoUrl: this.url, since })
   }
 
   async getRateLimitStatus(): Promise<RateLimitStatus | null> {

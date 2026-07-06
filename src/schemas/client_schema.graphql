@@ -125,10 +125,6 @@ query getFixes($filters: fix_bool_exp!) {
         patchOriginalEncodingBase64
         questions {
           defaultValue
-          extraContext {
-            key
-            value
-          }
           index
           inputType
           key
@@ -785,10 +781,6 @@ fragment FixDetails on fix {
         inputType
         options
         index
-        extraContext {
-          key
-          value
-        }
         content
         description
         guidance
@@ -818,10 +810,6 @@ query getFixWithAnswers($fixId: uuid!, $userInput: [QuestionAnswer!]!) {
         inputType
         options
         index
-        extraContext {
-          key
-          value
-        }
         content
         description
         guidance

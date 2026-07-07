@@ -44176,6 +44176,7 @@ export type Repo_Sum_Fields = {
 export type Repo_Sync_Status = {
   __typename?: 'repo_sync_status';
   allContributors?: Maybe<Scalars['Int']['output']>;
+  attempt: Scalars['Int']['output'];
   contributorsOk: Scalars['Boolean']['output'];
   durationMs?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
@@ -44228,6 +44229,7 @@ export type Repo_Sync_Status_Aggregate_FieldsCountArgs = {
 export type Repo_Sync_Status_Avg_Fields = {
   __typename?: 'repo_sync_status_avg_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44238,6 +44240,7 @@ export type Repo_Sync_Status_Bool_Exp = {
   _not?: InputMaybe<Repo_Sync_Status_Bool_Exp>;
   _or?: InputMaybe<Array<Repo_Sync_Status_Bool_Exp>>;
   allContributors?: InputMaybe<Int_Comparison_Exp>;
+  attempt?: InputMaybe<Int_Comparison_Exp>;
   contributorsOk?: InputMaybe<Boolean_Comparison_Exp>;
   durationMs?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -44266,6 +44269,7 @@ export enum Repo_Sync_Status_Constraint {
 /** input type for incrementing numeric columns in table "repo_sync_status" */
 export type Repo_Sync_Status_Inc_Input = {
   allContributors?: InputMaybe<Scalars['Int']['input']>;
+  attempt?: InputMaybe<Scalars['Int']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -44273,6 +44277,7 @@ export type Repo_Sync_Status_Inc_Input = {
 /** input type for inserting data into table "repo_sync_status" */
 export type Repo_Sync_Status_Insert_Input = {
   allContributors?: InputMaybe<Scalars['Int']['input']>;
+  attempt?: InputMaybe<Scalars['Int']['input']>;
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -44294,6 +44299,7 @@ export type Repo_Sync_Status_Insert_Input = {
 export type Repo_Sync_Status_Max_Fields = {
   __typename?: 'repo_sync_status_max_fields';
   allContributors?: Maybe<Scalars['Int']['output']>;
+  attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
@@ -44312,6 +44318,7 @@ export type Repo_Sync_Status_Max_Fields = {
 export type Repo_Sync_Status_Min_Fields = {
   __typename?: 'repo_sync_status_min_fields';
   allContributors?: Maybe<Scalars['Int']['output']>;
+  attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
@@ -44345,6 +44352,7 @@ export type Repo_Sync_Status_On_Conflict = {
 /** Ordering options when selecting data from "repo_sync_status". */
 export type Repo_Sync_Status_Order_By = {
   allContributors?: InputMaybe<Order_By>;
+  attempt?: InputMaybe<Order_By>;
   contributorsOk?: InputMaybe<Order_By>;
   durationMs?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -44371,6 +44379,8 @@ export type Repo_Sync_Status_Pk_Columns_Input = {
 export enum Repo_Sync_Status_Select_Column {
   /** column name */
   AllContributors = 'allContributors',
+  /** column name */
+  Attempt = 'attempt',
   /** column name */
   ContributorsOk = 'contributorsOk',
   /** column name */
@@ -44404,6 +44414,7 @@ export enum Repo_Sync_Status_Select_Column {
 /** input type for updating data in table "repo_sync_status" */
 export type Repo_Sync_Status_Set_Input = {
   allContributors?: InputMaybe<Scalars['Int']['input']>;
+  attempt?: InputMaybe<Scalars['Int']['input']>;
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -44424,6 +44435,7 @@ export type Repo_Sync_Status_Set_Input = {
 export type Repo_Sync_Status_Stddev_Fields = {
   __typename?: 'repo_sync_status_stddev_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44432,6 +44444,7 @@ export type Repo_Sync_Status_Stddev_Fields = {
 export type Repo_Sync_Status_Stddev_Pop_Fields = {
   __typename?: 'repo_sync_status_stddev_pop_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44440,6 +44453,7 @@ export type Repo_Sync_Status_Stddev_Pop_Fields = {
 export type Repo_Sync_Status_Stddev_Samp_Fields = {
   __typename?: 'repo_sync_status_stddev_samp_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44455,6 +44469,7 @@ export type Repo_Sync_Status_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Repo_Sync_Status_Stream_Cursor_Value_Input = {
   allContributors?: InputMaybe<Scalars['Int']['input']>;
+  attempt?: InputMaybe<Scalars['Int']['input']>;
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -44475,6 +44490,7 @@ export type Repo_Sync_Status_Stream_Cursor_Value_Input = {
 export type Repo_Sync_Status_Sum_Fields = {
   __typename?: 'repo_sync_status_sum_fields';
   allContributors?: Maybe<Scalars['Int']['output']>;
+  attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
 };
@@ -44483,6 +44499,8 @@ export type Repo_Sync_Status_Sum_Fields = {
 export enum Repo_Sync_Status_Update_Column {
   /** column name */
   AllContributors = 'allContributors',
+  /** column name */
+  Attempt = 'attempt',
   /** column name */
   ContributorsOk = 'contributorsOk',
   /** column name */
@@ -44526,6 +44544,7 @@ export type Repo_Sync_Status_Updates = {
 export type Repo_Sync_Status_Var_Pop_Fields = {
   __typename?: 'repo_sync_status_var_pop_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44534,6 +44553,7 @@ export type Repo_Sync_Status_Var_Pop_Fields = {
 export type Repo_Sync_Status_Var_Samp_Fields = {
   __typename?: 'repo_sync_status_var_samp_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };
@@ -44542,6 +44562,7 @@ export type Repo_Sync_Status_Var_Samp_Fields = {
 export type Repo_Sync_Status_Variance_Fields = {
   __typename?: 'repo_sync_status_variance_fields';
   allContributors?: Maybe<Scalars['Float']['output']>;
+  attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
 };

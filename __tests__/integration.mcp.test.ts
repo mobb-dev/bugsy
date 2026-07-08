@@ -105,6 +105,21 @@ const randomRepoUrl = `https://github.com/test-org/test-repo-${Math.random()
   .toString(36)
   .substring(2, 15)}`
 
+// A single fresh backend scan + fix-generation round-trip takes ~70-120s in CI
+// (measured) and is internally capped at this budget by both waitForScanCompletion
+// and expectSingleFix. It's the single source of truth for how long one round-trip
+// may take, so those two helpers can never disagree on the ceiling.
+const SCAN_FIXGEN_BUDGET_MS = 180000
+
+// Per-test it() budgets are sized to (number of sequential fresh scan+fix-gen
+// round-trips the test performs) * SCAN_FIXGEN_BUDGET_MS + ~60s overhead, so a
+// slow-but-valid scan is never killed before the scan itself times out. They are
+// written as numeric literals at each it() (not derived here) because prettier only
+// keeps the test-call formatting when the timeout argument is a numeric literal:
+//   one round-trip  -> 240000 (180000 + 60000)
+//   two round-trips -> 420000 (2 * 180000 + 60000)
+// Tests that perform no fresh round-trip keep their original, smaller budgets.
+
 describe('mcp tests', () => {
   let mcpClient: InlineMCPClient
 
@@ -727,7 +742,7 @@ describe('mcp tests', () => {
     const waitForScanCompletion = async (
       client: InlineMCPClient,
       repoPath: string,
-      timeoutMs: number = 180000 // 3 minutes timeout
+      timeoutMs: number = SCAN_FIXGEN_BUDGET_MS
     ) => {
       let response = await expectInitialScanPrompt(client, repoPath)
 
@@ -771,7 +786,14 @@ describe('mcp tests', () => {
 
     // This helper expects a single "next batch" fix to show up. It requires full-model analyzer
     // behavior (CI jobs that run this suite set ENVIRONMENT=ci-tests-e2e for consumer-analyzer).
-    const expectSingleFix = async (timeout = 60000, interval = 50) => {
+    // Defaults to the full fresh-scan budget: when the awaited fix must be produced by a fresh
+    // backend scan+fix-generation round-trip, a shorter budget races the backend and
+    // false-negatives. Call sites where the fix is already cached from the initial scan return
+    // on the first poll, so the larger default costs them nothing.
+    const expectSingleFix = async (
+      timeout = SCAN_FIXGEN_BUDGET_MS,
+      interval = 50
+    ) => {
       const start = Date.now()
       let lastError: unknown
 
@@ -872,7 +894,7 @@ describe('mcp tests', () => {
 
       // After initial scan, there should be no fresh fixes
       await expectNoFreshFixes()
-    }, 200000)
+    }, 240000)
 
     // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
     // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
@@ -892,7 +914,7 @@ describe('mcp tests', () => {
       expect(getTextContent(firstFixesRes!.content![0])).toContain('## Fix 3:')
 
       await expectNoFreshFixes()
-    }, 200000)
+    }, 240000)
 
     // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
     // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
@@ -913,7 +935,7 @@ describe('mcp tests', () => {
       await expectSingleFix()
 
       await expectNoFreshFixes()
-    }, 200000)
+    }, 420000)
 
     it('should detect new fixes introduced after initial scan', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
@@ -947,12 +969,15 @@ describe('mcp tests', () => {
         intervalCallback()
       }
 
+      // The fix here must be produced by a fresh backend scan+fix-generation
+      // round-trip, which is exactly what expectSingleFix's default budgets for.
       await expectSingleFix()
       await expectNoFreshFixes()
 
       // Restore the original setInterval
       global.setInterval = originalSetInterval
-    }, 200000)
+      // Two sequential fresh scans: the initial scan plus the detection above.
+    }, 420000)
 
     it('should not report new fixes that moved', async () => {
       process.env['MVS_AUTO_FIX'] = 'false'
@@ -984,6 +1009,8 @@ describe('mcp tests', () => {
         intervalCallback()
       }
 
+      // Fresh scan+fix-generation round-trip (~70-120s in CI): relies on
+      // expectSingleFix's 180s default budget rather than racing it at 60s.
       await expectSingleFix()
       await expectNoFreshFixes()
 
@@ -1004,7 +1031,9 @@ describe('mcp tests', () => {
 
       // Restore the original setInterval
       global.setInterval = originalSetInterval
-    }, 200000)
+      // Two sequential fresh scans (initial + the detection above) plus a
+      // trailing second-scan check.
+    }, 420000)
 
     describe('MVS_AUTO_FIX Integration Tests', () => {
       beforeEach(() => {
@@ -1088,7 +1117,7 @@ describe('mcp tests', () => {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
         }
-      }, 200000)
+      }, 240000)
 
       // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
       // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
@@ -1146,7 +1175,7 @@ describe('mcp tests', () => {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
         }
-      }, 200000)
+      }, 240000)
 
       // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
       // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
@@ -1248,7 +1277,8 @@ describe('mcp tests', () => {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
         }
-      }, 200000)
+        // Two sequential fresh scans: initial auto-apply, then the re-scan.
+      }, 420000)
 
       // MOBB-3591: un-skipped after swapping the fixture to deterministic PYTHON/INSECURE_UUID_VERSION
       // (semgrep rule lang.security.insecure-uuid-version.insecure-uuid-version). Algorithmic fixer — no LLM cost.
@@ -1362,7 +1392,7 @@ describe('mcp tests', () => {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
         }
-      }, 200000)
+      }, 240000)
 
       it('should ONLY auto-apply fixes to uncommitted files (git status filtering)', async () => {
         process.env['MVS_AUTO_FIX'] = 'true'
@@ -1437,7 +1467,7 @@ describe('mcp tests', () => {
           delete process.env['WORKSPACE_FOLDER_PATHS']
           testRepo.cleanupAll()
         }
-      }, 200000)
+      }, 240000)
     })
   })
 

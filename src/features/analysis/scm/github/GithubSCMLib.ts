@@ -329,27 +329,30 @@ export class GithubSCMLib extends SCMLib {
         primary?.email ?? verified?.email ?? authEmails[0]?.email ?? null
     }
 
+    // Enrich each collaborator with a SINGLE profile lookup (displayName, and
+    // email when the user exposes it). The former per-collaborator fallback chain
+    // — getLatestRepoCommitByAuthor + getEmailFromPublicEvents +
+    // getEmailFromCommitSearch (the last on GitHub's 30-req/min search bucket) —
+    // spent up to ~4 calls per collaborator and was the dominant cause of per-repo
+    // timeouts on large orgs. It is removed: anyone who committed in the window
+    // already gets an EXACT email from the 90-day commit stream
+    // (streamRecentCommitAuthors), which is what drives the billed count, so
+    // trimming this only affects the display email of NON-committing members.
     const enrichLimit = pLimit(5)
     const enriched = await Promise.all(
       collaborators.map((c) =>
         enrichLimit(async () => {
-          let profileEmail: string | null = c.email ?? null
+          let email: string | null = c.email ?? null
           let displayName: string | null = c.login ?? null
-          let emailSource: string = profileEmail ? 'collaborator_api' : 'none'
 
           if (
-            !profileEmail &&
+            !email &&
             authUser &&
             authUserPrimaryEmail &&
             c.id === authUser.id
           ) {
-            profileEmail = authUserPrimaryEmail
-            emailSource = 'authenticated_user'
+            email = authUserPrimaryEmail
           }
-
-          const isRealEmail = (e: string | null) => e && !e.includes('noreply')
-          let noreplyFallback: string | null = null
-          let noreplySource = ''
 
           if (c.login) {
             try {
@@ -357,8 +360,7 @@ export class GithubSCMLib extends SCMLib {
                 username: c.login,
               })
               if (profile.email) {
-                profileEmail = profile.email
-                emailSource = 'user_profile'
+                email = profile.email
               }
               displayName = profile.name ?? displayName
             } catch (err) {
@@ -367,121 +369,13 @@ export class GithubSCMLib extends SCMLib {
                 error: err instanceof Error ? err.message : String(err),
               })
             }
-
-            if (!isRealEmail(profileEmail)) {
-              if (profileEmail && !noreplyFallback) {
-                noreplyFallback = profileEmail
-                noreplySource = emailSource
-              }
-              try {
-                const commit = await this.githubSdk.getLatestRepoCommitByAuthor(
-                  {
-                    owner,
-                    repo,
-                    author: c.login,
-                  }
-                )
-                const commitAuthor = commit?.commit?.author
-                const commitEmail = commitAuthor?.email
-                if (commitAuthor?.name && displayName === c.login) {
-                  displayName = commitAuthor.name
-                }
-                if (commitEmail) {
-                  if (isRealEmail(commitEmail)) {
-                    profileEmail = commitEmail
-                    emailSource = 'commit_author'
-                  } else if (!noreplyFallback) {
-                    noreplyFallback = commitEmail
-                    noreplySource = 'commit_noreply'
-                  }
-                }
-              } catch (err) {
-                contextLogger.warn(
-                  '[GitHub] getLatestRepoCommitByAuthor failed',
-                  {
-                    username: c.login,
-                    owner,
-                    repo,
-                    error: err instanceof Error ? err.message : String(err),
-                  }
-                )
-              }
-            }
-
-            if (!isRealEmail(profileEmail)) {
-              try {
-                const eventEmail =
-                  await this.githubSdk.getEmailFromPublicEvents({
-                    username: c.login,
-                  })
-                if (eventEmail) {
-                  if (isRealEmail(eventEmail)) {
-                    profileEmail = eventEmail
-                    emailSource = 'public_events'
-                  } else if (!noreplyFallback) {
-                    noreplyFallback = eventEmail
-                    noreplySource = 'events_noreply'
-                  }
-                }
-              } catch (err) {
-                contextLogger.warn('[GitHub] getEmailFromPublicEvents failed', {
-                  username: c.login,
-                  error: err instanceof Error ? err.message : String(err),
-                })
-              }
-            }
-
-            if (!isRealEmail(profileEmail)) {
-              try {
-                const searchEmail =
-                  await this.githubSdk.getEmailFromCommitSearch({
-                    username: c.login,
-                  })
-                if (searchEmail) {
-                  if (isRealEmail(searchEmail)) {
-                    profileEmail = searchEmail
-                    emailSource = 'commit_search'
-                  } else if (!noreplyFallback) {
-                    noreplyFallback = searchEmail
-                    noreplySource = 'search_noreply'
-                  }
-                }
-              } catch (err) {
-                contextLogger.warn('[GitHub] getEmailFromCommitSearch failed', {
-                  username: c.login,
-                  error: err instanceof Error ? err.message : String(err),
-                })
-              }
-            }
-
-            if (!isRealEmail(profileEmail) && noreplyFallback) {
-              profileEmail = noreplyFallback
-              emailSource = noreplySource
-            }
           }
-
-          if (profileEmail) {
-            contextLogger.info('[GitHub] Resolved contributor email', {
-              username: c.login,
-              emailSource,
-            })
-          } else {
-            contextLogger.debug('[GitHub] No email resolved for contributor', {
-              username: c.login,
-            })
-          }
-
-          contextLogger.info('[GitHub] Contributor resolved', {
-            username: c.login,
-            profileName: displayName,
-            displayNameIsNull: displayName === null,
-          })
 
           return {
             externalId: String(c.id),
             username: c.login ?? null,
             displayName,
-            email: profileEmail,
+            email,
             accessLevel: c.role_name ?? null,
           }
         })

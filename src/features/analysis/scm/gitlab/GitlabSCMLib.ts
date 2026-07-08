@@ -1,5 +1,3 @@
-import pLimit from 'p-limit'
-
 import { contextLogger } from '../../../../utils/contextLogger'
 import { Pr_Status_Enum } from '../generates/client_generates'
 import { SCMLib } from '../scm'
@@ -42,7 +40,6 @@ import {
   getGitlabReferenceData,
   getGitlabRepoDefaultBranch,
   getGitlabUsername,
-  getGitlabUserPublicEmail,
   gitlabMergeRequestStatus,
   gitlabValidateParams,
   listGitlabProjectMembers,
@@ -572,74 +569,42 @@ export class GitlabSCMLib extends SCMLib {
       repoContributorCount: repoContributors.length,
     })
 
-    const enrichLimit = pLimit(5)
-    const enriched = await Promise.all(
-      members.map((m) =>
-        enrichLimit(async () => {
-          let email: string | null = null
-          let emailSource = 'none'
+    // Enrich each member with an email resolved WITHOUT any per-member API call:
+    // the authenticated user's own email, else a match against the commit
+    // contributors we already fetched (by name, free). The former per-member
+    // getGitlabUserPublicEmail lookup was one broker round-trip PER member, and
+    // GitLab group inheritance attaches 1000+ members to every repo — that N+1
+    // was the dominant cause of the GitLab 90-day sync timeouts (~788 repos). It
+    // is removed: anyone who committed in the window gets an EXACT email from the
+    // commit stream (getGitlabRecentCommitAuthors), which is what the billed
+    // count uses, so this only affects the display email of non-committing
+    // members. Now fully local — no fan-out, so no concurrency limiter needed.
+    const enriched = members.map((m) => {
+      let email: string | null = null
 
-          if (authUser?.email && authUser.id === m.id) {
-            email = authUser.email
-            emailSource = 'authenticated_user'
-          }
+      if (authUser?.email && authUser.id === m.id) {
+        email = authUser.email
+      }
 
-          if (!email) {
-            try {
-              email = await getGitlabUserPublicEmail({
-                repoUrl: this.url,
-                accessToken: this.accessToken,
-                userId: m.id,
-              })
-              if (email) emailSource = 'public_email'
-            } catch (err) {
-              contextLogger.warn('[GitLab] getGitlabUserPublicEmail failed', {
-                username: m.username,
-                userId: m.id,
-                error: err instanceof Error ? err.message : String(err),
-              })
-            }
-          }
+      if (!email && m.username) {
+        const match = repoContributors.find(
+          (rc) =>
+            rc.name?.toLowerCase() === m.username?.toLowerCase() ||
+            rc.name?.toLowerCase() === m.name?.toLowerCase()
+        )
+        if (match?.email) {
+          email = match.email
+        }
+      }
 
-          if (!email && m.username) {
-            const match = repoContributors.find(
-              (rc) =>
-                rc.name?.toLowerCase() === m.username?.toLowerCase() ||
-                rc.name?.toLowerCase() === m.name?.toLowerCase()
-            )
-            if (match?.email) {
-              email = match.email
-              emailSource = match.email.includes('noreply')
-                ? 'commit_noreply'
-                : 'commit_author'
-            } else {
-              contextLogger.debug(
-                '[GitLab] No commit author match for member',
-                {
-                  username: m.username,
-                  displayName: m.name,
-                }
-              )
-            }
-          }
-
-          if (email) {
-            contextLogger.info('[GitLab] Resolved contributor email', {
-              username: m.username,
-              emailSource,
-            })
-          }
-
-          return {
-            externalId: String(m.id),
-            username: m.username ?? null,
-            displayName: m.name ?? null,
-            email,
-            accessLevel: m.access_level != null ? String(m.access_level) : null,
-          }
-        })
-      )
-    )
+      return {
+        externalId: String(m.id),
+        username: m.username ?? null,
+        displayName: m.name ?? null,
+        email,
+        accessLevel: m.access_level != null ? String(m.access_level) : null,
+      }
+    })
 
     // Read-only fallback: listing members can need more than read_repository. If
     // we got no members but could read commit contributors, count those so a

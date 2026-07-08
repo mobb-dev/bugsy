@@ -5,6 +5,7 @@ import bitbucketPkg, { APIClient, Schema } from 'bitbucket'
 import Debug from 'debug'
 import { z } from 'zod'
 
+import { MAX_ACTIVE_BRANCHES_SCAN } from '../constants'
 import {
   InvalidAccessTokenError,
   InvalidRepoUrlError,
@@ -544,62 +545,127 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
     }): Promise<RecentCommitAuthor[]> {
       const sinceMs = new Date(params.since).getTime()
       const byKey = new Map<string, RecentCommitAuthor>()
-      let page = 1
       // Generous page ceiling purely as a runaway guard; the date boundary below
       // is the real stop. The per-repo sync timeout bounds pathological repos.
       const HARD_PAGE_CEILING = 10000
-      while (page <= HARD_PAGE_CEILING) {
-        const res = await bitbucketClient.repositories.listCommits({
-          repo_slug: params.repo_slug,
-          workspace: params.workspace,
-          page: String(page),
-          pagelen: 100,
-        } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
-        const data = res.data as { values?: unknown[]; next?: string }
-        const commits = data?.values ?? []
-        if (commits.length === 0) break
-        // Bitbucket has no server-side date filter and its commit list isn't
-        // strictly date-ordered (merges/imports/clock-skew interleave). Stop only
-        // after a FULL page with NO in-window commit — a single old commit on an
-        // otherwise in-window page must not truncate the walk and drop later
-        // in-window authors.
-        let sawInWindow = false
-        for (const commit of commits) {
-          const record = commit as Record<string, unknown>
-          const dateStr = record['date'] as string | undefined
-          if (dateStr && new Date(dateStr).getTime() < sinceMs) {
-            continue
+
+      // include=undefined → main branch; include=<branch> → that branch's reachable
+      // commits. We do NOT early-stop on already-seen commits: Bitbucket's commit
+      // list isn't strictly date-ordered (merges/imports/clock-skew interleave), so
+      // a branch's unique in-window commit can follow shared history on the same
+      // page — stopping early would drop a feature-branch-only committer. The
+      // date-window stop below bounds each walk to the 90-day window; distinct
+      // authors are deduped by the byKey map, so re-seeing shared commits is a
+      // harmless no-op.
+      const walkRef = async (include: string | undefined) => {
+        let page = 1
+        while (page <= HARD_PAGE_CEILING) {
+          const res = await bitbucketClient.repositories.listCommits({
+            repo_slug: params.repo_slug,
+            workspace: params.workspace,
+            page: String(page),
+            pagelen: 100,
+            ...(include ? { include } : {}),
+          } as Parameters<typeof bitbucketClient.repositories.listCommits>[0])
+          const data = res.data as { values?: unknown[]; next?: string }
+          const commits = data?.values ?? []
+          if (commits.length === 0) break
+          // Bitbucket has no server-side date filter and its commit list isn't
+          // strictly date-ordered (merges/imports/clock-skew interleave). Stop
+          // only after a FULL page with NO in-window commit — a single old commit
+          // on an otherwise in-window page must not truncate the walk and drop
+          // later in-window authors.
+          let sawInWindow = false
+          for (const commit of commits) {
+            const record = commit as Record<string, unknown>
+            const dateStr = record['date'] as string | undefined
+            if (dateStr && new Date(dateStr).getTime() < sinceMs) {
+              continue
+            }
+            sawInWindow = true
+            const author = record['author'] as
+              | { raw?: string; user?: { account_id?: string } }
+              | undefined
+            if (!author?.raw) continue
+            const match = author.raw.match(/^(.+?)\s*<([^>]+)>/)
+            if (!match) continue
+            const [, name, email] = match
+            if (!email) continue
+            const externalId = author.user?.account_id ?? null
+            const date = dateStr ?? params.since
+            const key = externalId ?? email.toLowerCase()
+            const prev = byKey.get(key)
+            if (
+              !prev ||
+              new Date(date).getTime() > new Date(prev.date).getTime()
+            ) {
+              byKey.set(key, {
+                email: email.toLowerCase(),
+                name: name!.trim() || null,
+                date,
+                externalId,
+                isBot: false,
+              })
+            }
           }
-          sawInWindow = true
-          const author = record['author'] as
-            | { raw?: string; user?: { account_id?: string } }
-            | undefined
-          if (!author?.raw) continue
-          const match = author.raw.match(/^(.+?)\s*<([^>]+)>/)
-          if (!match) continue
-          const [, name, email] = match
-          if (!email) continue
-          const externalId = author.user?.account_id ?? null
-          const date = dateStr ?? params.since
-          const key = externalId ?? email.toLowerCase()
-          const prev = byKey.get(key)
-          if (
-            !prev ||
-            new Date(date).getTime() > new Date(prev.date).getTime()
-          ) {
-            byKey.set(key, {
-              email: email.toLowerCase(),
-              name: name!.trim() || null,
-              date,
-              externalId,
-              isBot: false,
-            })
-          }
+          // Whole page was older than the window → we've walked past it, stop.
+          if (!sawInWindow) break
+          if (!data?.next) break
+          page++
         }
-        // Whole page was older than the window → we've walked past it, stop.
-        if (!sawInWindow) break
-        if (!data?.next) break
-        page++
+      }
+
+      // 1) Main branch — the bulk of history.
+      await walkRef(undefined)
+
+      // 2) Other branches, most-recently-active first (Bitbucket sorts by
+      //    -target.date). Page through them until one predates the window (all
+      //    later ones are older too — stop) or the cap is hit, so stale branches
+      //    aren't even walked. A committer whose only recent commits are on a
+      //    feature/release branch is still counted (revenue). Any failure falls
+      //    back to the main-branch authors already gathered — no regression.
+      try {
+        const branches: string[] = []
+        let bpage = 1
+        let bdone = false
+        while (!bdone && branches.length < MAX_ACTIVE_BRANCHES_SCAN) {
+          const branchRes = await bitbucketClient.refs.listBranches({
+            repo_slug: params.repo_slug,
+            workspace: params.workspace,
+            pagelen: 100,
+            page: String(bpage),
+            sort: '-target.date',
+          } as Parameters<typeof bitbucketClient.refs.listBranches>[0])
+          const vals = (branchRes.data.values ?? []) as {
+            name?: string
+            target?: { date?: string }
+          }[]
+          if (vals.length === 0) break
+          for (const b of vals) {
+            const d = b.target?.date
+            if (!d || new Date(d).getTime() < sinceMs) {
+              bdone = true // sorted -target.date → everything after is older too
+              break
+            }
+            if (b.name) branches.push(b.name)
+            if (branches.length >= MAX_ACTIVE_BRANCHES_SCAN) break
+          }
+          if (!(branchRes.data as { next?: string }).next) break
+          bpage++
+        }
+        if (branches.length >= MAX_ACTIVE_BRANCHES_SCAN) {
+          console.warn(
+            `[Bitbucket] active-branch scan hit cap (${MAX_ACTIVE_BRANCHES_SCAN}) for ${params.workspace}/${params.repo_slug}; some branches skipped`
+          )
+        }
+        for (const branch of branches) {
+          await walkRef(branch)
+        }
+      } catch (err) {
+        console.warn(
+          `[Bitbucket] all-branch author scan failed for ${params.workspace}/${params.repo_slug}; using main-branch count`,
+          err instanceof Error ? err.message : String(err)
+        )
       }
       return [...byKey.values()]
     },
@@ -619,7 +685,6 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
         { name: string; email: string; accountId: string | null }
       >()
       let page = 1
-      // eslint-disable-next-line no-constant-condition
       while (page <= MAX_PAGES) {
         const res = await bitbucketClient.repositories.listCommits({
           repo_slug: params.repo_slug,

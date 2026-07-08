@@ -7,6 +7,7 @@ import {
   ReferenceType,
   ScmRepoInfo,
 } from '..'
+import { MAX_ACTIVE_BRANCHES_SCAN } from '../constants'
 import {
   InvalidRepoUrlError,
   InvalidUrlPatternError,
@@ -400,20 +401,15 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       const defaultBranch = repository.defaultBranch?.replace('refs/heads/', '')
       const byEmail = new Map<string, RecentCommitAuthor>()
       const PAGE = 100
-      let skip = 0
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const page = await git.getCommits(
-          repo,
-          {
-            fromDate: since,
-            itemVersion: defaultBranch ? { version: defaultBranch } : undefined,
-            $top: PAGE,
-            $skip: skip,
-          },
-          projectName
-        )
-        if (!page || page.length === 0) break
+
+      // Accumulate distinct authors (keyed by lowercased email), keeping the most
+      // recent commit date. We do NOT early-stop on an already-seen commit: ADO
+      // returns commits newest-first by date, not strictly topologically, so a
+      // branch's unique in-window commit can sort after shared/merged history —
+      // stopping early would drop a feature-branch-only committer. `fromDate`
+      // bounds every walk to the window; the active-branch cap + per-repo timeout
+      // bound the cost of re-walking shared in-window history per branch.
+      const accumulate = (page: Awaited<ReturnType<typeof git.getCommits>>) => {
         for (const c of page) {
           const email = c.author?.email
           if (!email) continue
@@ -435,8 +431,70 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
             })
           }
         }
-        if (page.length < PAGE) break
-        skip += PAGE
+      }
+
+      const walk = async (branch: string | undefined) => {
+        let skip = 0
+        let hasMore = true
+        while (hasMore) {
+          const page = await git.getCommits(
+            repo,
+            {
+              fromDate: since,
+              itemVersion: branch ? { version: branch } : undefined,
+              $top: PAGE,
+              $skip: skip,
+            },
+            projectName
+          )
+          const count = page?.length ?? 0
+          if (count > 0) {
+            accumulate(page)
+          }
+          hasMore = count === PAGE
+          skip += PAGE
+        }
+      }
+
+      // 1) Default branch — the bulk of history.
+      await walk(defaultBranch)
+
+      // 2) Every OTHER branch active within the window, most-recently-committed
+      //    first. git.getBranches is UNSORTED, so we sort by tip date and keep
+      //    only branches whose tip is inside the window before applying the cap —
+      //    otherwise the cap could drop the active branches and keep stale ones.
+      //    A committer whose only recent commits are on a feature/release branch
+      //    is still counted. Any failure falls back to the default-branch authors.
+      try {
+        const sinceMs = new Date(since).getTime()
+        const branches = await git.getBranches(repo, projectName)
+        const active = (branches ?? [])
+          .filter(
+            (b) =>
+              !!b.name &&
+              b.name !== defaultBranch &&
+              !!b.commit?.committer?.date &&
+              b.commit.committer.date.getTime() >= sinceMs
+          )
+          .sort(
+            (a, b) =>
+              (b.commit?.committer?.date?.getTime() ?? 0) -
+              (a.commit?.committer?.date?.getTime() ?? 0)
+          )
+          .map((b) => b.name as string)
+        if (active.length > MAX_ACTIVE_BRANCHES_SCAN) {
+          console.warn(
+            `[ADO] active-branch scan hit cap (${MAX_ACTIVE_BRANCHES_SCAN}) for ${repoUrl}; some branches skipped`
+          )
+        }
+        for (const branch of active.slice(0, MAX_ACTIVE_BRANCHES_SCAN)) {
+          await walk(branch)
+        }
+      } catch (err) {
+        console.warn(
+          `[ADO] all-branch author scan failed for ${repoUrl}; using default-branch count`,
+          err instanceof Error ? err.message : String(err)
+        )
       }
       return [...byEmail.values()]
     },

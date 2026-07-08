@@ -1,7 +1,7 @@
 import { OctokitOptions } from '@octokit/core'
 import { RequestError } from '@octokit/request-error'
 
-import { MAX_BRANCHES_FETCH } from '../constants'
+import { MAX_ACTIVE_BRANCHES_SCAN, MAX_BRANCHES_FETCH } from '../constants'
 import { RefNotFoundError } from '../errors'
 import {
   ChangedLinesData,
@@ -145,6 +145,40 @@ async function executeBatchGraphQL<TKey, TResult>(
   })
 
   return result
+}
+
+// Most-recently-pushed branches with their tip commit date, newest first, so the
+// caller can take only those active within the window and stop early. Works on
+// GitHub Enterprise Server (GraphQL v4). `... on Commit` because a ref target can
+// also be a tag/tree.
+const RECENT_BRANCHES_QUERY = `
+  query ($owner: String!, $repo: String!, $cursor: String) {
+    repository(owner: $owner, name: $repo) {
+      defaultBranchRef { name }
+      refs(
+        refPrefix: "refs/heads/"
+        first: 100
+        after: $cursor
+        orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+      ) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          name
+          target { ... on Commit { committedDate } }
+        }
+      }
+    }
+  }
+`
+
+type RecentBranchesResponse = {
+  repository: {
+    defaultBranchRef: { name: string } | null
+    refs: {
+      pageInfo: { hasNextPage: boolean; endCursor: string | null }
+      nodes: { name: string; target: { committedDate?: string } | null }[]
+    } | null
+  } | null
 }
 
 export function getGithubSdk(
@@ -783,22 +817,28 @@ export function getGithubSdk(
       repo: string
       since: string
     }): Promise<RecentCommitAuthor[]> {
+      const { owner, repo, since } = params
       const byAuthor = new Map<string, RecentCommitAuthor>()
-      for await (const { data } of octokit.paginate.iterator(
-        octokit.rest.repos.listCommits,
-        {
-          owner: params.owner,
-          repo: params.repo,
-          since: params.since,
-          per_page: 100,
-        }
-      )) {
+
+      // Accumulate distinct authors, deduped by external id (else lowercased
+      // email), keeping the most recent commit date. Re-seeing a commit across
+      // branches is a harmless no-op on the map. We deliberately do NOT early-stop
+      // a branch walk on the first already-seen commit: listCommits is ordered by
+      // date, not strictly topologically, so shared/merged history interleaves
+      // with a branch's unique commits — stopping early would drop a
+      // feature-branch-only committer (e.g. after `main` is merged into a
+      // long-lived branch). The `since` filter already bounds every walk to the
+      // 90-day window, and the active-branch cap + per-repo timeout bound the
+      // (bounded) cost of re-walking shared in-window history per branch.
+      const accumulate = (
+        data: Awaited<ReturnType<typeof octokit.rest.repos.listCommits>>['data']
+      ): void => {
         for (const c of data) {
           const email = c.commit?.author?.email
           if (!email) continue
           const externalId = c.author?.id != null ? String(c.author.id) : null
           const date =
-            c.commit?.committer?.date ?? c.commit?.author?.date ?? params.since
+            c.commit?.committer?.date ?? c.commit?.author?.date ?? since
           const key = externalId ?? email.toLowerCase()
           const prev = byAuthor.get(key)
           if (
@@ -815,6 +855,80 @@ export function getGithubSdk(
           }
         }
       }
+
+      const walkBranch = async (branch: string | undefined) => {
+        for await (const { data } of octokit.paginate.iterator(
+          octokit.rest.repos.listCommits,
+          {
+            owner,
+            repo,
+            since,
+            per_page: 100,
+            ...(branch ? { sha: branch } : {}),
+          }
+        )) {
+          accumulate(data)
+        }
+      }
+
+      // 1) Default branch — the bulk of history.
+      await walkBranch(undefined)
+
+      // 2) Every OTHER branch with activity in the window. Discover the most-
+      //    recently-pushed branches via GraphQL (ordered by commit date desc, so
+      //    we stop as soon as one predates `since` — a repo with hundreds of stale
+      //    branches costs ~1 page), then walk each active one for its unique
+      //    commits. Counting across all branches: a committer whose only recent
+      //    commits are on a feature/release branch is still counted (each such
+      //    committer is revenue). ANY GraphQL failure falls back to the default-
+      //    branch authors already gathered — never a regression.
+      try {
+        const sinceMs = new Date(since).getTime()
+        const activeBranches: string[] = []
+        let cursor: string | null = null
+        let defaultBranch: string | null = null
+        let done = false
+        while (!done && activeBranches.length < MAX_ACTIVE_BRANCHES_SCAN) {
+          const resp: RecentBranchesResponse = await octokit.graphql(
+            RECENT_BRANCHES_QUERY,
+            { owner, repo, cursor }
+          )
+          defaultBranch =
+            defaultBranch ?? resp.repository?.defaultBranchRef?.name ?? null
+          const refs = resp.repository?.refs
+          if (!refs) break
+          for (const node of refs.nodes) {
+            const committedDate = node.target?.committedDate
+            if (committedDate && new Date(committedDate).getTime() < sinceMs) {
+              done = true // ordered desc → everything after is older too
+              break
+            }
+            // Missing date (target not a Commit, or a transient null): skip this
+            // ref only — do NOT terminate discovery of the remaining branches.
+            if (!committedDate) continue
+            if (node.name !== defaultBranch) {
+              activeBranches.push(node.name)
+            }
+            if (activeBranches.length >= MAX_ACTIVE_BRANCHES_SCAN) break
+          }
+          if (!refs.pageInfo.hasNextPage) break
+          cursor = refs.pageInfo.endCursor
+        }
+        if (activeBranches.length >= MAX_ACTIVE_BRANCHES_SCAN) {
+          console.warn(
+            `[GitHub] active-branch scan hit cap (${MAX_ACTIVE_BRANCHES_SCAN}) for ${owner}/${repo}; some branches skipped`
+          )
+        }
+        for (const branch of activeBranches) {
+          await walkBranch(branch)
+        }
+      } catch (err) {
+        console.warn(
+          `[GitHub] all-branch author scan failed for ${owner}/${repo}; using default-branch count`,
+          err instanceof Error ? err.message : String(err)
+        )
+      }
+
       return [...byAuthor.values()]
     },
     async getRateLimitStatus() {
@@ -1171,24 +1285,6 @@ export function getGithubSdk(
       return data
     },
 
-    async getLatestRepoCommitByAuthor(params: {
-      owner: string
-      repo: string
-      author: string
-    }) {
-      try {
-        const { data } = await octokit.rest.repos.listCommits({
-          owner: params.owner,
-          repo: params.repo,
-          author: params.author,
-          per_page: 1,
-        })
-        return data[0] ?? null
-      } catch {
-        return null
-      }
-    },
-
     async getAuthenticatedUser(): Promise<{
       id: number
       login: string
@@ -1213,58 +1309,6 @@ export function getGithubSdk(
         return data
       } catch {
         return []
-      }
-    },
-
-    async getEmailFromPublicEvents(params: {
-      username: string
-    }): Promise<string | null> {
-      try {
-        const { data: events } =
-          await octokit.rest.activity.listPublicEventsForUser({
-            username: params.username,
-            per_page: 30,
-          })
-        let fallback: string | null = null
-        for (const event of events) {
-          if (event.type !== 'PushEvent') continue
-          const payload = event.payload as {
-            commits?: { author?: { email?: string } }[]
-          }
-          if (!payload.commits) continue
-          for (const commit of payload.commits) {
-            const email = commit.author?.email
-            if (!email) continue
-            if (!email.includes('noreply')) return email
-            if (!fallback) fallback = email
-          }
-        }
-        return fallback
-      } catch {
-        return null
-      }
-    },
-
-    async getEmailFromCommitSearch(params: {
-      username: string
-    }): Promise<string | null> {
-      try {
-        const { data } = await octokit.rest.search.commits({
-          q: `author:${params.username}`,
-          sort: 'author-date',
-          order: 'desc',
-          per_page: 5,
-        })
-        let fallback: string | null = null
-        for (const item of data.items) {
-          const email = item.commit?.author?.email
-          if (!email) continue
-          if (!email.includes('noreply')) return email
-          if (!fallback) fallback = email
-        }
-        return fallback
-      } catch {
-        return null
       }
     },
   }

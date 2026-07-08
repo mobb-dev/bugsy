@@ -941,6 +941,9 @@ export async function getGitlabRecentCommits({
 // author count — the contributor sync's exact 90-day count. GitLab commits carry
 // no user id, so authors are keyed by email; bot detection is left to the
 // caller's heuristics (isBot flag is always false here).
+// `all: true` counts commits across ALL branches (GitLab then ignores ref_name),
+// not just the default branch — a contributor whose only recent commits are on a
+// feature/release branch must still be counted (each such committer is revenue).
 export async function getGitlabRecentCommitAuthors({
   repoUrl,
   accessToken,
@@ -959,6 +962,7 @@ export async function getGitlabRecentCommitAuthors({
   while (hasMore) {
     const response = await api.Commits.all(projectPath, {
       since,
+      all: true,
       perPage,
       page,
       showExpanded: true,
@@ -1326,24 +1330,6 @@ export async function listGitlabProjectMembers({
   }
 
   return projectMembers
-}
-
-export async function getGitlabUserPublicEmail({
-  repoUrl,
-  accessToken,
-  userId,
-}: {
-  repoUrl: string
-  accessToken: string
-  userId: number
-}): Promise<string | null> {
-  try {
-    const api = getGitBeaker({ url: repoUrl, gitlabAuthToken: accessToken })
-    const user = await api.Users.show(userId)
-    return (user as Record<string, unknown>)['public_email'] as string | null
-  } catch {
-    return null
-  }
 }
 
 type GitlabRepoContributor = {

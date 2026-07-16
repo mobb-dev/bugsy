@@ -12,6 +12,7 @@ import {
   createSessionConfigStore,
 } from '../../utils/ConfigStoreService'
 import { withTimeout } from '../../utils/with-timeout'
+import { ConfigstoreUploadLedger } from '../analysis/context_upload_ledger'
 import { runQuarantineCheckIfNeeded } from '../analysis/skill_quarantine'
 import { DaemonPidFile } from './daemon_pid_file'
 import {
@@ -24,6 +25,7 @@ import {
   CONTEXT_SCAN_INTERVAL_MS,
   DAEMON_CHUNK_SIZE,
   DAEMON_POLL_INTERVAL_MS,
+  DAEMON_SHUTDOWN_DRAIN_MS,
   DAEMON_TTL_MS,
   GQL_AUTH_TIMEOUT_MS,
 } from './data_collector_constants'
@@ -65,9 +67,25 @@ export async function startDaemon(): Promise<void> {
 
   const pidFile = await acquirePidFile()
 
+  // Persistent, content-addressed dedup/backoff/breaker state for context and
+  // skill uploads. Survives daemon restarts so we don't re-upload (and re-fail)
+  // the entire corpus every 30-min TTL cycle.
+  const uploadLedger = new ConfigstoreUploadLedger()
+  // In-flight fire-and-forget context uploads; drained on shutdown so we don't
+  // abort them (and log spurious "aborted" errors) by exiting mid-upload.
+  const inFlightContextUploads = new Set<Promise<void>>()
+
   async function gracefulExit(code: number, reason: string): Promise<never> {
     hookLog.info({ data: { code } }, `Daemon exiting: ${reason}`)
     pidFile.remove()
+    // Let in-flight context uploads finish (bounded) instead of aborting them.
+    if (inFlightContextUploads.size > 0) {
+      await Promise.race([
+        Promise.allSettled([...inFlightContextUploads]),
+        sleep(DAEMON_SHUTDOWN_DRAIN_MS),
+      ])
+    }
+    uploadLedger.flush()
     await flushDdLogs()
     process.exit(code)
   }
@@ -192,17 +210,37 @@ export async function startDaemon(): Promise<void> {
         }
       }
 
-      // Scan context files independently of transcript changes, every 5 s.
-      // mtime tracking inside scanContextFiles makes repeated calls cheap.
+      // Scan context files independently of transcript changes, on the slow
+      // CONTEXT_SCAN_INTERVAL_MS cadence. mtime tracking + the persistent upload
+      // ledger make repeated scans cheap (unchanged content is never re-uploaded).
       const now = Date.now()
-      if (now - lastContextScanMs >= CONTEXT_SCAN_INTERVAL_MS) {
+      if (
+        !shuttingDown &&
+        now - lastContextScanMs >= CONTEXT_SCAN_INTERVAL_MS
+      ) {
         lastContextScanMs = now
+        // Context files aren't time-sensitive: scan every active session on the
+        // slow cadence. Uploads are sequential + content-deduped + pooled, so a
+        // tick is mostly no-ops and never bursts the network.
         for (const { sessionId, cwd } of sessionCwdCache.values()) {
           const log = createScopedHookLog(cwd, { daemonMode: true })
-          uploadContextFilesIfNeeded(sessionId, cwd, gqlClient, log).catch(
-            (err) => log.warn({ err }, 'Context file scan failed')
+          // Track the promise so gracefulExit can drain it instead of aborting
+          // the upload by exiting the process mid-flight.
+          const p = uploadContextFilesIfNeeded(
+            sessionId,
+            cwd,
+            gqlClient,
+            log,
+            uploadLedger
           )
+            .catch((err) => log.warn({ err }, 'Context file scan failed'))
+            .finally(() => inFlightContextUploads.delete(p))
+          inFlightContextUploads.add(p)
         }
+        // Persist any ledger mutations accumulated so far (at most one disk
+        // write per tick). This tick's uploads are fire-and-forget, so their
+        // success/failure mutations land on a later tick's flush or on shutdown.
+        uploadLedger.flush()
       }
 
       // Cleanup stale session files (runs at most once per day)

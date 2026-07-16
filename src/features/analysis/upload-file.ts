@@ -3,7 +3,7 @@ import { Agent } from 'node:http'
 import Debug from 'debug'
 import fetch, { File, fileFrom, FormData } from 'node-fetch'
 
-import { getProxyAgent } from '../../utils/proxy'
+import { getUploadAgent } from '../../utils/proxy'
 
 const debug = Debug('mobbdev:upload-file')
 
@@ -85,6 +85,29 @@ export class S3UploadError extends Error {
   }
 }
 
+/**
+ * S3 error codes that indicate a real, actionable misconfiguration (auth /
+ * permission / policy) rather than a transient blip. These should always surface
+ * at `error` level and be exempt from failure log-once suppression, so a broken
+ * credential is never hidden behind the 30-min per-md5 log window.
+ */
+const ACTIONABLE_S3_CODES = new Set([
+  'AccessDenied',
+  'ExpiredToken',
+  'InvalidAccessKeyId',
+  'SignatureDoesNotMatch',
+  'TokenRefreshRequired',
+])
+
+/** True for an S3 rejection a human must act on, vs a transient 5xx/SlowDown. */
+export function isActionableS3Error(err: unknown): boolean {
+  return (
+    err instanceof S3UploadError &&
+    err.s3Code !== undefined &&
+    ACTIONABLE_S3_CODES.has(err.s3Code)
+  )
+}
+
 /** Extract `<Code>`/`<Message>` from S3's XML error document (best-effort). */
 function parseS3ErrorBody(body: string): {
   code?: string
@@ -161,7 +184,7 @@ export async function uploadFile({
       )
     )
   }
-  const agent = getProxyAgent(url)
+  const agent = getUploadAgent(url)
   // Bound every request: callers that don't pass a signal still get a timeout
   // (scaled to payload size) so a stalled or silently-reset socket can't hang
   // the upload indefinitely.

@@ -10708,6 +10708,276 @@ export type Analytics_Fix_Generation_Type_Updates = {
   where: Analytics_Fix_Generation_Type_Bool_Exp;
 };
 
+/** Precomputed per-org ROI dashboard aggregates (MOBB-3700). Internal: read only by the organization_*_summary computed-field functions, which fall back to the live _v2 functions on a miss. */
+export type Analytics_Organization_Roi_Summary = {
+  __typename?: 'analytics_organization_roi_summary';
+  computed_at: Scalars['timestamptz']['output'];
+  count: Scalars['bigint']['output'];
+  key: Scalars['String']['output'];
+  metric: Scalars['String']['output'];
+  min_confidence: Scalars['Int']['output'];
+  organization_id: Scalars['uuid']['output'];
+  variant: Scalars['String']['output'];
+};
+
+/** aggregated selection of "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Aggregate = {
+  __typename?: 'analytics_organization_roi_summary_aggregate';
+  aggregate?: Maybe<Analytics_Organization_Roi_Summary_Aggregate_Fields>;
+  nodes: Array<Analytics_Organization_Roi_Summary>;
+};
+
+/** aggregate fields of "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Aggregate_Fields = {
+  __typename?: 'analytics_organization_roi_summary_aggregate_fields';
+  avg?: Maybe<Analytics_Organization_Roi_Summary_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Analytics_Organization_Roi_Summary_Max_Fields>;
+  min?: Maybe<Analytics_Organization_Roi_Summary_Min_Fields>;
+  stddev?: Maybe<Analytics_Organization_Roi_Summary_Stddev_Fields>;
+  stddev_pop?: Maybe<Analytics_Organization_Roi_Summary_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Analytics_Organization_Roi_Summary_Stddev_Samp_Fields>;
+  sum?: Maybe<Analytics_Organization_Roi_Summary_Sum_Fields>;
+  var_pop?: Maybe<Analytics_Organization_Roi_Summary_Var_Pop_Fields>;
+  var_samp?: Maybe<Analytics_Organization_Roi_Summary_Var_Samp_Fields>;
+  variance?: Maybe<Analytics_Organization_Roi_Summary_Variance_Fields>;
+};
+
+
+/** aggregate fields of "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Analytics_Organization_Roi_Summary_Avg_Fields = {
+  __typename?: 'analytics_organization_roi_summary_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "analytics.organization_roi_summary". All fields are combined with a logical 'AND'. */
+export type Analytics_Organization_Roi_Summary_Bool_Exp = {
+  _and?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Bool_Exp>>;
+  _not?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+  _or?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Bool_Exp>>;
+  computed_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  key?: InputMaybe<String_Comparison_Exp>;
+  metric?: InputMaybe<String_Comparison_Exp>;
+  min_confidence?: InputMaybe<Int_Comparison_Exp>;
+  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  variant?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "analytics.organization_roi_summary" */
+export enum Analytics_Organization_Roi_Summary_Constraint {
+  /** unique or primary key constraint on columns "key", "variant", "organization_id", "min_confidence", "metric" */
+  OrganizationRoiSummaryPkey = 'organization_roi_summary_pkey'
+}
+
+/** input type for incrementing numeric columns in table "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Inc_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Insert_Input = {
+  computed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  metric?: InputMaybe<Scalars['String']['input']>;
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  variant?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Analytics_Organization_Roi_Summary_Max_Fields = {
+  __typename?: 'analytics_organization_roi_summary_max_fields';
+  computed_at?: Maybe<Scalars['timestamptz']['output']>;
+  count?: Maybe<Scalars['bigint']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  metric?: Maybe<Scalars['String']['output']>;
+  min_confidence?: Maybe<Scalars['Int']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  variant?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Analytics_Organization_Roi_Summary_Min_Fields = {
+  __typename?: 'analytics_organization_roi_summary_min_fields';
+  computed_at?: Maybe<Scalars['timestamptz']['output']>;
+  count?: Maybe<Scalars['bigint']['output']>;
+  key?: Maybe<Scalars['String']['output']>;
+  metric?: Maybe<Scalars['String']['output']>;
+  min_confidence?: Maybe<Scalars['Int']['output']>;
+  organization_id?: Maybe<Scalars['uuid']['output']>;
+  variant?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Mutation_Response = {
+  __typename?: 'analytics_organization_roi_summary_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Analytics_Organization_Roi_Summary>;
+};
+
+/** on_conflict condition type for table "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_On_Conflict = {
+  constraint: Analytics_Organization_Roi_Summary_Constraint;
+  update_columns?: Array<Analytics_Organization_Roi_Summary_Update_Column>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "analytics.organization_roi_summary". */
+export type Analytics_Organization_Roi_Summary_Order_By = {
+  computed_at?: InputMaybe<Order_By>;
+  count?: InputMaybe<Order_By>;
+  key?: InputMaybe<Order_By>;
+  metric?: InputMaybe<Order_By>;
+  min_confidence?: InputMaybe<Order_By>;
+  organization_id?: InputMaybe<Order_By>;
+  variant?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: analytics.organization_roi_summary */
+export type Analytics_Organization_Roi_Summary_Pk_Columns_Input = {
+  key: Scalars['String']['input'];
+  metric: Scalars['String']['input'];
+  min_confidence: Scalars['Int']['input'];
+  organization_id: Scalars['uuid']['input'];
+  variant: Scalars['String']['input'];
+};
+
+/** select columns of table "analytics.organization_roi_summary" */
+export enum Analytics_Organization_Roi_Summary_Select_Column {
+  /** column name */
+  ComputedAt = 'computed_at',
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Key = 'key',
+  /** column name */
+  Metric = 'metric',
+  /** column name */
+  MinConfidence = 'min_confidence',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  Variant = 'variant'
+}
+
+/** input type for updating data in table "analytics.organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Set_Input = {
+  computed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  metric?: InputMaybe<Scalars['String']['input']>;
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  variant?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Analytics_Organization_Roi_Summary_Stddev_Fields = {
+  __typename?: 'analytics_organization_roi_summary_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Analytics_Organization_Roi_Summary_Stddev_Pop_Fields = {
+  __typename?: 'analytics_organization_roi_summary_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Analytics_Organization_Roi_Summary_Stddev_Samp_Fields = {
+  __typename?: 'analytics_organization_roi_summary_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "analytics_organization_roi_summary" */
+export type Analytics_Organization_Roi_Summary_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Analytics_Organization_Roi_Summary_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Analytics_Organization_Roi_Summary_Stream_Cursor_Value_Input = {
+  computed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
+  metric?: InputMaybe<Scalars['String']['input']>;
+  min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  variant?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Analytics_Organization_Roi_Summary_Sum_Fields = {
+  __typename?: 'analytics_organization_roi_summary_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  min_confidence?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "analytics.organization_roi_summary" */
+export enum Analytics_Organization_Roi_Summary_Update_Column {
+  /** column name */
+  ComputedAt = 'computed_at',
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Key = 'key',
+  /** column name */
+  Metric = 'metric',
+  /** column name */
+  MinConfidence = 'min_confidence',
+  /** column name */
+  OrganizationId = 'organization_id',
+  /** column name */
+  Variant = 'variant'
+}
+
+export type Analytics_Organization_Roi_Summary_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Analytics_Organization_Roi_Summary_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Analytics_Organization_Roi_Summary_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Analytics_Organization_Roi_Summary_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Analytics_Organization_Roi_Summary_Var_Pop_Fields = {
+  __typename?: 'analytics_organization_roi_summary_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Analytics_Organization_Roi_Summary_Var_Samp_Fields = {
+  __typename?: 'analytics_organization_roi_summary_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Analytics_Organization_Roi_Summary_Variance_Fields = {
+  __typename?: 'analytics_organization_roi_summary_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+  min_confidence?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "analytics.pr_conversion_stats" */
 export type Analytics_Pr_Conversion_Stats = {
   __typename?: 'analytics_pr_conversion_stats';
@@ -11434,6 +11704,10 @@ export type Analytics_Pr_Conversion_Stats_Variance_Fields = {
   createdPrsPrevious?: Maybe<Scalars['Float']['output']>;
   mergedPrsCurrent?: Maybe<Scalars['Float']['output']>;
   mergedPrsPrevious?: Maybe<Scalars['Float']['output']>;
+};
+
+export type Analytics_Refresh_Organization_Roi_Summary_Args = {
+  p_org_id?: InputMaybe<Scalars['uuid']['input']>;
 };
 
 /** columns and relationships of "analytics.stats_report" */
@@ -22133,6 +22407,8 @@ export type Mutation_Root = {
   __typename?: 'mutation_root';
   addUserToOrganization?: Maybe<AddUserToOrganizationResponse>;
   addUsersToProject?: Maybe<AddUsersToProjectResponse>;
+  /** execute VOLATILE function "analytics.refresh_organization_roi_summary" which returns "analytics.organization_roi_summary" */
+  analytics_refresh_organization_roi_summary: Array<Analytics_Organization_Roi_Summary>;
   /**
    * Process a git commit and analyze it for AI-generated code.
    * User must have access to both the repository and organization.
@@ -22261,6 +22537,10 @@ export type Mutation_Root = {
   delete_analytics_fix_generation_type?: Maybe<Analytics_Fix_Generation_Type_Mutation_Response>;
   /** delete single row from the table: "analytics.fix_generation_type" */
   delete_analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** delete data from the table: "analytics.organization_roi_summary" */
+  delete_analytics_organization_roi_summary?: Maybe<Analytics_Organization_Roi_Summary_Mutation_Response>;
+  /** delete single row from the table: "analytics.organization_roi_summary" */
+  delete_analytics_organization_roi_summary_by_pk?: Maybe<Analytics_Organization_Roi_Summary>;
   /** delete data from the table: "analytics.pr_conversion_stats" */
   delete_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
   /** delete data from the table: "analytics.pr_conversion_stats_activity_trends" */
@@ -22823,6 +23103,10 @@ export type Mutation_Root = {
   insert_analytics_fix_generation_type?: Maybe<Analytics_Fix_Generation_Type_Mutation_Response>;
   /** insert a single row into the table: "analytics.fix_generation_type" */
   insert_analytics_fix_generation_type_one?: Maybe<Analytics_Fix_Generation_Type>;
+  /** insert data into the table: "analytics.organization_roi_summary" */
+  insert_analytics_organization_roi_summary?: Maybe<Analytics_Organization_Roi_Summary_Mutation_Response>;
+  /** insert a single row into the table: "analytics.organization_roi_summary" */
+  insert_analytics_organization_roi_summary_one?: Maybe<Analytics_Organization_Roi_Summary>;
   /** insert data into the table: "analytics.pr_conversion_stats" */
   insert_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
   /** insert data into the table: "analytics.pr_conversion_stats_activity_trends" */
@@ -23464,6 +23748,12 @@ export type Mutation_Root = {
   update_analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
   /** update multiples rows of table: "analytics.fix_generation_type" */
   update_analytics_fix_generation_type_many?: Maybe<Array<Maybe<Analytics_Fix_Generation_Type_Mutation_Response>>>;
+  /** update data of the table: "analytics.organization_roi_summary" */
+  update_analytics_organization_roi_summary?: Maybe<Analytics_Organization_Roi_Summary_Mutation_Response>;
+  /** update single row of the table: "analytics.organization_roi_summary" */
+  update_analytics_organization_roi_summary_by_pk?: Maybe<Analytics_Organization_Roi_Summary>;
+  /** update multiples rows of table: "analytics.organization_roi_summary" */
+  update_analytics_organization_roi_summary_many?: Maybe<Array<Maybe<Analytics_Organization_Roi_Summary_Mutation_Response>>>;
   /** update data of the table: "analytics.pr_conversion_stats" */
   update_analytics_pr_conversion_stats?: Maybe<Analytics_Pr_Conversion_Stats_Mutation_Response>;
   /** update data of the table: "analytics.pr_conversion_stats_activity_trends" */
@@ -24163,6 +24453,17 @@ export type Mutation_RootAddUsersToProjectArgs = {
 
 
 /** mutation root */
+export type Mutation_RootAnalytics_Refresh_Organization_Roi_SummaryArgs = {
+  args: Analytics_Refresh_Organization_Roi_Summary_Args;
+  distinct_on?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Order_By>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+
+/** mutation root */
 export type Mutation_RootAnalyzeCommitForAiBlameArgs = {
   commitAuthor?: InputMaybe<GitIdentityInput>;
   commitCoAuthors?: InputMaybe<Array<GitIdentityInput>>;
@@ -24588,6 +24889,22 @@ export type Mutation_RootDelete_Analytics_Fix_Generation_TypeArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Analytics_Fix_Generation_Type_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Organization_Roi_SummaryArgs = {
+  where: Analytics_Organization_Roi_Summary_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Analytics_Organization_Roi_Summary_By_PkArgs = {
+  key: Scalars['String']['input'];
+  metric: Scalars['String']['input'];
+  min_confidence: Scalars['Int']['input'];
+  organization_id: Scalars['uuid']['input'];
+  variant: Scalars['String']['input'];
 };
 
 
@@ -26306,6 +26623,20 @@ export type Mutation_RootInsert_Analytics_Fix_Generation_TypeArgs = {
 export type Mutation_RootInsert_Analytics_Fix_Generation_Type_OneArgs = {
   object: Analytics_Fix_Generation_Type_Insert_Input;
   on_conflict?: InputMaybe<Analytics_Fix_Generation_Type_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Organization_Roi_SummaryArgs = {
+  objects: Array<Analytics_Organization_Roi_Summary_Insert_Input>;
+  on_conflict?: InputMaybe<Analytics_Organization_Roi_Summary_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Analytics_Organization_Roi_Summary_OneArgs = {
+  object: Analytics_Organization_Roi_Summary_Insert_Input;
+  on_conflict?: InputMaybe<Analytics_Organization_Roi_Summary_On_Conflict>;
 };
 
 
@@ -28660,6 +28991,28 @@ export type Mutation_RootUpdate_Analytics_Fix_Generation_Type_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Analytics_Fix_Generation_Type_ManyArgs = {
   updates: Array<Analytics_Fix_Generation_Type_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Organization_Roi_SummaryArgs = {
+  _inc?: InputMaybe<Analytics_Organization_Roi_Summary_Inc_Input>;
+  _set?: InputMaybe<Analytics_Organization_Roi_Summary_Set_Input>;
+  where: Analytics_Organization_Roi_Summary_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Organization_Roi_Summary_By_PkArgs = {
+  _inc?: InputMaybe<Analytics_Organization_Roi_Summary_Inc_Input>;
+  _set?: InputMaybe<Analytics_Organization_Roi_Summary_Set_Input>;
+  pk_columns: Analytics_Organization_Roi_Summary_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Analytics_Organization_Roi_Summary_ManyArgs = {
+  updates: Array<Analytics_Organization_Roi_Summary_Updates>;
 };
 
 
@@ -32110,7 +32463,7 @@ export type Organization = {
   adoptionTrendsTimeSeries: GetAdoptionTrendsTimeSeriesResponse;
   /** Per-org feature flag controlling whether NoFix issues are routed to consumers/agentic_remediation for a second remediation pass. Off by default; flipped per-organization during controlled rollout. */
   agenticRemediationEnabled: Scalars['Boolean']['output'];
-  /** A computed field, executes function "organization_aggregated_unexpired_vulnerabilities_v3" */
+  /** A computed field, executes function "organization_unexpired_state_summary" */
   aggregatedUnexpiredVulnerabilitiesState?: Maybe<Array<Aggregated_Issue_States_With_Normalized>>;
   /** A computed field, executes function "organization_aggregated_vulnerabilities_v2" */
   aggregatedVulnerabilitiesState?: Maybe<Array<Aggregated_Fix_State>>;
@@ -32166,7 +32519,7 @@ export type Organization = {
   issueTypeSettings: Array<Organization_Issue_Type_Settings>;
   /** An aggregate relationship */
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
-  /** A computed field, executes function "organization_count_vulnerability_issues_by_categories_v2" */
+  /** A computed field, executes function "organization_issues_by_categories_summary" */
   issuesByCategories?: Maybe<Array<View_Types_Aggregated_Categories>>;
   /** A computed field, executes function "organization_lines_of_code_stats" */
   linesOfCodeStats?: Maybe<Array<View_Types_Lines_Of_Code_Stats>>;
@@ -32227,7 +32580,7 @@ export type Organization = {
   repositoryMcpServersAndToolsCounts: GetRepositoryMcpServersAndToolsCountsResponse;
   repositoryModelStats: GetRepositoryModelStatsResponse;
   repositorySkillStats: GetRepositorySkillStatsResponse;
-  /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities_v2" */
+  /** A computed field, executes function "organization_resolved_severities_summary" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
   /** A computed field, executes function "organization_review_time_stats" */
   reviewTimeStats?: Maybe<Array<View_Types_Ai_Human_Days_Stats>>;
@@ -32240,7 +32593,7 @@ export type Organization = {
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
   scmConfigs_aggregate: Scm_Config_Aggregate;
-  /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities_v2" */
+  /** A computed field, executes function "organization_unresolved_severities_summary" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
 };
 
@@ -37483,6 +37836,12 @@ export type Query_Root = {
   analytics_fix_generation_type_aggregate: Analytics_Fix_Generation_Type_Aggregate;
   /** fetch data from the table: "analytics.fix_generation_type" using primary key columns */
   analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
+  /** fetch data from the table: "analytics.organization_roi_summary" */
+  analytics_organization_roi_summary: Array<Analytics_Organization_Roi_Summary>;
+  /** fetch aggregated fields from the table: "analytics.organization_roi_summary" */
+  analytics_organization_roi_summary_aggregate: Analytics_Organization_Roi_Summary_Aggregate;
+  /** fetch data from the table: "analytics.organization_roi_summary" using primary key columns */
+  analytics_organization_roi_summary_by_pk?: Maybe<Analytics_Organization_Roi_Summary>;
   /** fetch data from the table: "analytics.pr_conversion_stats" */
   analytics_pr_conversion_stats: Array<Analytics_Pr_Conversion_Stats>;
   /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" */
@@ -39064,6 +39423,33 @@ export type Query_RootAnalytics_Fix_Generation_Type_AggregateArgs = {
 
 export type Query_RootAnalytics_Fix_Generation_Type_By_PkArgs = {
   value: Scalars['String']['input'];
+};
+
+
+export type Query_RootAnalytics_Organization_Roi_SummaryArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Order_By>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Organization_Roi_Summary_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Order_By>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+
+export type Query_RootAnalytics_Organization_Roi_Summary_By_PkArgs = {
+  key: Scalars['String']['input'];
+  metric: Scalars['String']['input'];
+  min_confidence: Scalars['Int']['input'];
+  organization_id: Scalars['uuid']['input'];
+  variant: Scalars['String']['input'];
 };
 
 
@@ -47200,6 +47586,14 @@ export type Subscription_Root = {
   analytics_fix_generation_type_by_pk?: Maybe<Analytics_Fix_Generation_Type>;
   /** fetch data from the table in a streaming manner: "analytics.fix_generation_type" */
   analytics_fix_generation_type_stream: Array<Analytics_Fix_Generation_Type>;
+  /** fetch data from the table: "analytics.organization_roi_summary" */
+  analytics_organization_roi_summary: Array<Analytics_Organization_Roi_Summary>;
+  /** fetch aggregated fields from the table: "analytics.organization_roi_summary" */
+  analytics_organization_roi_summary_aggregate: Analytics_Organization_Roi_Summary_Aggregate;
+  /** fetch data from the table: "analytics.organization_roi_summary" using primary key columns */
+  analytics_organization_roi_summary_by_pk?: Maybe<Analytics_Organization_Roi_Summary>;
+  /** fetch data from the table in a streaming manner: "analytics.organization_roi_summary" */
+  analytics_organization_roi_summary_stream: Array<Analytics_Organization_Roi_Summary>;
   /** fetch data from the table: "analytics.pr_conversion_stats" */
   analytics_pr_conversion_stats: Array<Analytics_Pr_Conversion_Stats>;
   /** fetch data from the table: "analytics.pr_conversion_stats_activity_trends" */
@@ -49043,6 +49437,40 @@ export type Subscription_RootAnalytics_Fix_Generation_Type_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Analytics_Fix_Generation_Type_Stream_Cursor_Input>>;
   where?: InputMaybe<Analytics_Fix_Generation_Type_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Organization_Roi_SummaryArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Order_By>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Organization_Roi_Summary_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Analytics_Organization_Roi_Summary_Order_By>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
+};
+
+
+export type Subscription_RootAnalytics_Organization_Roi_Summary_By_PkArgs = {
+  key: Scalars['String']['input'];
+  metric: Scalars['String']['input'];
+  min_confidence: Scalars['Int']['input'];
+  organization_id: Scalars['uuid']['input'];
+  variant: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAnalytics_Organization_Roi_Summary_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Analytics_Organization_Roi_Summary_Stream_Cursor_Input>>;
+  where?: InputMaybe<Analytics_Organization_Roi_Summary_Bool_Exp>;
 };
 
 

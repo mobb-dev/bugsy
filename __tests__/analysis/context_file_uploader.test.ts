@@ -6,6 +6,7 @@ import type {
 } from '../../src/features/analysis/context_file_processor'
 import type { SkillGroup } from '../../src/features/analysis/context_file_scanner'
 import { runContextFileUploadPipeline } from '../../src/features/analysis/context_file_uploader'
+import type { UploadLedger } from '../../src/features/analysis/context_upload_ledger'
 
 const mocks = vi.hoisted(() => ({
   uploadFile: vi.fn(),
@@ -108,7 +109,9 @@ describe('runContextFileUploadPipeline — empty input', () => {
       submitRecords,
     })
 
-    expect(result).toEqual({ fileCount: 0, skillCount: 0 })
+    expect(result).toEqual(
+      expect.objectContaining({ fileCount: 0, skillCount: 0 })
+    )
     expect(submitRecords).not.toHaveBeenCalled()
     expect(mocks.markContextFilesUploaded).not.toHaveBeenCalled()
   })
@@ -128,7 +131,9 @@ describe('runContextFileUploadPipeline — successful upload', () => {
       submitRecords,
     })
 
-    expect(result).toEqual({ fileCount: 1, skillCount: 1 })
+    expect(result).toEqual(
+      expect.objectContaining({ fileCount: 1, skillCount: 1 })
+    )
     expect(submitRecords).toHaveBeenCalledOnce()
     expect(mocks.markContextFilesUploaded).toHaveBeenCalledOnce()
   })
@@ -214,8 +219,192 @@ describe('runContextFileUploadPipeline — transient retry', () => {
     })
 
     expect(mocks.uploadFile).toHaveBeenCalledTimes(2)
-    expect(result).toEqual({ fileCount: 1, skillCount: 0 })
+    expect(result).toEqual(
+      expect.objectContaining({ fileCount: 1, skillCount: 0 })
+    )
     expect(mocks.markContextUploadFailed).not.toHaveBeenCalled()
     expect(mocks.markContextFilesUploaded).toHaveBeenCalledOnce()
+  })
+})
+
+/** Configurable fake ledger for exercising dedup/backoff/breaker branches. */
+function fakeLedger(overrides: Partial<UploadLedger> = {}): UploadLedger {
+  return {
+    isUploaded: () => false,
+    isBackedOff: () => false,
+    isBreakerOpen: () => false,
+    onSuccess: vi.fn(),
+    onFailure: vi.fn(() => true),
+    flush: vi.fn(),
+    ...overrides,
+  }
+}
+
+describe('runContextFileUploadPipeline — ledger dedup', () => {
+  it('skips the S3 upload for an already-uploaded md5 but still emits the record', async () => {
+    const submitRecords = vi.fn().mockResolvedValue(undefined)
+    const onSuccess = vi.fn()
+
+    const result = await runContextFileUploadPipeline({
+      ...baseOpts,
+      processedFiles: [makeFile('dup-md5')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords,
+      ledger: fakeLedger({ isUploaded: () => true, onSuccess }),
+    })
+
+    // No network upload, but the per-session record is still submitted.
+    expect(mocks.uploadFile).not.toHaveBeenCalled()
+    expect(submitRecords).toHaveBeenCalledOnce()
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(result).toEqual(
+      expect.objectContaining({ fileCount: 1, dedupedCount: 1 })
+    )
+    expect(mocks.markContextFilesUploaded).toHaveBeenCalledOnce()
+  })
+})
+
+describe('runContextFileUploadPipeline — ledger suppression', () => {
+  it('does not attempt or log an upload while in backoff', async () => {
+    const submitRecords = vi.fn().mockResolvedValue(undefined)
+    const onFileError = vi.fn()
+
+    const result = await runContextFileUploadPipeline({
+      ...baseOpts,
+      processedFiles: [makeFile('backed-off')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords,
+      onFileError,
+      ledger: fakeLedger({ isBackedOff: () => true }),
+    })
+
+    expect(mocks.uploadFile).not.toHaveBeenCalled()
+    expect(onFileError).not.toHaveBeenCalled()
+    expect(submitRecords).not.toHaveBeenCalled()
+    expect(result).toEqual(
+      expect.objectContaining({ fileCount: 0, suppressedCount: 1 })
+    )
+  })
+
+  it('skips all attempts when the circuit breaker is open', async () => {
+    const result = await runContextFileUploadPipeline({
+      ...baseOpts,
+      processedFiles: [makeFile('a'), makeFile('b', 'x', '/proj/AGENTS.md')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: vi.fn(),
+      ledger: fakeLedger({ isBreakerOpen: () => true }),
+    })
+
+    expect(mocks.uploadFile).not.toHaveBeenCalled()
+    expect(result).toEqual(
+      expect.objectContaining({ suppressedCount: 2, breakerOpen: true })
+    )
+  })
+})
+
+describe('runContextFileUploadPipeline — ledger log-once', () => {
+  it('suppresses onFileError when the ledger says not to log', async () => {
+    mocks.uploadFile.mockRejectedValue(new Error('S3 error'))
+    const onFileError = vi.fn()
+
+    await runContextFileUploadPipeline({
+      ...baseOpts,
+      processedFiles: [makeFile('fail-md5')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: vi.fn(),
+      onFileError,
+      ledger: fakeLedger({ onFailure: vi.fn(() => false) }),
+    })
+
+    // Upload was attempted and failed, but logging is suppressed by log-once.
+    expect(mocks.uploadFile).toHaveBeenCalledOnce()
+    expect(onFileError).not.toHaveBeenCalled()
+  })
+})
+
+describe('runContextFileUploadPipeline — in-flight coalescing', () => {
+  it('collapses concurrent uploads of the same md5 into a single POST', async () => {
+    // Hold the upload open so both sessions overlap on the same key.
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    mocks.uploadFile.mockReturnValueOnce(gate)
+
+    const submitA = vi.fn().mockResolvedValue(undefined)
+    const submitB = vi.fn().mockResolvedValue(undefined)
+
+    const pA = runContextFileUploadPipeline({
+      ...baseOpts,
+      sessionId: 'sess-A',
+      processedFiles: [makeFile('shared-md5')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: submitA,
+    })
+    const pB = runContextFileUploadPipeline({
+      ...baseOpts,
+      sessionId: 'sess-B',
+      processedFiles: [makeFile('shared-md5')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: submitB,
+    })
+
+    release()
+    await Promise.all([pA, pB])
+
+    // One network POST for the shared blob, but both sessions emit their record.
+    expect(mocks.uploadFile).toHaveBeenCalledOnce()
+    expect(submitA).toHaveBeenCalledOnce()
+    expect(submitB).toHaveBeenCalledOnce()
+  })
+
+  it('on a coalesced failure, both sessions mark failed but only the leader records/logs', async () => {
+    let reject!: (e: unknown) => void
+    const gate = new Promise<void>((_, r) => {
+      reject = r
+    })
+    mocks.uploadFile.mockReturnValueOnce(gate)
+
+    const onFailure = vi.fn(() => true)
+    const ledger = fakeLedger({ onFailure })
+    const onFileErrorA = vi.fn()
+    const onFileErrorB = vi.fn()
+
+    const pA = runContextFileUploadPipeline({
+      ...baseOpts,
+      sessionId: 'sess-A',
+      processedFiles: [makeFile('shared-fail')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: vi.fn(),
+      onFileError: onFileErrorA,
+      ledger,
+    })
+    const pB = runContextFileUploadPipeline({
+      ...baseOpts,
+      sessionId: 'sess-B',
+      processedFiles: [makeFile('shared-fail')],
+      processedSkills: [],
+      uploadFieldsJSON: VALID_FIELDS,
+      submitRecords: vi.fn(),
+      onFileError: onFileErrorB,
+      ledger,
+    })
+
+    reject(new Error('boom'))
+    await Promise.all([pA, pB])
+
+    expect(mocks.uploadFile).toHaveBeenCalledOnce() // coalesced to one POST
+    expect(onFailure).toHaveBeenCalledOnce() // leader-only ledger recording
+    // Exactly one session (the leader) logged the failure.
+    expect(
+      onFileErrorA.mock.calls.length + onFileErrorB.mock.calls.length
+    ).toBe(1)
   })
 })

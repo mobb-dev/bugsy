@@ -11,6 +11,7 @@ import { getAuthenticatedGQLClient } from '../../commands/handleMobbLogin'
 import { processContextFiles } from '../../features/analysis/context_file_processor'
 import { scanContextFiles } from '../../features/analysis/context_file_scanner'
 import { runContextFileUploadPipeline } from '../../features/analysis/context_file_uploader'
+import type { UploadLedger } from '../../features/analysis/context_upload_ledger'
 import { GQLClient } from '../../features/analysis/graphql/gql'
 import {
   DEGENERATE_RECORDS_LOG_MESSAGE,
@@ -21,6 +22,7 @@ import {
   AiBlameInferenceType,
   InferencePlatform,
 } from '../../features/analysis/scm/generates/client_generates'
+import { isActionableS3Error } from '../../features/analysis/upload-file'
 import { packageJson } from '../../utils/check_node_version'
 import {
   configStore,
@@ -783,7 +785,8 @@ export async function uploadContextFilesIfNeeded(
   sessionId: string,
   cwd: string,
   gqlClient: GQLClient,
-  log: Logger
+  log: Logger,
+  ledger?: UploadLedger
 ): Promise<void> {
   const { regularFiles, skillGroups } = await scanContextFiles(
     cwd,
@@ -812,6 +815,11 @@ export async function uploadContextFilesIfNeeded(
     return
   }
 
+  // Accumulate only the failures the ledger deemed worth logging (log-once per
+  // md5 per window) and emit a single aggregated line below — instead of one
+  // error log per file per cycle, which historically flooded Datadog.
+  const uploadFailures: { name: string; err: unknown }[] = []
+
   const pipelineResult = await runContextFileUploadPipeline({
     processedFiles,
     processedSkills,
@@ -820,22 +828,15 @@ export async function uploadContextFilesIfNeeded(
     url,
     uploadFieldsJSON,
     keyPrefix,
+    ledger,
     submitRecords: async (records) => {
       const r = await prepareAndSendTracyRecords(gqlClient, records, cwd)
       if (!r.ok) {
         throw new Error(r.errors?.join(', ') ?? 'batch upload failed')
       }
     },
-    onFileError: (name, err) =>
-      log.error(
-        { data: { sessionId, name, err } },
-        'Failed to upload context file to S3'
-      ),
-    onSkillError: (name, err) =>
-      log.error(
-        { data: { sessionId, name, err } },
-        'Failed to upload skill zip to S3'
-      ),
+    onFileError: (name, err) => uploadFailures.push({ name, err }),
+    onSkillError: (name, err) => uploadFailures.push({ name, err }),
   })
 
   if (pipelineResult === null) {
@@ -846,6 +847,31 @@ export async function uploadContextFilesIfNeeded(
     return
   }
 
+  if (uploadFailures.length > 0) {
+    // Aborted/system/network failures (and transient S3 5xx/SlowDown) are
+    // expected on hostile networks and retried with backoff — log them at warn.
+    // Reserve error for actionable S3 rejections (AccessDenied, ExpiredToken,
+    // InvalidAccessKeyId, …) keyed on the S3 error CODE, not the class name, so
+    // a retried transient 5xx doesn't get logged at error.
+    const hasActionableS3Error = uploadFailures.some((f) =>
+      isActionableS3Error(f.err)
+    )
+    const payload = {
+      sessionId,
+      failedCount: pipelineResult.failedCount,
+      suppressedCount: pipelineResult.suppressedCount,
+      dedupedCount: pipelineResult.dedupedCount,
+      breakerOpen: pipelineResult.breakerOpen,
+      errTypes: summarizeUploadErrTypes(uploadFailures.map((f) => f.err)),
+      sample: uploadFailures.slice(0, 3).map((f) => f.name),
+    }
+    if (hasActionableS3Error) {
+      log.error({ data: payload }, 'Context/skill S3 upload failures')
+    } else {
+      log.warn({ data: payload }, 'Context/skill upload failures (transient)')
+    }
+  }
+
   if (pipelineResult.fileCount > 0 || pipelineResult.skillCount > 0) {
     log.info(
       {
@@ -853,9 +879,25 @@ export async function uploadContextFilesIfNeeded(
           sessionId,
           fileCount: pipelineResult.fileCount,
           skillCount: pipelineResult.skillCount,
+          dedupedCount: pipelineResult.dedupedCount,
         },
       },
       'Uploaded context files and skills for session'
     )
   }
+}
+
+/**
+ * Bucket upload errors by their discriminating field (node-fetch `type` for
+ * aborts/system errors, `code` for transport errors, else `name`) so a single
+ * aggregated log line captures the failure mix without per-file spam.
+ */
+function summarizeUploadErrTypes(errs: unknown[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const err of errs) {
+    const e = err as { type?: string; code?: string; name?: string } | undefined
+    const key = e?.type ?? e?.code ?? e?.name ?? 'unknown'
+    counts[key] = (counts[key] ?? 0) + 1
+  }
+  return counts
 }

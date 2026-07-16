@@ -361,8 +361,7 @@ export class BitbucketSCMLib extends SCMLib {
       data: rawCommits.map((commit) => {
         const c = commit as Record<string, unknown>
         const author = c['author'] as
-          | { raw?: string; user?: { account_id?: string } }
-          | undefined
+          { raw?: string; user?: { account_id?: string } } | undefined
         const match = author?.raw?.match(/^(.+?)\s*<([^>]+)>/)
         return {
           sha: (c['hash'] as string) ?? '',

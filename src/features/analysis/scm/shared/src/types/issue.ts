@@ -22,10 +22,10 @@ export const VulnerabilityReportIssueRatingZ = z.object({
 
 export const VulnerabilityReportIssueSharedStateZ = z
   .object({
-    id: z.string().uuid(),
+    id: z.guid(),
     createdAt: z.string(),
     isArchived: z.boolean(),
-    ticketIntegrationId: z.string().uuid().nullable(),
+    ticketIntegrationId: z.guid().nullable(),
     ticketIntegrations: z.array(
       z.object({
         url: z.string(),
@@ -36,12 +36,12 @@ export const VulnerabilityReportIssueSharedStateZ = z
   .nullish()
 
 export const BaseIssuePartsZ = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   safeIssueType: z.string(),
   safeIssueLanguage: z.string(),
   createdAt: z.string(),
   parsedSeverity: ParsedSeverityZ,
-  category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
+  category: z.enum(Vulnerability_Report_Issue_Category_Enum),
   extraData: z.object({
     missing_files: z.string().array().nullish(),
     error_files: z.string().array().nullish(),
@@ -49,7 +49,7 @@ export const BaseIssuePartsZ = z.object({
   }),
   vulnerabilityReportIssueTags: z.array(
     z.object({
-      tag: z.nativeEnum(Vulnerability_Report_Issue_Tag_Enum),
+      tag: z.enum(Vulnerability_Report_Issue_Tag_Enum),
     })
   ),
   codeNodes: z
@@ -106,7 +106,7 @@ export const BaseIssuePartsZ = z.object({
     })
     .nullish(),
   sharedState: VulnerabilityReportIssueSharedStateZ,
-  unfixableId: z.string().uuid().nullish(),
+  unfixableId: z.guid().nullish(),
 })
 
 export const FalsePositivePartsZ = z.object({
@@ -121,22 +121,22 @@ export const UnfixablePartsZ = z.object({
 })
 export type UnfixableParts = z.infer<typeof UnfixablePartsZ>
 
-const IssuePartsWithFixZ = BaseIssuePartsZ.merge(
+const IssuePartsWithFixZ = BaseIssuePartsZ.extend(
   z.object({
     category: z.literal(Vulnerability_Report_Issue_Category_Enum.Irrelevant),
     fix: FixPartsForFixScreenZ.nullish(),
-  })
+  }).shape
 )
 
-export const IssuePartsFpZ = BaseIssuePartsZ.merge(
+export const IssuePartsFpZ = BaseIssuePartsZ.extend(
   z.object({
     category: z.literal(Vulnerability_Report_Issue_Category_Enum.FalsePositive),
-    fpId: z.string().uuid(),
+    fpId: z.guid(),
     getFalsePositive: FalsePositivePartsZ,
-  })
+  }).shape
 )
 
-const GeneralIssueZ = BaseIssuePartsZ.merge(
+const GeneralIssueZ = BaseIssuePartsZ.extend(
   z.object({
     category: z.union([
       z.literal(Vulnerability_Report_Issue_Category_Enum.NoFix),
@@ -146,7 +146,7 @@ const GeneralIssueZ = BaseIssuePartsZ.merge(
       z.literal(Vulnerability_Report_Issue_Category_Enum.Pending),
     ]),
     getUnfixable: UnfixablePartsZ.nullish(),
-  })
+  }).shape
 )
 
 export const IssuePartsZ = z.union([
@@ -163,12 +163,12 @@ export const GetIssueIndexesZ = z.object({
   totalIssues: z.number(),
   nextIssue: z
     .object({
-      id: z.string().uuid(),
+      id: z.guid(),
     })
     .nullish(),
   prevIssue: z
     .object({
-      id: z.string().uuid(),
+      id: z.guid(),
     })
     .nullish(),
 })

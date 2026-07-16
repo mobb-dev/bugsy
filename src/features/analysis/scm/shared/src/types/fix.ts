@@ -18,8 +18,8 @@ const PackageInfoZ = z.object({
 })
 
 const ManifestActionRequiredZ = z.object({
-  action: z.nativeEnum(ManifestAction),
-  language: z.nativeEnum(Language),
+  action: z.enum(ManifestAction),
+  language: z.enum(Language),
   lib: PackageInfoZ,
   typesLib: PackageInfoZ.nullable(),
 })
@@ -61,7 +61,7 @@ export const PatchAndQuestionsZ = z.object({
       index: z.number(),
       defaultValue: z.string(),
       value: z.string().nullable(),
-      inputType: z.nativeEnum(FixQuestionInputType),
+      inputType: z.enum(FixQuestionInputType),
       options: z.array(z.string()),
       // E-2015: analyzer-served question text. default('') so a query that
       // omits these still parses (-> ''), while the output type stays a required
@@ -77,7 +77,7 @@ export const PatchAndQuestionsZ = z.object({
 
 export const FixRatingZ = z.object({
   voteScore: z.number(),
-  fixRatingTag: z.nativeEnum(Fix_Rating_Tag_Enum).nullable().default(null),
+  fixRatingTag: z.enum(Fix_Rating_Tag_Enum).nullable().default(null),
   comment: z.string().nullable().default(null),
   updatedDate: z.string().nullable(),
   user: z.object({
@@ -113,7 +113,7 @@ const IssueSharedStateZ = z
 
 export const FixSharedStateZ = z
   .object({
-    state: z.nativeEnum(Fix_State_Enum),
+    state: z.enum(Fix_State_Enum),
     isArchived: z.boolean(),
     scmSubmitFixRequests: ScmSubmitFixRequestsZ,
     fixRatings: z.array(FixRatingZ).default([]),
@@ -132,14 +132,14 @@ export const FixSharedStateZ = z
 
 export const FixQueryZ = z.object({
   __typename: z.literal('fix').optional(),
-  id: z.string().uuid(),
+  id: z.guid(),
   sharedState: FixSharedStateZ,
   modifiedBy: z.string().nullable(),
   gitBlameLogin: z.string().nullable(),
   safeIssueLanguage: z.string(),
   safeIssueType: z.string(),
   confidence: z.number(),
-  fixReportId: z.string().uuid(),
+  fixReportId: z.guid(),
   isExpired: z.boolean().default(false),
   fixFiles: z.array(
     z.object({
@@ -147,7 +147,7 @@ export const FixQueryZ = z.object({
     })
   ),
   numberOfVulnerabilityIssues: z.number(),
-  severityText: z.nativeEnum(Vulnerability_Severity_Enum),
+  severityText: z.enum(Vulnerability_Severity_Enum),
   vulnerabilityReportIssues: z.array(
     z.object({
       vendorIssueId: z.string(),
@@ -155,19 +155,19 @@ export const FixQueryZ = z.object({
       parsedSeverity: ParsedSeverityZ,
       sharedState: z
         .object({
-          id: z.string().uuid(),
+          id: z.guid(),
           isArchived: z.boolean(),
-          ticketIntegrationId: z.string().uuid().nullable(),
+          ticketIntegrationId: z.guid().nullable(),
         })
         .nullable(),
     })
   ),
   patchAndQuestions: PatchAndQuestionsZ,
 
-  effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
+  effortToApplyFix: z.enum(Effort_To_Apply_Fix_Enum).nullable(),
 })
 
-export const FixPartsForFixScreenZ = FixQueryZ.merge(
+export const FixPartsForFixScreenZ = FixQueryZ.extend(
   z.object({
     vulnerabilityReportIssues: z.array(
       z.object({
@@ -177,7 +177,7 @@ export const FixPartsForFixScreenZ = FixQueryZ.merge(
         sharedState: IssueSharedStateZ,
       })
     ),
-  })
+  }).shape
 )
 
 export type VulnerabilityReportIssues = z.infer<

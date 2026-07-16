@@ -57,7 +57,7 @@ export async function createScmLib(
     if (e instanceof InvalidRepoUrlError && url) {
       throw new RepoNoTokenAccessError(
         'no access to repo',
-        scmLibScmTypeToScmType[z.nativeEnum(ScmLibScmType).parse(scmType)]
+        scmLibScmTypeToScmType[z.enum(ScmLibScmType).parse(scmType)]
       )
     }
     console.error(`error validating scm: ${scmType} `, e)

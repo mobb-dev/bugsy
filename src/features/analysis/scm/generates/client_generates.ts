@@ -1295,8 +1295,30 @@ export type OrgMcpServer = {
 
 export type OrgRepoAccessIssue = {
   __typename?: 'OrgRepoAccessIssue';
+  lastSyncedAt?: Maybe<Scalars['String']['output']>;
+  projects: Array<OrgRepoProject>;
   reason?: Maybe<Scalars['String']['output']>;
+  retryQueued: Scalars['Boolean']['output'];
   url: Scalars['String']['output'];
+};
+
+export type OrgRepoContributor = {
+  __typename?: 'OrgRepoContributor';
+  accessLevel?: Maybe<Scalars['String']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  excludedFromCount: Scalars['Boolean']['output'];
+  lastCommittedAt?: Maybe<Scalars['String']['output']>;
+  linkedToMobbUser: Scalars['Boolean']['output'];
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+export type OrgRepoContributorsResponse = OrgRepoContributorsSuccess | ScmError;
+
+export type OrgRepoContributorsSuccess = {
+  __typename?: 'OrgRepoContributorsSuccess';
+  contributors: Array<OrgRepoContributor>;
+  status: Status;
 };
 
 export type OrgRepoDashboardResponse = OrgRepoDashboardSuccess | ScmError;
@@ -1315,16 +1337,26 @@ export type OrgRepoDashboardSuccess = {
 
 export type OrgRepoProcessing = {
   __typename?: 'OrgRepoProcessing';
+  projects: Array<OrgRepoProject>;
   state: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type OrgRepoProject = {
+  __typename?: 'OrgRepoProject';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type OrgRepoSuccess = {
   __typename?: 'OrgRepoSuccess';
   contributors: Scalars['Int']['output'];
   incomplete?: Maybe<Scalars['String']['output']>;
+  lastSyncedAt?: Maybe<Scalars['String']['output']>;
   partial: Scalars['Boolean']['output'];
+  projects: Array<OrgRepoProject>;
   recentContributors: Scalars['Int']['output'];
+  retryQueued: Scalars['Boolean']['output'];
   url: Scalars['String']['output'];
 };
 
@@ -1568,6 +1600,13 @@ export type RepositorySkillStat = {
 export type ResendInvitationResponse = {
   __typename?: 'ResendInvitationResponse';
   id: Scalars['String']['output'];
+};
+
+export type RetryRepoSyncResponse = RetryRepoSyncSuccess | ScmError;
+
+export type RetryRepoSyncSuccess = {
+  __typename?: 'RetryRepoSyncSuccess';
+  status: Status;
 };
 
 export type RoiTrendsTimeSeriesPoint = {
@@ -23239,6 +23278,7 @@ export type Mutation_Root = {
   rerunAnalysis: VulnerabilityReportResponse;
   resendInvitation?: Maybe<ResendInvitationResponse>;
   resetAnswers?: Maybe<Scalars['Void']['output']>;
+  retryRepoSync?: Maybe<RetryRepoSyncResponse>;
   saveCheckmarxIntegration?: Maybe<SaveCheckmarxIntegrationResponse>;
   saveUsageMcp?: Maybe<SaveUsageMcpResponse>;
   scanSkill: ScanSkillResult;
@@ -27902,6 +27942,14 @@ export type Mutation_RootResetAnswersArgs = {
 
 
 /** mutation root */
+export type Mutation_RootRetryRepoSyncArgs = {
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+  timeoutMinutes?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** mutation root */
 export type Mutation_RootSaveCheckmarxIntegrationArgs = {
   apiKey: Scalars['String']['input'];
   ast: Scalars['String']['input'];
@@ -32047,6 +32095,14 @@ export enum Order_By {
   DescNullsLast = 'desc_nulls_last'
 }
 
+export type Org_Project_Resolved_Vulnerabilities_Args = {
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+export type Org_Project_Vulnerability_Severities_Args = {
+  organization_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
 /** columns and relationships of "organization" */
 export type Organization = {
   __typename?: 'organization';
@@ -32110,7 +32166,7 @@ export type Organization = {
   issueTypeSettings: Array<Organization_Issue_Type_Settings>;
   /** An aggregate relationship */
   issueTypeSettings_aggregate: Organization_Issue_Type_Settings_Aggregate;
-  /** A computed field, executes function "organization_count_vulnerability_issues_by_categories" */
+  /** A computed field, executes function "organization_count_vulnerability_issues_by_categories_v2" */
   issuesByCategories?: Maybe<Array<View_Types_Aggregated_Categories>>;
   /** A computed field, executes function "organization_lines_of_code_stats" */
   linesOfCodeStats?: Maybe<Array<View_Types_Lines_Of_Code_Stats>>;
@@ -32171,7 +32227,7 @@ export type Organization = {
   repositoryMcpServersAndToolsCounts: GetRepositoryMcpServersAndToolsCountsResponse;
   repositoryModelStats: GetRepositoryModelStatsResponse;
   repositorySkillStats: GetRepositorySkillStatsResponse;
-  /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities" */
+  /** A computed field, executes function "organization_resolved_aggregated_vulnerability_severities_v2" */
   resolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
   /** A computed field, executes function "organization_review_time_stats" */
   reviewTimeStats?: Maybe<Array<View_Types_Ai_Human_Days_Stats>>;
@@ -32184,7 +32240,7 @@ export type Organization = {
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
   scmConfigs_aggregate: Scm_Config_Aggregate;
-  /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities" */
+  /** A computed field, executes function "organization_unresolved_aggregated_vulnerability_severities_v2" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
 };
 
@@ -37709,6 +37765,7 @@ export type Query_Root = {
    * of getOrgSkills.
    */
   getOrgMcpServers: GetOrgMcpServersResponse;
+  getOrgRepoContributors?: Maybe<OrgRepoContributorsResponse>;
   getOrgRepoDashboard?: Maybe<OrgRepoDashboardResponse>;
   /**
    * Get aggregated skill data for all skills observed across the organization.
@@ -37918,6 +37975,14 @@ export type Query_Root = {
   on_prem_scm_oauth_config_aggregate: On_Prem_Scm_Oauth_Config_Aggregate;
   /** fetch data from the table: "on_prem_scm_oauth_config" using primary key columns */
   on_prem_scm_oauth_config_by_pk?: Maybe<On_Prem_Scm_Oauth_Config>;
+  /** execute function "org_project_resolved_vulnerabilities" which returns "view_project_resolved_vulnerabilities" */
+  org_project_resolved_vulnerabilities: Array<View_Project_Resolved_Vulnerabilities>;
+  /** execute function "org_project_resolved_vulnerabilities" and query aggregates on result of table type "view_project_resolved_vulnerabilities" */
+  org_project_resolved_vulnerabilities_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
+  /** execute function "org_project_vulnerability_severities" which returns "view_project_vulnerability_severities" */
+  org_project_vulnerability_severities: Array<View_Project_Vulnerability_Severities>;
+  /** execute function "org_project_vulnerability_severities" and query aggregates on result of table type "view_project_vulnerability_severities" */
+  org_project_vulnerability_severities_aggregate: View_Project_Vulnerability_Severities_Aggregate;
   /** fetch data from the table: "organization" */
   organization: Array<Organization>;
   /** fetch aggregated fields from the table: "organization" */
@@ -40013,6 +40078,12 @@ export type Query_RootGetOrgMcpServersArgs = {
 };
 
 
+export type Query_RootGetOrgRepoContributorsArgs = {
+  organizationId: Scalars['String']['input'];
+  repositoryUrl: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetOrgRepoDashboardArgs = {
   organizationId: Scalars['String']['input'];
 };
@@ -40541,6 +40612,46 @@ export type Query_RootOn_Prem_Scm_Oauth_Config_AggregateArgs = {
 
 export type Query_RootOn_Prem_Scm_Oauth_Config_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOrg_Project_Resolved_VulnerabilitiesArgs = {
+  args: Org_Project_Resolved_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootOrg_Project_Resolved_Vulnerabilities_AggregateArgs = {
+  args: Org_Project_Resolved_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Query_RootOrg_Project_Vulnerability_SeveritiesArgs = {
+  args: Org_Project_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Query_RootOrg_Project_Vulnerability_Severities_AggregateArgs = {
+  args: Org_Project_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
 };
 
 
@@ -44187,6 +44298,9 @@ export type Repo_Sync_Status = {
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
   recent90dOk: Scalars['Boolean']['output'];
   repositoryUrl: Scalars['String']['output'];
+  requestedTimeoutMs?: Maybe<Scalars['Int']['output']>;
+  retryRequested: Scalars['Boolean']['output'];
+  retryRequestedAt?: Maybe<Scalars['timestamptz']['output']>;
   snapshotDate: Scalars['date']['output'];
   startedAt?: Maybe<Scalars['timestamptz']['output']>;
   state: Scalars['String']['output'];
@@ -44232,6 +44346,7 @@ export type Repo_Sync_Status_Avg_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Boolean expression to filter rows from the table "repo_sync_status". All fields are combined with a logical 'AND'. */
@@ -44250,6 +44365,9 @@ export type Repo_Sync_Status_Bool_Exp = {
   recent90dContributors?: InputMaybe<Int_Comparison_Exp>;
   recent90dOk?: InputMaybe<Boolean_Comparison_Exp>;
   repositoryUrl?: InputMaybe<String_Comparison_Exp>;
+  requestedTimeoutMs?: InputMaybe<Int_Comparison_Exp>;
+  retryRequested?: InputMaybe<Boolean_Comparison_Exp>;
+  retryRequestedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   snapshotDate?: InputMaybe<Date_Comparison_Exp>;
   startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   state?: InputMaybe<String_Comparison_Exp>;
@@ -44272,6 +44390,7 @@ export type Repo_Sync_Status_Inc_Input = {
   attempt?: InputMaybe<Scalars['Int']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
+  requestedTimeoutMs?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "repo_sync_status" */
@@ -44287,6 +44406,9 @@ export type Repo_Sync_Status_Insert_Input = {
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
   recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  requestedTimeoutMs?: InputMaybe<Scalars['Int']['input']>;
+  retryRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  retryRequestedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   state?: InputMaybe<Scalars['String']['input']>;
@@ -44306,6 +44428,8 @@ export type Repo_Sync_Status_Max_Fields = {
   reason?: Maybe<Scalars['String']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Int']['output']>;
+  retryRequestedAt?: Maybe<Scalars['timestamptz']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
   startedAt?: Maybe<Scalars['timestamptz']['output']>;
   state?: Maybe<Scalars['String']['output']>;
@@ -44325,6 +44449,8 @@ export type Repo_Sync_Status_Min_Fields = {
   reason?: Maybe<Scalars['String']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
   repositoryUrl?: Maybe<Scalars['String']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Int']['output']>;
+  retryRequestedAt?: Maybe<Scalars['timestamptz']['output']>;
   snapshotDate?: Maybe<Scalars['date']['output']>;
   startedAt?: Maybe<Scalars['timestamptz']['output']>;
   state?: Maybe<Scalars['String']['output']>;
@@ -44362,6 +44488,9 @@ export type Repo_Sync_Status_Order_By = {
   recent90dContributors?: InputMaybe<Order_By>;
   recent90dOk?: InputMaybe<Order_By>;
   repositoryUrl?: InputMaybe<Order_By>;
+  requestedTimeoutMs?: InputMaybe<Order_By>;
+  retryRequested?: InputMaybe<Order_By>;
+  retryRequestedAt?: InputMaybe<Order_By>;
   snapshotDate?: InputMaybe<Order_By>;
   startedAt?: InputMaybe<Order_By>;
   state?: InputMaybe<Order_By>;
@@ -44398,6 +44527,12 @@ export enum Repo_Sync_Status_Select_Column {
   /** column name */
   RepositoryUrl = 'repositoryUrl',
   /** column name */
+  RequestedTimeoutMs = 'requestedTimeoutMs',
+  /** column name */
+  RetryRequested = 'retryRequested',
+  /** column name */
+  RetryRequestedAt = 'retryRequestedAt',
+  /** column name */
   SnapshotDate = 'snapshotDate',
   /** column name */
   StartedAt = 'startedAt',
@@ -44423,6 +44558,9 @@ export type Repo_Sync_Status_Set_Input = {
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
   recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  requestedTimeoutMs?: InputMaybe<Scalars['Int']['input']>;
+  retryRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  retryRequestedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   state?: InputMaybe<Scalars['String']['input']>;
@@ -44438,6 +44576,7 @@ export type Repo_Sync_Status_Stddev_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_pop on columns */
@@ -44447,6 +44586,7 @@ export type Repo_Sync_Status_Stddev_Pop_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate stddev_samp on columns */
@@ -44456,6 +44596,7 @@ export type Repo_Sync_Status_Stddev_Samp_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "repo_sync_status" */
@@ -44478,6 +44619,9 @@ export type Repo_Sync_Status_Stream_Cursor_Value_Input = {
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
   recent90dOk?: InputMaybe<Scalars['Boolean']['input']>;
   repositoryUrl?: InputMaybe<Scalars['String']['input']>;
+  requestedTimeoutMs?: InputMaybe<Scalars['Int']['input']>;
+  retryRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  retryRequestedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   snapshotDate?: InputMaybe<Scalars['date']['input']>;
   startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   state?: InputMaybe<Scalars['String']['input']>;
@@ -44493,6 +44637,7 @@ export type Repo_Sync_Status_Sum_Fields = {
   attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Int']['output']>;
 };
 
 /** update columns of table "repo_sync_status" */
@@ -44517,6 +44662,12 @@ export enum Repo_Sync_Status_Update_Column {
   Recent90dOk = 'recent90dOk',
   /** column name */
   RepositoryUrl = 'repositoryUrl',
+  /** column name */
+  RequestedTimeoutMs = 'requestedTimeoutMs',
+  /** column name */
+  RetryRequested = 'retryRequested',
+  /** column name */
+  RetryRequestedAt = 'retryRequestedAt',
   /** column name */
   SnapshotDate = 'snapshotDate',
   /** column name */
@@ -44547,6 +44698,7 @@ export type Repo_Sync_Status_Var_Pop_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate var_samp on columns */
@@ -44556,6 +44708,7 @@ export type Repo_Sync_Status_Var_Samp_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** aggregate variance on columns */
@@ -44565,6 +44718,7 @@ export type Repo_Sync_Status_Variance_Fields = {
   attempt?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   recent90dContributors?: Maybe<Scalars['Float']['output']>;
+  requestedTimeoutMs?: Maybe<Scalars['Float']['output']>;
 };
 
 /** update columns of table "repo" */
@@ -47452,6 +47606,14 @@ export type Subscription_Root = {
   on_prem_scm_oauth_config_by_pk?: Maybe<On_Prem_Scm_Oauth_Config>;
   /** fetch data from the table in a streaming manner: "on_prem_scm_oauth_config" */
   on_prem_scm_oauth_config_stream: Array<On_Prem_Scm_Oauth_Config>;
+  /** execute function "org_project_resolved_vulnerabilities" which returns "view_project_resolved_vulnerabilities" */
+  org_project_resolved_vulnerabilities: Array<View_Project_Resolved_Vulnerabilities>;
+  /** execute function "org_project_resolved_vulnerabilities" and query aggregates on result of table type "view_project_resolved_vulnerabilities" */
+  org_project_resolved_vulnerabilities_aggregate: View_Project_Resolved_Vulnerabilities_Aggregate;
+  /** execute function "org_project_vulnerability_severities" which returns "view_project_vulnerability_severities" */
+  org_project_vulnerability_severities: Array<View_Project_Vulnerability_Severities>;
+  /** execute function "org_project_vulnerability_severities" and query aggregates on result of table type "view_project_vulnerability_severities" */
+  org_project_vulnerability_severities_aggregate: View_Project_Vulnerability_Severities_Aggregate;
   /** fetch data from the table: "organization" */
   organization: Array<Organization>;
   /** fetch aggregated fields from the table: "organization" */
@@ -50430,6 +50592,46 @@ export type Subscription_RootOn_Prem_Scm_Oauth_Config_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<On_Prem_Scm_Oauth_Config_Stream_Cursor_Input>>;
   where?: InputMaybe<On_Prem_Scm_Oauth_Config_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrg_Project_Resolved_VulnerabilitiesArgs = {
+  args: Org_Project_Resolved_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrg_Project_Resolved_Vulnerabilities_AggregateArgs = {
+  args: Org_Project_Resolved_Vulnerabilities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Resolved_Vulnerabilities_Order_By>>;
+  where?: InputMaybe<View_Project_Resolved_Vulnerabilities_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrg_Project_Vulnerability_SeveritiesArgs = {
+  args: Org_Project_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
+};
+
+
+export type Subscription_RootOrg_Project_Vulnerability_Severities_AggregateArgs = {
+  args: Org_Project_Vulnerability_Severities_Args;
+  distinct_on?: InputMaybe<Array<View_Project_Vulnerability_Severities_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Project_Vulnerability_Severities_Order_By>>;
+  where?: InputMaybe<View_Project_Vulnerability_Severities_Bool_Exp>;
 };
 
 

@@ -447,8 +447,8 @@ export type PrepareCommitBlameResponseMessage = z.infer<
 >
 
 export const VulnerabilityAttributionMessageZ = z.object({
-  fixReportId: z.string().uuid(),
-  vulnerabilityAttributionRequestId: z.string().uuid(),
+  fixReportId: z.guid(),
+  vulnerabilityAttributionRequestId: z.guid(),
   userEmail: z.string(),
 })
 export const VulnerabilityAttributionMessageSchema =

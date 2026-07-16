@@ -106,8 +106,8 @@ export function buildFixCommentBody({
   const validFixParseRes = z
     .object({
       patchAndQuestions: PatchAndQuestionsZ,
-      safeIssueLanguage: z.nativeEnum(IssueLanguage_Enum),
-      severityText: z.nativeEnum(Vulnerability_Severity_Enum),
+      safeIssueLanguage: z.enum(IssueLanguage_Enum),
+      severityText: z.enum(Vulnerability_Severity_Enum),
       safeIssueType: SafeIssueTypeStringZ,
     })
     .safeParse(fix)

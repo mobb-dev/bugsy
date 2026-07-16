@@ -29,11 +29,14 @@ Example: \n\tmobbdev ${command} -r ${chalk.bold(
 }
 
 const UrlZ = z.string({
-  invalid_type_error: `is not a valid ${Object.values(ScmType).join('/ ')} URL`,
+  error: (issue) =>
+    issue.code === 'invalid_type'
+      ? `is not a valid ${Object.values(ScmType).join('/ ')} URL`
+      : undefined,
 })
 
 export function validateOrganizationId(organizationId?: string) {
-  const orgIdValidation = z.string().uuid().nullish().safeParse(organizationId)
+  const orgIdValidation = z.guid().nullish().safeParse(organizationId)
 
   if (!orgIdValidation.success) {
     throw new CliError(`organizationId: ${organizationId} is not a valid UUID`)

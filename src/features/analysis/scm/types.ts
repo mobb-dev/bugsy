@@ -172,7 +172,7 @@ export type CreateSubmitRequestParams = {
 export const GetReferenceResultZ = z.object({
   date: z.date().optional(),
   sha: z.string(),
-  type: z.nativeEnum(ReferenceType),
+  type: z.enum(ReferenceType),
 })
 
 export type GetReferenceResult = z.infer<typeof GetReferenceResultZ>

@@ -54,8 +54,7 @@ const execFileAsync = promisify(execFile)
  */
 export async function detectClaudeCodeVersion(): Promise<string | undefined> {
   const cachedCliVersion = configStore.get(CC_VERSION_CLI_KEY) as
-    | string
-    | undefined
+    string | undefined
   if (cachedCliVersion === packageJson.version) {
     return configStore.get(CC_VERSION_CACHE_KEY) as string | undefined
   }
@@ -218,8 +217,7 @@ export async function readNewTranscriptEntries(
   transcriptPath = await resolveTranscriptPath(transcriptPath, sessionId)
 
   const cursor = sessionStore.get(getCursorKey(transcriptPath)) as
-    | CursorValue
-    | undefined
+    CursorValue | undefined
 
   let content: string
   let fileSize: number
@@ -476,8 +474,7 @@ export function filterEntries(
  */
 export async function cleanupStaleSessions(configDir: string): Promise<void> {
   const lastCleanup = configStore.get('claudeCode.lastCleanupAt') as
-    | number
-    | undefined
+    number | undefined
   if (lastCleanup && Date.now() - lastCleanup < CLEANUP_INTERVAL_MS) {
     return
   }

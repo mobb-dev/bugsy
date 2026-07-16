@@ -98,11 +98,7 @@ type MockState = {
   errorMessages: Record<string, string>
   getReportFixes: 'success' | 'empty' | 'error' | 'withQuestions'
   getFixWithAnswers:
-    | 'success'
-    | 'cascading'
-    | 'notFound'
-    | 'noFix'
-    | 'answersIgnored'
+    'success' | 'cascading' | 'notFound' | 'noFix' | 'answersIgnored'
 }
 
 // Initialize the mock state

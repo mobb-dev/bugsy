@@ -1,10 +1,5 @@
 export type HostIDE =
-  | 'CURSOR'
-  | 'VSCODE'
-  | 'WINDSURF'
-  | 'CLAUDE'
-  | 'WEBSTORM'
-  | 'UNKNOWN'
+  'CURSOR' | 'VSCODE' | 'WINDSURF' | 'CLAUDE' | 'WEBSTORM' | 'UNKNOWN'
 
 /**
  * Service for managing workspace-related operations

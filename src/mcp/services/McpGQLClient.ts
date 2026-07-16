@@ -43,8 +43,7 @@ export { isAuthError, isTransientError }
 export const isNetworkError = isTransientError
 
 type McpGQLClientArgs =
-  | { apiKey: string; type: 'apiKey' }
-  | { token: string; type: 'token' }
+  { apiKey: string; type: 'apiKey' } | { token: string; type: 'token' }
 
 export class McpGQLClient extends GQLClient {
   private currentUser: MeQuery['me'] | null = null

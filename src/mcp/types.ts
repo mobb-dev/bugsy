@@ -17,7 +17,7 @@ export type ScanAndFixVulnerabilitiesToolSchema = z.infer<
 
 // Schema for vulnerability report issue tags
 const VulnerabilityReportIssueTagSchema = z.object({
-  vulnerability_report_issue_tag_value: z.nativeEnum(
+  vulnerability_report_issue_tag_value: z.enum(
     Vulnerability_Report_Issue_Tag_Enum
   ),
 })
@@ -26,17 +26,14 @@ const VulnerabilityReportIssueTagSchema = z.object({
 const VulnerabilityReportIssueSchema = z.object({
   category: z.any().optional().nullable(),
   parsedIssueType: SafeIssueTypeStringZ.nullable().optional(),
-  parsedSeverity: z
-    .nativeEnum(Vulnerability_Severity_Enum)
-    .nullable()
-    .optional(),
+  parsedSeverity: z.enum(Vulnerability_Severity_Enum).nullable().optional(),
   vulnerabilityReportIssueTags: z.array(VulnerabilityReportIssueTagSchema),
 })
 
 // Schema for shared state
 const SharedStateSchema = z.object({
   __typename: z.literal('fix_shared_state').optional(),
-  id: z.any(), // GraphQL uses `any` type for UUID
+  id: z.any().optional(), // GraphQL uses `any` type for UUID
   downloadedBy: z.array(z.any().nullable()).optional().nullable(),
 })
 
@@ -44,7 +41,7 @@ const SharedStateSchema = z.object({
 const UnstructuredFixExtraContextSchema = z.object({
   __typename: z.literal('UnstructuredFixExtraContext').optional(),
   key: z.string(),
-  value: z.any(), // GraphQL JSON type
+  value: z.any().optional(), // GraphQL JSON type
 })
 
 // Schema for fix extra context response (matches GraphQL FixExtraContextResponse)
@@ -61,7 +58,7 @@ export const FixQuestionSchema = z.object({
   name: z.string(),
   defaultValue: z.string(),
   value: z.string().nullable().optional(),
-  inputType: z.nativeEnum(FixQuestionInputType),
+  inputType: z.enum(FixQuestionInputType),
   options: z.array(z.string()),
   index: z.number(),
   // E-2015: analyzer-served question text. default('') so a query that omits it
@@ -94,7 +91,7 @@ const PatchAndQuestionsSchema = z.union([FixDataSchema, GetFixNoFixErrorSchema])
 // Schema for McpFix based on FixDetails fragment
 export const McpFixSchema = z.object({
   __typename: z.literal('fix').optional(),
-  id: z.any(), // GraphQL uses `any` type for UUID
+  id: z.any().optional(), // GraphQL uses `any` type for UUID
   confidence: z.number(),
   safeIssueType: z.string().nullable(),
   safeIssueLanguage: z.string().nullable().optional(),
@@ -140,13 +137,13 @@ const RepoSchema = z.object({
 
 // Schema for project information
 const ProjectSchema = z.object({
-  id: z.any(), // GraphQL uses `any` type for UUID
-  organizationId: z.any(), // GraphQL uses `any` type for UUID
+  id: z.any().optional(), // GraphQL uses `any` type for UUID
+  organizationId: z.any().optional(), // GraphQL uses `any` type for UUID
 })
 
 // Schema for vulnerability report
 const VulnerabilityReportSchema = z.object({
-  scanDate: z.any().nullable(), // GraphQL uses `any` type for timestamp
+  scanDate: z.any().nullish(), // GraphQL uses `any` type for timestamp
   vendor: z.string(), // GraphQL generates as string, not enum
   projectId: z.any().optional(), // GraphQL uses `any` type for UUID
   project: ProjectSchema,
@@ -158,10 +155,10 @@ const VulnerabilityReportSchema = z.object({
 // Schema for fix report summary (based on FixReportSummaryFields fragment)
 export const FixReportSummarySchema = z.object({
   __typename: z.literal('fixReport').optional(),
-  id: z.any(), // GraphQL uses `any` type for UUID
-  createdOn: z.any(), // GraphQL uses `any` type for timestamp
+  id: z.any().optional(), // GraphQL uses `any` type for UUID
+  createdOn: z.any().optional(), // GraphQL uses `any` type for timestamp
   repo: RepoSchema.nullable(),
-  issueTypes: z.any().nullable(), // GraphQL uses `any` type for JSON
+  issueTypes: z.any().nullish(), // GraphQL uses `any` type for JSON
   CRITICAL: FixAggregateSchema,
   HIGH: FixAggregateSchema,
   MEDIUM: FixAggregateSchema,
@@ -176,8 +173,8 @@ export const FixReportSummarySchema = z.object({
 // Schema for expired report
 export const ExpiredReportSchema = z.object({
   __typename: z.literal('fixReport').optional(),
-  id: z.any(), // GraphQL uses `any` type for UUID
-  expirationOn: z.any().nullable(), // GraphQL uses `any` type for timestamp
+  id: z.any().optional(), // GraphQL uses `any` type for UUID
+  expirationOn: z.any().nullish(), // GraphQL uses `any` type for timestamp
 })
 
 // Main schema for GetLatestReportByRepoUrl response

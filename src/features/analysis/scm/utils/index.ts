@@ -229,7 +229,7 @@ export function shouldValidateUrl(repoUrl?: string | null) {
 }
 
 export function isBrokerUrl(url: string) {
-  return z.string().uuid().safeParse(new URL(url).host).success
+  return z.guid().safeParse(new URL(url).host).success
 }
 
 export function buildAuthorizedRepoUrl(args: {
@@ -286,12 +286,12 @@ export function getCloudScmLibTypeFromUrl(
 export function getScmTypeFromScmLibType(
   scmLibType: string | null | undefined
 ) {
-  const parsedScmLibType = z.nativeEnum(ScmLibScmType).parse(scmLibType)
+  const parsedScmLibType = z.enum(ScmLibScmType).parse(scmLibType)
   return scmLibScmTypeToScmType[parsedScmLibType]
 }
 
 export function getScmLibTypeFromScmType(scmType: string | null | undefined) {
-  const parsedScmType = z.nativeEnum(ScmType).parse(scmType)
+  const parsedScmType = z.enum(ScmType).parse(scmType)
   return scmTypeToScmLibScmType[parsedScmType]
 }
 

@@ -32,8 +32,7 @@ export type ContextFileCategory = (typeof CATEGORY)[keyof typeof CATEGORY]
 export const SKILL_CATEGORY = CATEGORY.SKILL
 
 type RootSpec =
-  | { root: 'workspace' | 'home' }
-  | { root: 'absolute'; absoluteBase: string }
+  { root: 'workspace' | 'home' } | { root: 'absolute'; absoluteBase: string }
 
 export type ScanEntry =
   | ({ kind?: 'glob'; glob: string; category: ContextFileCategory } & RootSpec)

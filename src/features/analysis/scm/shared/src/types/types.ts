@@ -24,38 +24,38 @@ import { ParsedSeverityZ } from './shared'
 export type Unpacked<T> = T extends (infer U)[] ? U : T
 
 export const OrganizationScreenQueryParamsZ = z.object({
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
 })
 
 export const PermissionsScreenQueryParamsZ = OrganizationScreenQueryParamsZ
 
 export const ProjectPageQueryParamsZ = z.object({
-  organizationId: z.string().uuid(),
-  projectId: z.string().uuid(),
+  organizationId: z.guid(),
+  projectId: z.guid(),
 })
 export const AnalysisPageQueryParamsZ = ProjectPageQueryParamsZ.extend({
-  reportId: z.string().uuid(),
+  reportId: z.guid(),
 })
 
 export const FixPageQueryParamsZ = AnalysisPageQueryParamsZ.extend({
-  fixId: z.string().uuid(),
+  fixId: z.guid(),
 })
 export const IssuePageQueryParamsZ = AnalysisPageQueryParamsZ.extend({
-  issueId: z.string().uuid(),
+  issueId: z.guid(),
 })
 
 export const CliLoginPageQueryParamsZ = z.object({
-  loginId: z.string().uuid(),
+  loginId: z.guid(),
 })
 
 // Note: we're using zod here becasue we need to assue we have all the data ready for rendering the page
 // This saves null chekcing on the internal components
 
 export const AnalysisReportDigestedZ = z.object({
-  id: z.string().uuid(),
-  state: z.nativeEnum(Fix_Report_State_Enum),
+  id: z.guid(),
+  state: z.enum(Fix_Report_State_Enum),
   vulnerabilityReport: z.object({
-    reportSummaryUrl: z.string().url().nullish(),
+    reportSummaryUrl: z.url().nullish(),
     scanDate: z.string().nullable(),
     supported: z.object({
       aggregate: z.object({
@@ -67,19 +67,19 @@ export const AnalysisReportDigestedZ = z.object({
         count: z.number(),
       }),
     }),
-    vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),
+    vendor: z.enum(Vulnerability_Report_Vendor_Enum),
     project: z.object({
-      organizationId: z.string().uuid(),
+      organizationId: z.guid(),
     }),
   }),
 })
 
 const IssueSharedStateZ = z
   .object({
-    id: z.string().uuid(),
+    id: z.guid(),
     createdAt: z.string(),
     isArchived: z.boolean(),
-    ticketIntegrationId: z.string().uuid().nullable(),
+    ticketIntegrationId: z.guid().nullable(),
     ticketIntegrations: z.array(
       z.object({
         url: z.string(),
@@ -90,7 +90,7 @@ const IssueSharedStateZ = z
 
 export const ReportQueryResultZ = z.object({
   fixReport_by_pk: z.object({
-    id: z.string().uuid(),
+    id: z.guid(),
     analysisUrl: z.string(),
     fixesCommitted: z.object({
       aggregate: z.object({ count: z.number() }),
@@ -109,19 +109,19 @@ export const ReportQueryResultZ = z.object({
     vulnerabilitySeverities: z.record(z.string(), z.number()).nullable(),
     createdOn: z.string(),
     expirationOn: z.string().nullable(),
-    state: z.nativeEnum(Fix_Report_State_Enum),
+    state: z.enum(Fix_Report_State_Enum),
     failReason: z.string().nullable(),
     candidateToRerun: z.boolean(),
     fixes: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.guid(),
         safeIssueLanguage: z.string(),
         safeIssueType: z.string(),
         confidence: z.number(),
-        effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
+        effortToApplyFix: z.enum(Effort_To_Apply_Fix_Enum).nullable(),
         modifiedBy: z.string().nullable(),
         gitBlameLogin: z.string().nullable(),
-        fixReportId: z.string().uuid(),
+        fixReportId: z.guid(),
         filePaths: z.array(
           z.object({
             fileRepoRelativePath: z.string(),
@@ -129,13 +129,13 @@ export const ReportQueryResultZ = z.object({
         ),
         sharedState: FixSharedStateZ,
         numberOfVulnerabilityIssues: z.number(),
-        severityText: z.nativeEnum(Vulnerability_Severity_Enum),
+        severityText: z.enum(Vulnerability_Severity_Enum),
         vulnerabilityReportIssues: z.array(
           z.object({
-            id: z.string().uuid(),
+            id: z.guid(),
             issueType: z.string(),
             issueLanguage: z.string(),
-            category: z.nativeEnum(Vulnerability_Report_Issue_Category_Enum),
+            category: z.enum(Vulnerability_Report_Issue_Category_Enum),
             sharedState: IssueSharedStateZ,
           })
         ),
@@ -166,20 +166,20 @@ export const ReportQueryResultZ = z.object({
       }),
     }),
     vulnerabilityReport: z.object({
-      id: z.string().uuid(),
-      reportSummaryUrl: z.string().url().nullish(),
-      computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
-      vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
+      id: z.guid(),
+      reportSummaryUrl: z.url().nullish(),
+      computedVendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
+      vendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
       issuesWithKnownLanguage: z.number().nullable(),
       scanDate: z.string().nullable(),
-      vendorReportId: z.string().uuid().nullable(),
-      projectId: z.string().uuid(),
+      vendorReportId: z.guid().nullable(),
+      projectId: z.guid(),
       project: z.object({
-        organizationId: z.string().uuid(),
+        organizationId: z.guid(),
       }),
       file: z
         .object({
-          id: z.string().uuid(),
+          id: z.guid(),
           path: z.string(),
         })
         .nullable(),
@@ -225,7 +225,7 @@ export const ReportQueryResultZ = z.object({
       }),
       vulnerabilityReportIssues: z
         .object({
-          id: z.string().uuid(),
+          id: z.guid(),
           extraData: z.object({
             missing_files: z.string().array().nullish(),
             large_files: z.string().array().nullish(),
@@ -239,21 +239,21 @@ export const ReportQueryResultZ = z.object({
 })
 
 export const ReportFixesQueryFixZ = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   sharedState: FixSharedStateZ,
   confidence: z.number(),
   gitBlameLogin: z.string().nullable(),
-  effortToApplyFix: z.nativeEnum(Effort_To_Apply_Fix_Enum).nullable(),
+  effortToApplyFix: z.enum(Effort_To_Apply_Fix_Enum).nullable(),
   safeIssueLanguage: z.string(),
   safeIssueType: z.string(),
-  fixReportId: z.string().uuid(),
+  fixReportId: z.guid(),
   filePaths: z.array(
     z.object({
       fileRepoRelativePath: z.string(),
     })
   ),
   numberOfVulnerabilityIssues: z.number(),
-  severityText: z.nativeEnum(Vulnerability_Severity_Enum),
+  severityText: z.enum(Vulnerability_Severity_Enum),
   vulnerabilityReportIssues: z
     .array(
       z.object({
@@ -267,9 +267,9 @@ export const ReportFixesQueryFixZ = z.object({
 
 // Base schema with common fields for vulnerability report issues
 export const BaseVulnerabilityReportIssueZ = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   createdAt: z.string(),
-  state: z.nativeEnum(Vulnerability_Report_Issue_State_Enum),
+  state: z.enum(Vulnerability_Report_Issue_State_Enum),
   safeIssueType: z.string(),
   safeIssueLanguage: z.string(),
   extraData: z.object({
@@ -281,7 +281,7 @@ export const BaseVulnerabilityReportIssueZ = z.object({
   fix: ReportFixesQueryFixZ.nullable(),
   falsePositive: z
     .object({
-      id: z.string().uuid(),
+      id: z.guid(),
     })
     .nullable(),
   parsedSeverity: ParsedSeverityZ,
@@ -297,19 +297,19 @@ export const BaseVulnerabilityReportIssueZ = z.object({
 })
 
 // schema with codeNodes (for existing functionality, issue page)
-export const VulnerabilityReportIssueZ = BaseVulnerabilityReportIssueZ.merge(
+export const VulnerabilityReportIssueZ = BaseVulnerabilityReportIssueZ.extend(
   z.object({
     codeNodes: z.array(z.object({ path: z.string() })),
-  })
+  }).shape
 )
 export type VulnerabilityReportIssue = z.infer<typeof VulnerabilityReportIssueZ>
 
 // New schema with codeFilePath (for GetReportIssuesQuery)
 export const VulnerabilityReportIssueWithCodeFilePathZ =
-  BaseVulnerabilityReportIssueZ.merge(
+  BaseVulnerabilityReportIssueZ.extend(
     z.object({
       codeFilePath: z.string().nullable(),
-    })
+    }).shape
   )
 export type VulnerabilityReportIssueWithCodeFilePath = z.infer<
   typeof VulnerabilityReportIssueWithCodeFilePathZ
@@ -320,7 +320,7 @@ export const GetReportIssuesQueryZ = z
     fixReport: z
       .object({
         vulnerabilityReport: z.object({
-          id: z.string().uuid(),
+          id: z.guid(),
           lastIssueUpdatedAt: z.string(),
           vulnerabilityReportIssues_aggregate: z.object({
             aggregate: z.object({ count: z.number() }),
@@ -338,7 +338,7 @@ export const FixReportByProjectZ = z.object({
   project_by_pk: z.object({
     vulnerabilityReports: z.array(
       z.object({
-        fixReport: z.object({ id: z.string().uuid() }).nullable(),
+        fixReport: z.object({ id: z.guid() }).nullable(),
       })
     ),
   }),
@@ -349,9 +349,9 @@ export const FixScreenQueryResultZ = z.object({
   fix_by_pk: FixPartsForFixScreenZ,
   fixesWithSameIssueType: z.array(
     z.object({
-      id: z.string().uuid(),
+      id: z.guid(),
       sharedState: z
-        .object({ state: z.nativeEnum(Fix_State_Enum) })
+        .object({ state: z.enum(Fix_State_Enum) })
         .nullable()
         .default({ state: Fix_State_Enum.Ready }),
     })
@@ -396,9 +396,9 @@ export const GetReportFixesQueryZ = z
 export const GetFixReportStatsQueryZ = z.object({
   fixReport_by_pk: z
     .object({
-      id: z.string().uuid(),
+      id: z.guid(),
       vulnerabilitySeverities: z
-        .record(z.nativeEnum(Vulnerability_Severity_Enum), z.number())
+        .partialRecord(z.enum(Vulnerability_Severity_Enum), z.number())
         .nullable(),
       vulnerabilityReportIrrelevantIssuesCount: z.object({
         vulnerabilityReportIssues_aggregate: z.object({
@@ -410,16 +410,17 @@ export const GetFixReportStatsQueryZ = z.object({
 })
 
 const ProjectVulnerabilityReport = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string().nullable(),
-  vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
-  computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum).nullable(),
+  vendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
+  computedVendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
   fixReport: z.object({
-    id: z.string().uuid(),
+    id: z.guid(),
     createdOn: z.string(),
     issueTypes: z.record(z.string(), z.number()).nullable(),
+    // reports only contain the languages actually found in the repo
     issueLanguages: z
-      .record(z.nativeEnum(IssueLanguage_Enum), z.number())
+      .partialRecord(z.enum(IssueLanguage_Enum), z.number())
       .nullable(),
     repo: z
       .object({
@@ -441,7 +442,7 @@ const ProjectVulnerabilityReport = z.object({
         email: z.string(),
       })
       .nullable(),
-    state: z.nativeEnum(Fix_Report_State_Enum),
+    state: z.enum(Fix_Report_State_Enum),
     expirationOn: z.string(),
   }),
 })
@@ -451,7 +452,7 @@ export const GetProjectsQueryZ = z.object({
     id: z.string(),
     projects: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.guid(),
         name: z.string(),
         numberOfUniqueRepos: z.number(),
       })
@@ -461,16 +462,16 @@ export const GetProjectsQueryZ = z.object({
 
 export const ProjectPageQueryResultZ = z.object({
   name: z.string(),
-  id: z.string().uuid(),
+  id: z.guid(),
   isDefault: z.boolean().default(false),
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   vulnerabilityReports: z.array(ProjectVulnerabilityReport),
   autoPrIncludeAiFixes: z.preprocess(
     (val) => (val === null || val === undefined ? false : val),
     z.boolean()
   ),
   projectIssueTypeSettings: z.array(
-    IssueTypeSettingZ.merge(z.object({ id: z.string() }))
+    IssueTypeSettingZ.extend(z.object({ id: z.string() }).shape)
   ),
 })
 
@@ -499,14 +500,14 @@ export const GetProjectMembersDataZ = z.object({
       z.object({
         projectToRole: z.object({
           projectRole: z.object({
-            type: z.nativeEnum(Project_Role_Type_Enum),
+            type: z.enum(Project_Role_Type_Enum),
           }),
         }),
         user: z.object({
-          id: z.string().uuid(),
+          id: z.guid(),
           picture: z.string().nullable().optional(),
           name: z.string().nullish(),
-          email: z.string().email(),
+          email: z.email(),
         }),
       })
     ),
@@ -517,7 +518,7 @@ export type GetProjectMembersData = z.infer<typeof GetProjectMembersDataZ>
 export type GetFixReportStatsQuery = z.infer<typeof GetFixReportStatsQueryZ>
 
 export const RepoArgsZ = z.object({
-  originalUrl: z.string().url(),
+  originalUrl: z.url(),
   branch: z.string(),
   commitSha: z.string(),
 })

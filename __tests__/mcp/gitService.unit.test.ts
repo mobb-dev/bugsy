@@ -640,10 +640,7 @@ describe('GitService', () => {
         return originalReadFileSync(
           filePath,
           options as
-            | fs.ObjectEncodingOptions
-            | BufferEncoding
-            | null
-            | undefined
+            fs.ObjectEncodingOptions | BufferEncoding | null | undefined
         )
       })
 

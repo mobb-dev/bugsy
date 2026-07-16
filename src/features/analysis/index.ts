@@ -227,9 +227,7 @@ function _getUrlForScmType({
 
 function getBrokerHosts(
   userOrgsAnUserOrgRoles:
-    | (null | undefined | OrganizationToRoleType)[]
-    | null
-    | undefined
+    (null | undefined | OrganizationToRoleType)[] | null | undefined
 ) {
   const brokerHosts: {
     realDomain: string
@@ -951,7 +949,7 @@ async function waitForAnaysisAndReviewPr({
 }) {
   const params = z
     .object({
-      repo: z.string().url(),
+      repo: z.url(),
       githubActionToken: z.string(),
     })
     .parse({ repo, githubActionToken })
@@ -973,7 +971,7 @@ async function waitForAnaysisAndReviewPr({
       analysisId,
       gqlClient,
       scm,
-      scanner: z.nativeEnum(SCANNERS).parse(scanner),
+      scanner: z.enum(SCANNERS).parse(scanner),
     })
   }
 

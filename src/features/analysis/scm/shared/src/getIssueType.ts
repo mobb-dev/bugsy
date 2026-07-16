@@ -45,7 +45,7 @@ export const statusMap: Record<Vulnerability_Report_Issue_State_Enum, string> =
     [Vulnerability_Report_Issue_State_Enum.Unsupported]: 'Unsupported',
   } as const
 
-const statusZ = z.nativeEnum(Vulnerability_Report_Issue_State_Enum)
+const statusZ = z.enum(Vulnerability_Report_Issue_State_Enum)
 export const getStatusFriendlyString = (
   status: string | null | undefined
 ): string => {

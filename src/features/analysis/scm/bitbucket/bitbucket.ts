@@ -390,7 +390,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       // validate that the sha is a valid reference
       this.getReferenceData({ ref: sha, url })
       const repoRes = await this.getRepo({ repoUrl: url })
-      const parsedRepoUrl = z.string().url().parse(repoRes.links?.html?.href)
+      const parsedRepoUrl = z.url().parse(repoRes.links?.html?.href)
       return `${parsedRepoUrl}/get/${sha}.zip`
     },
     async getPullRequest(params: { url: string; prNumber: number }) {
@@ -472,8 +472,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
         ])
         const accountId =
           ((userRes.data as Record<string, unknown>)?.['account_id'] as
-            | string
-            | null) ?? null
+            string | null) ?? null
         const emails = ((emailsRes.data as { values?: unknown[] })?.values ??
           []) as {
           email?: string
@@ -514,8 +513,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
         if (values.length === 0) break
         for (const commit of values) {
           const date = (commit as Record<string, unknown>)?.['date'] as
-            | string
-            | undefined
+            string | undefined
           if (date && new Date(date) < sinceDate) {
             // Reached the age boundary — don't fetch further pages, but keep
             // scanning this page: commits aren't strictly date-ordered (merges
@@ -584,8 +582,7 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
             }
             sawInWindow = true
             const author = record['author'] as
-              | { raw?: string; user?: { account_id?: string } }
-              | undefined
+              { raw?: string; user?: { account_id?: string } } | undefined
             if (!author?.raw) continue
             const match = author.raw.match(/^(.+?)\s*<([^>]+)>/)
             if (!match) continue

@@ -127,8 +127,7 @@ function generateStableComputerName(): string {
 export function getStableComputerName(): string {
   // Check cache first
   const cached = configStore.get(STABLE_COMPUTER_NAME_CONFIG_KEY) as
-    | string
-    | undefined
+    string | undefined
 
   if (cached) {
     // Return cached value

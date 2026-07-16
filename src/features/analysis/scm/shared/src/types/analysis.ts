@@ -4,10 +4,10 @@ import { Vulnerability_Report_Vendor_Enum } from '../../../generates/client_gene
 import { Fix_Report_State_Enum } from '../../../generates/client_generates'
 
 export const FixPageFixReportZ = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   analysisUrl: z.string(),
   createdOn: z.string(),
-  state: z.nativeEnum(Fix_Report_State_Enum),
+  state: z.enum(Fix_Report_State_Enum),
   repo: z
     .object({
       name: z.string().nullable(),
@@ -28,12 +28,12 @@ export const FixPageFixReportZ = z.object({
         }
     ),
   vulnerabilityReport: z.object({
-    id: z.string().uuid(),
-    vendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),
-    computedVendor: z.nativeEnum(Vulnerability_Report_Vendor_Enum),
-    projectId: z.string().uuid(),
+    id: z.guid(),
+    vendor: z.enum(Vulnerability_Report_Vendor_Enum),
+    computedVendor: z.enum(Vulnerability_Report_Vendor_Enum),
+    projectId: z.guid(),
     project: z.object({
-      organizationId: z.string().uuid(),
+      organizationId: z.guid(),
     }),
   }),
 })

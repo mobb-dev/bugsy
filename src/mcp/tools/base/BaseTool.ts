@@ -63,12 +63,14 @@ export abstract class BaseTool {
       return this.inputValidationSchema.parse(args)
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorDetails = error.errors.map((e) => {
+        const errorDetails = error.issues.map((e) => {
           const fieldPath = e.path.length > 0 ? e.path.join('.') : 'root'
-          const message =
-            e.message === 'Required'
-              ? `Missing required parameter '${fieldPath}'`
-              : `Invalid value for '${fieldPath}': ${e.message}`
+          const isMissing =
+            e.code === 'invalid_type' &&
+            e.message.endsWith('received undefined')
+          const message = isMissing
+            ? `Missing required parameter '${fieldPath}'`
+            : `Invalid value for '${fieldPath}': ${e.message}`
           return message
         })
 

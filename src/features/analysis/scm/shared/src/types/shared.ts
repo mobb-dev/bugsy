@@ -7,7 +7,7 @@ import {
 
 // note: we can't use default since it will fail when the value is null
 export const ParsedSeverityZ = z
-  .nativeEnum(Vulnerability_Severity_Enum)
+  .enum(Vulnerability_Severity_Enum)
   .nullish()
   .transform((i) => i ?? Vulnerability_Severity_Enum.Low)
 
@@ -21,7 +21,7 @@ export const ScmSubmitFixRequestsZ = z.array(
         targetBranchName: z.string().default(''),
       }),
       prUrl: z.string().nullable(),
-      prStatus: z.nativeEnum(Pr_Status_Enum).nullable(),
+      prStatus: z.enum(Pr_Status_Enum).nullable(),
       commitUrl: z.string().nullable(),
       scmId: z.string(),
     }),

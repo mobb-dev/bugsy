@@ -15,9 +15,14 @@ export const ScmSubmitFixRequestsZ = z.array(
   z.object({
     scmSubmitFixRequest: z.object({
       submitFixRequest: z.object({
-        createdByUser: z.object({
-          email: z.string(),
-        }),
+        // note: nullable at runtime (e.g. deleted or permission-filtered user)
+        // even though the generated schema says otherwise
+        createdByUser: z
+          .object({
+            email: z.string(),
+          })
+          .nullable()
+          .transform((user) => user ?? { email: '' }),
         targetBranchName: z.string().default(''),
       }),
       prUrl: z.string().nullable(),

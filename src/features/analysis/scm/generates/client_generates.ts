@@ -1285,6 +1285,26 @@ export type OpenSecuritySkillPrResult = {
   skillId: Scalars['ID']['output'];
 };
 
+export type OrgContributor = {
+  __typename?: 'OrgContributor';
+  activeLast90d: Scalars['Boolean']['output'];
+  displayName?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  lastCommittedAt?: Maybe<Scalars['String']['output']>;
+  linkedToMobbUser: Scalars['Boolean']['output'];
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+export type OrgContributorsResponse = OrgContributorsSuccess | ScmError;
+
+export type OrgContributorsSuccess = {
+  __typename?: 'OrgContributorsSuccess';
+  allContributors: Scalars['Int']['output'];
+  contributors: Array<OrgContributor>;
+  contributors90d: Scalars['Int']['output'];
+  status: Status;
+};
+
 export type OrgMcpServer = {
   __typename?: 'OrgMcpServer';
   firstSeen?: Maybe<Scalars['String']['output']>;
@@ -1295,10 +1315,12 @@ export type OrgMcpServer = {
 
 export type OrgRepoAccessIssue = {
   __typename?: 'OrgRepoAccessIssue';
+  lastSuccessfulSyncAt?: Maybe<Scalars['String']['output']>;
   lastSyncedAt?: Maybe<Scalars['String']['output']>;
   projects: Array<OrgRepoProject>;
   reason?: Maybe<Scalars['String']['output']>;
   retryQueued: Scalars['Boolean']['output'];
+  state: RepoSyncState;
   url: Scalars['String']['output'];
 };
 
@@ -1318,7 +1340,10 @@ export type OrgRepoContributorsResponse = OrgRepoContributorsSuccess | ScmError;
 export type OrgRepoContributorsSuccess = {
   __typename?: 'OrgRepoContributorsSuccess';
   contributors: Array<OrgRepoContributor>;
+  contributors90d: Scalars['Int']['output'];
+  repo: OrgRepoDetails;
   status: Status;
+  totalContributors: Scalars['Int']['output'];
 };
 
 export type OrgRepoDashboardResponse = OrgRepoDashboardSuccess | ScmError;
@@ -1330,15 +1355,27 @@ export type OrgRepoDashboardSuccess = {
   failedRepos: Array<OrgRepoAccessIssue>;
   lastCheckedAt?: Maybe<Scalars['String']['output']>;
   processingRepos: Array<OrgRepoProcessing>;
+  reposAccessible: Scalars['Int']['output'];
+  reposWithIssues: Scalars['Int']['output'];
   runStatus?: Maybe<Scalars['String']['output']>;
   status: Status;
   successfulRepos: Array<OrgRepoSuccess>;
 };
 
+export type OrgRepoDetails = {
+  __typename?: 'OrgRepoDetails';
+  lastSyncedAt?: Maybe<Scalars['String']['output']>;
+  projects: Array<OrgRepoProject>;
+  reason?: Maybe<Scalars['String']['output']>;
+  retryQueued: Scalars['Boolean']['output'];
+  state?: Maybe<RepoSyncState>;
+  url: Scalars['String']['output'];
+};
+
 export type OrgRepoProcessing = {
   __typename?: 'OrgRepoProcessing';
   projects: Array<OrgRepoProject>;
-  state: Scalars['String']['output'];
+  state: RepoSyncState;
   url: Scalars['String']['output'];
 };
 
@@ -1357,6 +1394,7 @@ export type OrgRepoSuccess = {
   projects: Array<OrgRepoProject>;
   recentContributors: Scalars['Int']['output'];
   retryQueued: Scalars['Boolean']['output'];
+  state: RepoSyncState;
   url: Scalars['String']['output'];
 };
 
@@ -1525,6 +1563,14 @@ export type RepoSubmitReport = {
   originalUrl: Scalars['String']['output'];
   reference: Scalars['String']['output'];
 };
+
+export enum RepoSyncState {
+  Failed = 'failed',
+  Partial = 'partial',
+  Processing = 'processing',
+  Succeeded = 'succeeded',
+  Waiting = 'waiting'
+}
 
 export type RepoUnreachableError = BaseError & {
   __typename?: 'RepoUnreachableError';
@@ -38116,6 +38162,7 @@ export type Query_Root = {
   getIssuesApiV5: GetIssuesV5Response;
   getLinearIntegrationData: GetLinearIntegrationData;
   getLinearTeams: LinearTeamsResponse;
+  getOrgContributors?: Maybe<OrgContributorsResponse>;
   /**
    * Get aggregated MCP-server data for the organization. Per-server: first
    * seen date, installation count (distinct users who had the server
@@ -38477,6 +38524,10 @@ export type Query_Root = {
   repo_contributor_snapshot_aggregate: Repo_Contributor_Snapshot_Aggregate;
   /** fetch data from the table: "repo_contributor_snapshot" using primary key columns */
   repo_contributor_snapshot_by_pk?: Maybe<Repo_Contributor_Snapshot>;
+  /** fetch data from the table: "repo_detected_project" */
+  repo_detected_project: Array<Repo_Detected_Project>;
+  /** fetch aggregated fields from the table: "repo_detected_project" */
+  repo_detected_project_aggregate: Repo_Detected_Project_Aggregate;
   /** fetch data from the table: "repo_sync_status" */
   repo_sync_status: Array<Repo_Sync_Status>;
   /** fetch aggregated fields from the table: "repo_sync_status" */
@@ -40458,6 +40509,11 @@ export type Query_RootGetLinearTeamsArgs = {
 };
 
 
+export type Query_RootGetOrgContributorsArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetOrgMcpServersArgs = {
   fromDate?: InputMaybe<Scalars['String']['input']>;
   organizationId: Scalars['String']['input'];
@@ -41567,6 +41623,24 @@ export type Query_RootRepo_Contributor_Snapshot_AggregateArgs = {
 
 export type Query_RootRepo_Contributor_Snapshot_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootRepo_Detected_ProjectArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Detected_Project_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Detected_Project_Order_By>>;
+  where?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
+};
+
+
+export type Query_RootRepo_Detected_Project_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Detected_Project_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Detected_Project_Order_By>>;
+  where?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
 };
 
 
@@ -44500,6 +44574,102 @@ export type Repo_Contributor_Updates = {
   where: Repo_Contributor_Bool_Exp;
 };
 
+/** columns and relationships of "repo_detected_project" */
+export type Repo_Detected_Project = {
+  __typename?: 'repo_detected_project';
+  normUrl?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  projectName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "repo_detected_project" */
+export type Repo_Detected_Project_Aggregate = {
+  __typename?: 'repo_detected_project_aggregate';
+  aggregate?: Maybe<Repo_Detected_Project_Aggregate_Fields>;
+  nodes: Array<Repo_Detected_Project>;
+};
+
+/** aggregate fields of "repo_detected_project" */
+export type Repo_Detected_Project_Aggregate_Fields = {
+  __typename?: 'repo_detected_project_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Repo_Detected_Project_Max_Fields>;
+  min?: Maybe<Repo_Detected_Project_Min_Fields>;
+};
+
+
+/** aggregate fields of "repo_detected_project" */
+export type Repo_Detected_Project_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Repo_Detected_Project_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "repo_detected_project". All fields are combined with a logical 'AND'. */
+export type Repo_Detected_Project_Bool_Exp = {
+  _and?: InputMaybe<Array<Repo_Detected_Project_Bool_Exp>>;
+  _not?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
+  _or?: InputMaybe<Array<Repo_Detected_Project_Bool_Exp>>;
+  normUrl?: InputMaybe<String_Comparison_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  projectName?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type Repo_Detected_Project_Max_Fields = {
+  __typename?: 'repo_detected_project_max_fields';
+  normUrl?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  projectName?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Repo_Detected_Project_Min_Fields = {
+  __typename?: 'repo_detected_project_min_fields';
+  normUrl?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  projectName?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "repo_detected_project". */
+export type Repo_Detected_Project_Order_By = {
+  normUrl?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  projectName?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "repo_detected_project" */
+export enum Repo_Detected_Project_Select_Column {
+  /** column name */
+  NormUrl = 'normUrl',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  ProjectName = 'projectName'
+}
+
+/** Streaming cursor of the table "repo_detected_project" */
+export type Repo_Detected_Project_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Repo_Detected_Project_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Repo_Detected_Project_Stream_Cursor_Value_Input = {
+  normUrl?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  projectName?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** input type for incrementing numeric columns in table "repo" */
 export type Repo_Inc_Input = {
   pullRequest?: InputMaybe<Scalars['Int']['input']>;
@@ -44677,6 +44847,7 @@ export type Repo_Sync_Status = {
   contributorsOk: Scalars['Boolean']['output'];
   durationMs?: Maybe<Scalars['Int']['output']>;
   id: Scalars['uuid']['output'];
+  lastSucceededAt?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
@@ -44745,6 +44916,7 @@ export type Repo_Sync_Status_Bool_Exp = {
   contributorsOk?: InputMaybe<Boolean_Comparison_Exp>;
   durationMs?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  lastSucceededAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
   reason?: InputMaybe<String_Comparison_Exp>;
@@ -44786,6 +44958,7 @@ export type Repo_Sync_Status_Insert_Input = {
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastSucceededAt?: InputMaybe<Scalars['timestamptz']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   reason?: InputMaybe<Scalars['String']['input']>;
@@ -44810,6 +44983,7 @@ export type Repo_Sync_Status_Max_Fields = {
   attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastSucceededAt?: Maybe<Scalars['timestamptz']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
@@ -44831,6 +45005,7 @@ export type Repo_Sync_Status_Min_Fields = {
   attempt?: Maybe<Scalars['Int']['output']>;
   durationMs?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
+  lastSucceededAt?: Maybe<Scalars['timestamptz']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
   recent90dContributors?: Maybe<Scalars['Int']['output']>;
@@ -44868,6 +45043,7 @@ export type Repo_Sync_Status_Order_By = {
   contributorsOk?: InputMaybe<Order_By>;
   durationMs?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  lastSucceededAt?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   reason?: InputMaybe<Order_By>;
@@ -44902,6 +45078,8 @@ export enum Repo_Sync_Status_Select_Column {
   DurationMs = 'durationMs',
   /** column name */
   Id = 'id',
+  /** column name */
+  LastSucceededAt = 'lastSucceededAt',
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
@@ -44939,6 +45117,7 @@ export type Repo_Sync_Status_Set_Input = {
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastSucceededAt?: InputMaybe<Scalars['timestamptz']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   reason?: InputMaybe<Scalars['String']['input']>;
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
@@ -45000,6 +45179,7 @@ export type Repo_Sync_Status_Stream_Cursor_Value_Input = {
   contributorsOk?: InputMaybe<Scalars['Boolean']['input']>;
   durationMs?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  lastSucceededAt?: InputMaybe<Scalars['timestamptz']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
   reason?: InputMaybe<Scalars['String']['input']>;
   recent90dContributors?: InputMaybe<Scalars['Int']['input']>;
@@ -45038,6 +45218,8 @@ export enum Repo_Sync_Status_Update_Column {
   DurationMs = 'durationMs',
   /** column name */
   Id = 'id',
+  /** column name */
+  LastSucceededAt = 'lastSucceededAt',
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
@@ -48182,6 +48364,12 @@ export type Subscription_Root = {
   repo_contributor_snapshot_stream: Array<Repo_Contributor_Snapshot>;
   /** fetch data from the table in a streaming manner: "repo_contributor" */
   repo_contributor_stream: Array<Repo_Contributor>;
+  /** fetch data from the table: "repo_detected_project" */
+  repo_detected_project: Array<Repo_Detected_Project>;
+  /** fetch aggregated fields from the table: "repo_detected_project" */
+  repo_detected_project_aggregate: Repo_Detected_Project_Aggregate;
+  /** fetch data from the table in a streaming manner: "repo_detected_project" */
+  repo_detected_project_stream: Array<Repo_Detected_Project>;
   /** fetch data from the table in a streaming manner: "repo" */
   repo_stream: Array<Repo>;
   /** fetch data from the table: "repo_sync_status" */
@@ -51724,6 +51912,31 @@ export type Subscription_RootRepo_Contributor_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Repo_Contributor_Stream_Cursor_Input>>;
   where?: InputMaybe<Repo_Contributor_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Detected_ProjectArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Detected_Project_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Detected_Project_Order_By>>;
+  where?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Detected_Project_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Repo_Detected_Project_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Repo_Detected_Project_Order_By>>;
+  where?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
+};
+
+
+export type Subscription_RootRepo_Detected_Project_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Repo_Detected_Project_Stream_Cursor_Input>>;
+  where?: InputMaybe<Repo_Detected_Project_Bool_Exp>;
 };
 
 

@@ -563,6 +563,7 @@ mutation DigestVulnerabilityReport(
   $reference: String
   $sha: String
   $baselineCommit: String
+  $isFixEnabled: Boolean
 ) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
@@ -573,6 +574,7 @@ mutation DigestVulnerabilityReport(
     reference: $reference
     sha: $sha
     baselineCommit: $baselineCommit
+    isFixEnabled: $isFixEnabled
   ) {
     __typename
     ... on VulnerabilityReport {

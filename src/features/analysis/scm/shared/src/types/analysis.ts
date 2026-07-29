@@ -8,6 +8,7 @@ export const FixPageFixReportZ = z.object({
   analysisUrl: z.string(),
   createdOn: z.string(),
   state: z.enum(Fix_Report_State_Enum),
+  isFixEnabled: z.boolean().nullish(),
   repo: z
     .object({
       name: z.string().nullable(),

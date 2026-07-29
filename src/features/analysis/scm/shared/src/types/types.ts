@@ -110,6 +110,8 @@ export const ReportQueryResultZ = z.object({
     createdOn: z.string(),
     expirationOn: z.string().nullable(),
     state: z.enum(Fix_Report_State_Enum),
+    // NOT NULL column with a default, so always present on the wire.
+    isFixEnabled: z.boolean(),
     failReason: z.string().nullable(),
     candidateToRerun: z.boolean(),
     fixes: z.array(

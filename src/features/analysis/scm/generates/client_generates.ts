@@ -17415,6 +17415,8 @@ export type FixReport = {
   hybridFixes: Scalars['Int']['output'];
   id: Scalars['uuid']['output'];
   isAiEnabled?: Maybe<Scalars['Boolean']['output']>;
+  /** Whether fixes are generated for this report. When false the report is scan-only: findings were scanned and categorized but no fixes were requested (report stops at Digested). Lets the UI treat Digested as a terminal state for these reports. */
+  isFixEnabled: Scalars['Boolean']['output'];
   /** A computed field, executes function "get_issue_languages" */
   issueLanguages?: Maybe<Scalars['json']['output']>;
   /** A computed field, executes function "get_issue_types" */
@@ -17612,6 +17614,7 @@ export type FixReport_Bool_Exp = {
   hybridFixes?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
+  isFixEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguages?: InputMaybe<Json_Comparison_Exp>;
   issueTypes?: InputMaybe<Json_Comparison_Exp>;
   remainingUnstableFixes?: InputMaybe<Int_Comparison_Exp>;
@@ -17653,6 +17656,8 @@ export type FixReport_Insert_Input = {
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Whether fixes are generated for this report. When false the report is scan-only: findings were scanned and categorized but no fixes were requested (report stops at Digested). Lets the UI treat Digested as a terminal state for these reports. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   repo?: InputMaybe<Repo_Obj_Rel_Insert_Input>;
   repoArchiveId?: InputMaybe<Scalars['uuid']['input']>;
@@ -17755,6 +17760,7 @@ export type FixReport_Order_By = {
   hybridFixes?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isAiEnabled?: InputMaybe<Order_By>;
+  isFixEnabled?: InputMaybe<Order_By>;
   issueLanguages?: InputMaybe<Order_By>;
   issueTypes?: InputMaybe<Order_By>;
   remainingUnstableFixes?: InputMaybe<Order_By>;
@@ -17792,6 +17798,8 @@ export enum FixReport_Select_Column {
   /** column name */
   IsAiEnabled = 'isAiEnabled',
   /** column name */
+  IsFixEnabled = 'isFixEnabled',
+  /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
   RepoArchiveId = 'repoArchiveId',
@@ -17814,6 +17822,8 @@ export type FixReport_Set_Input = {
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Whether fixes are generated for this report. When false the report is scan-only: findings were scanned and categorized but no fixes were requested (report stops at Digested). Lets the UI treat Digested as a terminal state for these reports. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   repoArchiveId?: InputMaybe<Scalars['uuid']['input']>;
   s3RefreshedOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -17882,6 +17892,8 @@ export type FixReport_Stream_Cursor_Value_Input = {
   hybridFixes?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Whether fixes are generated for this report. When false the report is scan-only: findings were scanned and categorized but no fixes were requested (report stops at Digested). Lets the UI treat Digested as a terminal state for these reports. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   repoArchiveId?: InputMaybe<Scalars['uuid']['input']>;
   s3RefreshedOn?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -17921,6 +17933,8 @@ export enum FixReport_Update_Column {
   Id = 'id',
   /** column name */
   IsAiEnabled = 'isAiEnabled',
+  /** column name */
+  IsFixEnabled = 'isFixEnabled',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
   /** column name */
@@ -26290,6 +26304,7 @@ export type Mutation_RootDelete_Vulnerability_Severity_By_PkArgs = {
 export type Mutation_RootDigestVulnerabilityReportArgs = {
   baselineCommit?: InputMaybe<Scalars['String']['input']>;
   fixReportId: Scalars['String']['input'];
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   projectId: Scalars['String']['input'];
   reference?: InputMaybe<Scalars['String']['input']>;
@@ -32556,6 +32571,8 @@ export type Organization = {
   isAiEnabled: Scalars['Boolean']['output'];
   isDashboardActivityOrg: Scalars['Boolean']['output'];
   isDashboardActivityProject: Scalars['Boolean']['output'];
+  /** Org product mode. true = SAST and fix, the current behaviour every pre-existing org was backfilled to. false = SAST-only: findings are surfaced but no fixes are generated or offered. NULL (unset) - ask the user to set when the organization is created, during first login. Distinct from is_mobb_sast_enabled, which controls whether the org can run Mobb's own scanner at all. */
+  isFixEnabled?: Maybe<Scalars['Boolean']['output']>;
   isMobbSastEnabled: Scalars['Boolean']['output'];
   isPrivateRepoEnabled: Scalars['Boolean']['output'];
   isSendInvitationEnabled: Scalars['Boolean']['output'];
@@ -33262,6 +33279,7 @@ export type Organization_Bool_Exp = {
   isAiEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isDashboardActivityOrg?: InputMaybe<Boolean_Comparison_Exp>;
   isDashboardActivityProject?: InputMaybe<Boolean_Comparison_Exp>;
+  isFixEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isMobbSastEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isPrivateRepoEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   isSendInvitationEnabled?: InputMaybe<Boolean_Comparison_Exp>;
@@ -33751,6 +33769,8 @@ export type Organization_Insert_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Org product mode. true = SAST and fix, the current behaviour every pre-existing org was backfilled to. false = SAST-only: findings are surfaced but no fixes are generated or offered. NULL (unset) - ask the user to set when the organization is created, during first login. Distinct from is_mobb_sast_enabled, which controls whether the org can run Mobb's own scanner at all. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -34151,6 +34171,7 @@ export type Organization_Order_By = {
   isAiEnabled?: InputMaybe<Order_By>;
   isDashboardActivityOrg?: InputMaybe<Order_By>;
   isDashboardActivityProject?: InputMaybe<Order_By>;
+  isFixEnabled?: InputMaybe<Order_By>;
   isMobbSastEnabled?: InputMaybe<Order_By>;
   isPrivateRepoEnabled?: InputMaybe<Order_By>;
   isSendInvitationEnabled?: InputMaybe<Order_By>;
@@ -34798,6 +34819,8 @@ export enum Organization_Select_Column {
   /** column name */
   IsDashboardActivityProject = 'isDashboardActivityProject',
   /** column name */
+  IsFixEnabled = 'isFixEnabled',
+  /** column name */
   IsMobbSastEnabled = 'isMobbSastEnabled',
   /** column name */
   IsPrivateRepoEnabled = 'isPrivateRepoEnabled',
@@ -34854,6 +34877,8 @@ export type Organization_Set_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Org product mode. true = SAST and fix, the current behaviour every pre-existing org was backfilled to. false = SAST-only: findings are surfaced but no fixes are generated or offered. NULL (unset) - ask the user to set when the organization is created, during first login. Distinct from is_mobb_sast_enabled, which controls whether the org can run Mobb's own scanner at all. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -35015,6 +35040,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityOrg?: InputMaybe<Scalars['Boolean']['input']>;
   isDashboardActivityProject?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Org product mode. true = SAST and fix, the current behaviour every pre-existing org was backfilled to. false = SAST-only: findings are surfaced but no fixes are generated or offered. NULL (unset) - ask the user to set when the organization is created, during first login. Distinct from is_mobb_sast_enabled, which controls whether the org can run Mobb's own scanner at all. */
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isMobbSastEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isPrivateRepoEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   isSendInvitationEnabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -35569,6 +35596,8 @@ export enum Organization_Update_Column {
   IsDashboardActivityOrg = 'isDashboardActivityOrg',
   /** column name */
   IsDashboardActivityProject = 'isDashboardActivityProject',
+  /** column name */
+  IsFixEnabled = 'isFixEnabled',
   /** column name */
   IsMobbSastEnabled = 'isMobbSastEnabled',
   /** column name */
@@ -68573,6 +68602,7 @@ export type DigestVulnerabilityReportMutationVariables = Exact<{
   reference?: InputMaybe<Scalars['String']['input']>;
   sha?: InputMaybe<Scalars['String']['input']>;
   baselineCommit?: InputMaybe<Scalars['String']['input']>;
+  isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -69363,7 +69393,7 @@ export const GetTracyRawDataUploadUrlDocument = `
 }
     `;
 export const DigestVulnerabilityReportDocument = `
-    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String, $baselineCommit: String) {
+    mutation DigestVulnerabilityReport($vulnerabilityReportFileName: String, $fixReportId: String!, $projectId: String!, $scanSource: String!, $repoUrl: String, $reference: String, $sha: String, $baselineCommit: String, $isFixEnabled: Boolean) {
   digestVulnerabilityReport(
     fixReportId: $fixReportId
     vulnerabilityReportFileName: $vulnerabilityReportFileName
@@ -69373,6 +69403,7 @@ export const DigestVulnerabilityReportDocument = `
     reference: $reference
     sha: $sha
     baselineCommit: $baselineCommit
+    isFixEnabled: $isFixEnabled
   ) {
     __typename
     ... on VulnerabilityReport {

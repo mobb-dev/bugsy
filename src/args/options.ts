@@ -152,6 +152,14 @@ export const baselineCommitOption = {
   type: 'string',
 } as const
 
+export const scanOnlyOption = {
+  describe: chalk.bold(
+    'Scan only: run the Mobb scan and report findings without generating fixes. The report can be fixed later (re-run without this flag, or use the Fix button in the app). Ignores fix-related flags (--auto-pr, --commit-directly, --create-one-pr).'
+  ),
+  type: 'boolean',
+  default: false,
+} as const
+
 export const pollingOption = {
   describe: chalk.bold(
     'Use HTTP polling instead of WebSocket for status updates. Useful for proxy environments or firewalls that block WebSocket connections. Polling interval: 5 seconds, timeout: 30 minutes.'

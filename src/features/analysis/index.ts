@@ -176,6 +176,7 @@ export type AnalysisParams = {
   commitDirectly?: boolean
   polling?: boolean
   baselineCommit?: string
+  scanOnly?: boolean
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -355,6 +356,7 @@ export async function _scan(
     pullRequest,
     polling,
     baselineCommit,
+    scanOnly,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -502,11 +504,15 @@ export async function _scan(
     polling,
     // Only meaningful when opengrep is going to run (no user-supplied report).
     baselineCommit: shouldScan ? baselineCommit : undefined,
+    scanOnly,
   })
 
   uploadReportSpinner.success({ text: '📁 Report uploaded successfully' })
+
   const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
+  // Scan-only still submits so the backend runs the analysis (code locations +
+  // classification); the backend skips fix generation for scan-only reports.
   const sendReportRes = await sendReport({
     gqlClient,
     spinner: mobbSpinner,
@@ -534,9 +540,12 @@ export async function _scan(
   }
 
   mobbSpinner.success({
-    text: '🕵️‍♂️ Generating fixes...',
+    text: scanOnly
+      ? '🔍 Scanning (scan-only, no fixes)...'
+      : '🕵️‍♂️ Generating fixes...',
   })
-  if (autoPr) {
+  // Fix-related follow-ups don't apply to scan-only reports.
+  if (autoPr && !scanOnly) {
     await handleAutoPr({
       gqlClient,
       analysisId: reportUploadInfo.fixReportId,
@@ -549,7 +558,7 @@ export async function _scan(
   }
 
   await askToOpenAnalysis()
-  if (command === 'review') {
+  if (command === 'review' && !scanOnly) {
     await waitForAnaysisAndReviewPr({
       repo,
       githubActionToken,
@@ -689,6 +698,7 @@ export async function _scan(
         // only applies to the opengrep code path. Drop it to keep the contract
         // honest with the CLI help text.
         baselineCommit: undefined,
+        scanOnly,
       })
 
       const res = await _zipAndUploadRepo({
@@ -716,11 +726,14 @@ export async function _scan(
         shouldScan,
         polling,
         baselineCommit,
+        scanOnly,
       })
     }
 
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
+    // Scan-only still submits so the backend runs the analysis (code locations +
+    // classification); the backend skips fix generation for scan-only reports.
     try {
       await sendReport({
         gqlClient,
@@ -739,7 +752,7 @@ export async function _scan(
         polling,
       })
 
-      if (command === 'review') {
+      if (command === 'review' && !scanOnly) {
         await waitForAnaysisAndReviewPr({
           repo,
           githubActionToken,
@@ -755,9 +768,11 @@ export async function _scan(
     }
 
     mobbSpinner.success({
-      text: '🕵️‍♂️ Generating fixes...',
+      text: scanOnly
+        ? '🔍 Scanning (scan-only, no fixes)...'
+        : '🕵️‍♂️ Generating fixes...',
     })
-    if (autoPr) {
+    if (autoPr && !scanOnly) {
       await handleAutoPr({
         gqlClient,
         analysisId: reportUploadInfo.fixReportId,
@@ -840,6 +855,7 @@ export async function _digestReport({
   shouldScan,
   polling,
   baselineCommit,
+  scanOnly,
 }: {
   gqlClient: GQLClient
   fixReportId: string
@@ -852,6 +868,7 @@ export async function _digestReport({
   shouldScan?: boolean
   polling?: boolean
   baselineCommit?: string
+  scanOnly?: boolean
 }) {
   const digestSpinner = createSpinner(
     progressMassages.processingVulnerabilityReport
@@ -867,6 +884,7 @@ export async function _digestReport({
         reference,
         shouldScan,
         baselineCommit,
+        scanOnly,
       }
     )
 

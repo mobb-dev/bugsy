@@ -18,6 +18,7 @@ import {
   pollingOption,
   refOption,
   repoOption,
+  scanOnlyOption,
   yesOption,
 } from '../options'
 import { AnalyzeOptions, BaseAnalyzeOptions } from '../types'
@@ -69,6 +70,11 @@ export function analyzeBuilder(
     })
     .option('polling', pollingOption)
     .option('baseline-commit', baselineCommitOption)
+    .option('scan-only', scanOnlyOption)
+    .example(
+      'npx mobbdev@latest analyze -r https://github.com/org/repo --scan-only',
+      'scan only — report findings without generating fixes'
+    )
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
       'analyze an existing repository'

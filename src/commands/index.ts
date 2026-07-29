@@ -71,6 +71,7 @@ export async function analyze(
     pullRequest,
     polling,
     baselineCommit,
+    scanOnly,
   }: AnalyzeOptions,
   { skipPrompts = false }: CommandOptions = {}
 ) {
@@ -94,6 +95,7 @@ export async function analyze(
       createOnePr,
       polling,
       baselineCommit,
+      scanOnly,
     },
     { skipPrompts }
   )

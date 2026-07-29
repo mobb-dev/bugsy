@@ -433,6 +433,7 @@ export class GQLClient {
     sha,
     shouldScan,
     baselineCommit,
+    scanOnly,
   }: {
     fixReportId: string
     projectId: string
@@ -442,6 +443,7 @@ export class GQLClient {
     sha?: string
     shouldScan?: boolean
     baselineCommit?: string
+    scanOnly?: boolean
   }) {
     const res = await this._clientSdk.DigestVulnerabilityReport({
       fixReportId,
@@ -454,6 +456,8 @@ export class GQLClient {
       reference,
       sha,
       baselineCommit,
+      // CLI exposes the inverse `--scan-only` flag; the wire field is isFixEnabled.
+      isFixEnabled: scanOnly === undefined ? undefined : !scanOnly,
     })
     if (res.digestVulnerabilityReport.__typename !== 'VulnerabilityReport') {
       throw new Error('Digesting vulnerability report failed')

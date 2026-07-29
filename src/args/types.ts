@@ -32,6 +32,8 @@ export type BaseAnalyzeOptions = {
   pullRequest?: number
   polling?: boolean
   baselineCommit?: string
+  scanOnly?: boolean
+  'scan-only'?: boolean
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>

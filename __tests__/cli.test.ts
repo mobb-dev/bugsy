@@ -188,6 +188,55 @@ describe('cli commands', () => {
       expect.any(Object)
     )
   })
+
+  it('should pass scanOnly parameter to runAnalysis when --scan-only is used', async () => {
+    const baseAnalyzeOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      scanFile: reportPath,
+      scanOnly: true,
+    }
+    const rawArgs = Object.entries(baseAnalyzeOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.analyze, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        scanOnly: true,
+        command: 'analyze',
+      }),
+      expect.any(Object)
+    )
+  })
+
+  it('should default scanOnly to false when --scan-only is not specified', async () => {
+    const baseAnalyzeOptions = {
+      apiKey: TEST_REPO.API_KEY,
+      repo: TEST_REPO.URL,
+      ref: TEST_REPO.REF,
+      scanFile: reportPath,
+    }
+    const rawArgs = Object.entries(baseAnalyzeOptions).flatMap(
+      ([key, value]) => {
+        return [kebabCase(key), `${value}`]
+      }
+    )
+    const runAnalysisSpy = vi.spyOn(analysisExports, 'runAnalysis')
+    await runCommand([mobbCliCommand.analyze, ...rawArgs])
+    expect(runAnalysisSpy).toBeCalled()
+    expect(runAnalysisSpy).toBeCalledWith(
+      expect.objectContaining({
+        scanOnly: false,
+        command: 'analyze',
+      }),
+      expect.any(Object)
+    )
+  })
 })
 
 function runCommand(args: string[]) {

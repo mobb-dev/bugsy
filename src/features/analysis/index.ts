@@ -356,7 +356,7 @@ export async function _scan(
     pullRequest,
     polling,
     baselineCommit,
-    scanOnly,
+    scanOnly: requestedScanOnly,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -377,10 +377,23 @@ export async function _scan(
     projectId,
     organizationId,
     enableV2Fixes: orgEnableV2Fixes,
+    isFixEnabled: orgIsFixEnabled,
   } = await gqlClient.getLastOrgAndNamedProject({
     projectName: mobbProjectName,
     userDefinedOrganizationId: userOrganizationId,
   })
+
+  // A SAST-only organization can only scan, whether or not --scan-only was
+  // passed. The backend enforces this too; here it is about saying so out loud
+  // instead of silently dropping the fixes the user asked for.
+  const scanOnly = requestedScanOnly || !orgIsFixEnabled
+  if (scanOnly && !requestedScanOnly) {
+    console.log(
+      chalk.yellow(
+        'ℹ️  Your organization is on Mobb Scan (scan-only): issues will be found and reported, but no fixes are generated. Contact support to enable Mobb Fixer.'
+      )
+    )
+  }
   const {
     uploadS3BucketInfo: { repoUploadInfo, reportUploadInfo },
   } = await gqlClient.uploadS3BucketInfo()

@@ -68442,14 +68442,14 @@ export type GetLastOrgAndNamedProjectQueryVariables = Exact<{
 }>;
 
 
-export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
+export type GetLastOrgAndNamedProjectQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean, isFixEnabled?: boolean | null, projects: Array<{ __typename?: 'project', name: string, id: any }> } }> }> };
 
 export type GetLastOrgQueryVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
 
-export type GetLastOrgQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, name?: string | null, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean } }> }> };
+export type GetLastOrgQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: any, name?: string | null, userOrganizationsAndUserOrganizationRoles: Array<{ __typename?: 'organization_to_user', id: any, organization: { __typename?: 'organization', id: any, enableV2Fixes: boolean, isFixEnabled?: boolean | null } }> }> };
 
 export type GetEncryptedApiTokenQueryVariables = Exact<{
   loginId: Scalars['uuid']['input'];
@@ -68973,6 +68973,7 @@ export const GetLastOrgAndNamedProjectDocument = `
       organization {
         id
         enableV2Fixes
+        isFixEnabled
         projects(where: {name: {_eq: $projectName}}) {
           name
           id
@@ -68992,6 +68993,7 @@ export const GetLastOrgDocument = `
       organization {
         id
         enableV2Fixes
+        isFixEnabled
       }
     }
   }

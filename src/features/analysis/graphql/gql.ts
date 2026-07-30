@@ -287,6 +287,7 @@ export class GQLClient {
           organization: {
             id: string
             enableV2Fixes: boolean
+            isFixEnabled?: boolean | null
             projects?: { id: string }[]
           }
         }) => org.organization
@@ -316,6 +317,9 @@ export class GQLClient {
       organizationId: organization.id,
       projectId: projectId,
       enableV2Fixes: organization.enableV2Fixes === true,
+      // NULL means "unset" and keeps the fix-enabled behaviour; only an
+      // explicit false puts the org in SAST-only mode.
+      isFixEnabled: organization.isFixEnabled !== false,
     }
   }
 

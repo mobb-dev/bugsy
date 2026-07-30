@@ -42,6 +42,9 @@ export { isAuthError, isTransientError }
 // Backwards-compatible alias
 export const isNetworkError = isTransientError
 
+export const MVS_SCAN_ONLY_ERROR =
+  'Mobb Vibe Shield is not available for your organization: it is on Mobb Scan (scan-only), which reports issues but does not generate fixes. Contact support to enable Mobb Fixer.'
+
 type McpGQLClientArgs =
   { apiKey: string; type: 'apiKey' } | { token: string; type: 'token' }
 
@@ -256,13 +259,22 @@ export class McpGQLClient extends GQLClient {
       }
 
       const orgRes = await this._clientSdk.getLastOrg({ email: userEmail })
-      const organizationId =
+      const organization =
         orgRes.user?.[0]?.userOrganizationsAndUserOrganizationRoles?.[0]
-          ?.organization?.id
+          ?.organization
+      const organizationId = organization?.id
       if (!organizationId) {
         throw new Error(
           `The user with email:${userEmail} is not associated with any organization`
         )
+      }
+
+      // MVS is a fix product: every MCP tool ends in applying a patch. A
+      // SAST-only org has nothing to apply, so stop here rather than resolve an
+      // MVS project and fail later with something less explainable. NULL means
+      // unset and stays fix-enabled.
+      if (organization.isFixEnabled === false) {
+        throw new Error(MVS_SCAN_ONLY_ERROR)
       }
 
       // Resolved server-side: members lack canCreateProject, so the developer's

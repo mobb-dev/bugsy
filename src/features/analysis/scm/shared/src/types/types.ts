@@ -6,6 +6,7 @@ import {
   Fix_State_Enum,
   IssueLanguage_Enum,
   Project_Role_Type_Enum,
+  Scan_Source_Enum,
   Vulnerability_Report_Issue_Category_Enum,
   Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Vendor_Enum,
@@ -172,6 +173,8 @@ export const ReportQueryResultZ = z.object({
       reportSummaryUrl: z.url().nullish(),
       computedVendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
       vendor: z.enum(Vulnerability_Report_Vendor_Enum).nullable(),
+      // Lets the waiting screen distinguish a first scan from a rescan.
+      scanSource: z.enum(Scan_Source_Enum).nullable(),
       issuesWithKnownLanguage: z.number().nullable(),
       scanDate: z.string().nullable(),
       vendorReportId: z.guid().nullable(),

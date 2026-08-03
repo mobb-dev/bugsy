@@ -16,6 +16,7 @@ import {
 import { cxOperatingSystemSupportMessage } from '../../../post_install/constants.mjs'
 import { CliError } from '../../../utils'
 import { createSpawn } from '../../../utils/child_process'
+import { isStandaloneBinary } from '../../../utils/standalone_binary'
 
 const debug = Debug('mobbdev:checkmarx')
 // Handle both ESM and CommonJS environments
@@ -48,6 +49,13 @@ const getCheckmarxPath = () => {
   try {
     return costumeRequire.resolve(`.bin/${cxFileName}`)
   } catch (e) {
+    // cx is installed by the npm postinstall, which never runs for the
+    // standalone binary — don't blame the user's OS.
+    if (isStandaloneBinary()) {
+      throw new CliError(
+        'The Checkmarx scanner is not available in the standalone mobbdev binary yet. Use the npm package instead: npx mobbdev@latest'
+      )
+    }
     throw new CliError(cxOperatingSystemSupportMessage)
   }
 }

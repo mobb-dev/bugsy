@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test index.mjs",
-    "test:mcp": "node --test mcp.mjs"
+    "test:mcp": "node --test mcp.mjs",
+    "test:binary": "node --test binary.mjs"
   },
   "dependencies": {
     "adm-zip": "0.5.17",

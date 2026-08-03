@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-binary
 build
 html
 coverage
@@ -8,6 +9,7 @@ src/features/codeium_intellij/proto
 src/mcp/client_generates.ts
 client_codegen.ts
 tsup.config.js
+tsup.binary.config.js
 __tests__/assets/github_fixer_demo/**/*.js
 __tests__/assets/github_fixer_demo/false_positive_no_fix/repo/main.js
 __tests__/mcp/vitest.config.ts

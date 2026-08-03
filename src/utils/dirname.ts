@@ -17,6 +17,12 @@ declare const __dirname: string | undefined
  * Walking up the tree ensures we always find package.json regardless of the calling context.
  */
 export function getModuleRootDir() {
+  // Set by sea_assets.ts when running inside a Node SEA binary.
+  const seaRoot = process.env['MOBBDEV_MODULE_ROOT']
+  if (seaRoot) {
+    return seaRoot
+  }
+
   let manifestDir = getDirName()
 
   for (let i = 0; i < 10; i++) {

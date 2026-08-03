@@ -38,8 +38,10 @@ export function createSpawn(
   { args, processPath, name, cwd, env }: BaseChildProcessArgs,
   options: ChildProcessOptions
 ) {
+  // No 'ipc' slot: spawn targets are external binaries (cx, snyk standalone),
+  // and an ipc fd injects NODE_CHANNEL_FD into children that can't service it.
   const child = cp.spawn(processPath, args, {
-    stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
+    stdio: ['inherit', 'pipe', 'pipe'],
     env: { ...process.env, ...env },
     cwd,
   })

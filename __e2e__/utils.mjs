@@ -1,26 +1,13 @@
 import { spawn } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { unlink } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { parse } from 'dotenv'
-
-/**
- * Environment variables for SAST providers integrations.
- *
- * @type {Object}
- */
-export const SAST_PROVIDERS_ENV = parse(
-  readFileSync(
-    path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      '../../../consumers/analyzer/analyzer/report_generator/.env'
-    ),
-    'utf8'
-  )
-)
+// No eager file reads at module scope: importing this module must not require a
+// submodule checkout. (SAST_PROVIDERS_ENV used to read the analyzer's gitignored
+// report_generator/.env here — it was referenced only from commented-out code
+// in index.mjs, and it broke every importer on a no-submodule checkout.)
 
 /**
  * Absolute path to the CLI folder.

@@ -1,10 +1,8 @@
-import { mkdtemp } from 'node:fs/promises'
+import { mkdtemp, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
 import { runServer } from 'verdaccio'
-
-import { run } from './utils.mjs'
 
 export const REGISTRY_PORT = 4873
 
@@ -29,13 +27,20 @@ export class Registry {
     this.#tmpDir = await mkdtemp(path.join(os.tmpdir(), 'registry'))
     this.#server = await runServer({
       storage: this.#tmpDir,
+      // Platform binary tarballs are ~40MB compressed; default is 10mb.
+      max_body_size: '200mb',
       uplinks: {
         npmjs: {
           url: 'https://registry.npmjs.org/',
         },
       },
       packages: {
-        mobbdev: {
+        // JS CLI package (mobbdev) + scoped binary distribution (@mobb.ai/*)
+        'mobbdev*': {
+          access: '$all',
+          publish: '$all',
+        },
+        '@mobb.ai/*': {
           access: '$all',
           publish: '$all',
         },
@@ -85,7 +90,7 @@ export class Registry {
       this.#server.closeAllConnections()
     }
     if (this.#tmpDir) {
-      await run(['rm', '-rf', this.#tmpDir])
+      await rm(this.#tmpDir, { recursive: true, force: true })
     }
   }
 }

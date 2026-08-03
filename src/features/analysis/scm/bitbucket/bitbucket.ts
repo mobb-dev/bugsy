@@ -1,7 +1,7 @@
 import querystring from 'node:querystring'
 
 import * as bitbucketPkgNode from 'bitbucket'
-import bitbucketPkg, { APIClient, Schema } from 'bitbucket'
+import { APIClient, Schema } from 'bitbucket'
 import Debug from 'debug'
 import { z } from 'zod'
 
@@ -28,6 +28,10 @@ import {
   GetReposParam,
 } from './types'
 import { BitbucketAuthResultZ } from './validation'
+
+// Static default import breaks CJS bundling (binary build); derive it instead.
+const bitbucketPkg = (bitbucketPkgNode as { default?: typeof bitbucketPkgNode })
+  .default
 
 const debug = Debug('scm:bitbucket')
 

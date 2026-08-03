@@ -39,3 +39,7 @@ html
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Standalone binary build outputs (build:binary)
+dist-binary/
+binaries/

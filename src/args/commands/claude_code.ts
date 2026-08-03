@@ -11,6 +11,7 @@ import {
   installMobbHooks,
   writeDaemonCheckScript,
 } from '../../features/claude_code/install_hook'
+import { isStandaloneBinary } from '../../utils/standalone_binary'
 
 export const claudeCodeInstallHookBuilder = (yargs: Argv) => {
   return yargs
@@ -55,6 +56,16 @@ export const claudeCodeDaemonBuilder = (yargs: Argv) => {
 export const claudeCodeInstallHookHandler = async (argv: {
   'save-env': boolean
 }) => {
+  // The hook we install is `<node> ~/.mobbdev/daemon-check.js`. A SEA binary is
+  // not a JS runtime — it would ignore the script path and print its own help
+  // on every tool use — and the shim itself needs node/npx anyway.
+  if (isStandaloneBinary()) {
+    console.error(
+      'Claude Code hooks are not available in the standalone mobbdev binary (they need a Node.js runtime). Install them with the npm package instead: npx mobbdev@latest claude-code-install-hook'
+    )
+    process.exit(1)
+  }
+
   try {
     // Authenticate user using existing CLI auth flow
     await getAuthenticatedGQLClient({ isSkipPrompts: false })

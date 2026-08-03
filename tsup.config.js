@@ -20,6 +20,8 @@ function textLoaderPlugin(suffix) {
   }
 }
 
+// KEEP IN SYNC with tsup.binary.config.js (standalone binary build): the
+// dotenv cascade, define block, and text-loader plugin are duplicated there.
 export default defineConfig(({ env }) => {
   const isProd = env.NODE_ENV === 'production'
 

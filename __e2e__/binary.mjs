@@ -20,9 +20,9 @@ import { after, before, describe, test } from 'node:test'
 import {
   CLI_DIR,
   hostTarget,
-  LAUNCHER_PKG,
   parseTarget,
   platformPackageName,
+  SCOPED_CLI_PKG,
   WRAPPER_DIR,
 } from '../../scripts/targets.mjs'
 import { assert } from './helpers/assertions.mjs'
@@ -75,7 +75,7 @@ describe('npm packaging (Verdaccio publish → install)', () => {
   // packages now declare a `mobbdev` bin too, so which one owns that shim is
   // up to npm's install order. Test the launcher's resolution logic directly.
   const launcher = () =>
-    path.join(proj, 'node_modules', LAUNCHER_PKG, 'bin/mobbdev.js')
+    path.join(proj, 'node_modules', SCOPED_CLI_PKG, 'bin/mobbdev.js')
 
   before(async () => {
     assert(
@@ -144,7 +144,7 @@ describe('npm packaging (Verdaccio publish → install)', () => {
         '--no-audit',
         '--registry',
         REGISTRY_URL,
-        LAUNCHER_PKG,
+        SCOPED_CLI_PKG,
       ],
       { cwd: proj, env: npmEnv }
     )

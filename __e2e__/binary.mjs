@@ -20,10 +20,10 @@ import { after, before, describe, test } from 'node:test'
 import {
   CLI_DIR,
   hostTarget,
+  LAUNCHER_PKG,
   parseTarget,
   platformPackageName,
   WRAPPER_DIR,
-  WRAPPER_PKG,
 } from '../../scripts/targets.mjs'
 import { assert } from './helpers/assertions.mjs'
 import { Registry, REGISTRY_PORT } from './Registry.mjs'
@@ -71,8 +71,11 @@ describe('npm packaging (Verdaccio publish → install)', () => {
   let work
   let proj
 
-  // The bin npm put on PATH for @mobb.ai/cli.
-  const launcher = () => path.join(proj, 'node_modules/.bin/mobbdev')
+  // The launcher's own entry, not node_modules/.bin/mobbdev: the platform
+  // packages now declare a `mobbdev` bin too, so which one owns that shim is
+  // up to npm's install order. Test the launcher's resolution logic directly.
+  const launcher = () =>
+    path.join(proj, 'node_modules', LAUNCHER_PKG, 'bin/mobbdev.js')
 
   before(async () => {
     assert(
@@ -141,7 +144,7 @@ describe('npm packaging (Verdaccio publish → install)', () => {
         '--no-audit',
         '--registry',
         REGISTRY_URL,
-        WRAPPER_PKG,
+        LAUNCHER_PKG,
       ],
       { cwd: proj, env: npmEnv }
     )
@@ -167,14 +170,14 @@ describe('npm packaging (Verdaccio publish → install)', () => {
   })
 
   test('launcher runs the binary it resolved', () => {
-    const { out, code } = cli(launcher(), ['--help'])
+    const { out, code } = cli(process.execPath, [launcher(), '--help'])
     assert(code === 0, `launcher --help exited ${code}`)
     assert(out.includes('Bugsy'), 'launcher --help output missing banner')
   })
 
   test('launcher forwards the exit code', () => {
     const direct = cli(HOST_BINARY, ['scan', '--ci'])
-    const viaLauncher = cli(launcher(), ['scan', '--ci'])
+    const viaLauncher = cli(process.execPath, [launcher(), 'scan', '--ci'])
     assert(
       direct.code === viaLauncher.code,
       `exit code passthrough broken (direct=${direct.code} launcher=${viaLauncher.code})`

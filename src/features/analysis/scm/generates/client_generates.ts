@@ -8610,6 +8610,10 @@ export type Ai_Tool_User_Day_Usage_Variance_Order_By = {
   tokenCount?: InputMaybe<Order_By>;
 };
 
+export type Analysis_Groups_Vulnerability_Report_Args = {
+  filters?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** columns and relationships of "analytics.active_repositories_analysis_runs_trends" */
 export type Analytics_Active_Repositories_Analysis_Runs_Trends = {
   __typename?: 'analytics_active_repositories_analysis_runs_trends';
@@ -38786,6 +38790,10 @@ export type Query_Root = {
   view_types_ai_human_days_stats: Array<View_Types_Ai_Human_Days_Stats>;
   /** fetch aggregated fields from the table: "view_types.ai_human_days_stats" */
   view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
+  /** fetch data from the table: "view_types.analysis_group_count" */
+  view_types_analysis_group_count: Array<View_Types_Analysis_Group_Count>;
+  /** fetch aggregated fields from the table: "view_types.analysis_group_count" */
+  view_types_analysis_group_count_aggregate: View_Types_Analysis_Group_Count_Aggregate;
   /** fetch data from the table: "view_types.contributor_counts" */
   view_types_contributor_counts: Array<View_Types_Contributor_Counts>;
   /** fetch aggregated fields from the table: "view_types.contributor_counts" */
@@ -42610,6 +42618,24 @@ export type Query_RootView_Types_Ai_Human_Days_Stats_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
   where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Analysis_Group_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Analysis_Group_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Analysis_Group_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Analysis_Group_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
 };
 
 
@@ -48701,6 +48727,12 @@ export type Subscription_Root = {
   view_types_ai_human_days_stats_aggregate: View_Types_Ai_Human_Days_Stats_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.ai_human_days_stats" */
   view_types_ai_human_days_stats_stream: Array<View_Types_Ai_Human_Days_Stats>;
+  /** fetch data from the table: "view_types.analysis_group_count" */
+  view_types_analysis_group_count: Array<View_Types_Analysis_Group_Count>;
+  /** fetch aggregated fields from the table: "view_types.analysis_group_count" */
+  view_types_analysis_group_count_aggregate: View_Types_Analysis_Group_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.analysis_group_count" */
+  view_types_analysis_group_count_stream: Array<View_Types_Analysis_Group_Count>;
   /** fetch data from the table: "view_types.contributor_counts" */
   view_types_contributor_counts: Array<View_Types_Contributor_Counts>;
   /** fetch aggregated fields from the table: "view_types.contributor_counts" */
@@ -53144,6 +53176,31 @@ export type Subscription_RootView_Types_Ai_Human_Days_Stats_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Ai_Human_Days_Stats_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Analysis_Group_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Analysis_Group_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Analysis_Group_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Analysis_Group_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Analysis_Group_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Analysis_Group_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
 };
 
 
@@ -62131,6 +62188,198 @@ export type View_Types_Ai_Human_Days_Stats_Variance_Fields = {
   previousHumanAvgDays?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "view_types.analysis_group_count" */
+export type View_Types_Analysis_Group_Count = {
+  __typename?: 'view_types_analysis_group_count';
+  fixCount?: Maybe<Scalars['bigint']['output']>;
+  fixedIssueCount?: Maybe<Scalars['bigint']['output']>;
+  issueCount?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+  rowCount?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.analysis_group_count" */
+export type View_Types_Analysis_Group_Count_Aggregate = {
+  __typename?: 'view_types_analysis_group_count_aggregate';
+  aggregate?: Maybe<View_Types_Analysis_Group_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Analysis_Group_Count>;
+};
+
+/** aggregate fields of "view_types.analysis_group_count" */
+export type View_Types_Analysis_Group_Count_Aggregate_Fields = {
+  __typename?: 'view_types_analysis_group_count_aggregate_fields';
+  avg?: Maybe<View_Types_Analysis_Group_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Analysis_Group_Count_Max_Fields>;
+  min?: Maybe<View_Types_Analysis_Group_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Analysis_Group_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Analysis_Group_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Analysis_Group_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Analysis_Group_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Analysis_Group_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Analysis_Group_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Analysis_Group_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.analysis_group_count" */
+export type View_Types_Analysis_Group_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Analysis_Group_Count_Avg_Fields = {
+  __typename?: 'view_types_analysis_group_count_avg_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.analysis_group_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Analysis_Group_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Analysis_Group_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Analysis_Group_Count_Bool_Exp>>;
+  fixCount?: InputMaybe<Bigint_Comparison_Exp>;
+  fixedIssueCount?: InputMaybe<Bigint_Comparison_Exp>;
+  issueCount?: InputMaybe<Bigint_Comparison_Exp>;
+  issueType?: InputMaybe<String_Comparison_Exp>;
+  rowCount?: InputMaybe<Bigint_Comparison_Exp>;
+  severity?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Analysis_Group_Count_Max_Fields = {
+  __typename?: 'view_types_analysis_group_count_max_fields';
+  fixCount?: Maybe<Scalars['bigint']['output']>;
+  fixedIssueCount?: Maybe<Scalars['bigint']['output']>;
+  issueCount?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+  rowCount?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Analysis_Group_Count_Min_Fields = {
+  __typename?: 'view_types_analysis_group_count_min_fields';
+  fixCount?: Maybe<Scalars['bigint']['output']>;
+  fixedIssueCount?: Maybe<Scalars['bigint']['output']>;
+  issueCount?: Maybe<Scalars['bigint']['output']>;
+  issueType?: Maybe<Scalars['String']['output']>;
+  rowCount?: Maybe<Scalars['bigint']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.analysis_group_count". */
+export type View_Types_Analysis_Group_Count_Order_By = {
+  fixCount?: InputMaybe<Order_By>;
+  fixedIssueCount?: InputMaybe<Order_By>;
+  issueCount?: InputMaybe<Order_By>;
+  issueType?: InputMaybe<Order_By>;
+  rowCount?: InputMaybe<Order_By>;
+  severity?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.analysis_group_count" */
+export enum View_Types_Analysis_Group_Count_Select_Column {
+  /** column name */
+  FixCount = 'fixCount',
+  /** column name */
+  FixedIssueCount = 'fixedIssueCount',
+  /** column name */
+  IssueCount = 'issueCount',
+  /** column name */
+  IssueType = 'issueType',
+  /** column name */
+  RowCount = 'rowCount',
+  /** column name */
+  Severity = 'severity'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Analysis_Group_Count_Stddev_Fields = {
+  __typename?: 'view_types_analysis_group_count_stddev_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Analysis_Group_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_analysis_group_count_stddev_pop_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Analysis_Group_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_analysis_group_count_stddev_samp_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_analysis_group_count" */
+export type View_Types_Analysis_Group_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Analysis_Group_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Analysis_Group_Count_Stream_Cursor_Value_Input = {
+  fixCount?: InputMaybe<Scalars['bigint']['input']>;
+  fixedIssueCount?: InputMaybe<Scalars['bigint']['input']>;
+  issueCount?: InputMaybe<Scalars['bigint']['input']>;
+  issueType?: InputMaybe<Scalars['String']['input']>;
+  rowCount?: InputMaybe<Scalars['bigint']['input']>;
+  severity?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Analysis_Group_Count_Sum_Fields = {
+  __typename?: 'view_types_analysis_group_count_sum_fields';
+  fixCount?: Maybe<Scalars['bigint']['output']>;
+  fixedIssueCount?: Maybe<Scalars['bigint']['output']>;
+  issueCount?: Maybe<Scalars['bigint']['output']>;
+  rowCount?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Analysis_Group_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_analysis_group_count_var_pop_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Analysis_Group_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_analysis_group_count_var_samp_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Analysis_Group_Count_Variance_Fields = {
+  __typename?: 'view_types_analysis_group_count_variance_fields';
+  fixCount?: Maybe<Scalars['Float']['output']>;
+  fixedIssueCount?: Maybe<Scalars['Float']['output']>;
+  issueCount?: Maybe<Scalars['Float']['output']>;
+  rowCount?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "view_types.contributor_counts" */
 export type View_Types_Contributor_Counts = {
   __typename?: 'view_types_contributor_counts';
@@ -64724,6 +64973,8 @@ export type Vulnerability_Issue_Attribution_Updates = {
 /** columns and relationships of "vulnerability_report" */
 export type Vulnerability_Report = {
   __typename?: 'vulnerability_report';
+  /** A computed field, executes function "get_analysis_groups" */
+  analysis_groups?: Maybe<Array<View_Types_Analysis_Group_Count>>;
   commonPathPrefix?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "get_computed_vendor" */
   computedVendor?: Maybe<Scalars['String']['output']>;
@@ -64764,6 +65015,17 @@ export type Vulnerability_Report = {
   vulnerability_report_states?: Maybe<Array<View_Types_State_Count>>;
   /** A computed field, executes function "get_vulnerability_report_issue_tags" */
   vulnerability_report_tags?: Maybe<Array<View_Types_Tag_Count>>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportAnalysis_GroupsArgs = {
+  args?: InputMaybe<Analysis_Groups_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Analysis_Group_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Analysis_Group_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Analysis_Group_Count_Bool_Exp>;
 };
 
 
@@ -65019,6 +65281,9 @@ export type Vulnerability_Report_Issue = {
   /** An aggregate relationship */
   codeNodes_aggregate: Vulnerability_Report_Issue_Code_Node_Aggregate;
   createdAt: Scalars['timestamptz']['output'];
+  disposition: Scalars['String']['output'];
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: Maybe<Scalars['String']['output']>;
   extraData?: Maybe<Scalars['jsonb']['output']>;
   /** An object relationship */
   falsePositive?: Maybe<False_Positive>;
@@ -65028,6 +65293,8 @@ export type Vulnerability_Report_Issue = {
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
+  /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
+  isFixRepresentative: Scalars['Boolean']['output'];
   isSuppressed: Scalars['Boolean']['output'];
   issueLanguage: Scalars['String']['output'];
   issueType: Scalars['String']['output'];
@@ -65226,6 +65493,8 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Bool_Exp>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Bool_Exp>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  disposition?: InputMaybe<String_Comparison_Exp>;
+  effectiveIssueType?: InputMaybe<String_Comparison_Exp>;
   extraData?: InputMaybe<Jsonb_Comparison_Exp>;
   falsePositive?: InputMaybe<False_Positive_Bool_Exp>;
   fingerprintHash?: InputMaybe<String_Comparison_Exp>;
@@ -65233,6 +65502,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fpId?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  isFixRepresentative?: InputMaybe<Boolean_Comparison_Exp>;
   isSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguage?: InputMaybe<String_Comparison_Exp>;
   issueType?: InputMaybe<String_Comparison_Exp>;
@@ -65969,6 +66239,9 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   codeFilePath?: InputMaybe<Scalars['String']['input']>;
   codeNodes?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Arr_Rel_Insert_Input>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: InputMaybe<Scalars['String']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   falsePositive?: InputMaybe<False_Positive_Obj_Rel_Insert_Input>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -65976,6 +66249,8 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
+  isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
@@ -66008,6 +66283,9 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   __typename?: 'vulnerability_report_issue_max_fields';
   codeFilePath?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  disposition?: Maybe<Scalars['String']['output']>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: Maybe<Scalars['String']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
@@ -66035,6 +66313,9 @@ export type Vulnerability_Report_Issue_Max_Fields = {
 export type Vulnerability_Report_Issue_Max_Order_By = {
   codeFilePath?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
+  disposition?: InputMaybe<Order_By>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: InputMaybe<Order_By>;
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
@@ -66057,6 +66338,9 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   __typename?: 'vulnerability_report_issue_min_fields';
   codeFilePath?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  disposition?: Maybe<Scalars['String']['output']>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: Maybe<Scalars['String']['output']>;
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
@@ -66084,6 +66368,9 @@ export type Vulnerability_Report_Issue_Min_Fields = {
 export type Vulnerability_Report_Issue_Min_Order_By = {
   codeFilePath?: InputMaybe<Order_By>;
   createdAt?: InputMaybe<Order_By>;
+  disposition?: InputMaybe<Order_By>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: InputMaybe<Order_By>;
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
@@ -66130,6 +66417,8 @@ export type Vulnerability_Report_Issue_Order_By = {
   codeFilePath?: InputMaybe<Order_By>;
   codeNodes_aggregate?: InputMaybe<Vulnerability_Report_Issue_Code_Node_Aggregate_Order_By>;
   createdAt?: InputMaybe<Order_By>;
+  disposition?: InputMaybe<Order_By>;
+  effectiveIssueType?: InputMaybe<Order_By>;
   extraData?: InputMaybe<Order_By>;
   falsePositive?: InputMaybe<False_Positive_Order_By>;
   fingerprintHash?: InputMaybe<Order_By>;
@@ -66137,6 +66426,7 @@ export type Vulnerability_Report_Issue_Order_By = {
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  isFixRepresentative?: InputMaybe<Order_By>;
   isSuppressed?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
@@ -66545,6 +66835,10 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
+  Disposition = 'disposition',
+  /** column name */
+  EffectiveIssueType = 'effectiveIssueType',
+  /** column name */
   ExtraData = 'extraData',
   /** column name */
   FingerprintHash = 'fingerprintHash',
@@ -66554,6 +66848,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   FpId = 'fpId',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsFixRepresentative = 'isFixRepresentative',
   /** column name */
   IsSuppressed = 'isSuppressed',
   /** column name */
@@ -66587,11 +66883,15 @@ export enum Vulnerability_Report_Issue_Select_Column {
 /** select "vulnerability_report_issue_aggregate_bool_exp_bool_and_arguments_columns" columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
   /** column name */
+  IsFixRepresentative = 'isFixRepresentative',
+  /** column name */
   IsSuppressed = 'isSuppressed'
 }
 
 /** select "vulnerability_report_issue_aggregate_bool_exp_bool_or_arguments_columns" columns of table "vulnerability_report_issue" */
 export enum Vulnerability_Report_Issue_Select_Column_Vulnerability_Report_Issue_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  IsFixRepresentative = 'isFixRepresentative',
   /** column name */
   IsSuppressed = 'isSuppressed'
 }
@@ -66601,11 +66901,16 @@ export type Vulnerability_Report_Issue_Set_Input = {
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   codeFilePath?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: InputMaybe<Scalars['String']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
+  isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
@@ -66627,6 +66932,10 @@ export type Vulnerability_Report_Issue_Set_Input = {
 export type Vulnerability_Report_Issue_Shared_State = {
   __typename?: 'vulnerability_report_issue_shared_state';
   createdAt: Scalars['timestamptz']['output'];
+  disposition: Scalars['String']['output'];
+  dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
+  dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
+  dispositionReason?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   isArchived: Scalars['Boolean']['output'];
   issueFingerprintHash: Scalars['String']['output'];
@@ -66737,6 +67046,10 @@ export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
   _not?: InputMaybe<Vulnerability_Report_Issue_Shared_State_Bool_Exp>;
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_Shared_State_Bool_Exp>>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  disposition?: InputMaybe<String_Comparison_Exp>;
+  dispositionAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  dispositionByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  dispositionReason?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
   issueFingerprintHash?: InputMaybe<String_Comparison_Exp>;
@@ -66763,6 +67076,10 @@ export enum Vulnerability_Report_Issue_Shared_State_Constraint {
 /** input type for inserting data into table "vulnerability_report_issue_shared_state" */
 export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  dispositionReason?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -66779,6 +67096,10 @@ export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
 export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
   __typename?: 'vulnerability_report_issue_shared_state_max_fields';
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  disposition?: Maybe<Scalars['String']['output']>;
+  dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
+  dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
+  dispositionReason?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -66790,6 +67111,10 @@ export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
 export type Vulnerability_Report_Issue_Shared_State_Min_Fields = {
   __typename?: 'vulnerability_report_issue_shared_state_min_fields';
   createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  disposition?: Maybe<Scalars['String']['output']>;
+  dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
+  dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
+  dispositionReason?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -66823,6 +67148,10 @@ export type Vulnerability_Report_Issue_Shared_State_On_Conflict = {
 /** Ordering options when selecting data from "vulnerability_report_issue_shared_state". */
 export type Vulnerability_Report_Issue_Shared_State_Order_By = {
   createdAt?: InputMaybe<Order_By>;
+  disposition?: InputMaybe<Order_By>;
+  dispositionAt?: InputMaybe<Order_By>;
+  dispositionByUserId?: InputMaybe<Order_By>;
+  dispositionReason?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
   issueFingerprintHash?: InputMaybe<Order_By>;
@@ -66845,6 +67174,14 @@ export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
+  Disposition = 'disposition',
+  /** column name */
+  DispositionAt = 'dispositionAt',
+  /** column name */
+  DispositionByUserId = 'dispositionByUserId',
+  /** column name */
+  DispositionReason = 'dispositionReason',
+  /** column name */
   Id = 'id',
   /** column name */
   IsArchived = 'isArchived',
@@ -66861,6 +67198,10 @@ export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
 /** input type for updating data in table "vulnerability_report_issue_shared_state" */
 export type Vulnerability_Report_Issue_Shared_State_Set_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  dispositionReason?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -66880,6 +67221,10 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  dispositionReason?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -66892,6 +67237,14 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = 
 export enum Vulnerability_Report_Issue_Shared_State_Update_Column {
   /** column name */
   CreatedAt = 'createdAt',
+  /** column name */
+  Disposition = 'disposition',
+  /** column name */
+  DispositionAt = 'dispositionAt',
+  /** column name */
+  DispositionByUserId = 'dispositionByUserId',
+  /** column name */
+  DispositionReason = 'dispositionReason',
   /** column name */
   Id = 'id',
   /** column name */
@@ -67113,11 +67466,16 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   category?: InputMaybe<Vulnerability_Report_Issue_Category_Enum>;
   codeFilePath?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  disposition?: InputMaybe<Scalars['String']['input']>;
+  /** COALESCE(parsed_issue_type, issue_type). The unified issues view groups on this; materialised so the group key is a plain indexable equality. */
+  effectiveIssueType?: InputMaybe<Scalars['String']['input']>;
   extraData?: InputMaybe<Scalars['jsonb']['input']>;
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
+  isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
   isSuppressed?: InputMaybe<Scalars['Boolean']['input']>;
   issueLanguage?: InputMaybe<Scalars['String']['input']>;
   issueType?: InputMaybe<Scalars['String']['input']>;
@@ -67522,6 +67880,10 @@ export enum Vulnerability_Report_Issue_Update_Column {
   /** column name */
   CreatedAt = 'createdAt',
   /** column name */
+  Disposition = 'disposition',
+  /** column name */
+  EffectiveIssueType = 'effectiveIssueType',
+  /** column name */
   ExtraData = 'extraData',
   /** column name */
   FingerprintHash = 'fingerprintHash',
@@ -67531,6 +67893,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   FpId = 'fpId',
   /** column name */
   Id = 'id',
+  /** column name */
+  IsFixRepresentative = 'isFixRepresentative',
   /** column name */
   IsSuppressed = 'isSuppressed',
   /** column name */

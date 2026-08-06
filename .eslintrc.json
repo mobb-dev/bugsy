@@ -37,6 +37,12 @@
       }
     },
     {
+      "files": ["scripts/**/*.mjs", "scripts/**/*.ts"],
+      "parserOptions": {
+        "project": "./scripts/tsconfig.json"
+      }
+    },
+    {
       "files": ["**/*.graphql"],
       "parser": "@graphql-eslint/eslint-plugin",
       "plugins": ["graphql"],

@@ -429,16 +429,82 @@ export async function createMergeRequest(options: {
     url: options.repoUrl,
     gitlabAuthToken: options.accessToken,
   })
-  const res = await api.MergeRequests.create(
-    projectPath,
-    options.sourceBranchName,
-    options.targetBranchName,
-    options.title,
-    {
-      description: safeBody(options.body, MAX_GITLAB_PR_BODY_LENGTH),
+  try {
+    const res = await api.MergeRequests.create(
+      projectPath,
+      options.sourceBranchName,
+      options.targetBranchName,
+      options.title,
+      {
+        description: safeBody(options.body, MAX_GITLAB_PR_BODY_LENGTH),
+      }
+    )
+    return res.iid
+  } catch (e) {
+    // Creation is a POST, and brokerRequestHandler now retries it on 408/5xx.
+    // Those statuses don't tell us whether GitLab applied the request before
+    // timing out, so a retry can hit a branch that already has an open MR and
+    // come back with GitLab's "another open merge request already exists"
+    // conflict. That is a SUCCESS for our purposes — adopt the existing MR
+    // instead of reporting a failure the caller can never recover from.
+    if (!isGitlabDuplicateMergeRequest(e)) {
+      throw e
     }
+    const existingIid = await findOpenGitlabMergeRequestIid({
+      api,
+      projectPath,
+      sourceBranchName: options.sourceBranchName,
+      targetBranchName: options.targetBranchName,
+    })
+    if (existingIid === undefined) {
+      throw e
+    }
+    contextLogger.warn(
+      '[createMergeRequest] adopted existing MR after duplicate conflict',
+      {
+        projectPath,
+        sourceBranch: options.sourceBranchName,
+        targetBranch: options.targetBranchName,
+        iid: existingIid,
+      }
+    )
+    return existingIid
+  }
+}
+
+// gitbeaker surfaces the conflict either as a 409 or as a 4xx whose body carries
+// GitLab's validation message, so match on both.
+export function isGitlabDuplicateMergeRequest(e: unknown): boolean {
+  const status = (e as { status?: number; response?: { status?: number } })
+    ?.status
+  const msg = (e instanceof Error ? e.message : String(e)).toLowerCase()
+  return (
+    status === 409 ||
+    /another open merge request already exists|merge request already exists/.test(
+      msg
+    )
   )
-  return res.iid
+}
+
+async function findOpenGitlabMergeRequestIid({
+  api,
+  projectPath,
+  sourceBranchName,
+  targetBranchName,
+}: {
+  api: ReturnType<typeof getGitBeaker>
+  projectPath: string
+  sourceBranchName: string
+  targetBranchName: string
+}): Promise<number | undefined> {
+  const open = await api.MergeRequests.all({
+    projectId: projectPath,
+    sourceBranch: sourceBranchName,
+    targetBranch: targetBranchName,
+    state: 'opened',
+    perPage: 1,
+  })
+  return open[0]?.iid
 }
 type GetGitlabMergeRequestParams = {
   url: string
@@ -1197,9 +1263,111 @@ async function processBody(response: UndiciResponse) {
 // its submit button permanently disabled. Retry transient responses (and request
 // timeouts) with backoff, honouring Retry-After for 429s. A non-transient status
 // (e.g. 4xx) is thrown immediately, unchanged. See MOBB-3644.
-const GITLAB_RETRYABLE_STATUSES = new Set([429, 502, 503, 504])
-const GITLAB_REQUEST_MAX_ATTEMPTS = 4
+//
+// 408 belongs in this set even though it is a 4xx: it means GitLab gave up
+// waiting on its own upstream, not that our request was malformed, so the same
+// call can succeed on retry. Leaving it out cost us two CI failures where
+// `MergeRequests.create` threw `gitbeaker: Request Timeout` on the FIRST attempt
+// — the branch had already been pushed, so the fix was applied but no MR ever
+// appeared. 520/522/524 are Cloudflare's origin-timeout codes (gitlab.com sits
+// behind Cloudflare) and mean the same thing one hop earlier.
+const GITLAB_RETRYABLE_STATUSES = new Set([
+  408, 429, 500, 502, 503, 504, 520, 522, 524,
+])
+const GITLAB_REQUEST_MAX_ATTEMPTS = 5
 const GITLAB_REQUEST_BASE_BACKOFF_MS = 1_000
+// Cap the exponential growth so attempt 5 doesn't wait 16s, and cap a
+// server-supplied Retry-After so a large value can't stall the caller past the
+// timeouts the app/Playwright are waiting on.
+const GITLAB_REQUEST_MAX_BACKOFF_MS = 8_000
+const GITLAB_RETRY_AFTER_CAP_MS = 30_000
+// Parallel CI jobs share GitLab's rate limit, so a fixed backoff makes them all
+// retry in lockstep and collide again. Spread each retry over a random window.
+const GITLAB_REQUEST_JITTER_MS = 1_000
+// Bound each ATTEMPT rather than the whole operation. undici's default
+// headersTimeout is 300s: a hung socket used to block far longer than any caller
+// waits (the app polls for ~2min) and burned the entire retry budget on one
+// stalled attempt. A tighter per-attempt ceiling plus retries tolerates a slow
+// GitLab better than one long wait does.
+const GITLAB_HEADERS_TIMEOUT_MS = 30_000
+const GITLAB_BODY_TIMEOUT_MS = 60_000
+
+// Reused across requests so the direct (non-broker) path keeps undici's
+// connection pooling — a fresh Agent per call would drop keep-alive and leak
+// sockets.
+const gitlabDirectAgent = new Agent({
+  headersTimeout: GITLAB_HEADERS_TIMEOUT_MS,
+  bodyTimeout: GITLAB_BODY_TIMEOUT_MS,
+})
+
+export function isRetryableGitlabStatus(status: number): boolean {
+  return GITLAB_RETRYABLE_STATUSES.has(status)
+}
+
+// undici's fetch wraps network errors in TypeError with the real error as cause.
+// Classify timeouts and connection failures as transient so the retry loop
+// catches them instead of rethrowing immediately.
+const TRANSIENT_UNDICI_CODES = new Set([
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_SOCKET',
+])
+
+export function isTransientNetworkError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false
+  if (e.name === 'TimeoutError' || e.name === 'AbortError') return true
+  const cause = (e as { cause?: { code?: string; name?: string } }).cause
+  if (cause && typeof cause.code === 'string') {
+    return TRANSIENT_UNDICI_CODES.has(cause.code)
+  }
+  return false
+}
+
+/**
+ * How long to wait before the next attempt.
+ *
+ * Prefers the server's Retry-After (seconds, as GitLab sends it for 429s) and
+ * otherwise backs off exponentially with jitter. Both branches are capped. An
+ * HTTP-date Retry-After parses to NaN and falls through to the backoff, which is
+ * the safe default.
+ */
+export function getGitlabRetryDelayMs({
+  attempt,
+  retryAfterHeader,
+}: {
+  attempt: number
+  retryAfterHeader?: string | null
+}): number {
+  const retryAfterSec = Number(retryAfterHeader)
+  if (Number.isFinite(retryAfterSec) && retryAfterSec > 0) {
+    return Math.min(retryAfterSec * 1_000, GITLAB_RETRY_AFTER_CAP_MS)
+  }
+
+  const backoffMs = Math.min(
+    GITLAB_REQUEST_BASE_BACKOFF_MS * 2 ** (attempt - 1),
+    GITLAB_REQUEST_MAX_BACKOFF_MS
+  )
+  return backoffMs + Math.floor(Math.random() * GITLAB_REQUEST_JITTER_MS)
+}
+
+/**
+ * Error for a non-OK GitLab response, carrying the numeric status.
+ *
+ * Callers classify failures (permission denied, duplicate MR) and previously the
+ * only thing they could inspect was the status TEXT — `isGitlabPermissionDenied`
+ * checks `status === 403` and never matched, falling through to a regex on
+ * "Forbidden". Keeping the status on the error makes that classification real.
+ */
+function gitlabResponseError(
+  response: UndiciResponse
+): Error & { status: number } {
+  const error = new Error(`gitbeaker: ${response.statusText}`) as Error & {
+    status: number
+  }
+  error.status = response.status
+  return error
+}
 
 async function brokerRequestHandler(
   endpoint: string,
@@ -1221,8 +1389,10 @@ async function brokerRequestHandler(
           requestTls: {
             rejectUnauthorized: false,
           },
+          headersTimeout: GITLAB_HEADERS_TIMEOUT_MS,
+          bodyTimeout: GITLAB_BODY_TIMEOUT_MS,
         })
-      : undefined
+      : gitlabDirectAgent
 
   let lastError: Error | undefined
   for (let attempt = 1; attempt <= GITLAB_REQUEST_MAX_ATTEMPTS; attempt++) {
@@ -1236,11 +1406,7 @@ async function brokerRequestHandler(
         dispatcher,
       })
     } catch (e) {
-      // Treat request timeouts as transient and retry; rethrow anything else.
-      if (
-        (e as Error).name === 'TimeoutError' ||
-        (e as Error).name === 'AbortError'
-      ) {
+      if (isTransientNetworkError(e)) {
         lastError = new Error('Query timeout was reached')
       } else {
         throw e
@@ -1255,20 +1421,30 @@ async function brokerRequestHandler(
           status: response.status,
         }
       }
-      if (!GITLAB_RETRYABLE_STATUSES.has(response.status)) {
-        throw new Error(`gitbeaker: ${response.statusText}`)
+      if (!isRetryableGitlabStatus(response.status)) {
+        throw gitlabResponseError(response)
       }
-      lastError = new Error(`gitbeaker: ${response.statusText}`)
+      lastError = gitlabResponseError(response)
     }
 
     if (attempt === GITLAB_REQUEST_MAX_ATTEMPTS) break
 
-    // Honour Retry-After (seconds) when present (429s); otherwise exponential backoff.
-    const retryAfter = Number(response?.headers.get('retry-after'))
-    const waitMs =
-      Number.isFinite(retryAfter) && retryAfter > 0
-        ? retryAfter * 1_000
-        : GITLAB_REQUEST_BASE_BACKOFF_MS * 2 ** (attempt - 1)
+    const waitMs = getGitlabRetryDelayMs({
+      attempt,
+      retryAfterHeader: response?.headers.get('retry-after'),
+    })
+    // Without this the retries are invisible: the CI logs that sent us hunting
+    // showed only the final error, with nothing to say whether we had retried at
+    // all. Log the attempt so the next incident is one grep away.
+    contextLogger.warn('[brokerRequestHandler] retrying GitLab request', {
+      method: options?.method ?? 'GET',
+      pathname: url.pathname,
+      status: response?.status,
+      attempt,
+      maxAttempts: GITLAB_REQUEST_MAX_ATTEMPTS,
+      waitMs,
+      error: lastError?.message,
+    })
     await delay(waitMs)
   }
 

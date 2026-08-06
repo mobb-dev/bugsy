@@ -15909,6 +15909,193 @@ export type Date_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['date']['input']>>;
 };
 
+/** Mobb-owned reference data: the default fnmatch globs that classify findings into a category when an organization has not configured that category. Read-only to users and changed only by migration; per-org overrides live in organization_files_matching_settings. */
+export type Default_Files_Matching_Glob_Pattern = {
+  __typename?: 'default_files_matching_glob_pattern';
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  filesMatchingCategory: Files_Matching_Category;
+  filesMatchingCategoryValue: Files_Matching_Category_Enum;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern: Scalars['String']['output'];
+  id: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Aggregate = {
+  __typename?: 'default_files_matching_glob_pattern_aggregate';
+  aggregate?: Maybe<Default_Files_Matching_Glob_Pattern_Aggregate_Fields>;
+  nodes: Array<Default_Files_Matching_Glob_Pattern>;
+};
+
+/** aggregate fields of "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Aggregate_Fields = {
+  __typename?: 'default_files_matching_glob_pattern_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Default_Files_Matching_Glob_Pattern_Max_Fields>;
+  min?: Maybe<Default_Files_Matching_Glob_Pattern_Min_Fields>;
+};
+
+
+/** aggregate fields of "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "default_files_matching_glob_pattern". All fields are combined with a logical 'AND'. */
+export type Default_Files_Matching_Glob_Pattern_Bool_Exp = {
+  _and?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Bool_Exp>>;
+  _not?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+  _or?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  filesMatchingCategory?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+  filesMatchingCategoryValue?: InputMaybe<Files_Matching_Category_Enum_Comparison_Exp>;
+  globPattern?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "default_files_matching_glob_pattern" */
+export enum Default_Files_Matching_Glob_Pattern_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  DefaultFilesMatchingGlobPatternPkey = 'default_files_matching_glob_pattern_pkey',
+  /** unique or primary key constraint on columns "files_matching_category_value", "glob_pattern" */
+  DefaultFilesMatchingGlobPatternUnique = 'default_files_matching_glob_pattern_unique'
+}
+
+/** input type for inserting data into table "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Insert_Input = {
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  filesMatchingCategory?: InputMaybe<Files_Matching_Category_Obj_Rel_Insert_Input>;
+  filesMatchingCategoryValue?: InputMaybe<Files_Matching_Category_Enum>;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Default_Files_Matching_Glob_Pattern_Max_Fields = {
+  __typename?: 'default_files_matching_glob_pattern_max_fields';
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Default_Files_Matching_Glob_Pattern_Min_Fields = {
+  __typename?: 'default_files_matching_glob_pattern_min_fields';
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Mutation_Response = {
+  __typename?: 'default_files_matching_glob_pattern_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Default_Files_Matching_Glob_Pattern>;
+};
+
+/** on_conflict condition type for table "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_On_Conflict = {
+  constraint: Default_Files_Matching_Glob_Pattern_Constraint;
+  update_columns?: Array<Default_Files_Matching_Glob_Pattern_Update_Column>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "default_files_matching_glob_pattern". */
+export type Default_Files_Matching_Glob_Pattern_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  filesMatchingCategory?: InputMaybe<Files_Matching_Category_Order_By>;
+  filesMatchingCategoryValue?: InputMaybe<Order_By>;
+  globPattern?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: default_files_matching_glob_pattern */
+export type Default_Files_Matching_Glob_Pattern_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "default_files_matching_glob_pattern" */
+export enum Default_Files_Matching_Glob_Pattern_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  FilesMatchingCategoryValue = 'filesMatchingCategoryValue',
+  /** column name */
+  GlobPattern = 'globPattern',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Set_Input = {
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  filesMatchingCategoryValue?: InputMaybe<Files_Matching_Category_Enum>;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "default_files_matching_glob_pattern" */
+export type Default_Files_Matching_Glob_Pattern_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Default_Files_Matching_Glob_Pattern_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Default_Files_Matching_Glob_Pattern_Stream_Cursor_Value_Input = {
+  /** Why this glob is a default. Carried over from the inline comments in the Python constants this table replaced. */
+  comment?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  filesMatchingCategoryValue?: InputMaybe<Files_Matching_Category_Enum>;
+  /** An fnmatch pattern, not a gitignore pattern - the star crosses a slash. This is why the list carries both bare and doubled-star variants of the same directory. */
+  globPattern?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "default_files_matching_glob_pattern" */
+export enum Default_Files_Matching_Glob_Pattern_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  FilesMatchingCategoryValue = 'filesMatchingCategoryValue',
+  /** column name */
+  GlobPattern = 'globPattern',
+  /** column name */
+  Id = 'id'
+}
+
+export type Default_Files_Matching_Glob_Pattern_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Default_Files_Matching_Glob_Pattern_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Default_Files_Matching_Glob_Pattern_Bool_Exp;
+};
+
 export type DeployedFixesCount_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -16718,6 +16905,165 @@ export type File_Updates = {
   _set?: InputMaybe<File_Set_Input>;
   /** filter the rows which have to be updated */
   where: File_Bool_Exp;
+};
+
+/** Enum: the categories a file-matching glob can classify a finding into. A subset of vulnerability_report_issue_tag restricted to the path-derived values, enforced by the FK on value. */
+export type Files_Matching_Category = {
+  __typename?: 'files_matching_category';
+  comment: Scalars['String']['output'];
+  value: Vulnerability_Report_Issue_Tag_Enum;
+};
+
+/** aggregated selection of "files_matching_category" */
+export type Files_Matching_Category_Aggregate = {
+  __typename?: 'files_matching_category_aggregate';
+  aggregate?: Maybe<Files_Matching_Category_Aggregate_Fields>;
+  nodes: Array<Files_Matching_Category>;
+};
+
+/** aggregate fields of "files_matching_category" */
+export type Files_Matching_Category_Aggregate_Fields = {
+  __typename?: 'files_matching_category_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Files_Matching_Category_Max_Fields>;
+  min?: Maybe<Files_Matching_Category_Min_Fields>;
+};
+
+
+/** aggregate fields of "files_matching_category" */
+export type Files_Matching_Category_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Files_Matching_Category_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "files_matching_category". All fields are combined with a logical 'AND'. */
+export type Files_Matching_Category_Bool_Exp = {
+  _and?: InputMaybe<Array<Files_Matching_Category_Bool_Exp>>;
+  _not?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+  _or?: InputMaybe<Array<Files_Matching_Category_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "files_matching_category" */
+export enum Files_Matching_Category_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  FilesMatchingCategoryPkey = 'files_matching_category_pkey'
+}
+
+export enum Files_Matching_Category_Enum {
+  /** Autogenerated code */
+  AutogeneratedCode = 'AUTOGENERATED_CODE',
+  /** Auxiliary code */
+  AuxiliaryCode = 'AUXILIARY_CODE',
+  /** Test code */
+  TestCode = 'TEST_CODE',
+  /** Vendor code */
+  VendorCode = 'VENDOR_CODE'
+}
+
+/** Boolean expression to compare columns of type "files_matching_category_enum". All fields are combined with logical 'AND'. */
+export type Files_Matching_Category_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Files_Matching_Category_Enum>;
+  _in?: InputMaybe<Array<Files_Matching_Category_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Files_Matching_Category_Enum>;
+  _nin?: InputMaybe<Array<Files_Matching_Category_Enum>>;
+};
+
+/** input type for inserting data into table "files_matching_category" */
+export type Files_Matching_Category_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** aggregate max on columns */
+export type Files_Matching_Category_Max_Fields = {
+  __typename?: 'files_matching_category_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Files_Matching_Category_Min_Fields = {
+  __typename?: 'files_matching_category_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "files_matching_category" */
+export type Files_Matching_Category_Mutation_Response = {
+  __typename?: 'files_matching_category_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Files_Matching_Category>;
+};
+
+/** input type for inserting object relation for remote table "files_matching_category" */
+export type Files_Matching_Category_Obj_Rel_Insert_Input = {
+  data: Files_Matching_Category_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Files_Matching_Category_On_Conflict>;
+};
+
+/** on_conflict condition type for table "files_matching_category" */
+export type Files_Matching_Category_On_Conflict = {
+  constraint: Files_Matching_Category_Constraint;
+  update_columns?: Array<Files_Matching_Category_Update_Column>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "files_matching_category". */
+export type Files_Matching_Category_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: files_matching_category */
+export type Files_Matching_Category_Pk_Columns_Input = {
+  value: Vulnerability_Report_Issue_Tag_Enum;
+};
+
+/** select columns of table "files_matching_category" */
+export enum Files_Matching_Category_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "files_matching_category" */
+export type Files_Matching_Category_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** Streaming cursor of the table "files_matching_category" */
+export type Files_Matching_Category_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Files_Matching_Category_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Files_Matching_Category_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
+};
+
+/** update columns of table "files_matching_category" */
+export enum Files_Matching_Category_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Files_Matching_Category_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Files_Matching_Category_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Files_Matching_Category_Bool_Exp;
 };
 
 /** columns and relationships of "fix" */
@@ -22677,6 +23023,10 @@ export type Mutation_Root = {
   delete_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
   /** delete single row from the table: "commit_blame_request" */
   delete_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** delete data from the table: "default_files_matching_glob_pattern" */
+  delete_default_files_matching_glob_pattern?: Maybe<Default_Files_Matching_Glob_Pattern_Mutation_Response>;
+  /** delete single row from the table: "default_files_matching_glob_pattern" */
+  delete_default_files_matching_glob_pattern_by_pk?: Maybe<Default_Files_Matching_Glob_Pattern>;
   /** delete data from the table: "tracy.developer_group" */
   delete_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
   /** delete single row from the table: "tracy.developer_group" */
@@ -22697,6 +23047,10 @@ export type Mutation_Root = {
   delete_file?: Maybe<File_Mutation_Response>;
   /** delete single row from the table: "file" */
   delete_file_by_pk?: Maybe<File>;
+  /** delete data from the table: "files_matching_category" */
+  delete_files_matching_category?: Maybe<Files_Matching_Category_Mutation_Response>;
+  /** delete single row from the table: "files_matching_category" */
+  delete_files_matching_category_by_pk?: Maybe<Files_Matching_Category>;
   /** delete data from the table: "fix" */
   delete_fix?: Maybe<Fix_Mutation_Response>;
   /** delete data from the table: "fix_answer" */
@@ -23243,6 +23597,10 @@ export type Mutation_Root = {
   insert_commit_blame_request?: Maybe<Commit_Blame_Request_Mutation_Response>;
   /** insert a single row into the table: "commit_blame_request" */
   insert_commit_blame_request_one?: Maybe<Commit_Blame_Request>;
+  /** insert data into the table: "default_files_matching_glob_pattern" */
+  insert_default_files_matching_glob_pattern?: Maybe<Default_Files_Matching_Glob_Pattern_Mutation_Response>;
+  /** insert a single row into the table: "default_files_matching_glob_pattern" */
+  insert_default_files_matching_glob_pattern_one?: Maybe<Default_Files_Matching_Glob_Pattern>;
   /** insert data into the table: "tracy.developer_group" */
   insert_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
   /** insert data into the table: "tracy.developer_group_member" */
@@ -23263,6 +23621,10 @@ export type Mutation_Root = {
   insert_file?: Maybe<File_Mutation_Response>;
   /** insert a single row into the table: "file" */
   insert_file_one?: Maybe<File>;
+  /** insert data into the table: "files_matching_category" */
+  insert_files_matching_category?: Maybe<Files_Matching_Category_Mutation_Response>;
+  /** insert a single row into the table: "files_matching_category" */
+  insert_files_matching_category_one?: Maybe<Files_Matching_Category>;
   /** insert data into the table: "fix" */
   insert_fix?: Maybe<Fix_Mutation_Response>;
   /** insert data into the table: "fix_answer" */
@@ -23926,6 +24288,12 @@ export type Mutation_Root = {
   update_commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** update multiples rows of table: "commit_blame_request" */
   update_commit_blame_request_many?: Maybe<Array<Maybe<Commit_Blame_Request_Mutation_Response>>>;
+  /** update data of the table: "default_files_matching_glob_pattern" */
+  update_default_files_matching_glob_pattern?: Maybe<Default_Files_Matching_Glob_Pattern_Mutation_Response>;
+  /** update single row of the table: "default_files_matching_glob_pattern" */
+  update_default_files_matching_glob_pattern_by_pk?: Maybe<Default_Files_Matching_Glob_Pattern>;
+  /** update multiples rows of table: "default_files_matching_glob_pattern" */
+  update_default_files_matching_glob_pattern_many?: Maybe<Array<Maybe<Default_Files_Matching_Glob_Pattern_Mutation_Response>>>;
   /** update data of the table: "tracy.developer_group" */
   update_developer_group?: Maybe<Tracy_Developer_Group_Mutation_Response>;
   /** update single row of the table: "tracy.developer_group" */
@@ -23952,6 +24320,12 @@ export type Mutation_Root = {
   update_file_by_pk?: Maybe<File>;
   /** update multiples rows of table: "file" */
   update_file_many?: Maybe<Array<Maybe<File_Mutation_Response>>>;
+  /** update data of the table: "files_matching_category" */
+  update_files_matching_category?: Maybe<Files_Matching_Category_Mutation_Response>;
+  /** update single row of the table: "files_matching_category" */
+  update_files_matching_category_by_pk?: Maybe<Files_Matching_Category>;
+  /** update multiples rows of table: "files_matching_category" */
+  update_files_matching_category_many?: Maybe<Array<Maybe<Files_Matching_Category_Mutation_Response>>>;
   /** update data of the table: "fix" */
   update_fix?: Maybe<Fix_Mutation_Response>;
   /** update data of the table: "fix_answer" */
@@ -25189,6 +25563,18 @@ export type Mutation_RootDelete_Commit_Blame_Request_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Default_Files_Matching_Glob_PatternArgs = {
+  where: Default_Files_Matching_Glob_Pattern_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Default_Files_Matching_Glob_Pattern_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Developer_GroupArgs = {
   where: Tracy_Developer_Group_Bool_Exp;
 };
@@ -25245,6 +25631,18 @@ export type Mutation_RootDelete_FileArgs = {
 /** mutation root */
 export type Mutation_RootDelete_File_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Files_Matching_CategoryArgs = {
+  where: Files_Matching_Category_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Files_Matching_Category_By_PkArgs = {
+  value: Vulnerability_Report_Issue_Tag_Enum;
 };
 
 
@@ -26958,6 +27356,20 @@ export type Mutation_RootInsert_Commit_Blame_Request_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Default_Files_Matching_Glob_PatternArgs = {
+  objects: Array<Default_Files_Matching_Glob_Pattern_Insert_Input>;
+  on_conflict?: InputMaybe<Default_Files_Matching_Glob_Pattern_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Default_Files_Matching_Glob_Pattern_OneArgs = {
+  object: Default_Files_Matching_Glob_Pattern_Insert_Input;
+  on_conflict?: InputMaybe<Default_Files_Matching_Glob_Pattern_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Developer_GroupArgs = {
   objects: Array<Tracy_Developer_Group_Insert_Input>;
   on_conflict?: InputMaybe<Tracy_Developer_Group_On_Conflict>;
@@ -27024,6 +27436,20 @@ export type Mutation_RootInsert_FileArgs = {
 export type Mutation_RootInsert_File_OneArgs = {
   object: File_Insert_Input;
   on_conflict?: InputMaybe<File_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Files_Matching_CategoryArgs = {
+  objects: Array<Files_Matching_Category_Insert_Input>;
+  on_conflict?: InputMaybe<Files_Matching_Category_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Files_Matching_Category_OneArgs = {
+  object: Files_Matching_Category_Insert_Input;
+  on_conflict?: InputMaybe<Files_Matching_Category_On_Conflict>;
 };
 
 
@@ -29454,6 +29880,26 @@ export type Mutation_RootUpdate_Commit_Blame_Request_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Default_Files_Matching_Glob_PatternArgs = {
+  _set?: InputMaybe<Default_Files_Matching_Glob_Pattern_Set_Input>;
+  where: Default_Files_Matching_Glob_Pattern_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Default_Files_Matching_Glob_Pattern_By_PkArgs = {
+  _set?: InputMaybe<Default_Files_Matching_Glob_Pattern_Set_Input>;
+  pk_columns: Default_Files_Matching_Glob_Pattern_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Default_Files_Matching_Glob_Pattern_ManyArgs = {
+  updates: Array<Default_Files_Matching_Glob_Pattern_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Developer_GroupArgs = {
   _set?: InputMaybe<Tracy_Developer_Group_Set_Input>;
   where: Tracy_Developer_Group_Bool_Exp;
@@ -29538,6 +29984,26 @@ export type Mutation_RootUpdate_File_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_File_ManyArgs = {
   updates: Array<File_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Files_Matching_CategoryArgs = {
+  _set?: InputMaybe<Files_Matching_Category_Set_Input>;
+  where: Files_Matching_Category_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Files_Matching_Category_By_PkArgs = {
+  _set?: InputMaybe<Files_Matching_Category_Set_Input>;
+  pk_columns: Files_Matching_Category_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Files_Matching_Category_ManyArgs = {
+  updates: Array<Files_Matching_Category_Updates>;
 };
 
 
@@ -33502,12 +33968,18 @@ export type Organization_Domain_Updates = {
 /** columns and relationships of "organization_files_matching_settings" */
 export type Organization_Files_Matching_Settings = {
   __typename?: 'organization_files_matching_settings';
-  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
   id: Scalars['uuid']['output'];
-  organization_id: Scalars['uuid']['output'];
-  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 /** aggregated selection of "organization_files_matching_settings" */
@@ -33562,12 +34034,13 @@ export type Organization_Files_Matching_Settings_Bool_Exp = {
   _and?: InputMaybe<Array<Organization_Files_Matching_Settings_Bool_Exp>>;
   _not?: InputMaybe<Organization_Files_Matching_Settings_Bool_Exp>;
   _or?: InputMaybe<Array<Organization_Files_Matching_Settings_Bool_Exp>>;
-  autogenerated_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
-  auxiliary_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+  autogeneratedCodeGlobPattern?: InputMaybe<String_Array_Comparison_Exp>;
+  auxiliaryCodeGlobPattern?: InputMaybe<String_Array_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
-  organization_id?: InputMaybe<Uuid_Comparison_Exp>;
-  testing_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
-  vendor_code_glob_pattern?: InputMaybe<String_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  testingCodeGlobPattern?: InputMaybe<String_Array_Comparison_Exp>;
+  vendorCodeGlobPattern?: InputMaybe<String_Array_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "organization_files_matching_settings" */
@@ -33580,54 +34053,75 @@ export enum Organization_Files_Matching_Settings_Constraint {
 
 /** input type for inserting data into table "organization_files_matching_settings" */
 export type Organization_Files_Matching_Settings_Insert_Input = {
-  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  organization_id?: InputMaybe<Scalars['uuid']['input']>;
-  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** aggregate max on columns */
 export type Organization_Files_Matching_Settings_Max_Fields = {
   __typename?: 'organization_files_matching_settings_max_fields';
-  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
   id?: Maybe<Scalars['uuid']['output']>;
-  organization_id?: Maybe<Scalars['uuid']['output']>;
-  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 /** order by max() on columns of table "organization_files_matching_settings" */
 export type Organization_Files_Matching_Settings_Max_Order_By = {
-  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
-  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  organization_id?: InputMaybe<Order_By>;
-  testing_code_glob_pattern?: InputMaybe<Order_By>;
-  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type Organization_Files_Matching_Settings_Min_Fields = {
   __typename?: 'organization_files_matching_settings_min_fields';
-  autogenerated_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  auxiliary_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
   id?: Maybe<Scalars['uuid']['output']>;
-  organization_id?: Maybe<Scalars['uuid']['output']>;
-  testing_code_glob_pattern?: Maybe<Scalars['String']['output']>;
-  vendor_code_glob_pattern?: Maybe<Scalars['String']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 /** order by min() on columns of table "organization_files_matching_settings" */
 export type Organization_Files_Matching_Settings_Min_Order_By = {
-  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
-  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  organization_id?: InputMaybe<Order_By>;
-  testing_code_glob_pattern?: InputMaybe<Order_By>;
-  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: InputMaybe<Order_By>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "organization_files_matching_settings" */
@@ -33648,12 +34142,13 @@ export type Organization_Files_Matching_Settings_On_Conflict = {
 
 /** Ordering options when selecting data from "organization_files_matching_settings". */
 export type Organization_Files_Matching_Settings_Order_By = {
-  autogenerated_code_glob_pattern?: InputMaybe<Order_By>;
-  auxiliary_code_glob_pattern?: InputMaybe<Order_By>;
+  autogeneratedCodeGlobPattern?: InputMaybe<Order_By>;
+  auxiliaryCodeGlobPattern?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
-  organization_id?: InputMaybe<Order_By>;
-  testing_code_glob_pattern?: InputMaybe<Order_By>;
-  vendor_code_glob_pattern?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  testingCodeGlobPattern?: InputMaybe<Order_By>;
+  vendorCodeGlobPattern?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: organization_files_matching_settings */
@@ -33664,27 +34159,31 @@ export type Organization_Files_Matching_Settings_Pk_Columns_Input = {
 /** select columns of table "organization_files_matching_settings" */
 export enum Organization_Files_Matching_Settings_Select_Column {
   /** column name */
-  AutogeneratedCodeGlobPattern = 'autogenerated_code_glob_pattern',
+  AutogeneratedCodeGlobPattern = 'autogeneratedCodeGlobPattern',
   /** column name */
-  AuxiliaryCodeGlobPattern = 'auxiliary_code_glob_pattern',
+  AuxiliaryCodeGlobPattern = 'auxiliaryCodeGlobPattern',
   /** column name */
   Id = 'id',
   /** column name */
-  OrganizationId = 'organization_id',
+  OrganizationId = 'organizationId',
   /** column name */
-  TestingCodeGlobPattern = 'testing_code_glob_pattern',
+  TestingCodeGlobPattern = 'testingCodeGlobPattern',
   /** column name */
-  VendorCodeGlobPattern = 'vendor_code_glob_pattern'
+  VendorCodeGlobPattern = 'vendorCodeGlobPattern'
 }
 
 /** input type for updating data in table "organization_files_matching_settings" */
 export type Organization_Files_Matching_Settings_Set_Input = {
-  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  organization_id?: InputMaybe<Scalars['uuid']['input']>;
-  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** Streaming cursor of the table "organization_files_matching_settings" */
@@ -33697,28 +34196,32 @@ export type Organization_Files_Matching_Settings_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Organization_Files_Matching_Settings_Stream_Cursor_Value_Input = {
-  autogenerated_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  auxiliary_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  /** fnmatch glob patterns classifying findings as AUTOGENERATED_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  autogeneratedCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as AUXILIARY_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  auxiliaryCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
-  organization_id?: InputMaybe<Scalars['uuid']['input']>;
-  testing_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
-  vendor_code_glob_pattern?: InputMaybe<Scalars['String']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** fnmatch glob patterns classifying findings as TEST_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  testingCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** fnmatch glob patterns classifying findings as VENDOR_CODE. NULL = never configured (Mobb defaults apply); empty array = explicitly no rules for this category. */
+  vendorCodeGlobPattern?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** update columns of table "organization_files_matching_settings" */
 export enum Organization_Files_Matching_Settings_Update_Column {
   /** column name */
-  AutogeneratedCodeGlobPattern = 'autogenerated_code_glob_pattern',
+  AutogeneratedCodeGlobPattern = 'autogeneratedCodeGlobPattern',
   /** column name */
-  AuxiliaryCodeGlobPattern = 'auxiliary_code_glob_pattern',
+  AuxiliaryCodeGlobPattern = 'auxiliaryCodeGlobPattern',
   /** column name */
   Id = 'id',
   /** column name */
-  OrganizationId = 'organization_id',
+  OrganizationId = 'organizationId',
   /** column name */
-  TestingCodeGlobPattern = 'testing_code_glob_pattern',
+  TestingCodeGlobPattern = 'testingCodeGlobPattern',
   /** column name */
-  VendorCodeGlobPattern = 'vendor_code_glob_pattern'
+  VendorCodeGlobPattern = 'vendorCodeGlobPattern'
 }
 
 export type Organization_Files_Matching_Settings_Updates = {
@@ -38033,6 +38536,12 @@ export type Query_Root = {
   commit_blame_request_aggregate: Commit_Blame_Request_Aggregate;
   /** fetch data from the table: "commit_blame_request" using primary key columns */
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
+  /** fetch data from the table: "default_files_matching_glob_pattern" */
+  default_files_matching_glob_pattern: Array<Default_Files_Matching_Glob_Pattern>;
+  /** fetch aggregated fields from the table: "default_files_matching_glob_pattern" */
+  default_files_matching_glob_pattern_aggregate: Default_Files_Matching_Glob_Pattern_Aggregate;
+  /** fetch data from the table: "default_files_matching_glob_pattern" using primary key columns */
+  default_files_matching_glob_pattern_by_pk?: Maybe<Default_Files_Matching_Glob_Pattern>;
   /** fetch data from the table: "tracy.developer_group" */
   developer_group: Array<Tracy_Developer_Group>;
   /** fetch aggregated fields from the table: "tracy.developer_group" */
@@ -38072,6 +38581,12 @@ export type Query_Root = {
   file_aggregate: File_Aggregate;
   /** fetch data from the table: "file" using primary key columns */
   file_by_pk?: Maybe<File>;
+  /** fetch data from the table: "files_matching_category" */
+  files_matching_category: Array<Files_Matching_Category>;
+  /** fetch aggregated fields from the table: "files_matching_category" */
+  files_matching_category_aggregate: Files_Matching_Category_Aggregate;
+  /** fetch data from the table: "files_matching_category" using primary key columns */
+  files_matching_category_by_pk?: Maybe<Files_Matching_Category>;
   /** fetch data from the table: "fix" */
   fix: Array<Fix>;
   /** fetch data from the table: "fix_answer" */
@@ -39976,6 +40491,29 @@ export type Query_RootCommit_Blame_Request_By_PkArgs = {
 };
 
 
+export type Query_RootDefault_Files_Matching_Glob_PatternArgs = {
+  distinct_on?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Order_By>>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+
+export type Query_RootDefault_Files_Matching_Glob_Pattern_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Order_By>>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+
+export type Query_RootDefault_Files_Matching_Glob_Pattern_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootDeveloper_GroupArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -40131,6 +40669,29 @@ export type Query_RootFile_AggregateArgs = {
 
 export type Query_RootFile_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootFiles_Matching_CategoryArgs = {
+  distinct_on?: InputMaybe<Array<Files_Matching_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Files_Matching_Category_Order_By>>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+};
+
+
+export type Query_RootFiles_Matching_Category_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Files_Matching_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Files_Matching_Category_Order_By>>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+};
+
+
+export type Query_RootFiles_Matching_Category_By_PkArgs = {
+  value: Vulnerability_Report_Issue_Tag_Enum;
 };
 
 
@@ -47975,6 +48536,14 @@ export type Subscription_Root = {
   commit_blame_request_by_pk?: Maybe<Commit_Blame_Request>;
   /** fetch data from the table in a streaming manner: "commit_blame_request" */
   commit_blame_request_stream: Array<Commit_Blame_Request>;
+  /** fetch data from the table: "default_files_matching_glob_pattern" */
+  default_files_matching_glob_pattern: Array<Default_Files_Matching_Glob_Pattern>;
+  /** fetch aggregated fields from the table: "default_files_matching_glob_pattern" */
+  default_files_matching_glob_pattern_aggregate: Default_Files_Matching_Glob_Pattern_Aggregate;
+  /** fetch data from the table: "default_files_matching_glob_pattern" using primary key columns */
+  default_files_matching_glob_pattern_by_pk?: Maybe<Default_Files_Matching_Glob_Pattern>;
+  /** fetch data from the table in a streaming manner: "default_files_matching_glob_pattern" */
+  default_files_matching_glob_pattern_stream: Array<Default_Files_Matching_Glob_Pattern>;
   /** fetch data from the table: "tracy.developer_group" */
   developer_group: Array<Tracy_Developer_Group>;
   /** fetch aggregated fields from the table: "tracy.developer_group" */
@@ -48021,6 +48590,14 @@ export type Subscription_Root = {
   file_by_pk?: Maybe<File>;
   /** fetch data from the table in a streaming manner: "file" */
   file_stream: Array<File>;
+  /** fetch data from the table: "files_matching_category" */
+  files_matching_category: Array<Files_Matching_Category>;
+  /** fetch aggregated fields from the table: "files_matching_category" */
+  files_matching_category_aggregate: Files_Matching_Category_Aggregate;
+  /** fetch data from the table: "files_matching_category" using primary key columns */
+  files_matching_category_by_pk?: Maybe<Files_Matching_Category>;
+  /** fetch data from the table in a streaming manner: "files_matching_category" */
+  files_matching_category_stream: Array<Files_Matching_Category>;
   /** fetch data from the table: "fix" */
   fix: Array<Fix>;
   /** fetch data from the table: "fix_answer" */
@@ -50263,6 +50840,36 @@ export type Subscription_RootCommit_Blame_Request_StreamArgs = {
 };
 
 
+export type Subscription_RootDefault_Files_Matching_Glob_PatternArgs = {
+  distinct_on?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Order_By>>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+
+export type Subscription_RootDefault_Files_Matching_Glob_Pattern_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Default_Files_Matching_Glob_Pattern_Order_By>>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+
+export type Subscription_RootDefault_Files_Matching_Glob_Pattern_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootDefault_Files_Matching_Glob_Pattern_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Default_Files_Matching_Glob_Pattern_Stream_Cursor_Input>>;
+  where?: InputMaybe<Default_Files_Matching_Glob_Pattern_Bool_Exp>;
+};
+
+
 export type Subscription_RootDeveloper_GroupArgs = {
   distinct_on?: InputMaybe<Array<Tracy_Developer_Group_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -50439,6 +51046,36 @@ export type Subscription_RootFile_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<File_Stream_Cursor_Input>>;
   where?: InputMaybe<File_Bool_Exp>;
+};
+
+
+export type Subscription_RootFiles_Matching_CategoryArgs = {
+  distinct_on?: InputMaybe<Array<Files_Matching_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Files_Matching_Category_Order_By>>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+};
+
+
+export type Subscription_RootFiles_Matching_Category_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Files_Matching_Category_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Files_Matching_Category_Order_By>>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
+};
+
+
+export type Subscription_RootFiles_Matching_Category_By_PkArgs = {
+  value: Vulnerability_Report_Issue_Tag_Enum;
+};
+
+
+export type Subscription_RootFiles_Matching_Category_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Files_Matching_Category_Stream_Cursor_Input>>;
+  where?: InputMaybe<Files_Matching_Category_Bool_Exp>;
 };
 
 
@@ -65292,6 +65929,7 @@ export type Vulnerability_Report_Issue = {
   fix?: Maybe<Fix>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
+  gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id: Scalars['uuid']['output'];
   /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
   isFixRepresentative: Scalars['Boolean']['output'];
@@ -65501,6 +66139,7 @@ export type Vulnerability_Report_Issue_Bool_Exp = {
   fix?: InputMaybe<Fix_Bool_Exp>;
   fixId?: InputMaybe<Uuid_Comparison_Exp>;
   fpId?: InputMaybe<Uuid_Comparison_Exp>;
+  gitBlameLogin?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isFixRepresentative?: InputMaybe<Boolean_Comparison_Exp>;
   isSuppressed?: InputMaybe<Boolean_Comparison_Exp>;
@@ -66248,6 +66887,7 @@ export type Vulnerability_Report_Issue_Insert_Input = {
   fix?: InputMaybe<Fix_Obj_Rel_Insert_Input>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
+  gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
   isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
@@ -66289,6 +66929,7 @@ export type Vulnerability_Report_Issue_Max_Fields = {
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
+  gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
@@ -66319,6 +66960,7 @@ export type Vulnerability_Report_Issue_Max_Order_By = {
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
+  gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
@@ -66344,6 +66986,7 @@ export type Vulnerability_Report_Issue_Min_Fields = {
   fingerprintHash?: Maybe<Scalars['String']['output']>;
   fixId?: Maybe<Scalars['uuid']['output']>;
   fpId?: Maybe<Scalars['uuid']['output']>;
+  gitBlameLogin?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueLanguage?: Maybe<Scalars['String']['output']>;
   issueType?: Maybe<Scalars['String']['output']>;
@@ -66374,6 +67017,7 @@ export type Vulnerability_Report_Issue_Min_Order_By = {
   fingerprintHash?: InputMaybe<Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
+  gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   issueLanguage?: InputMaybe<Order_By>;
   issueType?: InputMaybe<Order_By>;
@@ -66425,6 +67069,7 @@ export type Vulnerability_Report_Issue_Order_By = {
   fix?: InputMaybe<Fix_Order_By>;
   fixId?: InputMaybe<Order_By>;
   fpId?: InputMaybe<Order_By>;
+  gitBlameLogin?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isFixRepresentative?: InputMaybe<Order_By>;
   isSuppressed?: InputMaybe<Order_By>;
@@ -66847,6 +67492,8 @@ export enum Vulnerability_Report_Issue_Select_Column {
   /** column name */
   FpId = 'fpId',
   /** column name */
+  GitBlameLogin = 'gitBlameLogin',
+  /** column name */
   Id = 'id',
   /** column name */
   IsFixRepresentative = 'isFixRepresentative',
@@ -66908,6 +67555,7 @@ export type Vulnerability_Report_Issue_Set_Input = {
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
+  gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
   isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
@@ -67473,6 +68121,7 @@ export type Vulnerability_Report_Issue_Stream_Cursor_Value_Input = {
   fingerprintHash?: InputMaybe<Scalars['String']['input']>;
   fixId?: InputMaybe<Scalars['uuid']['input']>;
   fpId?: InputMaybe<Scalars['uuid']['input']>;
+  gitBlameLogin?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   /** True for the single issue that represents its fix in the unified issues list. Always true when fix_id IS NULL. */
   isFixRepresentative?: InputMaybe<Scalars['Boolean']['input']>;
@@ -67891,6 +68540,8 @@ export enum Vulnerability_Report_Issue_Update_Column {
   FixId = 'fixId',
   /** column name */
   FpId = 'fpId',
+  /** column name */
+  GitBlameLogin = 'gitBlameLogin',
   /** column name */
   Id = 'id',
   /** column name */

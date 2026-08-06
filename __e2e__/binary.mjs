@@ -71,11 +71,17 @@ describe('npm packaging (Verdaccio publish → install)', () => {
   let work
   let proj
 
-  // The launcher's own entry, not node_modules/.bin/mobbdev: the platform
-  // packages now declare a `mobbdev` bin too, so which one owns that shim is
-  // up to npm's install order. Test the launcher's resolution logic directly.
+  // The launcher's own entry. Invoked directly (fast, cross-platform) to test
+  // resolution + exit-code passthrough without a shell shim in the way.
   const launcher = () =>
     path.join(proj, 'node_modules', SCOPED_CLI_PKG, 'bin/mobbdev.js')
+
+  // The `mobbdev` command as npx / `npm i -g` expose it. Only the launcher
+  // declares this bin (platform packages carry none), so npm links it
+  // unambiguously. 1.4.56 shipped with a `mobbdev` bin on every platform
+  // package too: npm saw the collision, linked NONE of them, and
+  // `npx @mobb.ai/cli` died with "mobbdev: command not found".
+  const binShim = () => path.join(proj, 'node_modules', '.bin', 'mobbdev')
 
   before(async () => {
     assert(
@@ -166,6 +172,15 @@ describe('npm packaging (Verdaccio publish → install)', () => {
     assert(
       installed.length === 1 && installed[0] === expected,
       `expected only ${expected} to be installed, got [${installed.join(', ')}]`
+    )
+  })
+
+  test('the mobbdev command lands on PATH (.bin shim linked)', () => {
+    // Regression guard for 1.4.56: a bin-name collision left this shim
+    // uncreated, so `npx @mobb.ai/cli` could not find `mobbdev`.
+    assert(
+      fs.existsSync(binShim()),
+      `${binShim()} missing — the mobbdev bin was not linked (bin-name collision?)`
     )
   })
 

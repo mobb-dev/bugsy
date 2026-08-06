@@ -39313,6 +39313,10 @@ export type Query_Root = {
   view_types_contributor_counts: Array<View_Types_Contributor_Counts>;
   /** fetch aggregated fields from the table: "view_types.contributor_counts" */
   view_types_contributor_counts_aggregate: View_Types_Contributor_Counts_Aggregate;
+  /** fetch data from the table: "view_types.dev_owner_count" */
+  view_types_dev_owner_count: Array<View_Types_Dev_Owner_Count>;
+  /** fetch aggregated fields from the table: "view_types.dev_owner_count" */
+  view_types_dev_owner_count_aggregate: View_Types_Dev_Owner_Count_Aggregate;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -43215,6 +43219,24 @@ export type Query_RootView_Types_Contributor_Counts_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Contributor_Counts_Order_By>>;
   where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Dev_Owner_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Dev_Owner_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
+};
+
+
+export type Query_RootView_Types_Dev_Owner_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Dev_Owner_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
 };
 
 
@@ -49316,6 +49338,12 @@ export type Subscription_Root = {
   view_types_contributor_counts_aggregate: View_Types_Contributor_Counts_Aggregate;
   /** fetch data from the table in a streaming manner: "view_types.contributor_counts" */
   view_types_contributor_counts_stream: Array<View_Types_Contributor_Counts>;
+  /** fetch data from the table: "view_types.dev_owner_count" */
+  view_types_dev_owner_count: Array<View_Types_Dev_Owner_Count>;
+  /** fetch aggregated fields from the table: "view_types.dev_owner_count" */
+  view_types_dev_owner_count_aggregate: View_Types_Dev_Owner_Count_Aggregate;
+  /** fetch data from the table in a streaming manner: "view_types.dev_owner_count" */
+  view_types_dev_owner_count_stream: Array<View_Types_Dev_Owner_Count>;
   /** fetch data from the table: "view_types.issue_type_count" */
   view_types_issue_type_count: Array<View_Types_Issue_Type_Count>;
   /** fetch aggregated fields from the table: "view_types.issue_type_count" */
@@ -53863,6 +53891,31 @@ export type Subscription_RootView_Types_Contributor_Counts_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<View_Types_Contributor_Counts_Stream_Cursor_Input>>;
   where?: InputMaybe<View_Types_Contributor_Counts_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Dev_Owner_CountArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Dev_Owner_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Dev_Owner_Count_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Dev_Owner_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
+};
+
+
+export type Subscription_RootView_Types_Dev_Owner_Count_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<View_Types_Dev_Owner_Count_Stream_Cursor_Input>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
 };
 
 
@@ -63262,6 +63315,142 @@ export type View_Types_Contributor_Counts_Variance_Order_By = {
   total?: InputMaybe<Order_By>;
 };
 
+/** columns and relationships of "view_types.dev_owner_count" */
+export type View_Types_Dev_Owner_Count = {
+  __typename?: 'view_types_dev_owner_count';
+  count?: Maybe<Scalars['bigint']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "view_types.dev_owner_count" */
+export type View_Types_Dev_Owner_Count_Aggregate = {
+  __typename?: 'view_types_dev_owner_count_aggregate';
+  aggregate?: Maybe<View_Types_Dev_Owner_Count_Aggregate_Fields>;
+  nodes: Array<View_Types_Dev_Owner_Count>;
+};
+
+/** aggregate fields of "view_types.dev_owner_count" */
+export type View_Types_Dev_Owner_Count_Aggregate_Fields = {
+  __typename?: 'view_types_dev_owner_count_aggregate_fields';
+  avg?: Maybe<View_Types_Dev_Owner_Count_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<View_Types_Dev_Owner_Count_Max_Fields>;
+  min?: Maybe<View_Types_Dev_Owner_Count_Min_Fields>;
+  stddev?: Maybe<View_Types_Dev_Owner_Count_Stddev_Fields>;
+  stddev_pop?: Maybe<View_Types_Dev_Owner_Count_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<View_Types_Dev_Owner_Count_Stddev_Samp_Fields>;
+  sum?: Maybe<View_Types_Dev_Owner_Count_Sum_Fields>;
+  var_pop?: Maybe<View_Types_Dev_Owner_Count_Var_Pop_Fields>;
+  var_samp?: Maybe<View_Types_Dev_Owner_Count_Var_Samp_Fields>;
+  variance?: Maybe<View_Types_Dev_Owner_Count_Variance_Fields>;
+};
+
+
+/** aggregate fields of "view_types.dev_owner_count" */
+export type View_Types_Dev_Owner_Count_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type View_Types_Dev_Owner_Count_Avg_Fields = {
+  __typename?: 'view_types_dev_owner_count_avg_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "view_types.dev_owner_count". All fields are combined with a logical 'AND'. */
+export type View_Types_Dev_Owner_Count_Bool_Exp = {
+  _and?: InputMaybe<Array<View_Types_Dev_Owner_Count_Bool_Exp>>;
+  _not?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
+  _or?: InputMaybe<Array<View_Types_Dev_Owner_Count_Bool_Exp>>;
+  count?: InputMaybe<Bigint_Comparison_Exp>;
+  owner?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** aggregate max on columns */
+export type View_Types_Dev_Owner_Count_Max_Fields = {
+  __typename?: 'view_types_dev_owner_count_max_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type View_Types_Dev_Owner_Count_Min_Fields = {
+  __typename?: 'view_types_dev_owner_count_min_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+  owner?: Maybe<Scalars['String']['output']>;
+};
+
+/** Ordering options when selecting data from "view_types.dev_owner_count". */
+export type View_Types_Dev_Owner_Count_Order_By = {
+  count?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** select columns of table "view_types.dev_owner_count" */
+export enum View_Types_Dev_Owner_Count_Select_Column {
+  /** column name */
+  Count = 'count',
+  /** column name */
+  Owner = 'owner'
+}
+
+/** aggregate stddev on columns */
+export type View_Types_Dev_Owner_Count_Stddev_Fields = {
+  __typename?: 'view_types_dev_owner_count_stddev_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type View_Types_Dev_Owner_Count_Stddev_Pop_Fields = {
+  __typename?: 'view_types_dev_owner_count_stddev_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type View_Types_Dev_Owner_Count_Stddev_Samp_Fields = {
+  __typename?: 'view_types_dev_owner_count_stddev_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "view_types_dev_owner_count" */
+export type View_Types_Dev_Owner_Count_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: View_Types_Dev_Owner_Count_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type View_Types_Dev_Owner_Count_Stream_Cursor_Value_Input = {
+  count?: InputMaybe<Scalars['bigint']['input']>;
+  owner?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type View_Types_Dev_Owner_Count_Sum_Fields = {
+  __typename?: 'view_types_dev_owner_count_sum_fields';
+  count?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregate var_pop on columns */
+export type View_Types_Dev_Owner_Count_Var_Pop_Fields = {
+  __typename?: 'view_types_dev_owner_count_var_pop_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type View_Types_Dev_Owner_Count_Var_Samp_Fields = {
+  __typename?: 'view_types_dev_owner_count_var_samp_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type View_Types_Dev_Owner_Count_Variance_Fields = {
+  __typename?: 'view_types_dev_owner_count_variance_fields';
+  count?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "view_types.issue_type_count" */
 export type View_Types_Issue_Type_Count = {
   __typename?: 'view_types_issue_type_count';
@@ -65642,6 +65831,8 @@ export type Vulnerability_Report = {
   vulnerabilityReportIssues_aggregate: Vulnerability_Report_Issue_Aggregate;
   /** A computed field, executes function "get_vulnerability_report_issue_categories" */
   vulnerability_report_categories?: Maybe<Array<View_Types_Aggregated_Categories>>;
+  /** A computed field, executes function "get_vulnerability_report_issue_dev_owners" */
+  vulnerability_report_issue_dev_owners?: Maybe<Array<View_Types_Dev_Owner_Count>>;
   /** A computed field, executes function "get_vulnerability_report_issue_languages" */
   vulnerability_report_issue_languages?: Maybe<Array<View_Types_Language_Count>>;
   /** A computed field, executes function "get_vulnerability_report_issue_types" */
@@ -65694,6 +65885,17 @@ export type Vulnerability_ReportVulnerability_Report_CategoriesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Aggregated_Categories_Order_By>>;
   where?: InputMaybe<View_Types_Aggregated_Categories_Bool_Exp>;
+};
+
+
+/** columns and relationships of "vulnerability_report" */
+export type Vulnerability_ReportVulnerability_Report_Issue_Dev_OwnersArgs = {
+  args?: InputMaybe<Vulnerability_Report_Issue_Dev_Owners_Vulnerability_Report_Args>;
+  distinct_on?: InputMaybe<Array<View_Types_Dev_Owner_Count_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<View_Types_Dev_Owner_Count_Order_By>>;
+  where?: InputMaybe<View_Types_Dev_Owner_Count_Bool_Exp>;
 };
 
 
@@ -66870,6 +67072,10 @@ export type Vulnerability_Report_Issue_Delete_Elem_Input = {
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
 export type Vulnerability_Report_Issue_Delete_Key_Input = {
   extraData?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Vulnerability_Report_Issue_Dev_Owners_Vulnerability_Report_Args = {
+  categories?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** input type for inserting data into table "vulnerability_report_issue" */

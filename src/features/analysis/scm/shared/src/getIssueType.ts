@@ -67,6 +67,8 @@ export function getTagTooltip(tag: string) {
   switch (tag) {
     case 'FALSE_POSITIVE':
       return 'Issue was found to be a false positive'
+    case 'ACCEPTED_RISK':
+      return 'Issue was accepted as an acknowledged risk'
     case 'TEST_CODE':
       return 'Issue found in test files, not production code'
     case 'VENDOR_CODE':
@@ -96,6 +98,8 @@ export const issueDescription: Record<
     "The flagged code **does not represent an actual vulnerability within the application's context.** This categorization indicates that the issue is either misidentified by the scanner or deemed irrelevant to the application's functionality.",
   [Vulnerability_Report_Issue_Tag_Enum.TestCode]:
     'The flagged code resides in a test-specific path or context. This categorization indicates that **it supports testing scenarios and is isolated from production use**.',
+  [Vulnerability_Report_Issue_Tag_Enum.AcceptedRisk]:
+    'The flagged code is a real issue, but the risk has been reviewed and accepted as-is. This categorization records a deliberate decision rather than a dispute about the finding.',
   [Vulnerability_Report_Issue_Tag_Enum.Unfixable]:
     'The flagged code cannot be fixed',
   [Vulnerability_Report_Issue_Tag_Enum.VendorCode]:

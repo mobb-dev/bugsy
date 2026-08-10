@@ -526,6 +526,15 @@ export enum EditType {
   TabAutocomplete = 'TAB_AUTOCOMPLETE'
 }
 
+export type EffectiveScanPolicyResponse = EffectiveScanPolicySuccess | ScanPolicyValidationError;
+
+export type EffectiveScanPolicySuccess = {
+  __typename?: 'EffectiveScanPolicySuccess';
+  /** JSON-encoded EffectiveScanPolicy (targets, disabledIssueTypes, ruleOverrides). */
+  effectivePolicyJson: Scalars['String']['output'];
+  status: Status;
+};
+
 export type ExplainFixResponse = {
   __typename?: 'ExplainFixResponse';
   errorMessage?: Maybe<Scalars['String']['output']>;
@@ -1707,6 +1716,46 @@ export type ScanFinding = {
   lineNumber?: Maybe<Scalars['Int']['output']>;
   ruleId?: Maybe<Scalars['String']['output']>;
   severity: Scalars['String']['output'];
+};
+
+export type ScanPolicyRelaxLockError = BaseError & {
+  __typename?: 'ScanPolicyRelaxLockError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+  /**
+   * JSON-encoded array of { kind, target, key } entries naming each relaxing
+   * project entry that the organization's per-target lock forbids.
+   */
+  violationsJson: Scalars['String']['output'];
+};
+
+export type ScanPolicyUpdateResponse = ScanPolicyRelaxLockError | ScanPolicyUpdateSuccess | ScanPolicyValidationError;
+
+/**
+ * Scan Policy (MOBB-3750). Policy documents travel as JSON-encoded strings
+ * (shape: ScanPolicyDocZ in tscommon/backend/src/scanPolicy.ts); server-side
+ * zod validation is the contract, not the GraphQL type system.
+ */
+export type ScanPolicyUpdateSuccess = {
+  __typename?: 'ScanPolicyUpdateSuccess';
+  status: Status;
+  /**
+   * The stored (normalized) policy document, JSON-encoded. Null when the update
+   * cleared every deviation (column set to NULL).
+   */
+  storedPolicyJson?: Maybe<Scalars['String']['output']>;
+  /**
+   * Non-blocking notes: rule ids / issue types referenced by the document but
+   * unknown to the current rule manifest (stored anyway — they become active if
+   * a later ruleset knows them).
+   */
+  warnings: Array<Scalars['String']['output']>;
+};
+
+export type ScanPolicyValidationError = BaseError & {
+  __typename?: 'ScanPolicyValidationError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
 };
 
 export type ScanSkillResult = {
@@ -24041,6 +24090,19 @@ export type Mutation_Root = {
   updateGitlabToken: ScmAccessToken;
   updateLinearConfiguration: UpdateLinearConfigurationResponse;
   updateLinearToken: TicketAccessToken;
+  /**
+   * Replace the organization's scan-policy deviations (org owner only).
+   * policyJson: JSON-encoded ScanPolicyDoc; omit/null to clear all deviations.
+   * True toggle entries are normalized away (org default is enabled).
+   */
+  updateOrganizationScanPolicy: ScanPolicyUpdateResponse;
+  /**
+   * Replace the project's scan-policy deviations (project admin/writer or org
+   * owner). policyJson: JSON-encoded tri-state ScanPolicyDoc; omit/null to fully
+   * inherit the organization policy. Entries that relax an org-locked target are
+   * rejected with ScanPolicyRelaxLockError.
+   */
+  updateProjectScanPolicy: ScanPolicyUpdateResponse;
   updateScmToken?: Maybe<ScmAccessTokenUpdateResponse>;
   /** update data of the table: "agentic_remediation.knowledge_base_cwe_mapping" */
   update_agentic_remediation_knowledge_base_cwe_mapping?: Maybe<Agentic_Remediation_Knowledge_Base_Cwe_Mapping_Mutation_Response>;
@@ -28990,6 +29052,20 @@ export type Mutation_RootUpdateLinearTokenArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdateOrganizationScanPolicyArgs = {
+  organizationId: Scalars['String']['input'];
+  policyJson?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdateProjectScanPolicyArgs = {
+  policyJson?: InputMaybe<Scalars['String']['input']>;
+  projectId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdateScmTokenArgs = {
   org?: InputMaybe<Scalars['String']['input']>;
   refreshToken?: InputMaybe<Scalars['String']['input']>;
@@ -30751,6 +30827,11 @@ export type Mutation_RootUpdate_Pr_Status_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_ProjectArgs = {
+  _append?: InputMaybe<Project_Append_Input>;
+  _delete_at_path?: InputMaybe<Project_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Project_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Project_Delete_Key_Input>;
+  _prepend?: InputMaybe<Project_Prepend_Input>;
   _set?: InputMaybe<Project_Set_Input>;
   where: Project_Bool_Exp;
 };
@@ -30758,6 +30839,11 @@ export type Mutation_RootUpdate_ProjectArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Project_By_PkArgs = {
+  _append?: InputMaybe<Project_Append_Input>;
+  _delete_at_path?: InputMaybe<Project_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Project_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Project_Delete_Key_Input>;
+  _prepend?: InputMaybe<Project_Prepend_Input>;
   _set?: InputMaybe<Project_Set_Input>;
   pk_columns: Project_Pk_Columns_Input;
 };
@@ -33122,6 +33208,8 @@ export type Organization = {
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiTrendsTimeSeries: GetRoiTrendsTimeSeriesResponse;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: Maybe<Scalars['jsonb']['output']>;
   /** An array relationship */
   scmConfigs: Array<Scm_Config>;
   /** An aggregate relationship */
@@ -33614,6 +33702,12 @@ export type OrganizationRoiTrendsTimeSeriesArgs = {
 
 
 /** columns and relationships of "organization" */
+export type OrganizationScanPolicyArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "organization" */
 export type OrganizationScmConfigsArgs = {
   distinct_on?: InputMaybe<Array<Scm_Config_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -33682,6 +33776,8 @@ export type Organization_Aggregated_Vulnerabilities_Args = {
 export type Organization_Append_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** aggregate avg on columns */
@@ -33784,6 +33880,7 @@ export type Organization_Bool_Exp = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
   roiTriageTimeInMinutes?: InputMaybe<Int_Comparison_Exp>;
+  scanPolicy?: InputMaybe<Jsonb_Comparison_Exp>;
   scmConfigs?: InputMaybe<Scm_Config_Bool_Exp>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Bool_Exp>;
 };
@@ -33798,18 +33895,24 @@ export enum Organization_Constraint {
 export type Organization_Delete_At_Path_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
 export type Organization_Delete_Elem_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['Int']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
 export type Organization_Delete_Key_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['String']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "organization_domain" */
@@ -34307,6 +34410,8 @@ export type Organization_Insert_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
 };
 
@@ -34704,6 +34809,7 @@ export type Organization_Order_By = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Order_By>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Order_By>;
   roiTriageTimeInMinutes?: InputMaybe<Order_By>;
+  scanPolicy?: InputMaybe<Order_By>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Order_By>;
 };
 
@@ -34716,6 +34822,8 @@ export type Organization_Pk_Columns_Input = {
 export type Organization_Prepend_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** Table for storing raw issue types that should be blocked for an organization */
@@ -35358,7 +35466,9 @@ export enum Organization_Select_Column {
   /** column name */
   RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes',
   /** column name */
-  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes'
+  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes',
+  /** column name */
+  ScanPolicy = 'scanPolicy'
 }
 
 /** input type for updating data in table "organization" */
@@ -35406,6 +35516,8 @@ export type Organization_Set_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -35569,6 +35681,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -36136,7 +36250,9 @@ export enum Organization_Update_Column {
   /** column name */
   RoiMobbFixingTimeInMinutes = 'roiMobbFixingTimeInMinutes',
   /** column name */
-  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes'
+  RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes',
+  /** column name */
+  ScanPolicy = 'scanPolicy'
 }
 
 export type Organization_Updates = {
@@ -36479,6 +36595,8 @@ export type Project = {
   projectUsers: Array<Project_To_User>;
   /** An aggregate relationship */
   projectUsers_aggregate: Project_To_User_Aggregate;
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: Maybe<Scalars['jsonb']['output']>;
   /** An object relationship */
   totalResolvedVulnerabilitiesView?: Maybe<View_Project_Total_Resolved_Vulnerabilities>;
   /** An object relationship */
@@ -36621,6 +36739,12 @@ export type ProjectProjectUsers_AggregateArgs = {
 
 
 /** columns and relationships of "project" */
+export type ProjectScanPolicyArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** columns and relationships of "project" */
 export type ProjectVulnerabilityReportsArgs = {
   distinct_on?: InputMaybe<Array<Vulnerability_Report_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -36708,6 +36832,12 @@ export type Project_Aggregated_Vulnerability_Severities_Args = {
   project_row?: InputMaybe<Scalars['project_scalar']['input']>;
 };
 
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Project_Append_Input = {
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
 /** input type for inserting array relation for remote table "project" */
 export type Project_Arr_Rel_Insert_Input = {
   data: Array<Project_Insert_Input>;
@@ -36764,6 +36894,7 @@ export type Project_Bool_Exp = {
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Bool_Exp>;
   projectUsers?: InputMaybe<Project_To_User_Bool_Exp>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Bool_Exp>;
+  scanPolicy?: InputMaybe<Jsonb_Comparison_Exp>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Bool_Exp>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Bool_Exp>;
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -36778,6 +36909,24 @@ export enum Project_Constraint {
   /** unique or primary key constraint on columns "id" */
   ProjectPkey = 'project_pkey'
 }
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Project_Delete_At_Path_Input = {
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Project_Delete_Elem_Input = {
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Project_Delete_Key_Input = {
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['String']['input']>;
+};
 
 /** input type for inserting data into table "project" */
 export type Project_Insert_Input = {
@@ -36795,6 +36944,8 @@ export type Project_Insert_Input = {
   projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   projectRoles?: InputMaybe<Project_To_Project_Role_Arr_Rel_Insert_Input>;
   projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Obj_Rel_Insert_Input>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Obj_Rel_Insert_Input>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -37160,6 +37311,7 @@ export type Project_Order_By = {
   projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Order_By>;
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Order_By>;
   projectUsers_aggregate?: InputMaybe<Project_To_User_Aggregate_Order_By>;
+  scanPolicy?: InputMaybe<Order_By>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Order_By>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>;
   updatedAt?: InputMaybe<Order_By>;
@@ -37169,6 +37321,12 @@ export type Project_Order_By = {
 /** primary key columns input for table: project */
 export type Project_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Project_Prepend_Input = {
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
 /** columns and relationships of "project_role" */
@@ -37579,6 +37737,8 @@ export enum Project_Select_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  ScanPolicy = 'scanPolicy',
+  /** column name */
   UpdatedAt = 'updatedAt'
 }
 
@@ -37616,6 +37776,8 @@ export type Project_Set_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -37706,6 +37868,8 @@ export type Project_Stream_Cursor_Value_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
@@ -38186,10 +38350,22 @@ export enum Project_Update_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  ScanPolicy = 'scanPolicy',
+  /** column name */
   UpdatedAt = 'updatedAt'
 }
 
 export type Project_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Project_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Project_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Project_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Project_Delete_Key_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Project_Prepend_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Project_Set_Input>;
   /** filter the rows which have to be updated */
@@ -38562,6 +38738,10 @@ export type Query_Root = {
   developer_statistics_row: Array<Developer_Statistics_Row>;
   /** fetch aggregated fields from the table: "developer_statistics_row" */
   developer_statistics_row_aggregate: Developer_Statistics_Row_Aggregate;
+  /** Effective org scan policy: Mobb default + org deviations (any org member). */
+  effectiveOrganizationScanPolicy: EffectiveScanPolicyResponse;
+  /** Effective project scan policy: org effective + project deviations + relax-lock clamp (any project member or org owner). */
+  effectiveProjectScanPolicy: EffectiveScanPolicyResponse;
   /** fetch data from the table: "effort_to_apply_fix" */
   effort_to_apply_fix: Array<Effort_To_Apply_Fix>;
   /** fetch aggregated fields from the table: "effort_to_apply_fix" */
@@ -40597,6 +40777,16 @@ export type Query_RootDeveloper_Statistics_Row_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Developer_Statistics_Row_Order_By>>;
   where?: InputMaybe<Developer_Statistics_Row_Bool_Exp>;
+};
+
+
+export type Query_RootEffectiveOrganizationScanPolicyArgs = {
+  organizationId: Scalars['String']['input'];
+};
+
+
+export type Query_RootEffectiveProjectScanPolicyArgs = {
+  projectId: Scalars['String']['input'];
 };
 
 
@@ -45990,6 +46180,8 @@ export type Scan = {
   __typename?: 'scan';
   context: Scalars['String']['output'];
   duration: Scalars['Int']['output'];
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Int']['output']>;
   file_count: Scalars['Int']['output'];
   /** An object relationship */
   fix_report: FixReport;
@@ -46085,6 +46277,8 @@ export type Scan_Arr_Rel_Insert_Input = {
 export type Scan_Avg_Fields = {
   __typename?: 'scan_avg_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46092,6 +46286,8 @@ export type Scan_Avg_Fields = {
 /** order by avg() on columns of table "scan" */
 export type Scan_Avg_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46103,6 +46299,7 @@ export type Scan_Bool_Exp = {
   _or?: InputMaybe<Array<Scan_Bool_Exp>>;
   context?: InputMaybe<String_Comparison_Exp>;
   duration?: InputMaybe<Int_Comparison_Exp>;
+  excluded_rule_count?: InputMaybe<Int_Comparison_Exp>;
   file_count?: InputMaybe<Int_Comparison_Exp>;
   fix_report?: InputMaybe<FixReport_Bool_Exp>;
   fix_report_id?: InputMaybe<Uuid_Comparison_Exp>;
@@ -46122,6 +46319,8 @@ export enum Scan_Constraint {
 /** input type for incrementing numeric columns in table "scan" */
 export type Scan_Inc_Input = {
   duration?: InputMaybe<Scalars['Int']['input']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Scalars['Int']['input']>;
   file_count?: InputMaybe<Scalars['Int']['input']>;
   rule_count?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -46130,6 +46329,8 @@ export type Scan_Inc_Input = {
 export type Scan_Insert_Input = {
   context?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Scalars['Int']['input']>;
   file_count?: InputMaybe<Scalars['Int']['input']>;
   fix_report?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
@@ -46145,6 +46346,8 @@ export type Scan_Max_Fields = {
   __typename?: 'scan_max_fields';
   context?: Maybe<Scalars['String']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Int']['output']>;
   file_count?: Maybe<Scalars['Int']['output']>;
   fix_report_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -46156,6 +46359,8 @@ export type Scan_Max_Fields = {
 export type Scan_Max_Order_By = {
   context?: InputMaybe<Order_By>;
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   fix_report_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -46168,6 +46373,8 @@ export type Scan_Min_Fields = {
   __typename?: 'scan_min_fields';
   context?: Maybe<Scalars['String']['output']>;
   duration?: Maybe<Scalars['Int']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Int']['output']>;
   file_count?: Maybe<Scalars['Int']['output']>;
   fix_report_id?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
@@ -46179,6 +46386,8 @@ export type Scan_Min_Fields = {
 export type Scan_Min_Order_By = {
   context?: InputMaybe<Order_By>;
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   fix_report_id?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -46206,6 +46415,7 @@ export type Scan_On_Conflict = {
 export type Scan_Order_By = {
   context?: InputMaybe<Order_By>;
   duration?: InputMaybe<Order_By>;
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   fix_report?: InputMaybe<FixReport_Order_By>;
   fix_report_id?: InputMaybe<Order_By>;
@@ -46227,6 +46437,8 @@ export enum Scan_Select_Column {
   Context = 'context',
   /** column name */
   Duration = 'duration',
+  /** column name */
+  ExcludedRuleCount = 'excluded_rule_count',
   /** column name */
   FileCount = 'file_count',
   /** column name */
@@ -46257,6 +46469,8 @@ export enum Scan_Select_Column_Scan_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns
 export type Scan_Set_Input = {
   context?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Scalars['Int']['input']>;
   file_count?: InputMaybe<Scalars['Int']['input']>;
   fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -46447,6 +46661,8 @@ export type Scan_Source_Updates = {
 export type Scan_Stddev_Fields = {
   __typename?: 'scan_stddev_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46454,6 +46670,8 @@ export type Scan_Stddev_Fields = {
 /** order by stddev() on columns of table "scan" */
 export type Scan_Stddev_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46462,6 +46680,8 @@ export type Scan_Stddev_Order_By = {
 export type Scan_Stddev_Pop_Fields = {
   __typename?: 'scan_stddev_pop_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46469,6 +46689,8 @@ export type Scan_Stddev_Pop_Fields = {
 /** order by stddev_pop() on columns of table "scan" */
 export type Scan_Stddev_Pop_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46477,6 +46699,8 @@ export type Scan_Stddev_Pop_Order_By = {
 export type Scan_Stddev_Samp_Fields = {
   __typename?: 'scan_stddev_samp_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46484,6 +46708,8 @@ export type Scan_Stddev_Samp_Fields = {
 /** order by stddev_samp() on columns of table "scan" */
 export type Scan_Stddev_Samp_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46500,6 +46726,8 @@ export type Scan_Stream_Cursor_Input = {
 export type Scan_Stream_Cursor_Value_Input = {
   context?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<Scalars['Int']['input']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Scalars['Int']['input']>;
   file_count?: InputMaybe<Scalars['Int']['input']>;
   fix_report_id?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
@@ -46512,6 +46740,8 @@ export type Scan_Stream_Cursor_Value_Input = {
 export type Scan_Sum_Fields = {
   __typename?: 'scan_sum_fields';
   duration?: Maybe<Scalars['Int']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Int']['output']>;
   file_count?: Maybe<Scalars['Int']['output']>;
   rule_count?: Maybe<Scalars['Int']['output']>;
 };
@@ -46519,6 +46749,8 @@ export type Scan_Sum_Fields = {
 /** order by sum() on columns of table "scan" */
 export type Scan_Sum_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46529,6 +46761,8 @@ export enum Scan_Update_Column {
   Context = 'context',
   /** column name */
   Duration = 'duration',
+  /** column name */
+  ExcludedRuleCount = 'excluded_rule_count',
   /** column name */
   FileCount = 'file_count',
   /** column name */
@@ -46556,6 +46790,8 @@ export type Scan_Updates = {
 export type Scan_Var_Pop_Fields = {
   __typename?: 'scan_var_pop_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46563,6 +46799,8 @@ export type Scan_Var_Pop_Fields = {
 /** order by var_pop() on columns of table "scan" */
 export type Scan_Var_Pop_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46571,6 +46809,8 @@ export type Scan_Var_Pop_Order_By = {
 export type Scan_Var_Samp_Fields = {
   __typename?: 'scan_var_samp_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46578,6 +46818,8 @@ export type Scan_Var_Samp_Fields = {
 /** order by var_samp() on columns of table "scan" */
 export type Scan_Var_Samp_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -46586,6 +46828,8 @@ export type Scan_Var_Samp_Order_By = {
 export type Scan_Variance_Fields = {
   __typename?: 'scan_variance_fields';
   duration?: Maybe<Scalars['Float']['output']>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: Maybe<Scalars['Float']['output']>;
   file_count?: Maybe<Scalars['Float']['output']>;
   rule_count?: Maybe<Scalars['Float']['output']>;
 };
@@ -46593,6 +46837,8 @@ export type Scan_Variance_Fields = {
 /** order by variance() on columns of table "scan" */
 export type Scan_Variance_Order_By = {
   duration?: InputMaybe<Order_By>;
+  /** Rules excluded from this run by the effective scan policy (MOBB-3750). NULL = scan ran without a policy. */
+  excluded_rule_count?: InputMaybe<Order_By>;
   file_count?: InputMaybe<Order_By>;
   rule_count?: InputMaybe<Order_By>;
 };
@@ -67788,8 +68034,12 @@ export type Vulnerability_Report_Issue_Shared_State = {
   createdAt: Scalars['timestamptz']['output'];
   disposition: Scalars['String']['output'];
   dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  dispositionByUser?: Maybe<User>;
   dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
   dispositionReason?: Maybe<Scalars['String']['output']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: Maybe<Array<Scalars['String']['output']>>;
   id: Scalars['uuid']['output'];
   isArchived: Scalars['Boolean']['output'];
   issueFingerprintHash: Scalars['String']['output'];
@@ -67902,8 +68152,10 @@ export type Vulnerability_Report_Issue_Shared_State_Bool_Exp = {
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   disposition?: InputMaybe<String_Comparison_Exp>;
   dispositionAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  dispositionByUser?: InputMaybe<User_Bool_Exp>;
   dispositionByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   dispositionReason?: InputMaybe<String_Comparison_Exp>;
+  dispositionReasons?: InputMaybe<String_Array_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isArchived?: InputMaybe<Boolean_Comparison_Exp>;
   issueFingerprintHash?: InputMaybe<String_Comparison_Exp>;
@@ -67932,8 +68184,11 @@ export type Vulnerability_Report_Issue_Shared_State_Insert_Input = {
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   disposition?: InputMaybe<Scalars['String']['input']>;
   dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  dispositionByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
   dispositionReason?: InputMaybe<Scalars['String']['input']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -67954,6 +68209,8 @@ export type Vulnerability_Report_Issue_Shared_State_Max_Fields = {
   dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
   dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
   dispositionReason?: Maybe<Scalars['String']['output']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: Maybe<Array<Scalars['String']['output']>>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -67969,6 +68226,8 @@ export type Vulnerability_Report_Issue_Shared_State_Min_Fields = {
   dispositionAt?: Maybe<Scalars['timestamptz']['output']>;
   dispositionByUserId?: Maybe<Scalars['uuid']['output']>;
   dispositionReason?: Maybe<Scalars['String']['output']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: Maybe<Array<Scalars['String']['output']>>;
   id?: Maybe<Scalars['uuid']['output']>;
   issueFingerprintHash?: Maybe<Scalars['String']['output']>;
   projectId?: Maybe<Scalars['uuid']['output']>;
@@ -68004,8 +68263,10 @@ export type Vulnerability_Report_Issue_Shared_State_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   disposition?: InputMaybe<Order_By>;
   dispositionAt?: InputMaybe<Order_By>;
+  dispositionByUser?: InputMaybe<User_Order_By>;
   dispositionByUserId?: InputMaybe<Order_By>;
   dispositionReason?: InputMaybe<Order_By>;
+  dispositionReasons?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   isArchived?: InputMaybe<Order_By>;
   issueFingerprintHash?: InputMaybe<Order_By>;
@@ -68036,6 +68297,8 @@ export enum Vulnerability_Report_Issue_Shared_State_Select_Column {
   /** column name */
   DispositionReason = 'dispositionReason',
   /** column name */
+  DispositionReasons = 'dispositionReasons',
+  /** column name */
   Id = 'id',
   /** column name */
   IsArchived = 'isArchived',
@@ -68056,6 +68319,8 @@ export type Vulnerability_Report_Issue_Shared_State_Set_Input = {
   dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
   dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
   dispositionReason?: InputMaybe<Scalars['String']['input']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -68079,6 +68344,8 @@ export type Vulnerability_Report_Issue_Shared_State_Stream_Cursor_Value_Input = 
   dispositionAt?: InputMaybe<Scalars['timestamptz']['input']>;
   dispositionByUserId?: InputMaybe<Scalars['uuid']['input']>;
   dispositionReason?: InputMaybe<Scalars['String']['input']>;
+  /** User-selected ignore reasons, as vulnerability_report_issue_tag values. The decision's own copy — VRI tags remain the analyzer's triage signal. */
+  dispositionReasons?: InputMaybe<Array<Scalars['String']['input']>>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isArchived?: InputMaybe<Scalars['Boolean']['input']>;
   issueFingerprintHash?: InputMaybe<Scalars['String']['input']>;
@@ -68099,6 +68366,8 @@ export enum Vulnerability_Report_Issue_Shared_State_Update_Column {
   DispositionByUserId = 'dispositionByUserId',
   /** column name */
   DispositionReason = 'dispositionReason',
+  /** column name */
+  DispositionReasons = 'dispositionReasons',
   /** column name */
   Id = 'id',
   /** column name */
@@ -68400,6 +68669,8 @@ export enum Vulnerability_Report_Issue_Tag_Constraint {
 }
 
 export enum Vulnerability_Report_Issue_Tag_Enum {
+  /** Accepted risk */
+  AcceptedRisk = 'ACCEPTED_RISK',
   /** consumers/agentic_remediation is currently retrying remediation for this issue */
   AgenticRemediationInProgress = 'AGENTIC_REMEDIATION_IN_PROGRESS',
   /** Autogenerated code */
@@ -68523,6 +68794,8 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag = {
   /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
   createdAt: Scalars['timestamptz']['output'];
   id: Scalars['uuid']['output'];
+  /** An object relationship */
+  vulnerabilityReportIssue: Vulnerability_Report_Issue;
   vulnerability_report_issue_id: Scalars['uuid']['output'];
   vulnerability_report_issue_tag_value: Vulnerability_Report_Issue_Tag_Enum;
 };
@@ -68581,6 +68854,7 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Ex
   _or?: InputMaybe<Array<Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Bool_Exp>>;
   createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Bool_Exp>;
   vulnerability_report_issue_id?: InputMaybe<Uuid_Comparison_Exp>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum_Comparison_Exp>;
 };
@@ -68598,6 +68872,7 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Insert_
   /** Per-row stamp time. The maintenance_service stuck-tag sweep filters AGENTIC_REMEDIATION_IN_PROGRESS rows on created_at < (NOW() - 3h05m) to reclaim orphans from dead workers; the value also serves as a general audit of when each tag was applied. */
   createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Obj_Rel_Insert_Input>;
   vulnerability_report_issue_id?: InputMaybe<Scalars['uuid']['input']>;
   vulnerability_report_issue_tag_value?: InputMaybe<Vulnerability_Report_Issue_Tag_Enum>;
 };
@@ -68656,6 +68931,7 @@ export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_On_Conf
 export type Vulnerability_Report_Issue_To_Vulnerability_Report_Issue_Tag_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  vulnerabilityReportIssue?: InputMaybe<Vulnerability_Report_Issue_Order_By>;
   vulnerability_report_issue_id?: InputMaybe<Order_By>;
   vulnerability_report_issue_tag_value?: InputMaybe<Order_By>;
 };

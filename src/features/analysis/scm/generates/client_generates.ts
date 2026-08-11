@@ -1652,6 +1652,14 @@ export type RepositorySkillStat = {
   skillName: Scalars['String']['output'];
 };
 
+export type RequestRoiRefreshError = {
+  __typename?: 'RequestRoiRefreshError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type RequestRoiRefreshResponse = RequestRoiRefreshError | StatusQueryResponse;
+
 export type ResendInvitationResponse = {
   __typename?: 'ResendInvitationResponse';
   id: Scalars['String']['output'];
@@ -4269,6 +4277,7 @@ export type Agentic_Remediation_Vulnerability_Blacklist_Updates = {
 export type AggregatedUnexpiredVulnerabilitiesState_Organization_Args = {
   linear_vul_count_limit?: InputMaybe<Scalars['Int']['input']>;
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AggregatedVulnerabilitiesState_Organization_Args = {
@@ -10816,6 +10825,7 @@ export type Analytics_Organization_Roi_Summary = {
   metric: Scalars['String']['output'];
   min_confidence: Scalars['Int']['output'];
   organization_id: Scalars['uuid']['output'];
+  time_frame: Scalars['String']['output'];
   variant: Scalars['String']['output'];
 };
 
@@ -10867,12 +10877,13 @@ export type Analytics_Organization_Roi_Summary_Bool_Exp = {
   metric?: InputMaybe<String_Comparison_Exp>;
   min_confidence?: InputMaybe<Int_Comparison_Exp>;
   organization_id?: InputMaybe<Uuid_Comparison_Exp>;
+  time_frame?: InputMaybe<String_Comparison_Exp>;
   variant?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "analytics.organization_roi_summary" */
 export enum Analytics_Organization_Roi_Summary_Constraint {
-  /** unique or primary key constraint on columns "key", "variant", "organization_id", "min_confidence", "metric" */
+  /** unique or primary key constraint on columns "time_frame", "key", "variant", "organization_id", "min_confidence", "metric" */
   OrganizationRoiSummaryPkey = 'organization_roi_summary_pkey'
 }
 
@@ -10890,6 +10901,7 @@ export type Analytics_Organization_Roi_Summary_Insert_Input = {
   metric?: InputMaybe<Scalars['String']['input']>;
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
   variant?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -10902,6 +10914,7 @@ export type Analytics_Organization_Roi_Summary_Max_Fields = {
   metric?: Maybe<Scalars['String']['output']>;
   min_confidence?: Maybe<Scalars['Int']['output']>;
   organization_id?: Maybe<Scalars['uuid']['output']>;
+  time_frame?: Maybe<Scalars['String']['output']>;
   variant?: Maybe<Scalars['String']['output']>;
 };
 
@@ -10914,6 +10927,7 @@ export type Analytics_Organization_Roi_Summary_Min_Fields = {
   metric?: Maybe<Scalars['String']['output']>;
   min_confidence?: Maybe<Scalars['Int']['output']>;
   organization_id?: Maybe<Scalars['uuid']['output']>;
+  time_frame?: Maybe<Scalars['String']['output']>;
   variant?: Maybe<Scalars['String']['output']>;
 };
 
@@ -10941,6 +10955,7 @@ export type Analytics_Organization_Roi_Summary_Order_By = {
   metric?: InputMaybe<Order_By>;
   min_confidence?: InputMaybe<Order_By>;
   organization_id?: InputMaybe<Order_By>;
+  time_frame?: InputMaybe<Order_By>;
   variant?: InputMaybe<Order_By>;
 };
 
@@ -10950,6 +10965,7 @@ export type Analytics_Organization_Roi_Summary_Pk_Columns_Input = {
   metric: Scalars['String']['input'];
   min_confidence: Scalars['Int']['input'];
   organization_id: Scalars['uuid']['input'];
+  time_frame: Scalars['String']['input'];
   variant: Scalars['String']['input'];
 };
 
@@ -10968,6 +10984,8 @@ export enum Analytics_Organization_Roi_Summary_Select_Column {
   /** column name */
   OrganizationId = 'organization_id',
   /** column name */
+  TimeFrame = 'time_frame',
+  /** column name */
   Variant = 'variant'
 }
 
@@ -10979,6 +10997,7 @@ export type Analytics_Organization_Roi_Summary_Set_Input = {
   metric?: InputMaybe<Scalars['String']['input']>;
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
   variant?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -11019,6 +11038,7 @@ export type Analytics_Organization_Roi_Summary_Stream_Cursor_Value_Input = {
   metric?: InputMaybe<Scalars['String']['input']>;
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
   variant?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -11043,6 +11063,8 @@ export enum Analytics_Organization_Roi_Summary_Update_Column {
   MinConfidence = 'min_confidence',
   /** column name */
   OrganizationId = 'organization_id',
+  /** column name */
+  TimeFrame = 'time_frame',
   /** column name */
   Variant = 'variant'
 }
@@ -11807,6 +11829,7 @@ export type Analytics_Pr_Conversion_Stats_Variance_Fields = {
 
 export type Analytics_Refresh_Organization_Roi_Summary_Args = {
   p_org_id?: InputMaybe<Scalars['uuid']['input']>;
+  p_time_frame?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "analytics.stats_report" */
@@ -22813,6 +22836,7 @@ export type IssueLanguage_Updates = {
 
 export type IssuesByCategories_Organization_Args = {
   categories?: InputMaybe<Scalars['_text']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Boolean expression to compare columns of type "json". All fields are combined with logical 'AND'. */
@@ -24034,6 +24058,7 @@ export type Mutation_Root = {
   processVulnerabilityAttributions: ProcessVulnerabilityAttributionsResponse;
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
+  requestRoiRefresh?: Maybe<RequestRoiRefreshResponse>;
   rerunAnalysis: VulnerabilityReportResponse;
   resendInvitation?: Maybe<ResendInvitationResponse>;
   resetAnswers?: Maybe<Scalars['Void']['output']>;
@@ -25404,6 +25429,7 @@ export type Mutation_RootDelete_Analytics_Organization_Roi_Summary_By_PkArgs = {
   metric: Scalars['String']['input'];
   min_confidence: Scalars['Int']['input'];
   organization_id: Scalars['uuid']['input'];
+  time_frame: Scalars['String']['input'];
   variant: Scalars['String']['input'];
 };
 
@@ -28803,6 +28829,13 @@ export type Mutation_RootRemoveTokenArgs = {
 export type Mutation_RootRemoveUserFromProjectArgs = {
   projectId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootRequestRoiRefreshArgs = {
+  organizationId: Scalars['String']['input'];
+  timeFrame?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -33067,6 +33100,7 @@ export enum Order_By {
 
 export type Org_Project_Resolved_Vulnerabilities_Args = {
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
+  p_from?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
 export type Org_Project_Vulnerability_Severities_Args = {
@@ -33206,6 +33240,8 @@ export type Organization = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_roi_summary_freshness" */
+  roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTrendsTimeSeries: GetRoiTrendsTimeSeriesResponse;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
@@ -33691,6 +33727,12 @@ export type OrganizationReviewTimeStatsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<View_Types_Ai_Human_Days_Stats_Order_By>>;
   where?: InputMaybe<View_Types_Ai_Human_Days_Stats_Bool_Exp>;
+};
+
+
+/** columns and relationships of "organization" */
+export type OrganizationRoiSummaryFreshnessArgs = {
+  args: RoiSummaryFreshness_Organization_Args;
 };
 
 
@@ -34683,6 +34725,8 @@ export type Organization_Max_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_roi_summary_freshness" */
+  roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -34696,6 +34740,12 @@ export type Organization_Max_FieldsDeployedFixesCountArgs = {
 /** aggregate max on columns */
 export type Organization_Max_FieldsDeployedVulnerabilityIssuesCountArgs = {
   args: DeployedVulnerabilityIssuesCount_Organization_Args;
+};
+
+
+/** aggregate max on columns */
+export type Organization_Max_FieldsRoiSummaryFreshnessArgs = {
+  args: RoiSummaryFreshness_Organization_Args;
 };
 
 /** aggregate min on columns */
@@ -34722,6 +34772,8 @@ export type Organization_Min_Fields = {
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
   roiMobbFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** A computed field, executes function "organization_roi_summary_freshness" */
+  roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -34735,6 +34787,12 @@ export type Organization_Min_FieldsDeployedFixesCountArgs = {
 /** aggregate min on columns */
 export type Organization_Min_FieldsDeployedVulnerabilityIssuesCountArgs = {
   args: DeployedVulnerabilityIssuesCount_Organization_Args;
+};
+
+
+/** aggregate min on columns */
+export type Organization_Min_FieldsRoiSummaryFreshnessArgs = {
+  args: RoiSummaryFreshness_Organization_Args;
 };
 
 /** response of any mutation on the table "organization" */
@@ -40236,6 +40294,7 @@ export type Query_RootAnalytics_Organization_Roi_Summary_By_PkArgs = {
   metric: Scalars['String']['input'];
   min_confidence: Scalars['Int']['input'];
   organization_id: Scalars['uuid']['input'];
+  time_frame: Scalars['String']['input'];
   variant: Scalars['String']['input'];
 };
 
@@ -46168,11 +46227,16 @@ export type Repo_Variance_Fields = {
 
 export type ResolvedAggregatedVulnerabilitySeverities_Organization_Args = {
   min_confidence?: InputMaybe<Scalars['Int']['input']>;
+  time_frame?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ReviewTimeStats_Organization_Args = {
   end_date?: InputMaybe<Scalars['timestamptz']['input']>;
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+export type RoiSummaryFreshness_Organization_Args = {
+  time_frame?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** columns and relationships of "scan" */
@@ -50563,6 +50627,7 @@ export type Subscription_RootAnalytics_Organization_Roi_Summary_By_PkArgs = {
   metric: Scalars['String']['input'];
   min_confidence: Scalars['Int']['input'];
   organization_id: Scalars['uuid']['input'];
+  time_frame: Scalars['String']['input'];
   variant: Scalars['String']['input'];
 };
 

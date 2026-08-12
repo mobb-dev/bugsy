@@ -9,7 +9,7 @@
     "test:binary": "node --test binary.mjs"
   },
   "dependencies": {
-    "adm-zip": "0.5.17",
+    "adm-zip": "0.5.18",
     "dotenv": "16.6.1",
     "globby": "14.1.0",
     "node-pty": "1.1.0-beta38",

@@ -419,18 +419,19 @@ export const expiredReportPrompt = ({
   lastReportDate: string
 }) => `🔍 **MOBB SECURITY SCAN STATUS**
 
-## Out-of-Date Vulnerability Report
+## Fixes Have Expired
 
-Your most recent vulnerability report for this repository **expired on ${lastReportDate}** and is no longer available for fetching automated fixes.
+The fixes from your most recent vulnerability report for this repository **expired on ${lastReportDate}**, so there are no automated fixes left to fetch.
 
 ### 📋 Why Did This Happen?
-- Reports are automatically purged after a retention period for security and storage optimization.
-- No new scans have been run since the last report expired.
+- Fixes are kept for a limited window after an analysis (extendable), and this one has passed.
+- The findings themselves have not gone anywhere: the report is still viewable in the Mobb web app, with every issue, location and severity intact.
+- No new scans have been run since those fixes expired.
 
 ### 🎯 Recommended Actions
-1. **Run a fresh security scan** to generate an up-to-date vulnerability report.
+1. **Run a fresh security scan** to generate new fixes for the current code.
    - Use the \`${MCP_TOOL_SCAN_AND_FIX_VULNERABILITIES}\` tool.
-2. **Verify repository access** if scans fail to run or the repository has moved.
+2. **Open the existing report in the web app** if you need the findings themselves — for an audit, a compliance review, or to see what was reported.
 3. **Review your CI/CD pipeline** to ensure regular scans are triggered.
 
 For more help:

@@ -9,6 +9,11 @@ export const FixPageFixReportZ = z.object({
   createdOn: z.string(),
   state: z.enum(Fix_Report_State_Enum),
   isFixEnabled: z.boolean().nullish(),
+  // When this report's fixes expire(d). Nullish because the column is, and
+  // because the issue screen reads it only to date the "fixes expired"
+  // messaging — a missing date degrades to the undated wording rather than
+  // failing the parse (MOBB-3769).
+  expirationOn: z.string().nullish(),
   repo: z
     .object({
       name: z.string().nullable(),

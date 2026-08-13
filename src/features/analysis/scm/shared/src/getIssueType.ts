@@ -110,7 +110,10 @@ export const issueDescription: Record<
     'Mobb is currently retrying remediation on this issue. The state will refresh automatically once the run finishes.',
 }
 
-type FalsePositiveData = IssuePartsFp['getFalsePositive']
+// NonNullable deliberately: the explanation is optional on the issue (it can
+// expire out of S3), but this parser has nothing to say about an absent one.
+// Callers decide what to render instead — see fixExpiryCopy.explanationUnavailable.
+type FalsePositiveData = NonNullable<IssuePartsFp['getFalsePositive']>
 
 function replaceKeysWithValues(
   fixDescription: string,

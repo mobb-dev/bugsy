@@ -76,8 +76,18 @@ export const BaseIssuePartsZ = z.object({
           }),
         })
         .transform(async ({ sourceCodeFile }) => {
+          // Null when the snippet cannot actually be read — same rule as the
+          // node-diff transform below, and for the same reason: a signed URL is
+          // not proof the object exists. `getFile` presigns report-scoped keys
+          // without checking S3, so a swept snippet hands back a valid-looking
+          // URL whose GET returns S3's NoSuchKey XML. Without the `ok` check
+          // that XML became the file's "source code"; without the catch, one
+          // rejected fetch failed the whole issue parse instead of one snippet.
           const { url } = sourceCodeFile.signedFile
-          const sourceCodeRes = await fetch(url)
+          const sourceCodeRes = await fetch(url).catch(() => null)
+          if (!sourceCodeRes?.ok) {
+            return null
+          }
           if (
             Number(sourceCodeRes.headers.get('Content-Length')) >
             MAX_SOURCE_CODE_FILE_SIZE_IN_BYTES
@@ -93,20 +103,43 @@ export const BaseIssuePartsZ = z.object({
     .transform((nodes) => nodes.filter((node) => node !== null)),
 
   fix: FixPartsForFixScreenZ.nullish(),
+  // Null when the diff cannot actually be read, not merely when the row is
+  // absent. The `vulnerability_report_issue_node_diff_file_id` column outlives
+  // the object it points at — only code-node rows are GC'd — and `getFile`
+  // signs a URL without checking existence, so a fixes-expired report hands
+  // back a perfectly valid URL for an object the lifecycle already swept.
+  //
+  // Treating the row as proof of the object put an empty box under "The issue
+  // was reported in the following locations:", because the renderer took the
+  // diff branch and had nothing to draw. Collapsing to null falls back to the
+  // locations list, which is the honest thing to show. Same rule as the
+  // snippet reader: an id is not evidence a file exists.
   vulnerabilityReportIssueNodeDiffFile: z
     .object({
-      signedFile: z
-        .object({
-          url: z.string(),
-        })
-        .transform(async ({ url }) => {
-          const codeDiff = await fetch(url).then((res) => res.text())
-          return { codeDiff }
-        }),
+      signedFile: z.object({
+        url: z.string(),
+      }),
     })
-    .nullish(),
+    .nullish()
+    .transform(async (nodeDiffFile) => {
+      if (!nodeDiffFile) {
+        return nodeDiffFile
+      }
+      const response = await fetch(nodeDiffFile.signedFile.url).catch(
+        () => null
+      )
+      if (!response?.ok) {
+        return null
+      }
+      return { signedFile: { codeDiff: await response.text() } }
+    }),
   sharedState: VulnerabilityReportIssueSharedStateZ,
   unfixableId: z.guid().nullish(),
+  // The DB link to the fix, which outlives the fix's S3 artifacts. Non-null
+  // means "this issue had a fix" even when `fix` above is absent because the
+  // report's fixes expired, and that distinction is what keeps such an issue
+  // from being rendered as if it were never fixable (MOBB-3769).
+  fixId: z.guid().nullish(),
 })
 
 export const FalsePositivePartsZ = z.object({
@@ -132,7 +165,13 @@ export const IssuePartsFpZ = BaseIssuePartsZ.extend(
   z.object({
     category: z.literal(Vulnerability_Report_Issue_Category_Enum.FalsePositive),
     fpId: z.guid(),
-    getFalsePositive: FalsePositivePartsZ,
+    // Nullish, like getUnfixable on GeneralIssueZ, because the explanation can
+    // genuinely be absent: the analyzer's pickle dies with the report's fixes,
+    // and issues processed before the persistent store existed (MOBB-3768)
+    // have nothing to fall back to. This used to be required, so the
+    // resolver's error member failed the parse and took down the entire issue
+    // screen instead of rendering one "explanation unavailable" accordion.
+    getFalsePositive: FalsePositivePartsZ.nullish(),
   }).shape
 )
 

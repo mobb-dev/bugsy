@@ -1525,7 +1525,7 @@ All tools require authentication via the Mobb API. The tools will handle authent
 
 Common scenarios:
 - **No fixes found**: Repository has no vulnerabilities or they're not fixable
-- **Report expired**: Previous scan is too old, need to rescan
+- **Fixes expired**: The previous scan's fixes have aged out — rescan to get new ones (the findings themselves stay viewable in the web app)
 - **No report found**: No previous scan exists, run scan_and_fix_vulnerabilities
 - **Authentication required**: User needs to authenticate with Mobb
 

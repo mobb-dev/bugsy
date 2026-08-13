@@ -1083,7 +1083,9 @@ describe('MCP Server', () => {
 
       expectValidResult(result)
       const responseText = result.content[0]?.text ?? ''
-      expect(responseText).toContain('Out-of-Date Vulnerability Report')
+      // The heading changed with MOBB-3769: a report does not expire, its
+      // fixes do, and the findings stay viewable in the web app.
+      expect(responseText).toContain('Fixes Have Expired')
 
       // Verify info log about expired report prompt
       expect(

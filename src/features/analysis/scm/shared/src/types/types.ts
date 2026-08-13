@@ -262,6 +262,10 @@ export const ReportFixesQueryFixZ = z.object({
   vulnerabilityReportIssues: z
     .array(
       z.object({
+        // The row's reroute target once fixes expire: a fix's own page cannot
+        // render without its S3 patch, so the fixable bucket points the row
+        // at this issue instead (MOBB-3769).
+        id: z.guid(),
         issueType: z.string(),
         issueLanguage: z.string(),
         sharedState: IssueSharedStateZ,
@@ -449,6 +453,10 @@ const ProjectVulnerabilityReport = z.object({
       .nullable(),
     state: z.enum(Fix_Report_State_Enum),
     expirationOn: z.string(),
+    // Whether this org has fixes at all. Scan-only reports hit the same
+    // expiry date as every other report, so the list needs this to avoid
+    // badging them for fixes they never had (MOBB-3769).
+    isFixEnabled: z.boolean(),
   }),
 })
 

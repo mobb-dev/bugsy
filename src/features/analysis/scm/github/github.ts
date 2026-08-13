@@ -461,6 +461,13 @@ export function getGithubSdk(
           repoLanguages: repo.language ? [repo.language] : [],
           repoIsPublic: !repo.private,
           repoUpdatedAt: repo.updated_at,
+          // GitHub already returns this on /user/repos; it was simply never mapped.
+          // PR-check enablement registers a webhook, which needs repo admin, so a
+          // picker without it can only offer every repository and let the customer
+          // discover by failing.
+          repoIsAdmin: repo.permissions
+            ? repo.permissions.admin === true
+            : undefined,
         }))
 
         return {

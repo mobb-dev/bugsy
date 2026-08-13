@@ -1490,6 +1490,55 @@ export type PackageInfoResponse = {
   version: Scalars['String']['output'];
 };
 
+/**
+ * Registration failed in a way the customer can usually fix themselves — most often
+ * the token is not a repo admin. Separate from ScmError so the UI can show the row's
+ * own actionable message instead of a generic failure.
+ */
+export type PrCheckSettingsError = ScmBaseError & {
+  __typename?: 'PrCheckSettingsError';
+  error: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  status: Status;
+};
+
+export type PrCheckSettingsResponse = PrCheckSettingsError | PrCheckSettingsSuccess;
+
+export type PrCheckSettingsSuccess = {
+  __typename?: 'PrCheckSettingsSuccess';
+  /** False when the row was disabled but GitHub would not delete the hook. */
+  hookRemoved?: Maybe<Scalars['Boolean']['output']>;
+  status: Status;
+};
+
+/**
+ * A delivery we would not act on.
+ *
+ * The message is deliberately uninformative for anything touching enrollment: unknown
+ * repository, missing secret and bad signature all answer identically, because varying
+ * them would turn this into an oracle for which private repositories a customer has
+ * connected.
+ */
+export type PrCheckWebhookError = {
+  __typename?: 'PrCheckWebhookError';
+  error: Scalars['String']['output'];
+  status: Status;
+};
+
+export type PrCheckWebhookResponse = PrCheckWebhookError | PrCheckWebhookSuccess;
+
+export type PrCheckWebhookSuccess = {
+  __typename?: 'PrCheckWebhookSuccess';
+  /** Set only when a scan was queued. */
+  fixReportId?: Maybe<Scalars['String']['output']>;
+  /**
+   * What we decided: queued, ignored (a draft we skip), or not-connected. Every one
+   * of these means the integration worked, so they are not errors.
+   */
+  outcome: Scalars['String']['output'];
+  status: Status;
+};
+
 export type ProcessAiBlameErrorResult = {
   __typename?: 'ProcessAIBlameErrorResult';
   error: Scalars['String']['output'];
@@ -1787,6 +1836,15 @@ export type ScanPolicyRelaxLockError = BaseError & {
   violationsJson: Scalars['String']['output'];
 };
 
+export type ScanPolicyRuleCatalogItem = {
+  __typename?: 'ScanPolicyRuleCatalogItem';
+  cwe: Array<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  issueType?: Maybe<Scalars['String']['output']>;
+  severity: Scalars['String']['output'];
+  target: Scalars['String']['output'];
+};
+
 export type ScanPolicyUpdateResponse = ScanPolicyRelaxLockError | ScanPolicyUpdateSuccess | ScanPolicyValidationError;
 
 /**
@@ -1977,6 +2035,7 @@ export type ScmNoScmTokenError = ScmBaseError & {
 export type ScmRepo = {
   __typename?: 'ScmRepo';
   hasAttributions?: Maybe<Scalars['Boolean']['output']>;
+  repoIsAdmin?: Maybe<Scalars['Boolean']['output']>;
   repoIsPublic: Scalars['Boolean']['output'];
   repoLanguages: Array<Scalars['String']['output']>;
   repoName: Scalars['String']['output'];
@@ -17893,6 +17952,8 @@ export type FixReport = {
   issueLanguages?: Maybe<Scalars['json']['output']>;
   /** A computed field, executes function "get_issue_types" */
   issueTypes?: Maybe<Scalars['json']['output']>;
+  /** An object relationship */
+  prCheckRun?: Maybe<PrCheckRun>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   /** An object relationship */
   repo?: Maybe<Repo>;
@@ -18089,6 +18150,7 @@ export type FixReport_Bool_Exp = {
   isFixEnabled?: InputMaybe<Boolean_Comparison_Exp>;
   issueLanguages?: InputMaybe<Json_Comparison_Exp>;
   issueTypes?: InputMaybe<Json_Comparison_Exp>;
+  prCheckRun?: InputMaybe<PrCheckRun_Bool_Exp>;
   remainingUnstableFixes?: InputMaybe<Int_Comparison_Exp>;
   repo?: InputMaybe<Repo_Bool_Exp>;
   repoArchiveId?: InputMaybe<Uuid_Comparison_Exp>;
@@ -18130,6 +18192,7 @@ export type FixReport_Insert_Input = {
   isAiEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   /** Whether fixes are generated for this report. When false the report is scan-only: findings were scanned and categorized but no fixes were requested (report stops at Digested). Lets the UI treat Digested as a terminal state for these reports. */
   isFixEnabled?: InputMaybe<Scalars['Boolean']['input']>;
+  prCheckRun?: InputMaybe<PrCheckRun_Obj_Rel_Insert_Input>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   repo?: InputMaybe<Repo_Obj_Rel_Insert_Input>;
   repoArchiveId?: InputMaybe<Scalars['uuid']['input']>;
@@ -18235,6 +18298,7 @@ export type FixReport_Order_By = {
   isFixEnabled?: InputMaybe<Order_By>;
   issueLanguages?: InputMaybe<Order_By>;
   issueTypes?: InputMaybe<Order_By>;
+  prCheckRun?: InputMaybe<PrCheckRun_Order_By>;
   remainingUnstableFixes?: InputMaybe<Order_By>;
   repo?: InputMaybe<Repo_Order_By>;
   repoArchiveId?: InputMaybe<Order_By>;
@@ -23310,6 +23374,14 @@ export type Mutation_Root = {
   delete_organization_to_user?: Maybe<Organization_To_User_Mutation_Response>;
   /** delete single row from the table: "organization_to_user" */
   delete_organization_to_user_by_pk?: Maybe<Organization_To_User>;
+  /** delete data from the table: "pr_check_run" */
+  delete_prCheckRun?: Maybe<PrCheckRun_Mutation_Response>;
+  /** delete single row from the table: "pr_check_run" */
+  delete_prCheckRun_by_pk?: Maybe<PrCheckRun>;
+  /** delete data from the table: "pr_scan_webhook" */
+  delete_pr_scan_webhook?: Maybe<Pr_Scan_Webhook_Mutation_Response>;
+  /** delete single row from the table: "pr_scan_webhook" */
+  delete_pr_scan_webhook_by_pk?: Maybe<Pr_Scan_Webhook>;
   /** delete data from the table: "pr_status" */
   delete_pr_status?: Maybe<Pr_Status_Mutation_Response>;
   /** delete single row from the table: "pr_status" */
@@ -23541,6 +23613,8 @@ export type Mutation_Root = {
   /** delete single row from the table: "vulnerability_severity" */
   delete_vulnerability_severity_by_pk?: Maybe<Vulnerability_Severity>;
   digestVulnerabilityReport: VulnerabilityReportResponse;
+  disablePrCheck?: Maybe<PrCheckSettingsResponse>;
+  enablePrCheck?: Maybe<PrCheckSettingsResponse>;
   /**
    * Ensure temporary code access for a fixes-expired report (MOBB-3768):
    * re-fetches the repo at its original revision with the caller's SCM
@@ -23581,6 +23655,12 @@ export type Mutation_Root = {
   getTracyRawDataUploadUrl: TracyRawDataUploadUrlResponse;
   handleGithubAppCallback: BaseResponseWithMessage;
   handleGithubWebhook: GithubWebhookResponse;
+  /**
+   * stringifiedPayload is GitHub's raw request body, byte-for-byte, as forwarded by
+   * the worker. It must not be re-serialized anywhere in the chain: the HMAC is over
+   * exactly these bytes.
+   */
+  handlePrCheckWebhook?: Maybe<PrCheckWebhookResponse>;
   initOrganizationAndProject?: Maybe<InitOrganizationAndProjectResponse>;
   initOrganizationAndProjectAdmin?: Maybe<InitOrganizationAndProjectResponse>;
   /** insert data into the table: "agentic_remediation.knowledge_base_cwe_mapping" */
@@ -23911,6 +23991,14 @@ export type Mutation_Root = {
   insert_organization_to_user?: Maybe<Organization_To_User_Mutation_Response>;
   /** insert a single row into the table: "organization_to_user" */
   insert_organization_to_user_one?: Maybe<Organization_To_User>;
+  /** insert data into the table: "pr_check_run" */
+  insert_prCheckRun?: Maybe<PrCheckRun_Mutation_Response>;
+  /** insert a single row into the table: "pr_check_run" */
+  insert_prCheckRun_one?: Maybe<PrCheckRun>;
+  /** insert data into the table: "pr_scan_webhook" */
+  insert_pr_scan_webhook?: Maybe<Pr_Scan_Webhook_Mutation_Response>;
+  /** insert a single row into the table: "pr_scan_webhook" */
+  insert_pr_scan_webhook_one?: Maybe<Pr_Scan_Webhook>;
   /** insert data into the table: "pr_status" */
   insert_pr_status?: Maybe<Pr_Status_Mutation_Response>;
   /** insert a single row into the table: "pr_status" */
@@ -24214,6 +24302,7 @@ export type Mutation_Root = {
    * True toggle entries are normalized away (org default is enabled).
    */
   updateOrganizationScanPolicy: ScanPolicyUpdateResponse;
+  updatePrCheckPolicy?: Maybe<PrCheckSettingsResponse>;
   /**
    * Replace the project's scan-policy deviations (project admin/writer or org
    * owner). policyJson: JSON-encoded tri-state ScanPolicyDoc; omit/null to fully
@@ -24710,6 +24799,18 @@ export type Mutation_Root = {
   update_organization_to_user_by_pk?: Maybe<Organization_To_User>;
   /** update multiples rows of table: "organization_to_user" */
   update_organization_to_user_many?: Maybe<Array<Maybe<Organization_To_User_Mutation_Response>>>;
+  /** update data of the table: "pr_check_run" */
+  update_prCheckRun?: Maybe<PrCheckRun_Mutation_Response>;
+  /** update single row of the table: "pr_check_run" */
+  update_prCheckRun_by_pk?: Maybe<PrCheckRun>;
+  /** update multiples rows of table: "pr_check_run" */
+  update_prCheckRun_many?: Maybe<Array<Maybe<PrCheckRun_Mutation_Response>>>;
+  /** update data of the table: "pr_scan_webhook" */
+  update_pr_scan_webhook?: Maybe<Pr_Scan_Webhook_Mutation_Response>;
+  /** update single row of the table: "pr_scan_webhook" */
+  update_pr_scan_webhook_by_pk?: Maybe<Pr_Scan_Webhook>;
+  /** update multiples rows of table: "pr_scan_webhook" */
+  update_pr_scan_webhook_many?: Maybe<Array<Maybe<Pr_Scan_Webhook_Mutation_Response>>>;
   /** update data of the table: "pr_status" */
   update_pr_status?: Maybe<Pr_Status_Mutation_Response>;
   /** update single row of the table: "pr_status" */
@@ -26260,6 +26361,30 @@ export type Mutation_RootDelete_Organization_To_User_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_PrCheckRunArgs = {
+  where: PrCheckRun_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_PrCheckRun_By_PkArgs = {
+  fixReportId: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Pr_Scan_WebhookArgs = {
+  where: Pr_Scan_Webhook_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Pr_Scan_Webhook_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Pr_StatusArgs = {
   where: Pr_Status_Bool_Exp;
 };
@@ -26971,6 +27096,20 @@ export type Mutation_RootDigestVulnerabilityReportArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDisablePrCheckArgs = {
+  organizationId: Scalars['String']['input'];
+  repoFullName: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootEnablePrCheckArgs = {
+  organizationId: Scalars['String']['input'];
+  repoFullName: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootEnsureReportCodeAccessArgs = {
   fixReportId: Scalars['String']['input'];
   retry?: InputMaybe<Scalars['Boolean']['input']>;
@@ -27030,6 +27169,12 @@ export type Mutation_RootHandleGithubAppCallbackArgs = {
 
 /** mutation root */
 export type Mutation_RootHandleGithubWebhookArgs = {
+  stringifiedPayload: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootHandlePrCheckWebhookArgs = {
   stringifiedPayload: Scalars['String']['input'];
 };
 
@@ -28190,6 +28335,34 @@ export type Mutation_RootInsert_Organization_To_User_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_PrCheckRunArgs = {
+  objects: Array<PrCheckRun_Insert_Input>;
+  on_conflict?: InputMaybe<PrCheckRun_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_PrCheckRun_OneArgs = {
+  object: PrCheckRun_Insert_Input;
+  on_conflict?: InputMaybe<PrCheckRun_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Pr_Scan_WebhookArgs = {
+  objects: Array<Pr_Scan_Webhook_Insert_Input>;
+  on_conflict?: InputMaybe<Pr_Scan_Webhook_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Pr_Scan_Webhook_OneArgs = {
+  object: Pr_Scan_Webhook_Insert_Input;
+  on_conflict?: InputMaybe<Pr_Scan_Webhook_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Pr_StatusArgs = {
   objects: Array<Pr_Status_Insert_Input>;
   on_conflict?: InputMaybe<Pr_Status_On_Conflict>;
@@ -29316,6 +29489,14 @@ export type Mutation_RootUpdateLinearTokenArgs = {
 export type Mutation_RootUpdateOrganizationScanPolicyArgs = {
   organizationId: Scalars['String']['input'];
   policyJson?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdatePrCheckPolicyArgs = {
+  organizationId: Scalars['String']['input'];
+  repoFullName: Scalars['String']['input'];
+  scanDrafts: Scalars['Boolean']['input'];
 };
 
 
@@ -31063,6 +31244,50 @@ export type Mutation_RootUpdate_Organization_To_User_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Organization_To_User_ManyArgs = {
   updates: Array<Organization_To_User_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_PrCheckRunArgs = {
+  _inc?: InputMaybe<PrCheckRun_Inc_Input>;
+  _set?: InputMaybe<PrCheckRun_Set_Input>;
+  where: PrCheckRun_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_PrCheckRun_By_PkArgs = {
+  _inc?: InputMaybe<PrCheckRun_Inc_Input>;
+  _set?: InputMaybe<PrCheckRun_Set_Input>;
+  pk_columns: PrCheckRun_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_PrCheckRun_ManyArgs = {
+  updates: Array<PrCheckRun_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_Scan_WebhookArgs = {
+  _inc?: InputMaybe<Pr_Scan_Webhook_Inc_Input>;
+  _set?: InputMaybe<Pr_Scan_Webhook_Set_Input>;
+  where: Pr_Scan_Webhook_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_Scan_Webhook_By_PkArgs = {
+  _inc?: InputMaybe<Pr_Scan_Webhook_Inc_Input>;
+  _set?: InputMaybe<Pr_Scan_Webhook_Set_Input>;
+  pk_columns: Pr_Scan_Webhook_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Pr_Scan_Webhook_ManyArgs = {
+  updates: Array<Pr_Scan_Webhook_Updates>;
 };
 
 
@@ -33562,7 +33787,7 @@ export type Organization = {
   roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTrendsTimeSeries: GetRoiTrendsTimeSeriesResponse;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: Maybe<Scalars['jsonb']['output']>;
   /** An array relationship */
   scmConfigs: Array<Scm_Config>;
@@ -34136,7 +34361,7 @@ export type Organization_Aggregated_Vulnerabilities_Args = {
 export type Organization_Append_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -34255,7 +34480,7 @@ export enum Organization_Constraint {
 export type Organization_Delete_At_Path_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Array<Scalars['String']['input']>>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
@@ -34263,7 +34488,7 @@ export type Organization_Delete_At_Path_Input = {
 export type Organization_Delete_Elem_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['Int']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -34271,7 +34496,7 @@ export type Organization_Delete_Elem_Input = {
 export type Organization_Delete_Key_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['String']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -34866,7 +35091,7 @@ export type Organization_Insert_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
 };
@@ -35294,7 +35519,7 @@ export type Organization_Pk_Columns_Input = {
 export type Organization_Prepend_Input = {
   /** This is a deprecated field it should be deleted */
   allowedIssueTypes?: InputMaybe<Scalars['jsonb']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -35988,7 +36213,7 @@ export type Organization_Set_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -36153,7 +36378,7 @@ export type Organization_Stream_Cursor_Value_Input = {
   roiIndustryFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiMobbFixingTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
-  /** Sparse scan-policy deviations from the Mobb default (all rules enabled): disables only, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -36870,6 +37095,594 @@ export type PercentReposWithAiStats_Organization_Args = {
   start_date?: InputMaybe<Scalars['timestamptz']['input']>;
 };
 
+/** One row per automatic pull-request scan (MOBB-3735), 1:1 with fix_report. Records our conversation with GitHub for that run: the pull request, what commit status we last posted, when, why it failed, and when the run last showed progress. */
+export type PrCheckRun = {
+  __typename?: 'prCheckRun';
+  /** An object relationship */
+  fixReport: FixReport;
+  fixReportId: Scalars['uuid']['output'];
+  postError?: Maybe<Scalars['String']['output']>;
+  postedAt?: Maybe<Scalars['timestamptz']['output']>;
+  postedState?: Maybe<Scalars['String']['output']>;
+  prNumber: Scalars['Int']['output'];
+  progressAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregated selection of "pr_check_run" */
+export type PrCheckRun_Aggregate = {
+  __typename?: 'prCheckRun_aggregate';
+  aggregate?: Maybe<PrCheckRun_Aggregate_Fields>;
+  nodes: Array<PrCheckRun>;
+};
+
+/** aggregate fields of "pr_check_run" */
+export type PrCheckRun_Aggregate_Fields = {
+  __typename?: 'prCheckRun_aggregate_fields';
+  avg?: Maybe<PrCheckRun_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<PrCheckRun_Max_Fields>;
+  min?: Maybe<PrCheckRun_Min_Fields>;
+  stddev?: Maybe<PrCheckRun_Stddev_Fields>;
+  stddev_pop?: Maybe<PrCheckRun_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<PrCheckRun_Stddev_Samp_Fields>;
+  sum?: Maybe<PrCheckRun_Sum_Fields>;
+  var_pop?: Maybe<PrCheckRun_Var_Pop_Fields>;
+  var_samp?: Maybe<PrCheckRun_Var_Samp_Fields>;
+  variance?: Maybe<PrCheckRun_Variance_Fields>;
+};
+
+
+/** aggregate fields of "pr_check_run" */
+export type PrCheckRun_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<PrCheckRun_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type PrCheckRun_Avg_Fields = {
+  __typename?: 'prCheckRun_avg_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "pr_check_run". All fields are combined with a logical 'AND'. */
+export type PrCheckRun_Bool_Exp = {
+  _and?: InputMaybe<Array<PrCheckRun_Bool_Exp>>;
+  _not?: InputMaybe<PrCheckRun_Bool_Exp>;
+  _or?: InputMaybe<Array<PrCheckRun_Bool_Exp>>;
+  fixReport?: InputMaybe<FixReport_Bool_Exp>;
+  fixReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  postError?: InputMaybe<String_Comparison_Exp>;
+  postedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  postedState?: InputMaybe<String_Comparison_Exp>;
+  prNumber?: InputMaybe<Int_Comparison_Exp>;
+  progressAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "pr_check_run" */
+export enum PrCheckRun_Constraint {
+  /** unique or primary key constraint on columns "fix_report_id" */
+  PrCheckRunPkey = 'pr_check_run_pkey'
+}
+
+/** input type for incrementing numeric columns in table "pr_check_run" */
+export type PrCheckRun_Inc_Input = {
+  prNumber?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "pr_check_run" */
+export type PrCheckRun_Insert_Input = {
+  fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  postError?: InputMaybe<Scalars['String']['input']>;
+  postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  postedState?: InputMaybe<Scalars['String']['input']>;
+  prNumber?: InputMaybe<Scalars['Int']['input']>;
+  progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type PrCheckRun_Max_Fields = {
+  __typename?: 'prCheckRun_max_fields';
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  postError?: Maybe<Scalars['String']['output']>;
+  postedAt?: Maybe<Scalars['timestamptz']['output']>;
+  postedState?: Maybe<Scalars['String']['output']>;
+  prNumber?: Maybe<Scalars['Int']['output']>;
+  progressAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type PrCheckRun_Min_Fields = {
+  __typename?: 'prCheckRun_min_fields';
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  postError?: Maybe<Scalars['String']['output']>;
+  postedAt?: Maybe<Scalars['timestamptz']['output']>;
+  postedState?: Maybe<Scalars['String']['output']>;
+  prNumber?: Maybe<Scalars['Int']['output']>;
+  progressAt?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "pr_check_run" */
+export type PrCheckRun_Mutation_Response = {
+  __typename?: 'prCheckRun_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<PrCheckRun>;
+};
+
+/** input type for inserting object relation for remote table "pr_check_run" */
+export type PrCheckRun_Obj_Rel_Insert_Input = {
+  data: PrCheckRun_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<PrCheckRun_On_Conflict>;
+};
+
+/** on_conflict condition type for table "pr_check_run" */
+export type PrCheckRun_On_Conflict = {
+  constraint: PrCheckRun_Constraint;
+  update_columns?: Array<PrCheckRun_Update_Column>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "pr_check_run". */
+export type PrCheckRun_Order_By = {
+  fixReport?: InputMaybe<FixReport_Order_By>;
+  fixReportId?: InputMaybe<Order_By>;
+  postError?: InputMaybe<Order_By>;
+  postedAt?: InputMaybe<Order_By>;
+  postedState?: InputMaybe<Order_By>;
+  prNumber?: InputMaybe<Order_By>;
+  progressAt?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: pr_check_run */
+export type PrCheckRun_Pk_Columns_Input = {
+  fixReportId: Scalars['uuid']['input'];
+};
+
+/** select columns of table "pr_check_run" */
+export enum PrCheckRun_Select_Column {
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  PostError = 'postError',
+  /** column name */
+  PostedAt = 'postedAt',
+  /** column name */
+  PostedState = 'postedState',
+  /** column name */
+  PrNumber = 'prNumber',
+  /** column name */
+  ProgressAt = 'progressAt'
+}
+
+/** input type for updating data in table "pr_check_run" */
+export type PrCheckRun_Set_Input = {
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  postError?: InputMaybe<Scalars['String']['input']>;
+  postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  postedState?: InputMaybe<Scalars['String']['input']>;
+  prNumber?: InputMaybe<Scalars['Int']['input']>;
+  progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type PrCheckRun_Stddev_Fields = {
+  __typename?: 'prCheckRun_stddev_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type PrCheckRun_Stddev_Pop_Fields = {
+  __typename?: 'prCheckRun_stddev_pop_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type PrCheckRun_Stddev_Samp_Fields = {
+  __typename?: 'prCheckRun_stddev_samp_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "prCheckRun" */
+export type PrCheckRun_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: PrCheckRun_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type PrCheckRun_Stream_Cursor_Value_Input = {
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  postError?: InputMaybe<Scalars['String']['input']>;
+  postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  postedState?: InputMaybe<Scalars['String']['input']>;
+  prNumber?: InputMaybe<Scalars['Int']['input']>;
+  progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type PrCheckRun_Sum_Fields = {
+  __typename?: 'prCheckRun_sum_fields';
+  prNumber?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "pr_check_run" */
+export enum PrCheckRun_Update_Column {
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  PostError = 'postError',
+  /** column name */
+  PostedAt = 'postedAt',
+  /** column name */
+  PostedState = 'postedState',
+  /** column name */
+  PrNumber = 'prNumber',
+  /** column name */
+  ProgressAt = 'progressAt'
+}
+
+export type PrCheckRun_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<PrCheckRun_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<PrCheckRun_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: PrCheckRun_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type PrCheckRun_Var_Pop_Fields = {
+  __typename?: 'prCheckRun_var_pop_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type PrCheckRun_Var_Samp_Fields = {
+  __typename?: 'prCheckRun_var_samp_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type PrCheckRun_Variance_Fields = {
+  __typename?: 'prCheckRun_variance_fields';
+  prNumber?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Per-repo webhook registration for automatic SAST on pull requests (MOBB-3735). One row per (organization, repo) once an admin enables scanning: the hook we registered, its HMAC secret, whether it is active, and whose SCM credential the scans borrow. Gate policy is NOT here - what blocks a merge is resolved from the gate policy model, not from this table. */
+export type Pr_Scan_Webhook = {
+  __typename?: 'pr_scan_webhook';
+  createdAt: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  credentialUser?: Maybe<User>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: Maybe<Scalars['uuid']['output']>;
+  enabled: Scalars['Boolean']['output'];
+  gateSeverity: Vulnerability_Severity_Enum;
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  repoFullName: Scalars['String']['output'];
+  scanDrafts: Scalars['Boolean']['output'];
+  /** Which provider this registration is with, following scm_config.scm_type rather than one table per provider. GitHub-only today; the row shape is provider-agnostic because the only GitHub-shaped state (the posted commit status) lives in pr_check_run. */
+  scmType: Submit_Fix_Request_Scm_Type_Enum;
+  updatedAt: Scalars['timestamptz']['output'];
+  webhookId?: Maybe<Scalars['bigint']['output']>;
+  webhookSecret?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregated selection of "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Aggregate = {
+  __typename?: 'pr_scan_webhook_aggregate';
+  aggregate?: Maybe<Pr_Scan_Webhook_Aggregate_Fields>;
+  nodes: Array<Pr_Scan_Webhook>;
+};
+
+/** aggregate fields of "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Aggregate_Fields = {
+  __typename?: 'pr_scan_webhook_aggregate_fields';
+  avg?: Maybe<Pr_Scan_Webhook_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Pr_Scan_Webhook_Max_Fields>;
+  min?: Maybe<Pr_Scan_Webhook_Min_Fields>;
+  stddev?: Maybe<Pr_Scan_Webhook_Stddev_Fields>;
+  stddev_pop?: Maybe<Pr_Scan_Webhook_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Pr_Scan_Webhook_Stddev_Samp_Fields>;
+  sum?: Maybe<Pr_Scan_Webhook_Sum_Fields>;
+  var_pop?: Maybe<Pr_Scan_Webhook_Var_Pop_Fields>;
+  var_samp?: Maybe<Pr_Scan_Webhook_Var_Samp_Fields>;
+  variance?: Maybe<Pr_Scan_Webhook_Variance_Fields>;
+};
+
+
+/** aggregate fields of "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Pr_Scan_Webhook_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Pr_Scan_Webhook_Avg_Fields = {
+  __typename?: 'pr_scan_webhook_avg_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "pr_scan_webhook". All fields are combined with a logical 'AND'. */
+export type Pr_Scan_Webhook_Bool_Exp = {
+  _and?: InputMaybe<Array<Pr_Scan_Webhook_Bool_Exp>>;
+  _not?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+  _or?: InputMaybe<Array<Pr_Scan_Webhook_Bool_Exp>>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  credentialUser?: InputMaybe<User_Bool_Exp>;
+  credentialUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  enabled?: InputMaybe<Boolean_Comparison_Exp>;
+  gateSeverity?: InputMaybe<Vulnerability_Severity_Enum_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  repoFullName?: InputMaybe<String_Comparison_Exp>;
+  scanDrafts?: InputMaybe<Boolean_Comparison_Exp>;
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum_Comparison_Exp>;
+  updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  webhookId?: InputMaybe<Bigint_Comparison_Exp>;
+  webhookSecret?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "pr_scan_webhook" */
+export enum Pr_Scan_Webhook_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  PrScanWebhookPkey = 'pr_scan_webhook_pkey',
+  /** unique or primary key constraint on columns "repo_full_name", "organization_id" */
+  PrScanWebhookRepoFullNameOrganizationIdKey = 'pr_scan_webhook_repo_full_name_organization_id_key'
+}
+
+/** input type for incrementing numeric columns in table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Inc_Input = {
+  webhookId?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** input type for inserting data into table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Insert_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  credentialUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: InputMaybe<Scalars['uuid']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  gateSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repoFullName?: InputMaybe<Scalars['String']['input']>;
+  scanDrafts?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Which provider this registration is with, following scm_config.scm_type rather than one table per provider. GitHub-only today; the row shape is provider-agnostic because the only GitHub-shaped state (the posted commit status) lives in pr_check_run. */
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  webhookId?: InputMaybe<Scalars['bigint']['input']>;
+  webhookSecret?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Pr_Scan_Webhook_Max_Fields = {
+  __typename?: 'pr_scan_webhook_max_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repoFullName?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  webhookId?: Maybe<Scalars['bigint']['output']>;
+  webhookSecret?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Pr_Scan_Webhook_Min_Fields = {
+  __typename?: 'pr_scan_webhook_min_fields';
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  repoFullName?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  webhookId?: Maybe<Scalars['bigint']['output']>;
+  webhookSecret?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Mutation_Response = {
+  __typename?: 'pr_scan_webhook_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Pr_Scan_Webhook>;
+};
+
+/** on_conflict condition type for table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_On_Conflict = {
+  constraint: Pr_Scan_Webhook_Constraint;
+  update_columns?: Array<Pr_Scan_Webhook_Update_Column>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "pr_scan_webhook". */
+export type Pr_Scan_Webhook_Order_By = {
+  createdAt?: InputMaybe<Order_By>;
+  credentialUser?: InputMaybe<User_Order_By>;
+  credentialUserId?: InputMaybe<Order_By>;
+  enabled?: InputMaybe<Order_By>;
+  gateSeverity?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  repoFullName?: InputMaybe<Order_By>;
+  scanDrafts?: InputMaybe<Order_By>;
+  scmType?: InputMaybe<Order_By>;
+  updatedAt?: InputMaybe<Order_By>;
+  webhookId?: InputMaybe<Order_By>;
+  webhookSecret?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: pr_scan_webhook */
+export type Pr_Scan_Webhook_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "pr_scan_webhook" */
+export enum Pr_Scan_Webhook_Select_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  CredentialUserId = 'credentialUserId',
+  /** column name */
+  Enabled = 'enabled',
+  /** column name */
+  GateSeverity = 'gateSeverity',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepoFullName = 'repoFullName',
+  /** column name */
+  ScanDrafts = 'scanDrafts',
+  /** column name */
+  ScmType = 'scmType',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  WebhookId = 'webhookId',
+  /** column name */
+  WebhookSecret = 'webhookSecret'
+}
+
+/** input type for updating data in table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Set_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: InputMaybe<Scalars['uuid']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  gateSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repoFullName?: InputMaybe<Scalars['String']['input']>;
+  scanDrafts?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Which provider this registration is with, following scm_config.scm_type rather than one table per provider. GitHub-only today; the row shape is provider-agnostic because the only GitHub-shaped state (the posted commit status) lives in pr_check_run. */
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  webhookId?: InputMaybe<Scalars['bigint']['input']>;
+  webhookSecret?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Pr_Scan_Webhook_Stddev_Fields = {
+  __typename?: 'pr_scan_webhook_stddev_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Pr_Scan_Webhook_Stddev_Pop_Fields = {
+  __typename?: 'pr_scan_webhook_stddev_pop_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Pr_Scan_Webhook_Stddev_Samp_Fields = {
+  __typename?: 'pr_scan_webhook_stddev_samp_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "pr_scan_webhook" */
+export type Pr_Scan_Webhook_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Pr_Scan_Webhook_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Pr_Scan_Webhook_Stream_Cursor_Value_Input = {
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** The user whose SCM credential this repo's PR-check scans borrow. Set to whoever enabled the repo, since registering the webhook proves their credential reaches it. NULL means fall back to walking organization owners. */
+  credentialUserId?: InputMaybe<Scalars['uuid']['input']>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  gateSeverity?: InputMaybe<Vulnerability_Severity_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  repoFullName?: InputMaybe<Scalars['String']['input']>;
+  scanDrafts?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Which provider this registration is with, following scm_config.scm_type rather than one table per provider. GitHub-only today; the row shape is provider-agnostic because the only GitHub-shaped state (the posted commit status) lives in pr_check_run. */
+  scmType?: InputMaybe<Submit_Fix_Request_Scm_Type_Enum>;
+  updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  webhookId?: InputMaybe<Scalars['bigint']['input']>;
+  webhookSecret?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Pr_Scan_Webhook_Sum_Fields = {
+  __typename?: 'pr_scan_webhook_sum_fields';
+  webhookId?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** update columns of table "pr_scan_webhook" */
+export enum Pr_Scan_Webhook_Update_Column {
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  CredentialUserId = 'credentialUserId',
+  /** column name */
+  Enabled = 'enabled',
+  /** column name */
+  GateSeverity = 'gateSeverity',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  RepoFullName = 'repoFullName',
+  /** column name */
+  ScanDrafts = 'scanDrafts',
+  /** column name */
+  ScmType = 'scmType',
+  /** column name */
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  WebhookId = 'webhookId',
+  /** column name */
+  WebhookSecret = 'webhookSecret'
+}
+
+export type Pr_Scan_Webhook_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Pr_Scan_Webhook_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Pr_Scan_Webhook_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Pr_Scan_Webhook_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Pr_Scan_Webhook_Var_Pop_Fields = {
+  __typename?: 'pr_scan_webhook_var_pop_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Pr_Scan_Webhook_Var_Samp_Fields = {
+  __typename?: 'pr_scan_webhook_var_samp_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Pr_Scan_Webhook_Variance_Fields = {
+  __typename?: 'pr_scan_webhook_variance_fields';
+  webhookId?: Maybe<Scalars['Float']['output']>;
+};
+
 /** columns and relationships of "pr_status" */
 export type Pr_Status = {
   __typename?: 'pr_status';
@@ -37071,7 +37884,7 @@ export type Project = {
   projectUsers: Array<Project_To_User>;
   /** An aggregate relationship */
   projectUsers_aggregate: Project_To_User_Aggregate;
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: Maybe<Scalars['jsonb']['output']>;
   /** An object relationship */
   totalResolvedVulnerabilitiesView?: Maybe<View_Project_Total_Resolved_Vulnerabilities>;
@@ -37330,7 +38143,7 @@ export type Project_Aggregated_Vulnerability_Severities_Args = {
 
 /** append existing jsonb value of filtered columns with new jsonb value */
 export type Project_Append_Input = {
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -37410,19 +38223,19 @@ export enum Project_Constraint {
 
 /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
 export type Project_Delete_At_Path_Input = {
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
 export type Project_Delete_Elem_Input = {
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** delete key/value pair or string element. key/value pairs are matched based on their key value */
 export type Project_Delete_Key_Input = {
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -37813,7 +38626,7 @@ export type Project_Insert_Input = {
   projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   projectRoles?: InputMaybe<Project_To_Project_Role_Arr_Rel_Insert_Input>;
   projectUsers?: InputMaybe<Project_To_User_Arr_Rel_Insert_Input>;
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   totalResolvedVulnerabilitiesView?: InputMaybe<View_Project_Total_Resolved_Vulnerabilities_Obj_Rel_Insert_Input>;
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Obj_Rel_Insert_Input>;
@@ -38195,7 +39008,7 @@ export type Project_Pk_Columns_Input = {
 
 /** prepend existing jsonb value of filtered columns with new jsonb value */
 export type Project_Prepend_Input = {
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
 };
 
@@ -38646,7 +39459,7 @@ export type Project_Set_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -38738,7 +39551,7 @@ export type Project_Stream_Cursor_Value_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
-  /** Sparse tri-state scan-policy deviations from the org effective policy: absent key = inherit, false = off, true = on. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750). */
+  /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -40058,6 +40871,19 @@ export type Query_Root = {
   organization_to_user_aggregate: Organization_To_User_Aggregate;
   /** fetch data from the table: "organization_to_user" using primary key columns */
   organization_to_user_by_pk?: Maybe<Organization_To_User>;
+  /** fetch data from the table: "pr_check_run" */
+  prCheckRun: Array<PrCheckRun>;
+  /** fetch aggregated fields from the table: "pr_check_run" */
+  prCheckRun_aggregate: PrCheckRun_Aggregate;
+  /** fetch data from the table: "pr_check_run" using primary key columns */
+  prCheckRun_by_pk?: Maybe<PrCheckRun>;
+  prCheckWebhookHealth: Scalars['String']['output'];
+  /** fetch data from the table: "pr_scan_webhook" */
+  pr_scan_webhook: Array<Pr_Scan_Webhook>;
+  /** fetch aggregated fields from the table: "pr_scan_webhook" */
+  pr_scan_webhook_aggregate: Pr_Scan_Webhook_Aggregate;
+  /** fetch data from the table: "pr_scan_webhook" using primary key columns */
+  pr_scan_webhook_by_pk?: Maybe<Pr_Scan_Webhook>;
   /** fetch data from the table: "pr_status" */
   pr_status: Array<Pr_Status>;
   /** fetch aggregated fields from the table: "pr_status" */
@@ -40165,6 +40991,7 @@ export type Query_Root = {
   report_reconnect_request_state_by_pk?: Maybe<Report_Reconnect_Request_State>;
   /** fetch data from the table: "scan" */
   scan: Array<Scan>;
+  scanPolicyRuleCatalog: Array<ScanPolicyRuleCatalogItem>;
   /** fetch aggregated fields from the table: "scan" */
   scan_aggregate: Scan_Aggregate;
   /** fetch data from the table: "scan" using primary key columns */
@@ -43025,6 +43852,52 @@ export type Query_RootOrganization_To_User_AggregateArgs = {
 
 
 export type Query_RootOrganization_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootPrCheckRunArgs = {
+  distinct_on?: InputMaybe<Array<PrCheckRun_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<PrCheckRun_Order_By>>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+
+export type Query_RootPrCheckRun_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<PrCheckRun_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<PrCheckRun_Order_By>>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+
+export type Query_RootPrCheckRun_By_PkArgs = {
+  fixReportId: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootPr_Scan_WebhookArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Scan_Webhook_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Scan_Webhook_Order_By>>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+};
+
+
+export type Query_RootPr_Scan_Webhook_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Scan_Webhook_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Scan_Webhook_Order_By>>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+};
+
+
+export type Query_RootPr_Scan_Webhook_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -47922,6 +48795,8 @@ export enum Scan_Source_Enum {
   CiUnknown = 'CI_UNKNOWN',
   /** This is Bugsy executed from a command line */
   Cli = 'CLI',
+  /** Automatic scan of a GitHub pull request, triggered by our repository webhook */
+  GithubPrCheck = 'GITHUB_PR_CHECK',
   /** This is an open-grep scan triggered by the MCP */
   Mcp = 'MCP',
   /** Web App from the Checkmarx integration */
@@ -50544,6 +51419,22 @@ export type Subscription_Root = {
   organization_to_user_by_pk?: Maybe<Organization_To_User>;
   /** fetch data from the table in a streaming manner: "organization_to_user" */
   organization_to_user_stream: Array<Organization_To_User>;
+  /** fetch data from the table: "pr_check_run" */
+  prCheckRun: Array<PrCheckRun>;
+  /** fetch aggregated fields from the table: "pr_check_run" */
+  prCheckRun_aggregate: PrCheckRun_Aggregate;
+  /** fetch data from the table: "pr_check_run" using primary key columns */
+  prCheckRun_by_pk?: Maybe<PrCheckRun>;
+  /** fetch data from the table in a streaming manner: "pr_check_run" */
+  prCheckRun_stream: Array<PrCheckRun>;
+  /** fetch data from the table: "pr_scan_webhook" */
+  pr_scan_webhook: Array<Pr_Scan_Webhook>;
+  /** fetch aggregated fields from the table: "pr_scan_webhook" */
+  pr_scan_webhook_aggregate: Pr_Scan_Webhook_Aggregate;
+  /** fetch data from the table: "pr_scan_webhook" using primary key columns */
+  pr_scan_webhook_by_pk?: Maybe<Pr_Scan_Webhook>;
+  /** fetch data from the table in a streaming manner: "pr_scan_webhook" */
+  pr_scan_webhook_stream: Array<Pr_Scan_Webhook>;
   /** fetch data from the table: "pr_status" */
   pr_status: Array<Pr_Status>;
   /** fetch aggregated fields from the table: "pr_status" */
@@ -53921,6 +54812,66 @@ export type Subscription_RootOrganization_To_User_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Organization_To_User_Stream_Cursor_Input>>;
   where?: InputMaybe<Organization_To_User_Bool_Exp>;
+};
+
+
+export type Subscription_RootPrCheckRunArgs = {
+  distinct_on?: InputMaybe<Array<PrCheckRun_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<PrCheckRun_Order_By>>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+
+export type Subscription_RootPrCheckRun_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<PrCheckRun_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<PrCheckRun_Order_By>>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+
+export type Subscription_RootPrCheckRun_By_PkArgs = {
+  fixReportId: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootPrCheckRun_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<PrCheckRun_Stream_Cursor_Input>>;
+  where?: InputMaybe<PrCheckRun_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_Scan_WebhookArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Scan_Webhook_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Scan_Webhook_Order_By>>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_Scan_Webhook_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Pr_Scan_Webhook_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Pr_Scan_Webhook_Order_By>>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
+};
+
+
+export type Subscription_RootPr_Scan_Webhook_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootPr_Scan_Webhook_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Pr_Scan_Webhook_Stream_Cursor_Input>>;
+  where?: InputMaybe<Pr_Scan_Webhook_Bool_Exp>;
 };
 
 

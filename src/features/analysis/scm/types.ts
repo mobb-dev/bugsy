@@ -139,6 +139,18 @@ export type ScmRepoInfo = {
   repoLanguages: string[]
   repoIsPublic: boolean
   repoUpdatedAt: string | null
+  /**
+   * Whether the token holds admin on this repository.
+   *
+   * Optional because only GitHub reports it today, and `undefined` means "unknown"
+   * rather than "no" — a consumer that filters on it must decide which way unknown
+   * falls rather than treating absence as a denial.
+   *
+   * Added for PR-check enablement, which registers a webhook and therefore needs repo
+   * admin: without this the picker offered every visible repository and the customer
+   * only found out which ones they could use by clicking and failing.
+   */
+  repoIsAdmin?: boolean
 }
 
 export const scmCloudHostname: Record<ScmType, string> = {

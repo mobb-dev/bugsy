@@ -1874,6 +1874,20 @@ export type ScanPolicyValidationError = BaseError & {
   status: Status;
 };
 
+/**
+ * A requested SARIF export. Generation runs in report_init; the client watches
+ * the reportExport row for state and progress and asks for the link once it is
+ * Ready.
+ */
+export type ScanSarifExport = {
+  __typename?: 'ScanSarifExport';
+  downloadUrl?: Maybe<Scalars['String']['output']>;
+  exportId: Scalars['String']['output'];
+  fileName?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['Int']['output']>;
+  state: Scalars['String']['output'];
+};
+
 export type ScanSkillResult = {
   __typename?: 'ScanSkillResult';
   cached: Scalars['Boolean']['output'];
@@ -23438,10 +23452,22 @@ export type Mutation_Root = {
   delete_repo_sync_status?: Maybe<Repo_Sync_Status_Mutation_Response>;
   /** delete single row from the table: "repo_sync_status" */
   delete_repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
+  /** delete data from the table: "report_export" */
+  delete_reportExport?: Maybe<ReportExport_Mutation_Response>;
+  /** delete single row from the table: "report_export" */
+  delete_reportExport_by_pk?: Maybe<ReportExport>;
   /** delete data from the table: "report_reconnect_request" */
   delete_reportReconnectRequest?: Maybe<ReportReconnectRequest_Mutation_Response>;
   /** delete single row from the table: "report_reconnect_request" */
   delete_reportReconnectRequest_by_pk?: Maybe<ReportReconnectRequest>;
+  /** delete data from the table: "report_export_format" */
+  delete_report_export_format?: Maybe<Report_Export_Format_Mutation_Response>;
+  /** delete single row from the table: "report_export_format" */
+  delete_report_export_format_by_pk?: Maybe<Report_Export_Format>;
+  /** delete data from the table: "report_export_state" */
+  delete_report_export_state?: Maybe<Report_Export_State_Mutation_Response>;
+  /** delete single row from the table: "report_export_state" */
+  delete_report_export_state_by_pk?: Maybe<Report_Export_State>;
   /** delete data from the table: "report_reconnect_request_state" */
   delete_report_reconnect_request_state?: Maybe<Report_Reconnect_Request_State_Mutation_Response>;
   /** delete single row from the table: "report_reconnect_request_state" */
@@ -24055,10 +24081,22 @@ export type Mutation_Root = {
   insert_repo_sync_status?: Maybe<Repo_Sync_Status_Mutation_Response>;
   /** insert a single row into the table: "repo_sync_status" */
   insert_repo_sync_status_one?: Maybe<Repo_Sync_Status>;
+  /** insert data into the table: "report_export" */
+  insert_reportExport?: Maybe<ReportExport_Mutation_Response>;
+  /** insert a single row into the table: "report_export" */
+  insert_reportExport_one?: Maybe<ReportExport>;
   /** insert data into the table: "report_reconnect_request" */
   insert_reportReconnectRequest?: Maybe<ReportReconnectRequest_Mutation_Response>;
   /** insert a single row into the table: "report_reconnect_request" */
   insert_reportReconnectRequest_one?: Maybe<ReportReconnectRequest>;
+  /** insert data into the table: "report_export_format" */
+  insert_report_export_format?: Maybe<Report_Export_Format_Mutation_Response>;
+  /** insert a single row into the table: "report_export_format" */
+  insert_report_export_format_one?: Maybe<Report_Export_Format>;
+  /** insert data into the table: "report_export_state" */
+  insert_report_export_state?: Maybe<Report_Export_State_Mutation_Response>;
+  /** insert a single row into the table: "report_export_state" */
+  insert_report_export_state_one?: Maybe<Report_Export_State>;
   /** insert data into the table: "report_reconnect_request_state" */
   insert_report_reconnect_request_state?: Maybe<Report_Reconnect_Request_State_Mutation_Response>;
   /** insert a single row into the table: "report_reconnect_request_state" */
@@ -24240,6 +24278,12 @@ export type Mutation_Root = {
   removeToken?: Maybe<StatusQueryResponse>;
   removeUserFromProject?: Maybe<BaseResponse>;
   requestRoiRefresh?: Maybe<RequestRoiRefreshResponse>;
+  /**
+   * Request a SARIF export of this scan's findings, or return one already
+   * generated for the same data. Returns as soon as the work is queued; watch
+   * the reportExport row for progress.
+   */
+  requestScanSarifExport: ScanSarifExport;
   rerunAnalysis: VulnerabilityReportResponse;
   resendInvitation?: Maybe<ResendInvitationResponse>;
   resetAnswers?: Maybe<Scalars['Void']['output']>;
@@ -24895,12 +24939,30 @@ export type Mutation_Root = {
   update_repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
   /** update multiples rows of table: "repo_sync_status" */
   update_repo_sync_status_many?: Maybe<Array<Maybe<Repo_Sync_Status_Mutation_Response>>>;
+  /** update data of the table: "report_export" */
+  update_reportExport?: Maybe<ReportExport_Mutation_Response>;
+  /** update single row of the table: "report_export" */
+  update_reportExport_by_pk?: Maybe<ReportExport>;
+  /** update multiples rows of table: "report_export" */
+  update_reportExport_many?: Maybe<Array<Maybe<ReportExport_Mutation_Response>>>;
   /** update data of the table: "report_reconnect_request" */
   update_reportReconnectRequest?: Maybe<ReportReconnectRequest_Mutation_Response>;
   /** update single row of the table: "report_reconnect_request" */
   update_reportReconnectRequest_by_pk?: Maybe<ReportReconnectRequest>;
   /** update multiples rows of table: "report_reconnect_request" */
   update_reportReconnectRequest_many?: Maybe<Array<Maybe<ReportReconnectRequest_Mutation_Response>>>;
+  /** update data of the table: "report_export_format" */
+  update_report_export_format?: Maybe<Report_Export_Format_Mutation_Response>;
+  /** update single row of the table: "report_export_format" */
+  update_report_export_format_by_pk?: Maybe<Report_Export_Format>;
+  /** update multiples rows of table: "report_export_format" */
+  update_report_export_format_many?: Maybe<Array<Maybe<Report_Export_Format_Mutation_Response>>>;
+  /** update data of the table: "report_export_state" */
+  update_report_export_state?: Maybe<Report_Export_State_Mutation_Response>;
+  /** update single row of the table: "report_export_state" */
+  update_report_export_state_by_pk?: Maybe<Report_Export_State>;
+  /** update multiples rows of table: "report_export_state" */
+  update_report_export_state_many?: Maybe<Array<Maybe<Report_Export_State_Mutation_Response>>>;
   /** update data of the table: "report_reconnect_request_state" */
   update_report_reconnect_request_state?: Maybe<Report_Reconnect_Request_State_Mutation_Response>;
   /** update single row of the table: "report_reconnect_request_state" */
@@ -26554,6 +26616,18 @@ export type Mutation_RootDelete_Repo_Sync_Status_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_ReportExportArgs = {
+  where: ReportExport_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_ReportExport_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_ReportReconnectRequestArgs = {
   where: ReportReconnectRequest_Bool_Exp;
 };
@@ -26562,6 +26636,30 @@ export type Mutation_RootDelete_ReportReconnectRequestArgs = {
 /** mutation root */
 export type Mutation_RootDelete_ReportReconnectRequest_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Report_Export_FormatArgs = {
+  where: Report_Export_Format_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Report_Export_Format_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Report_Export_StateArgs = {
+  where: Report_Export_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Report_Export_State_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -28559,6 +28657,20 @@ export type Mutation_RootInsert_Repo_Sync_Status_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_ReportExportArgs = {
+  objects: Array<ReportExport_Insert_Input>;
+  on_conflict?: InputMaybe<ReportExport_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_ReportExport_OneArgs = {
+  object: ReportExport_Insert_Input;
+  on_conflict?: InputMaybe<ReportExport_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_ReportReconnectRequestArgs = {
   objects: Array<ReportReconnectRequest_Insert_Input>;
   on_conflict?: InputMaybe<ReportReconnectRequest_On_Conflict>;
@@ -28569,6 +28681,34 @@ export type Mutation_RootInsert_ReportReconnectRequestArgs = {
 export type Mutation_RootInsert_ReportReconnectRequest_OneArgs = {
   object: ReportReconnectRequest_Insert_Input;
   on_conflict?: InputMaybe<ReportReconnectRequest_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Report_Export_FormatArgs = {
+  objects: Array<Report_Export_Format_Insert_Input>;
+  on_conflict?: InputMaybe<Report_Export_Format_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Report_Export_Format_OneArgs = {
+  object: Report_Export_Format_Insert_Input;
+  on_conflict?: InputMaybe<Report_Export_Format_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Report_Export_StateArgs = {
+  objects: Array<Report_Export_State_Insert_Input>;
+  on_conflict?: InputMaybe<Report_Export_State_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Report_Export_State_OneArgs = {
+  object: Report_Export_State_Insert_Input;
+  on_conflict?: InputMaybe<Report_Export_State_On_Conflict>;
 };
 
 
@@ -29237,6 +29377,12 @@ export type Mutation_RootRemoveUserFromProjectArgs = {
 export type Mutation_RootRequestRoiRefreshArgs = {
   organizationId: Scalars['String']['input'];
   timeFrame?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+/** mutation root */
+export type Mutation_RootRequestScanSarifExportArgs = {
+  fixReportId: Scalars['String']['input'];
 };
 
 
@@ -31588,6 +31734,28 @@ export type Mutation_RootUpdate_Repo_Sync_Status_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_ReportExportArgs = {
+  _inc?: InputMaybe<ReportExport_Inc_Input>;
+  _set?: InputMaybe<ReportExport_Set_Input>;
+  where: ReportExport_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_ReportExport_By_PkArgs = {
+  _inc?: InputMaybe<ReportExport_Inc_Input>;
+  _set?: InputMaybe<ReportExport_Set_Input>;
+  pk_columns: ReportExport_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_ReportExport_ManyArgs = {
+  updates: Array<ReportExport_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_ReportReconnectRequestArgs = {
   _set?: InputMaybe<ReportReconnectRequest_Set_Input>;
   where: ReportReconnectRequest_Bool_Exp;
@@ -31604,6 +31772,46 @@ export type Mutation_RootUpdate_ReportReconnectRequest_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_ReportReconnectRequest_ManyArgs = {
   updates: Array<ReportReconnectRequest_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_FormatArgs = {
+  _set?: InputMaybe<Report_Export_Format_Set_Input>;
+  where: Report_Export_Format_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_Format_By_PkArgs = {
+  _set?: InputMaybe<Report_Export_Format_Set_Input>;
+  pk_columns: Report_Export_Format_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_Format_ManyArgs = {
+  updates: Array<Report_Export_Format_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_StateArgs = {
+  _set?: InputMaybe<Report_Export_State_Set_Input>;
+  where: Report_Export_State_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_State_By_PkArgs = {
+  _set?: InputMaybe<Report_Export_State_Set_Input>;
+  pk_columns: Report_Export_State_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Report_Export_State_ManyArgs = {
+  updates: Array<Report_Export_State_Updates>;
 };
 
 
@@ -40662,6 +40870,13 @@ export type Query_Root = {
    * Restricted to admin users.
    */
   getS3FileContent: S3FileContentResponse;
+  /**
+   * The download link for a finished export. Returns the state alone while the
+   * export is still Queued or Running. Separate from requesting one because the
+   * link is presigned and short-lived — minting it when generation finishes
+   * would start that clock while the user is still looking at the toast.
+   */
+  getScanSarifExportDownload: ScanSarifExport;
   getScmRepos?: Maybe<GetScmReposResponse>;
   getScmUserInformation?: Maybe<ScmValidateTokenResponse>;
   getSplitFix: GetSplitFixResponseUnion;
@@ -40977,12 +41192,30 @@ export type Query_Root = {
   repo_sync_status_aggregate: Repo_Sync_Status_Aggregate;
   /** fetch data from the table: "repo_sync_status" using primary key columns */
   repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
+  /** fetch data from the table: "report_export" */
+  reportExport: Array<ReportExport>;
+  /** fetch aggregated fields from the table: "report_export" */
+  reportExport_aggregate: ReportExport_Aggregate;
+  /** fetch data from the table: "report_export" using primary key columns */
+  reportExport_by_pk?: Maybe<ReportExport>;
   /** fetch data from the table: "report_reconnect_request" */
   reportReconnectRequest: Array<ReportReconnectRequest>;
   /** fetch aggregated fields from the table: "report_reconnect_request" */
   reportReconnectRequest_aggregate: ReportReconnectRequest_Aggregate;
   /** fetch data from the table: "report_reconnect_request" using primary key columns */
   reportReconnectRequest_by_pk?: Maybe<ReportReconnectRequest>;
+  /** fetch data from the table: "report_export_format" */
+  report_export_format: Array<Report_Export_Format>;
+  /** fetch aggregated fields from the table: "report_export_format" */
+  report_export_format_aggregate: Report_Export_Format_Aggregate;
+  /** fetch data from the table: "report_export_format" using primary key columns */
+  report_export_format_by_pk?: Maybe<Report_Export_Format>;
+  /** fetch data from the table: "report_export_state" */
+  report_export_state: Array<Report_Export_State>;
+  /** fetch aggregated fields from the table: "report_export_state" */
+  report_export_state_aggregate: Report_Export_State_Aggregate;
+  /** fetch data from the table: "report_export_state" using primary key columns */
+  report_export_state_by_pk?: Maybe<Report_Export_State>;
   /** fetch data from the table: "report_reconnect_request_state" */
   report_reconnect_request_state: Array<Report_Reconnect_Request_State>;
   /** fetch aggregated fields from the table: "report_reconnect_request_state" */
@@ -43161,6 +43394,11 @@ export type Query_RootGetS3FileContentArgs = {
 };
 
 
+export type Query_RootGetScanSarifExportDownloadArgs = {
+  exportId: Scalars['String']['input'];
+};
+
+
 export type Query_RootGetScmReposArgs = {
   cursor?: InputMaybe<Scalars['String']['input']>;
   includeLanguages?: InputMaybe<Scalars['Boolean']['input']>;
@@ -44268,6 +44506,29 @@ export type Query_RootRepo_Sync_Status_By_PkArgs = {
 };
 
 
+export type Query_RootReportExportArgs = {
+  distinct_on?: InputMaybe<Array<ReportExport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<ReportExport_Order_By>>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+
+export type Query_RootReportExport_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<ReportExport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<ReportExport_Order_By>>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+
+export type Query_RootReportExport_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
 export type Query_RootReportReconnectRequestArgs = {
   distinct_on?: InputMaybe<Array<ReportReconnectRequest_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -44288,6 +44549,52 @@ export type Query_RootReportReconnectRequest_AggregateArgs = {
 
 export type Query_RootReportReconnectRequest_By_PkArgs = {
   id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootReport_Export_FormatArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_Format_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_Format_Order_By>>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+
+export type Query_RootReport_Export_Format_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_Format_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_Format_Order_By>>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+
+export type Query_RootReport_Export_Format_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Query_RootReport_Export_StateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_State_Order_By>>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
+};
+
+
+export type Query_RootReport_Export_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_State_Order_By>>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
+};
+
+
+export type Query_RootReport_Export_State_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -48044,6 +48351,402 @@ export type Repo_Variance_Fields = {
   pullRequest?: Maybe<Scalars['Float']['output']>;
 };
 
+/** One requested export. Also the audit record: actor, format, scan and timestamps survive the artifact, which the bucket lifecycle expires. */
+export type ReportExport = {
+  __typename?: 'reportExport';
+  cacheKey: Scalars['String']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  downloadedAt?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  finishedAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  fixReport: FixReport;
+  fixReportId: Scalars['uuid']['output'];
+  format: Report_Export_Format_Enum;
+  id: Scalars['uuid']['output'];
+  processedCount: Scalars['Int']['output'];
+  /** An object relationship */
+  project: Project;
+  projectId: Scalars['uuid']['output'];
+  /** An object relationship */
+  requestedByUser?: Maybe<User>;
+  requestedByUserId?: Maybe<Scalars['uuid']['output']>;
+  s3Key?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['bigint']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  state: Report_Export_State_Enum;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregated selection of "report_export" */
+export type ReportExport_Aggregate = {
+  __typename?: 'reportExport_aggregate';
+  aggregate?: Maybe<ReportExport_Aggregate_Fields>;
+  nodes: Array<ReportExport>;
+};
+
+/** aggregate fields of "report_export" */
+export type ReportExport_Aggregate_Fields = {
+  __typename?: 'reportExport_aggregate_fields';
+  avg?: Maybe<ReportExport_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<ReportExport_Max_Fields>;
+  min?: Maybe<ReportExport_Min_Fields>;
+  stddev?: Maybe<ReportExport_Stddev_Fields>;
+  stddev_pop?: Maybe<ReportExport_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<ReportExport_Stddev_Samp_Fields>;
+  sum?: Maybe<ReportExport_Sum_Fields>;
+  var_pop?: Maybe<ReportExport_Var_Pop_Fields>;
+  var_samp?: Maybe<ReportExport_Var_Samp_Fields>;
+  variance?: Maybe<ReportExport_Variance_Fields>;
+};
+
+
+/** aggregate fields of "report_export" */
+export type ReportExport_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<ReportExport_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type ReportExport_Avg_Fields = {
+  __typename?: 'reportExport_avg_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "report_export". All fields are combined with a logical 'AND'. */
+export type ReportExport_Bool_Exp = {
+  _and?: InputMaybe<Array<ReportExport_Bool_Exp>>;
+  _not?: InputMaybe<ReportExport_Bool_Exp>;
+  _or?: InputMaybe<Array<ReportExport_Bool_Exp>>;
+  cacheKey?: InputMaybe<String_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  downloadedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  error?: InputMaybe<String_Comparison_Exp>;
+  finishedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  fixReport?: InputMaybe<FixReport_Bool_Exp>;
+  fixReportId?: InputMaybe<Uuid_Comparison_Exp>;
+  format?: InputMaybe<Report_Export_Format_Enum_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  processedCount?: InputMaybe<Int_Comparison_Exp>;
+  project?: InputMaybe<Project_Bool_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+  requestedByUser?: InputMaybe<User_Bool_Exp>;
+  requestedByUserId?: InputMaybe<Uuid_Comparison_Exp>;
+  s3Key?: InputMaybe<String_Comparison_Exp>;
+  sizeBytes?: InputMaybe<Bigint_Comparison_Exp>;
+  startedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  state?: InputMaybe<Report_Export_State_Enum_Comparison_Exp>;
+  totalCount?: InputMaybe<Int_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "report_export" */
+export enum ReportExport_Constraint {
+  /** unique or primary key constraint on columns "format", "fix_report_id", "requested_by_user_id" */
+  ReportExportOneInFlightIdx = 'report_export_one_in_flight_idx',
+  /** unique or primary key constraint on columns "id" */
+  ReportExportPkey = 'report_export_pkey'
+}
+
+/** input type for incrementing numeric columns in table "report_export" */
+export type ReportExport_Inc_Input = {
+  processedCount?: InputMaybe<Scalars['Int']['input']>;
+  sizeBytes?: InputMaybe<Scalars['bigint']['input']>;
+  totalCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "report_export" */
+export type ReportExport_Insert_Input = {
+  cacheKey?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  finishedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  format?: InputMaybe<Report_Export_Format_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  processedCount?: InputMaybe<Scalars['Int']['input']>;
+  project?: InputMaybe<Project_Obj_Rel_Insert_Input>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  requestedByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  requestedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  s3Key?: InputMaybe<Scalars['String']['input']>;
+  sizeBytes?: InputMaybe<Scalars['bigint']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Report_Export_State_Enum>;
+  totalCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate max on columns */
+export type ReportExport_Max_Fields = {
+  __typename?: 'reportExport_max_fields';
+  cacheKey?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  downloadedAt?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  finishedAt?: Maybe<Scalars['timestamptz']['output']>;
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  processedCount?: Maybe<Scalars['Int']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  requestedByUserId?: Maybe<Scalars['uuid']['output']>;
+  s3Key?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['bigint']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** aggregate min on columns */
+export type ReportExport_Min_Fields = {
+  __typename?: 'reportExport_min_fields';
+  cacheKey?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  downloadedAt?: Maybe<Scalars['timestamptz']['output']>;
+  error?: Maybe<Scalars['String']['output']>;
+  finishedAt?: Maybe<Scalars['timestamptz']['output']>;
+  fixReportId?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  processedCount?: Maybe<Scalars['Int']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+  requestedByUserId?: Maybe<Scalars['uuid']['output']>;
+  s3Key?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['bigint']['output']>;
+  startedAt?: Maybe<Scalars['timestamptz']['output']>;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** response of any mutation on the table "report_export" */
+export type ReportExport_Mutation_Response = {
+  __typename?: 'reportExport_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<ReportExport>;
+};
+
+/** on_conflict condition type for table "report_export" */
+export type ReportExport_On_Conflict = {
+  constraint: ReportExport_Constraint;
+  update_columns?: Array<ReportExport_Update_Column>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "report_export". */
+export type ReportExport_Order_By = {
+  cacheKey?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  downloadedAt?: InputMaybe<Order_By>;
+  error?: InputMaybe<Order_By>;
+  finishedAt?: InputMaybe<Order_By>;
+  fixReport?: InputMaybe<FixReport_Order_By>;
+  fixReportId?: InputMaybe<Order_By>;
+  format?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  processedCount?: InputMaybe<Order_By>;
+  project?: InputMaybe<Project_Order_By>;
+  projectId?: InputMaybe<Order_By>;
+  requestedByUser?: InputMaybe<User_Order_By>;
+  requestedByUserId?: InputMaybe<Order_By>;
+  s3Key?: InputMaybe<Order_By>;
+  sizeBytes?: InputMaybe<Order_By>;
+  startedAt?: InputMaybe<Order_By>;
+  state?: InputMaybe<Order_By>;
+  totalCount?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: report_export */
+export type ReportExport_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "report_export" */
+export enum ReportExport_Select_Column {
+  /** column name */
+  CacheKey = 'cacheKey',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DownloadedAt = 'downloadedAt',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FinishedAt = 'finishedAt',
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  Format = 'format',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ProcessedCount = 'processedCount',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RequestedByUserId = 'requestedByUserId',
+  /** column name */
+  S3Key = 's3Key',
+  /** column name */
+  SizeBytes = 'sizeBytes',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  State = 'state',
+  /** column name */
+  TotalCount = 'totalCount'
+}
+
+/** input type for updating data in table "report_export" */
+export type ReportExport_Set_Input = {
+  cacheKey?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  finishedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  format?: InputMaybe<Report_Export_Format_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  processedCount?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  requestedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  s3Key?: InputMaybe<Scalars['String']['input']>;
+  sizeBytes?: InputMaybe<Scalars['bigint']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Report_Export_State_Enum>;
+  totalCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type ReportExport_Stddev_Fields = {
+  __typename?: 'reportExport_stddev_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type ReportExport_Stddev_Pop_Fields = {
+  __typename?: 'reportExport_stddev_pop_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type ReportExport_Stddev_Samp_Fields = {
+  __typename?: 'reportExport_stddev_samp_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "reportExport" */
+export type ReportExport_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: ReportExport_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type ReportExport_Stream_Cursor_Value_Input = {
+  cacheKey?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  downloadedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  error?: InputMaybe<Scalars['String']['input']>;
+  finishedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  fixReportId?: InputMaybe<Scalars['uuid']['input']>;
+  format?: InputMaybe<Report_Export_Format_Enum>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  processedCount?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+  requestedByUserId?: InputMaybe<Scalars['uuid']['input']>;
+  s3Key?: InputMaybe<Scalars['String']['input']>;
+  sizeBytes?: InputMaybe<Scalars['bigint']['input']>;
+  startedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  state?: InputMaybe<Report_Export_State_Enum>;
+  totalCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** aggregate sum on columns */
+export type ReportExport_Sum_Fields = {
+  __typename?: 'reportExport_sum_fields';
+  processedCount?: Maybe<Scalars['Int']['output']>;
+  sizeBytes?: Maybe<Scalars['bigint']['output']>;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "report_export" */
+export enum ReportExport_Update_Column {
+  /** column name */
+  CacheKey = 'cacheKey',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  DownloadedAt = 'downloadedAt',
+  /** column name */
+  Error = 'error',
+  /** column name */
+  FinishedAt = 'finishedAt',
+  /** column name */
+  FixReportId = 'fixReportId',
+  /** column name */
+  Format = 'format',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  ProcessedCount = 'processedCount',
+  /** column name */
+  ProjectId = 'projectId',
+  /** column name */
+  RequestedByUserId = 'requestedByUserId',
+  /** column name */
+  S3Key = 's3Key',
+  /** column name */
+  SizeBytes = 'sizeBytes',
+  /** column name */
+  StartedAt = 'startedAt',
+  /** column name */
+  State = 'state',
+  /** column name */
+  TotalCount = 'totalCount'
+}
+
+export type ReportExport_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<ReportExport_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<ReportExport_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: ReportExport_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type ReportExport_Var_Pop_Fields = {
+  __typename?: 'reportExport_var_pop_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type ReportExport_Var_Samp_Fields = {
+  __typename?: 'reportExport_var_samp_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type ReportExport_Variance_Fields = {
+  __typename?: 'reportExport_variance_fields';
+  processedCount?: Maybe<Scalars['Float']['output']>;
+  sizeBytes?: Maybe<Scalars['Float']['output']>;
+  totalCount?: Maybe<Scalars['Float']['output']>;
+};
+
 /** Code-rehydration requests for fixes-expired reports (MOBB-3768). Backend-written only; the latest row per fix_report drives the derived UI access state. */
 export type ReportReconnectRequest = {
   __typename?: 'reportReconnectRequest';
@@ -48258,6 +48961,314 @@ export type ReportReconnectRequest_Updates = {
   _set?: InputMaybe<ReportReconnectRequest_Set_Input>;
   /** filter the rows which have to be updated */
   where: ReportReconnectRequest_Bool_Exp;
+};
+
+/** columns and relationships of "report_export_format" */
+export type Report_Export_Format = {
+  __typename?: 'report_export_format';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "report_export_format" */
+export type Report_Export_Format_Aggregate = {
+  __typename?: 'report_export_format_aggregate';
+  aggregate?: Maybe<Report_Export_Format_Aggregate_Fields>;
+  nodes: Array<Report_Export_Format>;
+};
+
+/** aggregate fields of "report_export_format" */
+export type Report_Export_Format_Aggregate_Fields = {
+  __typename?: 'report_export_format_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Report_Export_Format_Max_Fields>;
+  min?: Maybe<Report_Export_Format_Min_Fields>;
+};
+
+
+/** aggregate fields of "report_export_format" */
+export type Report_Export_Format_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Report_Export_Format_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "report_export_format". All fields are combined with a logical 'AND'. */
+export type Report_Export_Format_Bool_Exp = {
+  _and?: InputMaybe<Array<Report_Export_Format_Bool_Exp>>;
+  _not?: InputMaybe<Report_Export_Format_Bool_Exp>;
+  _or?: InputMaybe<Array<Report_Export_Format_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "report_export_format" */
+export enum Report_Export_Format_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  ReportExportFormatPkey = 'report_export_format_pkey'
+}
+
+export enum Report_Export_Format_Enum {
+  /** Rendered audit report plus findings.csv — not implemented yet */
+  Audit = 'Audit',
+  /** Findings as CSV — not implemented yet */
+  Csv = 'Csv',
+  /** Rendered report — not implemented yet */
+  Pdf = 'Pdf',
+  /** SARIF 2.1.0 generated from the recorded findings */
+  Sarif = 'Sarif'
+}
+
+/** Boolean expression to compare columns of type "report_export_format_enum". All fields are combined with logical 'AND'. */
+export type Report_Export_Format_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Report_Export_Format_Enum>;
+  _in?: InputMaybe<Array<Report_Export_Format_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Report_Export_Format_Enum>;
+  _nin?: InputMaybe<Array<Report_Export_Format_Enum>>;
+};
+
+/** input type for inserting data into table "report_export_format" */
+export type Report_Export_Format_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Report_Export_Format_Max_Fields = {
+  __typename?: 'report_export_format_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Report_Export_Format_Min_Fields = {
+  __typename?: 'report_export_format_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "report_export_format" */
+export type Report_Export_Format_Mutation_Response = {
+  __typename?: 'report_export_format_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Report_Export_Format>;
+};
+
+/** on_conflict condition type for table "report_export_format" */
+export type Report_Export_Format_On_Conflict = {
+  constraint: Report_Export_Format_Constraint;
+  update_columns?: Array<Report_Export_Format_Update_Column>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "report_export_format". */
+export type Report_Export_Format_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: report_export_format */
+export type Report_Export_Format_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "report_export_format" */
+export enum Report_Export_Format_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "report_export_format" */
+export type Report_Export_Format_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "report_export_format" */
+export type Report_Export_Format_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Report_Export_Format_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Report_Export_Format_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "report_export_format" */
+export enum Report_Export_Format_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Report_Export_Format_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Report_Export_Format_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Report_Export_Format_Bool_Exp;
+};
+
+/** columns and relationships of "report_export_state" */
+export type Report_Export_State = {
+  __typename?: 'report_export_state';
+  comment?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "report_export_state" */
+export type Report_Export_State_Aggregate = {
+  __typename?: 'report_export_state_aggregate';
+  aggregate?: Maybe<Report_Export_State_Aggregate_Fields>;
+  nodes: Array<Report_Export_State>;
+};
+
+/** aggregate fields of "report_export_state" */
+export type Report_Export_State_Aggregate_Fields = {
+  __typename?: 'report_export_state_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Report_Export_State_Max_Fields>;
+  min?: Maybe<Report_Export_State_Min_Fields>;
+};
+
+
+/** aggregate fields of "report_export_state" */
+export type Report_Export_State_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Report_Export_State_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "report_export_state". All fields are combined with a logical 'AND'. */
+export type Report_Export_State_Bool_Exp = {
+  _and?: InputMaybe<Array<Report_Export_State_Bool_Exp>>;
+  _not?: InputMaybe<Report_Export_State_Bool_Exp>;
+  _or?: InputMaybe<Array<Report_Export_State_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "report_export_state" */
+export enum Report_Export_State_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  ReportExportStatePkey = 'report_export_state_pkey'
+}
+
+export enum Report_Export_State_Enum {
+  /** Generation failed; error carries the reason */
+  Failed = 'Failed',
+  /** Accepted and published to the worker queue */
+  Queued = 'Queued',
+  /** The artifact is in S3 and can be downloaded */
+  Ready = 'Ready',
+  /** A worker has picked it up */
+  Running = 'Running'
+}
+
+/** Boolean expression to compare columns of type "report_export_state_enum". All fields are combined with logical 'AND'. */
+export type Report_Export_State_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Report_Export_State_Enum>;
+  _in?: InputMaybe<Array<Report_Export_State_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Report_Export_State_Enum>;
+  _nin?: InputMaybe<Array<Report_Export_State_Enum>>;
+};
+
+/** input type for inserting data into table "report_export_state" */
+export type Report_Export_State_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Report_Export_State_Max_Fields = {
+  __typename?: 'report_export_state_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Report_Export_State_Min_Fields = {
+  __typename?: 'report_export_state_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "report_export_state" */
+export type Report_Export_State_Mutation_Response = {
+  __typename?: 'report_export_state_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Report_Export_State>;
+};
+
+/** on_conflict condition type for table "report_export_state" */
+export type Report_Export_State_On_Conflict = {
+  constraint: Report_Export_State_Constraint;
+  update_columns?: Array<Report_Export_State_Update_Column>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "report_export_state". */
+export type Report_Export_State_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: report_export_state */
+export type Report_Export_State_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "report_export_state" */
+export enum Report_Export_State_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "report_export_state" */
+export type Report_Export_State_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "report_export_state" */
+export type Report_Export_State_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Report_Export_State_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Report_Export_State_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "report_export_state" */
+export enum Report_Export_State_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Report_Export_State_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Report_Export_State_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Report_Export_State_Bool_Exp;
 };
 
 /** Enum: lifecycle states of a report code-rehydration request (MOBB-3768). No Expired value on purpose — window expiry is derived from report_reconnect_request.code_available_until. */
@@ -51557,6 +52568,14 @@ export type Subscription_Root = {
   repo_sync_status_by_pk?: Maybe<Repo_Sync_Status>;
   /** fetch data from the table in a streaming manner: "repo_sync_status" */
   repo_sync_status_stream: Array<Repo_Sync_Status>;
+  /** fetch data from the table: "report_export" */
+  reportExport: Array<ReportExport>;
+  /** fetch aggregated fields from the table: "report_export" */
+  reportExport_aggregate: ReportExport_Aggregate;
+  /** fetch data from the table: "report_export" using primary key columns */
+  reportExport_by_pk?: Maybe<ReportExport>;
+  /** fetch data from the table in a streaming manner: "report_export" */
+  reportExport_stream: Array<ReportExport>;
   /** fetch data from the table: "report_reconnect_request" */
   reportReconnectRequest: Array<ReportReconnectRequest>;
   /** fetch aggregated fields from the table: "report_reconnect_request" */
@@ -51565,6 +52584,22 @@ export type Subscription_Root = {
   reportReconnectRequest_by_pk?: Maybe<ReportReconnectRequest>;
   /** fetch data from the table in a streaming manner: "report_reconnect_request" */
   reportReconnectRequest_stream: Array<ReportReconnectRequest>;
+  /** fetch data from the table: "report_export_format" */
+  report_export_format: Array<Report_Export_Format>;
+  /** fetch aggregated fields from the table: "report_export_format" */
+  report_export_format_aggregate: Report_Export_Format_Aggregate;
+  /** fetch data from the table: "report_export_format" using primary key columns */
+  report_export_format_by_pk?: Maybe<Report_Export_Format>;
+  /** fetch data from the table in a streaming manner: "report_export_format" */
+  report_export_format_stream: Array<Report_Export_Format>;
+  /** fetch data from the table: "report_export_state" */
+  report_export_state: Array<Report_Export_State>;
+  /** fetch aggregated fields from the table: "report_export_state" */
+  report_export_state_aggregate: Report_Export_State_Aggregate;
+  /** fetch data from the table: "report_export_state" using primary key columns */
+  report_export_state_by_pk?: Maybe<Report_Export_State>;
+  /** fetch data from the table in a streaming manner: "report_export_state" */
+  report_export_state_stream: Array<Report_Export_State>;
   /** fetch data from the table: "report_reconnect_request_state" */
   report_reconnect_request_state: Array<Report_Reconnect_Request_State>;
   /** fetch aggregated fields from the table: "report_reconnect_request_state" */
@@ -55341,6 +56376,36 @@ export type Subscription_RootRepo_Sync_Status_StreamArgs = {
 };
 
 
+export type Subscription_RootReportExportArgs = {
+  distinct_on?: InputMaybe<Array<ReportExport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<ReportExport_Order_By>>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+
+export type Subscription_RootReportExport_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<ReportExport_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<ReportExport_Order_By>>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+
+export type Subscription_RootReportExport_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootReportExport_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<ReportExport_Stream_Cursor_Input>>;
+  where?: InputMaybe<ReportExport_Bool_Exp>;
+};
+
+
 export type Subscription_RootReportReconnectRequestArgs = {
   distinct_on?: InputMaybe<Array<ReportReconnectRequest_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -55368,6 +56433,66 @@ export type Subscription_RootReportReconnectRequest_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<ReportReconnectRequest_Stream_Cursor_Input>>;
   where?: InputMaybe<ReportReconnectRequest_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_FormatArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_Format_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_Format_Order_By>>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_Format_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_Format_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_Format_Order_By>>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_Format_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootReport_Export_Format_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Report_Export_Format_Stream_Cursor_Input>>;
+  where?: InputMaybe<Report_Export_Format_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_StateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_State_Order_By>>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_State_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Report_Export_State_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Report_Export_State_Order_By>>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
+};
+
+
+export type Subscription_RootReport_Export_State_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootReport_Export_State_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Report_Export_State_Stream_Cursor_Input>>;
+  where?: InputMaybe<Report_Export_State_Bool_Exp>;
 };
 
 

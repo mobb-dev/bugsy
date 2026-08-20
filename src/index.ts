@@ -18,7 +18,7 @@ async function run() {
   } catch (err) {
     if (err instanceof CliError) {
       console.error(err.message)
-      process.exit(1)
+      process.exit(err.exitCode)
     }
     // unexpected error - print stack trace
     console.error(

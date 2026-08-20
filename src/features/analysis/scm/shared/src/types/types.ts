@@ -305,14 +305,6 @@ export const BaseVulnerabilityReportIssueZ = z.object({
   sharedState: VulnerabilityReportIssueSharedStateZ,
 })
 
-// schema with codeNodes (for existing functionality, issue page)
-export const VulnerabilityReportIssueZ = BaseVulnerabilityReportIssueZ.extend(
-  z.object({
-    codeNodes: z.array(z.object({ path: z.string() })),
-  }).shape
-)
-export type VulnerabilityReportIssue = z.infer<typeof VulnerabilityReportIssueZ>
-
 // New schema with codeFilePath (for GetReportIssuesQuery)
 export const VulnerabilityReportIssueWithCodeFilePathZ =
   BaseVulnerabilityReportIssueZ.extend(

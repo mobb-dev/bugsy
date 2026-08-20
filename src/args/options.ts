@@ -160,6 +160,14 @@ export const scanOnlyOption = {
   default: false,
 } as const
 
+export const gateOption = {
+  describe: chalk.bold(
+    "Enforce the organization's Scan & Gate Policy: after the scan, the backend decides whether any finding blocks, and the CLI exits 2 when it does (0 = pass, 1 = operational error; a scan that fails to finish exits 1, not 2). Mobb scans only — cannot be combined with --scan-file. In PR pipelines pair it with --baseline-commit so only findings new in the PR can block."
+  ),
+  type: 'boolean',
+  default: false,
+} as const
+
 export const pollingOption = {
   describe: chalk.bold(
     'Use HTTP polling instead of WebSocket for status updates. Useful for proxy environments or firewalls that block WebSocket connections. Polling interval: 5 seconds, timeout: 30 minutes.'

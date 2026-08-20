@@ -97,6 +97,119 @@ export class MobbApi {
   }
 
   /**
+   * MOBB-3810 — the id of the caller's organization. The e2e user is created by
+   * initOrganizationAndProject, so it is the owner of exactly one org; Hasura's
+   * user-role filter scopes the select to it.
+   *
+   * @returns {Promise<string>}
+   */
+  async getOrganizationId() {
+    const response = await fetch(CLI_LOCAL_ENV_OVERWRITE.API_URL, {
+      headers: {
+        authorization: `Bearer ${this.#auth0Token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: 'query GetOrganizationId {\n  organization {\n    id\n  }\n}',
+        variables: {},
+        operationName: 'GetOrganizationId',
+      }),
+      method: 'POST',
+    })
+
+    const body = await response.json()
+
+    if (body.errors || !body.data?.organization?.length) {
+      throw new Error(
+        `Failed to resolve organization id ${JSON.stringify(body, null, 2)}`
+      )
+    }
+
+    return body.data.organization[0].id
+  }
+
+  /**
+   * MOBB-3810 — replace the org's Scan & Gate Policy deviations (owner-only
+   * mutation). Pass null to clear the policy back to the gate-on-by-default
+   * baseline. Returns the success payload so callers can assert on `warnings`
+   * (an "unknown rule id" warning means the backend has no rules_manifest.json
+   * — run scripts/opengrep_init.sh).
+   *
+   * @param {string} organizationId
+   * @param {string | null} policyJson - JSON-encoded ScanPolicyDoc or null.
+   * @returns {Promise<{storedPolicyJson: string | null, warnings: string[]}>}
+   */
+  async updateOrgScanPolicy(organizationId, policyJson) {
+    const response = await fetch(CLI_LOCAL_ENV_OVERWRITE.API_URL, {
+      headers: {
+        authorization: `Bearer ${this.#auth0Token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        query:
+          'mutation UpdateOrgScanPolicy($organizationId: String!, $policyJson: String) {\n  updateOrganizationScanPolicy(\n    organizationId: $organizationId\n    policyJson: $policyJson\n  ) {\n    __typename\n    ... on ScanPolicyUpdateSuccess {\n      storedPolicyJson\n      warnings\n    }\n    ... on ScanPolicyValidationError {\n      error\n    }\n  }\n}',
+        variables: { organizationId, policyJson },
+        operationName: 'UpdateOrgScanPolicy',
+      }),
+      method: 'POST',
+    })
+
+    const body = await response.json()
+    const result = body.data?.updateOrganizationScanPolicy
+
+    if (body.errors || result?.__typename !== 'ScanPolicyUpdateSuccess') {
+      throw new Error(
+        `Failed to update org scan policy ${JSON.stringify(body, null, 2)}`
+      )
+    }
+
+    return result
+  }
+
+  /**
+   * MOBB-3810 — the distinct OpenGrep rule ids of a report's findings, read
+   * from each issue's extra_data.rule_id (persisted by the engine under
+   * --no-rewrite-rule-ids). Findings without a rule id are skipped.
+   *
+   * @param {string} fixReportId
+   * @returns {Promise<string[]>}
+   */
+  async getReportFindingRuleIds(fixReportId) {
+    const response = await fetch(CLI_LOCAL_ENV_OVERWRITE.API_URL, {
+      headers: {
+        authorization: `Bearer ${this.#auth0Token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        query:
+          'query GetReportFindingRuleIds($fixReportId: uuid!) {\n  fixReport_by_pk(id: $fixReportId) {\n    vulnerabilityReport {\n      vulnerabilityReportIssues {\n        extraData(path: "rule_id")\n      }\n    }\n  }\n}',
+        variables: { fixReportId },
+        operationName: 'GetReportFindingRuleIds',
+      }),
+      method: 'POST',
+    })
+
+    const body = await response.json()
+
+    if (body.errors) {
+      throw new Error(
+        `Failed to read report finding rule ids ${JSON.stringify(body, null, 2)}`
+      )
+    }
+
+    const issues =
+      body.data?.fixReport_by_pk?.vulnerabilityReport
+        ?.vulnerabilityReportIssues ?? []
+    return [
+      ...new Set(
+        issues
+          .map((issue) => issue.extraData)
+          .filter((ruleId) => typeof ruleId === 'string' && ruleId.length > 0)
+      ),
+    ]
+  }
+
+  /**
    * Create new Mobb API token.
    *
    * @returns {Promise<string>}

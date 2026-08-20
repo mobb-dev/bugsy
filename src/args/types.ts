@@ -34,6 +34,7 @@ export type BaseAnalyzeOptions = {
   baselineCommit?: string
   scanOnly?: boolean
   'scan-only'?: boolean
+  gate?: boolean
 }
 
 export type ReviewOptions = Yargs.ArgumentsCamelCase<BaseReviewOptions>

@@ -48,6 +48,20 @@ export const MVS_SCAN_ONLY_ERROR =
 type McpGQLClientArgs =
   { apiKey: string; type: 'apiKey' } | { token: string; type: 'token' }
 
+// "The issue has a code node in any of these files": jsonb array containment
+// on the issue's codeNodesJson row — `_contains` is true when SOME element of
+// `nodes` contains `{path}`. Replaces the legacy relational
+// `codeNodes: { path: { _in } }` filter, whose table was dropped in MOBB-3770.
+// Deliberately NOT `codeFilePath` (a plain column): that is the FIRST node's
+// path only, and would silently narrow multi-file (dataflow) issues.
+function issueTouchesFilesFilter(fileFilter: string[]) {
+  return {
+    _or: fileFilter.map((path) => ({
+      codeNodesJson: { nodes: { _contains: [{ path }] } },
+    })),
+  }
+}
+
 export class McpGQLClient extends GQLClient {
   private currentUser: MeQuery['me'] | null = null
 
@@ -518,9 +532,8 @@ export class McpGQLClient extends GQLClient {
       // Build filters object including file filter if provided
       const filters: Record<string, unknown> = {}
       if (fileFilter && fileFilter.length > 0) {
-        filters['vulnerabilityReportIssues'] = {
-          codeNodes: { path: { _in: fileFilter } },
-        }
+        filters['vulnerabilityReportIssues'] =
+          issueTouchesFilesFilter(fileFilter)
       }
 
       // GetLatestReportByRepoUrl uses _ilike (case-insensitive) on repo.originalUrl,
@@ -604,9 +617,7 @@ export class McpGQLClient extends GQLClient {
     }
 
     if (fileFilter && fileFilter.length > 0) {
-      filters['vulnerabilityReportIssues'] = {
-        codeNodes: { path: { _in: fileFilter } },
-      }
+      filters['vulnerabilityReportIssues'] = issueTouchesFilesFilter(fileFilter)
     }
 
     try {

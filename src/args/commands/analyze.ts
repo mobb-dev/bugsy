@@ -13,6 +13,7 @@ import {
   commitDirectlyOption,
   commitHashOption,
   createOnePrOption,
+  gateOption,
   mobbProjectNameOption,
   organizationIdOptions,
   pollingOption,
@@ -71,9 +72,14 @@ export function analyzeBuilder(
     .option('polling', pollingOption)
     .option('baseline-commit', baselineCommitOption)
     .option('scan-only', scanOnlyOption)
+    .option('gate', gateOption)
     .example(
       'npx mobbdev@latest analyze -r https://github.com/org/repo --scan-only',
       'scan only — report findings without generating fixes'
+    )
+    .example(
+      'npx mobbdev@latest analyze -r https://github.com/org/repo --ci --api-key <key> --baseline-commit <sha> --gate',
+      'PR pipeline: scan the diff and fail the build (exit 2) when the Scan & Gate Policy blocks'
     )
     .example(
       'npx mobbdev@latest analyze -r https://github.com/WebGoat/WebGoat -f <your_vulnerability_report_path>',
@@ -86,7 +92,14 @@ export function analyzeBuilder(
     .help()
 }
 
-function validateAnalyzeOptions(argv: AnalyzeOptions) {
+export function validateAnalyzeOptions(argv: AnalyzeOptions) {
+  // The gate judges Mobb's own scan against the org's Scan & Gate Policy; a
+  // third-party report has no Mobb rule identities to judge (MOBB-3810).
+  if (argv.gate && argv.f) {
+    throw new CliError(
+      '--gate enforces the policy on a Mobb scan and cannot be combined with --scan-file'
+    )
+  }
   if (argv.f && !fs.existsSync(argv.f)) {
     throw new CliError(`\nCan't access ${chalk.bold(argv.f)}`)
   }
@@ -128,5 +141,17 @@ function validateAnalyzeOptions(argv: AnalyzeOptions) {
 
 export async function analyzeHandler(args: AnalyzeOptions) {
   validateAnalyzeOptions(args)
-  await analyze(args, { skipPrompts: args.yes })
+  try {
+    await analyze(args, { skipPrompts: args.yes })
+  } catch (err) {
+    // yargs treats any handler rejection as a usage failure (help screen, exit
+    // 1), which would swallow a non-default exit code before index.ts sees it.
+    // The gate verdict (MOBB-3810) exits 2 by contract, so it leaves here
+    // directly — same precedent as scan-skill's malicious-verdict exit.
+    if (err instanceof CliError && err.exitCode !== 1) {
+      console.error(err.message)
+      process.exit(err.exitCode)
+    }
+    throw err
+  }
 }

@@ -87,6 +87,69 @@ subscription getAnalysisSubscription($analysisId: uuid!) {
   }
 }
 
+# MOBB-3810 e2e-only operations (clients/cli/__e2e__/gate.mjs). Living in the
+# CLI document set is what allow-lists them on Hasura — the same precedent as
+# SetQuarantineEnabled below. The CLI itself never calls them.
+query GetOrganizationId {
+  organization {
+    id
+  }
+}
+
+mutation UpdateOrgScanPolicy($organizationId: String!, $policyJson: String) {
+  updateOrganizationScanPolicy(
+    organizationId: $organizationId
+    policyJson: $policyJson
+  ) {
+    __typename
+    ... on ScanPolicyUpdateSuccess {
+      storedPolicyJson
+      warnings
+    }
+    ... on ScanPolicyValidationError {
+      error
+    }
+  }
+}
+
+query GetReportFindingRuleIds($fixReportId: uuid!) {
+  fixReport_by_pk(id: $fixReportId) {
+    vulnerabilityReport {
+      vulnerabilityReportIssues {
+        extraData(path: "rule_id")
+      }
+    }
+  }
+}
+
+# MOBB-3810 - the gate verdict for a Mobb-scan report. The backend is the only
+# decider; the CLI maps `blocking` onto its exit code (2 = gate blocked) and
+# prints `description` + the counts. Called after the digest wait, when the
+# report's findings are fully persisted.
+query getGateVerdict($fixReportId: String!) {
+  getGateVerdict(fixReportId: $fixReportId) {
+    __typename
+    ... on GateVerdictSuccess {
+      blocking
+      blockingCount
+      totalIssues
+      criticalCount
+      highCount
+      mediumCount
+      lowCount
+      unclassifiedCount
+      description
+      degraded
+    }
+    ... on GateVerdictNotReady {
+      state
+    }
+    ... on GateVerdictError {
+      error
+    }
+  }
+}
+
 query getAnalysis($analysisId: uuid!) {
   analysis: fixReport_by_pk(id: $analysisId) {
     id
@@ -167,52 +230,33 @@ query getFixes($filters: fix_bool_exp!) {
   }
 }
 
+# PR-review flow (the `review` command): fetch the report's issues whose JSONB
+# code-nodes row touches any PR-changed file. Paths are pre-filtered
+# server-side via jsonb array containment ("some node carries this path");
+# line-window matching and the fixable/non-fixable counts are computed
+# client-side, because `_contains` cannot express line ranges. The legacy
+# per-node relational table this query used to filter on was dropped in
+# MOBB-3770.
 query getVulByNodesMetadata(
-  $filters: [vulnerability_report_issue_code_node_bool_exp!]
+  $pathFilters: [vulnerability_report_issue_bool_exp!]
   $vulnerabilityReportId: uuid!
 ) {
-  vulnerabilityReportIssueCodeNodes: vulnerability_report_issue_code_node(
-    order_by: { index: desc }
+  vulnerabilityReportIssues: vulnerability_report_issue(
     where: {
-      _or: $filters
-      vulnerabilityReportIssue: {
-        fixId: { _is_null: false }
-        vulnerabilityReportId: { _eq: $vulnerabilityReportId }
-      }
-    }
-  ) {
-    vulnerabilityReportIssueId
-    path
-    startLine
-    vulnerabilityReportIssue {
-      safeIssueType
-      fixId
-      category
-      vulnerabilityReportIssueTags {
-        tag: vulnerability_report_issue_tag_value
-      }
-    }
-  }
-  fixablePrVuls: vulnerability_report_issue_aggregate(
-    where: {
-      fixId: { _is_null: false }
       vulnerabilityReportId: { _eq: $vulnerabilityReportId }
-      codeNodes: { _or: $filters }
+      _or: $pathFilters
     }
   ) {
-    aggregate {
-      count
+    id
+    safeIssueType
+    fixId
+    fpId
+    category
+    vulnerabilityReportIssueTags {
+      tag: vulnerability_report_issue_tag_value
     }
-  }
-  nonFixablePrVuls: vulnerability_report_issue_aggregate(
-    where: {
-      fixId: { _is_null: true }
-      vulnerabilityReportId: { _eq: $vulnerabilityReportId }
-      codeNodes: { _or: $filters }
-    }
-  ) {
-    aggregate {
-      count
+    codeNodesJson {
+      nodes
     }
   }
   totalScanVulnerabilities: vulnerability_report_issue_aggregate(
@@ -220,34 +264,6 @@ query getVulByNodesMetadata(
   ) {
     aggregate {
       count
-    }
-  }
-  irrelevantVulnerabilityReportIssue: vulnerability_report(
-    where: { id: { _eq: $vulnerabilityReportId } }
-  ) {
-    vulnerabilityReportIssues(
-      where: {
-        fixId: { _is_null: true }
-        category: { _in: [Irrelevant, FalsePositive, Filtered] }
-        _not: {
-          vulnerabilityReportIssueTags: {
-            vulnerability_report_issue_tag_value: { _eq: SUPPRESSED }
-          }
-        }
-      }
-    ) {
-      id
-      safeIssueType
-      fixId
-      category
-      vulnerabilityReportIssueTags {
-        tag: vulnerability_report_issue_tag_value
-      }
-      codeNodes(order_by: { index: desc }, where: { _or: $filters }, limit: 1) {
-        path
-        startLine
-      }
-      fpId
     }
   }
 }

@@ -48,11 +48,11 @@ import {
   UploadTracyRecordsMutationVariables,
   ValidateRepoUrlQueryVariables,
 } from '../scm/generates/client_generates'
+import { matchVulByNodesMetadata } from './matchVulByNodesMetadata'
 import {
-  GetVulByNodesMetadataFilter,
+  codeNodesJsonPathFilter,
   GetVulByNodesMetadataParams,
   GetVulByNodesMetadataZ,
-  VulnerabilityReportIssueCodeNode,
 } from './types'
 
 const debug = Debug('mobbdev:gql')
@@ -366,59 +366,38 @@ export class GQLClient {
     hunks,
     vulnerabilityReportId,
   }: GetVulByNodesMetadataParams) {
-    const filters = hunks.map((hunk) => {
-      const filter: GetVulByNodesMetadataFilter = {
-        path: { _eq: hunk.path },
-        _or: hunk.ranges.flatMap(({ endLine, startLine }) => {
-          return [
-            { startLine: { _gte: startLine, _lte: endLine } },
-            { endLine: { _gte: startLine, _lte: endLine } },
-          ]
-        }),
-      }
-      return filter
-    })
+    // Server-side: only the path pre-filter (jsonb containment on the issues'
+    // codeNodesJson rows). Line windows, the per-issue node pick and the
+    // fixable/non-fixable counts are computed client-side by
+    // matchVulByNodesMetadata with the same predicates the legacy relational
+    // query ran server-side (the per-node table was dropped in MOBB-3770).
+    const pathFilters = hunks.map((hunk) => codeNodesJsonPathFilter(hunk.path))
     const getVulByNodesMetadataRes =
       await this._clientSdk.getVulByNodesMetadata({
-        filters: { _or: filters },
+        pathFilters,
         vulnerabilityReportId,
       })
     const parsedGetVulByNodesMetadataRes = GetVulByNodesMetadataZ.parse(
       getVulByNodesMetadataRes
     )
 
-    // We need to filter out duplicate vulnerabilities by metadata,
-    // the vulnerability nodes are ordered by index, so we can just take the first one
-    const uniqueVulByNodesMetadata =
-      parsedGetVulByNodesMetadataRes.vulnerabilityReportIssueCodeNodes.reduce<
-        Record<string, VulnerabilityReportIssueCodeNode>
-      >((acc, vulnerabilityReportIssueCodeNode) => {
-        if (acc[vulnerabilityReportIssueCodeNode.vulnerabilityReportIssueId]) {
-          return acc
-        }
-        return {
-          ...acc,
-          [vulnerabilityReportIssueCodeNode.vulnerabilityReportIssueId]:
-            vulnerabilityReportIssueCodeNode,
-        }
-      }, {})
-    const nonFixablePrVuls =
-      parsedGetVulByNodesMetadataRes.nonFixablePrVuls.aggregate.count
-    const fixablePrVuls =
-      parsedGetVulByNodesMetadataRes.fixablePrVuls.aggregate.count
+    const {
+      vulnerabilityReportIssueCodeNodes,
+      fixablePrVuls,
+      nonFixablePrVuls,
+      irrelevantVulnerabilityReportIssues,
+    } = matchVulByNodesMetadata(
+      parsedGetVulByNodesMetadataRes.vulnerabilityReportIssues,
+      hunks
+    )
     const totalScanVulnerabilities =
       parsedGetVulByNodesMetadataRes.totalScanVulnerabilities.aggregate.count
     const vulnerabilitiesOutsidePr =
       totalScanVulnerabilities - nonFixablePrVuls - fixablePrVuls
     const totalPrVulnerabilities = nonFixablePrVuls + fixablePrVuls
-    const irrelevantVulnerabilityReportIssues =
-      parsedGetVulByNodesMetadataRes.irrelevantVulnerabilityReportIssue?.[0]
-        ?.vulnerabilityReportIssues ?? []
 
     return {
-      vulnerabilityReportIssueCodeNodes: Object.values(
-        uniqueVulByNodesMetadata
-      ),
+      vulnerabilityReportIssueCodeNodes,
       nonFixablePrVuls,
       fixablePrVuls,
       totalScanVulnerabilities,
@@ -688,6 +667,16 @@ export class GQLClient {
     }
     return res.analysis
   }
+
+  /**
+   * The gate verdict for a Mobb-scan report (MOBB-3810). The backend is the
+   * only decider; the caller maps the answer onto an exit code.
+   */
+  async getGateVerdict(fixReportId: string) {
+    const res = await this._clientSdk.getGateVerdict({ fixReportId })
+    return res.getGateVerdict
+  }
+
   async autoPrAnalysis({
     analysisId,
     commitDirectly,

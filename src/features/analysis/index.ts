@@ -31,6 +31,7 @@ import * as utils from '../../utils'
 import { getTopLevelDirName, sleep } from '../../utils'
 import { addFixCommentsForPr } from './add_fix_comments_for_pr'
 import { handleAutoPr } from './auto_pr_handler'
+import { enforceGateVerdict } from './gate_verdict'
 import { getGitInfo, GetGitInfoResult } from './git'
 import { GQLClient } from './graphql'
 import { pack, repackFpr } from './pack'
@@ -177,6 +178,7 @@ export type AnalysisParams = {
   polling?: boolean
   baselineCommit?: string
   scanOnly?: boolean
+  gate?: boolean
 }
 export async function runAnalysis(
   params: AnalysisParams,
@@ -357,6 +359,7 @@ export async function _scan(
     polling,
     baselineCommit,
     scanOnly: requestedScanOnly,
+    gate,
   } = params
   debug('start %s %s', dirname, repo)
   const { createSpinner } = Spinner({ ci })
@@ -368,6 +371,23 @@ export async function _scan(
   // The analyze flow renders analyzer-served issue-type labels/descriptions, so
   // hydrate the catalog here (label-scoped). No fallback: throws if it fails.
   await gqlClient.loadIssueTypeCatalog()
+
+  // Shared tail of both analyze paths (repo-URL and src-path). Runs last,
+  // after the report URL is printed: a blocking verdict throws an exit-code-2
+  // CliError, and the developer must still get the link to the findings that
+  // blocked them. The Finished wait is required for rule fidelity — see
+  // enforceGateVerdict. No delay is needed after it: Finished means every
+  // issue's batch processing — the step that writes extra_data.rule_id — has
+  // completed, so the state cannot precede the writes the verdict depends on.
+  const runGate = async (fixReportId: string) => {
+    await waitForAnalysisFinished({
+      gqlClient,
+      analysisId: fixReportId,
+      polling,
+      ci,
+    })
+    await enforceGateVerdict({ gqlClient, fixReportId })
+  }
 
   if (!mobbProjectName) {
     throw new Error('mobbProjectName is required')
@@ -580,6 +600,9 @@ export async function _scan(
       gqlClient,
       polling,
     })
+  }
+  if (gate) {
+    await runGate(reportUploadInfo.fixReportId)
   }
   return reportUploadInfo.fixReportId
 
@@ -798,6 +821,9 @@ export async function _scan(
     }
 
     await askToOpenAnalysis()
+    if (gate) {
+      await runGate(reportUploadInfo.fixReportId)
+    }
     return reportUploadInfo.fixReportId
   }
 }
@@ -1037,4 +1063,58 @@ async function waitForAnaysisAndReviewPr({
       callbackStates: [Fix_Report_State_Enum.Finished],
     })
   }
+}
+
+/**
+ * Block until the report's analysis is Finished — the point where every
+ * finding's extra_data (including the rule id the gate resolves against) is
+ * final. Used by the --gate flow only; see enforceGateVerdict for why the
+ * verdict cannot be fetched earlier. A Failed report rejects here, which the
+ * top level maps to exit 1 — operationally fail-closed.
+ */
+async function waitForAnalysisFinished({
+  gqlClient,
+  analysisId,
+  polling,
+  ci,
+}: {
+  gqlClient: GQLClient
+  analysisId: string
+  polling?: boolean
+  ci: boolean
+}) {
+  const { createSpinner } = Spinner({ ci })
+  const gateSpinner = createSpinner(
+    '🚧 Waiting for the analysis to finish to evaluate the gate…'
+  ).start()
+  const callback = () => undefined
+  try {
+    if (polling) {
+      await gqlClient.pollForAnalysisState({
+        analysisId,
+        callback,
+        callbackStates: [Fix_Report_State_Enum.Finished],
+      })
+    } else {
+      await gqlClient.subscribeToAnalysis({
+        subscribeToAnalysisParams: {
+          analysisId,
+        },
+        callback,
+        callbackStates: [Fix_Report_State_Enum.Finished],
+      })
+    }
+  } catch (e) {
+    // Both waiters throw ReportDigestError with the backend failReason when
+    // the analysis reaches Failed — name that case; "did not finish" is for
+    // timeouts and transport errors.
+    gateSpinner.error({
+      text:
+        e instanceof ReportDigestError
+          ? '🚧 Analysis failed — cannot evaluate the gate'
+          : '🚧 Analysis did not finish',
+    })
+    throw e
+  }
+  gateSpinner.success({ text: '🚧 Analysis finished, evaluating the gate' })
 }

@@ -167,6 +167,49 @@ export class MobbApi {
   }
 
   /**
+   * MOBB-3816 — replace a project's Scan & Gate Policy overrides. The project
+   * doc is a per-control overlay on the org-effective policy (absent = inherit,
+   * false = off, true = on); project entries win over the org for gates. Pass
+   * null to clear the project's overrides so it inherits the org again. Returns
+   * the success payload so callers can assert on `warnings`.
+   *
+   * The query is byte-identical to the app's `updateProjectScanPolicy` mutation
+   * (services/app/src/graphql/mutations.graphql) — including `status` — so it
+   * matches that already-allowlisted operation instead of needing a separate
+   * (test-only) entry in the shipped CLI schema.
+   *
+   * @param {string} projectId
+   * @param {string | null} policyJson - JSON-encoded ScanPolicyDoc or null.
+   * @returns {Promise<{storedPolicyJson: string | null, warnings: string[]}>}
+   */
+  async updateProjectScanPolicy(projectId, policyJson) {
+    const response = await fetch(CLI_LOCAL_ENV_OVERWRITE.API_URL, {
+      headers: {
+        authorization: `Bearer ${this.#auth0Token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        query:
+          'mutation updateProjectScanPolicy($projectId: String!, $policyJson: String) {\n  updateProjectScanPolicy(projectId: $projectId, policyJson: $policyJson) {\n    __typename\n    ... on ScanPolicyUpdateSuccess {\n      status\n      storedPolicyJson\n      warnings\n    }\n    ... on ScanPolicyValidationError {\n      status\n      error\n    }\n    ... on ScanPolicyRelaxLockError {\n      status\n      error\n      violationsJson\n    }\n  }\n}',
+        variables: { projectId, policyJson },
+        operationName: 'updateProjectScanPolicy',
+      }),
+      method: 'POST',
+    })
+
+    const body = await response.json()
+    const result = body.data?.updateProjectScanPolicy
+
+    if (body.errors || result?.__typename !== 'ScanPolicyUpdateSuccess') {
+      throw new Error(
+        `Failed to update project scan policy ${JSON.stringify(body, null, 2)}`
+      )
+    }
+
+    return result
+  }
+
+  /**
    * MOBB-3810 — the distinct OpenGrep rule ids of a report's findings, read
    * from each issue's extra_data.rule_id (persisted by the engine under
    * --no-rewrite-rule-ids). Findings without a rule id are skipped.

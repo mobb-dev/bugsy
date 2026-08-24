@@ -46,6 +46,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      // The generated client barrel re-exports the shared base types from
+      // @mobb/commonshared, whose built output isn't present when running these
+      // tests. Resolve from source so vitest loads them without a build.
+      '@mobb/commonshared/base-types': path.resolve(
+        __dirname,
+        '../../tscommon/shared/src/gql/base-types.ts'
+      ),
       '@mobb/bugsy': path.resolve(__dirname, './src'),
     },
   },

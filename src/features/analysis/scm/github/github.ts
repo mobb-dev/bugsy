@@ -468,6 +468,9 @@ export function getGithubSdk(
           repoIsAdmin: repo.permissions
             ? repo.permissions.admin === true
             : undefined,
+          // Same story as repoIsAdmin: already on the response, never mapped.
+          repoDefaultBranch: repo.default_branch ?? null,
+          repoIsArchived: repo.archived === true,
         }))
 
         return {

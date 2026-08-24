@@ -53,6 +53,16 @@ export default defineConfig(() => {
       // bitbucket.ts reads `.default` off a namespace import with a runtime
       // fallback; undefined here is expected. The ESM build keeps this check.
       options.logOverride = { 'import-is-undefined': 'silent' }
+      // Resolve the shared GraphQL base types to source so the bundle doesn't
+      // depend on `@mobb/commonshared` being built first (this binary build runs
+      // without building workspace deps). Inlined via noExternal above.
+      options.alias = {
+        ...(options.alias ?? {}),
+        '@mobb/commonshared/base-types': path.resolve(
+          __dirname,
+          '../../tscommon/shared/src/gql/base-types.ts'
+        ),
+      }
     },
     define: {
       __DD_RUM_TOKEN__: JSON.stringify(process.env.DD_RUM_TOKEN ?? ''),

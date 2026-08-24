@@ -85,6 +85,24 @@ const UserWorkspacePermissionsRepositoriesResponseZ = z.object({
     )
     .optional(),
 })
+// Response schema for GET /2.0/user/workspaces — the replacement for the
+// end-of-lifed cross-workspace endpoints.
+// https://developer.atlassian.com/cloud/bitbucket/changelog/
+const UserWorkspacesResponseZ = z.object({
+  next: z.string().optional(),
+  values: z
+    .array(
+      z.object({
+        slug: z.string().optional(),
+        workspace: z
+          .object({
+            slug: z.string().optional(),
+          })
+          .optional(),
+      })
+    )
+    .optional(),
+})
 export function parseBitbucketOrganizationAndRepo(bitbucketUrl: string): {
   workspace: string
   repo_slug: string
@@ -207,12 +225,15 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
       return repoRes.map((repo) => ({
         repoIsPublic: !repo.is_private,
         repoName: repo.name || 'unknown repo name',
-        repoOwner: (repo.owner?.['username'] || 'unknown owner') as string,
+        repoOwner: repoWorkspaceSlug(repo),
         repoLanguages: repo.language ? [repo.language] : [],
         repoUpdatedAt: repo.updated_on
           ? repo.updated_on
           : new Date().toISOString(),
         repoUrl: repo.links?.html?.href || '',
+        repoDefaultBranch:
+          (repo.mainbranch as { name?: string } | undefined)?.name ?? null,
+        // Bitbucket has no archived flag — undefined, not false.
       }))
     },
     async getBranchList(params: { repoUrl: string }) {
@@ -758,25 +779,233 @@ export async function validateBitbucketParams(params: {
   }
 }
 
+/**
+ * The workspace a repository belongs to.
+ *
+ * `owner.username` only exists when the owner is a personal *user* account. A
+ * workspace-owned repository — which is every repository under a team workspace,
+ * so most of them — carries a workspace object there instead, with `slug` and no
+ * `username`, so every one of those came back as "unknown owner". The onboarding
+ * org picker groups by this, so Bitbucket showed one "unknown owner" bucket and
+ * the owner filter matched nothing.
+ *
+ * `full_name` is `<workspace-slug>/<repo-slug>` and is present on every
+ * repository, so it is the reliable source; the rest are fallbacks.
+ */
+function repoWorkspaceSlug(repo: Schema.Repository): string {
+  const fromFullName = repo.full_name?.split('/')[0]
+  if (fromFullName) {
+    return fromFullName
+  }
+  const workspace = repo['workspace'] as { slug?: string } | undefined
+  return (
+    workspace?.slug ??
+    (repo.owner?.['username'] as string | undefined) ??
+    (repo.owner?.['display_name'] as string | undefined) ??
+    'unknown owner'
+  )
+}
+
+/** Bitbucket's max; the default is 10, which silently truncated every listing. */
+const BITBUCKET_PAGE_LEN = 100
+/** Backstop against a `next` link that never stops. */
+const BITBUCKET_MAX_PAGES = 100
+
+/**
+ * Names the endpoint on the way out.
+ *
+ * Bitbucket is mid-sunset on several endpoints and answers the retired ones with
+ * a bare `410 Gone`. That reached us as "unexpected SCM error: Gone" with no
+ * indication of *which* call died, so diagnosing it was guesswork. Any Bitbucket
+ * call whose failure could plausibly be a sunset should go through this.
+ */
+async function withEndpointContext<T>(
+  endpoint: string,
+  call: () => Promise<T>
+): Promise<T> {
+  try {
+    return await call()
+  } catch (e) {
+    const status = (e as { status?: number })?.status
+    const message = e instanceof Error ? e.message : String(e)
+    const error = new Error(
+      `${endpoint} failed${status ? ` with ${status}` : ''}: ${message}` +
+        (status === 410
+          ? ' — this endpoint has been sunset by Bitbucket, see https://developer.atlassian.com/cloud/bitbucket/changelog/'
+          : '')
+    )
+    // Keep the original for anything downstream that inspects `status`.
+    ;(error as { cause?: unknown }).cause = e
+    throw error
+  }
+}
+
+/**
+ * Every page of one workspace's repositories.
+ *
+ * `repositories.list` returns a *page* — 10 by default. Both callers used to
+ * take that single page and treat it as the whole workspace, so a workspace with
+ * more than ten repositories quietly lost the rest.
+ */
+async function listWorkspaceRepositories(
+  bitbucketClient: APIClient,
+  workspaceSlug: string
+): Promise<Schema.Repository[]> {
+  const repos: Schema.Repository[] = []
+  for (let page = 1; page <= BITBUCKET_MAX_PAGES; page += 1) {
+    const res = await withEndpointContext(
+      `GET /2.0/repositories/${workspaceSlug}`,
+      () =>
+        bitbucketClient.repositories.list({
+          workspace: workspaceSlug,
+          pagelen: BITBUCKET_PAGE_LEN,
+          page: String(page),
+        })
+    )
+    const values = res.data.values
+    if (!values?.length) {
+      break
+    }
+    repos.push(...values)
+    if (!res.data.next) {
+      break
+    }
+  }
+  return repos
+}
+
+/**
+ * The workspaces the token can see.
+ *
+ * Bitbucket ended life on every cross-workspace API on 2026-03-31; the old calls
+ * now answer **410 Gone**, which is what broke repository listing entirely (every
+ * repo is fetched per workspace, so losing the workspace list loses everything).
+ * All of these are dead:
+ *
+ * - `GET /2.0/workspaces`               ← what `workspaces.getWorkspaces` calls
+ * - `GET /2.0/user/permissions/workspaces`
+ * - `GET /2.0/user/permissions/repositories`  ← already worked around above
+ * - `GET /2.0/repositories`             ← the cross-workspace repo list
+ *
+ * `GET /2.0/user/workspaces` is the sanctioned replacement, in the same
+ * `/user/workspaces` namespace this file already uses for repository
+ * permissions. No named method in bitbucket@2.12.0, so it goes through request().
+ *
+ * Which replacement is *the* replacement is genuinely unclear: the REST
+ * reference marks `/user/workspaces` deprecated and points at
+ * `/user/permissions/workspaces`, while the end-of-life announcement and
+ * CHANGE-2770 say the opposite. Rather than bet on one, try them in order and
+ * let Bitbucket answer — a retired endpoint says 410/404, anything else is a
+ * real failure and propagates. This also self-heals whenever the next one goes.
+ *
+ * The item shape is read leniently — `slug` at the top level or nested under
+ * `workspace` — because the two endpoints document different shapes.
+ */
+const WORKSPACE_LIST_ENDPOINTS = [
+  '/user/permissions/workspaces',
+  '/user/workspaces',
+] as const
+async function listWorkspacesFrom(
+  bitbucketClient: APIClient,
+  path: string
+): Promise<string[]> {
+  const slugs: string[] = []
+  for (let page = 1; page <= BITBUCKET_MAX_PAGES; page += 1) {
+    const res = await withEndpointContext(`GET /2.0${path}`, () =>
+      bitbucketClient.request({
+        method: 'GET',
+        url: path,
+        pagelen: BITBUCKET_PAGE_LEN,
+        page: String(page),
+      })
+    )
+    const parsed = UserWorkspacesResponseZ.safeParse(res.data)
+    // A payload we cannot read is a failure, not an empty page. Returning []
+    // here set the caller's `sawEmpty`, and if both endpoints answered with
+    // something unrecognisable the result was a healthy "0 workspaces, 0
+    // repositories" — the exact silent failure this fallback exists to prevent.
+    if (!parsed.success) {
+      throw new Error(
+        `GET /2.0${path} returned an unrecognised payload: ${parsed.error.message}`
+      )
+    }
+    const values = parsed.data.values ?? []
+    if (values.length === 0) {
+      break
+    }
+    for (const value of values) {
+      const slug = value.slug ?? value.workspace?.slug
+      if (slug) {
+        slugs.push(slug)
+      }
+    }
+    if (!parsed.data.next) {
+      break
+    }
+  }
+  return slugs
+}
+
+/** A retired endpoint, as opposed to a real failure worth surfacing. */
+function isGoneOrMissing(e: unknown): boolean {
+  const status =
+    (e as { status?: number })?.status ??
+    ((e as { cause?: { status?: number } })?.cause?.status || undefined)
+  if (status === 410 || status === 404) {
+    return true
+  }
+  const message = e instanceof Error ? e.message : String(e)
+  return / with (410|404):/.test(message)
+}
+
 async function getUsersWorkspacesSlugs(bitbucketClient: APIClient) {
-  const res = await bitbucketClient.workspaces.getWorkspaces({})
-  return res.data.values?.map((v) => z.string().parse(v.slug))
+  let lastError: unknown
+  /**
+   * An endpoint answered, just with nothing.
+   *
+   * Tracked separately from an error because a 200 with no `values` is
+   * ambiguous: it is what a genuinely empty account returns, and also what an
+   * under-scoped token can return instead of a 403. Returning that first empty
+   * answer meant the other endpoint was never tried, and the caller reported a
+   * healthy "0 workspaces, 0 repositories" for a connection that in fact works.
+   * So: keep looking, and only settle for empty once nothing else is left.
+   */
+  let sawEmpty = false
+  for (const path of WORKSPACE_LIST_ENDPOINTS) {
+    try {
+      const slugs = await listWorkspacesFrom(bitbucketClient, path)
+      if (slugs.length > 0) {
+        return slugs
+      }
+      debug(`bitbucket workspace listing ${path} returned nothing, trying next`)
+      sawEmpty = true
+    } catch (e) {
+      // Only a retirement moves us on. A 401/403/5xx is a real problem and must
+      // not be masked by trying the next URL.
+      if (!isGoneOrMissing(e)) {
+        throw e
+      }
+      debug(`bitbucket workspace listing ${path} is retired, trying next`)
+      lastError = e
+    }
+  }
+  // Every endpoint that answered said "none" — that is a real, empty account.
+  if (sawEmpty) {
+    return []
+  }
+  throw (
+    lastError ??
+    new Error('no usable Bitbucket workspace-listing endpoint remains')
+  )
 }
 
 async function getAllUsersRepositories(bitbucketClient: APIClient) {
   const userWorkspacesSlugs = await getUsersWorkspacesSlugs(bitbucketClient)
-  if (!userWorkspacesSlugs) {
-    return []
-  }
   const allWorkspaceRepos: Schema.Repository[] = []
   for (const workspaceSlug of userWorkspacesSlugs) {
-    const repos = await bitbucketClient.repositories.list({
-      workspace: workspaceSlug,
-    })
-    if (!repos.data.values) {
-      continue
-    }
-    allWorkspaceRepos.push(...repos.data.values)
+    allWorkspaceRepos.push(
+      ...(await listWorkspaceRepositories(bitbucketClient, workspaceSlug))
+    )
   }
   return allWorkspaceRepos
 }
@@ -784,8 +1013,5 @@ async function getRepositoriesByWorkspace(
   bitbucketClient: APIClient,
   { workspaceSlug }: { workspaceSlug: string }
 ) {
-  const res = await bitbucketClient.repositories.list({
-    workspace: workspaceSlug,
-  })
-  return res.data.values ?? []
+  return listWorkspaceRepositories(bitbucketClient, workspaceSlug)
 }

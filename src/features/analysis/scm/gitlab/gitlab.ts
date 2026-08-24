@@ -300,8 +300,15 @@ export async function searchGitlabProjects({
     namespace_name: string
     visibility: string
     last_activity_at: string
+    default_branch: string | null
+    archived: boolean
   }[]
   hasMore: boolean
+  /**
+   * From `X-Total`, which GitLab omits once a result set gets large (its
+   * counting threshold) — undefined then, never a guess.
+   */
+  totalCount?: number
 }> {
   if (perPage > GITLAB_MAX_PER_PAGE) {
     throw new Error(
@@ -346,11 +353,21 @@ export async function searchGitlabProjects({
     namespace_name: (p.namespace as { name: string })?.name ?? '',
     visibility: p.visibility,
     last_activity_at: p.last_activity_at,
+    // Both already on the project listing — no extra request.
+    default_branch: (p as { default_branch?: string }).default_branch ?? null,
+    archived: (p as { archived?: boolean }).archived === true,
   }))
 
+  // `Number.isFinite`, not `typeof`: GitBeaker derives this with
+  // `parseInt(X-Total, 10)`, and GitLab omits that header past its counting
+  // threshold — so the value is NaN, which *is* a `number`. It would then reach
+  // the GraphQL Int (`?? null` does not catch NaN either) and fail the whole
+  // repository listing at serialization time.
+  const total = (response.paginationInfo as { total?: number }).total
   return {
     projects,
     hasMore: response.paginationInfo.next !== null,
+    totalCount: Number.isFinite(total) ? total : undefined,
   }
 }
 

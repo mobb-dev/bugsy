@@ -30,6 +30,33 @@ describe('getBrokerEffectiveUrl', () => {
     expect(getBrokerEffectiveUrl({ url, brokerHosts })).toBe(expected)
   })
 
+  /**
+   * A server on a non-default port enrols as `real3.example.com:8443` — that is
+   * the host the app canonicalises to — and matching only the bare hostname sent
+   * every request straight past the tunnel while the UI reported a live broker.
+   */
+  it('matches a broker enrolled for a host with a port', () => {
+    const withPort = [
+      {
+        virtualDomain: 'virtual3.example.com',
+        realDomain: 'real3.example.com:8443',
+      },
+    ]
+    expect(
+      getBrokerEffectiveUrl({
+        url: 'https://real3.example.com:8443/path',
+        brokerHosts: withPort,
+      })
+    ).toBe('https://virtual3.example.com/path')
+    // A different port is a different server, and must not be routed there.
+    expect(
+      getBrokerEffectiveUrl({
+        url: 'https://real3.example.com:9443/path',
+        brokerHosts: withPort,
+      })
+    ).toBe('https://real3.example.com:9443/path')
+  })
+
   it('should preserve the path and query parameters', () => {
     const url =
       'https://real1.example.com/some/long/path?param1=value1&param2=value2'

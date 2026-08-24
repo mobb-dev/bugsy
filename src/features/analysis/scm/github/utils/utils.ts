@@ -246,6 +246,18 @@ export function handleGitHubError(
     )
   }
 
+  // GitHub is up but unwell (500, 502, 503, 504). Octokit has already retried by
+  // the time we get here, so this is a real outage — but it says nothing about
+  // the token. Without this branch a 503 fell through to the generic Error
+  // below, lost its status, and was reported to the user as bad credentials.
+  if (typeof status === 'number' && status >= 500) {
+    throw new NetworkError(
+      `GitHub is unavailable (${status}): ${errorMessage}`,
+      scmType,
+      String(status)
+    )
+  }
+
   // Network errors (connection issues)
   const errorCode = errorObj.code || errorObj.response?.code
   if (

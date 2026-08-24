@@ -42,12 +42,27 @@ export default defineConfig(({ env }) => {
     minify: false,
     bundle: true,
     splitting: false,
+    // @mobb/commonshared is a workspace-only dev dependency (the shared GraphQL
+    // base types). It is NOT published to npm, so it must be inlined into the
+    // bundle rather than left as an external import.
+    noExternal: ['@mobb/commonshared'],
     watch: !isProd,
     target: 'es2020',
     entry: ['src/index.ts', 'src/args/commands/upload_ai_blame.ts', 'src/hash_search/index.ts'],
     tsconfig: './tsconfig.json',
     dts: true,
     esbuildPlugins: [textLoaderPlugin('daemon-check-shim.tmpl.js')],
+    esbuildOptions(options) {
+      // Resolve the shared GraphQL base types to source so the bundle doesn't
+      // depend on `@mobb/commonshared` being built first. Inlined via noExternal.
+      options.alias = {
+        ...(options.alias ?? {}),
+        '@mobb/commonshared/base-types': path.resolve(
+          __dirname,
+          '../../tscommon/shared/src/gql/base-types.ts'
+        ),
+      }
+    },
     define: {
       __DD_RUM_TOKEN__: JSON.stringify(process.env.DD_RUM_TOKEN ?? ''),
       __CLI_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'unknown'),

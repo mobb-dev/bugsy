@@ -80,6 +80,14 @@ export type SearchReposResult = {
   results: ScmRepoInfo[]
   nextCursor?: string
   hasMore: boolean
+  /**
+   * How many repositories match in total, when the provider says so — it rides
+   * along on the page we already fetched, so it costs nothing extra. Undefined
+   * where the provider genuinely does not report one (GitHub's `/user/repos`,
+   * GitLab above its counting threshold); callers must show a bare count rather
+   * than invent a denominator.
+   */
+  totalCount?: number
 }
 
 export type PullRequestMetrics = {
@@ -151,6 +159,21 @@ export type ScmRepoInfo = {
    * only found out which ones they could use by clicking and failing.
    */
   repoIsAdmin?: boolean
+  /**
+   * The branch a scan would run against.
+   *
+   * Every provider already returns this on the repository listing — GitHub and
+   * GitLab as `default_branch`, Bitbucket as `mainbranch`, Azure DevOps as
+   * `defaultBranch` — so carrying it costs no extra request. Optional because a
+   * repository with no commits has no default branch at all.
+   */
+  repoDefaultBranch?: string | null
+  /**
+   * Archived/read-only upstream. Worth surfacing before a run: a scan slot spent
+   * on a dead repository is a slot not spent on a live one. Undefined where the
+   * provider has no such concept (Bitbucket), which is not the same as `false`.
+   */
+  repoIsArchived?: boolean
 }
 
 export const scmCloudHostname: Record<ScmType, string> = {

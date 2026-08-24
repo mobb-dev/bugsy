@@ -776,6 +776,8 @@ export class GithubSCMLib extends SCMLib {
       nextCursor:
         nextOffset < sortedRepos.length ? String(nextOffset) : undefined,
       hasMore: nextOffset < sortedRepos.length,
+      // This path already holds every repository, so the total is exact.
+      totalCount: sortedRepos.length,
     }
   }
 
@@ -828,12 +830,16 @@ export class GithubSCMLib extends SCMLib {
       repoLanguages: repo.language ? [repo.language] : [],
       repoIsPublic: !repo.private,
       repoUpdatedAt: repo.updated_at || null,
+      repoDefaultBranch: repo.default_branch ?? null,
+      repoIsArchived: repo.archived === true,
     }))
 
     return {
       results,
       nextCursor: searchResult.hasMore ? String(page + 1) : undefined,
       hasMore: searchResult.hasMore,
+      // Already on the response we just paid for.
+      totalCount: searchResult.totalCount,
     }
   }
 

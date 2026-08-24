@@ -333,9 +333,15 @@ export function getScmConfig({
       urlObject.port === configUrl.port
     )
   })
+  // `host` as well as `hostname` — see `matchesRealDomain` in ./broker.ts: a
+  // broker enrolled for a server on a non-default port stores `git.acme:8443`,
+  // and matching the bare hostname alone sent its traffic around the tunnel.
   const filteredBrokerHosts = brokerHosts.filter((broker) => {
-    const urlObject = new URL(url)
-    return urlObject.hostname.toLowerCase() === broker.realDomain.toLowerCase()
+    const real = broker.realDomain.trim().toLowerCase()
+    return (
+      real === urlObject.hostname.toLowerCase() ||
+      real === urlObject.host.toLowerCase()
+    )
   })
   // Same host, different protocol/port (e.g. the user typed http:// for a
   // connection saved as https://): reuse the existing connection instead of

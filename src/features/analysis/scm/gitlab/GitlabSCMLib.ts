@@ -422,7 +422,7 @@ export class GitlabSCMLib extends SCMLib {
     const orderBy: 'created_at' | 'last_activity_at' =
       sort.field === 'updated' ? 'last_activity_at' : 'created_at'
 
-    const { projects, hasMore } = await searchGitlabProjects({
+    const { projects, hasMore, totalCount } = await searchGitlabProjects({
       url: this.url,
       accessToken: this.accessToken,
       perPage,
@@ -457,12 +457,15 @@ export class GitlabSCMLib extends SCMLib {
       repoLanguages: languageMap.get(p.id) || [],
       repoIsPublic: p.visibility === 'public',
       repoUpdatedAt: p.last_activity_at,
+      repoDefaultBranch: p.default_branch,
+      repoIsArchived: p.archived,
     }))
 
     return {
       results,
       nextCursor: hasMore ? String(page + 1) : undefined,
       hasMore,
+      totalCount,
     }
   }
 

@@ -8,7 +8,10 @@
     "baseUrl": "./src",
     "types": ["vitest/globals"],
     "paths": {
-      "@mobb/bugsy/*": ["./*"]
+      "@mobb/bugsy/*": ["./*"],
+      "@mobb/commonshared/base-types": [
+        "../../../tscommon/shared/src/gql/base-types.ts"
+      ]
     },
     "esModuleInterop": true,
     "incremental": true,

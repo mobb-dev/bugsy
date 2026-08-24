@@ -746,6 +746,11 @@ export async function getAdoRepoList({
                     branch.commit?.committer?.date?.toISOString() ||
                     repo.project?.lastUpdateTime?.toISOString() ||
                     new Date().toISOString(),
+                  // Already on the repository object; refs/heads/ prefix stripped.
+                  repoDefaultBranch:
+                    repo.defaultBranch?.replace(/^refs\/heads\//, '') ?? null,
+                  // ADO disables rather than archives; same practical meaning.
+                  repoIsArchived: repo.isDisabled === true,
                 }
               })
             )

@@ -9,24 +9,36 @@ const debug = Debug('mobbdev:upload-file')
 
 /**
  * Per-request timeout bounds. Scaled to payload size so a stalled/reset socket
- * can't hang forever, while a genuinely large (up to 20MB) upload on a thin
- * link isn't aborted prematurely and then falsely retried. Small uploads get
- * the floor (fast failure on a hostile network); large ones get headroom.
+ * can't hang forever, while a genuinely large upload isn't aborted mid-stream
+ * and then falsely retried: FPR reports and repo zips reach multi-GB, so the
+ * ceiling must be minutes-scale, not seconds (a flat 60s cap aborted every
+ * upload slower than ~17MB/s). Small uploads get the floor (fast failure on a
+ * hostile network); callers needing tighter bounds (e.g. Tracy's KB-scale
+ * telemetry in s3-raw-data-upload.ts) pass their own `signal`.
  */
 const MIN_UPLOAD_TIMEOUT_MS = 10_000
-const MAX_UPLOAD_TIMEOUT_MS = 60_000
+const MAX_UPLOAD_TIMEOUT_MS = 10 * 60_000
 /** Assumed worst-case acceptable link: ~512 KB/s → bytes / this = added ms. */
 const SLOW_LINK_BYTES_PER_MS = 512
+/**
+ * Path uploads (user-supplied reports) got a flat 60s before size scaling
+ * existed; kept as their floor so scaling can only loosen that budget, never
+ * tighten it — a small report on a thin enterprise link must not gain a new
+ * abort risk. Buffers keep the lower floor: their pre-scaling behavior.
+ */
+const PATH_UPLOAD_FLOOR_MS = 60_000
 
-/** Size-scaled request timeout. Unknown size (path uploads) → generous max. */
-function computeUploadTimeoutMs(file: string | Buffer): number {
-  if (typeof file === 'string') {
-    return MAX_UPLOAD_TIMEOUT_MS
-  }
-  const sizeAllowanceMs = Math.ceil(file.byteLength / SLOW_LINK_BYTES_PER_MS)
+/** Size-scaled request timeout, bounded by the per-source floor and the ceiling. */
+export function computeUploadTimeoutMs(
+  sizeBytes: number,
+  source: 'path' | 'buffer'
+): number {
+  const floorMs =
+    source === 'path' ? PATH_UPLOAD_FLOOR_MS : MIN_UPLOAD_TIMEOUT_MS
+  const sizeAllowanceMs = Math.ceil(sizeBytes / SLOW_LINK_BYTES_PER_MS)
   return Math.min(
     MAX_UPLOAD_TIMEOUT_MS,
-    MIN_UPLOAD_TIMEOUT_MS + sizeAllowanceMs
+    Math.max(floorMs, MIN_UPLOAD_TIMEOUT_MS + sizeAllowanceMs)
   )
 }
 
@@ -158,11 +170,18 @@ export async function uploadFile({
   // Always set the key explicitly — required for MinIO and for starts-with presigned URLs
   // where the presigned fields may contain a placeholder key that must be overridden.
   form.set('key', uploadKey)
+  let uploadSizeBytes: number
+  let uploadSource: 'path' | 'buffer'
   if (typeof file === 'string') {
     debug('upload file from path %s', file)
     logInfo(`FileUpload: upload file from path ${file}`)
 
-    form.append('file', await fileFrom(file))
+    // fileFrom stats the path internally; reuse its size for the timeout so
+    // the budget matches the bytes actually being POSTed.
+    const fileFromPath = await fileFrom(file)
+    form.append('file', fileFromPath)
+    uploadSizeBytes = fileFromPath.size
+    uploadSource = 'path'
   } else {
     debug('upload file from buffer')
     logInfo(`FileUpload: upload file from buffer`)
@@ -183,13 +202,16 @@ export async function uploadFile({
         'file'
       )
     )
+    uploadSizeBytes = file.byteLength
+    uploadSource = 'buffer'
   }
   const agent = getUploadAgent(url)
   // Bound every request: callers that don't pass a signal still get a timeout
   // (scaled to payload size) so a stalled or silently-reset socket can't hang
   // the upload indefinitely.
   const effectiveSignal =
-    signal ?? AbortSignal.timeout(computeUploadTimeoutMs(file))
+    signal ??
+    AbortSignal.timeout(computeUploadTimeoutMs(uploadSizeBytes, uploadSource))
   const response = await fetch(url, {
     method: 'POST',
     body: form,

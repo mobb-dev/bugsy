@@ -7342,6 +7342,12 @@ export type Ai_Blame_Commit = {
   aiBlameAttributions: Array<Ai_Blame_Attribution>;
   /** An aggregate relationship */
   aiBlameAttributions_aggregate: Ai_Blame_Attribution_Aggregate;
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount: Scalars['Int']['output'];
+  /** Terminal outcome of the last analysis attempt. NULL = never evaluated (pre-T-533 rows, or in flight). */
+  analysisOutcome?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: Maybe<Scalars['timestamptz']['output']>;
   /** An object relationship */
   author?: Maybe<Git_Identity>;
   authorId?: Maybe<Scalars['uuid']['output']>;
@@ -7482,6 +7488,158 @@ export type Ai_Blame_Commit_Aggregate_Order_By = {
   variance?: InputMaybe<Ai_Blame_Commit_Variance_Order_By>;
 };
 
+/** Hasura enum: terminal outcome of a commit's AI-blame analysis attempt. */
+export type Ai_Blame_Commit_Analysis_Outcome = {
+  __typename?: 'ai_blame_commit_analysis_outcome';
+  comment: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** aggregated selection of "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Aggregate = {
+  __typename?: 'ai_blame_commit_analysis_outcome_aggregate';
+  aggregate?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Aggregate_Fields>;
+  nodes: Array<Ai_Blame_Commit_Analysis_Outcome>;
+};
+
+/** aggregate fields of "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Aggregate_Fields = {
+  __typename?: 'ai_blame_commit_analysis_outcome_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Max_Fields>;
+  min?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Min_Fields>;
+};
+
+
+/** aggregate fields of "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "ai_blame_commit_analysis_outcome". All fields are combined with a logical 'AND'. */
+export type Ai_Blame_Commit_Analysis_Outcome_Bool_Exp = {
+  _and?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>>;
+  _not?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+  _or?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>>;
+  comment?: InputMaybe<String_Comparison_Exp>;
+  value?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "ai_blame_commit_analysis_outcome" */
+export enum Ai_Blame_Commit_Analysis_Outcome_Constraint {
+  /** unique or primary key constraint on columns "value" */
+  AiBlameCommitAnalysisOutcomePkey = 'ai_blame_commit_analysis_outcome_pkey'
+}
+
+export enum Ai_Blame_Commit_Analysis_Outcome_Enum {
+  /** Attempt failed (e.g. candidate query hit the 29s ALB bound). Retried until the attempt cap. */
+  Failed = 'FAILED',
+  /** Candidate query ran and found no inferences. Trusted as terminal only once the ingest settle window has passed - see terminalSkipReason. */
+  NoInferences = 'NO_INFERENCES',
+  /** Analysis requests were created for every batch. Coverage tracking takes over. */
+  Requested = 'REQUESTED'
+}
+
+/** Boolean expression to compare columns of type "ai_blame_commit_analysis_outcome_enum". All fields are combined with logical 'AND'. */
+export type Ai_Blame_Commit_Analysis_Outcome_Enum_Comparison_Exp = {
+  _eq?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  _in?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Enum>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  _nin?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Enum>>;
+};
+
+/** input type for inserting data into table "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Insert_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Ai_Blame_Commit_Analysis_Outcome_Max_Fields = {
+  __typename?: 'ai_blame_commit_analysis_outcome_max_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** aggregate min on columns */
+export type Ai_Blame_Commit_Analysis_Outcome_Min_Fields = {
+  __typename?: 'ai_blame_commit_analysis_outcome_min_fields';
+  comment?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** response of any mutation on the table "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Mutation_Response = {
+  __typename?: 'ai_blame_commit_analysis_outcome_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Ai_Blame_Commit_Analysis_Outcome>;
+};
+
+/** on_conflict condition type for table "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_On_Conflict = {
+  constraint: Ai_Blame_Commit_Analysis_Outcome_Constraint;
+  update_columns?: Array<Ai_Blame_Commit_Analysis_Outcome_Update_Column>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "ai_blame_commit_analysis_outcome". */
+export type Ai_Blame_Commit_Analysis_Outcome_Order_By = {
+  comment?: InputMaybe<Order_By>;
+  value?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: ai_blame_commit_analysis_outcome */
+export type Ai_Blame_Commit_Analysis_Outcome_Pk_Columns_Input = {
+  value: Scalars['String']['input'];
+};
+
+/** select columns of table "ai_blame_commit_analysis_outcome" */
+export enum Ai_Blame_Commit_Analysis_Outcome_Select_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+/** input type for updating data in table "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Set_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "ai_blame_commit_analysis_outcome" */
+export type Ai_Blame_Commit_Analysis_Outcome_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Ai_Blame_Commit_Analysis_Outcome_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Ai_Blame_Commit_Analysis_Outcome_Stream_Cursor_Value_Input = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "ai_blame_commit_analysis_outcome" */
+export enum Ai_Blame_Commit_Analysis_Outcome_Update_Column {
+  /** column name */
+  Comment = 'comment',
+  /** column name */
+  Value = 'value'
+}
+
+export type Ai_Blame_Commit_Analysis_Outcome_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Ai_Blame_Commit_Analysis_Outcome_Bool_Exp;
+};
+
 /** input type for inserting array relation for remote table "ai_blame_commit" */
 export type Ai_Blame_Commit_Arr_Rel_Insert_Input = {
   data: Array<Ai_Blame_Commit_Insert_Input>;
@@ -7492,11 +7650,15 @@ export type Ai_Blame_Commit_Arr_Rel_Insert_Input = {
 /** aggregate avg on columns */
 export type Ai_Blame_Commit_Avg_Fields = {
   __typename?: 'ai_blame_commit_avg_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by avg() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Avg_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
@@ -7507,6 +7669,9 @@ export type Ai_Blame_Commit_Bool_Exp = {
   _or?: InputMaybe<Array<Ai_Blame_Commit_Bool_Exp>>;
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Bool_Exp>;
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Bool_Exp>;
+  analysisAttemptCount?: InputMaybe<Int_Comparison_Exp>;
+  analysisOutcome?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum_Comparison_Exp>;
+  analysisOutcomeAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   author?: InputMaybe<Git_Identity_Bool_Exp>;
   authorId?: InputMaybe<Uuid_Comparison_Exp>;
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Bool_Exp>;
@@ -7716,12 +7881,20 @@ export enum Ai_Blame_Commit_Constraint {
 
 /** input type for incrementing numeric columns in table "ai_blame_commit" */
 export type Ai_Blame_Commit_Inc_Input = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Scalars['Int']['input']>;
   inferenceCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "ai_blame_commit" */
 export type Ai_Blame_Commit_Insert_Input = {
   aiBlameAttributions?: InputMaybe<Ai_Blame_Attribution_Arr_Rel_Insert_Input>;
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Scalars['Int']['input']>;
+  /** Terminal outcome of the last analysis attempt. NULL = never evaluated (pre-T-533 rows, or in flight). */
+  analysisOutcome?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: InputMaybe<Scalars['timestamptz']['input']>;
   author?: InputMaybe<Git_Identity_Obj_Rel_Insert_Input>;
   authorId?: InputMaybe<Scalars['uuid']['input']>;
   blameAiAnalysisRequests?: InputMaybe<Blame_Ai_Analysis_Request_Arr_Rel_Insert_Input>;
@@ -7740,6 +7913,10 @@ export type Ai_Blame_Commit_Insert_Input = {
 /** aggregate max on columns */
 export type Ai_Blame_Commit_Max_Fields = {
   __typename?: 'ai_blame_commit_max_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Int']['output']>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: Maybe<Scalars['timestamptz']['output']>;
   authorId?: Maybe<Scalars['uuid']['output']>;
   commitSha?: Maybe<Scalars['String']['output']>;
   committerId?: Maybe<Scalars['uuid']['output']>;
@@ -7752,6 +7929,10 @@ export type Ai_Blame_Commit_Max_Fields = {
 
 /** order by max() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Max_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: InputMaybe<Order_By>;
   authorId?: InputMaybe<Order_By>;
   commitSha?: InputMaybe<Order_By>;
   committerId?: InputMaybe<Order_By>;
@@ -7765,6 +7946,10 @@ export type Ai_Blame_Commit_Max_Order_By = {
 /** aggregate min on columns */
 export type Ai_Blame_Commit_Min_Fields = {
   __typename?: 'ai_blame_commit_min_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Int']['output']>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: Maybe<Scalars['timestamptz']['output']>;
   authorId?: Maybe<Scalars['uuid']['output']>;
   commitSha?: Maybe<Scalars['String']['output']>;
   committerId?: Maybe<Scalars['uuid']['output']>;
@@ -7777,6 +7962,10 @@ export type Ai_Blame_Commit_Min_Fields = {
 
 /** order by min() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Min_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: InputMaybe<Order_By>;
   authorId?: InputMaybe<Order_By>;
   commitSha?: InputMaybe<Order_By>;
   committerId?: InputMaybe<Order_By>;
@@ -7813,6 +8002,9 @@ export type Ai_Blame_Commit_On_Conflict = {
 /** Ordering options when selecting data from "ai_blame_commit". */
 export type Ai_Blame_Commit_Order_By = {
   aiBlameAttributions_aggregate?: InputMaybe<Ai_Blame_Attribution_Aggregate_Order_By>;
+  analysisAttemptCount?: InputMaybe<Order_By>;
+  analysisOutcome?: InputMaybe<Order_By>;
+  analysisOutcomeAt?: InputMaybe<Order_By>;
   author?: InputMaybe<Git_Identity_Order_By>;
   authorId?: InputMaybe<Order_By>;
   blameAiAnalysisRequests_aggregate?: InputMaybe<Blame_Ai_Analysis_Request_Aggregate_Order_By>;
@@ -7836,6 +8028,12 @@ export type Ai_Blame_Commit_Pk_Columns_Input = {
 /** select columns of table "ai_blame_commit" */
 export enum Ai_Blame_Commit_Select_Column {
   /** column name */
+  AnalysisAttemptCount = 'analysisAttemptCount',
+  /** column name */
+  AnalysisOutcome = 'analysisOutcome',
+  /** column name */
+  AnalysisOutcomeAt = 'analysisOutcomeAt',
+  /** column name */
   AuthorId = 'authorId',
   /** column name */
   CommitSha = 'commitSha',
@@ -7855,6 +8053,12 @@ export enum Ai_Blame_Commit_Select_Column {
 
 /** input type for updating data in table "ai_blame_commit" */
 export type Ai_Blame_Commit_Set_Input = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Scalars['Int']['input']>;
+  /** Terminal outcome of the last analysis attempt. NULL = never evaluated (pre-T-533 rows, or in flight). */
+  analysisOutcome?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: InputMaybe<Scalars['timestamptz']['input']>;
   authorId?: InputMaybe<Scalars['uuid']['input']>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
   committerId?: InputMaybe<Scalars['uuid']['input']>;
@@ -7868,33 +8072,45 @@ export type Ai_Blame_Commit_Set_Input = {
 /** aggregate stddev on columns */
 export type Ai_Blame_Commit_Stddev_Fields = {
   __typename?: 'ai_blame_commit_stddev_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Stddev_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Ai_Blame_Commit_Stddev_Pop_Fields = {
   __typename?: 'ai_blame_commit_stddev_pop_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_pop() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Stddev_Pop_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_samp on columns */
 export type Ai_Blame_Commit_Stddev_Samp_Fields = {
   __typename?: 'ai_blame_commit_stddev_samp_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by stddev_samp() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Stddev_Samp_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
@@ -7908,6 +8124,12 @@ export type Ai_Blame_Commit_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Scalars['Int']['input']>;
+  /** Terminal outcome of the last analysis attempt. NULL = never evaluated (pre-T-533 rows, or in flight). */
+  analysisOutcome?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Enum>;
+  /** When analysis_outcome was recorded. Used to decide whether an empty result is trustworthy yet. */
+  analysisOutcomeAt?: InputMaybe<Scalars['timestamptz']['input']>;
   authorId?: InputMaybe<Scalars['uuid']['input']>;
   commitSha?: InputMaybe<Scalars['String']['input']>;
   committerId?: InputMaybe<Scalars['uuid']['input']>;
@@ -7921,16 +8143,26 @@ export type Ai_Blame_Commit_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Ai_Blame_Commit_Sum_Fields = {
   __typename?: 'ai_blame_commit_sum_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Int']['output']>;
   inferenceCount?: Maybe<Scalars['Int']['output']>;
 };
 
 /** order by sum() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Sum_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** update columns of table "ai_blame_commit" */
 export enum Ai_Blame_Commit_Update_Column {
+  /** column name */
+  AnalysisAttemptCount = 'analysisAttemptCount',
+  /** column name */
+  AnalysisOutcome = 'analysisOutcome',
+  /** column name */
+  AnalysisOutcomeAt = 'analysisOutcomeAt',
   /** column name */
   AuthorId = 'authorId',
   /** column name */
@@ -7961,33 +8193,45 @@ export type Ai_Blame_Commit_Updates = {
 /** aggregate var_pop on columns */
 export type Ai_Blame_Commit_Var_Pop_Fields = {
   __typename?: 'ai_blame_commit_var_pop_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_pop() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Var_Pop_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
 export type Ai_Blame_Commit_Var_Samp_Fields = {
   __typename?: 'ai_blame_commit_var_samp_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by var_samp() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Var_Samp_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
 /** aggregate variance on columns */
 export type Ai_Blame_Commit_Variance_Fields = {
   __typename?: 'ai_blame_commit_variance_fields';
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: Maybe<Scalars['Float']['output']>;
   inferenceCount?: Maybe<Scalars['Float']['output']>;
 };
 
 /** order by variance() on columns of table "ai_blame_commit" */
 export type Ai_Blame_Commit_Variance_Order_By = {
+  /** Number of analysis attempts that reached the candidate query. Caps speculative retries; not consulted for an unsettled empty result. */
+  analysisAttemptCount?: InputMaybe<Order_By>;
   inferenceCount?: InputMaybe<Order_By>;
 };
 
@@ -24631,6 +24875,10 @@ export type Mutation_Root = {
   delete_ai_blame_attribution_by_pk?: Maybe<Ai_Blame_Attribution>;
   /** delete data from the table: "ai_blame_commit" */
   delete_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** delete data from the table: "ai_blame_commit_analysis_outcome" */
+  delete_ai_blame_commit_analysis_outcome?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Mutation_Response>;
+  /** delete single row from the table: "ai_blame_commit_analysis_outcome" */
+  delete_ai_blame_commit_analysis_outcome_by_pk?: Maybe<Ai_Blame_Commit_Analysis_Outcome>;
   /** delete single row from the table: "ai_blame_commit" */
   delete_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
   /** delete data from the table: "ai_blame_commit_co_author" */
@@ -25263,6 +25511,10 @@ export type Mutation_Root = {
   insert_ai_blame_attribution_one?: Maybe<Ai_Blame_Attribution>;
   /** insert data into the table: "ai_blame_commit" */
   insert_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** insert data into the table: "ai_blame_commit_analysis_outcome" */
+  insert_ai_blame_commit_analysis_outcome?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Mutation_Response>;
+  /** insert a single row into the table: "ai_blame_commit_analysis_outcome" */
+  insert_ai_blame_commit_analysis_outcome_one?: Maybe<Ai_Blame_Commit_Analysis_Outcome>;
   /** insert data into the table: "ai_blame_commit_co_author" */
   insert_ai_blame_commit_co_author?: Maybe<Ai_Blame_Commit_Co_Author_Mutation_Response>;
   /** insert a single row into the table: "ai_blame_commit_co_author" */
@@ -25937,6 +26189,12 @@ export type Mutation_Root = {
   update_ai_blame_attribution_many?: Maybe<Array<Maybe<Ai_Blame_Attribution_Mutation_Response>>>;
   /** update data of the table: "ai_blame_commit" */
   update_ai_blame_commit?: Maybe<Ai_Blame_Commit_Mutation_Response>;
+  /** update data of the table: "ai_blame_commit_analysis_outcome" */
+  update_ai_blame_commit_analysis_outcome?: Maybe<Ai_Blame_Commit_Analysis_Outcome_Mutation_Response>;
+  /** update single row of the table: "ai_blame_commit_analysis_outcome" */
+  update_ai_blame_commit_analysis_outcome_by_pk?: Maybe<Ai_Blame_Commit_Analysis_Outcome>;
+  /** update multiples rows of table: "ai_blame_commit_analysis_outcome" */
+  update_ai_blame_commit_analysis_outcome_many?: Maybe<Array<Maybe<Ai_Blame_Commit_Analysis_Outcome_Mutation_Response>>>;
   /** update single row of the table: "ai_blame_commit" */
   update_ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
   /** update data of the table: "ai_blame_commit_co_author" */
@@ -27051,6 +27309,18 @@ export type Mutation_RootDelete_Ai_Blame_Attribution_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootDelete_Ai_Blame_CommitArgs = {
   where: Ai_Blame_Commit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Commit_Analysis_OutcomeArgs = {
+  where: Ai_Blame_Commit_Analysis_Outcome_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Ai_Blame_Commit_Analysis_Outcome_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -28912,6 +29182,20 @@ export type Mutation_RootInsert_Ai_Blame_Attribution_OneArgs = {
 export type Mutation_RootInsert_Ai_Blame_CommitArgs = {
   objects: Array<Ai_Blame_Commit_Insert_Input>;
   on_conflict?: InputMaybe<Ai_Blame_Commit_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Commit_Analysis_OutcomeArgs = {
+  objects: Array<Ai_Blame_Commit_Analysis_Outcome_Insert_Input>;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Ai_Blame_Commit_Analysis_Outcome_OneArgs = {
+  object: Ai_Blame_Commit_Analysis_Outcome_Insert_Input;
+  on_conflict?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_On_Conflict>;
 };
 
 
@@ -31335,6 +31619,26 @@ export type Mutation_RootUpdate_Ai_Blame_CommitArgs = {
   _inc?: InputMaybe<Ai_Blame_Commit_Inc_Input>;
   _set?: InputMaybe<Ai_Blame_Commit_Set_Input>;
   where: Ai_Blame_Commit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Analysis_OutcomeArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Set_Input>;
+  where: Ai_Blame_Commit_Analysis_Outcome_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Analysis_Outcome_By_PkArgs = {
+  _set?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Set_Input>;
+  pk_columns: Ai_Blame_Commit_Analysis_Outcome_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Ai_Blame_Commit_Analysis_Outcome_ManyArgs = {
+  updates: Array<Ai_Blame_Commit_Analysis_Outcome_Updates>;
 };
 
 
@@ -41910,6 +42214,12 @@ export type Query_Root = {
   ai_blame_commit: Array<Ai_Blame_Commit>;
   /** fetch aggregated fields from the table: "ai_blame_commit" */
   ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_analysis_outcome" */
+  ai_blame_commit_analysis_outcome: Array<Ai_Blame_Commit_Analysis_Outcome>;
+  /** fetch aggregated fields from the table: "ai_blame_commit_analysis_outcome" */
+  ai_blame_commit_analysis_outcome_aggregate: Ai_Blame_Commit_Analysis_Outcome_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_analysis_outcome" using primary key columns */
+  ai_blame_commit_analysis_outcome_by_pk?: Maybe<Ai_Blame_Commit_Analysis_Outcome>;
   /** fetch data from the table: "ai_blame_commit" using primary key columns */
   ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
   /** fetch data from the table: "ai_blame_commit_co_author" */
@@ -43352,6 +43662,29 @@ export type Query_RootAi_Blame_Commit_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
   where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_Analysis_OutcomeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_Analysis_Outcome_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+};
+
+
+export type Query_RootAi_Blame_Commit_Analysis_Outcome_By_PkArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -53449,6 +53782,14 @@ export type Subscription_Root = {
   ai_blame_commit: Array<Ai_Blame_Commit>;
   /** fetch aggregated fields from the table: "ai_blame_commit" */
   ai_blame_commit_aggregate: Ai_Blame_Commit_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_analysis_outcome" */
+  ai_blame_commit_analysis_outcome: Array<Ai_Blame_Commit_Analysis_Outcome>;
+  /** fetch aggregated fields from the table: "ai_blame_commit_analysis_outcome" */
+  ai_blame_commit_analysis_outcome_aggregate: Ai_Blame_Commit_Analysis_Outcome_Aggregate;
+  /** fetch data from the table: "ai_blame_commit_analysis_outcome" using primary key columns */
+  ai_blame_commit_analysis_outcome_by_pk?: Maybe<Ai_Blame_Commit_Analysis_Outcome>;
+  /** fetch data from the table in a streaming manner: "ai_blame_commit_analysis_outcome" */
+  ai_blame_commit_analysis_outcome_stream: Array<Ai_Blame_Commit_Analysis_Outcome>;
   /** fetch data from the table: "ai_blame_commit" using primary key columns */
   ai_blame_commit_by_pk?: Maybe<Ai_Blame_Commit>;
   /** fetch data from the table: "ai_blame_commit_co_author" */
@@ -55059,6 +55400,36 @@ export type Subscription_RootAi_Blame_Commit_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Ai_Blame_Commit_Order_By>>;
   where?: InputMaybe<Ai_Blame_Commit_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Analysis_OutcomeArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Analysis_Outcome_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Ai_Blame_Commit_Analysis_Outcome_Order_By>>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Analysis_Outcome_By_PkArgs = {
+  value: Scalars['String']['input'];
+};
+
+
+export type Subscription_RootAi_Blame_Commit_Analysis_Outcome_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Stream_Cursor_Input>>;
+  where?: InputMaybe<Ai_Blame_Commit_Analysis_Outcome_Bool_Exp>;
 };
 
 

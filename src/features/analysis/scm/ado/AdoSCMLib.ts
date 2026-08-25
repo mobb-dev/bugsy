@@ -103,8 +103,7 @@ export class AdoSCMLib extends SCMLib {
   async validateParams() {
     return adoValidateParams({
       url: this.url,
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
+      getClient: () => this.getAdoSdk(),
     })
   }
 

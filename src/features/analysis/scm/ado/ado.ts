@@ -1,3 +1,4 @@
+import { GitBranchStats } from 'azure-devops-node-api/interfaces/GitInterfaces'
 import pLimit from 'p-limit'
 
 import { contextLogger } from '../../../../utils/contextLogger'
@@ -13,6 +14,7 @@ import {
   InvalidUrlPatternError,
   RefNotFoundError,
 } from '../errors'
+import { parseScmURL, ScmType } from '../shared/src'
 import { safeBody } from '../utils'
 import { AdoTokenTypeEnum, DEFUALT_ADO_ORIGIN } from './constants'
 import {
@@ -27,7 +29,6 @@ import {
   getAdoTokenInfo,
   getOrgsForOauthToken,
   parseAdoOwnerAndRepo,
-  validateAdoRepo,
 } from './utils'
 import { ValidPullRequestStatusZ } from './validation'
 
@@ -35,11 +36,60 @@ const MAX_ADO_PR_BODY_LENGTH = 150000
 
 export async function getAdoSdk(params: GetAdoApiClientParams) {
   const api = await getAdoApiClient(params)
+  // A single branch enumeration serves validation, the access check and the
+  // branch list. On on-prem servers `stats/branches` costs 10-20s, and repeating
+  // it three times per request spent the whole gateway budget before the branch
+  // list was ever fetched (MOBB-3845). The memo is per-sdk-instance, so it lives
+  // and dies with the request that built it — no cross-request staleness.
+  const branchesByRepo = new Map<string, Promise<GitBranchStats[]>>()
+  const getBranchesOnce = (repoUrl: string) => {
+    const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+    const key = `${repo}\u0000${projectName ?? ''}`
+    const cached = branchesByRepo.get(key)
+    if (cached) {
+      return cached
+    }
+    // Only successes are memoized: a rejection evicts itself so the callers that
+    // retry (the scm resolvers wrap these in a retry helper) still get a fresh
+    // attempt instead of replaying one transient failure.
+    const pending = (async () => {
+      const git = await api.getGitApi()
+      return git.getBranches(repo, projectName)
+    })().catch((e) => {
+      branchesByRepo.delete(key)
+      throw e
+    })
+    branchesByRepo.set(key, pending)
+    return pending
+  }
+  const validateRepoHasBranches = async (repoUrl: string) => {
+    if (!parseScmURL(repoUrl, ScmType.Ado)) {
+      return
+    }
+    const branches = await getBranchesOnce(repoUrl)
+    if (!branches || branches.length === 0) {
+      throw new InvalidRepoUrlError('no branches')
+    }
+  }
   return {
+    async connect() {
+      return api.connect()
+    },
+    async validateAdoRepo({ repoUrl }: { repoUrl: string }) {
+      return validateRepoHasBranches(repoUrl)
+    },
     async getAdoIsUserCollaborator({ repoUrl }: { repoUrl: string }) {
       try {
-        const git = await api.getGitApi()
-        await validateAdoRepo({ git, repoUrl })
+        if (!parseScmURL(repoUrl, ScmType.Ado)) {
+          // No branches to check on a url that isn't an ADO repo url — but the
+          // pre-memo body resolved the git client BEFORE that guard, so a bad
+          // credential reported "no access" rather than "access". Keep proving
+          // the credential here. The normal path never takes this branch, so it
+          // adds no round trip to the request this change is about.
+          await api.getGitApi()
+          return true
+        }
+        await validateRepoHasBranches(repoUrl)
         return true
       } catch (e) {
         return false
@@ -179,9 +229,9 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     },
     async getAdoBranchList({ repoUrl }: { repoUrl: string }) {
       try {
-        const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-        const git = await api.getGitApi()
-        const res = await git.getBranches(repo, projectName)
+        // Copy before sorting: the memoized array is shared with the validation
+        // and access-check callers, and sort() mutates in place.
+        const res = [...(await getBranchesOnce(repoUrl))]
         res.sort((a, b) => {
           if (!a.commit?.committer?.date || !b.commit?.committer?.date) {
             return 0
@@ -467,6 +517,9 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       //    is still counted. Any failure falls back to the default-branch authors.
       try {
         const sinceMs = new Date(since).getTime()
+        // Deliberately NOT the memoized fetch used by validation/access/list:
+        // this is the scan path, which wants the branch tips as of now rather
+        // than whatever an earlier call in the same request observed.
         const branches = await git.getBranches(repo, projectName)
         const active = (branches ?? [])
           .filter(

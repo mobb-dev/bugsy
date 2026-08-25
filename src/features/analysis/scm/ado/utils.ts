@@ -1,7 +1,6 @@
 import querystring from 'node:querystring'
 
 import * as api from 'azure-devops-node-api'
-import { GitApi } from 'azure-devops-node-api/GitApi'
 import Debug from 'debug'
 import { z } from 'zod'
 
@@ -253,19 +252,31 @@ export async function getAdoClientParams(
   }
 }
 
+// Validation runs against the SAME client the rest of the lib uses, rather than
+// constructing a second one: each ADO client carries its own resource-area cache,
+// so two clients meant two discovery handshakes per lib (~3s each over the broker)
+// on top of the duplicated branch fetch (MOBB-3845). Structurally typed so this
+// module keeps no import back into the sdk.
+type AdoValidationClient = {
+  connect: () => Promise<unknown>
+  validateAdoRepo: (params: { repoUrl: string }) => Promise<void>
+}
+
 export async function adoValidateParams({
   url,
-  accessToken,
-  tokenOrg,
-}: AdoValidateParamsArgs) {
+  getClient,
+}: {
+  url: string | undefined
+  getClient: () => Promise<AdoValidationClient>
+}) {
   try {
-    const api = await getAdoApiClient(
-      await getAdoClientParams({ url, accessToken, tokenOrg })
-    )
-    await api.connect()
+    // Resolved inside the try, not in the caller's argument list: a failure while
+    // building the client has to keep the 401/403/404 mapping below instead of
+    // escaping as an untyped error.
+    const adoSdk = await getClient()
+    await adoSdk.connect()
     if (isValidAdoRepo(url)) {
-      const git = await api.getGitApi()
-      await validateAdoRepo({ git, repoUrl: url })
+      await adoSdk.validateAdoRepo({ repoUrl: url })
     }
   } catch (e) {
     console.log('adoValidateParams error', e)
@@ -388,23 +399,5 @@ export async function getAdoToken({
   } catch (e) {
     debug('failed to get ADO token:', e)
     return { success: false, data: null }
-  }
-}
-
-export async function validateAdoRepo({
-  git,
-  repoUrl,
-}: {
-  git: GitApi
-  repoUrl: string
-}) {
-  const isAdoRepo = !!parseScmURL(repoUrl, ScmType.Ado)
-  if (!isAdoRepo) {
-    return
-  }
-  const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-  const branches = await git.getBranches(repo, projectName)
-  if (!branches || branches.length === 0) {
-    throw new InvalidRepoUrlError('no branches')
   }
 }

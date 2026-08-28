@@ -32,6 +32,13 @@ import {
   SearchSubmitRequestsResult,
 } from '../types'
 import { parseCursorSafe } from '../utils/cursorValidation'
+import { getCachedRepoList, repoListCacheKey } from '../utils/repoListCache'
+import {
+  buildGithubRepoSearchQuery,
+  githubOwnerQualifier,
+  repoMatchesSearch,
+  sortByUpdatedDesc,
+} from '../utils/repoSearch'
 import {
   getGithubSdk,
   githubValidateParams,
@@ -51,6 +58,19 @@ import {
 import { encryptSecret } from './utils/encrypt_secret'
 import { commitShasBetweenBaseAndMerge } from './utils/mergeCommitShas'
 
+function isGithubSearchUnavailable(error: unknown): boolean {
+  const status = (error as { status?: number })?.status
+  const message = error instanceof Error ? error.message : String(error)
+  if (/rate limit|secondary rate|abuse detection/i.test(message)) {
+    return false
+  }
+  return (
+    status === 404 ||
+    status === 410 ||
+    /search is disabled|enterprise search|unavailable/i.test(message)
+  )
+}
+
 type PrState = NonNullable<
   GetPRMetricsResponse['repository']['pullRequest']
 >['state']
@@ -67,6 +87,35 @@ function determinePrStatus(state: PrState, isDraft: boolean): Pr_Status_Enum {
     case 'OPEN':
       return isDraft ? Pr_Status_Enum.Draft : Pr_Status_Enum.Active
   }
+}
+
+/**
+ * User-vs-Organization per origin. Module-level (SCMLib instances are
+ * per-request); the answer effectively never changes, and resolving it fresh
+ * cost a round trip per search. ponytail: unbounded Map, LRU if it ever matters.
+ */
+const ownerKindCache = new Map<string, 'User' | 'Organization'>()
+
+/**
+ * Cursor domains: native Search pages 1-based ('page:2'), the in-memory path
+ * offsets 0-based ('offset:20'). A foreign or malformed cursor restarts the
+ * path from its beginning instead of silently skipping/duplicating rows.
+ */
+function parseDomainCursor(
+  cursor: string | undefined,
+  domain: 'page' | 'offset',
+  fallback: number
+): number {
+  if (!cursor) {
+    return fallback
+  }
+  const [d, raw] = cursor.split(':')
+  if (d !== domain || raw === undefined) {
+    return fallback
+  }
+  // Delegate the numeric policy (bounds cap included) to the shared validator
+  // every other provider's cursors go through, so one overflow rule applies.
+  return parseCursorSafe(raw, fallback)
 }
 
 export class GithubSCMLib extends SCMLib {
@@ -715,10 +764,13 @@ export class GithubSCMLib extends SCMLib {
   }
 
   /**
-   * Override searchRepos for efficient server-side pagination.
-   * - With scmOrg: GitHub Search API (`org:…`)
-   * - Without scmOrg: paginated `GET /user/repos`
-   * - Name sort: in-memory over full list
+   * Server-side pagination with the Search API where it is both fast and
+   * complete (owner-scoped requests), and the cached /user/repos drain where
+   * it is not: name sort, `offset:` cursors (a session already served by the
+   * drain must stay there or pagination dead-ends), and no-owner queries —
+   * Search cannot see collaborator-only repos or match mid-name substrings.
+   * An owner-scoped Search that finds nothing on page 1 re-checks the drain
+   * for the substring case before claiming "no matches".
    */
   override async searchRepos(
     params: SearchReposParams
@@ -726,58 +778,96 @@ export class GithubSCMLib extends SCMLib {
     this._validateAccessToken()
 
     const sort = params.sort || { field: 'updated', order: 'desc' }
+    const hasQuery = Boolean(params.query?.trim())
 
-    if (sort.field === 'name') {
+    if (sort.field === 'name' || params.cursor?.startsWith('offset:')) {
       return this.searchReposInMemory(params)
     }
-
     if (!params.scmOrg) {
+      // Drained by design (Search can't see collaborator repos or substrings),
+      // but the user still feels the drain — report it so the UI can say so.
+      if (hasQuery) {
+        return this.searchReposInMemory(params, { degraded: true })
+      }
       return this.searchReposWithUserReposApi(params)
     }
 
-    return this.searchReposWithApi(params)
+    try {
+      const result = await this.searchReposWithApi(params)
+      if (hasQuery && result.results.length === 0 && !params.cursor) {
+        return this.searchReposInMemory(params)
+      }
+      return result
+    } catch (error) {
+      // GHES can disable Search (and an owner-kind 404 lands here too) —
+      // degrade to the owner-filtered drain. Rate limits still propagate.
+      if (isGithubSearchUnavailable(error)) {
+        return this.searchReposInMemory(params, { degraded: true })
+      }
+      throw error
+    }
   }
 
   /**
-   * Search repos by fetching all and sorting/paginating in-memory.
-   * Used only when name sorting is requested.
+   * Drain-and-filter path (cached 90s, owner-filtered here since the drain is
+   * token-scoped). `opts.degraded` drives the UI's slow-search hint: set where
+   * the user feels a systematic drain (GHES with Search disabled; no-owner
+   * queries), not for name-sort ordering or the one-off empty-page rescue.
    */
   private async searchReposInMemory(
-    params: SearchReposParams
+    params: SearchReposParams,
+    opts?: { degraded?: boolean }
   ): Promise<SearchReposResult> {
-    const repos = await this.getRepoList(params.scmOrg)
+    const allRepos = await getCachedRepoList(
+      repoListCacheKey({
+        accessToken: this.accessToken ?? '',
+        origin: this._originForCache(),
+      }),
+      () => this.getRepoList(undefined)
+    )
+    // GitHub logins are case-insensitive.
+    const repos = params.scmOrg
+      ? allRepos.filter(
+          (repo) =>
+            repo.repoOwner.toLowerCase() === params.scmOrg!.toLowerCase()
+        )
+      : allRepos
     const sort = params.sort || { field: 'updated', order: 'desc' }
-    const sortOrder = sort.order === 'asc' ? 1 : -1
+    const sortedRepos =
+      sort.field === 'name'
+        ? [...repos].sort(
+            (a, b) =>
+              a.repoName.localeCompare(b.repoName) *
+              (sort.order === 'asc' ? 1 : -1)
+          )
+        : sortByUpdatedDesc(repos)
 
-    const sortedRepos = [...repos].sort((a, b) => {
-      if (sort.field === 'name') {
-        return a.repoName.localeCompare(b.repoName) * sortOrder
-      }
-
-      // Always sort by updated date, never by created date
-      // This handles both 'updated' and 'created' field values
-      const aDate = a.repoUpdatedAt ? Date.parse(a.repoUpdatedAt) : 0
-      const bDate = b.repoUpdatedAt ? Date.parse(b.repoUpdatedAt) : 0
-      const dateCmp = (aDate - bDate) * sortOrder
-      if (dateCmp !== 0) {
-        return dateCmp
-      }
-      // Stable tie-breaker so offset pagination is consistent across requests
-      return a.repoName.localeCompare(b.repoName) * sortOrder
-    })
+    const query = params.query?.trim()
+    const matching = query
+      ? sortedRepos.filter((repo) => repoMatchesSearch(repo, query))
+      : sortedRepos
 
     const limit = params.limit || 10
-    const offset = parseCursorSafe(params.cursor, 0)
-    const paged = sortedRepos.slice(offset, offset + limit)
+    const offset = parseDomainCursor(params.cursor, 'offset', 0)
+    const paged = matching.slice(offset, offset + limit)
     const nextOffset = offset + limit
 
     return {
       results: paged,
       nextCursor:
-        nextOffset < sortedRepos.length ? String(nextOffset) : undefined,
-      hasMore: nextOffset < sortedRepos.length,
+        nextOffset < matching.length ? `offset:${nextOffset}` : undefined,
+      hasMore: nextOffset < matching.length,
       // This path already holds every repository, so the total is exact.
-      totalCount: sortedRepos.length,
+      totalCount: matching.length,
+      searchMode: opts?.degraded ? 'fallback' : 'native',
+    }
+  }
+
+  private _originForCache(): string {
+    try {
+      return new URL(this.url ?? '').origin
+    } catch {
+      return 'github.com'
     }
   }
 
@@ -787,7 +877,7 @@ export class GithubSCMLib extends SCMLib {
   private async searchReposWithUserReposApi(
     params: SearchReposParams
   ): Promise<SearchReposResult> {
-    const page = parseCursorSafe(params.cursor, 1)
+    const page = parseDomainCursor(params.cursor, 'page', 1)
     const perPage = params.limit || 10
     const sort = params.sort || { field: 'updated', order: 'desc' }
 
@@ -799,8 +889,9 @@ export class GithubSCMLib extends SCMLib {
 
     return {
       results: pageResult.items,
-      nextCursor: pageResult.hasMore ? String(page + 1) : undefined,
+      nextCursor: pageResult.hasMore ? `page:${page + 1}` : undefined,
       hasMore: pageResult.hasMore,
+      searchMode: 'native',
     }
   }
 
@@ -811,12 +902,13 @@ export class GithubSCMLib extends SCMLib {
   private async searchReposWithApi(
     params: SearchReposParams
   ): Promise<SearchReposResult> {
-    const page = parseCursorSafe(params.cursor, 1)
+    const page = parseDomainCursor(params.cursor, 'page', 1)
     const perPage = params.limit || 10
     const sort = params.sort || { field: 'updated', order: 'desc' }
+    const q = await this.buildSearchQuery(params)
 
     const searchResult = await this.githubSdk.searchRepositories({
-      org: params.scmOrg,
+      q,
       sort,
       perPage,
       page,
@@ -836,11 +928,45 @@ export class GithubSCMLib extends SCMLib {
 
     return {
       results,
-      nextCursor: searchResult.hasMore ? String(page + 1) : undefined,
+      nextCursor: searchResult.hasMore ? `page:${page + 1}` : undefined,
       hasMore: searchResult.hasMore,
       // Already on the response we just paid for.
       totalCount: searchResult.totalCount,
+      searchMode: 'native',
     }
+  }
+
+  /**
+   * `org:` on a personal account is a 422, so resolve User vs Organization
+   * first (cached — see ownerKindCache).
+   */
+  private async buildSearchQuery(params: SearchReposParams): Promise<string> {
+    // The dispatch routes every no-owner call to the drained list, so the
+    // Search API is only ever queried owner-scoped.
+    if (!params.scmOrg) {
+      throw new Error('GitHub Search queries must be owner-scoped')
+    }
+    const kind = await this._resolveOwnerKind(params.scmOrg)
+    return buildGithubRepoSearchQuery({
+      nameQuery: params.query,
+      ownerQualifiers: [githubOwnerQualifier(params.scmOrg, kind)],
+    })
+  }
+
+  private async _resolveOwnerKind(
+    owner: string
+  ): Promise<'User' | 'Organization'> {
+    // Keyed by origin so a GHES login cannot collide with the same login on
+    // github.com. Logins are case-insensitive on GitHub.
+    const cacheKey = `${this._originForCache()}/${owner.toLowerCase()}`
+    const cached = ownerKindCache.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+    const profile = await this.githubSdk.getUserProfile({ username: owner })
+    const kind = profile.type === 'Organization' ? 'Organization' : 'User'
+    ownerKindCache.set(cacheKey, kind)
+    return kind
   }
 
   async getPullRequestMetrics(prNumber: number): Promise<PullRequestMetrics> {

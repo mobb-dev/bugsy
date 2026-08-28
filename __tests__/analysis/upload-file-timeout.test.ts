@@ -5,7 +5,7 @@ import { computeUploadTimeoutMs } from '../../src/features/analysis/upload-file'
 // Deliberately re-pinned here (not imported) so a constant change in prod
 // requires a conscious edit of the expectations.
 const MIN_UPLOAD_TIMEOUT_MS = 10_000
-const MAX_UPLOAD_TIMEOUT_MS = 10 * 60_000
+const MAX_UPLOAD_TIMEOUT_MS = 2 * 60 * 60_000
 const PATH_UPLOAD_FLOOR_MS = 60_000
 const SLOW_LINK_BYTES_PER_MS = 512
 
@@ -29,6 +29,16 @@ describe('computeUploadTimeoutMs', () => {
     expect(expected).toBeGreaterThan(60_000)
     expect(computeUploadTimeoutMs(64 * MIB, 'path')).toBe(expected)
     expect(computeUploadTimeoutMs(64 * MIB, 'buffer')).toBe(expected)
+  })
+
+  it('gives a 3GB FPR its full ~98min size allowance (prod: 10min ceiling aborted it)', () => {
+    const threeGb = 3 * 1024 * MIB
+    const timeout = computeUploadTimeoutMs(threeGb, 'path')
+    expect(timeout).toBe(
+      MIN_UPLOAD_TIMEOUT_MS + Math.ceil(threeGb / SLOW_LINK_BYTES_PER_MS)
+    )
+    expect(timeout).toBeGreaterThan(10 * 60_000)
+    expect(timeout).toBeLessThan(MAX_UPLOAD_TIMEOUT_MS)
   })
 
   it('never exceeds the ceiling for pathological sizes', () => {

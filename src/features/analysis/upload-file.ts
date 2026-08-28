@@ -17,7 +17,13 @@ const debug = Debug('mobbdev:upload-file')
  * telemetry in s3-raw-data-upload.ts) pass their own `signal`.
  */
 const MIN_UPLOAD_TIMEOUT_MS = 10_000
-const MAX_UPLOAD_TIMEOUT_MS = 10 * 60_000
+/**
+ * Must exceed the size allowance of the largest expected payload (a ~3GB FPR
+ * at the 512 KB/s worst-case link ≈ 98min), or the ceiling aborts uploads the
+ * scaling itself deems acceptable — a 10min ceiling did exactly that in prod.
+ * The ceiling only exists so a dead socket can't hang the CLI indefinitely.
+ */
+const MAX_UPLOAD_TIMEOUT_MS = 2 * 60 * 60_000
 /** Assumed worst-case acceptable link: ~512 KB/s → bytes / this = added ms. */
 const SLOW_LINK_BYTES_PER_MS = 512
 /**

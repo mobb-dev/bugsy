@@ -39,6 +39,7 @@ import {
   STALE_KEY_MAX_AGE_MS,
 } from './data_collector_constants'
 import { getClaudeCodeVersion, hookLog } from './hook_logger'
+import { logNullRepoDiagnostics } from './repo_diagnostics'
 
 type TranscriptEntry = {
   type?: string
@@ -647,6 +648,12 @@ export async function processTranscript(
   // Code session is single-cwd by nature, so per-batch granularity matches
   // reality. Read fresh — no cross-batch cache.
   const sampledRepoState = await readRepoState(input.cwd)
+  // T-538: temporary instrumentation. No-ops unless this batch resolved no
+  // repository URL, in which case it records why — and, when cwd was not a git
+  // repo at all, whether the edited file's directory would have been.
+  // Deliberately not awaited: nothing consumes the result and its git probes must
+  // not sit in front of the upload. It never rejects.
+  void logNullRepoDiagnostics(entries, sampledRepoState, input.cwd, log)
   const records = entries.map((entry) => {
     const { _recordId, ...rawEntry } = entry
     const message = rawEntry['message'] as Record<string, unknown> | undefined
@@ -726,7 +733,16 @@ export async function processTranscript(
     )
   }
 
-  if (result.ok) {
+  // Advance past records the server has definitively rejected too.
+  // Its verdict cannot change for identical bytes, so leaving the cursor put
+  // made every poll cycle re-read and re-upload the same transcript forever —
+  // one poison record produced a permanent upload loop. `serverRejected` is set
+  // only when the resolver reports the failure as non-retryable, i.e. every
+  // record failed on its own content. A batch that failed in transit, or that
+  // the server could not accept (full queue, broker error, missing identity),
+  // carries no such verdict and keeps the cursor where it is, so those records
+  // are retried on the next cycle.
+  if (result.ok || result.serverRejected) {
     // Advance cursor to end of file (including filtered entries)
     const lastRawEntry = rawEntries[rawEntries.length - 1]!
     const cursor: CursorValue = {
@@ -736,6 +752,9 @@ export async function processTranscript(
       lastModel: lastSeenModel ?? undefined,
     }
     sessionStore.set(cursorKey, cursor)
+  }
+
+  if (result.ok) {
     // T-510: surface sub-agent ingestion separately so Datadog can spot
     // silent breakage (sub-agent entries dropping to 0 while main stays
     // healthy). Each `processTranscript` call is bound to exactly one of

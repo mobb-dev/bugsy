@@ -21,6 +21,7 @@ import {
 } from '../types'
 import { normalizeUrl, shouldValidateUrl } from '../utils'
 import { safeBody } from '../utils'
+import { escapeBitbucketFilterValue } from '../utils/repoSearch'
 import {
   CreatePullRequestParams,
   GetBitbucketTokenArgs,
@@ -219,22 +220,95 @@ export function getBitbucketSdk(params: GetBitbucketSdkParams) {
           })
         : await getAllUsersRepositories(bitbucketClient)
 
-      // for some reason the bitbucket client returns a list of repos with a null value
-      // even though the api docents the values are not nullable
-      // https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-get
-      return repoRes.map((repo) => ({
-        repoIsPublic: !repo.is_private,
-        repoName: repo.name || 'unknown repo name',
-        repoOwner: repoWorkspaceSlug(repo),
-        repoLanguages: repo.language ? [repo.language] : [],
-        repoUpdatedAt: repo.updated_on
-          ? repo.updated_on
-          : new Date().toISOString(),
-        repoUrl: repo.links?.html?.href || '',
-        repoDefaultBranch:
-          (repo.mainbranch as { name?: string } | undefined)?.name ?? null,
-        // Bitbucket has no archived flag — undefined, not false.
-      }))
+      return repoRes.map(toScmRepoInfo)
+    },
+    /**
+     * One page of a workspace (or every workspace) with optional `q=name~`.
+     * https://developer.atlassian.com/cloud/bitbucket/rest/intro/#filtering
+     */
+    async searchRepos(params: {
+      workspaceSlug?: string
+      query?: string
+      page?: number
+      pagelen?: number
+      /**
+       * Multi-workspace pagination state: slug → next page to fetch, or null
+       * once that workspace is exhausted. One shared page number was wrong —
+       * page 2 of a 1-page workspace is an out-of-range request (Bitbucket
+       * errors on it), which killed the whole search past the smallest
+       * workspace's depth.
+       */
+      workspacePages?: Record<string, number | null>
+    }): Promise<{
+      items: ScmRepoInfo[]
+      hasMore: boolean
+      totalCount?: number
+      workspacePages?: Record<string, number | null>
+    }> {
+      const page = params.page ?? 1
+      const pagelen = params.pagelen ?? BITBUCKET_PAGE_LEN
+      const query = params.query?.trim() || undefined
+
+      if (params.workspaceSlug) {
+        const result = await listWorkspaceRepositoriesPage(bitbucketClient, {
+          workspaceSlug: params.workspaceSlug,
+          page,
+          pagelen,
+          query,
+        })
+        return {
+          items: result.values.map(toScmRepoInfo),
+          hasMore: result.hasMore,
+          totalCount: result.size,
+        }
+      }
+
+      const pages =
+        params.workspacePages ??
+        Object.fromEntries(
+          (await getUsersWorkspacesSlugs(bitbucketClient)).map((slug) => [
+            slug,
+            1,
+          ])
+        )
+      const active = Object.entries(pages).filter(
+        (entry): entry is [string, number] => entry[1] !== null
+      )
+      // Independent workspaces — fetch in parallel, not one-after-another.
+      const results = await Promise.all(
+        active.map(async ([workspaceSlug, wsPage]) => {
+          try {
+            const result = await listWorkspaceRepositoriesPage(
+              bitbucketClient,
+              { workspaceSlug, page: wsPage, pagelen, query }
+            )
+            return { workspaceSlug, result }
+          } catch (e) {
+            // An out-of-range page reads as exhaustion, not failure — it can
+            // only happen when the workspace shrank between pages.
+            const status = (e as { status?: number })?.status
+            if (status === 404 || /404/.test(String(e))) {
+              return { workspaceSlug, result: null }
+            }
+            throw e
+          }
+        })
+      )
+
+      const items: ScmRepoInfo[] = []
+      const nextPages: Record<string, number | null> = { ...pages }
+      for (const { workspaceSlug, result } of results) {
+        if (!result) {
+          nextPages[workspaceSlug] = null
+          continue
+        }
+        items.push(...result.values.map(toScmRepoInfo))
+        nextPages[workspaceSlug] = result.hasMore
+          ? (pages[workspaceSlug] as number) + 1
+          : null
+      }
+      const hasMore = Object.values(nextPages).some((p) => p !== null)
+      return { items, hasMore, workspacePages: nextPages }
     },
     async getBranchList(params: { repoUrl: string }) {
       const { workspace, repo_slug } = parseBitbucketOrganizationAndRepo(
@@ -840,6 +914,64 @@ async function withEndpointContext<T>(
   }
 }
 
+function toScmRepoInfo(repo: Schema.Repository): ScmRepoInfo {
+  return {
+    repoIsPublic: !repo.is_private,
+    repoName: repo.name || 'unknown repo name',
+    repoOwner: repoWorkspaceSlug(repo),
+    repoLanguages: repo.language ? [repo.language] : [],
+    repoUpdatedAt: repo.updated_on ? repo.updated_on : new Date().toISOString(),
+    repoUrl: repo.links?.html?.href || '',
+    repoDefaultBranch:
+      (repo.mainbranch as { name?: string } | undefined)?.name ?? null,
+  }
+}
+
+async function listWorkspaceRepositoriesPage(
+  bitbucketClient: APIClient,
+  params: {
+    workspaceSlug: string
+    page: number
+    pagelen: number
+    query?: string
+  }
+): Promise<{
+  values: Schema.Repository[]
+  hasMore: boolean
+  size?: number
+}> {
+  // `name` and `full_name` are both documented filter fields (`full_name` is
+  // `workspace/slug`, so it covers a typed slug); `slug` is not, and an
+  // undocumented field makes the whole request a 400.
+  // https://developer.atlassian.com/cloud/bitbucket/rest/intro/#filtering
+  const term = params.query
+    ? escapeBitbucketFilterValue(params.query)
+    : undefined
+  const q = term ? `(name~"${term}" OR full_name~"${term}")` : undefined
+  const res = await withEndpointContext(
+    `GET /2.0/repositories/${params.workspaceSlug}`,
+    () =>
+      bitbucketClient.request({
+        method: 'GET',
+        url: `/repositories/${encodeURIComponent(params.workspaceSlug)}`,
+        pagelen: params.pagelen,
+        page: String(params.page),
+        sort: '-updated_on',
+        ...(q ? { q } : {}),
+      })
+  )
+  const values = (res.data.values ?? []) as Schema.Repository[]
+  const size =
+    typeof res.data.size === 'number' && Number.isFinite(res.data.size)
+      ? res.data.size
+      : undefined
+  return {
+    values,
+    hasMore: Boolean(res.data.next),
+    size,
+  }
+}
+
 /**
  * Every page of one workspace's repositories.
  *
@@ -853,21 +985,16 @@ async function listWorkspaceRepositories(
 ): Promise<Schema.Repository[]> {
   const repos: Schema.Repository[] = []
   for (let page = 1; page <= BITBUCKET_MAX_PAGES; page += 1) {
-    const res = await withEndpointContext(
-      `GET /2.0/repositories/${workspaceSlug}`,
-      () =>
-        bitbucketClient.repositories.list({
-          workspace: workspaceSlug,
-          pagelen: BITBUCKET_PAGE_LEN,
-          page: String(page),
-        })
-    )
-    const values = res.data.values
-    if (!values?.length) {
+    const result = await listWorkspaceRepositoriesPage(bitbucketClient, {
+      workspaceSlug,
+      page,
+      pagelen: BITBUCKET_PAGE_LEN,
+    })
+    if (!result.values.length) {
       break
     }
-    repos.push(...values)
-    if (!res.data.next) {
+    repos.push(...result.values)
+    if (!result.hasMore) {
       break
     }
   }

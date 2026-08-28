@@ -112,6 +112,11 @@ describe('readRepoState', () => {
       repositoryUrl: null,
       branch: null,
       commitSha: null,
+      // The directory exists but is not a checkout. `git config --get` resolves
+      // rather than throwing here, so this must be derived from both HEAD reads
+      // failing — otherwise it would report `no-remote` and mislabel the dominant
+      // bucket of the null population. See T-538.
+      repoUrlCause: 'not-a-repo',
     })
   })
 
@@ -124,6 +129,7 @@ describe('readRepoState', () => {
       repositoryUrl: null,
       branch: null,
       commitSha: null,
+      repoUrlCause: 'dir-missing',
     })
   })
 })

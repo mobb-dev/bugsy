@@ -183,7 +183,7 @@ export type UploadTracyRecordsMutationVariables = Types.Exact<{
 }>;
 
 
-export type UploadTracyRecordsMutation = { __typename?: 'mutation_root', uploadTracyRecords: { __typename?: 'TracyBatchUploadResponse', status: Types.Status, error?: string | null } };
+export type UploadTracyRecordsMutation = { __typename?: 'mutation_root', uploadTracyRecords: { __typename?: 'TracyBatchUploadResponse', status: Types.Status, error?: string | null, retryable: boolean } };
 
 export type GetTracyRawDataUploadUrlMutationVariables = Types.Exact<{ [key: string]: never; }>;
 
@@ -1002,6 +1002,7 @@ export const UploadTracyRecordsDocument = `
   uploadTracyRecords(records: $records) {
     status
     error
+    retryable
   }
 }
     `;

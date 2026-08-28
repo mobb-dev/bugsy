@@ -103,16 +103,48 @@ type SessionInput = {
   repositoryUrl?: string | null
 }
 
+/**
+ * Why `repositoryUrl` came back null. T-538: these failure modes were previously
+ * indistinguishable in the uploaded data, which is why a measured 22.5% of
+ * null-repo events — git worked, only the remote lookup failed — has had no
+ * actionable diagnosis. Each needs a different fix, or none:
+ *
+ * - `dir-missing`   the working directory does not exist; nothing to read
+ * - `not-a-repo`    the directory exists but is not a git checkout
+ * - `no-remote`     a git repo, but no `remote.origin.url` configured
+ * - `remote-error`  reading the remote threw (missing git binary, permissions)
+ * - `unparseable`   a remote exists but `parseScmURL` could not canonicalise it
+ *
+ * `not-a-repo` has to be derived rather than caught: `git config --get` *resolves*
+ * outside a repository, it does not throw. Without an explicit check every
+ * non-checkout directory reports `no-remote`, which would label the dominant
+ * 77.5% "cwd is not a git repo" population as the 22.5% "repo found, no usable
+ * remote" one — inverting the split this taxonomy exists to measure.
+ */
+export type RepoUrlCause =
+  | 'ok'
+  | 'dir-missing'
+  | 'not-a-repo'
+  | 'no-remote'
+  | 'remote-error'
+  | 'unparseable'
+
 export type RepoState = {
   repositoryUrl: string | null
   branch: string | null
   commitSha: string | null
+  /**
+   * Diagnostic only — never uploaded. Callers log it so the null population can
+   * be split by cause; see T-538.
+   */
+  repoUrlCause: RepoUrlCause
 }
 
 const NULL_REPO_STATE: RepoState = {
   repositoryUrl: null,
   branch: null,
   commitSha: null,
+  repoUrlCause: 'dir-missing',
 }
 
 /**
@@ -147,7 +179,10 @@ export async function readRepoState(workingDir?: string): Promise<RepoState> {
     .getCurrentRepoState()
     .catch(() => ({ branch: null, commitSha: null }))
 
-  const repositoryUrlPromise = gitService
+  const repositoryUrlPromise: Promise<{
+    repositoryUrl: string | null
+    repoUrlCause: RepoUrlCause
+  }> = gitService
     .getRemoteUrl()
     .then((url) => {
       // Store the same canonical form the AI-blame query computes for the commit's
@@ -161,17 +196,47 @@ export async function readRepoState(workingDir?: string): Promise<RepoState> {
       // Re-canonicalizing keeps the write side symmetric with the query side: a
       // genuinely unparseable remote (parseScmURL -> null) resolves to null on BOTH
       // sides, rather than the client storing a raw string the query can never equal.
-      if (!url) return null
-      return parseScmURL(url)?.canonicalUrl ?? null
+      // `getRemoteUrl` reads `remote.origin.url` only, so a repo whose remote is
+      // named anything else reaches here empty even though git worked fine.
+      if (!url)
+        return { repositoryUrl: null, repoUrlCause: 'no-remote' as const }
+      const canonicalUrl = parseScmURL(url)?.canonicalUrl ?? null
+      return canonicalUrl
+        ? { repositoryUrl: canonicalUrl, repoUrlCause: 'ok' as const }
+        : { repositoryUrl: null, repoUrlCause: 'unparseable' as const }
     })
-    .catch(() => null)
+    .catch(() => ({
+      repositoryUrl: null,
+      repoUrlCause: 'remote-error' as const,
+    }))
 
-  const [{ branch, commitSha }, repositoryUrl] = await Promise.all([
+  const [{ branch, commitSha }, remote] = await Promise.all([
     repoStatePromise,
     repositoryUrlPromise,
   ])
+  const { repositoryUrl } = remote
 
-  return { repositoryUrl, branch, commitSha }
+  // Distinguish "not a git checkout" from "a checkout with no usable remote".
+  // `git config --get` resolves outside a repository rather than throwing, so
+  // without this the dominant 77.5% bucket would report `no-remote` and the
+  // histogram would read backwards. Both HEAD reads failing is the corroborating
+  // signal: a real checkout resolves at least a commit sha (a freshly `git init`ed
+  // repo with no commits is the rare exception, and reads as not-a-repo here —
+  // harmless, since it has nothing to attribute either).
+  //
+  // Narrowed to `no-remote` deliberately. Widening it to "any non-ok cause" would
+  // also swallow `remote-error`: on a machine where git itself is broken (binary
+  // missing, permissions) `getRemoteUrl` throws *and* both HEAD reads fail, so
+  // those events would be relabelled `not-a-repo` and counted in the 77.5% bucket
+  // — whose fix (resolve from the edited file's directory) would not help them at
+  // all. The histogram is what picks the next investment, so environment failures
+  // stay visible as themselves.
+  const repoUrlCause: RepoUrlCause =
+    remote.repoUrlCause === 'no-remote' && branch === null && commitSha === null
+      ? 'not-a-repo'
+      : remote.repoUrlCause
+
+  return { repositoryUrl, branch, commitSha, repoUrlCause }
 }
 
 /**

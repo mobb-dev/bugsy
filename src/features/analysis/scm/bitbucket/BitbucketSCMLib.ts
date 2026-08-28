@@ -24,6 +24,7 @@ import {
   SearchSubmitRequestsParams,
   SearchSubmitRequestsResult,
 } from '../types'
+import { parseCursorSafe } from '../utils/cursorValidation'
 import {
   getBitbucketSdk,
   parseBitbucketOrganizationAndRepo,
@@ -337,9 +338,57 @@ export class BitbucketSCMLib extends SCMLib {
   }
 
   override async searchRepos(
-    _params: SearchReposParams
+    params: SearchReposParams
   ): Promise<SearchReposResult> {
-    throw new Error('searchRepos not implemented for Bitbucket')
+    this._validateAccessToken()
+    const perPage = params.limit || 100
+
+    if (params.scmOrg) {
+      const page = parseCursorSafe(params.cursor, 1)
+      const result = await this.bitbucketSdk.searchRepos({
+        workspaceSlug: params.scmOrg,
+        query: params.query?.trim() || undefined,
+        page,
+        pagelen: perPage,
+      })
+      return {
+        results: result.items,
+        nextCursor: result.hasMore ? String(page + 1) : undefined,
+        hasMore: result.hasMore,
+        totalCount: result.totalCount,
+        searchMode: 'native',
+      }
+    }
+
+    // No workspace selected: the cursor is a JSON map of per-workspace pages
+    // (slug → next page | null when exhausted), because workspaces have
+    // different depths and a single shared page number over-ran the small ones.
+    let workspacePages: Record<string, number | null> | undefined
+    if (params.cursor) {
+      try {
+        workspacePages = JSON.parse(params.cursor) as Record<
+          string,
+          number | null
+        >
+      } catch {
+        workspacePages = undefined // foreign/corrupt cursor: restart cleanly
+      }
+    }
+    const result = await this.bitbucketSdk.searchRepos({
+      query: params.query?.trim() || undefined,
+      pagelen: perPage,
+      workspacePages,
+    })
+    return {
+      results: result.items,
+      nextCursor:
+        result.hasMore && result.workspacePages
+          ? JSON.stringify(result.workspacePages)
+          : undefined,
+      hasMore: result.hasMore,
+      totalCount: result.totalCount,
+      searchMode: 'native',
+    }
   }
 
   // TODO: Add comprehensive tests for getPullRequestMetrics (Bitbucket)
@@ -497,6 +546,10 @@ export class BitbucketSCMLib extends SCMLib {
         username: user?.nickname ?? null,
         displayName: user?.display_name ?? null,
         email,
+        // The account-id match is provider-vouched; a name match is not.
+        emailFromNameMatch:
+          emailSource === 'commit_by_nickname' ||
+          emailSource === 'commit_by_displayname',
         accessLevel: null,
       }
     })

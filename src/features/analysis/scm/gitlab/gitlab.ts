@@ -35,6 +35,7 @@ import { parseScmURL, scmCloudUrl, ScmType } from '../shared/src'
 import { RateLimitStatus, RecentCommitAuthor, ReferenceType } from '../types'
 import { isBrokerUrl, safeBody, shouldValidateUrl } from '../utils'
 import { getBrokerEffectiveUrl } from '../utils/broker'
+import { repoListCacheKey } from '../utils/repoListCache'
 import {
   GetGitlabTokenParams,
   GitlabAuthResult,
@@ -269,6 +270,46 @@ export async function getGitlabIsRemoteBranch({
   }
 }
 
+type GitlabNamespace = {
+  /** Group endpoints take the numeric namespace id. */
+  id: number
+  /**
+   * User endpoints do NOT: `GET /users/:user_id/projects` wants a user id or
+   * username, and a user's namespace id is a different sequence entirely.
+   * https://docs.gitlab.com/api/projects/#list-a-users-projects
+   */
+  path: string
+  kind: 'group' | 'user'
+}
+
+/**
+ * ponytail: resolved per call, not memoised. One extra `GET /namespaces` per
+ * page is noise next to the project page itself, and a shared cache would hand
+ * one user's resolved group id to a user who cannot see that group. Thread the
+ * namespace through the caller if the bulk `getRepoList` walk ever shows up in
+ * a profile.
+ */
+async function resolveGitlabNamespace(
+  api: Gitlab,
+  scmOrg: string
+): Promise<GitlabNamespace | undefined> {
+  try {
+    const namespaces = await api.Namespaces.all({ search: scmOrg })
+    const list = Array.isArray(namespaces) ? namespaces : []
+    const match = list.find((ns) => namespaceMatchesScmOrg(ns, scmOrg))
+    if (!match?.id) {
+      return undefined
+    }
+    return {
+      id: match.id,
+      path: String(match.full_path ?? match.path ?? scmOrg),
+      kind: match.kind === 'user' ? 'user' : 'group',
+    }
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * Fetch paginated GitLab projects using gitbeaker with showExpanded for pagination info.
  * Uses `membership=true` with configurable sort order.
@@ -278,6 +319,26 @@ export async function getGitlabIsRemoteBranch({
  *   UI repo picker), the call falls back to `'created_at'` on failure since some
  *   GitLab instances/accounts return 500 for that sort field.
  */
+/**
+ * Accounts/instances where `order_by=last_activity_at` deterministically 500s
+ * (a long-standing GitLab quirk). Keyed by token-hash + origin — process
+ * lifetime, no TTL: the wrong-order fallback is cheap, re-probing is not.
+ */
+const brokenLastActivitySortAccounts = new Set<string>()
+
+/** Cap on membership pages one degraded-namespace request may scan — enough
+ * to fill a page without letting one request turn into a full drain. */
+const DEGRADED_NAMESPACE_SCAN_MAX_PAGES = 10
+
+/** The one namespace-identity predicate — resolution and the degraded filter
+ * must never drift, or the branch taken changes which repos an org "has". */
+function namespaceMatchesScmOrg(
+  ns: { name?: string; path?: string; full_path?: string } | undefined,
+  scmOrg: string
+): boolean {
+  return ns?.name === scmOrg || ns?.path === scmOrg || ns?.full_path === scmOrg
+}
+
 export async function searchGitlabProjects({
   url,
   accessToken,
@@ -285,6 +346,8 @@ export async function searchGitlabProjects({
   page = 1,
   orderBy = 'created_at',
   sort = 'desc',
+  search,
+  scmOrg,
 }: {
   url: string | undefined
   accessToken: string
@@ -292,6 +355,14 @@ export async function searchGitlabProjects({
   page?: number
   orderBy?: 'created_at' | 'last_activity_at'
   sort?: 'asc' | 'desc'
+  /**
+   * Official `search` on GET /projects — case-insensitive substring on
+   * path, name, and description.
+   * https://docs.gitlab.com/api/projects/#list-projects
+   */
+  search?: string
+  /** Group path/name or user namespace from the org picker. */
+  scmOrg?: string
 }): Promise<{
   projects: {
     id: number
@@ -309,6 +380,15 @@ export async function searchGitlabProjects({
    * counting threshold) — undefined then, never a guess.
    */
   totalCount?: number
+  /**
+   * True when scmOrg was requested but the namespace could not be resolved, so
+   * pages were filtered client-side over the unfiltered membership listing
+   * (with a bounded forward scan to fill the page): no total is reported.
+   */
+  namespaceFilterDegraded: boolean
+  /** The page pagination should resume from — the degraded scan may consume
+   * several underlying pages per request. */
+  nextPage: number
 }> {
   if (perPage > GITLAB_MAX_PER_PAGE) {
     throw new Error(
@@ -317,22 +397,58 @@ export async function searchGitlabProjects({
   }
 
   const api = getGitBeaker({ url, gitlabAuthToken: accessToken })
+  const namespace = scmOrg
+    ? await resolveGitlabNamespace(api, scmOrg)
+    : undefined
 
-  const fetchProjects = (effectiveOrderBy: 'created_at' | 'last_activity_at') =>
-    api.Projects.all({
-      membership: true,
+  const fetchProjects = (
+    effectiveOrderBy: 'created_at' | 'last_activity_at',
+    pageToFetch: number = page
+  ) => {
+    const shared = {
       orderBy: effectiveOrderBy,
       sort,
-      pagination: 'offset',
+      pagination: 'offset' as const,
       perPage,
-      page,
-      showExpanded: true,
+      page: pageToFetch,
+      showExpanded: true as const,
+      ...(search ? { search } : {}),
+    }
+    if (namespace?.kind === 'group') {
+      // Subgroups included: a group large enough to need server-side search is
+      // almost always subgrouped, and excluding them returned an empty search.
+      return api.Groups.allProjects(namespace.id, {
+        ...shared,
+        includeSubgroups: true,
+      })
+    }
+    if (namespace?.kind === 'user') {
+      // Path, not `namespace.id` — see GitlabNamespace above.
+      return api.Users.allProjects(namespace.path, shared)
+    }
+    return api.Projects.all({
+      membership: true,
+      ...shared,
     })
+  }
 
   let response
-  if (orderBy === 'last_activity_at') {
-    // last_activity_at can cause 500 errors on some GitLab instances/accounts.
-    // Fall back to created_at which is universally reliable.
+  let effectiveOrderBy: 'created_at' | 'last_activity_at' =
+    orderBy === 'last_activity_at' ? 'last_activity_at' : orderBy
+  // last_activity_at deterministically 500s on some accounts, and the probe
+  // sits behind a 5-attempt retry (~20-40s) — so the verdict is memoized per
+  // account per process; the better sort returns on restart.
+  const sortQuirkKey = repoListCacheKey({
+    accessToken,
+    origin: url ?? 'gitlab.com',
+  })
+  if (
+    effectiveOrderBy === 'last_activity_at' &&
+    brokenLastActivitySortAccounts.has(sortQuirkKey)
+  ) {
+    effectiveOrderBy = 'created_at'
+  }
+  if (effectiveOrderBy === 'last_activity_at') {
     try {
       response = await fetchProjects('last_activity_at')
     } catch (e) {
@@ -340,13 +456,50 @@ export async function searchGitlabProjects({
         '[searchGitlabProjects] order_by=last_activity_at failed, falling back to created_at: %s',
         e instanceof Error ? e.message : String(e)
       )
+      effectiveOrderBy = 'created_at'
       response = await fetchProjects('created_at')
+      // Memoize only after the fallback SUCCEEDED — proves the failure was
+      // sort-specific, so a transient outage can't poison the ordering.
+      brokenLastActivitySortAccounts.add(sortQuirkKey)
     }
   } else {
-    response = await fetchProjects(orderBy)
+    response = await fetchProjects(effectiveOrderBy)
   }
 
-  const projects = response.data.map((p) => ({
+  const namespaceFilterDegraded = Boolean(scmOrg && !namespace)
+  let rawProjects = namespaceFilterDegraded
+    ? response.data.filter((p) => namespaceMatchesScmOrg(p.namespace, scmOrg!))
+    : response.data
+  let lastPage = page
+  let hasNext = response.paginationInfo.next !== null
+
+  // Degraded mode filters an unfiltered membership listing, so single pages
+  // can be empty — which the frontend's empty-batch stop misread as "no
+  // repositories". Scan forward (bounded) until the page is worth returning.
+  // Overshoot accepted: the scan returns every match it collected, so one
+  // response can exceed perPage (bounded < 2x). Trimming would need an
+  // offset-within-page cursor for no caller benefit — the picker just caches
+  // the extra rows.
+  if (namespaceFilterDegraded) {
+    let scanned = 1
+    while (
+      rawProjects.length < perPage &&
+      hasNext &&
+      scanned < DEGRADED_NAMESPACE_SCAN_MAX_PAGES
+    ) {
+      lastPage += 1
+      scanned += 1
+      const nextResponse = await fetchProjects(effectiveOrderBy, lastPage)
+      rawProjects = rawProjects.concat(
+        nextResponse.data.filter((p) =>
+          namespaceMatchesScmOrg(p.namespace, scmOrg!)
+        )
+      )
+      hasNext = nextResponse.paginationInfo.next !== null
+    }
+  }
+
+  const projects = rawProjects.map((p) => ({
     id: p.id,
     path: p.path,
     web_url: p.web_url,
@@ -364,10 +517,17 @@ export async function searchGitlabProjects({
   // the GraphQL Int (`?? null` does not catch NaN either) and fail the whole
   // repository listing at serialization time.
   const total = (response.paginationInfo as { total?: number }).total
+  // Degraded mode: X-Total counts ALL membership projects, not the owner's —
+  // report no total, and flag the degradation so callers stop claiming native.
   return {
     projects,
-    hasMore: response.paginationInfo.next !== null,
-    totalCount: Number.isFinite(total) ? total : undefined,
+    hasMore: hasNext,
+    totalCount:
+      !namespaceFilterDegraded && Number.isFinite(total) ? total : undefined,
+    namespaceFilterDegraded,
+    // The degraded scan may consume several pages; pagination must resume from
+    // the last one consumed, not the one requested.
+    nextPage: lastPage + 1,
   }
 }
 

@@ -70,10 +70,24 @@ export type RepoSort = {
 
 export type SearchReposParams = {
   scmOrg: string | undefined
+  /**
+   * Case-insensitive name/path search, executed by the provider when it has a
+   * native filter (GitHub Search, GitLab `search`, Bitbucket `q=name~`).
+   * Callers with 10k-repo connections must pass this rather than paging a list.
+   */
+  query?: string
   sort?: RepoSort
   limit?: number
   cursor?: string
   includeLanguages?: boolean
+  /**
+   * Pay for per-repo timestamps. The fast (lite) listing is the DEFAULT on
+   * ADO, where it reports the PROJECT's lastUpdateTime for every repo — fine
+   * for display ordering, wrong for any consumer that reads repoUpdatedAt as
+   * a per-repo freshness signal (aiBlamePeriodicAnalysis early-stops on it).
+   * Such consumers must set this and accept ADO's per-repo branch fetches.
+   */
+  preferAccurateUpdatedAt?: boolean
 }
 
 export type SearchReposResult = {
@@ -88,6 +102,12 @@ export type SearchReposResult = {
    * than invent a denominator.
    */
   totalCount?: number
+  /**
+   * 'native' = provider filtered/paged server-side. 'fallback' = no provider
+   * search capability (ADO always; GHES with Search disabled) — drained and
+   * filtered in memory: complete, but slower. Surfaced in the UI.
+   */
+  searchMode: 'native' | 'fallback'
 }
 
 export type PullRequestMetrics = {
@@ -326,4 +346,10 @@ export type RepositoryContributor = {
   displayName: string | null
   email: string | null
   accessLevel: string | null
+  /**
+   * Email guessed by matching a commit author NAME to this member, not vouched
+   * for by the provider. Both halves of that match are commit metadata a pusher
+   * controls, so it may fill an empty row but never overwrite a stored one.
+   */
+  emailFromNameMatch?: boolean
 }

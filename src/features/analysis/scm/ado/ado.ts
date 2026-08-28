@@ -1,4 +1,3 @@
-import { GitBranchStats } from 'azure-devops-node-api/interfaces/GitInterfaces'
 import pLimit from 'p-limit'
 
 import { contextLogger } from '../../../../utils/contextLogger'
@@ -36,39 +35,105 @@ const MAX_ADO_PR_BODY_LENGTH = 150000
 
 export async function getAdoSdk(params: GetAdoApiClientParams) {
   const api = await getAdoApiClient(params)
-  // A single branch enumeration serves validation, the access check and the
-  // branch list. On on-prem servers `stats/branches` costs 10-20s, and repeating
-  // it three times per request spent the whole gateway budget before the branch
-  // list was ever fetched (MOBB-3845). The memo is per-sdk-instance, so it lives
-  // and dies with the request that built it — no cross-request staleness.
-  const branchesByRepo = new Map<string, Promise<GitBranchStats[]>>()
-  const getBranchesOnce = (repoUrl: string) => {
-    const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-    const key = `${repo}\u0000${projectName ?? ''}`
-    const cached = branchesByRepo.get(key)
-    if (cached) {
-      return cached
+  // Every getGitApi() is a resource-area discovery round trip (~1-3s over the
+  // broker on on-prem), so the memoized fetchers below share one. Per-sdk-instance,
+  // so it lives and dies with the request that built it; a rejection evicts itself
+  // so a retry still gets a fresh client.
+  let gitApi: ReturnType<typeof api.getGitApi> | undefined
+  const getGitApiOnce = () => {
+    if (!gitApi) {
+      gitApi = api.getGitApi().catch((e) => {
+        gitApi = undefined
+        throw e
+      })
     }
-    // Only successes are memoized: a rejection evicts itself so the callers that
-    // retry (the scm resolvers wrap these in a retry helper) still get a fresh
-    // attempt instead of replaying one transient failure.
-    const pending = (async () => {
-      const git = await api.getGitApi()
-      return git.getBranches(repo, projectName)
-    })().catch((e) => {
-      branchesByRepo.delete(key)
-      throw e
-    })
-    branchesByRepo.set(key, pending)
-    return pending
+    return gitApi
   }
-  const validateRepoHasBranches = async (repoUrl: string) => {
+  // Shared shape for the per-repo memos: keyed by repo + project, and only
+  // successes are retained. A memoized rejection would defeat the callers that
+  // retry (the scm resolvers wrap these in a retry helper) by replaying one
+  // transient failure on every attempt.
+  const memoizePerRepo = <T>(
+    fetchForRepo: (repo: string, projectName: string | undefined) => Promise<T>
+  ) => {
+    const cache = new Map<string, Promise<T>>()
+    return (repoUrl: string) => {
+      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
+      const key = `${repo}\u0000${projectName ?? ''}`
+      const cached = cache.get(key)
+      if (cached) {
+        return cached
+      }
+      const pending = fetchForRepo(repo, projectName).catch((e) => {
+        cache.delete(key)
+        throw e
+      })
+      cache.set(key, pending)
+      return pending
+    }
+  }
+  // A single branch enumeration serves the branch list. On on-prem servers
+  // `stats/branches` computes ahead/behind statistics for every branch in the
+  // repo and was measured at 0.25-27s, so it is fetched at most once per request
+  // (MOBB-3845) and only by the caller that actually needs the names.
+  const getBranchesOnce = memoizePerRepo(async (repo, projectName) => {
+    const git = await getGitApiOnce()
+    return git.getBranches(repo, projectName)
+  })
+  // The repo lookup is what validation and the access check need: ~1s against the
+  // same on-prem server that spends 27s on `stats/branches` (MOBB-3852). Memoized
+  // on the same terms so those two callers still share one round trip.
+  //
+  // `parseAdoOwnerAndRepo` already decodes both names (see the MOBB-2084 note
+  // there), so they are passed through as-is. Six `getRepository` call sites in
+  // this file used to decode them a second time, which is the double decode that
+  // note warns against: harmless for `my%20repo`, a `URIError` for a repo whose
+  // name contains a literal `%` (`decodeURI('100%')` throws). All six now pass
+  // the names through, matching `getCommits`/`getPullRequest`/`getBranches`
+  // elsewhere in the file — `getAdoRecentCommits` had both conventions three
+  // lines apart, which is what marks the extra decode as an accident.
+  //
+  // Note a retry interaction this creates: a record that came back WITHOUT a
+  // defaultBranch is a successful fetch, so it stays memoized, and the
+  // `retryAsyncOperation` wrapper around `getRepoDefaultBranch` replays it
+  // rather than re-fetching. Intended — a repo does not grow a defaultBranch
+  // mid-request, so the condition is not transient and a retry would only
+  // re-pay the round trip.
+  const getRepositoryOnce = memoizePerRepo(async (repo, projectName) => {
+    const git = await getGitApiOnce()
+    return git.getRepository(repo, projectName)
+  })
+  // "Does this repo exist and is it usable?" — answered by the repo record, not
+  // by enumerating branches. ADO sets `defaultBranch` on first push, so a repo
+  // with no commits reports none and is still rejected here. This is the check
+  // `getAdoRepoDefaultBranch` has always made.
+  //
+  // Deliberate behaviour change (MOBB-3852). `defaultBranch != null` is not the
+  // same predicate as `getBranches().length > 0`. They disagree in exactly two
+  // states, one in each direction:
+  //
+  //   empty branch list + stale `defaultBranch`   old rejected -> now ACCEPTS
+  //   branches present  + no `defaultBranch`      old accepted -> now REJECTS
+  //
+  // The second row is the one that carries risk: a usable repo would surface to
+  // the user as unreachable. It is held to be unreachable against a real ADO
+  // server, because ADO keeps `defaultBranch` even when the ref it names has
+  // been deleted, so any repo with branches reports one. That is an argument
+  // about ADO's behaviour rather than about this code, so BOTH rows are pinned
+  // by tests in `__tests__/adoBranchesMemo.test.ts` — if the assumption is ever
+  // wrong, a test names it instead of leaving it to be rediscovered as "repo
+  // unreachable" during onboarding.
+  //
+  // What is NOT a difference, despite being the obvious guess: a repo whose
+  // default ref was deleted while other branches remain. Its branch list is
+  // non-empty and ADO keeps the stale pointer, so old and new both accept it.
+  const validateRepoHasDefaultBranch = async (repoUrl: string) => {
     if (!parseScmURL(repoUrl, ScmType.Ado)) {
       return
     }
-    const branches = await getBranchesOnce(repoUrl)
-    if (!branches || branches.length === 0) {
-      throw new InvalidRepoUrlError('no branches')
+    const repository = await getRepositoryOnce(repoUrl)
+    if (!repository?.defaultBranch) {
+      throw new InvalidRepoUrlError('no default branch')
     }
   }
   return {
@@ -76,20 +141,20 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       return api.connect()
     },
     async validateAdoRepo({ repoUrl }: { repoUrl: string }) {
-      return validateRepoHasBranches(repoUrl)
+      return validateRepoHasDefaultBranch(repoUrl)
     },
     async getAdoIsUserCollaborator({ repoUrl }: { repoUrl: string }) {
       try {
         if (!parseScmURL(repoUrl, ScmType.Ado)) {
-          // No branches to check on a url that isn't an ADO repo url — but the
+          // No repo to look up on a url that isn't an ADO repo url — but the
           // pre-memo body resolved the git client BEFORE that guard, so a bad
           // credential reported "no access" rather than "access". Keep proving
           // the credential here. The normal path never takes this branch, so it
           // adds no round trip to the request this change is about.
-          await api.getGitApi()
+          await getGitApiOnce()
           return true
         }
-        await validateRepoHasBranches(repoUrl)
+        await validateRepoHasDefaultBranch(repoUrl)
         return true
       } catch (e) {
         return false
@@ -160,10 +225,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     async getAdoPrUrl({ url, prNumber }: { url: string; prNumber: number }) {
       const { repo, projectName } = parseAdoOwnerAndRepo(url)
       const git = await api.getGitApi()
-      const getRepositoryRes = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      const getRepositoryRes = await git.getRepository(repo, projectName)
       return `${getRepositoryRes.webUrl}/pullrequest/${prNumber}`
     },
     async getAdoCommitUrl({
@@ -175,10 +237,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     }) {
       const { repo, projectName } = parseAdoOwnerAndRepo(url)
       const git = await api.getGitApi()
-      const getRepositoryRes = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      const getRepositoryRes = await git.getRepository(repo, projectName)
       return `${getRepositoryRes.webUrl}/commit/${commitId}`
     },
     async getAdoBranchCommitsUrl({
@@ -190,10 +249,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     }) {
       const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
       const git = await api.getGitApi()
-      const getRepositoryRes = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      const getRepositoryRes = await git.getRepository(repo, projectName)
       return `${getRepositoryRes.webUrl}/commits?itemVersion=${branch}`
     },
     getAdoDownloadUrl({
@@ -229,8 +285,11 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     },
     async getAdoBranchList({ repoUrl }: { repoUrl: string }) {
       try {
-        // Copy before sorting: the memoized array is shared with the validation
-        // and access-check callers, and sort() mutates in place.
+        // Copy before sorting: the memoized array is shared with every other
+        // reader of the branch list in this request, and sort() mutates in place.
+        // (Validation and the access check used to be those readers; since
+        // MOBB-3852 they read `getRepositoryOnce` instead. The invariant stands
+        // on its own — the memo hands out one array to whoever asks twice.)
         const res = [...(await getBranchesOnce(repoUrl))]
         res.sort((a, b) => {
           if (!a.commit?.committer?.date || !b.commit?.committer?.date) {
@@ -412,10 +471,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
       const git = await api.getGitApi()
 
       // Get the default branch to fetch commits from
-      const repository = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      const repository = await git.getRepository(repo, projectName)
       const defaultBranch = repository.defaultBranch?.replace('refs/heads/', '')
 
       const commits = await git.getCommits(
@@ -444,10 +500,7 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     }): Promise<RecentCommitAuthor[]> {
       const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
       const git = await api.getGitApi()
-      const repository = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      const repository = await git.getRepository(repo, projectName)
       const defaultBranch = repository.defaultBranch?.replace('refs/heads/', '')
       const byEmail = new Map<string, RecentCommitAuthor>()
       const PAGE = 100
@@ -572,12 +625,10 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
     }: {
       repoUrl: string
     }): Promise<string> {
-      const { repo, projectName } = parseAdoOwnerAndRepo(repoUrl)
-      const git = await api.getGitApi()
-      const getRepositoryRes = await git.getRepository(
-        decodeURI(repo),
-        projectName ? decodeURI(projectName) : undefined
-      )
+      // Same lookup validation makes, so a request that validates and then asks
+      // for the default branch pays for one round trip, not two. Read-only —
+      // nothing here mutates the shared record.
+      const getRepositoryRes = await getRepositoryOnce(repoUrl)
       if (!getRepositoryRes?.defaultBranch) {
         throw new InvalidRepoUrlError('no default branch')
       }
@@ -728,16 +779,58 @@ export async function getAdoSdk(params: GetAdoApiClientParams) {
   }
 }
 
+/**
+ * One repo -> ScmRepoInfo mapping for BOTH listing paths; the credential-strip
+ * regex on remoteUrl is security-relevant and must never fork.
+ * Requires name/remoteUrl/defaultBranch (an empty just-initialized repo is not
+ * a scannable row). `repoUpdatedAt` is the caller's choice: the lite path has
+ * only the project timestamp, the full path fetches the branch commit date.
+ */
+function toAdoScmRepoInfo(
+  repo: {
+    name?: string
+    remoteUrl?: string
+    defaultBranch?: string
+    isDisabled?: boolean
+    project?: { visibility?: number; lastUpdateTime?: Date }
+  },
+  org: string,
+  repoUpdatedAt: string
+): ScmRepoInfo | null {
+  if (!repo.name || !repo.remoteUrl || !repo.defaultBranch) {
+    return null
+  }
+  return {
+    repoName: repo.name,
+    repoUrl: repo.remoteUrl.replace(
+      /^[hH][tT][tT][pP][sS]:\/\/[^/]+@/,
+      'https://'
+    ),
+    repoOwner: org,
+    repoIsPublic: repo.project?.visibility === ProjectVisibility.Public,
+    repoLanguages: [],
+    repoUpdatedAt,
+    repoDefaultBranch: repo.defaultBranch.replace(/^refs\/heads\//, ''),
+    repoIsArchived: repo.isDisabled === true,
+  }
+}
+
 export async function getAdoRepoList({
   orgName,
   tokenOrg,
   accessToken,
   url,
+  lite = false,
 }: {
   orgName: string | undefined
   tokenOrg: string | undefined
   accessToken: string
   url?: string | undefined
+  /**
+   * Skip the per-repo default-branch fetch. One `getRepositories()` per org —
+   * required for name search on large ADO orgs (the full path is N+1).
+   */
+  lite?: boolean
 }) {
   let orgs: string[] = []
   const adoTokenInfo = getAdoTokenInfo(accessToken)
@@ -767,6 +860,17 @@ export async function getAdoRepoList({
         })
         const gitOrg = await orgApi.getGitApi()
         const orgRepos = await gitOrg.getRepositories()
+        if (lite) {
+          return orgRepos.flatMap((repo) => {
+            const info = toAdoScmRepoInfo(
+              repo,
+              org,
+              repo.project?.lastUpdateTime?.toISOString() ||
+                new Date().toISOString()
+            )
+            return info ? [info] : []
+          })
+        }
         const repoLimit = pLimit(5)
         const repoInfoList = (
           await Promise.allSettled(
@@ -775,36 +879,24 @@ export async function getAdoRepoList({
                 if (!repo.name || !repo.remoteUrl || !repo.defaultBranch) {
                   throw new InvalidRepoUrlError('bad repo')
                 }
+                // The default branch's last commit; ADO has no per-repo
+                // "last pushed", so unmerged feature-branch pushes don't show.
                 const branch = await gitOrg.getBranch(
                   repo.name,
                   repo.defaultBranch.replace(/^refs\/heads\//, ''),
                   repo.project?.name
                 )
-                return {
-                  repoName: repo.name,
-                  repoUrl: repo.remoteUrl.replace(
-                    /^[hH][tT][tT][pP][sS]:\/\/[^/]+@/,
-                    'https://'
-                  ),
-                  repoOwner: org,
-                  repoIsPublic:
-                    repo.project?.visibility === ProjectVisibility.Public,
-                  repoLanguages: [],
-                  repoUpdatedAt:
-                    // Use the latest available timestamp.
-                    // branch.commit.committer.date = last commit on default branch.
-                    // project.lastUpdateTime = last project-level change (may be stale).
-                    // ADO doesn't expose a per-repo "last pushed" date like GitHub does,
-                    // so feature branch pushes won't be reflected until merged.
-                    branch.commit?.committer?.date?.toISOString() ||
+                const info = toAdoScmRepoInfo(
+                  repo,
+                  org,
+                  branch.commit?.committer?.date?.toISOString() ||
                     repo.project?.lastUpdateTime?.toISOString() ||
-                    new Date().toISOString(),
-                  // Already on the repository object; refs/heads/ prefix stripped.
-                  repoDefaultBranch:
-                    repo.defaultBranch?.replace(/^refs\/heads\//, '') ?? null,
-                  // ADO disables rather than archives; same practical meaning.
-                  repoIsArchived: repo.isDisabled === true,
+                    new Date().toISOString()
+                )
+                if (!info) {
+                  throw new InvalidRepoUrlError('bad repo')
                 }
+                return info
               })
             )
           )

@@ -422,14 +422,17 @@ export class GitlabSCMLib extends SCMLib {
     const orderBy: 'created_at' | 'last_activity_at' =
       sort.field === 'updated' ? 'last_activity_at' : 'created_at'
 
-    const { projects, hasMore, totalCount } = await searchGitlabProjects({
-      url: this.url,
-      accessToken: this.accessToken,
-      perPage,
-      page,
-      orderBy,
-      sort: sort.order,
-    })
+    const { projects, hasMore, totalCount, namespaceFilterDegraded, nextPage } =
+      await searchGitlabProjects({
+        url: this.url,
+        accessToken: this.accessToken,
+        perPage,
+        page,
+        orderBy,
+        sort: sort.order,
+        search: params.query?.trim() || undefined,
+        scmOrg: params.scmOrg,
+      })
 
     // Fetch languages for the current page only (unless opted out)
     const includeLanguages = params.includeLanguages !== false
@@ -463,9 +466,14 @@ export class GitlabSCMLib extends SCMLib {
 
     return {
       results,
-      nextCursor: hasMore ? String(page + 1) : undefined,
+      // nextPage, not page+1: the degraded-namespace scan may have consumed
+      // several underlying pages to fill this one.
+      nextCursor: hasMore ? String(nextPage) : undefined,
       hasMore,
       totalCount,
+      // Degraded when the namespace could not be resolved and pages were
+      // filtered client-side — no longer honest to call that native.
+      searchMode: namespaceFilterDegraded ? 'fallback' : 'native',
     }
   }
 
@@ -584,6 +592,8 @@ export class GitlabSCMLib extends SCMLib {
     // members. Now fully local — no fan-out, so no concurrency limiter needed.
     const enriched = members.map((m) => {
       let email: string | null = null
+      // Set only by the name-matched branch below. See RepositoryContributor.
+      let emailFromNameMatch = false
 
       if (authUser?.email && authUser.id === m.id) {
         email = authUser.email
@@ -597,6 +607,7 @@ export class GitlabSCMLib extends SCMLib {
         )
         if (match?.email) {
           email = match.email
+          emailFromNameMatch = true
         }
       }
 
@@ -605,6 +616,7 @@ export class GitlabSCMLib extends SCMLib {
         username: m.username ?? null,
         displayName: m.name ?? null,
         email,
+        emailFromNameMatch,
         accessLevel: m.access_level != null ? String(m.access_level) : null,
       }
     })

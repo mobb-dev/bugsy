@@ -24,6 +24,8 @@ import {
   SearchSubmitRequestsResult,
 } from '../types'
 import { parseCursorSafe } from '../utils/cursorValidation'
+import { getCachedRepoList, repoListCacheKey } from '../utils/repoListCache'
+import { repoMatchesSearch, sortByUpdatedDesc } from '../utils/repoSearch'
 import {
   AdoPullRequestStatus,
   adoValidateParams,
@@ -364,39 +366,57 @@ export class AdoSCMLib extends SCMLib {
     }
   }
 
-  // TODO: Performance — this fetches ALL repositories on every call, then paginates
-  // in-memory. For orgs with thousands of repos this can be slow and wasteful,
-  // especially when the UI pages through results (each page triggers a full re-fetch).
-  // Consider caching the fetched list with a short TTL, or using ADO's
-  // getRepositoriesPaged() API per-project for true server-side pagination.
+  // ADO has no repo-name search endpoint — GET .../_apis/git/repositories
+  // returns the org in one call. Filter in memory; `lite` skips the N+1
+  // default-branch fetch so a 10k-repo org stays one request per org.
   override async searchRepos(
     params: SearchReposParams
   ): Promise<SearchReposResult> {
     this._validateAccessToken()
-    const allRepos = await getAdoRepoList({
-      orgName: params.scmOrg,
-      accessToken: this.accessToken,
-      tokenOrg: this.scmOrg,
-      url: this.url,
-    })
+    // The whole org in one uncacheable-at-the-provider response (ADO's list
+    // endpoint has no filter or pagination) — hence the 90s repoListCache.
+    // `lite` is in the key because the two modes report different
+    // repoUpdatedAt semantics.
+    const lite = !params.preferAccurateUpdatedAt
+    const allRepos = await getCachedRepoList(
+      repoListCacheKey({
+        accessToken: this.accessToken ?? '',
+        origin: this.url ?? 'ado',
+        scmOrg: `${params.scmOrg || this.scmOrg || ''}|${lite ? 'lite' : 'full'}`,
+      }),
+      () =>
+        getAdoRepoList({
+          orgName: params.scmOrg,
+          accessToken: this.accessToken,
+          tokenOrg: this.scmOrg,
+          url: this.url,
+          lite,
+        })
+    )
 
-    // Sort by repoUpdatedAt descending (most recently updated first)
-    allRepos.sort((a, b) => {
-      const dateA = a.repoUpdatedAt ? new Date(a.repoUpdatedAt).getTime() : 0
-      const dateB = b.repoUpdatedAt ? new Date(b.repoUpdatedAt).getTime() : 0
-      return dateB - dateA
-    })
+    // Owner filter here, not in the drain: OAuth tokens list every org they
+    // can see regardless of orgName. Case-insensitive per ADO naming.
+    const owner = params.scmOrg?.toLowerCase()
+    const scoped = owner
+      ? allRepos.filter((repo) => repo.repoOwner.toLowerCase() === owner)
+      : allRepos
 
-    const page = parseCursorSafe(params.cursor, 0)
+    const query = params.query?.trim()
+    const matching = sortByUpdatedDesc(
+      query ? scoped.filter((repo) => repoMatchesSearch(repo, query)) : scoped
+    )
+
+    const start = parseCursorSafe(params.cursor, 0)
     const limit = params.limit || 100
-    const start = page
-    const pageResults = allRepos.slice(start, start + limit)
-    const hasMore = start + limit < allRepos.length
+    const hasMore = start + limit < matching.length
 
     return {
-      results: pageResults,
+      results: matching.slice(start, start + limit),
       nextCursor: hasMore ? String(start + limit) : undefined,
       hasMore,
+      totalCount: matching.length,
+      // ADO has no repo search API; this is always the drained-list path.
+      searchMode: 'fallback',
     }
   }
 

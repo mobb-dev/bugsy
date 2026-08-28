@@ -11,6 +11,7 @@ import {
   ScmRepoInfo,
 } from '../types'
 import { safeBody } from '../utils'
+import { GITHUB_SEARCH_MAX_RESULTS } from '../utils/repoSearch'
 import {
   CREATE_OR_UPDATE_A_REPOSITORY_SECRET,
   DELETE_COMMENT_PATH,
@@ -1160,25 +1161,22 @@ export function getGithubSdk(
     /**
      * Search repositories using GitHub's Search API.
      * Docs: https://docs.github.com/en/rest/search/search?apiVersion=2022-11-28#search-repositories
+     *
+     * Authenticated search is a separate 30 req/min bucket. Callers must debounce.
+     * `q` is built by the caller so owner qualifiers stay correct (org vs user).
      */
     async searchRepositories(params: {
-      org: string | undefined
+      q: string
       sort?: { field: 'updated' | 'name' | 'created'; order: 'asc' | 'desc' }
       perPage?: number
       page?: number
     }) {
       const {
-        org,
+        q,
         sort = { field: 'updated', order: 'desc' },
         perPage = 10,
         page = 1,
       } = params
-
-      if (!org) {
-        throw new Error('Organization is required for repository search')
-      }
-
-      const query = `org:${org} fork:true`
 
       // Map sort field to GitHub's sort parameter
       // GitHub supports: stars, forks, help-wanted-issues, updated
@@ -1187,17 +1185,25 @@ export function getGithubSdk(
       const githubSortField = sort.field === 'name' ? undefined : 'updated'
 
       const response = await octokit.rest.search.repos({
-        q: query,
+        q,
         sort: githubSortField,
         order: sort.order,
         per_page: perPage,
         page,
       })
 
+      // The Search API serves only the first 1000 matches — asking for page 11
+      // at perPage 100 is a 422, so `hasMore` must stop there even when
+      // `total_count` is far larger. The true total still rides along for the UI.
+      // https://docs.github.com/en/rest/search/search#about-search
+      const reachable = Math.min(
+        response.data.total_count,
+        GITHUB_SEARCH_MAX_RESULTS
+      )
       return {
         items: response.data.items,
         totalCount: response.data.total_count,
-        hasMore: page * perPage < response.data.total_count,
+        hasMore: page * perPage < reachable,
       }
     },
 

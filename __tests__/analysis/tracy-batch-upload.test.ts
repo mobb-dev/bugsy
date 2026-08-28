@@ -24,6 +24,7 @@ vi.mock('../../src/args/commands/upload_ai_blame', () => ({
     repositoryUrl: null,
     branch: null,
     commitSha: null,
+    repoUrlCause: 'dir-missing',
   }),
 }))
 vi.mock('../../src/utils/check_node_version', () => ({
@@ -46,9 +47,9 @@ function makeClient() {
         keyPrefix: 'tracy-uploads/aaaa/u1/agent-events/',
       },
     }),
-    uploadTracyRecords: vi
-      .fn()
-      .mockResolvedValue({ uploadTracyRecords: { status: 'OK', error: null } }),
+    uploadTracyRecords: vi.fn().mockResolvedValue({
+      uploadTracyRecords: { status: 'OK', error: null, retryable: false },
+    }),
   }
 }
 
@@ -143,5 +144,46 @@ describe('prepareAndSendTracyRecords — degenerate (empty) records', () => {
     const res = await send(client, [rec('empty', {})], /* sanitize */ true)
 
     expect(res.degenerate?.[0]?.sample).toBe('{}')
+  })
+})
+
+// A non-OK status covers two unrelated outcomes: the records were rejected on
+// their content, or the server could not accept them at all. Only the first is a
+// verdict on the bytes, and only the first makes advancing a cursor safe.
+describe('prepareAndSendTracyRecords — content rejection vs infrastructure failure', () => {
+  it('flags a content rejection so the caller can advance past the records', async () => {
+    const client = makeClient()
+    client.uploadTracyRecords.mockResolvedValue({
+      uploadTracyRecords: {
+        status: 'Error',
+        error:
+          'Record 0 (bad): must provide either (blameType + rawDataS3Key) or editType',
+        retryable: false,
+      },
+    })
+
+    const res = await send(client, [rec('bad', {})])
+
+    expect(res.ok).toBe(false)
+    expect(res.serverRejected).toBe(true)
+    expect(res.errors?.[0]).toContain('rejected')
+  })
+
+  it('does not flag an enqueue failure, so the caller keeps its cursor', async () => {
+    const client = makeClient()
+    client.uploadTracyRecords.mockResolvedValue({
+      uploadTracyRecords: {
+        status: 'Error',
+        error: 'Record 0 (rec): failed to enqueue message',
+        retryable: true,
+      },
+    })
+
+    const res = await send(client, [rec('rec', {})])
+
+    expect(res.ok).toBe(false)
+    // The records are still uploadable; dropping them here is the loss path.
+    expect(res.serverRejected).toBe(false)
+    expect(res.errors?.[0]).toContain('could not accept')
   })
 })

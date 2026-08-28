@@ -110,6 +110,14 @@ export type TracyBatchUploadResult = {
   errors: string[] | null
   /** Records skipped pre-upload because their rawData serialized to empty. */
   degenerate?: DegenerateRawDataRecord[]
+  /**
+   * The server rejected the records on their own content and said so is final
+   * (`retryable: false`): re-sending identical bytes cannot change the verdict,
+   * so callers must not retry them. False or absent whenever a retry is still
+   * worthwhile — the batch failed in transit, or the server could not accept it
+   * (full queue, broker error mid-batch, missing identity).
+   */
+  serverRejected?: boolean
 }
 
 /** Stable warning message for the degenerate-skip log (shared by all callers). */
@@ -286,10 +294,17 @@ export async function prepareAndSendTracyRecords(
       )
     )
     if (result.uploadTracyRecords.status !== 'OK') {
+      // A non-OK status alone is not a verdict on the bytes: the resolver also
+      // returns Error for a full queue, a broker error mid-batch, or a missing
+      // identity, all of which can succeed on a later attempt. Only
+      // `retryable: false` means every failure was a rejection of the records'
+      // own content, which is the sole case where advancing the cursor is safe.
+      const { retryable, error } = result.uploadTracyRecords
       return finish({
         ok: false,
+        serverRejected: !retryable,
         errors: [
-          `[step:gql-submit] Server rejected: ${result.uploadTracyRecords.error ?? 'Unknown server error'}`,
+          `[step:gql-submit] Server ${retryable ? 'could not accept' : 'rejected'}: ${error ?? 'Unknown server error'}`,
         ],
       })
     }

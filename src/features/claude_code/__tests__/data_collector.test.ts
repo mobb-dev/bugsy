@@ -328,6 +328,54 @@ describe('processTranscript — context file upload', () => {
     } as never
   }
 
+  it('advances the cursor when the server permanently rejected records', async () => {
+    // The cursor only moved on `ok`, so a record the server will
+    // never accept (bad shape, foreign S3 key) made every poll cycle re-read
+    // and re-upload the same transcript bytes forever. A server verdict is
+    // final — retrying identical bytes cannot change it — so the cursor must
+    // move past them.
+    ptMocks.prepareAndSendTracyRecords.mockResolvedValue({
+      ok: false,
+      errors: [
+        'Record 0 (bad): must provide either (blameType + rawDataS3Key)',
+      ],
+      serverRejected: true,
+    })
+    const log = makeMockLogger()
+    const sessionStore = makeMockSessionStore()
+
+    await processTranscript(
+      { session_id: sessionId, transcript_path: transcriptPath, cwd: '/proj' },
+      sessionStore as never,
+      log as never,
+      50,
+      makeMockGqlClient()
+    )
+
+    expect(sessionStore.set).toHaveBeenCalled()
+  })
+
+  it('leaves the cursor in place when the upload failed in transit', async () => {
+    // No server verdict here, so the records may still be accepted later —
+    // advancing would silently lose them.
+    ptMocks.prepareAndSendTracyRecords.mockResolvedValue({
+      ok: false,
+      errors: ['[step:gql-submit] socket hang up'],
+    })
+    const log = makeMockLogger()
+    const sessionStore = makeMockSessionStore()
+
+    await processTranscript(
+      { session_id: sessionId, transcript_path: transcriptPath, cwd: '/proj' },
+      sessionStore as never,
+      log as never,
+      50,
+      makeMockGqlClient()
+    )
+
+    expect(sessionStore.set).not.toHaveBeenCalled()
+  })
+
   it('uploads context files after successful batch upload', async () => {
     const log = makeMockLogger()
     const sessionStore = makeMockSessionStore()

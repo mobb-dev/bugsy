@@ -17,6 +17,7 @@ import { createScmLib } from '@mobb/bugsy/features/analysis/scm/scmFactory'
 import { mobbCliCommand } from '@mobb/bugsy/types'
 import AdmZip from 'adm-zip'
 import { HttpsProxyAgent } from 'https-proxy-agent'
+import type { MockInstance } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as commandsExports from '../src/commands'
@@ -115,6 +116,35 @@ it('test manifest files are included in zip upload', async () => {
     ]).toContain(entry.entryName)
   })
 })
+
+/**
+ * A run that passed no delivery flag.
+ *
+ * The CLI now calls autoPrAnalysis on every non-scan-only run and lets the
+ * SERVER resolve the project's Fix Policy, so what reaches the code depends on
+ * that policy — asserting an outcome here would assert the test organization's
+ * current policy and nothing about the CLI. It is also why these tests broke
+ * once the shipped pipeline default became "pr": an organization created after
+ * the migration legitimately delivers.
+ *
+ * What the CLI still owns is delegating rather than deciding, and never failing
+ * a scan over a delivery nobody asked for. The "policy off delivers nothing"
+ * property moved with the decision, to autoPranalysis.test.ts.
+ */
+async function expectPolicyRunDelegated(
+  spy: MockInstance<GQLClient['autoPrAnalysis']>
+) {
+  expect(spy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      deliveryMode: 'policy',
+      // Singular, matching what the page promises for a policy-driven run.
+      prStrategy: 'CONDENSE',
+    })
+  )
+  // Resolves whatever the policy decided, including a delivery that failed: a
+  // run nobody asked to deliver must not reject into the scan.
+  await expect(spy.mock.results[0]?.value).resolves.toBeDefined()
+}
 
 describe('Basic Analyze tests', () => {
   it('Full analyze flow', async () => {
@@ -228,7 +258,7 @@ describe('Basic Analyze tests', () => {
         { skipPrompts: true }
       )
       expect(_createOpenMock).toHaveBeenCalledTimes(2)
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
       expect(_createOpenMock).toBeCalledWith(
         expect.stringMatching(PROJECT_PAGE_REGEX)
       )
@@ -282,7 +312,7 @@ describe('Basic Analyze tests', () => {
       { skipPrompts: true }
     )
     expect(_createOpenMock).toHaveBeenCalledTimes(2)
-    expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+    await expectPolicyRunDelegated(autoPrAnalysisSpy)
     expect(_createOpenMock).toBeCalledWith(
       expect.stringMatching(PROJECT_PAGE_REGEX)
     )
@@ -382,7 +412,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
 
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
@@ -498,7 +528,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
 
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
@@ -611,7 +641,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
         vulnerabilityReport: {
@@ -724,7 +754,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
         vulnerabilityReport: {
@@ -837,7 +867,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
         vulnerabilityReport: {
@@ -961,7 +991,7 @@ describe('Basic Analyze tests', () => {
         token,
         type: 'token',
       })
-      expect(autoPrAnalysisSpy).not.toHaveBeenCalled()
+      await expectPolicyRunDelegated(autoPrAnalysisSpy)
       const getAnalysis = await gqlClient.getAnalysis(analysisId)
       const {
         vulnerabilityReport: {

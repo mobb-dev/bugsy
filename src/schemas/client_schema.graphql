@@ -748,12 +748,14 @@ mutation autoPrAnalysis(
   $commitDirectly: Boolean
   $prId: Int
   $prStrategy: PRStrategy
+  $deliveryMode: String
 ) {
   autoPrAnalysis(
     analysisId: $analysisId
     sameBranchCommit: $commitDirectly
     prId: $prId
     prStrategy: $prStrategy
+    deliveryMode: $deliveryMode
   ) {
     __typename
     ... on AutoPrSuccess {

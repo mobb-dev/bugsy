@@ -578,16 +578,28 @@ export async function _scan(
       : '🕵️‍♂️ Generating fixes...',
   })
   // Fix-related follow-ups don't apply to scan-only reports.
-  if (autoPr && !scanOnly) {
-    await handleAutoPr({
-      gqlClient,
-      analysisId: reportUploadInfo.fixReportId,
-      commitDirectly,
-      prId: pullRequest,
-      createSpinner,
-      createOnePr,
-      polling,
-    })
+  // See the note on the other call site: the server owns the decision now.
+  const deliverFixes = scanOnly
+    ? undefined
+    : () =>
+        handleAutoPr({
+          gqlClient,
+          analysisId: reportUploadInfo.fixReportId,
+          commitDirectly,
+          prId: pullRequest,
+          createSpinner,
+          createOnePr,
+          polling,
+          deliveryMode: autoPr ? (commitDirectly ? 'direct' : 'pr') : 'policy',
+        })
+
+  // An explicit flag keeps its old ordering: that run asked for a pull request
+  // before the gate decides. A policy-driven run asked for nothing, and delivery
+  // waits for fix generation to finish (up to the 30-minute timeout) — so it must
+  // not hold up the report URL and the gate, which is where a flagless run ended
+  // before this trigger existed.
+  if (autoPr) {
+    await deliverFixes?.()
   }
 
   await askToOpenAnalysis()
@@ -601,8 +613,16 @@ export async function _scan(
       polling,
     })
   }
-  if (gate) {
-    await runGate(reportUploadInfo.fixReportId)
+  // finally, because a blocking verdict throws out of runGate. That is exactly
+  // the run whose fix matters most, so delivery must not be skipped by it.
+  try {
+    if (gate) {
+      await runGate(reportUploadInfo.fixReportId)
+    }
+  } finally {
+    if (!autoPr) {
+      await deliverFixes?.()
+    }
   }
   return reportUploadInfo.fixReportId
 
@@ -768,6 +788,9 @@ export async function _scan(
 
     const mobbSpinner = createSpinner('🕵️‍♂️ Initiating Mobb analysis').start()
 
+    const submittedRepoUrl =
+      repo || gitInfo.repoUrl || getTopLevelDirName(srcPath)
+
     // Scan-only still submits so the backend runs the analysis (code locations +
     // classification); the backend skips fix generation for scan-only reports.
     try {
@@ -777,7 +800,7 @@ export async function _scan(
         submitVulnerabilityReportVariables: {
           fixReportId: reportUploadInfo.fixReportId,
           projectId: projectId,
-          repoUrl: repo || gitInfo.repoUrl || getTopLevelDirName(srcPath),
+          repoUrl: submittedRepoUrl,
           reference: ref || gitInfo.reference || 'no-branch',
           sha: commitHash || gitInfo.hash || '0123456789abcdef',
           scanSource: _getScanSource(command, ci),
@@ -808,21 +831,52 @@ export async function _scan(
         ? '🔍 Scanning (scan-only, no fixes)...'
         : '🕵️‍♂️ Generating fixes...',
     })
-    if (autoPr && !scanOnly) {
-      await handleAutoPr({
-        gqlClient,
-        analysisId: reportUploadInfo.fixReportId,
-        commitDirectly,
-        prId: pullRequest,
-        createSpinner,
-        createOnePr,
-        polling,
-      })
+    // Fix Policy: call on every non-scan-only run and let the server
+    // decide. Without a flag the run follows the project's pipeline_delivery,
+    // which may be off — previously no flag meant no call at all, so the setting
+    // was editable in the UI and read by nothing.
+    //
+    // Except when there is no repository to deliver into: a local-path scan
+    // submits the top-level directory name as the repo URL, and the server parses
+    // that as a URL and throws. An explicit --auto-pr still gets that error; a run
+    // that asked for nothing must not end on a red delivery failure.
+    const deliverFixes =
+      scanOnly || (!autoPr && !URL.canParse(submittedRepoUrl))
+        ? undefined
+        : () =>
+            handleAutoPr({
+              gqlClient,
+              analysisId: reportUploadInfo.fixReportId,
+              commitDirectly,
+              prId: pullRequest,
+              createSpinner,
+              createOnePr,
+              polling,
+              deliveryMode: autoPr
+                ? commitDirectly
+                  ? 'direct'
+                  : 'pr'
+                : 'policy',
+            })
+
+    // Flagged runs deliver first, as they always have. A policy-driven run waits
+    // for fix generation, so it goes last — the report URL and the gate must not
+    // wait on delivery nobody asked for.
+    if (autoPr) {
+      await deliverFixes?.()
     }
 
     await askToOpenAnalysis()
-    if (gate) {
-      await runGate(reportUploadInfo.fixReportId)
+    // finally, because a blocking verdict throws out of runGate. That is exactly
+    // the run whose fix matters most, so delivery must not be skipped by it.
+    try {
+      if (gate) {
+        await runGate(reportUploadInfo.fixReportId)
+      }
+    } finally {
+      if (!autoPr) {
+        await deliverFixes?.()
+      }
     }
     return reportUploadInfo.fixReportId
   }

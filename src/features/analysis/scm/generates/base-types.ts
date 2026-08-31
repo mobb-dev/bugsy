@@ -753,6 +753,25 @@ export type FixExtraContextResponse = {
   manifestActionsRequired: Array<FixExtraContextManifestActionRequiredResponse>;
 };
 
+export type FixPolicyIssueTypeSettingInput = {
+  autoPrEnabled: Scalars['Boolean']['input'];
+  enabled: Scalars['Boolean']['input'];
+  issueType: Scalars['String']['input'];
+};
+
+export type FixPolicyUpdateError = BaseError & {
+  __typename?: 'FixPolicyUpdateError';
+  error?: Maybe<Scalars['String']['output']>;
+  status: Status;
+};
+
+export type FixPolicyUpdateResponse = FixPolicyUpdateError | FixPolicyUpdateSuccess;
+
+export type FixPolicyUpdateSuccess = {
+  __typename?: 'FixPolicyUpdateSuccess';
+  status: Status;
+};
+
 export type FixQuestion = {
   __typename?: 'FixQuestion';
   content: Scalars['String']['output'];
@@ -1504,6 +1523,17 @@ export type Mutation = {
    * User must have access to both the repository and organization.
    */
   analyzePRForAIBlameFromWebhook: ProcessAiBlameResult;
+  /**
+   * Fix Policy. `deliveryMode` is how the caller says what decided
+   * the delivery for this run:
+   *   "policy"        -> no CLI flag; resolve project.pipeline_delivery
+   *   "pr" | "direct" -> a flag was passed and overrides the policy
+   *   omitted         -> legacy caller; fall back to sameBranchCommit, which is
+   *                      what every CLI before this change sends.
+   * Keeping the omitted case on the old path is deliberate: an older CLI only
+   * calls this when --auto-pr was passed, so resolving policy for it could turn
+   * an explicit --auto-pr into a direct commit it never asked for.
+   */
   autoPrAnalysis?: Maybe<AutoPrResponse>;
   changeUserOrgRole?: Maybe<StatusQueryResponse>;
   changeUserProjectRole?: Maybe<BaseResponse>;
@@ -1655,6 +1685,13 @@ export type Mutation = {
    */
   updateProjectFileFilters: FileFiltersUpdateResponse;
   /**
+   * Replace the project's Fix Policy: delivery mode per trigger, the adaptive
+   * switch, and the changed issue-type rows (project admin/writer, or org owner).
+   * Writes the audit row in the same transaction. auditJson: JSON-encoded
+   * description of the change, for the trail — the policy itself is the columns.
+   */
+  updateProjectFixPolicy: FixPolicyUpdateResponse;
+  /**
    * Replace the project's scan-policy deviations (project admin/writer or org
    * owner). policyJson: JSON-encoded tri-state ScanPolicyDoc; omit/null to fully
    * inherit the organization policy. Entries that relax an org-locked target are
@@ -1725,6 +1762,7 @@ export type MutationAnalyzePrForAiBlameFromWebhookArgs = {
 
 export type MutationAutoPrAnalysisArgs = {
   analysisId: Scalars['String']['input'];
+  deliveryMode?: InputMaybe<Scalars['String']['input']>;
   prId?: InputMaybe<Scalars['Int']['input']>;
   prStrategy?: InputMaybe<PrStrategy>;
   sameBranchCommit?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2159,6 +2197,16 @@ export type MutationUpdatePrCheckPolicyArgs = {
 export type MutationUpdateProjectFileFiltersArgs = {
   projectId: Scalars['String']['input'];
   settings: FileFilterSettingsInput;
+};
+
+
+export type MutationUpdateProjectFixPolicyArgs = {
+  auditJson: Scalars['String']['input'];
+  autoPrIncludeAiFixes: Scalars['Boolean']['input'];
+  issueTypeSettings: Array<FixPolicyIssueTypeSettingInput>;
+  pipelineDelivery: Scalars['String']['input'];
+  projectId: Scalars['String']['input'];
+  webhookDelivery: Scalars['String']['input'];
 };
 
 
@@ -19826,6 +19874,10 @@ export type FixReport = {
   createdByUser?: Maybe<User>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn: Scalars['timestamptz']['output'];
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: Maybe<Scalars['String']['output']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: Maybe<Scalars['String']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
   failReason?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
@@ -20037,6 +20089,8 @@ export type FixReport_Bool_Exp = {
   createdByUser?: InputMaybe<User_Bool_Exp>;
   createdByUserId?: InputMaybe<Uuid_Comparison_Exp>;
   createdOn?: InputMaybe<Timestamptz_Comparison_Exp>;
+  deliveryMode?: InputMaybe<String_Comparison_Exp>;
+  deliveryRequested?: InputMaybe<String_Comparison_Exp>;
   expirationOn?: InputMaybe<Timestamptz_Comparison_Exp>;
   failReason?: InputMaybe<String_Comparison_Exp>;
   falsePositives?: InputMaybe<False_Positive_Bool_Exp>;
@@ -20086,6 +20140,10 @@ export type FixReport_Insert_Input = {
   createdByUser?: InputMaybe<User_Obj_Rel_Insert_Input>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: InputMaybe<Scalars['String']['input']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: InputMaybe<Scalars['String']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
   failReason?: InputMaybe<Scalars['String']['input']>;
   falsePositives?: InputMaybe<False_Positive_Arr_Rel_Insert_Input>;
@@ -20114,6 +20172,10 @@ export type FixReport_Max_Fields = {
   analysisUrl?: Maybe<Scalars['String']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: Maybe<Scalars['String']['output']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: Maybe<Scalars['String']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
   failReason?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "count_fix_isdone" */
@@ -20138,6 +20200,10 @@ export type FixReport_Min_Fields = {
   analysisUrl?: Maybe<Scalars['String']['output']>;
   createdByUserId?: Maybe<Scalars['uuid']['output']>;
   createdOn?: Maybe<Scalars['timestamptz']['output']>;
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: Maybe<Scalars['String']['output']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: Maybe<Scalars['String']['output']>;
   expirationOn?: Maybe<Scalars['timestamptz']['output']>;
   failReason?: Maybe<Scalars['String']['output']>;
   /** A computed field, executes function "count_fix_isdone" */
@@ -20187,6 +20253,8 @@ export type FixReport_Order_By = {
   createdByUser?: InputMaybe<User_Order_By>;
   createdByUserId?: InputMaybe<Order_By>;
   createdOn?: InputMaybe<Order_By>;
+  deliveryMode?: InputMaybe<Order_By>;
+  deliveryRequested?: InputMaybe<Order_By>;
   expirationOn?: InputMaybe<Order_By>;
   failReason?: InputMaybe<Order_By>;
   falsePositives_aggregate?: InputMaybe<False_Positive_Aggregate_Order_By>;
@@ -20228,6 +20296,10 @@ export enum FixReport_Select_Column {
   /** column name */
   CreatedOn = 'createdOn',
   /** column name */
+  DeliveryMode = 'deliveryMode',
+  /** column name */
+  DeliveryRequested = 'deliveryRequested',
+  /** column name */
   ExpirationOn = 'expirationOn',
   /** column name */
   FailReason = 'failReason',
@@ -20256,6 +20328,10 @@ export type FixReport_Set_Input = {
   candidateToRerun?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: InputMaybe<Scalars['String']['input']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: InputMaybe<Scalars['String']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
   failReason?: InputMaybe<Scalars['String']['input']>;
   /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
@@ -20326,6 +20402,10 @@ export type FixReport_Stream_Cursor_Value_Input = {
   candidateToRerun?: InputMaybe<Scalars['Boolean']['input']>;
   createdByUserId?: InputMaybe<Scalars['uuid']['input']>;
   createdOn?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Fix Policy: the delivery mode this run actually resolved to — off | pr | direct. Written by autoPrAnalysis once, at resolution time. */
+  deliveryMode?: InputMaybe<Scalars['String']['input']>;
+  /** Fix Policy: what the caller asked for — policy | off | pr | direct, or NULL for a pre-Fix-Policy CLI that sent no deliveryMode. "policy" means the run deferred to the stored policy, which is every repository-webhook delivery and every flagless CLI run; anything else is an explicit override for that run. Compare with delivery_mode to see what the policy then resolved to. */
+  deliveryRequested?: InputMaybe<Scalars['String']['input']>;
   expirationOn?: InputMaybe<Scalars['timestamptz']['input']>;
   failReason?: InputMaybe<Scalars['String']['input']>;
   /** the number of io (llm) fixes, it can be a complete llm fix or a hybrid */
@@ -20363,6 +20443,10 @@ export enum FixReport_Update_Column {
   CreatedByUserId = 'createdByUserId',
   /** column name */
   CreatedOn = 'createdOn',
+  /** column name */
+  DeliveryMode = 'deliveryMode',
+  /** column name */
+  DeliveryRequested = 'deliveryRequested',
   /** column name */
   ExpirationOn = 'expirationOn',
   /** column name */
@@ -21211,6 +21295,241 @@ export type Fix_Order_By = {
 /** primary key columns input for table: fix */
 export type Fix_Pk_Columns_Input = {
   id: Scalars['uuid']['input'];
+};
+
+/** Fix Policy: who changed a scope's policy and when. One row per Apply; project_id NULL means organization scope. actor_email and created_at are server-stamped. */
+export type Fix_Policy_Audit = {
+  __typename?: 'fix_policy_audit';
+  actorEmail: Scalars['String']['output'];
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change: Scalars['jsonb']['output'];
+  createdAt: Scalars['timestamptz']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  organization: Organization;
+  organizationId: Scalars['uuid']['output'];
+  projectId?: Maybe<Scalars['uuid']['output']>;
+};
+
+
+/** Fix Policy: who changed a scope's policy and when. One row per Apply; project_id NULL means organization scope. actor_email and created_at are server-stamped. */
+export type Fix_Policy_AuditChangeArgs = {
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregated selection of "fix_policy_audit" */
+export type Fix_Policy_Audit_Aggregate = {
+  __typename?: 'fix_policy_audit_aggregate';
+  aggregate?: Maybe<Fix_Policy_Audit_Aggregate_Fields>;
+  nodes: Array<Fix_Policy_Audit>;
+};
+
+/** aggregate fields of "fix_policy_audit" */
+export type Fix_Policy_Audit_Aggregate_Fields = {
+  __typename?: 'fix_policy_audit_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Fix_Policy_Audit_Max_Fields>;
+  min?: Maybe<Fix_Policy_Audit_Min_Fields>;
+};
+
+
+/** aggregate fields of "fix_policy_audit" */
+export type Fix_Policy_Audit_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Fix_Policy_Audit_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** append existing jsonb value of filtered columns with new jsonb value */
+export type Fix_Policy_Audit_Append_Input = {
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** Boolean expression to filter rows from the table "fix_policy_audit". All fields are combined with a logical 'AND'. */
+export type Fix_Policy_Audit_Bool_Exp = {
+  _and?: InputMaybe<Array<Fix_Policy_Audit_Bool_Exp>>;
+  _not?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+  _or?: InputMaybe<Array<Fix_Policy_Audit_Bool_Exp>>;
+  actorEmail?: InputMaybe<String_Comparison_Exp>;
+  change?: InputMaybe<Jsonb_Comparison_Exp>;
+  createdAt?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  organization?: InputMaybe<Organization_Bool_Exp>;
+  organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  projectId?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "fix_policy_audit" */
+export enum Fix_Policy_Audit_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  FixPolicyAuditPkey = 'fix_policy_audit_pkey'
+}
+
+/** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+export type Fix_Policy_Audit_Delete_At_Path_Input = {
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+export type Fix_Policy_Audit_Delete_Elem_Input = {
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** delete key/value pair or string element. key/value pairs are matched based on their key value */
+export type Fix_Policy_Audit_Delete_Key_Input = {
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** input type for inserting data into table "fix_policy_audit" */
+export type Fix_Policy_Audit_Insert_Input = {
+  actorEmail?: InputMaybe<Scalars['String']['input']>;
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['jsonb']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Fix_Policy_Audit_Max_Fields = {
+  __typename?: 'fix_policy_audit_max_fields';
+  actorEmail?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** aggregate min on columns */
+export type Fix_Policy_Audit_Min_Fields = {
+  __typename?: 'fix_policy_audit_min_fields';
+  actorEmail?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  organizationId?: Maybe<Scalars['uuid']['output']>;
+  projectId?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** response of any mutation on the table "fix_policy_audit" */
+export type Fix_Policy_Audit_Mutation_Response = {
+  __typename?: 'fix_policy_audit_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Fix_Policy_Audit>;
+};
+
+/** on_conflict condition type for table "fix_policy_audit" */
+export type Fix_Policy_Audit_On_Conflict = {
+  constraint: Fix_Policy_Audit_Constraint;
+  update_columns?: Array<Fix_Policy_Audit_Update_Column>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "fix_policy_audit". */
+export type Fix_Policy_Audit_Order_By = {
+  actorEmail?: InputMaybe<Order_By>;
+  change?: InputMaybe<Order_By>;
+  createdAt?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  organization?: InputMaybe<Organization_Order_By>;
+  organizationId?: InputMaybe<Order_By>;
+  projectId?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: fix_policy_audit */
+export type Fix_Policy_Audit_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** prepend existing jsonb value of filtered columns with new jsonb value */
+export type Fix_Policy_Audit_Prepend_Input = {
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['jsonb']['input']>;
+};
+
+/** select columns of table "fix_policy_audit" */
+export enum Fix_Policy_Audit_Select_Column {
+  /** column name */
+  ActorEmail = 'actorEmail',
+  /** column name */
+  Change = 'change',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProjectId = 'projectId'
+}
+
+/** input type for updating data in table "fix_policy_audit" */
+export type Fix_Policy_Audit_Set_Input = {
+  actorEmail?: InputMaybe<Scalars['String']['input']>;
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['jsonb']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "fix_policy_audit" */
+export type Fix_Policy_Audit_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Fix_Policy_Audit_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Fix_Policy_Audit_Stream_Cursor_Value_Input = {
+  actorEmail?: InputMaybe<Scalars['String']['input']>;
+  /** Client-supplied description of the edit (the deviation keys the page computed). Descriptive only — the authoritative policy lives in organization/project and the issue_type_settings tables. */
+  change?: InputMaybe<Scalars['jsonb']['input']>;
+  createdAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  projectId?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "fix_policy_audit" */
+export enum Fix_Policy_Audit_Update_Column {
+  /** column name */
+  ActorEmail = 'actorEmail',
+  /** column name */
+  Change = 'change',
+  /** column name */
+  CreatedAt = 'createdAt',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  OrganizationId = 'organizationId',
+  /** column name */
+  ProjectId = 'projectId'
+}
+
+export type Fix_Policy_Audit_Updates = {
+  /** append existing jsonb value of filtered columns with new jsonb value */
+  _append?: InputMaybe<Fix_Policy_Audit_Append_Input>;
+  /** delete the field or element with specified path (for JSON arrays, negative integers count from the end) */
+  _delete_at_path?: InputMaybe<Fix_Policy_Audit_Delete_At_Path_Input>;
+  /** delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array */
+  _delete_elem?: InputMaybe<Fix_Policy_Audit_Delete_Elem_Input>;
+  /** delete key/value pair or string element. key/value pairs are matched based on their key value */
+  _delete_key?: InputMaybe<Fix_Policy_Audit_Delete_Key_Input>;
+  /** prepend existing jsonb value of filtered columns with new jsonb value */
+  _prepend?: InputMaybe<Fix_Policy_Audit_Prepend_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Fix_Policy_Audit_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Fix_Policy_Audit_Bool_Exp;
 };
 
 /** columns and relationships of "fix_rating" */
@@ -24937,6 +25256,17 @@ export type Mutation_Root = {
    */
   analyzePRForAIBlameFromWebhook: ProcessAiBlameResult;
   applySimilarAnswers?: Maybe<Scalars['Void']['output']>;
+  /**
+   * Fix Policy. `deliveryMode` is how the caller says what decided
+   * the delivery for this run:
+   *   "policy"        -> no CLI flag; resolve project.pipeline_delivery
+   *   "pr" | "direct" -> a flag was passed and overrides the policy
+   *   omitted         -> legacy caller; fall back to sameBranchCommit, which is
+   *                      what every CLI before this change sends.
+   * Keeping the omitted case on the old path is deliberate: an older CLI only
+   * calls this when --auto-pr was passed, so resolving policy for it could turn
+   * an explicit --auto-pr into a direct commit it never asked for.
+   */
   autoPrAnalysis?: Maybe<AutoPrResponse>;
   changeUserOrgRole?: Maybe<StatusQueryResponse>;
   changeUserProjectRole?: Maybe<BaseResponse>;
@@ -25185,6 +25515,10 @@ export type Mutation_Root = {
   delete_fix_download_to_user?: Maybe<Fix_Download_To_User_Mutation_Response>;
   /** delete single row from the table: "fix_download_to_user" */
   delete_fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
+  /** delete data from the table: "fix_policy_audit" */
+  delete_fix_policy_audit?: Maybe<Fix_Policy_Audit_Mutation_Response>;
+  /** delete single row from the table: "fix_policy_audit" */
+  delete_fix_policy_audit_by_pk?: Maybe<Fix_Policy_Audit>;
   /** delete data from the table: "fix_rating" */
   delete_fix_rating?: Maybe<Fix_Rating_Mutation_Response>;
   /** delete single row from the table: "fix_rating" */
@@ -25823,6 +26157,10 @@ export type Mutation_Root = {
   insert_fix_download_to_user_one?: Maybe<Fix_Download_To_User>;
   /** insert a single row into the table: "fix" */
   insert_fix_one?: Maybe<Fix>;
+  /** insert data into the table: "fix_policy_audit" */
+  insert_fix_policy_audit?: Maybe<Fix_Policy_Audit_Mutation_Response>;
+  /** insert a single row into the table: "fix_policy_audit" */
+  insert_fix_policy_audit_one?: Maybe<Fix_Policy_Audit>;
   /** insert data into the table: "fix_rating" */
   insert_fix_rating?: Maybe<Fix_Rating_Mutation_Response>;
   /** insert a single row into the table: "fix_rating" */
@@ -26273,6 +26611,13 @@ export type Mutation_Root = {
    */
   updateProjectFileFilters: FileFiltersUpdateResponse;
   /**
+   * Replace the project's Fix Policy: delivery mode per trigger, the adaptive
+   * switch, and the changed issue-type rows (project admin/writer, or org owner).
+   * Writes the audit row in the same transaction. auditJson: JSON-encoded
+   * description of the change, for the trail — the policy itself is the columns.
+   */
+  updateProjectFixPolicy: FixPolicyUpdateResponse;
+  /**
    * Replace the project's scan-policy deviations (project admin/writer or org
    * owner). policyJson: JSON-encoded tri-state ScanPolicyDoc; omit/null to fully
    * inherit the organization policy. Entries that relax an org-locked target are
@@ -26606,6 +26951,12 @@ export type Mutation_Root = {
   update_fix_download_to_user_many?: Maybe<Array<Maybe<Fix_Download_To_User_Mutation_Response>>>;
   /** update multiples rows of table: "fix" */
   update_fix_many?: Maybe<Array<Maybe<Fix_Mutation_Response>>>;
+  /** update data of the table: "fix_policy_audit" */
+  update_fix_policy_audit?: Maybe<Fix_Policy_Audit_Mutation_Response>;
+  /** update single row of the table: "fix_policy_audit" */
+  update_fix_policy_audit_by_pk?: Maybe<Fix_Policy_Audit>;
+  /** update multiples rows of table: "fix_policy_audit" */
+  update_fix_policy_audit_many?: Maybe<Array<Maybe<Fix_Policy_Audit_Mutation_Response>>>;
   /** update data of the table: "fix_rating" */
   update_fix_rating?: Maybe<Fix_Rating_Mutation_Response>;
   /** update single row of the table: "fix_rating" */
@@ -27234,6 +27585,7 @@ export type Mutation_RootApplySimilarAnswersArgs = {
 /** mutation root */
 export type Mutation_RootAutoPrAnalysisArgs = {
   analysisId: Scalars['String']['input'];
+  deliveryMode?: InputMaybe<Scalars['String']['input']>;
   prId?: InputMaybe<Scalars['Int']['input']>;
   prStrategy?: InputMaybe<PrStrategy>;
   sameBranchCommit?: InputMaybe<Scalars['Boolean']['input']>;
@@ -28027,6 +28379,18 @@ export type Mutation_RootDelete_Fix_Download_To_UserArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Fix_Download_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Policy_AuditArgs = {
+  where: Fix_Policy_Audit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Fix_Policy_Audit_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -30007,6 +30371,20 @@ export type Mutation_RootInsert_Fix_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Fix_Policy_AuditArgs = {
+  objects: Array<Fix_Policy_Audit_Insert_Input>;
+  on_conflict?: InputMaybe<Fix_Policy_Audit_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Fix_Policy_Audit_OneArgs = {
+  object: Fix_Policy_Audit_Insert_Input;
+  on_conflict?: InputMaybe<Fix_Policy_Audit_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Fix_RatingArgs = {
   objects: Array<Fix_Rating_Insert_Input>;
   on_conflict?: InputMaybe<Fix_Rating_On_Conflict>;
@@ -31614,6 +31992,17 @@ export type Mutation_RootUpdateProjectFileFiltersArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdateProjectFixPolicyArgs = {
+  auditJson: Scalars['String']['input'];
+  autoPrIncludeAiFixes: Scalars['Boolean']['input'];
+  issueTypeSettings: Array<FixPolicyIssueTypeSettingInput>;
+  pipelineDelivery: Scalars['String']['input'];
+  projectId: Scalars['String']['input'];
+  webhookDelivery: Scalars['String']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdateProjectScanPolicyArgs = {
   policyJson?: InputMaybe<Scalars['String']['input']>;
   projectId: Scalars['String']['input'];
@@ -32789,6 +33178,36 @@ export type Mutation_RootUpdate_Fix_Download_To_User_ManyArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Fix_ManyArgs = {
   updates: Array<Fix_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Policy_AuditArgs = {
+  _append?: InputMaybe<Fix_Policy_Audit_Append_Input>;
+  _delete_at_path?: InputMaybe<Fix_Policy_Audit_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Fix_Policy_Audit_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Fix_Policy_Audit_Delete_Key_Input>;
+  _prepend?: InputMaybe<Fix_Policy_Audit_Prepend_Input>;
+  _set?: InputMaybe<Fix_Policy_Audit_Set_Input>;
+  where: Fix_Policy_Audit_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Policy_Audit_By_PkArgs = {
+  _append?: InputMaybe<Fix_Policy_Audit_Append_Input>;
+  _delete_at_path?: InputMaybe<Fix_Policy_Audit_Delete_At_Path_Input>;
+  _delete_elem?: InputMaybe<Fix_Policy_Audit_Delete_Elem_Input>;
+  _delete_key?: InputMaybe<Fix_Policy_Audit_Delete_Key_Input>;
+  _prepend?: InputMaybe<Fix_Policy_Audit_Prepend_Input>;
+  _set?: InputMaybe<Fix_Policy_Audit_Set_Input>;
+  pk_columns: Fix_Policy_Audit_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Fix_Policy_Audit_ManyArgs = {
+  updates: Array<Fix_Policy_Audit_Updates>;
 };
 
 
@@ -35939,6 +36358,8 @@ export type Organization = {
   percentPrsWithAiStats?: Maybe<Array<View_Types_Percent_Prs_With_Ai_Stats>>;
   /** A computed field, executes function "organization_percent_repos_with_ai_stats" */
   percentReposWithAiStats?: Maybe<Array<View_Types_Percent_Repos_With_Ai_Stats>>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery: Scalars['String']['output'];
   /** An array relationship */
   projects: Array<Project>;
   /** An aggregate relationship */
@@ -35984,6 +36405,8 @@ export type Organization = {
   scmConfigs_aggregate: Scm_Config_Aggregate;
   /** A computed field, executes function "organization_unresolved_severities_summary" */
   unresolvedAggregatedVulnerabilitySeverities?: Maybe<Array<Aggregated_Severities>>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery: Scalars['String']['output'];
 };
 
 
@@ -36640,6 +37063,7 @@ export type Organization_Bool_Exp = {
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Bool_Exp>;
   organizationUsers?: InputMaybe<Organization_To_User_Bool_Exp>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Bool_Exp>;
+  pipelineDelivery?: InputMaybe<String_Comparison_Exp>;
   projects?: InputMaybe<Project_Bool_Exp>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Bool_Exp>;
   quarantineEnabled?: InputMaybe<Boolean_Comparison_Exp>;
@@ -36657,6 +37081,7 @@ export type Organization_Bool_Exp = {
   scanPolicy?: InputMaybe<Jsonb_Comparison_Exp>;
   scmConfigs?: InputMaybe<Scm_Config_Bool_Exp>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Bool_Exp>;
+  webhookDelivery?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "organization" */
@@ -37420,6 +37845,8 @@ export type Organization_Insert_Input = {
   organizationFilesMatchingSettings?: InputMaybe<Organization_Files_Matching_Settings_Arr_Rel_Insert_Input>;
   organizationRoles?: InputMaybe<Organization_To_Organization_Role_Arr_Rel_Insert_Input>;
   organizationUsers?: InputMaybe<Organization_To_User_Arr_Rel_Insert_Input>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   projects?: InputMaybe<Project_Arr_Rel_Insert_Input>;
   quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   rawIssueTypeBlocklist?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Arr_Rel_Insert_Input>;
@@ -37433,6 +37860,8 @@ export type Organization_Insert_Input = {
   /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   scmConfigs?: InputMaybe<Scm_Config_Arr_Rel_Insert_Input>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Many-to-many table for managing issue type setting inside the organization  */
@@ -37699,6 +38128,8 @@ export type Organization_Max_Fields = {
   name?: Maybe<Scalars['String']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery?: Maybe<Scalars['String']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -37706,6 +38137,8 @@ export type Organization_Max_Fields = {
   /** A computed field, executes function "organization_roi_summary_freshness" */
   roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -37746,6 +38179,8 @@ export type Organization_Min_Fields = {
   name?: Maybe<Scalars['String']['output']>;
   /** Maximum number of repos that can run OpenGrep within a single batch scan. 0 = OpenGrep batches disabled. Default 3. Managed via the Hasura console. */
   opengrepBatchQuota?: Maybe<Scalars['Int']['output']>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery?: Maybe<Scalars['String']['output']>;
   remainingUnstableFixes?: Maybe<Scalars['Int']['output']>;
   roiDevHourlyRate?: Maybe<Scalars['Int']['output']>;
   roiIndustryFixingTimeInMinutes?: Maybe<Scalars['Int']['output']>;
@@ -37753,6 +38188,8 @@ export type Organization_Min_Fields = {
   /** A computed field, executes function "organization_roi_summary_freshness" */
   roiSummaryFreshness?: Maybe<Scalars['timestamptz']['output']>;
   roiTriageTimeInMinutes?: Maybe<Scalars['Int']['output']>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -37835,6 +38272,7 @@ export type Organization_Order_By = {
   organizationFilesMatchingSettings_aggregate?: InputMaybe<Organization_Files_Matching_Settings_Aggregate_Order_By>;
   organizationRoles_aggregate?: InputMaybe<Organization_To_Organization_Role_Aggregate_Order_By>;
   organizationUsers_aggregate?: InputMaybe<Organization_To_User_Aggregate_Order_By>;
+  pipelineDelivery?: InputMaybe<Order_By>;
   projects_aggregate?: InputMaybe<Project_Aggregate_Order_By>;
   quarantineEnabled?: InputMaybe<Order_By>;
   rawIssueTypeBlocklist_aggregate?: InputMaybe<Organization_Raw_Issue_Type_Blocklist_Aggregate_Order_By>;
@@ -37847,6 +38285,7 @@ export type Organization_Order_By = {
   roiTriageTimeInMinutes?: InputMaybe<Order_By>;
   scanPolicy?: InputMaybe<Order_By>;
   scmConfigs_aggregate?: InputMaybe<Scm_Config_Aggregate_Order_By>;
+  webhookDelivery?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: organization */
@@ -38492,6 +38931,8 @@ export enum Organization_Select_Column {
   /** column name */
   OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
   /** column name */
+  PipelineDelivery = 'pipelineDelivery',
+  /** column name */
   QuarantineEnabled = 'quarantineEnabled',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
@@ -38504,7 +38945,9 @@ export enum Organization_Select_Column {
   /** column name */
   RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes',
   /** column name */
-  ScanPolicy = 'scanPolicy'
+  ScanPolicy = 'scanPolicy',
+  /** column name */
+  WebhookDelivery = 'webhookDelivery'
 }
 
 /** input type for updating data in table "organization" */
@@ -38546,6 +38989,8 @@ export type Organization_Set_Input = {
   opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
@@ -38554,6 +38999,8 @@ export type Organization_Set_Input = {
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -38711,6 +39158,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   opengrepBatchQuota?: InputMaybe<Scalars['Int']['input']>;
   orgDomainsAutoAdd?: InputMaybe<Scalars['Boolean']['input']>;
   orgDomainsAutoAddRole?: InputMaybe<Organization_Role_Type_Enum>;
+  /** Fix Policy: how fixes from a pipeline run reach the code — off | pr | direct. Resolved by autoPrAnalysis when the CLI sends deliveryMode "policy"; a --auto-pr flag overrides it. Ships pr for a new organization; existing ones are backfilled to off so they keep flag-only delivery (MOBB-3813 §6). */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   quarantineEnabled?: InputMaybe<Scalars['Boolean']['input']>;
   remainingUnstableFixes?: InputMaybe<Scalars['Int']['input']>;
   roiDevHourlyRate?: InputMaybe<Scalars['Int']['input']>;
@@ -38719,6 +39168,8 @@ export type Organization_Stream_Cursor_Value_Input = {
   roiTriageTimeInMinutes?: InputMaybe<Scalars['Int']['input']>;
   /** Sparse scan + gate policy deviations from the Mobb default (all rules enabled, all severities gated). Scan toggles are disables-only; gate maps (targets.<t>.gate, vulnGate, ruleGate) keep both true and false, plus per-target projectsCanRelax locks. NULL = no deviations. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
+  /** Fix Policy: how fixes from a repository-webhook (PR check) run reach the code — off | pr | direct. Ships direct, for new and existing organizations alike (MOBB-3813 §6: webhook takes the new default). Anything but off also switches the PR check from scan-only to fix-generating, which moves its commit status from scan-finish to fix-done — and that status is used in branch protection. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -39276,6 +39727,8 @@ export enum Organization_Update_Column {
   /** column name */
   OrgDomainsAutoAddRole = 'orgDomainsAutoAddRole',
   /** column name */
+  PipelineDelivery = 'pipelineDelivery',
+  /** column name */
   QuarantineEnabled = 'quarantineEnabled',
   /** column name */
   RemainingUnstableFixes = 'remainingUnstableFixes',
@@ -39288,7 +39741,9 @@ export enum Organization_Update_Column {
   /** column name */
   RoiTriageTimeInMinutes = 'roiTriageTimeInMinutes',
   /** column name */
-  ScanPolicy = 'scanPolicy'
+  ScanPolicy = 'scanPolicy',
+  /** column name */
+  WebhookDelivery = 'webhookDelivery'
 }
 
 export type Organization_Updates = {
@@ -39443,6 +39898,10 @@ export type PrCheckRun = {
   postError?: Maybe<Scalars['String']['output']>;
   postedAt?: Maybe<Scalars['timestamptz']['output']>;
   postedState?: Maybe<Scalars['String']['output']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: Maybe<Scalars['String']['output']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: Maybe<Scalars['uuid']['output']>;
   prNumber: Scalars['Int']['output'];
   progressAt?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -39493,6 +39952,8 @@ export type PrCheckRun_Bool_Exp = {
   postError?: InputMaybe<String_Comparison_Exp>;
   postedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   postedState?: InputMaybe<String_Comparison_Exp>;
+  prAuthorScmLogin?: InputMaybe<String_Comparison_Exp>;
+  prAuthorUserId?: InputMaybe<Uuid_Comparison_Exp>;
   prNumber?: InputMaybe<Int_Comparison_Exp>;
   progressAt?: InputMaybe<Timestamptz_Comparison_Exp>;
 };
@@ -39515,6 +39976,10 @@ export type PrCheckRun_Insert_Input = {
   postError?: InputMaybe<Scalars['String']['input']>;
   postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   postedState?: InputMaybe<Scalars['String']['input']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: InputMaybe<Scalars['String']['input']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: InputMaybe<Scalars['uuid']['input']>;
   prNumber?: InputMaybe<Scalars['Int']['input']>;
   progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -39526,6 +39991,10 @@ export type PrCheckRun_Max_Fields = {
   postError?: Maybe<Scalars['String']['output']>;
   postedAt?: Maybe<Scalars['timestamptz']['output']>;
   postedState?: Maybe<Scalars['String']['output']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: Maybe<Scalars['String']['output']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: Maybe<Scalars['uuid']['output']>;
   prNumber?: Maybe<Scalars['Int']['output']>;
   progressAt?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -39537,6 +40006,10 @@ export type PrCheckRun_Min_Fields = {
   postError?: Maybe<Scalars['String']['output']>;
   postedAt?: Maybe<Scalars['timestamptz']['output']>;
   postedState?: Maybe<Scalars['String']['output']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: Maybe<Scalars['String']['output']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: Maybe<Scalars['uuid']['output']>;
   prNumber?: Maybe<Scalars['Int']['output']>;
   progressAt?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -39571,6 +40044,8 @@ export type PrCheckRun_Order_By = {
   postError?: InputMaybe<Order_By>;
   postedAt?: InputMaybe<Order_By>;
   postedState?: InputMaybe<Order_By>;
+  prAuthorScmLogin?: InputMaybe<Order_By>;
+  prAuthorUserId?: InputMaybe<Order_By>;
   prNumber?: InputMaybe<Order_By>;
   progressAt?: InputMaybe<Order_By>;
 };
@@ -39591,6 +40066,10 @@ export enum PrCheckRun_Select_Column {
   /** column name */
   PostedState = 'postedState',
   /** column name */
+  PrAuthorScmLogin = 'prAuthorScmLogin',
+  /** column name */
+  PrAuthorUserId = 'prAuthorUserId',
+  /** column name */
   PrNumber = 'prNumber',
   /** column name */
   ProgressAt = 'progressAt'
@@ -39602,6 +40081,10 @@ export type PrCheckRun_Set_Input = {
   postError?: InputMaybe<Scalars['String']['input']>;
   postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   postedState?: InputMaybe<Scalars['String']['input']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: InputMaybe<Scalars['String']['input']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: InputMaybe<Scalars['uuid']['input']>;
   prNumber?: InputMaybe<Scalars['Int']['input']>;
   progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -39638,6 +40121,10 @@ export type PrCheckRun_Stream_Cursor_Value_Input = {
   postError?: InputMaybe<Scalars['String']['input']>;
   postedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   postedState?: InputMaybe<Scalars['String']['input']>;
+  /** GitHub login of the pull request author, used to grant them read access to the project holding this report. Nullable: absent on bot/synthetic events and on rows predating MOBB-3874. */
+  prAuthorScmLogin?: InputMaybe<Scalars['String']['input']>;
+  /** The Mobb user the pull request author resolved to, when resolution succeeded. Keys the one-grant-per-author-per-project guard. NULL means unresolved, which deliberately does not block a later attempt. */
+  prAuthorUserId?: InputMaybe<Scalars['uuid']['input']>;
   prNumber?: InputMaybe<Scalars['Int']['input']>;
   progressAt?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -39658,6 +40145,10 @@ export enum PrCheckRun_Update_Column {
   PostedAt = 'postedAt',
   /** column name */
   PostedState = 'postedState',
+  /** column name */
+  PrAuthorScmLogin = 'prAuthorScmLogin',
+  /** column name */
+  PrAuthorUserId = 'prAuthorUserId',
   /** column name */
   PrNumber = 'prNumber',
   /** column name */
@@ -40213,6 +40704,8 @@ export type Project = {
   /** An object relationship */
   organization: Organization;
   organizationId: Scalars['uuid']['output'];
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery: Scalars['String']['output'];
   /** An array relationship */
   projectFilesMatchingSettings: Array<Project_Files_Matching_Settings>;
   /** An aggregate relationship */
@@ -40240,6 +40733,8 @@ export type Project = {
   vulnerabilityReports: Array<Vulnerability_Report>;
   /** An aggregate relationship */
   vulnerabilityReports_aggregate: Vulnerability_Report_Aggregate;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery: Scalars['String']['output'];
 };
 
 
@@ -40542,6 +41037,7 @@ export type Project_Bool_Exp = {
   numberOfUniqueRepos?: InputMaybe<Int_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<Uuid_Comparison_Exp>;
+  pipelineDelivery?: InputMaybe<String_Comparison_Exp>;
   projectFilesMatchingSettings?: InputMaybe<Project_Files_Matching_Settings_Bool_Exp>;
   projectFilesMatchingSettings_aggregate?: InputMaybe<Project_Files_Matching_Settings_Aggregate_Bool_Exp>;
   projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Bool_Exp>;
@@ -40556,6 +41052,7 @@ export type Project_Bool_Exp = {
   updatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
   vulnerabilityReports?: InputMaybe<Vulnerability_Report_Bool_Exp>;
   vulnerabilityReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Bool_Exp>;
+  webhookDelivery?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "project" */
@@ -41117,6 +41614,8 @@ export type Project_Insert_Input = {
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   projectFilesMatchingSettings?: InputMaybe<Project_Files_Matching_Settings_Arr_Rel_Insert_Input>;
   projectIssueTypeSettings?: InputMaybe<Project_Issue_Type_Settings_Arr_Rel_Insert_Input>;
   projectRoles?: InputMaybe<Project_To_Project_Role_Arr_Rel_Insert_Input>;
@@ -41127,6 +41626,8 @@ export type Project_Insert_Input = {
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Obj_Rel_Insert_Input>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
   vulnerabilityReports?: InputMaybe<Vulnerability_Report_Arr_Rel_Insert_Input>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Many-to-many table for managing issue type setting inside the project */
@@ -41386,7 +41887,11 @@ export type Project_Max_Fields = {
   /** A computed field, executes function "get_number_of_unique_repos" */
   numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -41407,7 +41912,11 @@ export type Project_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -41423,7 +41932,11 @@ export type Project_Min_Fields = {
   /** A computed field, executes function "get_number_of_unique_repos" */
   numberOfUniqueRepos?: Maybe<Scalars['Int']['output']>;
   organizationId?: Maybe<Scalars['uuid']['output']>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamptz']['output']>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -41444,7 +41957,11 @@ export type Project_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "project" */
@@ -41485,6 +42002,7 @@ export type Project_Order_By = {
   numberOfUniqueRepos?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
+  pipelineDelivery?: InputMaybe<Order_By>;
   projectFilesMatchingSettings_aggregate?: InputMaybe<Project_Files_Matching_Settings_Aggregate_Order_By>;
   projectIssueTypeSettings_aggregate?: InputMaybe<Project_Issue_Type_Settings_Aggregate_Order_By>;
   projectRoles_aggregate?: InputMaybe<Project_To_Project_Role_Aggregate_Order_By>;
@@ -41494,6 +42012,7 @@ export type Project_Order_By = {
   totalUniqueUnresolvedVulnerabilitiesView?: InputMaybe<View_Total_Unique_Unresolved_Vulnerabilities_Order_By>;
   updatedAt?: InputMaybe<Order_By>;
   vulnerabilityReports_aggregate?: InputMaybe<Vulnerability_Report_Aggregate_Order_By>;
+  webhookDelivery?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: project */
@@ -41915,9 +42434,13 @@ export enum Project_Select_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  PipelineDelivery = 'pipelineDelivery',
+  /** column name */
   ScanPolicy = 'scanPolicy',
   /** column name */
-  UpdatedAt = 'updatedAt'
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  WebhookDelivery = 'webhookDelivery'
 }
 
 /** select "project_aggregate_bool_exp_bool_and_arguments_columns" columns of table "project" */
@@ -41954,9 +42477,13 @@ export type Project_Set_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -42046,9 +42573,13 @@ export type Project_Stream_Cursor_Value_Input = {
   isMvs?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
+  /** Fix Policy: effective pipeline delivery mode for this project — off | pr | direct. Inherited from the organization at project creation. */
+  pipelineDelivery?: InputMaybe<Scalars['String']['input']>;
   /** Sparse tri-state scan + gate policy deviations from the org effective policy: absent key = inherit, false = off/never-block, true = on/block. NULL = full inherit. Shape: ScanPolicyDocZ (tscommon/backend/src/scanPolicy.ts). Written only via scanPolicyApi mutations (MOBB-3750/MOBB-3790). */
   scanPolicy?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Fix Policy: effective webhook delivery mode for this project — off | pr | direct. Read by prCheckDeps.ts to decide isFixEnabled, and by deliverPrCheckFixes to choose the destination. */
+  webhookDelivery?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -42528,9 +43059,13 @@ export enum Project_Update_Column {
   /** column name */
   OrganizationId = 'organizationId',
   /** column name */
+  PipelineDelivery = 'pipelineDelivery',
+  /** column name */
   ScanPolicy = 'scanPolicy',
   /** column name */
-  UpdatedAt = 'updatedAt'
+  UpdatedAt = 'updatedAt',
+  /** column name */
+  WebhookDelivery = 'webhookDelivery'
 }
 
 export type Project_Updates = {
@@ -43009,6 +43544,12 @@ export type Query_Root = {
   fix_download_to_user_aggregate: Fix_Download_To_User_Aggregate;
   /** fetch data from the table: "fix_download_to_user" using primary key columns */
   fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
+  /** fetch data from the table: "fix_policy_audit" */
+  fix_policy_audit: Array<Fix_Policy_Audit>;
+  /** fetch aggregated fields from the table: "fix_policy_audit" */
+  fix_policy_audit_aggregate: Fix_Policy_Audit_Aggregate;
+  /** fetch data from the table: "fix_policy_audit" using primary key columns */
+  fix_policy_audit_by_pk?: Maybe<Fix_Policy_Audit>;
   /** fetch data from the table: "fix_rating" */
   fix_rating: Array<Fix_Rating>;
   /** fetch aggregated fields from the table: "fix_rating" */
@@ -45334,6 +45875,29 @@ export type Query_RootFix_Download_To_User_AggregateArgs = {
 
 
 export type Query_RootFix_Download_To_User_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootFix_Policy_AuditArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Policy_Audit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Policy_Audit_Order_By>>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Policy_Audit_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Policy_Audit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Policy_Audit_Order_By>>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+};
+
+
+export type Query_RootFix_Policy_Audit_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -54688,6 +55252,14 @@ export type Subscription_Root = {
   fix_download_to_user_by_pk?: Maybe<Fix_Download_To_User>;
   /** fetch data from the table in a streaming manner: "fix_download_to_user" */
   fix_download_to_user_stream: Array<Fix_Download_To_User>;
+  /** fetch data from the table: "fix_policy_audit" */
+  fix_policy_audit: Array<Fix_Policy_Audit>;
+  /** fetch aggregated fields from the table: "fix_policy_audit" */
+  fix_policy_audit_aggregate: Fix_Policy_Audit_Aggregate;
+  /** fetch data from the table: "fix_policy_audit" using primary key columns */
+  fix_policy_audit_by_pk?: Maybe<Fix_Policy_Audit>;
+  /** fetch data from the table in a streaming manner: "fix_policy_audit" */
+  fix_policy_audit_stream: Array<Fix_Policy_Audit>;
   /** fetch data from the table: "fix_rating" */
   fix_rating: Array<Fix_Rating>;
   /** fetch aggregated fields from the table: "fix_rating" */
@@ -57404,6 +57976,36 @@ export type Subscription_RootFix_Download_To_User_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Fix_Download_To_User_Stream_Cursor_Input>>;
   where?: InputMaybe<Fix_Download_To_User_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Policy_AuditArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Policy_Audit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Policy_Audit_Order_By>>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Policy_Audit_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Fix_Policy_Audit_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Fix_Policy_Audit_Order_By>>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
+};
+
+
+export type Subscription_RootFix_Policy_Audit_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootFix_Policy_Audit_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Fix_Policy_Audit_Stream_Cursor_Input>>;
+  where?: InputMaybe<Fix_Policy_Audit_Bool_Exp>;
 };
 
 

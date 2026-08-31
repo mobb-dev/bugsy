@@ -682,17 +682,25 @@ export class GQLClient {
     commitDirectly,
     prId,
     prStrategy,
+    deliveryMode,
   }: {
     analysisId: string
     commitDirectly?: boolean
     prId?: number
     prStrategy?: PrStrategy
+    /**
+     * Fix Policy: 'policy' when no delivery flag was passed, so the
+     * server resolves the project's pipeline_delivery; 'pr' / 'direct' when a
+     * flag was, which overrides it.
+     */
+    deliveryMode?: 'policy' | 'pr' | 'direct'
   }) {
     return this._clientSdk.autoPrAnalysis({
       analysisId,
       commitDirectly,
       prId,
       prStrategy,
+      deliveryMode,
     })
   }
   async getFixes(fixIds: string[]) {

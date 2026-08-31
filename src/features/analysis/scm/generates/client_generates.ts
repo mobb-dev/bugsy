@@ -280,6 +280,7 @@ export type AutoPrAnalysisMutationVariables = Types.Exact<{
   commitDirectly?: Types.InputMaybe<Types.Scalars['Boolean']['input']>;
   prId?: Types.InputMaybe<Types.Scalars['Int']['input']>;
   prStrategy?: Types.InputMaybe<Types.PrStrategy>;
+  deliveryMode?: Types.InputMaybe<Types.Scalars['String']['input']>;
 }>;
 
 
@@ -1166,12 +1167,13 @@ export const GitReferenceDocument = `
 }
     `;
 export const AutoPrAnalysisDocument = `
-    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean, $prId: Int, $prStrategy: PRStrategy) {
+    mutation autoPrAnalysis($analysisId: String!, $commitDirectly: Boolean, $prId: Int, $prStrategy: PRStrategy, $deliveryMode: String) {
   autoPrAnalysis(
     analysisId: $analysisId
     sameBranchCommit: $commitDirectly
     prId: $prId
     prStrategy: $prStrategy
+    deliveryMode: $deliveryMode
   ) {
     __typename
     ... on AutoPrSuccess {

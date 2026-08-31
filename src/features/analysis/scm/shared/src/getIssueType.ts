@@ -32,6 +32,7 @@ export const getIssueTypeFriendlyString = (
 
 export const statusMap: Record<Vulnerability_Report_Issue_State_Enum, string> =
   {
+    [Vulnerability_Report_Issue_State_Enum.AiQuotaExceeded]: 'AI Quota Reached',
     [Vulnerability_Report_Issue_State_Enum.Digested]: 'Digested',
     [Vulnerability_Report_Issue_State_Enum.Error]: 'Error',
     [Vulnerability_Report_Issue_State_Enum.FalsePositive]: 'False Positive',

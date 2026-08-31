@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import {
   Vulnerability_Report_Issue_Category_Enum,
+  Vulnerability_Report_Issue_State_Enum,
   Vulnerability_Report_Issue_Tag_Enum,
 } from '../../../generates/client_generates'
 import { FixPageFixReportZ } from './analysis'
@@ -42,9 +43,12 @@ export const BaseIssuePartsZ = z.object({
   createdAt: z.string(),
   parsedSeverity: ParsedSeverityZ,
   category: z.enum(Vulnerability_Report_Issue_Category_Enum),
+  state: z.enum(Vulnerability_Report_Issue_State_Enum),
   extraData: z.object({
     missing_files: z.string().array().nullish(),
     error_files: z.string().array().nullish(),
+    // Legacy pre-AiQuotaExceeded rows only; new rows carry the state instead
+    // (MOBB-3867).
     ai_cost_limit_exceeded: z.string().nullish(),
   }),
   vulnerabilityReportIssueTags: z.array(

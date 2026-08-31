@@ -72391,6 +72391,8 @@ export type Vulnerability_Report = {
   fixReport?: Maybe<FixReport>;
   id: Scalars['uuid']['output'];
   isDeleted: Scalars['Boolean']['output'];
+  /** The scan that produced this report ran the full OpenGrep rule tree rather than the fix-supported subset (MOBB-3802). Set at scan-enqueue time from the scan request; read when rerunning a Mobb-run scan so the rescan keeps the original rule breadth. Defaults to true so an unrecorded breadth rescans the full tree rather than silently losing rules. Meaningless for uploaded third-party reports, which are re-digested rather than rescanned. */
+  isFullScan: Scalars['Boolean']['output'];
   /** This flag indicates if the vulnerability report us created by us or received from an external source */
   isInternal: Scalars['Boolean']['output'];
   issuesWithKnownLanguage?: Maybe<Scalars['Int']['output']>;
@@ -72635,6 +72637,7 @@ export type Vulnerability_Report_Bool_Exp = {
   fixReport?: InputMaybe<FixReport_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   isDeleted?: InputMaybe<Boolean_Comparison_Exp>;
+  isFullScan?: InputMaybe<Boolean_Comparison_Exp>;
   isInternal?: InputMaybe<Boolean_Comparison_Exp>;
   issuesWithKnownLanguage?: InputMaybe<Int_Comparison_Exp>;
   lastIssueUpdatedAt?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -72674,6 +72677,8 @@ export type Vulnerability_Report_Insert_Input = {
   fixReport?: InputMaybe<FixReport_Obj_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The scan that produced this report ran the full OpenGrep rule tree rather than the fix-supported subset (MOBB-3802). Set at scan-enqueue time from the scan request; read when rerunning a Mobb-run scan so the rescan keeps the original rule breadth. Defaults to true so an unrecorded breadth rescans the full tree rather than silently losing rules. Meaningless for uploaded third-party reports, which are re-digested rather than rescanned. */
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   /** This flag indicates if the vulnerability report us created by us or received from an external source */
   isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
@@ -74410,6 +74415,8 @@ export enum Vulnerability_Report_Issue_State_Constraint {
 }
 
 export enum Vulnerability_Report_Issue_State_Enum {
+  /** The AI quota ran out before this vulnerability was analyzed/fixed */
+  AiQuotaExceeded = 'AiQuotaExceeded',
   /** This vulnerability was inserted to the database */
   Digested = 'Digested',
   /** Encountered an error while generating the fix */
@@ -75170,6 +75177,7 @@ export type Vulnerability_Report_Order_By = {
   fixReport?: InputMaybe<FixReport_Order_By>;
   id?: InputMaybe<Order_By>;
   isDeleted?: InputMaybe<Order_By>;
+  isFullScan?: InputMaybe<Order_By>;
   isInternal?: InputMaybe<Order_By>;
   issuesWithKnownLanguage?: InputMaybe<Order_By>;
   lastIssueUpdatedAt?: InputMaybe<Order_By>;
@@ -75354,6 +75362,8 @@ export enum Vulnerability_Report_Select_Column {
   /** column name */
   IsDeleted = 'isDeleted',
   /** column name */
+  IsFullScan = 'isFullScan',
+  /** column name */
   IsInternal = 'isInternal',
   /** column name */
   IssuesWithKnownLanguage = 'issuesWithKnownLanguage',
@@ -75382,6 +75392,8 @@ export enum Vulnerability_Report_Select_Column_Vulnerability_Report_Aggregate_Bo
   /** column name */
   IsDeleted = 'isDeleted',
   /** column name */
+  IsFullScan = 'isFullScan',
+  /** column name */
   IsInternal = 'isInternal'
 }
 
@@ -75389,6 +75401,8 @@ export enum Vulnerability_Report_Select_Column_Vulnerability_Report_Aggregate_Bo
 export enum Vulnerability_Report_Select_Column_Vulnerability_Report_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
   /** column name */
   IsDeleted = 'isDeleted',
+  /** column name */
+  IsFullScan = 'isFullScan',
   /** column name */
   IsInternal = 'isInternal'
 }
@@ -75399,6 +75413,8 @@ export type Vulnerability_Report_Set_Input = {
   fileId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The scan that produced this report ran the full OpenGrep rule tree rather than the fix-supported subset (MOBB-3802). Set at scan-enqueue time from the scan request; read when rerunning a Mobb-run scan so the rescan keeps the original rule breadth. Defaults to true so an unrecorded breadth rescans the full tree rather than silently losing rules. Meaningless for uploaded third-party reports, which are re-digested rather than rescanned. */
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   /** This flag indicates if the vulnerability report us created by us or received from an external source */
   isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
@@ -75468,6 +75484,8 @@ export type Vulnerability_Report_Stream_Cursor_Value_Input = {
   fileId?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The scan that produced this report ran the full OpenGrep rule tree rather than the fix-supported subset (MOBB-3802). Set at scan-enqueue time from the scan request; read when rerunning a Mobb-run scan so the rescan keeps the original rule breadth. Defaults to true so an unrecorded breadth rescans the full tree rather than silently losing rules. Meaningless for uploaded third-party reports, which are re-digested rather than rescanned. */
+  isFullScan?: InputMaybe<Scalars['Boolean']['input']>;
   /** This flag indicates if the vulnerability report us created by us or received from an external source */
   isInternal?: InputMaybe<Scalars['Boolean']['input']>;
   issuesWithKnownLanguage?: InputMaybe<Scalars['Int']['input']>;
@@ -75507,6 +75525,8 @@ export enum Vulnerability_Report_Update_Column {
   Id = 'id',
   /** column name */
   IsDeleted = 'isDeleted',
+  /** column name */
+  IsFullScan = 'isFullScan',
   /** column name */
   IsInternal = 'isInternal',
   /** column name */

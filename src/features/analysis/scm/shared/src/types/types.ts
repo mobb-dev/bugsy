@@ -228,6 +228,11 @@ export const ReportQueryResultZ = z.object({
           count: z.number(),
         }),
       }),
+      aiQuota: z.object({
+        aggregate: z.object({
+          count: z.number(),
+        }),
+      }),
       vulnerabilityReportIssues: z
         .object({
           id: z.guid(),
